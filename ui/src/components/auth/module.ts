@@ -1,72 +1,73 @@
-import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators';
+import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
 import {
   keycloakLogin,
   loadKeycloakUserProfile,
   isAuthenticated,
   keycloakInit,
-  keycloakEditProfile,
-} from '@/keycloak';
-import { KeycloakProfile } from 'keycloak-js';
+  keycloakEditProfile
+} from '@/keycloak'
+// eslint-disable-next-line no-unused-vars
+import { KeycloakProfile } from 'keycloak-js'
 
-const AUTH_URL: string = process.env.VUE_APP_AUTH_SERVER_URL;
+const AUTH_URL: string = process.env.VUE_APP_AUTH_SERVER_URL as string
 
 @Module({ namespaced: true })
 export default class AuthModule extends VuexModule {
-  private isAuth: boolean = false;
-  private userProfile: KeycloakProfile = {};
+  private isAuth: boolean = false
+  private userProfile: KeycloakProfile = {}
 
   @Action({ commit: 'setAuth' })
-  public async initKeycloak() {
-    await keycloakInit(AUTH_URL);
-    const isAuth = isAuthenticated();
+  public async initKeycloak (): Promise<boolean> {
+    await keycloakInit(AUTH_URL)
+    const isAuth = isAuthenticated()
 
     if (isAuth) {
-      this.context.dispatch('loadUserProfile');
+      this.context.dispatch('loadUserProfile')
     }
-    return isAuth;
+    return isAuth
   }
 
   @Action({ commit: 'setAuth' })
-  public async login() {
-    const isSuccessful: boolean = await keycloakLogin();
+  public async login (): Promise<boolean> {
+    const isSuccessful: boolean = await keycloakLogin()
 
     if (isSuccessful) {
-      this.context.dispatch('loadUserProfile');
+      this.context.dispatch('loadUserProfile')
     }
 
-    return isSuccessful;
+    return isSuccessful
   }
 
   @Action({ commit: 'setAuth' })
-  public logout() {
-    this.context.commit('setUserProfile', {});
-    return false;
+  public logout (): boolean {
+    this.context.commit('setUserProfile', {})
+    return false
   }
 
   @Action
-  public async editProfile() {
-    await keycloakEditProfile();
+  public async editProfile (): Promise<boolean> {
+    return keycloakEditProfile()
   }
 
   @Action({ commit: 'setUserProfile' })
-  public async loadUserProfile() {
+  public async loadUserProfile (): Promise<Keycloak.KeycloakProfile> {
     return new Promise((resolve, reject) => {
       loadKeycloakUserProfile()
         .success(profile => {
-          resolve(profile);
+          resolve(profile)
         })
         .error(err => {
-          reject(err);
-        });
-    });
+          reject(err)
+        })
+    })
   }
 
   @Mutation
-  private setAuth(value: boolean) {
-    this.isAuth = value;
+  private setAuth (value: boolean): void {
+    this.isAuth = value
   }
 
-  @Mutation private setUserProfile(value: KeycloakProfile) {
-    this.userProfile = value;
+  @Mutation private setUserProfile (value: KeycloakProfile): void {
+    this.userProfile = value
   }
 }
