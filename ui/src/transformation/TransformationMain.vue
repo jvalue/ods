@@ -3,34 +3,43 @@
     <h1>transformation service</h1>
     <v-card>
       <v-form>
-        <v-textarea v-model="functionInput" full-width></v-textarea>
+        <v-textarea
+          v-model="functionInput"
+          full-width
+        />
       </v-form>
     </v-card>
-    <v-btn color="success" @click="submit">submit</v-btn>
-    <h2>{{transformationResult}}</h2>
+    <v-btn
+      color="success"
+      @click="submit"
+    >
+      submit
+    </v-btn>
+    <h2>{{ transformationResult }}</h2>
   </div>
 </template>
 
-
 <script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { Action, State } from 'vuex-class';
+import Vue from 'vue'
+import Component from 'vue-class-component'
+import { Action, State } from 'vuex-class'
 
-const namespace = { namespace: 'transformation' };
+const namespace = { namespace: 'transformation' }
 
 @Component
 export default class TransformationMain extends Vue {
-  @State('transformationResult', namespace) private transformationResult!: any;
+  @State('transformationResult', namespace)
+  // TODO: remove if possible
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private transformationResult!: any;
 
   @Action('transformData', namespace)
   private transformData!: (functionInput: string) => void;
 
   private functionInput: string = '{"func":"return 1", "data":null}';
 
-  private submit() {
-    this.transformData(this.functionInput);
+  private submit () {
+    this.transformData(this.functionInput)
   }
-
 }
 </script>

@@ -1,0 +1,9 @@
+{
+  "editor.formatOnSave": false,
+  "eslint.workingDirectories": ["./transformation", "./ui"],
+  "eslint.autoFixOnSave": true,
+  "eslint.validate": [
+    "javascript",
+    { "language": "typescript", "autoFix": true }
+  ]
+}

@@ -1,6 +1,7 @@
 // @ts-check
 
-const { VM } = require('vm2')
+import { VM } from 'vm2'
+
 const vm = new VM({
   timeout: 5000
 })
@@ -11,7 +12,7 @@ function assertIsObjectOrArray (data) {
   }
 }
 
-exports.execute = function (func, data) {
+export function execute (func, data) {
   assertIsObjectOrArray(data)
 
   let wrapper =
