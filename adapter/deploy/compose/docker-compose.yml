@@ -1,0 +1,10 @@
+version: '3.3'
+
+services:
+  template-service:
+    build:
+      dockerfile: Dockerfile
+      context: ../../
+    image: jvalue/ods/microservice-template-spring-boot # TODO: replace with remote and add local file
+    ports:
+      - "8080:8080"
