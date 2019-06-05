@@ -15,9 +15,47 @@ repositories {
 	maven { url 'https://repo.spring.io/milestone' }
 }
 
+// integration test
+sourceSets {
+	integrationTest {
+		java {
+			srcDir file('src/integration-test/java')
+		}
+		resources.srcDir file('src/integration-test/resources')
+	}
+}
+
+configurations {
+	integrationTestImplementation.extendsFrom testImplementation
+	integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+task integrationTest(type: Test) {
+	testClassesDirs = sourceSets.integrationTest.output.classesDirs
+	classpath = sourceSets.integrationTest.runtimeClasspath
+	shouldRunAfter test
+
+	testLogging {
+		events "passed", "skipped", "failed", "standard_error"
+		showExceptions = true
+
+		afterSuite { desc, result ->
+			if (!desc.parent) {
+				println "Tests run: ${result.testCount}, " +
+						"Failures: ${result.failedTestCount}, " +
+						"Skipped: ${result.skippedTestCount}"
+			}
+		}
+	}
+
+	check.dependsOn integrationTest
+}
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	integrationTestImplementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.6'
 }

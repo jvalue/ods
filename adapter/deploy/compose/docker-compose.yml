@@ -5,6 +5,6 @@ services:
     build:
       dockerfile: Dockerfile
       context: ../../
-    image: jvalue/ods/microservice-template-spring-boot # TODO: replace with remote and add local file
+    image: jvalue/ods/adapter-service # TODO: replace with remote and add local file
     ports:
       - "8080:8080"
