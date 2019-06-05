@@ -1,7 +1,8 @@
 package org.jvalue.ods.adapterservice.importer;
 
-import org.jvalue.ods.adapterservice.models.RawData;
+import java.net.URI;
 
 public abstract class Importer {
-    public abstract RawData fetch();
+    public abstract Object fetch(URI from);
+    public abstract String type();
 }
