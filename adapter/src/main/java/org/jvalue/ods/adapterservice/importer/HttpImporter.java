@@ -9,8 +9,8 @@ public class HttpImporter extends Importer {
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Override
-    public Object fetch(URI from) {
-        ResponseEntity<Object> responseEntity = restTemplate.getForEntity(from, Object.class);
+    public String fetch(URI from) {
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity(from, String.class);
         return responseEntity.getBody();
     }
 

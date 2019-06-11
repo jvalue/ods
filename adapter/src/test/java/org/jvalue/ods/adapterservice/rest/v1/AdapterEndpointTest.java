@@ -17,20 +17,27 @@ public class AdapterEndpointTest {
         final AdapterConfig config = new AdapterConfig("HTTP", "JSON", "https://gturnquist-quoters.cfapps.io/api/random");
         JsonNode result = endpoint.executeDataImport(config);
 
-        JsonNode resultNode = mapper.valueToTree(result);
-        assertEquals("success", resultNode.get("type").asText());
-        assertEquals(2, resultNode.get("value").size());
+        assertEquals("success", result.get("type").asText());
+        assertEquals(2, result.get("value").size());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testExecuteDataImportFTPJSON() {
         final AdapterConfig config = new AdapterConfig("FTP", "JSON", "https://gturnquist-quoters.cfapps.io/api/random");
+        endpoint.executeDataImport(config);
+    }
+
+    @Test()
+    public void testExecuteDataImportHTTPXML() {
+        final AdapterConfig config = new AdapterConfig("HTTP", "XML", "http://www.mocky.io/v2/5cf4f8352f000081724f05bf");
         JsonNode result = endpoint.executeDataImport(config);
+
+        assertEquals("{\"to\":\"Tove\",\"from\":\"Jani\",\"heading\":\"Reminder\",\"body\":\"Don't forget me this weekend!\"}", result.toString());
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testExecuteDataImportHTTPXML() {
-        final AdapterConfig config = new AdapterConfig("HTTP", "XML", "https://gturnquist-quoters.cfapps.io/api/random");
-        JsonNode result = endpoint.executeDataImport(config);
+    public void testExecuteMalformedDataImport() {
+        final AdapterConfig config = new AdapterConfig("HTTP", "JSON", "http://www.mocky.io/v2/5cf4f8352f000081724f05bf");
+        endpoint.executeDataImport(config);
     }
 }

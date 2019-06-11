@@ -1,16 +1,16 @@
 package org.jvalue.ods.adapterservice.interpreter;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import java.io.IOException;
 
-public class JsonInterpreter extends Interpreter {
-    private static final ObjectMapper mapper = new ObjectMapper();
+public class XmlInterpreter extends Interpreter {
+    private final XmlMapper mapper = new XmlMapper();
 
     @Override
     public String type() {
-        return "JSON";
+        return "XML";
     }
 
     @Override
