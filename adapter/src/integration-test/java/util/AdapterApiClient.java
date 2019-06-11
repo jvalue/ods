@@ -12,7 +12,6 @@ import java.io.IOException;
 public class AdapterApiClient {
 
     public static final String ADAPTERSERVICE_URL = "http://localhost:8080/";
-    public static final String CONFIG_PATH = "./src/integration-test/resources/AdapterConfig.json";
 
     public static HttpResponse sendGetVersionRequest() throws IOException {
         HttpGet request = new HttpGet(ADAPTERSERVICE_URL + "api/version");
@@ -20,7 +19,7 @@ public class AdapterApiClient {
         return HttpClientBuilder.create().build().execute(request);
     }
 
-    public static HttpResponse sendDataImportRequest() throws IOException {
+    public static HttpResponse sendDataImportRequest(String CONFIG_PATH) throws IOException {
         HttpPost request = new HttpPost(ADAPTERSERVICE_URL + "dataImport");
 
         FileInputStream jsonStream = new FileInputStream(CONFIG_PATH);

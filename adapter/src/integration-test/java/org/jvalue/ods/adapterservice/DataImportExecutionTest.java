@@ -13,10 +13,12 @@ import static util.AdapterApiClient.sendDataImportRequest;
 
 public class DataImportExecutionTest extends AbstractApiTest {
     private final ObjectMapper mapper = new ObjectMapper();
+    public static final String CONFIG_PATH = "./src/integration-test/resources/";
+
 
     @Test
-    public void testDataImport() throws IOException {
-        HttpResponse response = sendDataImportRequest();
+    public void testJsonHttpDataImport() throws IOException {
+        HttpResponse response = sendDataImportRequest(CONFIG_PATH + "JsonAdapterConfig.json");
 
         String resultString = EntityUtils.toString(response.getEntity());
         JsonNode resultNode = mapper.readTree(resultString);
@@ -24,6 +26,21 @@ public class DataImportExecutionTest extends AbstractApiTest {
         assertEquals(2, resultNode.size());
         assertEquals("sera", resultNode.get("quesera").textValue());
         assertEquals("willbe", resultNode.get("whateverwillbe").textValue());
+    }
+
+    @Test
+    public void testXmlHttpDataImport() throws IOException {
+        HttpResponse response = sendDataImportRequest(CONFIG_PATH + "XmlAdapterConfig.json");
+
+        String resultString = EntityUtils.toString(response.getEntity());
+        JsonNode resultNode = mapper.readTree(resultString);
+
+        System.out.println(resultString);
+        assertEquals(4, resultNode.size());
+        assertEquals("Tove", resultNode.get("to").textValue());
+        assertEquals("Jani", resultNode.get("from").textValue());
+        assertEquals("Reminder", resultNode.get("heading").textValue());
+        assertEquals("Don't forget me this weekend!", resultNode.get("body").textValue());
     }
 
 }
