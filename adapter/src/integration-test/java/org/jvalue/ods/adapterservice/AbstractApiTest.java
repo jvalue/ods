@@ -3,12 +3,10 @@ package org.jvalue.ods.adapterservice;
 import org.junit.BeforeClass;
 import util.HttpServiceCheck;
 
-import static util.AdapterApiClient.ADAPTERSERVICE_URL;
+import static util.Constants.VERSION_ENDPOINT;
 
 
 public abstract class AbstractApiTest {
-
-    private static final String VERSION_ENDPOINT = ADAPTERSERVICE_URL + "api/version";
 
     @BeforeClass
     public static void checkAvailability() {

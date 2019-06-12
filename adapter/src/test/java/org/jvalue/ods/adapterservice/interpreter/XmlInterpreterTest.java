@@ -1,16 +1,18 @@
 package org.jvalue.ods.adapterservice.interpreter;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class XmlInterpreterTest {
     private final Interpreter interpreter = new XmlInterpreter();
     private static final String XML_STRING = "<note><to>Walter Frosch</to><body>Nice game!</body></note>";
-
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
     public void interpretXmlData() throws IOException {
@@ -25,4 +27,13 @@ public class XmlInterpreterTest {
     public void interpretMalformedData() throws IOException {
         interpreter.interpret("{\"this is\":\"no xml\"");
     }
+
+    @Test
+    public void testSerialization() throws IOException {
+        JsonNode expected = mapper.readTree("{\"type\":\"XML\",\"parameters\":{}}");
+        JsonNode result = mapper.valueToTree(interpreter);
+
+        assertEquals(expected, result);
+    }
+
 }

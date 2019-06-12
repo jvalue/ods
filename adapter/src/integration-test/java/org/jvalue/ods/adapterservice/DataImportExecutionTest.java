@@ -10,15 +10,15 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static util.AdapterApiClient.sendDataImportRequest;
+import static util.Constants.RESOURCES_PATH;
 
 public class DataImportExecutionTest extends AbstractApiTest {
     private final ObjectMapper mapper = new ObjectMapper();
-    public static final String CONFIG_PATH = "./src/integration-test/resources/";
 
 
     @Test
     public void testJsonHttpDataImport() throws IOException {
-        HttpResponse response = sendDataImportRequest(CONFIG_PATH + "JsonAdapterConfig.json");
+        HttpResponse response = sendDataImportRequest(RESOURCES_PATH + "JsonAdapterConfig.json");
 
         String resultString = EntityUtils.toString(response.getEntity());
         JsonNode resultNode = mapper.readTree(resultString);
@@ -30,7 +30,7 @@ public class DataImportExecutionTest extends AbstractApiTest {
 
     @Test
     public void testXmlHttpDataImport() throws IOException {
-        HttpResponse response = sendDataImportRequest(CONFIG_PATH + "XmlAdapterConfig.json");
+        HttpResponse response = sendDataImportRequest(RESOURCES_PATH + "XmlAdapterConfig.json");
 
         String resultString = EntityUtils.toString(response.getEntity());
         JsonNode resultNode = mapper.readTree(resultString);
