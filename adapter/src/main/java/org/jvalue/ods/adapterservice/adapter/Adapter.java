@@ -34,10 +34,10 @@ public class Adapter {
     }
 
     public String protocol() {
-        return importer.type();
+        return importer.getType();
     }
 
     public String format() {
-        return interpreter.type();
+        return interpreter.getType();
     }
 }
