@@ -9,7 +9,7 @@ public class XmlInterpreter extends Interpreter {
     private final XmlMapper mapper = new XmlMapper();
 
     @Override
-    public String type() {
+    public String getType() {
         return "XML";
     }
 

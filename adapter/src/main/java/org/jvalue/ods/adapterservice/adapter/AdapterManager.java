@@ -7,6 +7,8 @@ import org.jvalue.ods.adapterservice.interpreter.JsonInterpreter;
 import org.jvalue.ods.adapterservice.interpreter.XmlInterpreter;
 import org.jvalue.ods.adapterservice.model.AdapterConfig;
 
+import java.util.Collection;
+
 import java.util.Map;
 
 import static java.util.Map.entry;
@@ -33,5 +35,13 @@ public class AdapterManager {
         }
 
         return new Adapter(importer, interpreter);
+    }
+
+    public static Collection<Importer> getAllImporters() {
+        return importers.values();
+    }
+
+    public static Collection<Interpreter> getAllInterpreters() {
+        return interpreters.values();
     }
 }
