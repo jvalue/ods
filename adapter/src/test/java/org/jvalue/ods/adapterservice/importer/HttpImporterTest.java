@@ -7,7 +7,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.net.URI;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class HttpImporterTest {
     private final Importer importer = new HttpImporter();
@@ -22,4 +22,13 @@ public class HttpImporterTest {
         assertEquals("success", resultNode.get("type").asText());
         assertEquals(2, resultNode.get("value").size());
     }
+
+    @Test
+    public void testSerialization() throws IOException {
+        JsonNode expected = mapper.readTree("{\"parameters\":{},\"type\":\"HTTP\",\"description\":\"Plain HTTP\"}");
+        JsonNode result = mapper.valueToTree(importer);
+
+        assertEquals(expected, result);
+    }
+
 }

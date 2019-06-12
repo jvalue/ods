@@ -2,7 +2,7 @@
 The adapter service fetches data from external data sources and provides them via a HTTP API in JSON format. 
 The data coming from the external sources can be fetched over various protocols and can have various formats.
 ## Current Features
-* Currently the adapter service is only a prototype and can handle only JSON files that can be fetched over HTTP.
+* Currently the adapter service is only a prototype and can handle JSON and XML files that can be fetched over HTTP.
 ## Planned Features
 The handling of new protocols and formats is going to be implemented. 
 
@@ -10,7 +10,6 @@ Planned protocols:
 * ftp
 
 Planned formats:
-* xml
 * csv
 
 ## Getting Started
@@ -25,7 +24,9 @@ Note that you need to delete existing docker images from your local docker daemo
 ## API
 | Endpoint  | Method  | Request Body  | Response Body |
 |---|---|---|---|
-| *base_url*/api/version  | GET  | -  | String containing the API Version  |
+| *base_url*/version  | GET  | -  | String containing the API Version  |
+| *base_url*/formats  | GET  | -  | JsonArray of data formats available for parsing and possible parameters |
+| *base_url*/protocols  | GET  | -  | JsonArray of protocols available for importing and possible parameters  |
 | *base_url*/dataImport  | POST  | AdapterConfig file  | JSON representation of the imported data  |
 
 When nothing is changed *base_url* is `http://localhost/8080`
