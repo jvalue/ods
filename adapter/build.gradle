@@ -6,7 +6,7 @@ plugins {
 apply plugin: 'io.spring.dependency-management'
 
 group = 'org.jvalue.ods'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.1'
 sourceCompatibility = '12'
 
 repositories {
