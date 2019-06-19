@@ -1,4 +1,4 @@
-# First stage: image to build node application
+# First stage: image to build and test node application
 FROM node:lts-alpine as builder
 
 WORKDIR /build
@@ -7,6 +7,8 @@ COPY . .
 # Install dependencies and run build
 RUN npm install
 RUN npm run build
+RUN npm run lint
+RUN npm run test:unit
 
 # Second stage: image to run node application
 FROM node:lts-alpine
