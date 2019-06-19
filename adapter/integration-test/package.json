@@ -1,0 +1,20 @@
+{
+  "name": "adapter-service-it",
+  "version": "1.0.0",
+  "description": "Adapter-Service Integration-Tests",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^24.8.0",
+    "supertest": "^4.0.2"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "dependencies": {
+    "koa": "^2.7.0",
+    "koa-router": "^7.4.0",
+    "wait-on": "^3.2.0"
+  }
+}
