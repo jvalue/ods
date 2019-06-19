@@ -14,5 +14,7 @@ services:
       context: ../../integration-test
     ports:
       - "8081:8081"
-    environment: 
+    environment:
       ADAPTER_API: http://adapter-service:8080
+      MOCK_SERVER_HOST: adapter-service-it
+      MOCK_SERVER_PORT: 8081
