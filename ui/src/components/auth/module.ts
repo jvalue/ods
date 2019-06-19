@@ -53,10 +53,10 @@ export default class AuthModule extends VuexModule {
   public async loadUserProfile (): Promise<Keycloak.KeycloakProfile> {
     return new Promise((resolve, reject) => {
       loadKeycloakUserProfile()
-        .success(profile => {
+        .then(profile => {
           resolve(profile)
         })
-        .error(err => {
+        .catch(err => {
           reject(err)
         })
     })

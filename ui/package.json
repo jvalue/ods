@@ -1,18 +1,11 @@
 {
   "name": "ods-webclient",
   "version": "0.1.0",
-  "homepage": "https://github.com/jvalue/ods-webclient",
-  "repository": "https://github.com/jvalue/ods-webclient.git",
-  "licenses": [
-    {
-      "type": "GNU Affero General Public License 3",
-      "url": "https://opensource.org/licenses/AGPL-3.0"
-    }
-  ],
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "./node_modules/.bin/eslint src --ext .ts,.js,.vue --fix"
+    "lint": "./node_modules/.bin/eslint src --ext .ts,.js,.vue --fix",
+    "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
     "@types/node": "^11.13.5",
@@ -26,12 +19,16 @@
   },
   "devDependencies": {
     "@mdi/font": "^3.4.93",
+    "@types/jest": "^23.1.4",
     "@typescript-eslint/eslint-plugin": "^1.8.0",
     "@typescript-eslint/parser": "^1.8.0",
     "@vue/cli-plugin-babel": "^3.4.0",
     "@vue/cli-plugin-typescript": "^3.4.0",
+    "@vue/cli-plugin-unit-jest": "^3.8.0",
     "@vue/cli-service": "^3.4.0",
     "@vue/eslint-config-typescript": "^4.0.0",
+    "@vue/test-utils": "1.0.0-beta.29",
+    "babel-core": "7.0.0-bridge.0",
     "eslint": "^5.16.0",
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-import": "^2.17.2",
@@ -39,8 +36,18 @@
     "eslint-plugin-promise": "^4.1.1",
     "eslint-plugin-standard": "^4.0.0",
     "eslint-plugin-vue": "^5.2.2",
+    "jest-html-reporter": "^2.5.0",
+    "ts-jest": "^23.0.0",
     "typescript": "^3.3.1",
     "vue-template-compiler": "^2.6.3",
     "vuex-module-decorators": "^0.9.8"
-  }
+  },
+  "homepage": "https://github.com/jvalue/ods-webclient",
+  "licenses": [
+    {
+      "type": "GNU Affero General Public License 3",
+      "url": "https://opensource.org/licenses/AGPL-3.0"
+    }
+  ],
+  "repository": "https://github.com/jvalue/ods-webclient.git"
 }
