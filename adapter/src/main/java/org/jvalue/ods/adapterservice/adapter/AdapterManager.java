@@ -6,6 +6,7 @@ import org.jvalue.ods.adapterservice.interpreter.Interpreter;
 import org.jvalue.ods.adapterservice.interpreter.JsonInterpreter;
 import org.jvalue.ods.adapterservice.interpreter.XmlInterpreter;
 import org.jvalue.ods.adapterservice.model.AdapterConfig;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Collection;
 
@@ -16,7 +17,7 @@ import static java.util.Map.entry;
 public class AdapterManager {
 
     private static final Map<String, Importer> importers = Map.ofEntries(
-            entry("HTTP", new HttpImporter())
+            entry("HTTP", new HttpImporter(new RestTemplate()))
     );
     private static final Map<String, Interpreter> interpreters = Map.ofEntries(
             entry("JSON", new JsonInterpreter()),
