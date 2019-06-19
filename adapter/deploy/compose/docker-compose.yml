@@ -1,10 +1,18 @@
 version: '3.3'
 
 services:
-  template-service:
+  adapter-service:
     build:
       dockerfile: Dockerfile
       context: ../../
     image: jvalue/ods/adapter-service # TODO: replace with remote and add local file
     ports:
       - "8080:8080"
+  adapter-service-it:
+    build:
+      dockerfile: Dockerfile
+      context: ../../integration-test
+    ports:
+      - "8081:8081"
+    environment: 
+      ADAPTER_API: http://adapter-service:8080
