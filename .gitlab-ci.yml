@@ -1,10 +1,6 @@
 stages:
   - build
-  - test
-  - docker
-  - integrationTest
   - publish
-  - deploy
 
 services:
   - docker:dind
@@ -18,11 +14,10 @@ variables:
   # See further: https://docs.docker.com/storage/storagedriver/overlayfs-driver/
   # See further: https://docs.gitlab.com/ee/ci/docker/using_docker_build.html
   DOCKER_DRIVER: "overlay2"
-
-  GRADLE_USER_HOME: "${CI_PROJECT_DIR}/.gradle"
-
+  
   ADAPTER_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/adapter-service
   UI_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/ui-service
+
 
 
 # ----------------- ADAPTER SERVICE --------------------
@@ -30,37 +25,7 @@ variables:
 # BUILD
 build-adapter:
   stage: build
-  image: adoptopenjdk/openjdk12-openj9:alpine-slim
-  before_script:
-    - cd adapter
-  script:
-    - ./gradlew assemble
-    # save version for later CI steps
-    - echo $(./gradlew properties -q | grep 'version:' | awk '{print $2}') > ./build/version.txt
-  artifacts:
-    paths:
-      - ./adapter/build
-
-# TEST
-test-adapter:
-  stage: test
-  image: adoptopenjdk/openjdk12-openj9:alpine-slim
-  dependencies:
-    - build-adapter
-  before_script:
-    - cd adapter
-  script:
-    - ./gradlew test
-  artifacts:
-    reports:
-      junit: ./adapter/build/test-results/test/*.xml
-
-# DOCKER
-docker-adapter:
-  stage: docker
-  image: docker:stable 
-  dependencies:
-    - build-adapter
+  image: docker:stable
   before_script:
     - cd adapter
   script:
@@ -68,7 +33,6 @@ docker-adapter:
     - mkdir image # Store built image for following CI steps
     - docker save ${ADAPTER_DOCKER_IMAGE_NAME} > image/adapter.tar
   artifacts:
-    expire_in: 1 day
     paths:
       - ./adapter/image
 
@@ -77,20 +41,20 @@ publish-docker-adapter:
   stage: publish
   image: docker:stable 
   dependencies:
-      - docker-adapter
-      - build-adapter
+    - build-adapter
   when: manual
   before_script:
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
     - cd adapter
   script:
     - docker load -i ./image/adapter.tar
+    - export ADAPTER_VERSION=$(cat build.gradle | grep "version =" | awk '{print $3}' | sed "s/[']//g")
     # Tag as version and push
-    - export ADAPTER_VERSION=$(tr '[:upper:]' '[:lower:]' < ./build/version.txt) # from build-adapter
     - docker tag ${ADAPTER_DOCKER_IMAGE_NAME} ${ADAPTER_DOCKER_IMAGE_NAME}:${ADAPTER_VERSION}
     - docker tag ${ADAPTER_DOCKER_IMAGE_NAME} ${ADAPTER_DOCKER_IMAGE_NAME}:latest
     - docker push ${ADAPTER_DOCKER_IMAGE_NAME}:${ADAPTER_VERSION}
     - docker push ${ADAPTER_DOCKER_IMAGE_NAME}:latest
+
 
 
 # ----------------- UI SERVICE --------------------
@@ -105,44 +69,25 @@ build-ui:
     - "docker build -t ${UI_DOCKER_IMAGE_NAME} ."
     - mkdir image # Store built image for following CI steps
     - docker save ${UI_DOCKER_IMAGE_NAME} > image/ui.tar
-    - mkdir build
-    - echo $(cat package.json | grep "version" | awk '{print $2}' | sed 's/[,"]//g') > ./build/version.txt
   artifacts:
     paths:
       - ./ui/image
-      - ./ui/build
-
-# TEST
-test-ui:
-  stage: test
-  image: node:lts-alpine
-  before_script:
-    - cd ui
-  script:
-    - npm install
-    - npm run lint
-    - npm run test:unit
-  artifacts:
-    reports:
-      junit: ./ui/build/test-results/*.html
-
 
 # PUBLISH
 publish-docker-ui:
   stage: publish
   image: docker:stable 
   dependencies:
-      - build-ui
+    - build-ui
   when: manual
   before_script:
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
     - cd ui
   script:
     - docker load -i ./image/ui.tar
+    - export UI_VERSION=$(cat package.json | grep "version" | awk '{print $2}' | sed 's/[,"]//g')
     # Tag as version and push
-    - export UI_VERSION=$(tr '[:upper:]' '[:lower:]' < ./build/version.txt) # from build-adapter
     - docker tag ${UI_DOCKER_IMAGE_NAME} ${UI_DOCKER_IMAGE_NAME}:${UI_VERSION}
     - docker tag ${UI_DOCKER_IMAGE_NAME} ${UI_DOCKER_IMAGE_NAME}:latest
     - docker push ${UI_DOCKER_IMAGE_NAME}:${UI_VERSION}
     - docker push ${UI_DOCKER_IMAGE_NAME}:latest
-

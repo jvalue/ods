@@ -15,6 +15,20 @@ repositories {
 	maven { url 'https://repo.spring.io/milestone' }
 }
 
+test {
+	testLogging {
+		events "passed", "skipped", "failed"
+
+		afterSuite { desc, result ->
+			if (!desc.parent) {
+				println "Tests run: ${result.testCount}, " +
+						"Failures: ${result.failedTestCount}, " +
+						"Skipped: ${result.skippedTestCount}"
+			}
+		}
+	}
+}
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
