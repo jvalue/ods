@@ -24,7 +24,7 @@ Note that you need to delete existing docker images from your local docker daemo
 ## API
 | Endpoint  | Method  | Request Body  | Response Body |
 |---|---|---|---|
-| *base_url*/version  | GET  | -  | String containing the API Version  |
+| *base_url*/version  | GET  | -  | String containing the application version  |
 | *base_url*/formats  | GET  | -  | JsonArray of data formats available for parsing and possible parameters |
 | *base_url*/protocols  | GET  | -  | JsonArray of protocols available for importing and possible parameters  |
 | *base_url*/dataImport  | POST  | AdapterConfig file  | JSON representation of the imported data  |

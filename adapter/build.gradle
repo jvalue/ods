@@ -3,11 +3,20 @@ plugins {
 	id 'java'
 }
 
+def props = new Properties()
+file("src/main/resources/application.properties").withInputStream { props.load(it)}
+
 apply plugin: 'io.spring.dependency-management'
 
 group = 'org.jvalue.ods'
-version = '0.0.1'
+version = props.getProperty("app.version")
 sourceCompatibility = '12'
+
+task testProps {
+	doFirst {
+		println version
+	}
+}
 
 repositories {
 	mavenCentral()
@@ -35,4 +44,8 @@ dependencies {
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+processResources {
+	expand(project.properties)
 }
