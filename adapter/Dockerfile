@@ -19,4 +19,4 @@ COPY --from=builder /builder/build/libs/* app.jar
 
 # Run app
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
