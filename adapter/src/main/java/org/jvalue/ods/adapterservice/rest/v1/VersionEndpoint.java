@@ -1,5 +1,6 @@
 package org.jvalue.ods.adapterservice.rest.v1;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -8,10 +9,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/")
 public class VersionEndpoint {
 
-    private static final String API_VERSION = "1.0";
+    @Value("${app.version}")
+    private String VERSION;
 
     @GetMapping("/version")
-    public String getApiVersion() {
-        return API_VERSION;
+    public String getApplicationVersion() {
+        return VERSION;
     }
 }
