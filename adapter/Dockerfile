@@ -1,14 +1,21 @@
-# First stage: image to build and test java application
+#########################################################
+# First stage: image to build and test Java application #
+#########################################################
 FROM adoptopenjdk/openjdk12-openj9:alpine-slim as builder
 
 WORKDIR /builder
-COPY . .
+COPY *.gradle /builder/
+COPY src /builder/src
+COPY gradle /builder/gradle
+COPY gradlew /builder/gradlew
 
-# Install dependencies and run build
+# Build project and run unit tests
 RUN ./gradlew assemble
-RUN ./gradlew test 
+RUN ./gradlew test
 
-# Second stage: image to run node application
+#########################################################
+# Second stage: image to run Java application           #
+#########################################################
 FROM adoptopenjdk/openjdk12-openj9:alpine-slim
 
 RUN mkdir /app
