@@ -5,13 +5,14 @@ services:
     build:
       dockerfile: Dockerfile
       context: ../../
-    image: jvalue/ods/adapter-service # TODO: replace with remote and add local file
+    image: registry.gitlab.com/profoss/open-data-service/ods-main/adapter-service
     ports:
       - "8080:8080"
   adapter-service-it:
     build:
       dockerfile: Dockerfile
       context: ../../integration-test
+    image: open-data-service/ods-main/adapter-service-it
     ports:
       - "8081:8081"
     environment:

@@ -10,19 +10,31 @@ describe("Adapter", () => {
   console.log("Adapter-Service URL= " + URL);
 
   beforeAll(async () => {
-    const pingUrl = URL + "/version";
-    console.log("Waiting for service with URL: " + pingUrl);
-    console.log("Waiting for service with URL: " + MOCK_SERVER_URL);
-    await waitOn({ resources: [pingUrl, MOCK_SERVER_URL], timeout: 50000 });
+    try {
+      console.log("Waiting for service with URL: " + MOCK_SERVER_URL);
+      await waitOn({ resources: [MOCK_SERVER_URL], timeout: 50000 });
+      console.log("[online] Service with URL:  " + MOCK_SERVER_URL);
+    } catch(err) {
+      process.exit(1);
+    }
+    
+    try {
+      const pingUrl = URL + "/version";
+      console.log("Waiting for service with URL: " + pingUrl);
+      await waitOn({ resources: [pingUrl], timeout: 50000 });
+      console.log("[online] Service with URL:  " + pingUrl);
+    } catch(err) {
+      process.exit(1);
+    }
   }, 60000);
-
+  
   test("GET /version", async () => {
     const response = await request(URL).get("/version");
     expect(response.status).toEqual(200);
     expect(response.type).toEqual("text/plain");
-    expect(response.text).toMatch(new RegExp("^(0|[1-9]d*).(0|[1-9]d*)"));
-    // for semantic version
-    //expect(response.text).toMatch(new RegExp('^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)'));
+    
+    const semanticVersionRegEx = '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)';
+    expect(response.text).toMatch(new RegExp(semanticVersionRegEx));
   });
 
   test("GET /formats", async () => {
