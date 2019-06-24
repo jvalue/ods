@@ -1,5 +1,6 @@
 stages:
   - build
+  - integrationtest
   - publish
 
 services:
@@ -29,12 +30,30 @@ build-adapter:
   before_script:
     - cd adapter
   script:
-    - "docker build -t ${ADAPTER_DOCKER_IMAGE_NAME} ."
+    - docker build -t ${ADAPTER_DOCKER_IMAGE_NAME} .
     - mkdir image # Store built image for following CI steps
     - docker save ${ADAPTER_DOCKER_IMAGE_NAME} > image/adapter.tar
   artifacts:
+    expire_in: 1 day
     paths:
-      - ./adapter/image
+      - ./adapter/image/adapter.tar
+
+# INEGRATION-TEST
+integrationtest-adapter:
+  stage: integrationtest
+  image: mykiwi/docker
+  dependencies:
+    - build-adapter
+  before_script:
+    - cd adapter/deploy/compose
+  script:
+    - docker load -i ./../../image/adapter.tar
+    - docker-compose build adapter-service-it
+    - docker-compose up -d adapter-service
+    - docker-compose up --exit-code-from adapter-service-it adapter-service-it
+  after_script:
+    - cd adapter/deploy/compose
+    - docker-compose down
 
 # PUBLISH
 publish-docker-adapter:
@@ -47,14 +66,13 @@ publish-docker-adapter:
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
     - cd adapter
   script:
-    - docker load -i ./image/adapter.tar
+    - docker load -i image/adapter.tar
     - export ADAPTER_VERSION=$(cat build.gradle | grep "version =" | awk '{print $3}' | sed "s/[']//g")
     # Tag as version and push
     - docker tag ${ADAPTER_DOCKER_IMAGE_NAME} ${ADAPTER_DOCKER_IMAGE_NAME}:${ADAPTER_VERSION}
     - docker tag ${ADAPTER_DOCKER_IMAGE_NAME} ${ADAPTER_DOCKER_IMAGE_NAME}:latest
     - docker push ${ADAPTER_DOCKER_IMAGE_NAME}:${ADAPTER_VERSION}
     - docker push ${ADAPTER_DOCKER_IMAGE_NAME}:latest
-
 
 
 # ----------------- UI SERVICE --------------------
