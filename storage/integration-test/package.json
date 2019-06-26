@@ -1,0 +1,19 @@
+{
+  "name": "storage-service-it",
+  "version": "1.0.0",
+  "description": "Storage-Service Integration-Tests",
+  "scripts": {
+    "test": "jest",
+    "posttest": "killall node"
+  },
+  "devDependencies": {
+    "jest": "^24.8.0",
+    "supertest": "^4.0.2"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "dependencies": {
+    "wait-on": "^3.2.0"
+  }
+}
