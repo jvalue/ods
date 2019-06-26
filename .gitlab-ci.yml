@@ -18,6 +18,8 @@ variables:
   
   ADAPTER_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/adapter-service
   UI_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/ui-service
+  STORAGE_POSTGREST_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/storage-service-postgrest
+  STORAGE_LIQUIBASE_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/storage-service-liquibase
 
 
 
@@ -109,3 +111,68 @@ publish-docker-ui:
     - docker tag ${UI_DOCKER_IMAGE_NAME} ${UI_DOCKER_IMAGE_NAME}:latest
     - docker push ${UI_DOCKER_IMAGE_NAME}:${UI_VERSION}
     - docker push ${UI_DOCKER_IMAGE_NAME}:latest
+
+
+# ----------------- Storage SERVICE --------------------
+
+# BUILD
+build-storage:
+  stage: build
+  image: docker:stable
+  before_script:
+    - cd storage
+  script:
+    - "docker build -t ${STORAGE_POSTGREST_DOCKER_IMAGE_NAME} ./docker/postgrest/"
+    - "docker build -t ${STORAGE_LIQUIBASE_DOCKER_IMAGE_NAME} ./docker/liquibase/"
+    - mkdir image # Store built image for following CI steps
+    - docker save ${STORAGE_POSTGREST_DOCKER_IMAGE_NAME} > image/storage_postgrest.tar
+    - docker save ${STORAGE_LIQUIBASE_DOCKER_IMAGE_NAME} > image/storage_liquibase.tar
+  artifacts:
+    paths:
+      - ./storage/image
+
+
+# INEGRATION-TEST
+integrationtest-storage:
+  stage: integrationtest
+  image: mykiwi/docker
+  dependencies:
+    - build-storage
+  before_script:
+    - cd storage/deploy/compose
+  script:
+    - docker load -i ../../image/storage_postgrest.tar
+    - docker load -i ../../image/storage_liquibase.tar
+    - docker-compose build storage-service-it
+    - docker-compose up -d storage-db
+    - docker-compose up -d storage-db-liquibase
+    - docker-compose up -d storage-service
+    - docker-compose up --exit-code-from storage-service-it storage-service-it
+  after_script:
+    - cd storage/deploy/compose
+    - docker-compose down
+
+
+# PUBLISH
+publish-docker-storage:
+  stage: publish
+  image: docker:stable 
+  dependencies:
+    - build-storage
+  when: manual
+  before_script:
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+    - cd storage
+  script:
+    - docker load -i ./image/storage_postgrest.tar
+    - docker load -i ./image/storage_liquibase.tar
+    - export STORAGE_VERSION=$(cat version.txt | grep "VERSION" | awk '{print $3}' | sed 's/[,"]//g')
+    # Tag as version and push
+    - docker tag ${STORAGE_POSTGREST_DOCKER_IMAGE_NAME} ${STORAGE_POSTGREST_DOCKER_IMAGE_NAME}:${STORAGE_VERSION}
+    - docker tag ${STORAGE_POSTGREST_DOCKER_IMAGE_NAME} ${STORAGE_POSTGREST_DOCKER_IMAGE_NAME}:latest
+    - docker tag ${STORAGE_LIQUIBASE_DOCKER_IMAGE_NAME} ${STORAGE_LIQUIBASE_DOCKER_IMAGE_NAME}:${STORAGE_VERSION}
+    - docker tag ${STORAGE_LIQUIBASE_DOCKER_IMAGE_NAME} ${STORAGE_LIQUIBASE_DOCKER_IMAGE_NAME}:latest
+    - docker push ${STORAGE_POSTGREST_DOCKER_IMAGE_NAME}:${STORAGE_VERSION}
+    - docker push ${STORAGE_POSTGREST_DOCKER_IMAGE_NAME}:latest
+    - docker push ${STORAGE_LIQUIBASE_DOCKER_IMAGE_NAME}:${STORAGE_VERSION}
+    - docker push ${STORAGE_LIQUIBASE_DOCKER_IMAGE_NAME}:latest
