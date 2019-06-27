@@ -2,15 +2,20 @@
   "name": "open-data-service-transformation",
   "version": "1.0.0",
   "description": "TBD",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/api.js",
-    "lint": "./node_modules/.bin/eslint src/ --fix"
+    "test": "jest",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "start:transpiled": "node dist/index.js",
+    "watch-node": "nodemon dist/index.js",
+    "watch-ts": "tsc -w",
+    "watch-test": "jest --watch",
+    "watch": "concurrently -n ts,node \"npm run watch-ts\" \"npm run watch-node\""
   },
   "repository": {
     "type": "git",
-    "url": "https://mojo-forge.cs.fau.de/open-data/open-data-service-transformation.git"
+    "url": "https://gitlab.com/profoss/open-data-service/ods-main/tree/master/transformation"
   },
   "author": "",
   "license": "ISC",
@@ -19,15 +24,20 @@
     "cors": "^2.8.5",
     "express": "^4.16.4",
     "express-session": "^1.15.6",
-    "keycloak-connect": "^5.0.0"
+    "keycloak-connect": "^5.0.0",
+    "vm2": "^3.8.2"
   },
   "devDependencies": {
-    "eslint": "^5.16.0",
-    "eslint-config-standard": "^12.0.0",
-    "eslint-plugin-import": "^2.17.2",
-    "eslint-plugin-node": "^9.0.1",
-    "eslint-plugin-promise": "^4.1.1",
-    "eslint-plugin-standard": "^4.0.0",
-    "vm2": "^3.6.6"
+    "@types/cors": "^2.8.5",
+    "@types/express": "^4.16.1",
+    "@types/express-session": "^1.15.13",
+    "@types/jest": "^24.0.11",
+    "@types/keycloak-connect": "^4.5.1",
+    "concurrently": "^4.1.1",
+    "jest": "^24.5.0",
+    "nodemon": "^1.19.1",
+    "ts-jest": "^24.0.1",
+    "tslib": "^1.9.3",
+    "typescript": "^3.4.1"
   }
 }
