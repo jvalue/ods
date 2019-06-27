@@ -69,7 +69,7 @@ publish-docker-adapter:
     - cd adapter
   script:
     - docker load -i image/adapter.tar
-    - export ADAPTER_VERSION=$(cat build.gradle | grep "version =" | awk '{print $3}' | sed "s/[']//g")
+    - export ADAPTER_VERSION=$(cat ./src/main/resources/application.properties | grep "version =" | awk '{print $3}' | sed "s/[']//g")
     # Tag as version and push
     - docker tag ${ADAPTER_DOCKER_IMAGE_NAME} ${ADAPTER_DOCKER_IMAGE_NAME}:${ADAPTER_VERSION}
     - docker tag ${ADAPTER_DOCKER_IMAGE_NAME} ${ADAPTER_DOCKER_IMAGE_NAME}:latest
