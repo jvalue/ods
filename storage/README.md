@@ -10,8 +10,8 @@ The current implementation consists of the following parts:
 
 ## Getting Started
 
-* Build all conainers with `docker-compose -f ./deploy/compose/docker-compose.yml build`
-* Run all conainers with `docker-compose -f ./deploy/compose/docker-compose.yml up` (includes Adminer on port 8081 as UI for db, Swagger-UI as UI on port 8080 for REST API, Integration Tests)
+* Build all containers with `docker-compose -f ./deploy/compose/docker-compose.yml build`
+* Run all containers with `docker-compose -f ./deploy/compose/docker-compose.yml up` (includes Adminer on port 8081 as UI for db, Swagger-UI as UI on port 8080 for REST API, Integration Tests)
 Note that you need to delete existing docker images from your local docker daemon to have recent changes integrated. For development, you can use the following command:
 `docker system prune -f && docker volume prune -f && docker-compose -f ./deploy/compose/docker-compose.yml build && docker-compose -f ./deploy/compose/docker-compose.yml up`
 
