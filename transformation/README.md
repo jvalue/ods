@@ -1,18 +1,26 @@
 # Open Data Service - Transformation-Service
 
-TBD
-
 ## Getting started
 
-TBD
+Make sure they keyclone container is running (see `../auth`).
 
 ## Build
 
-TBD
+`npm install`
+
+`npm run build`
+
+## Run
+
+`npm start`
+
+## Running in watch mode
+
+Use `npm run watch` to concurrently start the `tsc` compiler as well as run the service. It automatically reloads after file changes.
 
 ## Running unit tests
 
-TBD
+Use `npm test` to run the unit tests. There is also `nrm run watch-test` available to start `jest` in "watch mode".
 
 ## Running end-to-end tests
 

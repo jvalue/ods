@@ -11,7 +11,12 @@ To ensure a consistent style you should use the following Visual Studio Code ext
 
 To enable auto formating on save go to `File > Preference > Settings` and add the option `"editor.formatOnSave": true`.
 
+## Preparations for running
+
+Copy the `.env.template` file as a `.env` file and adjust the urls for the other microservices in case they are different for your setup. For local development work the defaults should be accurate.
+
+Use `npm install` to install all dependencies.
+
 ## Running the webclient
 
 To run the webclient, just execute `npm run serve` in the subprojects root directory (i.e. ui/). 
-In order to communicate with the underlying microservices you need to create a .env file in the root directory (again ui/) and copy the contents of the .env.template file into it.
