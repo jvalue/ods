@@ -1,0 +1,28 @@
+# First stage: image to build and test node application
+FROM node:lts-alpine as builder
+
+WORKDIR /build
+COPY ./src ./src
+COPY ./package*.json ./
+COPY ./tsconfig.json ./
+COPY ./jest.config.js ./
+RUN npm install 
+
+# Install dependencies and run build
+RUN npm install 
+RUN npm run tsc
+RUN npm run test
+
+# Second stage: image to run node application
+FROM node:lts-alpine
+
+RUN mkdir /app
+WORKDIR /app
+
+COPY --from=builder /build/dist/* ./dist/
+COPY --from=builder /build/package*.json ./
+
+RUN npm install --only=production
+EXPOSE 8080
+
+CMD [ "npm", "run", "start:transpiled" ]

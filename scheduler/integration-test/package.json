@@ -1,0 +1,25 @@
+{
+  "name": "template-it",
+  "version": "1.0.0",
+  "description": "Template Integration-Tests",
+  "scripts": {
+    "mock": "node src/mock.server.js",
+    "pretest": "npm run mock &",
+    "test": "jest",
+    "posttest": "killall node",
+    "watch:mock": "nodemon src/mock.server.js"
+},
+  "devDependencies": {
+    "jest": "^24.8.0",
+    "nodemon": "^1.19.1",
+    "supertest": "^4.0.2"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "dependencies": {
+    "koa": "^2.7.0",
+    "koa-router": "^7.4.0",
+    "wait-on": "^3.2.0"
+  }
+}

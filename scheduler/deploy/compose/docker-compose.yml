@@ -1,0 +1,19 @@
+version: "3"
+services:
+  scheduler-service:
+    build: ../../.
+    image: registry.gitlab.com/profoss/open-data-service/ods-main/scheduler-service
+    ports:
+      - "8080:8080"
+    environment:
+      CONFIG_SERVICE_URL: http://scheduler-service-it:8081
+  scheduler-service-it:
+    build:
+      dockerfile: Dockerfile
+      context: ../../integration-test
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEDULER_API: http://scheduler-service:8080
+      MOCK_SERVER_HOST: scheduler-service-it
+      MOCK_SERVER_PORT: 8081
