@@ -18,6 +18,7 @@ variables:
   
   ADAPTER_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/adapter-service
   UI_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/ui-service
+  SCHEDULER_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/scheduler-service
   STORAGE_POSTGREST_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/storage-service-postgrest
   STORAGE_LIQUIBASE_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/storage-service-liquibase
 
@@ -176,3 +177,57 @@ publish-docker-storage:
     - docker push ${STORAGE_POSTGREST_DOCKER_IMAGE_NAME}:latest
     - docker push ${STORAGE_LIQUIBASE_DOCKER_IMAGE_NAME}:${STORAGE_VERSION}
     - docker push ${STORAGE_LIQUIBASE_DOCKER_IMAGE_NAME}:latest
+
+# ----------------- Scheduler SERVICE --------------------
+
+# BUILD
+build-scheduler:
+  stage: build
+  image: docker:stable
+  before_script:
+    - cd scheduler
+  script:
+    - "docker build -t ${SCHEDULER_DOCKER_IMAGE_NAME} ."
+    - mkdir image # Store built image for following CI steps
+    - docker save ${SCHEDULER_DOCKER_IMAGE_NAME} > image/scheduler.tar
+  artifacts:
+    paths:
+      - ./scheduler/image
+
+
+# INEGRATION-TEST
+integrationtest-scheduler:
+  stage: integrationtest
+  image: mykiwi/docker
+  dependencies:
+    - build-scheduler
+  before_script:
+    - cd scheduler/deploy/compose
+  script:
+    - docker load -i ../../image/scheduler.tar
+    - docker-compose build scheduler-service-it
+    - docker-compose up -d scheduler-service
+    - docker-compose up --exit-code-from scheduler-service-it scheduler-service-it
+  after_script:
+    - cd scheduler/deploy/compose
+    - docker-compose down
+
+
+# PUBLISH
+publish-docker-scheduler:
+  stage: publish
+  image: docker:stable 
+  dependencies:
+    - build-scheduler
+  when: manual
+  before_script:
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+    - cd scheduler
+  script:
+    - docker load -i ./image/scheduler.tar
+    - export SCHEDULER_VERSION=$(cat package.json | grep "version" | awk '{print $2}' | sed 's/[,"]//g')
+    # Tag as version and push
+    - docker tag ${SCHEDULER_DOCKER_IMAGE_NAME} ${SCHEDULER_DOCKER_IMAGE_NAME}:${SCHEDULER_VERSION}
+    - docker tag ${SCHEDULER_DOCKER_IMAGE_NAME} ${SCHEDULER_DOCKER_IMAGE_NAME}:latest
+    - docker push ${SCHEDULER_DOCKER_IMAGE_NAME}:${SCHEDULER_VERSION}
+    - docker push ${SCHEDULER_DOCKER_IMAGE_NAME}:latest
