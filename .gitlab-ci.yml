@@ -91,6 +91,7 @@ build-ui:
     - mkdir image # Store built image for following CI steps
     - docker save ${UI_DOCKER_IMAGE_NAME} > image/ui.tar
   artifacts:
+    expire_in: 1 day
     paths:
       - ./ui/image
 
@@ -129,6 +130,7 @@ build-storage:
     - docker save ${STORAGE_POSTGREST_DOCKER_IMAGE_NAME} > image/storage_postgrest.tar
     - docker save ${STORAGE_LIQUIBASE_DOCKER_IMAGE_NAME} > image/storage_liquibase.tar
   artifacts:
+    expire_in: 1 day
     paths:
       - ./storage/image
 
@@ -191,6 +193,7 @@ build-scheduler:
     - mkdir image # Store built image for following CI steps
     - docker save ${SCHEDULER_DOCKER_IMAGE_NAME} > image/scheduler.tar
   artifacts:
+    expire_in: 1 day
     paths:
       - ./scheduler/image
 
