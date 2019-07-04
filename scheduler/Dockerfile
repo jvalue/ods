@@ -6,7 +6,6 @@ COPY ./src ./src
 COPY ./package*.json ./
 COPY ./tsconfig.json ./
 COPY ./jest.config.js ./
-RUN npm install 
 
 # Install dependencies and run build
 RUN npm install 
