@@ -1,0 +1,40 @@
+# Overwrite service configurations of global docker-compose.yml 
+# for the CI ENVIRONMENT, including MOCKS and INTEGRATION TESTS
+
+version: '3.3'
+
+services:
+
+  # ----------------- ADAPTER SERVICE   (PORTS 9000 - 9099) --------------------
+  adapter-service-it:
+    build:
+      dockerfile: Dockerfile
+      context: ./adapter/integration-test/
+    image: open-data-service/ods-main/adapter-service-it
+    environment:
+      ADAPTER_API: http://adapter-service:8080
+      MOCK_SERVER_HOST: adapter-service-it
+      MOCK_SERVER_PORT: 8081
+
+  # ----------------- SCHEDULER SERVICE (PORTS 9300 - 9399) --------------------
+  scheduler-service:
+    ports:
+      - "9300:8080"
+    environment:
+      CONFIG_SERVICE_URL: http://scheduler-service-it:8081
+  scheduler-service-it:
+    build:
+      context: ./scheduler/integration-test/
+    environment:
+      SCHEDULER_API: http://scheduler-service:8080
+      MOCK_SERVER_HOST: scheduler-service-it
+      MOCK_SERVER_PORT: 8081
+
+
+  # ----------------- STORAGE SERVICE (PORTS 9400 - 9499) --------------------
+  storage-service-it:
+    build:
+      context: ./storage/integration-test
+    image: open-data-service/ods-main/storage-service-it
+    environment:
+      STORAGE_API: http://storage-service:3000
