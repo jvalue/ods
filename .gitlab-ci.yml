@@ -47,16 +47,13 @@ integrationtest-adapter:
   image: mykiwi/docker
   dependencies:
     - build-adapter
-  before_script:
-    - cd adapter/deploy/compose
   script:
-    - docker load -i ./../../image/adapter.tar
-    - docker-compose build adapter-service-it
-    - docker-compose up -d adapter-service
-    - docker-compose up --exit-code-from adapter-service-it adapter-service-it
+    - docker load -i ./adapter/image/adapter.tar
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml build adapter-service-it
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d adapter-service
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from adapter-service-it adapter-service-it
   after_script:
-    - cd adapter/deploy/compose
-    - docker-compose down
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
 
 # PUBLISH
 publish-docker-adapter:
@@ -141,19 +138,16 @@ integrationtest-storage:
   image: mykiwi/docker
   dependencies:
     - build-storage
-  before_script:
-    - cd storage/deploy/compose
   script:
-    - docker load -i ../../image/storage_postgrest.tar
-    - docker load -i ../../image/storage_liquibase.tar
-    - docker-compose build storage-service-it
-    - docker-compose up -d storage-db
-    - docker-compose up -d storage-db-liquibase
-    - docker-compose up -d storage-service
-    - docker-compose up --exit-code-from storage-service-it storage-service-it
+    - docker load -i ./storage/image/storage_postgrest.tar
+    - docker load -i ./storage/image/storage_liquibase.tar
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml build storage-service-it
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d storage-service-db
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d storage-service-db-liquibase
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d storage-service
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from storage-service-it storage-service-it
   after_script:
-    - cd storage/deploy/compose
-    - docker-compose down
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
 
 
 # PUBLISH
@@ -204,16 +198,13 @@ integrationtest-scheduler:
   image: mykiwi/docker
   dependencies:
     - build-scheduler
-  before_script:
-    - cd scheduler/deploy/compose
   script:
-    - docker load -i ../../image/scheduler.tar
-    - docker-compose build scheduler-service-it
-    - docker-compose up -d scheduler-service
-    - docker-compose up --exit-code-from scheduler-service-it scheduler-service-it
+    - docker load -i ./scheduler/image/scheduler.tar
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml build scheduler-service-it
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d scheduler-service
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from scheduler-service-it scheduler-service-it
   after_script:
-    - cd scheduler/deploy/compose
-    - docker-compose down
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
 
 
 # PUBLISH
