@@ -1,0 +1,110 @@
+# Service configurations for all microservices
+# has to be specified by environment files
+
+version: '3.3'
+
+
+volumes:
+  auth_postgres_data:
+    driver: local
+
+services:
+
+  # ----------------- ADAPTER SERVICE   (PORTS 9000 - 9099) --------------------
+  adapter-service:
+    image: registry.gitlab.com/profoss/open-data-service/ods-main/adapter-service
+    build:
+      context: ./adapter/
+    ports:
+      - "9000:8080"
+
+  # ----------------- AUTH SERVICE      (PORTS 9100 - 9199) --------------------
+  auth-service-db:
+    image: postgres
+    volumes:
+      - auth_postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
+      
+  auth-service:
+    image: jboss/keycloak
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: auth-service-db
+      DB_DATABASE: keycloak
+      DB_USER: keycloak
+      DB_PASSWORD: password
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: Pa55w0rd
+
+      #import realm
+      KEYCLOAK_IMPORT: /tmp/realm.json
+
+      #realm volume
+    volumes:
+      - "./auth/ods-userservice-realm.json:/tmp/realm.json"
+    ports:
+      - 9100:8080
+    depends_on:
+      - auth-service-db
+
+
+  # ----------------- SCHEDULER SERVICE (PORTS 9300 - 9399) --------------------
+  scheduler-service:
+    image: registry.gitlab.com/profoss/open-data-service/ods-main/scheduler-service
+    build: 
+      context: ./scheduler/
+    ports:
+      - "9300:8080"
+    environment:
+      CONFIG_SERVICE_URL: http://core-service:8080
+
+
+  # ----------------- STORAGE SERVICE (PORTS 9400 - 9499) --------------------
+  storage-service: # Wraps postgres database with API
+    build: ./storage/docker/postgrest/
+    ports:
+      - "9400:3000"
+    environment:
+      PGRST_DB_URI: postgres://postgrest:postgres-wrapper-pw@storage-service-db:5432/ods
+      PGRST_DB_SCHEMA: storage
+      PGRST_DB_ANON_ROLE: postgrest #In production this role should not be the same as the one used for the connection
+    depends_on:
+      - storage-service-db
+      - storage-service-db-liquibase # TODO: make sure the migration runs through before reading db structure
+
+  storage-service-db:
+    image: postgres:12-alpine
+    environment:
+      POSTGRES_DB: ods
+      POSTGRES_USER: ods_admin
+      POSTGRES_PASSWORD: ods_pw
+  # Uncomment this if you want to persist the data.
+  # volumes:
+  #   - "./pgdata:/var/lib/postgresql/data"
+
+  storage-service-db-ui: # management UI for Postgres
+    image: adminer
+    ports:
+      - 9402:8080
+
+  storage-service-db-liquibase: # perform database migration on start up
+    build: ./storage/docker/liquibase/
+    environment:
+      LIQUIBASE_URL: jdbc:postgresql://storage-service-db:5432/ods
+      LIQUIBASE_USERNAME: ods_admin
+      LIQUIBASE_PASSWORD: ods_pw
+      LIQUIBASE_CHANGELOG: /liquibase/changelog.xml
+    volumes:
+      - ./storage/changelog.xml:/liquibase/changelog.xml # TODO: Sql Injection is currently
+    depends_on: 
+      - storage-service-db
+
+  storage-service-swagger: # API documentation for storage service
+    image: swaggerapi/swagger-ui
+    ports:
+      - "9401:8080"
+    environment:
+      API_URL: http://localhost:9400/

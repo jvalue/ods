@@ -18,8 +18,9 @@ Planned formats:
 * Run unit tests with `./gradlew test`
 * Run integration test with `./gradlew integrationTest` (note that a instance of the adapterService needs to be up).
 * Start with `./gradlew bootRun`  - <b>not recommended</b>
-* Use Docker-Compose: `docker-compose -f deploy/compose/docker-compose.yml up` builds Docker images and starts them up. 
+* Use Docker-Compose: `docker-compose -f ../docker-compose.yml -f ../docker-compose.ci.yml up adapter-service` builds Docker images and starts them up. 
 Note that you need to delete existing docker images from your local docker daemon to have recent changes integrated. 
+* For integration testing run `docker-compose -f ../docker-compose.yml -f ../docker-compose.ci.yml up adapter-service adapter-service-it`
 
 ## API
 | Endpoint  | Method  | Request Body  | Response Body |
