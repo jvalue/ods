@@ -108,3 +108,24 @@ services:
       - "9401:8080"
     environment:
       API_URL: http://localhost:9400/
+
+
+  # ----------------- CORE SERVICE (PORTS 9500 - 9599) --------------------
+  core-service:
+    image: registry.gitlab.com/profoss/open-data-service/ods-main/core-service
+    build:
+      context: ./core/
+    environment:
+      - DB_URL=jdbc:postgresql://core-service-db:5432/coreservice
+    ports:
+      - "9500:8080"
+    depends_on:
+      - core-service-db
+
+  core-service-db:
+    image: postgres
+    environment:
+      - POSTGRES_USER=coreservice
+      - POSTGRES_PASSWORD=admin
+
+
