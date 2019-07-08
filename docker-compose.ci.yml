@@ -38,3 +38,13 @@ services:
     image: open-data-service/ods-main/storage-service-it
     environment:
       STORAGE_API: http://storage-service:3000
+
+
+  # ----------------- CORE SERVICE (PORTS 9500 - 9599) --------------------
+  core-service-it:
+    build:
+      context: ./core/integration-test
+    image: open-data-service/ods-main/core-service-it
+    environment:
+      CORE_API: http://core-service:8080
+

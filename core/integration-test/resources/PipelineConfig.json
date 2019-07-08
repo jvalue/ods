@@ -1,0 +1,26 @@
+{
+  "adapter": {
+    "protocol": "HTTP",
+    "format": "XML",
+    "location": "http://www.nodisrespect.org"
+  },
+  "transformations": [
+    {
+      "func": "return data+data;",
+      "data": "[1]"
+    },
+    {
+      "func": "return 1",
+      "data": "[]"
+    }
+  ],
+  "trigger": {
+    "firstExecution": "1905-12-01T02:30:00.123",
+    "periodic": true,
+    "interval": 50000
+  },
+  "metadata": {
+    "author": "icke",
+    "license": "none"
+  }
+}
