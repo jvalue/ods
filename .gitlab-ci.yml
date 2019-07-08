@@ -21,6 +21,7 @@ variables:
   SCHEDULER_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/scheduler-service
   STORAGE_POSTGREST_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/storage-service-postgrest
   STORAGE_LIQUIBASE_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/storage-service-liquibase
+  CORE_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/core-service
 
 
 
@@ -41,7 +42,7 @@ build-adapter:
     paths:
       - ./adapter/image/adapter.tar
 
-# INEGRATION-TEST
+# INTEGRATION-TEST
 integrationtest-adapter:
   stage: integrationtest
   image: mykiwi/docker
@@ -132,7 +133,7 @@ build-storage:
       - ./storage/image
 
 
-# INEGRATION-TEST
+# INTEGRATION-TEST
 integrationtest-storage:
   stage: integrationtest
   image: mykiwi/docker
@@ -174,6 +175,59 @@ publish-docker-storage:
     - docker push ${STORAGE_LIQUIBASE_DOCKER_IMAGE_NAME}:${STORAGE_VERSION}
     - docker push ${STORAGE_LIQUIBASE_DOCKER_IMAGE_NAME}:latest
 
+
+# ----------------- CORE SERVICE --------------------
+
+# BUILD
+build-core:
+  stage: build
+  image: docker:stable
+  before_script:
+    - cd core
+  script:
+    - docker build -t ${CORE_DOCKER_IMAGE_NAME} .
+    - mkdir image
+    - docker save ${CORE_DOCKER_IMAGE_NAME} > image/core.tar
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - ./core/image/core.tar
+
+# INTEGRATION-TEST
+integrationtest-core:
+  stage: integrationtest
+  image: mykiwi/docker
+  dependencies:
+    - build-core
+  script:
+    - docker load -i ./core/image/core.tar
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml build core-service-it
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d core-service
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from core-service-it core-service-it
+  after_script:
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
+
+
+#PUBLISH
+public-docker-core:
+  stage: publish
+  image: docker:stable
+  dependencies:
+    - build-core
+  when: manual
+  before_script:
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+    - cd core
+  script:
+    - docker load -i ./image/core.tar
+    - export CORE_VERSION=$(cat ./src/main/resources/application.properties | grep "version =" | awk '{print $3}' | sed "s/[']//g")
+    # Tag as version and push
+    - docker tag ${CORE_DOCKER_IMAGE_NAME} ${CORE_DOCKER_IMAGE_NAME}:${CORE_VERSION}
+    - docker tag ${CORE_DOCKER_IMAGE_NAME} ${CORE_DOCKER_IMAGE_NAME}:latest
+    - docker push ${CORE_DOCKER_IMAGE_NAME}:${CORE_VERSION}
+    - docker push ${CORE_DOCKER_IMAGE_NAME}:latest
+
+
 # ----------------- Scheduler SERVICE --------------------
 
 # BUILD
@@ -192,7 +246,7 @@ build-scheduler:
       - ./scheduler/image
 
 
-# INEGRATION-TEST
+# INTEGRATION-TEST
 integrationtest-scheduler:
   stage: integrationtest
   image: mykiwi/docker
@@ -210,7 +264,7 @@ integrationtest-scheduler:
 # PUBLISH
 publish-docker-scheduler:
   stage: publish
-  image: docker:stable 
+  image: docker:stable
   dependencies:
     - build-scheduler
   when: manual
