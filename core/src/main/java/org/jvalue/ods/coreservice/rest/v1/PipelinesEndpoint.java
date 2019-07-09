@@ -36,7 +36,7 @@ public class PipelinesEndpoint {
     }
 
     @PostMapping
-    public ResponseEntity<PipelineConfig> addPipeline(@Valid @RequestBody PipelineConfig config) {
+	public ResponseEntity<PipelineConfig> addPipeline(@Valid @RequestBody PipelineConfig config) {
         PipelineConfig savedConfig = pipelineRepository.save(config);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -45,6 +45,18 @@ public class PipelinesEndpoint {
                 .toUri();
 
         return ResponseEntity.created(location).body(savedConfig);
+    }
+
+    @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updatePipeline(
+            @PathVariable String id,
+            @Valid @RequestBody PipelineConfig updateConfig) {
+        PipelineConfig oldConfig = pipelineRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find pipeline with id " + id + ". Can only update existing pipelines."));
+
+        pipelineRepository.deleteById(id);
+        pipelineRepository.save(oldConfig.applyUpdate(updateConfig));
     }
 
     @DeleteMapping("/{id}")

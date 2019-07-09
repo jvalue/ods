@@ -35,44 +35,17 @@ describe("Core", () => {
   });
 
   test("POST & DELETE /pipelines", async () => {
-    const reqBody = {
-      "adapter": {
-        "protocol": "HTTP",
-        "format": "XML",
-        "location": "http://www.nodisrespect.org"
-      },
-      "transformations": [
-        {
-          "func": "return data+data;",
-          "data": "[1]"
-        },
-        {
-          "func": "return 1",
-          "data": "[]"
-        }
-      ],
-      "trigger": {
-        "firstExecution": "1905-12-01T02:30:00.123",
-        "periodic": true,
-        "interval": 50000
-      },
-      "metadata": {
-        "author": "icke",
-        "license": "none"
-      }
-    };
-
     const response = await request(URL)
         .post("/pipelines")
-        .send(reqBody);
+        .send(pipelineConfig);
 
     const UUIDregEx = '[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}';
     const id = response.body.id;
     expect(response.status).toEqual(201);
     expect(response.header.location).toContain(response.body.id)
-    expect(response.body.transformations).toEqual(reqBody.transformations);
-    expect(response.body.adapter).toEqual(reqBody.adapter);
-    expect(response.body.trigger).toEqual(reqBody.trigger);
+    expect(response.body.transformations).toEqual(pipelineConfig.transformations);
+    expect(response.body.adapter).toEqual(pipelineConfig.adapter);
+    expect(response.body.trigger).toEqual(pipelineConfig.trigger);
     expect(id).toMatch(new RegExp(UUIDregEx));
     expect(id).toEqual(response.body.persistence.pipelineid);
 
@@ -82,4 +55,70 @@ describe("Core", () => {
 
     expect(delResponse.status).toEqual(200);
   })
+
+  test("PUT & DELETE /pipelines/{id}", async () => {
+
+    const postResponse = await request(URL)
+      .post("/pipelines")
+      .send(pipelineConfig);
+
+    const pipelineId = postResponse.body.id;
+
+    const originalGetResponse = await request(URL)
+      .get("/pipelines/" + pipelineId);
+
+    let updatedConfig = pipelineConfig;
+    updatedConfig.adapter.location = "http://www.disrespect.com";
+
+    const putResponse = await request(URL)
+      .put("/pipelines/" + pipelineId)
+      .send(updatedConfig);
+
+    expect(putResponse.status).toEqual(204);
+
+    const updatedGetResponse = await request(URL)
+      .get("/pipelines/" + pipelineId);
+
+    expect(originalGetResponse.body.transformations).toEqual(updatedGetResponse.body.transformations);
+    expect(originalGetResponse.body.metadata).toEqual(updatedGetResponse.body.metadata);
+    expect(originalGetResponse.body.id).toEqual(updatedGetResponse.body.id);
+    expect(originalGetResponse.body.persistence).toEqual(updatedGetResponse.body.persistence);
+    expect(updatedConfig.adapter.location).toEqual(updatedGetResponse.body.adapter.location);
+    expect(originalGetResponse.body.adapter.format).toEqual(updatedGetResponse.body.adapter.format);
+    expect(originalGetResponse.body.adapter.protocol).toEqual(updatedGetResponse.body.adapter.protocol);
+
+    const delResponse = await request(URL)
+        .delete("/pipelines/" + pipelineId)
+        .send()
+
+    expect(delResponse.status).toEqual(200);
+    }
+  )
 });
+
+const pipelineConfig = {
+  "adapter": {
+    "protocol": "HTTP",
+    "format": "XML",
+    "location": "http://www.nodisrespect.org"
+  },
+  "transformations": [
+    {
+      "func": "return data+data;",
+      "data": "[1]"
+    },
+    {
+      "func": "return 1",
+      "data": "[]"
+    }
+  ],
+  "trigger": {
+    "firstExecution": "1905-12-01T02:30:00.123",
+    "periodic": true,
+    "interval": 50000
+  },
+  "metadata": {
+    "author": "icke",
+    "license": "none"
+  }
+};
