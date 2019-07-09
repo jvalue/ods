@@ -19,7 +19,7 @@ public class PipelineConfig implements Serializable {
     @Embedded @NotNull
     private AdapterConfig adapter;
 
-    @ElementCollection
+    @ElementCollection @NotNull
     private List<TransformationConfig> transformations;
 
     @Embedded @NotNull
@@ -44,7 +44,7 @@ public class PipelineConfig implements Serializable {
         this.id = UUID.randomUUID().toString();
         this.adapter = adapter;
         this.transformations = transformations;
-        this.persistence = new DataPersistenceConfig(id);
+        this.persistence = new DataPersistenceConfig(this.id);
         this.trigger = trigger;
         this.metadata = metadata;
     }
@@ -79,7 +79,7 @@ public class PipelineConfig implements Serializable {
         return id;
     }
 
-    public void setId(String id) {
+    private void setId(String id) {
         this.id = id;
     }
 
@@ -119,7 +119,24 @@ public class PipelineConfig implements Serializable {
         return metadata;
     }
 
-    public void setMetadata(PipelineMetadata metadata) {
-        this.metadata = metadata;
+    /**
+     * Create an updated PipelineConfig using the full representation of an update. This method ensures that id and creation time remain stable.
+     * @param updateConfig the representation of the updated config
+     * @return an updated PipelineConfig that has the same id and creationTimestamp as the original one.
+     */
+    public PipelineConfig applyUpdate(PipelineConfig updateConfig) {
+        PipelineMetadata updatedMetadata = new PipelineMetadata(updateConfig.metadata.getAuthor(), updateConfig.metadata.getLicense());
+        updatedMetadata.setCreationTimestamp(this.getMetadata().getCreationTimestamp());
+        DataPersistenceConfig updatedPersistence = new DataPersistenceConfig(this.id);
+
+        PipelineConfig updated = new PipelineConfig(
+                updateConfig.adapter,
+                updateConfig.transformations,
+                updateConfig.trigger,
+                updatedMetadata);
+        updated.setId(this.id);
+        updated.setPersistence(updatedPersistence);
+
+        return updated;
     }
 }
