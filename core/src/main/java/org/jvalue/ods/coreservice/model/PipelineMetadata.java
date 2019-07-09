@@ -20,7 +20,7 @@ public class PipelineMetadata {
     private LocalDateTime creationTimestamp;
 
     //Constructor for JPA
-    public PipelineMetadata() {
+    private PipelineMetadata() {
     }
 
     @JsonCreator
@@ -38,6 +38,10 @@ public class PipelineMetadata {
 
     public String getLicense() {
         return license;
+    }
+
+    public void setCreationTimestamp(LocalDateTime creationTimestamp) {
+        this.creationTimestamp = creationTimestamp;
     }
 
     public LocalDateTime getCreationTimestamp() {

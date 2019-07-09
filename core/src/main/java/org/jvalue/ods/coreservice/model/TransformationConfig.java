@@ -17,7 +17,7 @@ public class TransformationConfig {
 
 
     //Constructor for JPA
-    public TransformationConfig() {
+    private TransformationConfig() {
     }
 
     @JsonCreator
@@ -56,15 +56,7 @@ public class TransformationConfig {
         return func;
     }
 
-    public void setFunc(String func) {
-        this.func = func;
-    }
-
     public String getData() {
         return data;
-    }
-
-    public void setData(String data) {
-        this.data = data;
     }
 }
