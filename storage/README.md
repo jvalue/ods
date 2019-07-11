@@ -20,9 +20,7 @@ Note that you need to delete existing docker images from your local docker daemo
 |---|---|---|---|
 | *base_url*/rpc/createStructureForDatasource  | POST  | `{pipelineid: "the-pipeline-id"}` | - |
 | *base_url*/rpc/deleteStructureForDatasource  | POST  | `{pipelineid: "the-pipeline-id"}` | - |
-| *base_url*/{the-pipeline-id}_data  | POST  | `{data: {<<json object>>}}` | - |
-| *base_url*/{the-pipeline-id}_data  | GET  | - | `{id:123, data: {<<json object>}}` |
-| *base_url*/{the-pipeline-id}_metadata  | POST  | `{'timestamp': '2004-10-19 10:23:54', 'origin': 'origin', 'license': 'license', 'pipelineId': 'pipelineid','id_data': 1}` | - |
-| *base_url*/{the-pipeline-id}_metadata  | GET  | - | `{id:123, timestamp': '2004-10-19 10:23:54', 'origin': 'origin', 'license': 'license', 'pipelineId': 'pipelineid','id_data': 1}` |
+| *base_url*/{the-pipeline-id}  | POST  | `{data: {<<json object>>}, timestamp: "<<timestamp>>", origin: "<<origin>>", license: "<<license>>", pipelineId: "<<pipelineId>>}` | - |
+| *base_url*/{the-pipeline-id} | GET  | - | `{data: {<<json object>>, timestamp: "<<timestamp>>", origin: "<<origin>>", license: "<<license>>", pipelineId: "<<pipelineId>>}` |
 
 When nothing is changed *base_url* is `http://localhost/3000`

@@ -22,13 +22,22 @@ services:
       - "9300:8080"
     environment:
       CONFIG_SERVICE_URL: http://scheduler-service-it:8081
+      ADAPTER_SERVICE_URL: http://scheduler-service-it:8082
+      TRANSFORMATION_SERVICE_URL: http://scheduler-service-it:8083
+      STORAGE_SERVICE_URL: http://scheduler-service-it:8084
   scheduler-service-it:
     build:
       context: ./scheduler/integration-test/
     environment:
       SCHEDULER_API: http://scheduler-service:8080
-      MOCK_SERVER_HOST: scheduler-service-it
-      MOCK_SERVER_PORT: 8081
+      MOCK_CORE_HOST: scheduler-service-it
+      MOCK_CORE_PORT: 8081
+      MOCK_ADAPTER_HOST: scheduler-service-it
+      MOCK_ADAPTER_PORT: 8082
+      MOCK_TRANSFORMATION_HOST: scheduler-service-it
+      MOCK_TRANSFORMATION_PORT: 8083
+      MOCK_STORAGE_HOST: scheduler-service-it
+      MOCK_STORAGE_PORT: 8084
 
 
   # ----------------- STORAGE SERVICE (PORTS 9400 - 9499) --------------------
@@ -50,7 +59,7 @@ services:
     environment:
       SCHEDULER_API: http://transformation-service:8080
 
-  # ----------------- CORE SERVICE (PORTS 9500 - 9599) --------------------
+  # ----------------- CORE SERVICE (PORTS 9600 - 9599) --------------------
   core-service-it:
     build:
       context: ./core/integration-test

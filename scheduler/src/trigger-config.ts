@@ -1,5 +1,5 @@
 export default interface TriggerConfig {
   periodic: boolean;
-  firstExecution: number;
+  firstExecution: Date;
   interval: number;
 }

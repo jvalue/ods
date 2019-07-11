@@ -3,12 +3,15 @@
   "version": "1.0.0",
   "description": "Template Integration-Tests",
   "scripts": {
-    "mock": "node src/mock.server.js",
-    "pretest": "npm run mock &",
+    "mock:core": "node src/mock.core.js",
+    "mock:adapter": "node src/mock.adapter.js",
+    "mock:transformation": "node src/mock.transformation.js",
+    "mock:storage": "node src/mock.storage.js",
+    "pretest": "(npm run mock:adapter &) && (npm run mock:core &) && (npm run mock:transformation &) && (npm run mock:storage &)",
     "test": "jest",
     "posttest": "killall node",
     "watch:mock": "nodemon src/mock.server.js"
-},
+  },
   "devDependencies": {
     "jest": "^24.8.0",
     "nodemon": "^1.19.1",
@@ -19,6 +22,7 @@
   },
   "dependencies": {
     "koa": "^2.7.0",
+    "koa-bodyparser": "^4.2.1",
     "koa-router": "^7.4.0",
     "wait-on": "^3.2.0"
   }

@@ -45,6 +45,7 @@ const pipelineConfigPollingJob: schedule.Job = schedule.scheduleJob(
       const pipelineConfigurations: PipelineConfig[] = response.data
 
       pipelineConfigurations.forEach(pipelineConfig => {
+        pipelineConfig.trigger.firstExecution = new Date(pipelineConfig.trigger.firstExecution) // Otherwise it is a String
         if (!PipelineScheduling.existsEqualPipelineJob(pipelineConfig)) {
           PipelineScheduling.upsertPipelineJob(pipelineConfig)
         }
