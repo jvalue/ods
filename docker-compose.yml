@@ -60,6 +60,10 @@ services:
       - "9300:8080"
     environment:
       CONFIG_SERVICE_URL: http://core-service:8080
+      ADAPTER_SERVICE_URL: http://adapter-service:8080
+      TRANSFORMATION_SERVICE_URL: http://transformation-service:8080
+      STORAGE_SERVICE_URL: http://storage-service:3000
+
 
 
   # ----------------- STORAGE SERVICE (PORTS 9400 - 9499) --------------------
@@ -117,9 +121,9 @@ services:
     ports:
       - "9500:8080"
     environment:
-      AUTH_ENABLED: 'true'
+      AUTH_ENABLED: 'false' #TODO: turn to true as soon as it works!
 
-  # ----------------- CORE SERVICE (PORTS 9500 - 9599) --------------------
+  # ----------------- CORE SERVICE (PORTS 9600 - 9599) --------------------
   core-service:
     image: registry.gitlab.com/profoss/open-data-service/ods-main/core-service
     build:
@@ -127,7 +131,7 @@ services:
     environment:
       - DB_URL=jdbc:postgresql://core-service-db:5432/coreservice
     ports:
-      - "9500:8080"
+      - "9600:8080"
     depends_on:
       - core-service-db
 

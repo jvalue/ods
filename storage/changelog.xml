@@ -15,27 +15,16 @@
                 LANGUAGE plpgsql
                 AS $$
                 BEGIN
-                    EXECUTE format('CREATE TABLE storage."%s_data" (
+                    EXECUTE format('CREATE TABLE storage."%s" (
                         id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ,
                         data jsonb NOT NULL,
-                        CONSTRAINT "Data_pk_%s" PRIMARY KEY (id)
-                    )', pipelineId, pipelineId);
-                    EXECUTE format('ALTER TABLE storage."%s_data" OWNER TO postgrest', pipelineId);
-
-                    EXECUTE format('CREATE TABLE storage."%s_metadata" (
-                        id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ,
                         "timestamp" timestamp,
                         origin varchar,
                         license varchar,
                         "pipelineId" varchar,
-                        "id_data" bigint NOT NULL,
-                        CONSTRAINT "Metadata_pk_%s" PRIMARY KEY (id)
+                        CONSTRAINT "Data_pk_%s" PRIMARY KEY (id)
                     )', pipelineId, pipelineId);
-                    EXECUTE format('ALTER TABLE storage."%s_metadata" OWNER TO postgrest', pipelineId);
-                    EXECUTE format('ALTER TABLE storage."%s_metadata" ADD CONSTRAINT "Data_fk_%s" FOREIGN KEY ("id_data")
-                        REFERENCES storage."%s_data" (id) MATCH FULL
-                        ON DELETE RESTRICT ON UPDATE CASCADE', pipelineId, pipelineId, pipelineId);
-                    EXECUTE format('ALTER TABLE storage."%s_metadata" ADD CONSTRAINT "Metadata_uq_%s" UNIQUE ("id_data")', pipelineId, pipelineId);
+                    EXECUTE format('ALTER TABLE "%s" OWNER TO postgrest', pipelineId);
                 END;
             $$;
         </createProcedure>
@@ -45,8 +34,7 @@
                 LANGUAGE plpgsql
                 AS $$
                 BEGIN
-                    EXECUTE format('DROP TABLE "%s_data" CASCADE', pipelineId);
-                    EXECUTE format('DROP TABLE "%s_metadata" CASCADE', pipelineId);
+                    EXECUTE format('DROP TABLE "%s" CASCADE', pipelineId);
                 END;
             $$;
         </createProcedure>
