@@ -1,0 +1,13 @@
+@baseURL = http://localhost:9400
+@pipelineId = 8f0757c4-e76d-480a-9f98-6cd73074af4d
+
+### Perform Storage Structure Creation
+POST {{baseURL}}/rpc/createstructurefordatasource  HTTP/1.1
+Content-Type: application/json
+
+{
+    "pipelineid": "{{pipelineId}}"
+}
+
+### Get Stored Data
+GET {{baseURL}}/{{pipelineId}} HTTP/1.1

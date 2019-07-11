@@ -8,3 +8,9 @@ Main project for ODS. All related microservice projects for ODS are located in s
 Use `docker-compose up` to run all microservices in production mode.
 
 Use `docker-compose -f docker-compose.yml -f docker-compose.ci.yml up <services>` for starting up specific services in development mode and intergation tests. See sub-directories for futher information.
+
+## Getting Started
+
+### Using API
+
+You can finde example requests for the api under [doc/example-requests](./doc/example-requests).

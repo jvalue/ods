@@ -20,7 +20,6 @@ export function execute (func: string, data: any): string {
     JSON.stringify(data) +
     ')';
 
-  console.log(wrapper);
   const result = vm.run(wrapper);
   return JSON.stringify(result);
 }

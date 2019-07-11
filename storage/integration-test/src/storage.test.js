@@ -28,7 +28,7 @@ describe("Storage", () => {
     expect(response.status).toEqual(200);
   });
 
-  test("POST /pipeline-123test_data", async () => {
+  test("POST /pipeline-123test", async () => {
     const reqBody = {
       data: {
         argument1: "string",
@@ -37,47 +37,19 @@ describe("Storage", () => {
     };
 
     const response = await request(URL)
-      .post("/pipeline-123test_data")
+      .post("/pipeline-123test")
       .send(reqBody);
     expect(response.status).toEqual(201);
   });
 
-  test("GET /pipeline-123test_data", async () => {
+  test("GET /pipeline-123test", async () => {
 
     const response = await request(URL)
-      .get("/pipeline-123test_data");
+      .get("/pipeline-123test");
     expect(response.status).toEqual(200);
     expect(response.body.length).toEqual(1);
     expect(response.body[0].id).toBeDefined();
     expect(response.body[0].data).toEqual({argument1: "string", argument2: 123});
-  });
-
-  test("POST /pipeline-123test_metadata", async () => {
-    const reqBody = {
-      timestamp: '2004-10-19 10:23:54',
-      origin: 'origin',
-      license: 'license',
-      pipelineId: 'pipelineid',
-      id_data: 1
-    };
-
-    const response = await request(URL)
-      .post("/pipeline-123test_metadata")
-      .send(reqBody);
-    expect(response.status).toEqual(201);
-  });
-
-  test("GET /pipeline-123test_metadata", async () => {
-
-    const response = await request(URL)
-      .get("/pipeline-123test_metadata");
-    expect(response.status).toEqual(200);
-    expect(response.body.length).toEqual(1);
-    expect(response.body[0].id).toBeDefined();
-    expect(response.body[0].timestamp).toEqual('2004-10-19T10:23:54');
-    expect(response.body[0].license).toEqual('license');
-    expect(response.body[0].pipelineId).toEqual('pipelineid');
-    expect(response.body[0].id_data).toEqual(1);
   });
 
   test("POST /rpc/deleteStructureForDatasource", async () => {
