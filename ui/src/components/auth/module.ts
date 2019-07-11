@@ -9,7 +9,7 @@ import {
 // eslint-disable-next-line no-unused-vars
 import { KeycloakProfile } from 'keycloak-js'
 
-const AUTH_URL: string = process.env.VUE_APP_AUTH_SERVER_URL as string
+const AUTH_SERVICE_URL: string = process.env.VUE_APP_AUTH_SERVICE_URL as string
 
 @Module({ namespaced: true })
 export default class AuthModule extends VuexModule {
@@ -18,7 +18,8 @@ export default class AuthModule extends VuexModule {
 
   @Action({ commit: 'setAuth' })
   public async initKeycloak (): Promise<boolean> {
-    await keycloakInit(AUTH_URL)
+    console.log(`Using '${AUTH_SERVICE_URL}' as Keycloak URL`)
+    await keycloakInit(AUTH_SERVICE_URL)
     const isAuth = isAuthenticated()
 
     if (isAuth) {

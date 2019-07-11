@@ -1,7 +1,7 @@
 # Overwrite service configurations of global docker-compose.yml 
 # for the CI ENVIRONMENT, including MOCKS and INTEGRATION TESTS
 
-version: '3.3'
+version: '3.7'
 
 services:
 

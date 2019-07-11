@@ -62,6 +62,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Action, State } from 'vuex-class'
+import { KeycloakProfile } from 'keycloak-js'
 
 const namespace = { namespace: 'auth' }
 
@@ -71,6 +72,9 @@ export default class Login extends Vue {
 
   @State('isAuth', namespace)
   private isAuthenticated!: boolean;
+
+  @State('userProfile', namespace) 
+  private userProfile!: KeycloakProfile;
 
   @Action('login', namespace)
   private login!: () => void;

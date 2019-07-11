@@ -1,9 +1,10 @@
 module.exports = {
+  publicPath: './',
   configureWebpack: {
     devServer: {
       open: true,
-      port: 3000
+      port: 8080
     },
     devtool: 'source-map'
   }
-};
+}
