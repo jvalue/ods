@@ -39,6 +39,16 @@ services:
     environment:
       STORAGE_API: http://storage-service:3000
 
+  # ----------------- TRANSFOMRATION SERVICE (PORTS 9500 - 9599) --------------------
+  transformation-service:
+    environment:
+      AUTH_ENABLED: 'false'
+
+  transformation-service-it:
+    build:
+      context: ./transformation/integration-test/
+    environment:
+      SCHEDULER_API: http://transformation-service:8080
 
   # ----------------- CORE SERVICE (PORTS 9500 - 9599) --------------------
   core-service-it:

@@ -21,6 +21,7 @@ variables:
   SCHEDULER_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/scheduler-service
   STORAGE_POSTGREST_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/storage-service-postgrest
   STORAGE_LIQUIBASE_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/storage-service-liquibase
+  TRANSFORMATION_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/transformation-service
   CORE_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/core-service
 
 
@@ -279,3 +280,55 @@ publish-docker-scheduler:
     - docker tag ${SCHEDULER_DOCKER_IMAGE_NAME} ${SCHEDULER_DOCKER_IMAGE_NAME}:latest
     - docker push ${SCHEDULER_DOCKER_IMAGE_NAME}:${SCHEDULER_VERSION}
     - docker push ${SCHEDULER_DOCKER_IMAGE_NAME}:latest
+
+# ----------------- Transformation SERVICE --------------------
+
+# BUILD
+build-transformation:
+  stage: build
+  image: docker:stable
+  before_script:
+    - cd transformation
+  script:
+    - "docker build -t ${TRANSFORMATION_DOCKER_IMAGE_NAME} ."
+    - mkdir image # Store built image for following CI steps
+    - docker save ${TRANSFORMATION_DOCKER_IMAGE_NAME} > image/transformation.tar
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - ./transformation/image
+
+
+# INEGRATION-TEST
+integrationtest-transformation:
+  stage: integrationtest
+  image: mykiwi/docker
+  dependencies:
+    - build-transformation
+  script:
+    - docker load -i ./transformation/image/transformation.tar
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml build transformation-service-it
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d transformation-service
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from transformation-service-it transformation-service-it
+  after_script:
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
+
+
+# PUBLISH
+publish-docker-transformation:
+  stage: publish
+  image: docker:stable 
+  dependencies:
+    - build-transformation
+  when: manual
+  before_script:
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+    - cd transformation
+  script:
+    - docker load -i ./image/transformation.tar
+    - export TRANSFORMATION_VERSION=$(cat package.json | grep "version" | awk '{print $2}' | sed 's/[,"]//g')
+    # Tag as version and push
+    - docker tag ${TRANSFORMATION_DOCKER_IMAGE_NAME} ${TRANSFORMATION_DOCKER_IMAGE_NAME}:${TRANSFORMATION_VERSION}
+    - docker tag ${TRANSFORMATION_DOCKER_IMAGE_NAME} ${TRANSFORMATION_DOCKER_IMAGE_NAME}:latest
+    - docker push ${TRANSFORMATION_DOCKER_IMAGE_NAME}:${TRANSFORMATION_VERSION}
+    - docker push ${TRANSFORMATION_DOCKER_IMAGE_NAME}:latest
