@@ -3,7 +3,7 @@ export default interface PipelineConfig {
   id: number;
 
   adapter: any;
-  transformations: any;
+  transformations: any[];
   persistence: any;
   metadata: any;
 

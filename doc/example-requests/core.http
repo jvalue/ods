@@ -1,0 +1,33 @@
+@baseURL = http://localhost:9600
+
+### Get all pipelines
+GET {{baseURL}}/pipelines  HTTP/1.1
+
+
+### Create a pipeline
+POST {{baseURL}}/pipelines  HTTP/1.1
+Content-Type: application/json
+
+{
+  "adapter": {
+    "protocol": "HTTP",
+    "format": "JSON",
+    "location": "https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json"
+  },
+  "transformations": [
+    {
+      "func": "return data[0];"
+    },{
+      "func": "data.test = 'abc'; return data;"
+    }
+  ],
+  "trigger": {
+    "firstExecution": "2018-10-07T01:32:00.123",
+    "periodic": true,
+    "interval": 60000
+  },
+  "metadata": {
+    "author": "icke",
+    "license": "none"
+  }
+}
