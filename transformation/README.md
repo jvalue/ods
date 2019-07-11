@@ -8,7 +8,7 @@ Make sure they keyclone container is running (see `../auth`).
 
 `npm install`
 
-`npm run build`
+`npm run tsc`
 
 ## Run
 
