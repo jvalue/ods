@@ -1,7 +1,7 @@
 # Service configurations for all microservices
 # has to be specified by environment files
 
-version: '3.3'
+version: '3.7'
 
 
 volumes:
@@ -10,15 +10,21 @@ volumes:
 
 services:
 
-  # ----------------- ADAPTER SERVICE   (PORTS 9000 - 9099) --------------------
-  adapter-service:
-    image: registry.gitlab.com/profoss/open-data-service/ods-main/adapter-service
+  # ----------------- UI SERVICE (/ui) --------------------
+  ui-service:
+    image: registry.gitlab.com/profoss/open-data-service/ods-main/ui-service
     build:
-      context: ./adapter/
-    ports:
-      - "9000:8080"
-
-  # ----------------- AUTH SERVICE      (PORTS 9100 - 9199) --------------------
+      context: ./ui/
+      args:
+        AUTH_SERVICE_URL: /auth
+        TRANSFORMATION_SERVICE_URL: http://transformation-service:8080
+    labels: # traefic reverse-proxy config
+      - "traefik.backend=ui-service"
+      - "traefik.frontend.rule=PathPrefixStrip:/ui"
+      - "traefik.frontend.passHostHeader=true"
+      - "traefik.port=8080"
+    
+  # ----------------- AUTH SERVICE (/auth) --------------------
   auth-service-db:
     image: postgres
     volumes:
@@ -27,6 +33,8 @@ services:
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
       POSTGRES_PASSWORD: password
+    labels: # traefic reverse-proxy config
+      - "traefik.enable=false"
       
   auth-service:
     image: jboss/keycloak
@@ -38,6 +46,7 @@ services:
       DB_PASSWORD: password
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: Pa55w0rd
+      KEYCLOAK_LOGLEVEL: INFO
 
       #import realm
       KEYCLOAK_IMPORT: /tmp/realm.json
@@ -45,32 +54,39 @@ services:
       #realm volume
     volumes:
       - "./auth/ods-userservice-realm.json:/tmp/realm.json"
-    ports:
-      - 9100:8080
-    depends_on:
-      - auth-service-db
+    labels: # traefic reverse-proxy config
+      - "traefik.backend=auth-service"
+      - "traefik.frontend.rule=PathPrefix:/auth"
+      - "traefik.frontend.passHostHeader=true"
 
+  # ----------------- ADAPTER SERVICE (/adapter) --------------------
+  adapter-service:
+    image: registry.gitlab.com/profoss/open-data-service/ods-main/adapter-service
+    build:
+      context: ./adapter/
+    labels: # traefic reverse-proxy config
+      - "traefik.backend=adapter-service"
+      - "traefik.frontend.rule=PathPrefixStrip:/adapter"
+      - "traefik.frontend.passHostHeader=true"
 
-  # ----------------- SCHEDULER SERVICE (PORTS 9300 - 9399) --------------------
+  # ----------------- SCHEDULER SERVICE (/scheduler) --------------------
   scheduler-service:
     image: registry.gitlab.com/profoss/open-data-service/ods-main/scheduler-service
     build: 
       context: ./scheduler/
-    ports:
-      - "9300:8080"
     environment:
       CONFIG_SERVICE_URL: http://core-service:8080
       ADAPTER_SERVICE_URL: http://adapter-service:8080
       TRANSFORMATION_SERVICE_URL: http://transformation-service:8080
       STORAGE_SERVICE_URL: http://storage-service:3000
+    labels: # traefic reverse-proxy config
+      - "traefik.backend=scheduler-service"
+      - "traefik.frontend.rule=PathPrefixStrip:/scheduler"
+      - "traefik.frontend.passHostHeader=true"
 
-
-
-  # ----------------- STORAGE SERVICE (PORTS 9400 - 9499) --------------------
+  # ----------------- STORAGE SERVICE (/scheduler) --------------------
   storage-service: # Wraps postgres database with API
     build: ./storage/docker/postgrest/
-    ports:
-      - "9400:3000"
     environment:
       PGRST_DB_URI: postgres://postgrest:postgres-wrapper-pw@storage-service-db:5432/ods
       PGRST_DB_SCHEMA: storage
@@ -78,6 +94,11 @@ services:
     depends_on:
       - storage-service-db
       - storage-service-db-liquibase # TODO: make sure the migration runs through before reading db structure
+    labels: # traefic reverse-proxy config
+      - "traefik.backend=storage-service"
+      - "traefik.frontend.rule=PathPrefixStrip:/storage"
+      - "traefik.frontend.passHostHeader=true"
+      - "traefik.port=3000"
 
   storage-service-db:
     image: postgres:12-alpine
@@ -88,11 +109,13 @@ services:
   # Uncomment this if you want to persist the data.
   # volumes:
   #   - "./pgdata:/var/lib/postgresql/data"
+    labels: # traefic reverse-proxy config
+      - "traefik.enable=false"
 
   storage-service-db-ui: # management UI for Postgres
     image: adminer
-    ports:
-      - 9402:8080
+    labels: # traefic reverse-proxy config
+      - "traefik.enable=false"
 
   storage-service-db-liquibase: # perform database migration on start up
     build: ./storage/docker/liquibase/
@@ -105,40 +128,58 @@ services:
       - ./storage/changelog.xml:/liquibase/changelog.xml # TODO: Sql Injection is currently
     depends_on: 
       - storage-service-db
+    labels: # traefic reverse-proxy config
+      - "traefik.enable=false"
 
   storage-service-swagger: # API documentation for storage service
     image: swaggerapi/swagger-ui
-    ports:
-      - "9401:8080"
     environment:
       API_URL: http://localhost:9400/
+    labels: # traefic reverse-proxy config
+      - "traefik.enable=false"
 
-  # ----------------- TRANSFOMRATION SERVICE (PORTS 9500 - 9599) --------------------
+  # ----------------- TRANSFOMRATION SERVICE (/transformation) --------------------
   transformation-service:
     image: registry.gitlab.com/profoss/open-data-service/ods-main/transformation-service
     build: 
       context: ./transformation/
-    ports:
-      - "9500:8080"
     environment:
       AUTH_ENABLED: 'false' #TODO: turn to true as soon as it works!
+    labels: # traefic reverse-proxy config
+      - "traefik.backend=transformation-service"
+      - "traefik.frontend.rule=PathPrefixStrip:/transformation"
+      - "traefik.frontend.passHostHeader=true"
 
-  # ----------------- CORE SERVICE (PORTS 9600 - 9599) --------------------
+  # ----------------- CORE SERVICE (/core) --------------------
   core-service:
     image: registry.gitlab.com/profoss/open-data-service/ods-main/core-service
     build:
       context: ./core/
     environment:
       - DB_URL=jdbc:postgresql://core-service-db:5432/coreservice
-    ports:
-      - "9600:8080"
     depends_on:
       - core-service-db
+    labels: # traefic reverse-proxy config
+      - "traefik.backend=core-service"
+      - "traefik.frontend.rule=PathPrefixStrip:/core"
+      - "traefik.frontend.passHostHeader=true"
 
   core-service-db:
     image: postgres
     environment:
       - POSTGRES_USER=coreservice
       - POSTGRES_PASSWORD=admin
+    labels: # traefic reverse-proxy config
+      - "traefik.enable=false"
 
-
+# -------------------- EDGE SERVER (PORT 9000) -----------------------------
+  edge-server:
+    image: traefik # The official Traefik docker image
+    command: --api --docker # Enables the web UI and tells Traefik to listen to docker
+    ports:
+      - "9000:80"     # The HTTP port
+      - "9001:8080"   # The Web UI (enabled by --api)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
+    labels:
+        - "traefik.enable=false"
