@@ -1,6 +1,6 @@
 import { useBearer } from '@/keycloak'
 
-const TRANSFORMATION_URL = process.env.VUE_APP_TRANSFORMATION_SERVICE_URL as string
+const TRANSFORMATION_SERVICE_URL = process.env.TRANSFORMATION_SERVICE_URL as string
 
 // TODO: remove if possible
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -14,7 +14,7 @@ export async function transformData (inputFunc: string): Promise<any> {
     return
   }
 
-  return fetch(TRANSFORMATION_URL, {
+  return fetch(TRANSFORMATION_SERVICE_URL, {
     method: 'POST',
     mode: 'cors',
     body: inputFunc,

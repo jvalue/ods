@@ -1,27 +1,14 @@
 # First stage: image to build and test node application
-FROM node:lts-alpine as builder
+FROM node:lts-alpine
+
+ARG AUTH_SERVICE_URL
+ARG TRANSFORMATION_SERVICE_URL
 
 WORKDIR /build
 COPY . .
 
-# Install dependencies and run build
-RUN npm install
-RUN npm run build
-RUN npm run lint
-RUN npm run test:unit
+RUN echo "VUE_APP_AUTH_SERVICE_URL=$AUTH_SERVICE_URL" >> .env
+RUN echo "VUE_APP_TRANSFORMATION_SERVICE_URL=$TRANSFORMATION_SERVICE_URL" >> .env
+RUN cat .env
 
-# Second stage: image to run node application
-FROM node:lts-alpine
-
-# Install simple http server for serving static content
-RUN npm install -g http-server
-
-RUN mkdir /app
-WORKDIR /app
-
-# Pull the dist files from the builder container
-COPY --from=builder /build/dist .
-
-# Run app
-EXPOSE 8080
-CMD [ "http-server", "." ]
+CMD [ "npm", "run", "serve" ]
