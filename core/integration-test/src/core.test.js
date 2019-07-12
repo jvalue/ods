@@ -1,7 +1,7 @@
 const request = require("supertest");
 const waitOn = require("wait-on");
 
-const URL = process.env.CORE_API || "http://localhost:8080";
+const URL = process.env.CORE_API || "http://localhost:9000/core";
 
 describe("Core", () => {
   console.log("Core-Service URL= " + URL);
