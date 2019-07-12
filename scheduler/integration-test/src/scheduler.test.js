@@ -2,7 +2,7 @@
 const request = require("supertest");
 const waitOn = require("wait-on");
 
-const URL = process.env.SCHEDULER_API || "http://localhost:8080";
+const URL = process.env.SCHEDULER_API || "http://localhost:9000/scheduler";
 
 const MOCK_CORE_PORT = process.env.MOCK_CORE_PORT || 8081;
 const MOCK_CORE_HOST = process.env.MOCK_CORE_HOST || "localhost";

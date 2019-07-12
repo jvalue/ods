@@ -1,4 +1,4 @@
-@baseURL = http://localhost:9600
+@baseURL = http://localhost:9000/core
 
 ### Get all pipelines
 GET {{baseURL}}/pipelines  HTTP/1.1
