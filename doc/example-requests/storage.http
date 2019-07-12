@@ -1,4 +1,4 @@
-@baseURL = http://localhost:9400
+@baseURL = http://localhost:9000/storage
 @pipelineId = 8f0757c4-e76d-480a-9f98-6cd73074af4d
 
 ### Perform Storage Structure Creation

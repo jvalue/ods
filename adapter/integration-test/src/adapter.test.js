@@ -1,7 +1,7 @@
 const request = require("supertest");
 const waitOn = require("wait-on");
 
-const URL = process.env.ADAPTER_API || "http://localhost:8080";
+const URL = process.env.ADAPTER_API || "http://localhost:9000/adapter";
 const MOCK_SERVER_PORT = process.env.MOCK_SERVER_PORT || 8081;
 const MOCK_SERVER_HOST = process.env.MOCK_SERVER_HOST || "localhost";
 const MOCK_SERVER_URL = "http://" + MOCK_SERVER_HOST + ":" + MOCK_SERVER_PORT;
