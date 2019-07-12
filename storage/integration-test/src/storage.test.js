@@ -1,7 +1,7 @@
 const request = require("supertest");
 const waitOn = require("wait-on");
 
-const URL = process.env.STORAGE_API || "http://localhost:3000";
+const URL = process.env.STORAGE_API || "http://localhost:9000/storage";
 
 describe("Storage", () => {
   console.log("Storage-Service URL= " + URL);
