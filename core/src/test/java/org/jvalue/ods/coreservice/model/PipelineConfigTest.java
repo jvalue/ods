@@ -56,4 +56,16 @@ public class PipelineConfigTest {
         assertEquals("[2]", result.get("transformations").get(1).get("data").textValue());
 
     }
+
+    @Test
+    public void testRenewId() throws IOException {
+        File pipelineConfig = new File("src/test/java/org/jvalue/ods/coreservice/model/PipelineConfig.json");
+        PipelineConfig pipeline = mapper.readValue(pipelineConfig, PipelineConfig.class);
+
+        String oldId = pipeline.getId();
+        pipeline.renewId();
+        String renewedId = pipeline.getId();
+
+        assertNotEquals(oldId, renewedId);
+    }
 }
