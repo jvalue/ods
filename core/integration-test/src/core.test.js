@@ -97,6 +97,7 @@ describe("Core", () => {
 });
 
 const pipelineConfig = {
+  "id": "new",
   "adapter": {
     "protocol": "HTTP",
     "format": "XML",
