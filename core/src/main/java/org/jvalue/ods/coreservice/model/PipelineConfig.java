@@ -139,4 +139,12 @@ public class PipelineConfig implements Serializable {
 
         return updated;
     }
+
+    /**
+     * Create a new UUID that is be used as id.
+     */
+    public void renewId() {
+        this.id = UUID.randomUUID().toString();
+        this.persistence = new DataPersistenceConfig(this.id);
+    }
 }

@@ -37,6 +37,7 @@ public class PipelinesEndpoint {
 
     @PostMapping
 	public ResponseEntity<PipelineConfig> addPipeline(@Valid @RequestBody PipelineConfig config) {
+        config.renewId();
         PipelineConfig savedConfig = pipelineRepository.save(config);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
