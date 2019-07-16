@@ -1,5 +1,5 @@
 @baseURL = http://localhost:9000/storage
-@pipelineId = 8f0757c4-e76d-480a-9f98-6cd73074af4d
+@pipelineId = de1c9f8f-cd86-4edd-b10e-a0fe8762135e 
 
 ### Perform Storage Structure Creation
 POST {{baseURL}}/rpc/createstructurefordatasource  HTTP/1.1

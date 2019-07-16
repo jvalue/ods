@@ -62,10 +62,14 @@ import Router from '@/router'
 })
 export default class App extends Vue {
   private title: string = 'Open-Data-Service';
+
   private routerTitle: string = '';
+
   private drawer = null;
+
   private items = [
     { title: 'Dashboard', route: '/' },
+    { title: 'Pipelines', route: '/pipeline' },
     { title: 'Transformation', route: '/transformation' },
     { title: 'About', route: '/about' }
   ];
