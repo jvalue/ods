@@ -16,8 +16,11 @@ services:
     build:
       context: ./ui/
       args:
+        UI_BASE_URL: /ui
         AUTH_SERVICE_URL: /auth
-        TRANSFORMATION_SERVICE_URL: http://transformation-service:8080
+        CORE_SERVICE_URL: /core
+        STORAGE_SERVICE_URL: /storage
+        TRANSFORMATION_SERVICE_URL: /transformation
     labels: # traefic reverse-proxy config
       - "traefik.backend=ui-service"
       - "traefik.frontend.rule=PathPrefixStrip:/ui"
