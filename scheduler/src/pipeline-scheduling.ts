@@ -141,9 +141,11 @@ export function upsertPipelineJob (pipelineConfig: PipelineConfig): PipelineJob 
   console.log(`[${pipelineState}] pipeline detected with id ${pipelineConfig.id}. 
   Scheduled for next execution at ${executionDate.toLocaleString()}`)
 
-  if (!isNewPipeline) {
+  if (isNewPipeline) {
+    StorageClient.createStructure(pipelineConfig.id)
+  } else {
     cancelJob(pipelineConfig.id)
-  }
+  } 
 
   return schedulePipeline(pipelineConfig, executionDate)
 }
