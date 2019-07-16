@@ -3,11 +3,9 @@
 ### Get all pipelines
 GET {{baseURL}}/pipelines  HTTP/1.1
 
-
 ### Create a pipeline
 POST {{baseURL}}/pipelines  HTTP/1.1
 Content-Type: application/json
-
 {
   "adapter": {
     "protocol": "HTTP",

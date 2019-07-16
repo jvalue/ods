@@ -1,0 +1,54 @@
+@baseURL = http://localhost:9000
+
+### Create a pipeline for PegelOnline mirror
+POST {{baseURL}}/core/pipelines  HTTP/1.1
+Content-Type: application/json
+
+{
+  "adapter": {
+    "protocol": "HTTP",
+    "format": "JSON",
+    "location": "https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json?includeTimeseries=true&includeCurrentMeasurement=true"
+  },
+  "transformations": [
+    {
+      "func": "data.forEach((x) => { var currentMeasurement = x.timeseries[0].currentMeasurement; currentMeasurement.value /= 100; currentMeasurement.unit = 'm'; x.timeseries = undefined; x.currentMeasurement = currentMeasurement;}); return data;"
+    }
+  ],
+  "trigger": {
+    "firstExecution": "2018-10-07T01:32:00.123",
+    "periodic": true,
+    "interval": 60000
+  },
+  "metadata": {
+    "author": "icke",
+    "license": "none"
+  }
+}
+
+@pipelineId = 4d49ac4a-0fe2-4bd2-9c28-428923755fd0
+### Create a pipeline for PegelOnline mirror -> Cuxhaven
+POST {{baseURL}}/core/pipelines  HTTP/1.1
+Content-Type: application/json
+
+{
+  "adapter": {
+    "protocol": "HTTP",
+    "format": "JSON",
+    "location": "http://storage-service:3000/{{pipelineId}}?select=data&order=id.desc&limit=1"
+  },
+  "transformations": [
+    {
+      "func": "var data = data[0].data; var dataCuxhaven = data.filter((x) => x.shortname.toLowerCase().includes('cuxhaven')); return dataCuxhaven;"
+    }
+  ],
+  "trigger": {
+    "firstExecution": "2018-10-07T01:32:03.123",
+    "periodic": true,
+    "interval": 60000
+  },
+  "metadata": {
+    "author": "icke",
+    "license": "none"
+  }
+}
