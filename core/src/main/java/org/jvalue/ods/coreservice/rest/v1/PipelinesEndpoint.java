@@ -30,14 +30,14 @@ public class PipelinesEndpoint {
     }
 
     @GetMapping("/{id}")
-    public PipelineConfig getPipeline(@PathVariable String id) {
+    public PipelineConfig getPipeline(@PathVariable Long id) {
         return pipelineRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find pipeline with id " + id));
     }
 
     @PostMapping
 	public ResponseEntity<PipelineConfig> addPipeline(@Valid @RequestBody PipelineConfig config) {
-        config.renewId();
+        config.setId(null); // id not under control of client
         PipelineConfig savedConfig = pipelineRepository.save(config);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -51,17 +51,16 @@ public class PipelinesEndpoint {
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updatePipeline(
-            @PathVariable String id,
+            @PathVariable Long id,
             @Valid @RequestBody PipelineConfig updateConfig) {
         PipelineConfig oldConfig = pipelineRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find pipeline with id " + id + ". Can only update existing pipelines."));
 
-        pipelineRepository.deleteById(id);
         pipelineRepository.save(oldConfig.applyUpdate(updateConfig));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity deletePipeline(@PathVariable String id) {
+    public ResponseEntity deletePipeline(@PathVariable Long id) {
         pipelineRepository.deleteById(id);
 
         return ResponseEntity.ok().build();

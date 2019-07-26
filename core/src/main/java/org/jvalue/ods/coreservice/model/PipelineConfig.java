@@ -8,22 +8,19 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 @Entity
 public class PipelineConfig implements Serializable {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Embedded @NotNull
     private AdapterConfig adapter;
 
     @ElementCollection @NotNull
     private List<TransformationConfig> transformations;
-
-    @Embedded @NotNull
-    private DataPersistenceConfig persistence;
 
     @Embedded @NotNull
     private PipelineTriggerConfig trigger;
@@ -41,10 +38,8 @@ public class PipelineConfig implements Serializable {
             @JsonProperty("transformations") List<TransformationConfig> transformations,
             @JsonProperty("trigger") PipelineTriggerConfig trigger,
             @JsonProperty("metadata") PipelineMetadata metadata) {
-        this.id = UUID.randomUUID().toString();
         this.adapter = adapter;
         this.transformations = transformations;
-        this.persistence = new DataPersistenceConfig(this.id);
         this.trigger = trigger;
         this.metadata = metadata;
     }
@@ -56,7 +51,6 @@ public class PipelineConfig implements Serializable {
                 "id=" + id +
                 ", adapter=" + adapter +
                 ", transformations=" + transformations.toString() +
-                ", persistence=" + persistence +
                 ", trigger=" + trigger +
                 ", metadata=" + metadata +
                 '}';
@@ -75,11 +69,11 @@ public class PipelineConfig implements Serializable {
         return Objects.hash(id);
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    private void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -97,14 +91,6 @@ public class PipelineConfig implements Serializable {
 
     public void setTransformations(List<TransformationConfig> transformations) {
         this.transformations = transformations;
-    }
-
-    public DataPersistenceConfig getPersistence() {
-        return persistence;
-    }
-
-    public void setPersistence(DataPersistenceConfig persistence) {
-        this.persistence = persistence;
     }
 
     public PipelineTriggerConfig getTrigger() {
@@ -125,9 +111,12 @@ public class PipelineConfig implements Serializable {
      * @return an updated PipelineConfig that has the same id and creationTimestamp as the original one.
      */
     public PipelineConfig applyUpdate(PipelineConfig updateConfig) {
-        PipelineMetadata updatedMetadata = new PipelineMetadata(updateConfig.metadata.getAuthor(), updateConfig.metadata.getLicense());
+        PipelineMetadata updatedMetadata = new PipelineMetadata(
+                updateConfig.metadata.getAuthor(), 
+                updateConfig.metadata.getLicense(),
+                updateConfig.metadata.getDisplayName(),
+                updateConfig.metadata.getDescription());
         updatedMetadata.setCreationTimestamp(this.getMetadata().getCreationTimestamp());
-        DataPersistenceConfig updatedPersistence = new DataPersistenceConfig(this.id);
 
         PipelineConfig updated = new PipelineConfig(
                 updateConfig.adapter,
@@ -135,16 +124,7 @@ public class PipelineConfig implements Serializable {
                 updateConfig.trigger,
                 updatedMetadata);
         updated.setId(this.id);
-        updated.setPersistence(updatedPersistence);
 
         return updated;
-    }
-
-    /**
-     * Create a new UUID that is be used as id.
-     */
-    public void renewId() {
-        this.id = UUID.randomUUID().toString();
-        this.persistence = new DataPersistenceConfig(this.id);
     }
 }

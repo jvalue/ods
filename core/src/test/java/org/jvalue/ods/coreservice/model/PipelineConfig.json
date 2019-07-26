@@ -1,4 +1,5 @@
 {
+  "id": 123,
   "adapter": {
     "protocol": "HTTP",
     "format": "XML",
@@ -21,6 +22,8 @@
   },
   "metadata": {
     "author": "icke",
-    "license": "none"
+    "license": "none",
+    "displayName": "TestName",
+    "description": "Describing..."
   }
 }
