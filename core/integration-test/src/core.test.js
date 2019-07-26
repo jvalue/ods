@@ -39,15 +39,13 @@ describe("Core", () => {
         .post("/pipelines")
         .send(pipelineConfig);
 
-    const UUIDregEx = '[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}';
-    const id = response.body.id;
     expect(response.status).toEqual(201);
     expect(response.header.location).toContain(response.body.id)
     expect(response.body.transformations).toEqual(pipelineConfig.transformations);
     expect(response.body.adapter).toEqual(pipelineConfig.adapter);
     expect(response.body.trigger).toEqual(pipelineConfig.trigger);
-    expect(id).toMatch(new RegExp(UUIDregEx));
-    expect(id).toEqual(response.body.persistence.pipelineid);
+    expect(response.body.id).toBeDefined();
+    expect(response.body.id).not.toEqual(pipelineConfig.id) // id not under control of client
 
     const delResponse = await request(URL)
         .delete("/pipelines/" + response.body.id)
@@ -82,7 +80,6 @@ describe("Core", () => {
     expect(originalGetResponse.body.transformations).toEqual(updatedGetResponse.body.transformations);
     expect(originalGetResponse.body.metadata).toEqual(updatedGetResponse.body.metadata);
     expect(originalGetResponse.body.id).toEqual(updatedGetResponse.body.id);
-    expect(originalGetResponse.body.persistence).toEqual(updatedGetResponse.body.persistence);
     expect(updatedConfig.adapter.location).toEqual(updatedGetResponse.body.adapter.location);
     expect(originalGetResponse.body.adapter.format).toEqual(updatedGetResponse.body.adapter.format);
     expect(originalGetResponse.body.adapter.protocol).toEqual(updatedGetResponse.body.adapter.protocol);
@@ -97,7 +94,7 @@ describe("Core", () => {
 });
 
 const pipelineConfig = {
-  "id": "new",
+  "id": 12345,
   "adapter": {
     "protocol": "HTTP",
     "format": "XML",
@@ -120,6 +117,8 @@ const pipelineConfig = {
   },
   "metadata": {
     "author": "icke",
-    "license": "none"
+    "license": "none",
+    "displayName": "test pipeline 1",
+    "description": "integraiton testing pipeline"
   }
 };

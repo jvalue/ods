@@ -112,7 +112,7 @@ export default class PipelineStorageOverview extends Vue {
 
   private storageId: string = '';
 
-  private clipUrl: (string) => Promise<void> = clipboardCopy
+  private clipUrl: (content: string) => Promise<void> = clipboardCopy
 
   private getStorageItemUrl (storageId: string, itemId: string): string {
     let url = StorageClient.getItemUrl(storageId, itemId)

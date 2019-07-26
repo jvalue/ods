@@ -7,6 +7,12 @@ export async function getAllPipelines (): Promise<Pipeline[]> {
   return data
 }
 
+export async function getPipelineById (id: number): Promise<Pipeline> {
+  const response = await fetch(`${CORE_SERVICE_URL}/pipelines/${id}`)
+  const data = await response.json()
+  return data
+}
+
 export async function createPipeline (pipeline: Pipeline): Promise<Pipeline> {
   const options = {
     method: 'POST',
@@ -31,7 +37,7 @@ export async function updatePipeline (pipeline: Pipeline): Promise<Response> {
   return fetch(`${CORE_SERVICE_URL}/pipelines/${pipeline.id}`, options)
 }
 
-export async function deletePipeline (pipelineId: string): Promise<Response> {
+export async function deletePipeline (pipelineId: number): Promise<Response> {
   const options = { method: 'DELETE' }
   return fetch(`${CORE_SERVICE_URL}/pipelines/${pipelineId}`, options)
 }
