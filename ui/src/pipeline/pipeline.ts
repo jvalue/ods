@@ -1,8 +1,14 @@
 export default interface Pipeline {
-  id: string;
+  id: number;
   adapter: object;
-  metadata: object;
+  metadata: PipelineMetaData;
   transformations: object[];
   trigger: object;
-  persistence?: object;
+}
+
+export interface PipelineMetaData {
+  displayName: string;
+  description: string;
+  author: string;
+  license: string;
 }
