@@ -6,12 +6,19 @@ import * as RestService from './pipelineRest'
 export default class PipelineModule extends VuexModule {
   private pipelines: Pipeline[] = []
 
+  private selectedPipeline: Pipeline = {} as unknown as Pipeline
+
   private isLoadingPipelines: boolean = true
 
   @Mutation
   public setPipelines (pipelines: Pipeline[]): void {
     this.pipelines = pipelines
     this.isLoadingPipelines = false
+  }
+
+  @Mutation
+  public setSelectedPipeline (pipeline: Pipeline): void {
+    this.selectedPipeline = pipeline
   }
 
   @Mutation
@@ -24,6 +31,11 @@ export default class PipelineModule extends VuexModule {
     this.context.commit('setIsLoadingPipelines', true)
 
     return RestService.getAllPipelines()
+  }
+
+  @Action({ commit: 'setSelectedPipeline' })
+  public async loadPipelineById (id: number): Promise<Pipeline> {
+    return RestService.getPipelineById(id)
   }
 
   @Action({ commit: 'setPipelines' })
@@ -39,9 +51,8 @@ export default class PipelineModule extends VuexModule {
   }
 
   @Action({ commit: 'setPipelines' })
-  public async deletePipeline (pipelineId: string): Promise<Pipeline[]> {
+  public async deletePipeline (pipelineId: number): Promise<Pipeline[]> {
     await RestService.deletePipeline(pipelineId)
     return RestService.getAllPipelines()
   }
-
 }

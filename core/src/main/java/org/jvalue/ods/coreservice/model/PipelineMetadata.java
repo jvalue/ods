@@ -14,7 +14,11 @@ public class PipelineMetadata {
     @NotNull
     private String author;
 
+    @NotNull
+    private String displayName;
+
     private String license;
+    private String description;
 
     @NotNull
     private LocalDateTime creationTimestamp;
@@ -26,9 +30,13 @@ public class PipelineMetadata {
     @JsonCreator
     public PipelineMetadata(
             @JsonProperty("author") String author,
-            @JsonProperty("license") String license) {
+            @JsonProperty("license") String license,
+            @JsonProperty("displayName") String displayName,
+            @JsonProperty("description") String description) {
         this.author = author;
         this.license = license;
+        this.displayName = displayName;
+        this.description = description;
         this.creationTimestamp = LocalDateTime.now();
     }
 
@@ -38,6 +46,14 @@ public class PipelineMetadata {
 
     public String getLicense() {
         return license;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getDisplayName() {
+        return displayName;
     }
 
     public void setCreationTimestamp(LocalDateTime creationTimestamp) {
@@ -51,9 +67,11 @@ public class PipelineMetadata {
     @Override
     public String toString() {
         return "PipelineMetadata{" +
-                "author='" + author + '\'' +
+                "displayName='" + displayName + '\'' +
+                ", author='" + author + '\'' +
                 ", license='" + license + '\'' +
                 ", creationTimestamp=" + creationTimestamp +
+                ", description='" + description + '\'' +
                 '}';
     }
 
@@ -62,13 +80,16 @@ public class PipelineMetadata {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PipelineMetadata that = (PipelineMetadata) o;
-        return author.equals(that.author) &&
+        return Objects.equals(author, that.author) &&
                 Objects.equals(license, that.license) &&
-                creationTimestamp.equals(that.creationTimestamp);
+                Objects.equals(creationTimestamp, that.creationTimestamp) &&
+                Objects.equals(displayName, that.displayName) &&
+                Objects.equals(description, that.description);
     }
+
 
     @Override
     public int hashCode() {
-        return Objects.hash(author, license, creationTimestamp);
+        return Objects.hash(author, license, creationTimestamp, displayName, description);
     }
 }

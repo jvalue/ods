@@ -5,5 +5,5 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PipelineRepository extends CrudRepository<PipelineConfig, String> {
+public interface PipelineRepository extends CrudRepository<PipelineConfig, Long> {
 }
