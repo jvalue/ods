@@ -90,12 +90,50 @@
           <v-stepper-content step="5">
             <v-form ref="formStep5" v-model="validStep5">
               <v-switch v-model="dialogPipeline.trigger.periodic" label="Periodic execution"></v-switch>
-              <v-text-field
-                v-model="dialogPipeline.trigger.interval"
-                label="Interval [milliseconds]"
-                type="number"
-                :rules="[required]"
-              ></v-text-field>
+              <span class="subheading font-weight-light mr-1">Interval: {{dialogIntervalHours}}h {{dialogIntervalMinutes}}m</span>
+              <v-subheader>Hours</v-subheader>
+              <v-slider
+                v-model="dialogIntervalHours"
+                track-color="grey"
+                always-dirty
+                step="1"
+                ticks="always"
+                thumb-label="always"
+                tick-size="3"
+                :tick-labels="hoursTickLabels"
+                min="0"
+                max="24"
+              >
+                <template v-slot:prepend>
+                  <v-icon @click="dialogIntervalHours--" color="error">mdi-minus</v-icon>
+                </template>
+
+                <template v-slot:append>
+                  <v-icon @click="dialogIntervalHours++" color="primary">mdi-plus</v-icon>
+                </template>
+              </v-slider>
+
+              <v-subheader>Minutes</v-subheader>
+              <v-slider
+                v-model="dialogIntervalMinutes"
+                track-color="grey"
+                always-dirty
+                step="1"
+                ticks="always"
+                thumb-label="always"
+                :tick-labels="minutesTickLabels()"
+                min="0"
+                max="60"
+              >
+                <template v-slot:prepend>
+                  <v-icon @click="dialogIntervalMinutes--" color="error">mdi-minus</v-icon>
+                </template>
+
+                <template v-slot:append>
+                  <v-icon @click="dialogIntervalMinutes++" color="primary">mdi-plus</v-icon>
+                </template>
+              </v-slider>
+
               <v-btn @click="dialogStep = 4">Back</v-btn>
               <v-btn
                 :disabled="!validStep5"
@@ -128,11 +166,17 @@ const namespace = { namespace: "pipeline" };
 
 @Component
 export default class PipelineEdit extends Vue {
-  @Action("loadPipelineById", namespace) private loadPipelineByIdAction!: (id: number) => void;
-  @Action("createPipeline", namespace) private createPipelineAction!: (p: Pipeline) => void;
-  @Action("updatePipeline", namespace) private updatePipelineAction!: (p: Pipeline) => void;
-  
-  @State('selectedPipeline', namespace) private selectedPipeline!: Pipeline 
+  @Action("loadPipelineById", namespace) private loadPipelineByIdAction!: (
+    id: number
+  ) => void;
+  @Action("createPipeline", namespace) private createPipelineAction!: (
+    p: Pipeline
+  ) => void;
+  @Action("updatePipeline", namespace) private updatePipelineAction!: (
+    p: Pipeline
+  ) => void;
+
+  @State("selectedPipeline", namespace) private selectedPipeline!: Pipeline;
 
   private isEditMode: boolean = false;
 
@@ -168,29 +212,69 @@ export default class PipelineEdit extends Vue {
     }
   };
 
-  created() {
-    this.isEditMode = this.$route.meta.isEditMode
+  private dialogIntervalHours: number = 1
+  private dialogIntervalMinutes: number = 0
 
-    if(this.isEditMode) {
-        const id = this.$route.params.pipelineId as unknown as number
-        this.loadPipelineByIdAction(id)
+  private hoursTickLabels = ['0h','','','','','','6h','','','','','','12h','','','','','','18h','','','','','','24h']
+  private minutesTickLabels = () => {
+    var ticks = new Array(61)
+    ticks[0] = '0m'
+    ticks[15] = '15m'
+    ticks[30] = '30m'
+    ticks[45] = '45m'
+    ticks[60] = '60m'
+    return ticks
+  }
+  
+
+  created() {
+    this.isEditMode = this.$route.meta.isEditMode;
+
+    if (this.isEditMode) {
+      const id = (this.$route.params.pipelineId as unknown) as number;
+      this.loadPipelineByIdAction(id);
     }
   }
 
-  @Watch('selectedPipeline')
+  @Watch("selectedPipeline")
   onSelectedPipelineChange(value: Pipeline, oldValue: Pipeline) {
-    if(value != oldValue) {
-      this.dialogPipeline = value
+    if (value != oldValue) {
+      this.dialogPipeline = value;
+      this.loadDialogIntervalForSlider()
     }
+  }
+
+  private setDialogInterval() {
+    const hoursInMS = this.dialogIntervalHours * 3600 * 1000
+    const minutesInMS = this.dialogIntervalMinutes * 60 * 1000
+    this.dialogPipeline.trigger.interval = hoursInMS + minutesInMS 
+  }
+
+  private loadDialogIntervalForSlider() {
+    if (this.dialogPipeline.trigger.interval <= 1 ) {
+      this.dialogIntervalHours = 0
+      this.dialogIntervalMinutes = 0
+      return
+    }
+    
+    var intervalInMS = this.dialogPipeline.trigger.interval
+    const hours = Math.floor(intervalInMS / (1000 * 60 * 60))
+    intervalInMS -= hours * 3600 * 1000 
+    const minutes = Math.floor(intervalInMS / (1000 * 60))
+
+    this.dialogIntervalHours = hours
+    this.dialogIntervalMinutes = minutes
   }
 
   private onSave() {
-    this.createPipelineAction(this.dialogPipeline)
+    this.setDialogInterval()
+    this.createPipelineAction(this.dialogPipeline);
     this.routeToOverview();
   }
 
   private onUpdate() {
-    this.updatePipelineAction(this.dialogPipeline)
+    this.setDialogInterval()
+    this.updatePipelineAction(this.dialogPipeline);
     this.routeToOverview();
   }
 
