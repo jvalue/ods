@@ -3,7 +3,7 @@ export default interface Pipeline {
   adapter: object;
   metadata: PipelineMetaData;
   transformations: object[];
-  trigger: object;
+  trigger: Trigger;
 }
 
 export interface PipelineMetaData {
@@ -11,4 +11,9 @@ export interface PipelineMetaData {
   description: string;
   author: string;
   license: string;
+}
+
+export interface Trigger {
+  periodic: boolean;
+  interval: number;
 }
