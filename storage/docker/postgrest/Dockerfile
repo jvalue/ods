@@ -1,9 +1,3 @@
-FROM postgrest/postgrest
+FROM postgrest/postgrest:v6.0.0
 
-COPY ./refresh_schema.sh refresh_schema.sh
-
-# Removed the following line because Docker somehow missed the execution rights from one day to another
-# RUN chmod +x refresh_schema.sh
-
-CMD refresh_schema.sh & \
-    exec postgrest /etc/postgrest.conf
+CMD exec postgrest /etc/postgrest.conf
