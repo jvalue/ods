@@ -90,6 +90,10 @@
           <v-stepper-content step="5">
             <v-form ref="formStep5" v-model="validStep5">
               <v-switch v-model="dialogPipeline.trigger.periodic" label="Periodic execution"></v-switch>
+              <date-time-picker 
+                v-model="dialogPipeline.trigger.firstExecution"
+              />
+ 
               <span class="subheading font-weight-light mr-1">Interval: {{dialogIntervalHours}}h {{dialogIntervalMinutes}}m</span>
               <v-subheader>Hours</v-subheader>
               <v-slider
@@ -162,9 +166,13 @@ import { Watch } from "vue-property-decorator";
 import { Action, State } from "vuex-class";
 import Pipeline from "./pipeline";
 
+import DateTimePicker from '@/components/DateTimePicker.vue';
+
 const namespace = { namespace: "pipeline" };
 
-@Component
+@Component({
+  components: {DateTimePicker}
+})
 export default class PipelineEdit extends Vue {
   @Action("loadPipelineById", namespace) private loadPipelineByIdAction!: (
     id: number
@@ -208,6 +216,7 @@ export default class PipelineEdit extends Vue {
     },
     trigger: {
       periodic: true,
+      firstExecution: new Date(Date.now() + 600000),
       interval: 60000
     }
   };

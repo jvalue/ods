@@ -10,8 +10,8 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 import java.util.Objects;
-import java.time.LocalDateTime;
 
 @Embeddable
 public class PipelineTriggerConfig {
@@ -20,8 +20,8 @@ public class PipelineTriggerConfig {
 
     //time of first execution
     @NotNull
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
-    private LocalDateTime firstExecution;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", locale = "UTC")
+    private Date firstExecution;
 
     //execution interval in ms
     private Long interval;
@@ -34,7 +34,7 @@ public class PipelineTriggerConfig {
     @JsonCreator
     public PipelineTriggerConfig(
             @JsonProperty("periodic") boolean periodic,
-            @JsonProperty("firstExecution") LocalDateTime firstExecution,
+            @JsonProperty("firstExecution") Date firstExecution,
             @JsonProperty("interval") Long interval) {
         this.periodic = periodic;
         this.firstExecution = firstExecution;
@@ -69,9 +69,7 @@ public class PipelineTriggerConfig {
         return periodic;
     }
 
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    public LocalDateTime getFirstExecution() {
+    public Date getFirstExecution() {
         return firstExecution;
     }
 

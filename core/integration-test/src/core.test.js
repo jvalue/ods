@@ -111,7 +111,7 @@ const pipelineConfig = {
     }
   ],
   "trigger": {
-    "firstExecution": "1905-12-01T02:30:00.123",
+    "firstExecution": "1905-12-01T02:30:00.123Z",
     "periodic": true,
     "interval": 50000
   },

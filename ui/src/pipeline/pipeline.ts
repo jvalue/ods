@@ -16,4 +16,5 @@ export interface PipelineMetaData {
 export interface Trigger {
   periodic: boolean;
   interval: number;
+  firstExecution: Date;
 }
