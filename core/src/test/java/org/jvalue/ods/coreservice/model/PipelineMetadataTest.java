@@ -5,6 +5,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 import static org.junit.Assert.*;
 
@@ -22,6 +24,9 @@ public class PipelineMetadataTest {
 
         assertEquals("harri", result.getAuthor());
         assertEquals("nobodymayuseanything v1.0", result.getLicense());
-        assertEquals(LocalDateTime.now().getDayOfYear(), result.getCreationTimestamp().getDayOfYear());
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        cal.setTime(result.getCreationTimestamp());
+        assertEquals(LocalDateTime.now().getYear(), cal.get(Calendar.YEAR));
+        assertEquals(LocalDateTime.now().getDayOfYear(), cal.get(Calendar.DAY_OF_YEAR));
     }
 }
