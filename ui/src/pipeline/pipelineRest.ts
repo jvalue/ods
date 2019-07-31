@@ -1,16 +1,17 @@
 import Pipeline from './pipeline'
 
 const CORE_SERVICE_URL = process.env.VUE_APP_CORE_SERVICE_URL as string
+
 export async function getAllPipelines (): Promise<Pipeline[]> {
   const response = await fetch(`${CORE_SERVICE_URL}/pipelines`)
   const data = await response.json()
-  return data
+  return parsePipelines(data)
 }
 
 export async function getPipelineById (id: number): Promise<Pipeline> {
   const response = await fetch(`${CORE_SERVICE_URL}/pipelines/${id}`)
   const data = await response.json()
-  return data
+  return parsePipeline(data)
 }
 
 export async function createPipeline (pipeline: Pipeline): Promise<Pipeline> {
@@ -23,7 +24,7 @@ export async function createPipeline (pipeline: Pipeline): Promise<Pipeline> {
 
   const response = await fetch(`${CORE_SERVICE_URL}/pipelines`, options)
   const data = await response.json()
-  return data
+  return parsePipeline(data)
 }
 
 export async function updatePipeline (pipeline: Pipeline): Promise<Response> {
@@ -40,4 +41,16 @@ export async function updatePipeline (pipeline: Pipeline): Promise<Response> {
 export async function deletePipeline (pipelineId: number): Promise<Response> {
   const options = { method: 'DELETE' }
   return fetch(`${CORE_SERVICE_URL}/pipelines/${pipelineId}`, options)
+}
+
+function parsePipelines (pipelines: any[]): Pipeline[] {
+  const parsedPipelines: Pipeline[] = []
+  pipelines.forEach(x => parsedPipelines.push(parsePipeline(x)))
+  return parsedPipelines
+}
+
+function parsePipeline (pipeline: any): Pipeline {
+  const parsedPipeline = pipeline as Pipeline;
+  parsedPipeline.trigger.firstExecution = new Date(pipeline.trigger.firstExecution)
+  return parsedPipeline;
 }
