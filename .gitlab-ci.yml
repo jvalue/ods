@@ -15,7 +15,7 @@ variables:
   # See further: https://docs.docker.com/storage/storagedriver/overlayfs-driver/
   # See further: https://docs.gitlab.com/ee/ci/docker/using_docker_build.html
   DOCKER_DRIVER: "overlay2"
-  
+
   ADAPTER_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/adapter-service
   UI_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/ui-service
   SCHEDULER_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/scheduler-service
@@ -55,12 +55,13 @@ integrationtest-adapter:
     - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d adapter-service
     - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from adapter-service-it adapter-service-it
   after_script:
+    - docker-compose logs
     - docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
 
 # PUBLISH
 publish-docker-adapter:
   stage: publish
-  image: docker:stable 
+  image: docker:stable
   dependencies:
     - build-adapter
   when: manual
@@ -97,7 +98,7 @@ build-ui:
 # PUBLISH
 publish-docker-ui:
   stage: publish
-  image: docker:stable 
+  image: docker:stable
   dependencies:
     - build-ui
   when: manual
@@ -149,13 +150,14 @@ integrationtest-storage:
     - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d storage-service
     - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from storage-service-it storage-service-it
   after_script:
+    - docker-compose logs
     - docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
 
 
 # PUBLISH
 publish-docker-storage:
   stage: publish
-  image: docker:stable 
+  image: docker:stable
   dependencies:
     - build-storage
   when: manual
@@ -206,6 +208,7 @@ integrationtest-core:
     - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d core-service
     - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from core-service-it core-service-it
   after_script:
+    - docker-compose logs
     - docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
 
 
@@ -259,6 +262,7 @@ integrationtest-scheduler:
     - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d scheduler-service
     - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from scheduler-service-it scheduler-service-it
   after_script:
+    - docker-compose logs
     - docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
 
 
@@ -311,13 +315,14 @@ integrationtest-transformation:
     - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d transformation-service
     - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from transformation-service-it transformation-service-it
   after_script:
+    - docker-compose logs
     - docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
 
 
 # PUBLISH
 publish-docker-transformation:
   stage: publish
-  image: docker:stable 
+  image: docker:stable
   dependencies:
     - build-transformation
   when: manual
