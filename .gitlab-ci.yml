@@ -4,7 +4,7 @@ stages:
   - publish
 
 services:
-  - docker:dind
+  - docker:18.09.7-dind
 
 # For predefined environment variables see: https://docs.gitlab.com/ee/ci/variables/
 variables:
