@@ -1,6 +1,7 @@
-# ODS-Main
+# Open Data Service (ODS)
 
-Main project for ODS. All related microservice projects for ODS are located in sub-directories.
+The Open Data Service (ODS) is an application which can collect data from multiple sources simulataneously, process that data and then offer an improved (or "cleaned") version to its clients. 
+*We aim to establish the ODS as **the** go-to place for using Open Data!*
 
 ## Project Structure
 
