@@ -14,6 +14,7 @@ const AUTH_SERVICE_URL: string = process.env.VUE_APP_AUTH_SERVICE_URL as string
 @Module({ namespaced: true })
 export default class AuthModule extends VuexModule {
   private isAuth: boolean = false
+
   private userProfile: KeycloakProfile = {}
 
   @Action({ commit: 'setAuth' })

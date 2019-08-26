@@ -29,14 +29,13 @@ const namespace = { namespace: 'transformation' }
 @Component
 export default class TransformationMain extends Vue {
   @State('transformationResult', namespace)
-  // TODO: remove if possible
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private transformationResult!: any;
+
+  private transformationResult!: object;
 
   @Action('transformData', namespace)
   private transformData!: (functionInput: string) => void;
 
-  private functionInput: string = '{"func":"return 1", "data":null}';
+  private functionInput: string = '{"func":"return 42", "data":null}';
 
   private submit () {
     this.transformData(this.functionInput)

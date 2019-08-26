@@ -18,6 +18,6 @@ export default [
     path: '/pipeline/edit',
     name: 'pipeline-edit',
     component: PipelineEdit,
-    meta: { title: 'Edit Pipeline', requiresAuth: true, isEditMode: true },
+    meta: { title: 'Edit Pipeline', requiresAuth: true, isEditMode: true }
   }
 ]
