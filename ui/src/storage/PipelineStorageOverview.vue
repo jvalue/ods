@@ -107,35 +107,36 @@ const namespace = { namespace: 'storage' }
 
 @Component
 export default class PipelineStorageOverview extends Vue {
-  @State('data', namespace)
-  private data!: StorageItem[];
 
-  private storageId: string = '';
+  @State('data', namespace)
+  private data!: StorageItem[]
+
+  @Action('fetchData', namespace)
+  private fetchData!: (pipelineId: string) => void
+
+  private pipelineId: string = ''
 
   private clipUrl: (content: string) => Promise<void> = clipboardCopy
 
-  private getStorageItemUrl (storageId: string, itemId: string): string {
-    let url = StorageClient.getItemUrl(storageId, itemId)
+  private getStorageItemUrl (pipelineId: string, itemId: string): string {
+    let url = StorageClient.createUrlForItem(pipelineId, itemId)
     if(url.startsWith("/")) {
       url = window.location.origin + url
     }
-    return url;
+    return url
   };
 
-  private getLatestStorageItemUrl (storageId: string): string {
-    let url = StorageClient.getLatestItemUrl(storageId)
+  private getLatestStorageItemUrl (pipelineId: string): string {
+    let url = StorageClient.createUrlForLatestItem(pipelineId)
     if(url.startsWith("/")) {
       url = window.location.origin + url
     }
-    return url;
-  } 
-
-  created() {
-    this.storageId = this.$route.params.storageId;
-    this.fetchData(this.storageId);
+    return url
   }
 
-  @Action('fetchData', namespace)
-  private fetchData!: (storageId: string) => void;
+  private created () {
+    this.pipelineId = this.$route.params.storageId
+    this.fetchData(this.pipelineId)
+  }
 }
 </script>
