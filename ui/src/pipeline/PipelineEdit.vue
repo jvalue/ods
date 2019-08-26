@@ -90,10 +90,10 @@
           <v-stepper-content step="5">
             <v-form ref="formStep5" v-model="validStep5">
               <v-switch v-model="dialogPipeline.trigger.periodic" label="Periodic execution"></v-switch>
-              <date-time-picker 
+              <date-time-picker
                 v-model="dialogPipeline.trigger.firstExecution"
               />
- 
+
               <span class="subheading font-weight-light mr-1">Interval: {{dialogIntervalHours}}h {{dialogIntervalMinutes}}m</span>
               <v-subheader>Hours</v-subheader>
               <v-slider
@@ -157,18 +157,22 @@
     </v-card>
   </div>
 </template>
-          
-      
+
+
 <script lang="ts">
-import Vue from "vue";
-import Component from "vue-class-component";
-import { Watch } from "vue-property-decorator";
-import { Action, State } from "vuex-class";
-import Pipeline from "./pipeline";
+import Vue from "vue"
+import Component from "vue-class-component"
+import { Watch } from "vue-property-decorator"
+import { Action, State } from "vuex-class"
+import Pipeline from "./pipeline"
 
-import DateTimePicker from '@/components/DateTimePicker.vue';
+import DateTimePicker from '@/components/DateTimePicker.vue'
 
-const namespace = { namespace: "pipeline" };
+const namespace = { namespace: "pipeline" }
+
+const ONE_HOUR_IN_MS = 3600 * 1000
+
+const ONE_MINUTE_IN_MS = 60 * 1000
 
 @Component({
   components: {DateTimePicker}
@@ -176,28 +180,28 @@ const namespace = { namespace: "pipeline" };
 export default class PipelineEdit extends Vue {
   @Action("loadPipelineById", namespace) private loadPipelineByIdAction!: (
     id: number
-  ) => void;
+  ) => void
   @Action("createPipeline", namespace) private createPipelineAction!: (
     p: Pipeline
-  ) => void;
+  ) => void
   @Action("updatePipeline", namespace) private updatePipelineAction!: (
     p: Pipeline
-  ) => void;
+  ) => void
 
-  @State("selectedPipeline", namespace) private selectedPipeline!: Pipeline;
+  @State("selectedPipeline", namespace) private selectedPipeline!: Pipeline
 
-  private isEditMode: boolean = false;
+  private isEditMode: boolean = false
 
-  private dialogStep: number = 1;
+  private dialogStep: number = 1
 
-  private validStep1: boolean = false;
-  private validStep2: boolean = true; // starts with valid default values
-  private validStep3: boolean = true; // starts with valid default values
-  private validStep4: boolean = true; // no fields required
-  private validStep5: boolean = true; // starts with valid default values
+  private validStep1: boolean = false
+  private validStep2: boolean = true // starts with valid default values
+  private validStep3: boolean = true // starts with valid default values
+  private validStep4: boolean = true // no fields required
+  private validStep5: boolean = true // starts with valid default values
 
-  private availableAdapterProtocols = ["HTTP"];
-  private availableAdapterFormats = ["JSON", "XML"];
+  private availableAdapterProtocols = ["HTTP"]
+  private availableAdapterFormats = ["JSON", "XML"]
 
   private dialogPipeline: Pipeline = {
     id: -1,
@@ -219,7 +223,7 @@ export default class PipelineEdit extends Vue {
       firstExecution: new Date(Date.now() + 600000),
       interval: 60000
     }
-  };
+  }
 
   private dialogIntervalHours: number = 1
   private dialogIntervalMinutes: number = 0
@@ -234,70 +238,73 @@ export default class PipelineEdit extends Vue {
     ticks[60] = '60m'
     return ticks
   }
-  
+
 
   created() {
-    this.isEditMode = this.$route.meta.isEditMode;
+    this.isEditMode = this.$route.meta.isEditMode
 
     if (this.isEditMode) {
-      const id = (this.$route.params.pipelineId as unknown) as number;
-      this.loadPipelineByIdAction(id);
+      const id = (this.$route.params.pipelineId as unknown) as number
+      this.loadPipelineByIdAction(id)
     }
   }
 
   @Watch("selectedPipeline")
-  onSelectedPipelineChange(value: Pipeline, oldValue: Pipeline) {
+  onSelectedPipelineChange (value: Pipeline, oldValue: Pipeline) {
     if (value != oldValue) {
-      this.dialogPipeline = value;
+      this.dialogPipeline = value
       this.loadDialogIntervalForSlider()
     }
   }
 
-  private setDialogInterval() {
-    const hoursInMS = this.dialogIntervalHours * 3600 * 1000
-    const minutesInMS = this.dialogIntervalMinutes * 60 * 1000
-    this.dialogPipeline.trigger.interval = hoursInMS + minutesInMS 
+  private setDialogInterval () {
+    const hoursInMS = this.dialogIntervalHours * ONE_HOUR_IN_MS
+    const minutesInMS = this.dialogIntervalMinutes * ONE_MINUTE_IN_MS
+    this.dialogPipeline.trigger.interval = hoursInMS + minutesInMS
   }
 
-  private loadDialogIntervalForSlider() {
+  private loadDialogIntervalForSlider () {
     if (this.dialogPipeline.trigger.interval <= 1 ) {
       this.dialogIntervalHours = 0
       this.dialogIntervalMinutes = 0
       return
     }
-    
+
     var intervalInMS = this.dialogPipeline.trigger.interval
-    const hours = Math.floor(intervalInMS / (1000 * 60 * 60))
-    intervalInMS -= hours * 3600 * 1000 
-    const minutes = Math.floor(intervalInMS / (1000 * 60))
-
-    this.dialogIntervalHours = hours
-    this.dialogIntervalMinutes = minutes
+    this.dialogIntervalHours = this.getHoursFromMS(intervalInMS)
+    this.dialogIntervalMinutes = this.getMinutesFromMS(intervalInMS)
   }
 
-  private onSave() {
+  private getHoursFromMS (intervalInMS: number): number {
+    return Math.floor(intervalInMS / ONE_HOUR_IN_MS)
+  }
+
+  private getMinutesFromMS (intervalInMS: number): number {
+    return Math.floor((intervalInMS % ONE_HOUR_IN_MS ) / ONE_MINUTE_IN_MS )
+  }
+
+  private onSave () {
     this.setDialogInterval()
-    this.createPipelineAction(this.dialogPipeline);
-    this.routeToOverview();
+    this.createPipelineAction(this.dialogPipeline)
+    this.routeToOverview()
   }
 
-  private onUpdate() {
+  private onUpdate () {
     this.setDialogInterval()
-    this.updatePipelineAction(this.dialogPipeline);
-    this.routeToOverview();
+    this.updatePipelineAction(this.dialogPipeline)
+    this.routeToOverview()
   }
 
-  private onCancel(): void {
-    this.routeToOverview();
+  private onCancel (): void {
+    this.routeToOverview()
   }
 
-  private routeToOverview(): void {
-    this.$router.push({ name: "pipeline-overview" });
+  private routeToOverview (): void {
+    this.$router.push({ name: "pipeline-overview" })
   }
 
-  private required(val: string) {
-    return !!val || "required.";
+  private required (val: string) {
+    return !!val || "required."
   }
 }
 </script>
-      
