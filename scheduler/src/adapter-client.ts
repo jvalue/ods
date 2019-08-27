@@ -1,20 +1,16 @@
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
 
 import PipelineConfig from './pipeline-config'
 
 const ADAPTER_SERVICE_URL = process.env.ADAPTER_SERVICE_URL || 'http://localhost:8082'
 const ADAPTER_SERVICE_IMPORT_URL = ADAPTER_SERVICE_URL + '/dataImport'
 
-export async function executeAdapter(pipelineConfig: PipelineConfig): Promise<any> {
+const http = axios.create({
+  baseURL: ADAPTER_SERVICE_IMPORT_URL,
+  headers: { 'Content-Type': 'application/json' }
+})
 
-    const response = await axios.post<any>(
-        ADAPTER_SERVICE_IMPORT_URL, 
-        pipelineConfig.adapter, 
-        {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }
-    )
-    return response.data;
+export async function executeAdapter (pipelineConfig: PipelineConfig): Promise<AxiosResponse> {
+  const response = await http.post('/', pipelineConfig.adapter)
+  return response.data
 }

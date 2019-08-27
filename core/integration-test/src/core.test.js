@@ -1,7 +1,7 @@
 const request = require("supertest");
 const waitOn = require("wait-on");
 
-const URL = process.env.CORE_API || "http://localhost:9000/core";
+const URL = process.env.CORE_API || "http://localhost:8080";
 
 describe("Core", () => {
   console.log("Core-Service URL= " + URL);
@@ -40,19 +40,19 @@ describe("Core", () => {
         .send(pipelineConfig);
 
     expect(response.status).toEqual(201);
-    expect(response.header.location).toContain(response.body.id)
+    expect(response.header.location).toContain(response.body.id);
     expect(response.body.transformations).toEqual(pipelineConfig.transformations);
     expect(response.body.adapter).toEqual(pipelineConfig.adapter);
     expect(response.body.trigger).toEqual(pipelineConfig.trigger);
     expect(response.body.id).toBeDefined();
-    expect(response.body.id).not.toEqual(pipelineConfig.id) // id not under control of client
+    expect(response.body.id).not.toEqual(pipelineConfig.id); // id not under control of client
 
     const delResponse = await request(URL)
         .delete("/pipelines/" + response.body.id)
-        .send()
+        .send();
 
-    expect(delResponse.status).toEqual(200);
-  })
+    expect(delResponse.status).toEqual(204);
+  });
 
   test("PUT & DELETE /pipelines/{id}", async () => {
 
@@ -86,11 +86,105 @@ describe("Core", () => {
 
     const delResponse = await request(URL)
         .delete("/pipelines/" + pipelineId)
-        .send()
+        .send();
 
-    expect(delResponse.status).toEqual(200);
-    }
-  )
+    expect(delResponse.status).toEqual(204);
+  });
+
+  test("DELETE /pipelines/", async () => {
+
+    await request(URL)
+        .post("/pipelines")
+        .send(pipelineConfig);
+    await request(URL)
+        .post("/pipelines")
+        .send(pipelineConfig);
+
+    const delResponse = await request(URL)
+        .delete("/pipelines/")
+        .send();
+
+    expect(delResponse.status).toEqual(204)
+  });
+
+  test("GET /events", async () => {
+    const response = await request(URL)
+        .get("/events")
+        .send();
+
+    expect(response.status).toEqual(200);
+    expect(response.type).toEqual("application/json");
+  });
+
+  test("GET /events/pipeline/{id}", async () => {
+    const pipelinesResponse = await request(URL)
+        .post("/pipelines")
+        .send(pipelineConfig);
+    const pipelineId = pipelinesResponse.body.id;
+
+    await request(URL)
+        .delete("/pipelines/" + pipelineId);
+
+    const eventsResponse = await request(URL)
+        .get("/events/pipeline/"+pipelineId)
+        .send();
+
+    expect(eventsResponse.status).toEqual(200);
+    expect(eventsResponse.type).toEqual("application/json");
+    expect(eventsResponse.body.length).toBe(2);
+    expect(eventsResponse.body[0].pipelineConfig).toBe(pipelineId);
+    expect(eventsResponse.body[0].eventType).toEqual("PIPELINE_CREATE");
+    expect(eventsResponse.body[1].pipelineConfig).toBe(pipelineId);
+    expect(eventsResponse.body[1].eventType).toEqual("PIPELINE_DELETE");
+  });
+
+  test("GET /events [with offset]", async () => {
+    const pipelinesResponse = await request(URL)
+        .post("/pipelines")
+        .send(pipelineConfig);
+    const pipelineId = pipelinesResponse.body.id;
+
+    await request(URL)
+        .delete("/pipelines/" + pipelineId);
+
+    const eventsResponse = await request(URL)
+        .get("/events/pipeline/"+pipelineId)
+        .send();
+    const eventId = eventsResponse.body[0].eventId;
+
+    const eventsAfter = await request(URL)
+        .get("/events?after="+eventId)
+        .send();
+
+    expect(eventsAfter.status).toEqual(200);
+    expect(eventsAfter.type).toEqual("application/json");
+    expect(eventsAfter.body.length).toBe(1);
+    expect(eventsAfter.body[0].eventId).toBe(eventId+1);
+    expect(eventsAfter.body[0].pipelineConfig).toBe(pipelineId);
+    expect(eventsAfter.body[0].eventType).toEqual("PIPELINE_DELETE");
+  });
+
+  test("GET /events/latest", async () => {
+    const postResponse = await request(URL)
+        .post("/pipelines")
+        .send(pipelineConfig);
+    const pipelineId = postResponse.body.id;
+
+    await request(URL)
+        .delete("/pipelines/" + pipelineId)
+        .send();
+
+    const response = await request(URL)
+        .get("/events/latest")
+        .send();
+
+    expect(response.status).toEqual(200);
+    expect(response.type).toEqual("application/json");
+    expect(Object.keys(response.body)).toHaveLength(3);
+    expect(response.body.eventId).toBeTruthy();
+    expect(response.body.pipelineConfig).toBe(pipelineId);
+    expect(response.body.eventType).toEqual("PIPELINE_DELETE");
+  })
 });
 
 const pipelineConfig = {

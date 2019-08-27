@@ -28,6 +28,10 @@ router.get("/:path", async ctx => {
   ctx.body = dataStore.get(path);
 })
 
+router.post("/rpc/createstructurefordatasource", async ctx => {
+  ctx.status = 201;
+})
+
 app.use(router.routes());
 
 const server = app.listen(PORT, () => console.log("Starting mock storage server on port " + PORT));
