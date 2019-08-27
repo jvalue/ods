@@ -105,26 +105,4 @@ public class PipelineConfig implements Serializable {
         return metadata;
     }
 
-    /**
-     * Create an updated PipelineConfig using the full representation of an update. This method ensures that id and creation time remain stable.
-     * @param updateConfig the representation of the updated config
-     * @return an updated PipelineConfig that has the same id and creationTimestamp as the original one.
-     */
-    public PipelineConfig applyUpdate(PipelineConfig updateConfig) {
-        PipelineMetadata updatedMetadata = new PipelineMetadata(
-                updateConfig.metadata.getAuthor(), 
-                updateConfig.metadata.getLicense(),
-                updateConfig.metadata.getDisplayName(),
-                updateConfig.metadata.getDescription());
-        updatedMetadata.setCreationTimestamp(this.getMetadata().getCreationTimestamp());
-
-        PipelineConfig updated = new PipelineConfig(
-                updateConfig.adapter,
-                updateConfig.transformations,
-                updateConfig.trigger,
-                updatedMetadata);
-        updated.setId(this.id);
-
-        return updated;
-    }
 }

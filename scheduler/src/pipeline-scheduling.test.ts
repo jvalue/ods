@@ -4,6 +4,9 @@ import * as PipelineScheduling from './pipeline-scheduling'
 import { executeAdapter } from './adapter-client'
 import { executeTransformation } from './transformation-client'
 import { executeStorage } from './storage-client'
+import { getLatestEventId, getAllPipelines, getEventsAfter, getPipeline } from './core-client'
+import { EventType } from './pipeline-event'
+import PipelineConfig from './pipeline-config';
 
 jest.mock('./adapter-client')
 const mockedExecuteAdapter = executeAdapter as jest.Mock
@@ -17,11 +20,100 @@ jest.mock('./storage-client')
 const mockedExecuteStorage = executeStorage as jest.Mock
 mockedExecuteStorage.mockResolvedValue({})
 
+jest.mock('./core-client')
+const mockedGetLatestEventId = getLatestEventId as jest.Mock
+mockedGetLatestEventId.mockResolvedValue(321)
+const mockedGetAllPipelines = getAllPipelines as jest.Mock
+const mockedGetEventsAfter = getEventsAfter as jest.Mock
+const mockedGetPipeline = getPipeline as jest.Mock
+
 describe('Scheduler', () => {
+  test('should initialize jobs correctly', async () => {
+    const config = generateConfig(true, new Date(Date.now() + 5000), 6000)
+    mockedGetAllPipelines.mockResolvedValue([config])
+
+    await PipelineScheduling.initializeJobs()
+
+    expect(PipelineScheduling.getAllJobs()).toHaveLength(1)
+    expect(PipelineScheduling.getAllJobs()[0].pipelineConfig).toEqual(config)
+  })
+
+  test('should apply creation event', async () => {
+    mockedGetAllPipelines.mockResolvedValue([])
+    const toBeAdded = generateConfig(true, new Date(Date.now() + 5000), 6000)
+    const creationEvent = {
+      eventId: 322,
+      eventType: EventType.PIPELINE_CREATE,
+      pipelineId: 123
+    }
+
+    await PipelineScheduling.initializeJobs()
+    expect(PipelineScheduling.getAllJobs()).toHaveLength(0)
+
+    mockedGetEventsAfter.mockResolvedValue([creationEvent])
+    mockedGetPipeline.mockResolvedValue(toBeAdded)
+    await PipelineScheduling.updatePipelines()
+
+    await sleep(1000) // Give the scheduler some time to apply the update
+
+    expect(PipelineScheduling.getAllJobs()).toHaveLength(1)
+    const job123 = PipelineScheduling.getPipelineJob(123)
+    expect(job123).toBeDefined()
+    expect(job123!.pipelineConfig).toEqual(toBeAdded)
+  })
+
+  test('should apply deletion event', async () => {
+    const toBeDeleted = generateConfig(true, new Date(Date.now() + 5000), 6000)
+    mockedGetAllPipelines.mockResolvedValue([toBeDeleted])
+    const deletionEvent = {
+      eventId: 323,
+      eventType: EventType.PIPELINE_DELETE,
+      pipelineId: 123
+    }
+
+    await PipelineScheduling.initializeJobs()
+    expect(PipelineScheduling.getAllJobs()).toHaveLength(1)
+
+    mockedGetEventsAfter.mockResolvedValue([deletionEvent])
+    mockedGetPipeline.mockResolvedValue(toBeDeleted)
+    await PipelineScheduling.updatePipelines()
+
+    await sleep(1000) // Give the scheduler some time to apply the update
+
+    expect(PipelineScheduling.getAllJobs()).toHaveLength(0)
+  })
+
+  test('should apply update event', async () => {
+    const toBeUpdated = generateConfig(true, new Date(Date.now() + 5000), 6000)
+    mockedGetAllPipelines.mockResolvedValue([toBeUpdated])
+    const updateEvent = {
+      eventId: 324,
+      eventType: EventType.PIPELINE_UPDATE,
+      pipelineId: 123
+    }
+
+    await PipelineScheduling.initializeJobs()
+    const allJobs = PipelineScheduling.getAllJobs()
+    expect(allJobs).toHaveLength(1)
+    expect(allJobs[0].pipelineConfig).toEqual(toBeUpdated)
+
+    const updated = generateConfig(false, new Date(Date.now() + 5000), 12000)
+    mockedGetEventsAfter.mockResolvedValue([updateEvent])
+    mockedGetPipeline.mockResolvedValue(updated)
+
+    await PipelineScheduling.updatePipelines()
+
+    await sleep(1000) // Give the scheduler some time to apply the update
+
+    expect(PipelineScheduling.getAllJobs()).toHaveLength(1)
+    const job123 = PipelineScheduling.getPipelineJob(123)
+    expect(job123).toBeDefined()
+    expect(job123!.pipelineConfig).toEqual(updated)
+  })
+
   test('should have correct execution date in the future', () => {
     const timestampInFuture = Date.now() + 6000
     const pipelineConfig = generateConfig(true, new Date(timestampInFuture), 6000)
-    
     expect(PipelineScheduling.determineExecutionDate(pipelineConfig).getTime()).toEqual(timestampInFuture)
   })
 
@@ -30,7 +122,6 @@ describe('Scheduler', () => {
     const interval = 10000
 
     const pipelineConfig = generateConfig(true, new Date(timestampInPast), interval)
-    
     const expectedExecution = new Date(timestampInPast + interval)
     expect(PipelineScheduling.determineExecutionDate(pipelineConfig)).toEqual(expectedExecution)
   })
@@ -38,12 +129,11 @@ describe('Scheduler', () => {
   test('should insert new pipeline', () => {
     const timestampInFuture = Date.now() + 5000
     const pipelineConfig = generateConfig(true, new Date(timestampInFuture), 10000)
-    
     const pipelineJob = PipelineScheduling.upsertPipelineJob(pipelineConfig)
 
     expect(pipelineJob.pipelineConfig).toEqual(pipelineConfig)
     expect(pipelineJob.scheduleJob).toBeDefined()
-    expect(PipelineScheduling.getPipielineJob(pipelineConfig.id)).toEqual(pipelineJob)
+    expect(PipelineScheduling.getPipelineJob(pipelineConfig.id)).toEqual(pipelineJob)
   })
 
   test('should update existing pipeline', () => {
@@ -79,11 +169,10 @@ describe('Scheduler', () => {
   test('should execute pipeline once', async () => {
     const timestampInFuture = Date.now() + 200
     const pipelineConfig = generateConfig(false, new Date(timestampInFuture), 500)
-    
     PipelineScheduling.upsertPipelineJob(pipelineConfig)
     await sleep(250)
 
-    expect(PipelineScheduling.getPipielineJob(pipelineConfig.id)).toBeUndefined()
+    expect(PipelineScheduling.getPipelineJob(pipelineConfig.id)).toBeUndefined()
   })
 
   afterEach(() => {
@@ -93,11 +182,10 @@ describe('Scheduler', () => {
   test('should execute pipeline periodic', async () => {
     const timestampInFuture = Date.now() + 200
     const pipelineConfig = generateConfig(true, new Date(timestampInFuture), 500)
-    
     const pipelineJob1 = PipelineScheduling.upsertPipelineJob(pipelineConfig)
     const nextInvocation1: Date = pipelineJob1.scheduleJob.nextInvocation()
     await sleep(250)
-    const pipelineJob2 = PipelineScheduling.getPipielineJob(pipelineConfig.id)
+    const pipelineJob2 = PipelineScheduling.getPipelineJob(pipelineConfig.id)
     const nextInvocation2: Date = pipelineJob1.scheduleJob.nextInvocation()
 
     expect(nextInvocation1).not.toEqual(nextInvocation2)
@@ -109,11 +197,11 @@ describe('Scheduler', () => {
   })
 })
 
-const sleep = (ms: number) => {
+function sleep (ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-const generateConfig = (periodic: boolean, firstExecution: Date, interval: number) => {
+function generateConfig (periodic: boolean, firstExecution: Date, interval: number): PipelineConfig {
   return {
     id: 123,
     adapter: {},
