@@ -2,7 +2,7 @@
 const request = require("supertest");
 const waitOn = require("wait-on");
 
-const URL = process.env.SCHEDULER_API || "http://localhost:9000/scheduler";
+const URL = process.env.SCHEDULER_API || "http://localhost:8080";
 
 const MOCK_CORE_PORT = process.env.MOCK_CORE_PORT || 8081;
 const MOCK_CORE_HOST = process.env.MOCK_CORE_HOST || "localhost";
@@ -25,12 +25,13 @@ describe("Scheduler", () => {
 
   beforeAll(async () => {
     const pingUrl = URL + "/";
-    console.log("Waiting for service with URL: " + pingUrl);
     console.log("Waiting for service with URL: " + MOCK_CORE_URL);
     console.log("Waiting for service with URL: " + MOCK_ADAPTER_URL);
     console.log("Waiting for service with URL: " + MOCK_TRANSFORMATION_URL);
     console.log("Waiting for service with URL: " + MOCK_STORAGE_URL);
-    await waitOn({ resources: [pingUrl, MOCK_CORE_URL, MOCK_ADAPTER_URL, MOCK_TRANSFORMATION_URL, MOCK_STORAGE_URL], timeout: 50000 });
+    await waitOn({ resources: [ MOCK_CORE_URL, MOCK_ADAPTER_URL, MOCK_TRANSFORMATION_URL, MOCK_STORAGE_URL], timeout: 50000 });
+    console.log("Waiting for service with URL: " + pingUrl);
+    await waitOn({ resources: [ pingUrl ], timeout: 50000 });
   }, 60000);
 
   test("GET /version", async () => {
@@ -42,11 +43,11 @@ describe("Scheduler", () => {
   });
 
   test("GET /jobs", async () => {
-    await sleep(1200); // wait until scheduler does sync
+    await sleep(2000); // wait until scheduler does sync
     const response = await request(URL).get("/jobs");
     expect(response.status).toEqual(200);
     expect(response.type).toEqual("application/json");
-    expect(response.body.length).toEqual(1);
+    expect(response.body.length).toEqual(2);
     expect(response.body[0].scheduleJob).toBeDefined(); // TODO: make explicit
     expect(response.body[0].pipelineConfig).toEqual({
       id: 123,
@@ -56,6 +57,22 @@ describe("Scheduler", () => {
       }, {
         func: "return 1;"
       }],
+      persistence: {},
+      metadata: {},
+
+      trigger: {
+        periodic: true,
+        firstExecution: '2018-10-07T01:32:00.123Z',
+        interval: 10000
+      }
+    });
+    expect(response.body[1].pipelineConfig).toEqual({
+      id: 125,
+      adapter: {},
+      transformations: [{
+        func: "return 1;"
+      }
+    ],
       persistence: {},
       metadata: {},
 
@@ -82,6 +99,14 @@ describe("Scheduler", () => {
         test: 'abc' // from transformation service
     });
   }, 12000);
+
+  test("Pipeline processes events", async () => {
+    await sleep(3000);
+    const response = await request(URL).get("/jobs");
+    expect(response.status).toEqual(200);
+    expect(response.type).toEqual("application/json");
+    expect(response.body).toHaveLength(2);
+  })
 });
 
 const sleep = (ms) => {

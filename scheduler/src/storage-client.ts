@@ -13,7 +13,6 @@ export async function executeStorage (pipelineConfig: PipelineConfig, data: any)
   requestBody.origin = !!pipelineConfig.adapter && !!pipelineConfig.adapter.location ? pipelineConfig.adapter.location : 'UNKNOWN'
   requestBody.license = !!pipelineConfig.metadata && !!pipelineConfig.metadata.license ? pipelineConfig.metadata.license : 'UNKNOWN'
 
-
   await axios.post<any>(
     getDataRequestUrl(pipelineConfig.id),
     requestBody,
