@@ -8,7 +8,7 @@ COPY ./tsconfig.json ./
 COPY ./jest.config.js ./
 
 # Install dependencies and run build
-RUN npm install 
+RUN npm install
 RUN npm run tsc
 RUN npm run test
 
@@ -18,7 +18,7 @@ FROM node:lts-alpine
 RUN mkdir /app
 WORKDIR /app
 
-COPY --from=builder /build/dist/* ./dist/
+COPY --from=builder /build/dist/ ./dist/
 COPY --from=builder /build/package*.json ./
 
 RUN npm install --only=production
