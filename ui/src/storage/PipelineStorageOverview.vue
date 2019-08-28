@@ -120,7 +120,7 @@ export default class PipelineStorageOverview extends Vue {
 
   private getStorageItemUrl (pipelineId: string, itemId: string): string {
     let url = StorageClient.createUrlForItem(pipelineId, itemId)
-    if(url.startsWith("/")) {
+    if(url.startsWith('/')) {
       url = window.location.origin + url
     }
     return url
@@ -128,7 +128,7 @@ export default class PipelineStorageOverview extends Vue {
 
   private getLatestStorageItemUrl (pipelineId: string): string {
     let url = StorageClient.createUrlForLatestItem(pipelineId)
-    if(url.startsWith("/")) {
+    if(url.startsWith('/')) {
       url = window.location.origin + url
     }
     return url
