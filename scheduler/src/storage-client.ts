@@ -1,19 +1,19 @@
 import axios from 'axios'
 
-import PipelineConfig from './pipeline-config'
+import PipelineConfig from './interfaces/pipeline-config'
 
 const STORAGE_SERVICE_URL = process.env.STORAGE_SERVICE_URL || 'http://localhost:8084'
 
-export async function executeStorage (pipelineConfig: PipelineConfig, data: any): Promise<void> {
+export async function executeStorage (pipelineConfig: PipelineConfig, data: object): Promise<void> {
+  const requestBody: object = {
+    data,
+    pipelineId: pipelineConfig.id,
+    timestamp: new Date(Date.now()),
+    origin: !!pipelineConfig.adapter && !!pipelineConfig.adapter.location ? pipelineConfig.adapter.location : 'UNKNOWN',
+    license: !!pipelineConfig.metadata && !!pipelineConfig.metadata.license ? pipelineConfig.metadata.license : 'UNKNOWN'
+  }
 
-  const requestBody: any = {}
-  requestBody.data = data
-  requestBody.pipelineId = pipelineConfig.id
-  requestBody.timestamp = new Date(Date.now())
-  requestBody.origin = !!pipelineConfig.adapter && !!pipelineConfig.adapter.location ? pipelineConfig.adapter.location : 'UNKNOWN'
-  requestBody.license = !!pipelineConfig.metadata && !!pipelineConfig.metadata.license ? pipelineConfig.metadata.license : 'UNKNOWN'
-
-  await axios.post<any>(
+  await axios.post<object>(
     getDataRequestUrl(pipelineConfig.id),
     requestBody,
     {
@@ -25,8 +25,8 @@ export async function executeStorage (pipelineConfig: PipelineConfig, data: any)
 }
 
 export async function createStructure (pipelineId: number): Promise<void> {
-  const requestBody: any = {
-    'pipelineid': pipelineId
+  const requestBody: object = {
+    pipelineId
   }
   const requestURI = `${STORAGE_SERVICE_URL}/rpc/createstructurefordatasource`
 

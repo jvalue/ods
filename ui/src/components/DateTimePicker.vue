@@ -138,7 +138,7 @@ export default class DateTimePicker extends Vue {
   private onSave () {
     const selectedDate = new Date(
       this.sliceYearFromDateString(this.date),
-      this.sliceMonthFromDateString(this.date) -1,
+      this.sliceMonthFromDateString(this.date) - 1,
       this.sliceDayFromDateString(this.date),
       this.sliceHourFromTimeString(this.time),
       this.sliceMinuteFromTimeString(this.time)
@@ -154,13 +154,12 @@ export default class DateTimePicker extends Vue {
 
   private sliceYearFromDateString = (v: string): number => Number(v.slice(0, 4))
 
-  private sliceMonthFromDateString = (v: string): number => Number(v.slice(5,7))
+  private sliceMonthFromDateString = (v: string): number => Number(v.slice(5, 7))
 
-  private sliceDayFromDateString = (v: string): number => Number(v.slice(8,10))
+  private sliceDayFromDateString = (v: string): number => Number(v.slice(8, 10))
 
-  private sliceHourFromTimeString = (v: string): number => Number(v.slice(0,2))
+  private sliceHourFromTimeString = (v: string): number => Number(v.slice(0, 2))
 
-  private sliceMinuteFromTimeString = (v: string): number => Number(v.slice(3,5))
-
+  private sliceMinuteFromTimeString = (v: string): number => Number(v.slice(3, 5))
 }
 </script>
