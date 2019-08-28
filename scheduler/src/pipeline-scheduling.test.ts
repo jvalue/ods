@@ -111,18 +111,32 @@ describe('Scheduler', () => {
     expect(job123!.pipelineConfig).toEqual(updated)
   })
 
-  test('should have correct execution date in the future', () => {
+  test('should determine correct execution date from timestamp in the future ', () => {
     const timestampInFuture = Date.now() + 6000
     const pipelineConfig = generateConfig(true, new Date(timestampInFuture), 6000)
     expect(PipelineScheduling.determineExecutionDate(pipelineConfig).getTime()).toEqual(timestampInFuture)
   })
 
-  test('should have correct execution date in the past', () => {
+  test('should determine correct execution date from timestamp in the past', () => {
     const timestampInPast = Date.now() - 5000
     const interval = 10000
 
     const pipelineConfig = generateConfig(true, new Date(timestampInPast), interval)
     const expectedExecution = new Date(timestampInPast + interval)
+    expect(PipelineScheduling.determineExecutionDate(pipelineConfig)).toEqual(expectedExecution)
+  })
+
+  test('should determine correct execution date from timestamp in the past [> 24h]', () => {
+    const oneDayhInMs = 1000 * 3600 *24
+    const threeDaysInMs = oneDayhInMs * 3
+    const fiveMinutesInMs = 1000 * 60 * 5
+    const now = Date.now()
+
+    const timestampInPast = now - threeDaysInMs - fiveMinutesInMs
+    const interval = oneDayhInMs
+
+    const pipelineConfig = generateConfig(true, new Date(timestampInPast), interval)
+    const expectedExecution = new Date(now + interval - fiveMinutesInMs)
     expect(PipelineScheduling.determineExecutionDate(pipelineConfig)).toEqual(expectedExecution)
   })
 
