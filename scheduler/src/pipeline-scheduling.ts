@@ -104,12 +104,16 @@ export function existsEqualPipelineJob (pipelineConfig: PipelineConfig): boolean
 }
 
 export function determineExecutionDate (pipelineConfig: PipelineConfig): Date {
-  let potentialExecutionDate: number = pipelineConfig.trigger.firstExecution.getTime()
+  let executionDate = pipelineConfig.trigger.firstExecution.getTime()
+  const now =Date.now()
 
-  while (potentialExecutionDate < Date.now()) {
-    potentialExecutionDate += pipelineConfig.trigger.interval
+  if (executionDate > now) {
+    return pipelineConfig.trigger.firstExecution
   }
-  return new Date(potentialExecutionDate)
+
+  const offset = (now - executionDate) % pipelineConfig.trigger.interval
+  executionDate = now + pipelineConfig.trigger.interval - offset
+  return new Date(executionDate)
 }
 
 async function executePipeline (pipelineConfig: PipelineConfig): Promise<void> {
