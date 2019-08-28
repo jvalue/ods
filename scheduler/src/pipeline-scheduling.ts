@@ -1,7 +1,7 @@
 import deepEqual from 'deep-equal'
-import PipelineJob from './pipeline-job'
-import PipelineConfig from './pipeline-config'
-import PipelineEvent, { EventType } from './pipeline-event'
+import PipelineJob from './interfaces/pipeline-job'
+import PipelineConfig from './interfaces/pipeline-config'
+import PipelineEvent, { EventType } from './interfaces/pipeline-event'
 import schedule from 'node-schedule'
 
 import * as AdapterClient from './adapter-client'
@@ -26,10 +26,8 @@ export async function initializeJobs (retries: number = 30): Promise<void> {
     console.log(`Received ${pipelineConfigurations.length} pipelines from core-service`)
 
     pipelineConfigurations.forEach(pipelineConfig => {
-      pipelineConfig.trigger.firstExecution = new Date(pipelineConfig.trigger.firstExecution) // Otherwise it is a String
-      if (!PipelineScheduling.existsEqualPipelineJob(pipelineConfig)) { // We could leave out this check assuming that core-service checks for duplicates
-        PipelineScheduling.upsertPipelineJob(pipelineConfig)
-      }
+      pipelineConfig.trigger.firstExecution = new Date(pipelineConfig.trigger.firstExecution)
+      PipelineScheduling.upsertPipelineJob(pipelineConfig) // assuming core service checks for duplicates
     })
   } catch (e) {
     if (retries === 0) {
@@ -105,7 +103,7 @@ export function existsEqualPipelineJob (pipelineConfig: PipelineConfig): boolean
 
 export function determineExecutionDate (pipelineConfig: PipelineConfig): Date {
   let executionDate = pipelineConfig.trigger.firstExecution.getTime()
-  const now =Date.now()
+  const now = Date.now()
 
   if (executionDate > now) {
     return pipelineConfig.trigger.firstExecution

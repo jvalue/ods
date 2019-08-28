@@ -5,8 +5,8 @@ import { executeAdapter } from './adapter-client'
 import { executeTransformation } from './transformation-client'
 import { executeStorage } from './storage-client'
 import { getLatestEventId, getAllPipelines, getEventsAfter, getPipeline } from './core-client'
-import { EventType } from './pipeline-event'
-import PipelineConfig from './pipeline-config';
+import { EventType } from './interfaces/pipeline-event'
+import PipelineConfig from './interfaces/pipeline-config'
 
 jest.mock('./adapter-client')
 const mockedExecuteAdapter = executeAdapter as jest.Mock
@@ -59,7 +59,9 @@ describe('Scheduler', () => {
     expect(PipelineScheduling.getAllJobs()).toHaveLength(1)
     const job123 = PipelineScheduling.getPipelineJob(123)
     expect(job123).toBeDefined()
-    expect(job123!.pipelineConfig).toEqual(toBeAdded)
+    if (job123 !== undefined) {
+      expect(job123.pipelineConfig).toEqual(toBeAdded)
+    }
   })
 
   test('should apply deletion event', async () => {
@@ -108,7 +110,9 @@ describe('Scheduler', () => {
     expect(PipelineScheduling.getAllJobs()).toHaveLength(1)
     const job123 = PipelineScheduling.getPipelineJob(123)
     expect(job123).toBeDefined()
-    expect(job123!.pipelineConfig).toEqual(updated)
+    if (job123 !== undefined) {
+      expect(job123.pipelineConfig).toEqual(updated)
+    }
   })
 
   test('should determine correct execution date from timestamp in the future ', () => {
@@ -127,7 +131,7 @@ describe('Scheduler', () => {
   })
 
   test('should determine correct execution date from timestamp in the past [> 24h]', () => {
-    const oneDayhInMs = 1000 * 3600 *24
+    const oneDayhInMs = 1000 * 3600 * 24
     const threeDaysInMs = oneDayhInMs * 3
     const fiveMinutesInMs = 1000 * 60 * 5
     const now = Date.now()
@@ -203,7 +207,10 @@ describe('Scheduler', () => {
     const nextInvocation2: Date = pipelineJob1.scheduleJob.nextInvocation()
 
     expect(nextInvocation1).not.toEqual(nextInvocation2)
-    expect(pipelineJob1.pipelineConfig).toEqual(pipelineJob2!.pipelineConfig)
+    expect(pipelineJob2).toBeDefined()
+    if (pipelineJob2 !== undefined) {
+      expect(pipelineJob1.pipelineConfig).toEqual(pipelineJob2.pipelineConfig)
+    }
   })
 
   afterEach(() => {
@@ -218,10 +225,15 @@ function sleep (ms: number): Promise<void> {
 function generateConfig (periodic: boolean, firstExecution: Date, interval: number): PipelineConfig {
   return {
     id: 123,
-    adapter: {},
-    transformations: [{}],
+    adapter: {
+      location: 'somewhere'
+    },
+    transformations: [],
     persistence: {},
-    metadata: {},
+    metadata: {
+      creationTimestamp: firstExecution,
+      license: 'license'
+    },
 
     trigger: {
       periodic,

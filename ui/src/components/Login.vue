@@ -73,7 +73,7 @@ export default class Login extends Vue {
   @State('isAuth', namespace)
   private isAuthenticated!: boolean;
 
-  @State('userProfile', namespace) 
+  @State('userProfile', namespace)
   private userProfile!: KeycloakProfile;
 
   @Action('login', namespace)
