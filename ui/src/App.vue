@@ -1,52 +1,45 @@
 <template>
-  <div id="app">
-    <v-app>
+
+    <v-app id="app">
       <v-navigation-drawer
         v-model="drawer"
         clipped
         app
       >
-        <v-toolbar
-          dense
-          dark
-          color="primary"
-        >
-          <v-toolbar-side-icon @click.stop="drawer = !drawer" />
-          <v-toolbar-title>{{ title }}</v-toolbar-title>
-        </v-toolbar>
         <v-list>
-          <v-list-tile
+          <v-list-item
             v-for="item in items"
             :key="item.title"
             :to="item.route"
           >
-            <v-list-tile-content>
-              <v-list-tile-title>{{ item.title }}</v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
+            <v-list-item-content>
+              <v-list-item-title>{{ item.title }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
         </v-list>
       </v-navigation-drawer>
 
-      <v-toolbar
+      <v-app-bar
+        app
         dense
         dark
+        clipped-left
         color="primary"
       >
-        <v-toolbar-side-icon @click.stop="drawer = !drawer" />
+        <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
         <v-toolbar-title>{{ title }}</v-toolbar-title>
         <v-spacer />
         <v-toolbar-title>{{ routerTitle }}</v-toolbar-title>
         <v-spacer />
-
         <login />
-      </v-toolbar>
+      </v-app-bar>
+
       <v-content>
         <v-container fluid>
           <router-view />
         </v-container>
       </v-content>
     </v-app>
-  </div>
 </template>
 
 <script lang="ts">
