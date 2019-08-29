@@ -2,7 +2,9 @@
   <div class="pipeline">
     <v-card>
       <v-card-title>
+
         <v-btn
+          class="ma-2"
           color="success"
           @click="onCreatePipeline()"
         >
@@ -12,6 +14,7 @@
           </v-icon>
         </v-btn>
         <v-btn
+          class="ma-2"
           @click="loadPipelinesAction()"
         >
           <v-icon dark>
@@ -32,7 +35,7 @@
         :headers="headers"
         :items="pipelines"
         :search="search"
-        :custom-filter="filterPipelines"
+        :custom-filter="filterOnlyDisplayName"
         :loading="isLoadingPipelines"
         class="elevation-1"
       >
@@ -40,34 +43,30 @@
           slot="progress"
           indeterminate
         />
-        <template v-slot:items="props" >
-          <td class="text-xs-left">
-            {{ props.item.id }}
-          </td>
-          <td class="text-xs-left">
-            {{ props.item.metadata.displayName }}
-          </td>
-          <td class="text-xs-left">
-            {{ props.item.metadata.author }}
-          </td>
-          <td>
-            {{ getHoursFromMS(props.item.trigger.interval) }}h:{{ getMinutesFromMS(props.item.trigger.interval) }}m
-          </td>
-          <td>
-            <v-btn depressed small @click="onShowPipelineData(props.item)">
+
+        <template v-slot:item.trigger.interval="{ item }">
+          {{ getHoursFromMS(item.trigger.interval) }}h:{{ getMinutesFromMS(item.trigger.interval) }}m
+        </template>
+
+        <template v-slot:item.trigger.periodic="{ item }">
+          <v-switch v-model="item.trigger.periodic" class="ma-2" disabled></v-switch>
+        </template>
+
+        <template v-slot:item.action="{ item }">
+          <v-btn depressed small @click="onShowPipelineData(item)" class="ma-2">
               Data
               <v-icon dark right >mdi mdi-database</v-icon>
-            </v-btn>
-            <v-btn depressed small @click="onEditPipeline(props.item)">
-              Edit
-              <v-icon dark right >mdi mdi-pencil</v-icon>
-            </v-btn>
-            <v-btn depressed small @click="onDeletePipeline(props.item)">
-              Delete
-              <v-icon dark right>mdi mdi-delete</v-icon>
-            </v-btn>
-          </td>
+          </v-btn>
+          <v-btn depressed small @click="onEditPipeline(item)" class="ma-2">
+            Edit
+            <v-icon dark right >mdi mdi-pencil</v-icon>
+          </v-btn>
+          <v-btn depressed small @click="onDeletePipeline(item)" class="ma-2">
+            Delete
+            <v-icon dark right>mdi mdi-delete</v-icon>
+          </v-btn>
         </template>
+
       </v-data-table>
     </v-card>
   </div>
@@ -96,9 +95,10 @@ export default class PipelineOverview extends Vue {
 
   private headers = [
     { text: 'Id', value: 'id' },
-    { text: 'Pipeline Name', value: 'displayName', sortable: false}, // sorting to be implemented
-    { text: 'Author', value: 'author', sortable: false },
-    { text: 'Interval', value: 'interval', sortable: false},
+    { text: 'Pipeline Name', value: 'metadata.displayName', sortable: false}, // sorting to be implemented
+    { text: 'Author', value: 'metadata.author', sortable: false },
+    { text: 'Interval', value: 'trigger.interval', sortable: false},
+    { text: 'Periodic', value: 'trigger.periodic', sortable: false},
     { text: 'Action', value: 'action', sortable: false }
   ];
 
@@ -124,9 +124,11 @@ export default class PipelineOverview extends Vue {
     this.deletePipelineAction(pipeline.id);
   }
 
-  private filterPipelines (items: Pipeline[], search: string | null, filter: any) : Pipeline[] {
-    const searchTerm = !!search ? search.toLowerCase() : ''
-    return items.filter(item => filter(item.metadata.displayName, searchTerm))
+  private filterOnlyDisplayName (value: any, search: string, item: Pipeline): boolean {
+    return value != null &&
+          search != null &&
+          typeof value === 'string' &&
+          item.metadata.displayName.toLocaleLowerCase().indexOf(search.toLocaleLowerCase()) !== -1
   }
 
   private getHoursFromMS (intervalInMS: number): number {

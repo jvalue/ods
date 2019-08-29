@@ -20,7 +20,7 @@
                 label="Pipeline Name"
                 :rules="[required]"
               ></v-text-field>
-              <v-btn :disabled="!validStep1" color="primary" @click="dialogStep = 2">Next</v-btn>
+              <v-btn :disabled="!validStep1" color="primary" @click="dialogStep = 2"  class="ma-2">Next</v-btn>
             </v-form>
           </v-stepper-content>
 
@@ -47,8 +47,8 @@
                 label="URL"
                 :rules="[required]"
               ></v-text-field>
-              <v-btn @click="dialogStep = 1">Back</v-btn>
-              <v-btn :disabled="!validStep2" color="primary" @click="dialogStep = 3">Next</v-btn>
+              <v-btn @click="dialogStep = 1" class="ma-2">Back</v-btn>
+              <v-btn :disabled="!validStep2" color="primary" @click="dialogStep = 3" class="ma-2">Next</v-btn>
             </v-form>
           </v-stepper-content>
 
@@ -64,8 +64,8 @@
                 rows="3"
                 :rules="[required]"
               />
-              <v-btn @click="dialogStep = 2">Back</v-btn>
-              <v-btn :disabled="!validStep3" color="primary" @click="dialogStep = 4">Next</v-btn>
+              <v-btn @click="dialogStep = 2" class="ma-2">Back</v-btn>
+              <v-btn :disabled="!validStep3" color="primary" @click="dialogStep = 4" class="ma-2">Next</v-btn>
             </v-form>
           </v-stepper-content>
 
@@ -78,8 +78,8 @@
               />
               <v-text-field v-model="dialogPipeline.metadata.author" label="Author" />
               <v-text-field v-model="dialogPipeline.metadata.license" label="License" />
-              <v-btn @click="dialogStep = 3">Back</v-btn>
-              <v-btn :disabled="!validStep4" color="primary" @click="dialogStep = 5">Next</v-btn>
+              <v-btn @click="dialogStep = 3" class="ma-2">Back</v-btn>
+              <v-btn :disabled="!validStep4" color="primary" @click="dialogStep = 5" class="ma-2">Next</v-btn>
             </v-form>
           </v-stepper-content>
 
@@ -138,21 +138,22 @@
                 </template>
               </v-slider>
 
-              <v-btn @click="dialogStep = 4">Back</v-btn>
+              <v-btn @click="dialogStep = 4" class="ma-2">Back</v-btn>
               <v-btn
                 :disabled="!validStep5"
                 v-if="isEditMode"
                 color="primary"
                 @click="onUpdate"
+                class="ma-2"
               >Update</v-btn>
-              <v-btn :disabled="!validStep5" v-else color="primary" @click="onSave">Save</v-btn>
+              <v-btn :disabled="!validStep5" v-else color="primary" @click="onSave" class="ma-2">Save</v-btn>
             </v-form>
           </v-stepper-content>
         </v-stepper>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="error" @click="onCancel">Cancel</v-btn>
+        <v-btn color="error" @click="onCancel" class="ma-2">Cancel</v-btn>
       </v-card-actions>
     </v-card>
   </div>

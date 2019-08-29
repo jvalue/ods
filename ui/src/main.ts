@@ -10,8 +10,11 @@ import StorageModule from '@/storage/module'
 import AuthModule from '@/components/auth/module'
 import PipelineModule from '@/pipeline/module'
 
-Vue.use(Vuetify, {
-  iconfont: 'mdi'
+Vue.use(Vuetify)
+const vuetify = new Vuetify({
+  icons: {
+    iconfont: 'mdi'
+  }
 })
 
 Vue.use(Vuex)
@@ -28,6 +31,7 @@ export const store = new Vuex.Store({
 })
 
 new Vue({
+  vuetify,
   router,
   store,
   render: h => h(App)

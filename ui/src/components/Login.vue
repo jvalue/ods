@@ -2,7 +2,7 @@
   <v-toolbar-items>
     <v-btn
       v-show="!isAuthenticated"
-      flat
+      text
       @click="onLogin"
     >
       Login
@@ -23,7 +23,7 @@
       <template v-slot:activator="{ on }">
         <v-btn
           v-show="isAuthenticated"
-          flat
+          text
           to="/"
           v-on="on"
         >
@@ -38,21 +38,21 @@
       </template>
 
       <v-list>
-        <v-list-tile avatar>
-          <v-list-tile-content>
-            <v-list-tile-title>{{ userProfile.firstName }} {{ userProfile.lastName }}</v-list-tile-title>
-            <v-list-tile-sub-title>{{ userProfile.email }}</v-list-tile-sub-title>
-          </v-list-tile-content>
-        </v-list-tile>
+        <v-list-item avatar>
+          <v-list-item-content>
+            <v-list-item-title>{{ userProfile.firstName }} {{ userProfile.lastName }}</v-list-item-title>
+            <v-list-item-sub-title>{{ userProfile.email }}</v-list-item-sub-title>
+          </v-list-item-content>
+        </v-list-item>
 
         <v-divider />
 
-        <v-list-tile @click="onEditProfile">
-          <v-list-tile-title>Edit Profile</v-list-tile-title>
-        </v-list-tile>
-        <v-list-tile @click="onLogout">
-          <v-list-tile-title>Logout</v-list-tile-title>
-        </v-list-tile>
+        <v-list-item @click="onEditProfile">
+          <v-list-item-title>Edit Profile</v-list-item-title>
+        </v-list-item>
+        <v-list-item @click="onLogout">
+          <v-list-item-title>Logout</v-list-item-title>
+        </v-list-item>
       </v-list>
     </v-menu>
   </v-toolbar-items>
