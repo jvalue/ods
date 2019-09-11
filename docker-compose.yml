@@ -26,7 +26,7 @@ services:
       - "traefik.frontend.rule=PathPrefixStrip:/ui"
       - "traefik.frontend.passHostHeader=true"
       - "traefik.port=8080"
-    
+
   # ----------------- AUTH SERVICE (/auth) --------------------
   auth-service-db:
     image: postgres
@@ -38,7 +38,7 @@ services:
       POSTGRES_PASSWORD: password
     labels: # traefic reverse-proxy config
       - "traefik.enable=false"
-      
+
   auth-service:
     image: jboss/keycloak
     environment:
@@ -75,7 +75,7 @@ services:
   # ----------------- SCHEDULER SERVICE (/scheduler) --------------------
   scheduler-service:
     image: registry.gitlab.com/profoss/open-data-service/ods-main/scheduler-service
-    build: 
+    build:
       context: ./scheduler/
     environment:
       CONFIG_SERVICE_URL: http://core-service:8080
@@ -129,7 +129,7 @@ services:
       LIQUIBASE_CHANGELOG: /liquibase/changelog.xml
     volumes:
       - ./storage/changelog.xml:/liquibase/changelog.xml # TODO: Sql Injection is currently
-    depends_on: 
+    depends_on:
       - storage-service-db
     labels: # traefic reverse-proxy config
       - "traefik.enable=false"
@@ -141,10 +141,10 @@ services:
     labels: # traefic reverse-proxy config
       - "traefik.enable=false"
 
-  # ----------------- TRANSFOMRATION SERVICE (/transformation) --------------------
+  # ----------------- TRANSFORMATION SERVICE (/transformation) --------------------
   transformation-service:
     image: registry.gitlab.com/profoss/open-data-service/ods-main/transformation-service
-    build: 
+    build:
       context: ./transformation/
     environment:
       AUTH_ENABLED: 'false' #TODO: turn to true as soon as it works!
