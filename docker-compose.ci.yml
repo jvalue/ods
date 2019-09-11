@@ -1,4 +1,4 @@
-# Overwrite service configurations of global docker-compose.yml 
+# Overwrite service configurations of global docker-compose.yml
 # for the CI ENVIRONMENT, including MOCKS and INTEGRATION TESTS
 
 version: '3.7'
@@ -48,7 +48,7 @@ services:
     environment:
       STORAGE_API: http://storage-service:3000
 
-  # ----------------- TRANSFOMRATION SERVICE (PORTS 9500 - 9599) --------------------
+  # ----------------- TRANSFORMATION SERVICE (PORTS 9500 - 9599) --------------------
   transformation-service:
     environment:
       AUTH_ENABLED: 'false'
@@ -57,7 +57,7 @@ services:
     build:
       context: ./transformation/integration-test/
     environment:
-      SCHEDULER_API: http://transformation-service:8080
+      TRANSFORMATION_API: http://transformation-service:8080
 
   # ----------------- CORE SERVICE (PORTS 9600 - 9599) --------------------
   core-service-it:
