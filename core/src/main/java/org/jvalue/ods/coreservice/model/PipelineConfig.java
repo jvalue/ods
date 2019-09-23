@@ -28,6 +28,8 @@ public class PipelineConfig implements Serializable {
     @Embedded @NotNull
     private PipelineMetadata metadata;
 
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<NotificationConfig> notifications;
 
     //Constructor for JPA
     private PipelineConfig() {}
@@ -37,13 +39,14 @@ public class PipelineConfig implements Serializable {
             @JsonProperty("adapter") AdapterConfig adapter,
             @JsonProperty("transformations") List<TransformationConfig> transformations,
             @JsonProperty("trigger") PipelineTriggerConfig trigger,
-            @JsonProperty("metadata") PipelineMetadata metadata) {
+            @JsonProperty("metadata") PipelineMetadata metadata,
+            @JsonProperty("notifications") List<NotificationConfig> notifications) {
         this.adapter = adapter;
         this.transformations = transformations;
         this.trigger = trigger;
         this.metadata = metadata;
+        this.notifications = notifications;
     }
-
 
     @Override
     public String toString() {
@@ -105,4 +108,15 @@ public class PipelineConfig implements Serializable {
         return metadata;
     }
 
-}
+    public List<NotificationConfig> getNotifications() {
+        return notifications;
+    }
+
+    public void addNotification(NotificationConfig notification) {
+        this.notifications.add(notification);
+    }
+
+    public void removeNotification(NotificationConfig notification) {
+        this.notifications.remove(notification);
+    }
+ }

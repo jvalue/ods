@@ -3,9 +3,7 @@ package org.jvalue.ods.coreservice.pipeline;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.jvalue.ods.coreservice.model.EventType;
-import org.jvalue.ods.coreservice.model.PipelineConfig;
-import org.jvalue.ods.coreservice.model.PipelineEvent;
+import org.jvalue.ods.coreservice.model.*;
 import org.jvalue.ods.coreservice.repository.EventRepository;
 import org.jvalue.ods.coreservice.repository.PipelineRepository;
 import org.mockito.InjectMocks;
@@ -41,7 +39,7 @@ public class PipelineManagerTest {
     public void testCreatePipeline() throws IOException {
         PipelineConfig config = mapper.readValue(configFile, PipelineConfig.class);
 
-        PipelineConfig expectedConfig = new PipelineConfig(config.getAdapter(), config.getTransformations(), config.getTrigger(), config.getMetadata());
+        PipelineConfig expectedConfig = new PipelineConfig(config.getAdapter(), config.getTransformations(), config.getTrigger(), config.getMetadata(), config.getNotifications());
         expectedConfig.setId(123L);
 
         when(pipelineRepository.save(config)).thenReturn(expectedConfig);
@@ -58,7 +56,7 @@ public class PipelineManagerTest {
         PipelineConfig config = mapper.readValue(configFile, PipelineConfig.class);
         config.setId(123L);
 
-        PipelineConfig updated = new PipelineConfig(config.getAdapter(), Collections.emptyList(), config.getTrigger(), config.getMetadata());
+        PipelineConfig updated = new PipelineConfig(config.getAdapter(), Collections.emptyList(), config.getTrigger(), config.getMetadata(), config.getNotifications());
         updated.setId(123L);
 
         when(pipelineRepository.findById(123L)).thenReturn(Optional.of(config));
@@ -126,5 +124,41 @@ public class PipelineManagerTest {
         manager.getLatestEvent();
 
         verify(eventRepository).findFirstByOrderByEventIdDesc();
+    }
+
+    @Test
+    public void testAddNotification() throws IOException {
+        PipelineConfig pipelineConfig = mapper.readValue(configFile, PipelineConfig.class);
+        pipelineConfig.setId(21L);
+
+        when(pipelineRepository.findById(21L)).thenReturn(Optional.of(pipelineConfig));
+
+        NotificationConfig notificationConfig = new NotificationConfig(NotificationType.WEBHOOK, "data.value2 === 1", "http://www.hook.org");
+
+        when(pipelineRepository.save(pipelineConfig)).thenReturn(pipelineConfig);
+
+        manager.addNotification(21L, notificationConfig);
+
+        PipelineConfig result = manager.getPipeline(21L).get();
+
+        assertEquals(2, result.getNotifications().size());
+        assertEquals("data.value2 === 1", result.getNotifications().get(1).getCondition());
+        assertEquals("http://www.hook.org", result.getNotifications().get(1).getUrl());
+        verify(eventRepository).save(argThat(event -> event.getEventType().equals("PIPELINE_UPDATE")));
+    }
+
+    @Test
+    public void testRemoveNotification() throws IOException {
+        PipelineConfig pipelineConfig = mapper.readValue(configFile, PipelineConfig.class);
+        pipelineConfig.setId(22L);
+        pipelineConfig.getNotifications().get(0).setNotificationId(1L);
+
+        when(pipelineRepository.findById(22L)).thenReturn(Optional.of(pipelineConfig));
+
+        manager.removeNotification(22L, 1L);
+
+        PipelineConfig result = manager.getPipeline(22L).get();
+        assertEquals(0, result.getNotifications().size());
+        verify(eventRepository).save(argThat(event -> event.getEventType().equals("PIPELINE_UPDATE")));
     }
 }
