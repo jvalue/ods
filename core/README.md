@@ -28,6 +28,8 @@ Note that you need to delete existing docker images from your local docker daemo
 | *base_url*/pipelines  | POST  | PipelineConfig | PipelineConfig | Create a new pipeline (id will be set by the core service) |
 | *base_url*/pipelines/${id}  | PUT  | PipelineConfig | - | Update existing pipeline |
 | *base_url*/pipelines/${id}  | DELETE  | - | - | Delete existing pipeline |
+| *base_url*/pipelines/${id}/notifications  | POST  | NotificationConfig | NotificationConfig | Create notification for a pipeline |
+| *base_url*/pipelines/${id}/notifications/${notificationId}  | DELETE  | - | - | Delete notification |
 | *base_url*/pipelines  | DELETE  | - | - | Delete all pipelines |
 | *base_url*/events  | GET  | -  | Array of PipelineEvents  | Get all events |
 | *base_url*/events/${id}  | GET  | -  | PipelineEvent  | Get a event with id ${id} |
@@ -88,3 +90,11 @@ Note that you need to delete existing docker images from your local docker daemo
 }
 ```
 
+### NotificationConfig
+```
+{
+    "notificationType":"WEBHOOK",
+    "condition":String (Javascript boolean expression),
+    "url":String
+}
+```

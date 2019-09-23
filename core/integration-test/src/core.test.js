@@ -184,7 +184,91 @@ describe("Core", () => {
     expect(response.body.eventId).toBeTruthy();
     expect(response.body.pipelineConfig).toBe(pipelineId);
     expect(response.body.eventType).toEqual("PIPELINE_DELETE");
-  })
+  });
+
+  test('POST /{pipelineId}/notifications', async () => {
+    const notificationConfig = {
+      "notificationType": "WEBHOOK",
+      "condition": "data.value1 === 5",
+      "url": "www.some-url.net"
+    };
+
+    //add pipeline
+    const pipelineCreationResponse = await request(URL)
+        .post('/pipelines')
+        .send(pipelineConfig);
+
+    const pipelineId = pipelineCreationResponse.body.id;
+
+    const notificationCreationResponse = await request(URL)
+        .post('/pipelines/' + pipelineId + '/notifications')
+        .send(notificationConfig);
+
+    //check if notification post worked
+    expect(notificationCreationResponse.status).toEqual(200);
+    expect(notificationCreationResponse.type).toEqual('application/json');
+    expect(notificationCreationResponse.body.notificationType).toEqual("WEBHOOK");
+    expect(notificationCreationResponse.body.condition).toEqual("data.value1 === 5");
+    expect(notificationCreationResponse.body.url).toEqual("www.some-url.net");
+
+    //check if update event worked
+    const eventsResponse = await request(URL)
+        .get('/events/latest')
+        .send();
+
+    expect(eventsResponse.body.eventType).toEqual("PIPELINE_UPDATE");
+    expect(eventsResponse.body.pipelineConfig).toEqual(pipelineId);
+
+    //check if pipeline config was updated correctly
+    const pipelineResponse = await request(URL)
+        .get('/pipelines/' + pipelineId)
+        .send();
+
+    expect(pipelineResponse.body.notifications.length).toEqual(2);
+
+    //clean up
+    await request(URL)
+        .delete('/pipelines/ ' + pipelineId)
+        .send();
+  });
+
+  test('DELETE /{pipelineId}/notifications', async () => {
+    //add pipeline
+    const pipelineCreationResponse = await request(URL)
+        .post('/pipelines')
+        .send(pipelineConfig);
+
+    const pipelineId = pipelineCreationResponse.body.id;
+    const notificationId = pipelineCreationResponse.body.notifications[0].notificationId;
+
+    const notificationDeletionResponse = await request(URL)
+        .delete('/pipelines/' + pipelineId + '/notifications/' + notificationId)
+        .send();
+
+    //check if notification deletion worked
+    expect(notificationDeletionResponse.status).toEqual(204);
+
+    //check if update event worked
+    const eventsResponse = await request(URL)
+        .get('/events/latest')
+        .send();
+
+    expect(eventsResponse.body.eventType).toEqual("PIPELINE_UPDATE");
+    expect(eventsResponse.body.pipelineConfig).toEqual(pipelineId);
+
+    //check if pipeline config was updated correctly
+    const pipelineResponse = await request(URL)
+        .get('/pipelines/' + pipelineId)
+        .send();
+
+    expect(pipelineResponse.body.notifications.length).toEqual(0);
+
+    //clean up
+    await request(URL)
+        .delete('/pipelines/ ' + pipelineId)
+        .send();
+  });
+
 });
 
 const pipelineConfig = {
@@ -214,5 +298,12 @@ const pipelineConfig = {
     "license": "none",
     "displayName": "test pipeline 1",
     "description": "integraiton testing pipeline"
-  }
+  },
+  "notifications": [
+    {
+      "notificationType": "WEBHOOK",
+      "condition": "data.value1 > 10",
+      "url": "http://www.webhookland.com"
+    }
+  ]
 };
