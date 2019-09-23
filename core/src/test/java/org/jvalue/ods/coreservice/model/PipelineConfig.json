@@ -25,5 +25,12 @@
     "license": "none",
     "displayName": "TestName",
     "description": "Describing..."
-  }
+  },
+  "notifications": [
+    {
+      "notificationType": "WEBHOOK",
+      "condition": "data.value1 > 10",
+      "url": "http://www.webhookland.com"
+    }
+  ]
 }
