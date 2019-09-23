@@ -1,19 +1,15 @@
 package org.jvalue.ods.coreservice.pipeline;
 
-import org.jvalue.ods.coreservice.model.EventType;
-import org.jvalue.ods.coreservice.model.PipelineConfig;
-import org.jvalue.ods.coreservice.model.PipelineEvent;
-import org.jvalue.ods.coreservice.model.PipelineMetadata;
+import org.jvalue.ods.coreservice.model.*;
 import org.jvalue.ods.coreservice.repository.EventRepository;
 import org.jvalue.ods.coreservice.repository.PipelineRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 public class PipelineManager {
@@ -91,7 +87,8 @@ public class PipelineManager {
                 updateConfig.getAdapter(),
                 updateConfig.getTransformations(),
                 updateConfig.getTrigger(),
-                updatedMetadata);
+                updatedMetadata,
+                updateConfig.getNotifications());
         updated.setId(existing.getId());
 
         return updated;
@@ -113,4 +110,36 @@ public class PipelineManager {
         return eventRepository.findFirstByOrderByEventIdDesc();
     }
 
+    @Transactional
+    public NotificationConfig addNotification(long pipelineId, NotificationConfig notificationConfig) {
+        PipelineConfig existing = pipelineRepository.findById(pipelineId)
+                .orElseThrow(() -> new IllegalArgumentException("Pipeline with id " + pipelineId + " not found."));
+
+        List<NotificationConfig> notificationsBefore = new ArrayList<>(existing.getNotifications());
+
+        existing.addNotification(notificationConfig);
+
+        PipelineConfig savedConfig = pipelineRepository.save(existing);
+        eventRepository.save(new PipelineEvent(EventType.PIPELINE_UPDATE, pipelineId));
+
+        return savedConfig.getNotifications().stream()
+                .filter(n -> !notificationsBefore.contains(n))
+                .findFirst()
+                .orElseThrow(IllegalStateException::new);
+    }
+
+    @Transactional
+    public void removeNotification(long pipelineId, Long notificationId) {
+        PipelineConfig existing = pipelineRepository.findById(pipelineId)
+                .orElseThrow(() -> new IllegalArgumentException("Pipeline with id " + pipelineId + " not found."));
+
+        NotificationConfig toRemove = existing.getNotifications().stream()
+                .filter(n -> n.getNotificationId().equals(notificationId))
+                .findFirst()
+                .orElseThrow( () -> new IllegalArgumentException("Notification with id " + notificationId + "does not exist for pipeline with id " + pipelineId));
+
+        existing.removeNotification(toRemove);
+        pipelineRepository.save(existing);
+        eventRepository.save(new PipelineEvent(EventType.PIPELINE_UPDATE, pipelineId));
+    }
 }
