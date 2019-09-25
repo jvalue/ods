@@ -58,6 +58,8 @@ services:
       context: ./transformation/integration-test/
     environment:
       TRANSFORMATION_API: http://transformation-service:8080
+      MOCK_RECEIVER_HOST: transformation-service-it
+      MOCK_RECEIVER_PORT: 8081
 
   # ----------------- CORE SERVICE (PORTS 9600 - 9599) --------------------
   core-service-it:

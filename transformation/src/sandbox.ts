@@ -18,8 +18,30 @@ export function execute (func: string, data: object): string {
     func +
     ' ;return data;};f(' +
     JSON.stringify(data) +
-    ')'
+    ');'
 
   const result = vm.run(wrapper)
   return JSON.stringify(result)
+}
+
+export function evaluate (expression: string, data: object): boolean {
+  const wrapper =
+    'f=function(data){' +
+    'return ' +
+    expression +
+    '};f(' +
+    JSON.stringify(data) +
+    ');'
+
+  let result = false
+  try {
+    result = vm.run(wrapper)
+  } catch (err) {
+    console.error('Malformed expression received: ' + expression, err)
+  }
+  if (typeof result !== 'boolean') {
+    return false
+  } else {
+    return result
+  }
 }

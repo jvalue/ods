@@ -4,13 +4,18 @@ const waitOn = require('wait-on')
 
 const URL = process.env.TRANSFORMATION_API || 'http://localhost:9000/transformation'
 
+const MOCK_RECEIVER_PORT = process.env.MOCK_RECEIVER_PORT || 8081
+const MOCK_RECEIVER_HOST = process.env.MOCK_RECEIVER_HOST || 'localhost'
+const MOCK_RECEIVER_URL = 'http://' + MOCK_RECEIVER_HOST + ':' + MOCK_RECEIVER_PORT
+
 describe('Scheduler', () => {
   console.log('Scheduler-Service URL= ' + URL)
 
   beforeAll(async () => {
     const pingUrl = URL + '/'
-    console.log('Waiting for service with URL: ' + pingUrl)
-    await waitOn({ resources: [pingUrl], timeout: 50000 })
+    console.log('Waiting for transformation-service with URL: ' + pingUrl)
+    console.log('Waiting for mock webhook receiver with URL: ' + MOCK_RECEIVER_URL)
+    await waitOn({ resources: [pingUrl, MOCK_RECEIVER_URL], timeout: 50000 })
   }, 60000)
 
   test('GET /version', async () => {
@@ -65,8 +70,58 @@ describe('Scheduler', () => {
     expect(response.type).toEqual('application/json')
     expect(response.body).toEqual({ numberTwo: 2 })
   })
-})
 
-const sleep = (ms) => {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
+  test('POST /notification triggers webhook', async () => {
+    const dataLocation = 'storage/1234'
+    const notificationJob = {
+      callbackUrl: MOCK_RECEIVER_URL + '/webhook1',
+      dataLocation: dataLocation,
+      data: {
+        value1: 1
+      },
+      condition: 'data.value1 > 0',
+      type: 'WEBHOOK'
+    }
+
+    const transformationResponse = await request(URL)
+      .post('/notification')
+      .send(notificationJob)
+
+    expect(transformationResponse.status).toEqual(202)
+    await sleep(3000) // wait for processing
+
+    const receiverResponse = await request(MOCK_RECEIVER_URL)
+      .get('/data1')
+
+    expect(receiverResponse.status).toEqual(200)
+    expect(receiverResponse.body.location).toEqual(dataLocation)
+  })
+
+  test('POST /notification does not trigger webhook when condition is false', async () => {
+    const notificationJob = {
+      callbackUrl: MOCK_RECEIVER_URL + '/webhook2',
+      dataLocation: 'storage/1234',
+      data: {
+        value1: 1
+      },
+      condition: 'data.value1 < 0',
+      type: 'WEBHOOK'
+    }
+
+    const transformationResponse = await request(URL)
+      .post('/notification')
+      .send(notificationJob)
+
+    expect(transformationResponse.status).toEqual(202)
+    await sleep(3000)
+
+    const receiverResponse = await request(MOCK_RECEIVER_URL)
+      .get('/data2')
+
+    expect(receiverResponse.status).toEqual(404)
+  })
+
+  const sleep = (ms) => {
+    return new Promise(resolve => setTimeout(resolve, ms))
+  }
+})
