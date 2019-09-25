@@ -5,6 +5,9 @@ import session from 'express-session'
 import cors from 'cors'
 import { execute } from './sandbox'
 import Keycloak from 'keycloak-connect'
+import TransformationRequest from './interfaces/transformationRequest'
+import { NotificationRequest } from './interfaces/notificationRequest'
+import { handleNotification } from './notifications'
 
 const memoryStore = new session.MemoryStore()
 
@@ -39,11 +42,20 @@ app.get('/version', (req, res) => {
 })
 
 app.post('/job', determineAuth(), (req: Request, res: Response) => {
-  const answer = '' + execute(req.body.func, req.body.data)
+  const transformation: TransformationRequest = req.body
+  const answer = '' + execute(transformation.func, transformation.data)
   res.setHeader('Content-Type', 'application/json')
   res.writeHead(200)
   res.write(answer)
   res.end()
+})
+
+app.post('/notification', determineAuth(), (req: Request, res: Response) => {
+  const notification: NotificationRequest = req.body
+
+  handleNotification(notification) // Result of notification handling is ignored for now.
+
+  res.status(202).send()
 })
 
 function determineAuth (): express.RequestHandler | [] {
