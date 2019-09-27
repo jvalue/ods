@@ -3,7 +3,7 @@ import express from 'express'
 import schedule from 'node-schedule'
 
 import * as PipelineScheduling from './pipeline-scheduling'
-import { CONFIG_SERVICE_URL } from './core-client'
+import { CONFIG_SERVICE_URL } from './clients/core-client'
 
 const app = express()
 const port = 8080
