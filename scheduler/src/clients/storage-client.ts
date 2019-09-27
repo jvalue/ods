@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-import PipelineConfig from './interfaces/pipeline-config'
+import PipelineConfig from './../interfaces/pipeline-config'
 
 const STORAGE_SERVICE_URL = process.env.STORAGE_SERVICE_URL || 'http://localhost:8084'
 
@@ -10,7 +10,8 @@ export async function executeStorage (pipelineConfig: PipelineConfig, data: obje
     pipelineId: pipelineConfig.id,
     timestamp: new Date(Date.now()),
     origin: !!pipelineConfig.adapter && !!pipelineConfig.adapter.location ? pipelineConfig.adapter.location : 'UNKNOWN',
-    license: !!pipelineConfig.metadata && !!pipelineConfig.metadata.license ? pipelineConfig.metadata.license : 'UNKNOWN'
+    license: !!pipelineConfig.metadata && !!pipelineConfig.metadata.license
+      ? pipelineConfig.metadata.license : 'UNKNOWN'
   }
 
   await axios.post<object>(

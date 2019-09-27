@@ -4,19 +4,19 @@ import PipelineConfig from './interfaces/pipeline-config'
 import PipelineEvent, { EventType } from './interfaces/pipeline-event'
 import schedule from 'node-schedule'
 
-import * as AdapterClient from './adapter-client'
-import * as TransformationClient from './transformation-client'
-import * as StorageClient from './storage-client'
-import * as CoreClient from './core-client'
+import * as StorageClient from './clients/storage-client'
+import * as CoreClient from './clients/core-client'
 import * as PipelineScheduling from './pipeline-scheduling'
 
+import { executePipeline } from './pipeline-execution'
+
 const allJobs: Map<number, PipelineJob> = new Map() // pipelineId -> job
-var currentEventId: number
+let currentEventId: number
 
 /**
  * Initially receive all pipelines from core service and start them up.
  */
-export async function initializeJobs (retries: number = 30): Promise<void> {
+export async function initializeJobs (retries = 30): Promise<void> {
   try {
     console.log('Starting initialization pipeline scheduler')
     currentEventId = await CoreClient.getLatestEventId()
@@ -92,6 +92,10 @@ export function getPipelineJob (pipelineId: number): PipelineJob | undefined {
   return allJobs.get(pipelineId)
 }
 
+export function removePipelineJob (pipelineId: number): void {
+  allJobs.delete(pipelineId)
+}
+
 export function existsPipelineJob (pipelineId: number): boolean {
   return allJobs.has(pipelineId)
 }
@@ -114,94 +118,9 @@ export function determineExecutionDate (pipelineConfig: PipelineConfig): Date {
   return new Date(executionDate)
 }
 
-async function executePipeline (pipelineConfig: PipelineConfig): Promise<void> {
-  console.log(`Execute Pipeline ${pipelineConfig.id}`)
-
-  let retryNumber = 0
-  let pipelineSuccess = false
-  while (!pipelineSuccess && retryNumber <= 3) {
-    if (retryNumber > 0) {
-      await sleep(1000)
-      console.log(`Starting retry ${retryNumber} of Pipeline ${pipelineConfig.id}`)
-    }
-    try {
-      const importedData: object = await executeAdapter(pipelineConfig)
-      const transformedData = await executeTransformations(pipelineConfig, importedData)
-      await executeStorage(pipelineConfig, transformedData)
-      pipelineSuccess = true
-      console.log(`Successfully executed Pipeline ${pipelineConfig.id}`)
-    } catch (e) {
-      console.log(`Pipeline ${pipelineConfig.id} failed!`)
-      retryNumber++
-    }
-  }
-
-  if (pipelineConfig.trigger.periodic) {
-    const nextExecutionDate = determineExecutionDate(pipelineConfig)
-    console.log(`Scheduling next execution of Pipeline ${pipelineConfig.id} at ${nextExecutionDate.toLocaleString()}`)
-    schedulePipeline(pipelineConfig, nextExecutionDate)
-  } else {
-    console.log(`Pipeline ${pipelineConfig.id}  is not periodic. Removing it from scheduling.`)
-    allJobs.delete(pipelineConfig.id)
-  }
-}
-
-async function executeAdapter (pipelineConfig: PipelineConfig): Promise<object> {
-  console.log(`Execute Adapter for Pipeline ${pipelineConfig.id}`)
-  try {
-    const importedData = await AdapterClient.executeAdapter(pipelineConfig)
-    console.log(`Sucessful import via Adapter for Pipeline ${pipelineConfig.id}`)
-    return importedData
-  } catch (e) {
-    if (e.code === 'ECONNREFUSED' || e.code === 'ENOTFOUND') {
-      console.log(`Failed to import data via Adapter for Pipeline ${pipelineConfig.id}. Adapter Service not reachable`)
-    } else {
-      console.log(`Failed to import data via Adapter for Pipeline ${pipelineConfig.id}. Unknown error!`)
-      console.error(e)
-    }
-    throw Error('Failed to import data via Adapter Service')
-  }
-}
-
-async function executeTransformations (pipelineConfig: PipelineConfig, data: object): Promise<object> {
-  console.log(`Execute Pipeline Transformation ${pipelineConfig.id}`)
-  let lastPartialResult = data
-
-  try {
-    for (const transformation of pipelineConfig.transformations) {
-      const currentTransformation = JSON.parse(JSON.stringify(transformation)) // deeply copy object
-      currentTransformation.data = lastPartialResult
-      lastPartialResult = await TransformationClient.executeTransformation(currentTransformation)
-    }
-    console.log(`Sucessfully transformed data for Pipeline ${pipelineConfig.id}`)
-    return lastPartialResult
-  } catch (e) {
-    if (e.code === 'ECONNREFUSED' || e.code === 'ENOTFOUND') {
-      console.log(`Failed to transform data for Pipeline ${pipelineConfig.id}. Transformation Service not reachable`)
-    } else {
-      console.log(`Failed to transform data for Pipeline ${pipelineConfig.id}. Unknown error!`)
-      console.error(e)
-    }
-    throw Error('Failed to transform data via Transformation Service')
-  }
-}
-
-async function executeStorage (pipelineConfig: PipelineConfig, data: object): Promise<void> {
-  try {
-    await StorageClient.executeStorage(pipelineConfig, data)
-    console.log(`Sucessfully stored Data for Pipeline ${pipelineConfig.id}`)
-  } catch (e) {
-    if (e.code === 'ECONNREFUSED' || e.code === 'ENOTFOUND') {
-      console.log(`Failed to store Data for Pipeline ${pipelineConfig.id}. Storage Service not reachable`)
-    } else {
-      console.log(`Failed to store Data for Pipeline ${pipelineConfig.id}. Unknown error!`)
-      console.error(e)
-    }
-    throw Error('Failed to store data via Storage Service')
-  }
-}
-
-function schedulePipeline (pipelineConfig: PipelineConfig, executionDate: Date): PipelineJob {
+export function schedulePipeline (pipelineConfig: PipelineConfig): PipelineJob {
+  const executionDate: Date = determineExecutionDate(pipelineConfig)
+  console.log(`Pipeline ${pipelineConfig.id} scheduled for next execution at ${executionDate.toLocaleString()}.`)
   const pipelineId = pipelineConfig.id
 
   const scheduledJob = schedule.scheduleJob(`Pipeline ${pipelineId}`, executionDate, () =>
@@ -214,12 +133,10 @@ function schedulePipeline (pipelineConfig: PipelineConfig, executionDate: Date):
 }
 
 export function upsertPipelineJob (pipelineConfig: PipelineConfig): PipelineJob {
-  const executionDate: Date = determineExecutionDate(pipelineConfig)
   const isNewPipeline = !existsPipelineJob(pipelineConfig.id)
   const pipelineState = isNewPipeline ? 'New' : 'Updated'
 
-  console.log(`[${pipelineState}] pipeline detected with id ${pipelineConfig.id}.
-  Scheduled for next execution at ${executionDate.toLocaleString()}`)
+  console.log(`[${pipelineState}] pipeline detected with id ${pipelineConfig.id}.`)
 
   if (isNewPipeline) {
     StorageClient.createStructure(pipelineConfig.id)
@@ -227,7 +144,7 @@ export function upsertPipelineJob (pipelineConfig: PipelineConfig): PipelineJob 
     cancelJob(pipelineConfig.id)
   }
 
-  return schedulePipeline(pipelineConfig, executionDate)
+  return schedulePipeline(pipelineConfig)
 }
 
 export function getAllJobs (): PipelineJob[] {
