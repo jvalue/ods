@@ -1,26 +1,26 @@
 /* eslint-env jest */
 
 import * as PipelineScheduling from './pipeline-scheduling'
-import { executeAdapter } from './adapter-client'
-import { executeTransformation } from './transformation-client'
-import { executeStorage } from './storage-client'
-import { getLatestEventId, getAllPipelines, getEventsAfter, getPipeline } from './core-client'
+import { executeAdapter } from './clients/adapter-client'
+import { executeTransformation } from './clients/transformation-client'
+import { executeStorage } from './clients/storage-client'
+import { getLatestEventId, getAllPipelines, getEventsAfter, getPipeline } from './clients/core-client'
 import { EventType } from './interfaces/pipeline-event'
 import PipelineConfig from './interfaces/pipeline-config'
 
-jest.mock('./adapter-client')
+jest.mock('./clients/adapter-client')
 const mockedExecuteAdapter = executeAdapter as jest.Mock
 mockedExecuteAdapter.mockResolvedValue({})
 
-jest.mock('./transformation-client')
+jest.mock('./clients/transformation-client')
 const mockedExecuteTransformation = executeTransformation as jest.Mock
 mockedExecuteTransformation.mockResolvedValue({})
 
-jest.mock('./storage-client')
+jest.mock('./clients/storage-client')
 const mockedExecuteStorage = executeStorage as jest.Mock
 mockedExecuteStorage.mockResolvedValue({})
 
-jest.mock('./core-client')
+jest.mock('./clients/core-client')
 const mockedGetLatestEventId = getLatestEventId as jest.Mock
 mockedGetLatestEventId.mockResolvedValue(321)
 const mockedGetAllPipelines = getAllPipelines as jest.Mock
