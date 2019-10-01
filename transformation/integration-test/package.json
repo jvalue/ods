@@ -4,10 +4,9 @@
   "description": "Transformation Service Integration-Tests",
   "scripts": {
     "mock:receiver": "node src/mock.receiver.js",
-    "mock:killall": "killall node",
     "pretest": "npm run mock:receiver &",
-    "test": "npm-run-all jest mock:killall --continue-on-error",
-    "jest": "jest"
+    "test": "jest",
+    "posttest": "killall node"
   },
   "devDependencies": {
     "jest": "^24.9.0",
@@ -20,7 +19,6 @@
     "koa": "^2.8.1",
     "koa-bodyparser": "^4.2.1",
     "koa-router": "^7.4.0",
-    "npm-run-all": "^4.1.5",
     "wait-on": "^3.3.0"
   }
 }

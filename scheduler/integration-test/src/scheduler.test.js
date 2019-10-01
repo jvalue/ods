@@ -55,7 +55,7 @@ describe('Scheduler', () => {
       transformations: [{
         func: 'return data;'
       }, {
-        func: 'return 2;'
+        func: 'return 1;'
       }],
       persistence: {},
       metadata: {},
