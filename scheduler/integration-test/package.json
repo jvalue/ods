@@ -9,7 +9,7 @@
     "mock:storage": "node src/mock.storage.js",
     "mock:killall": "killall node",
     "pretest": "(npm run mock:adapter &) && (npm run mock:core &) && (npm run mock:transformation &) && (npm run mock:storage &)",
-    "test": "npm-run-all jest mock:killall --continue-on-error",
+    "test": "npm-run-all jest mock:killall",
     "jest": "jest",
     "watch:mock": "nodemon src/mock.server.js"
   },
