@@ -2,36 +2,36 @@
 const request = require('supertest')
 const waitOn = require('wait-on')
 
-const URL = process.env.SCHEDULER_API || 'http://localhost:8080';
+const URL = process.env.SCHEDULER_API || 'http://localhost:8080'
 
 const MOCK_CORE_PORT = process.env.MOCK_CORE_PORT || 8081
-const MOCK_CORE_HOST = process.env.MOCK_CORE_HOST || 'localhost';
+const MOCK_CORE_HOST = process.env.MOCK_CORE_HOST || 'localhost'
 const MOCK_CORE_URL = 'http://' + MOCK_CORE_HOST + ':' + MOCK_CORE_PORT
 
 const MOCK_ADAPTER_PORT = process.env.MOCK_ADAPTER_PORT || 8082
-const MOCK_ADAPTER_HOST = process.env.MOCK_ADAPTER_HOST || 'localhost';
+const MOCK_ADAPTER_HOST = process.env.MOCK_ADAPTER_HOST || 'localhost'
 const MOCK_ADAPTER_URL = 'http://' + MOCK_ADAPTER_HOST + ':' + MOCK_ADAPTER_PORT
 
 const MOCK_TRANSFORMATION_PORT = process.env.MOCK_TRANSFORMATION_PORT || 8083
-const MOCK_TRANSFORMATION_HOST = process.env.MOCK_TRANSFORMATION_HOST || 'localhost';
+const MOCK_TRANSFORMATION_HOST = process.env.MOCK_TRANSFORMATION_HOST || 'localhost'
 const MOCK_TRANSFORMATION_URL = 'http://' + MOCK_TRANSFORMATION_HOST + ':' + MOCK_TRANSFORMATION_PORT
 
 const MOCK_STORAGE_PORT = process.env.MOCK_STORAGE_PORT || 8084
-const MOCK_STORAGE_HOST = process.env.MOCK_STORAGE_HOST || 'localhost';
+const MOCK_STORAGE_HOST = process.env.MOCK_STORAGE_HOST || 'localhost'
 const MOCK_STORAGE_URL = 'http://' + MOCK_STORAGE_HOST + ':' + MOCK_STORAGE_PORT
 
 describe('Scheduler', () => {
   console.log('Scheduler-Service URL= ' + URL)
 
   beforeAll(async () => {
-    const pingUrl = URL + '/';
+    const pingUrl = URL + '/'
     console.log('Waiting for service with URL: ' + MOCK_CORE_URL)
     console.log('Waiting for service with URL: ' + MOCK_ADAPTER_URL)
     console.log('Waiting for service with URL: ' + MOCK_TRANSFORMATION_URL)
     console.log('Waiting for service with URL: ' + MOCK_STORAGE_URL)
-    await waitOn({ resources: [ MOCK_CORE_URL, MOCK_ADAPTER_URL, MOCK_TRANSFORMATION_URL, MOCK_STORAGE_URL], timeout: 50000 })
+    await waitOn({ resources: [MOCK_CORE_URL, MOCK_ADAPTER_URL, MOCK_TRANSFORMATION_URL, MOCK_STORAGE_URL], timeout: 50000 })
     console.log('Waiting for service with URL: ' + pingUrl)
-    await waitOn({ resources: [ pingUrl ], timeout: 50000 })
+    await waitOn({ resources: [pingUrl], timeout: 50000 })
   }, 60000)
 
   test('GET /version', async () => {
@@ -55,7 +55,7 @@ describe('Scheduler', () => {
       transformations: [{
         func: 'return data;'
       }, {
-        func: 'return 1;'
+        func: 'return 2;'
       }],
       persistence: {},
       metadata: {},
