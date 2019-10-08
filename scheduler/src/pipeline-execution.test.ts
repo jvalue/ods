@@ -5,6 +5,7 @@ import * as StorageClient from './clients/storage-client'
 import * as TransformationClient from './clients/transformation-client'
 import * as PipelineScheduling from './pipeline-scheduling'
 import PipelineConfig from './interfaces/pipeline-config'
+import NotificationConfig from './interfaces/notification-config'
 
 jest.mock('./clients/adapter-client')
 jest.mock('./clients/storage-client')
@@ -14,6 +15,7 @@ jest.mock('./pipeline-scheduling')
 const mockExecuteAdapter = AdapterClient.executeAdapter as jest.Mock
 const mockExecuteTransformation = TransformationClient.executeTransformation as jest.Mock
 const mockExecuteStorage = StorageClient.executeStorage as jest.Mock
+const mockExecuteNotification = TransformationClient.executeNotification as jest.Mock
 
 const mockSchedulePipeline = PipelineScheduling.schedulePipeline as jest.Mock
 const mockRemovePipelineJob = PipelineScheduling.removePipelineJob as jest.Mock
@@ -32,7 +34,7 @@ afterEach(() => {
 
 test('Should execute pipeline once', async () => {
   const transformation = generateTransformation('return data + 1', importedData)
-  const pipelineConfig = generateConfig([transformation], false)
+  const pipelineConfig = generateConfig([transformation], false, [])
 
   mockExecuteAdapter.mockResolvedValue(importedData)
   mockExecuteTransformation.mockResolvedValue(transformedData)
@@ -50,7 +52,7 @@ test('Should execute pipeline once', async () => {
 
 test('Should execute pipeline periodic', async () => {
   const transformation = generateTransformation('return data + 1', importedData)
-  const pipelineConfig = generateConfig([transformation], true)
+  const pipelineConfig = generateConfig([transformation], true, [])
 
   mockExecuteAdapter.mockResolvedValue(importedData)
   mockExecuteTransformation.mockResolvedValue(transformedData)
@@ -70,7 +72,7 @@ test('Should execute multiple transformations', async () => {
   const transformation2 = generateTransformation('return data + 2', transformedData)
   const transformation3 = generateTransformation('return data + 3', transformedData)
 
-  const pipelineConfig = generateConfig([transformation1, transformation2, transformation3], false)
+  const pipelineConfig = generateConfig([transformation1, transformation2, transformation3], false, [])
 
   mockExecuteAdapter.mockResolvedValue(importedData)
   mockExecuteTransformation.mockResolvedValue(transformedData)
@@ -84,7 +86,7 @@ test('Should execute multiple transformations', async () => {
 })
 
 test('Should ignore empty transformation arrays', async () => {
-  const pipelineConfig = generateConfig([], false)
+  const pipelineConfig = generateConfig([], false, [])
 
   mockExecuteAdapter.mockResolvedValue(importedData)
   mockExecuteTransformation.mockResolvedValue(transformedData)
@@ -94,6 +96,22 @@ test('Should ignore empty transformation arrays', async () => {
   expect(mockExecuteTransformation).not.toHaveBeenCalled()
 })
 
+test('Should trigger notifications', async () => {
+  const notification1: NotificationConfig = {
+    data: { value1: 1 }
+  }
+  const notification2: NotificationConfig = {
+    data: { schtring: 'text' }
+  }
+  const pipelineConfig = generateConfig([], false, [notification1, notification2])
+
+  mockExecuteAdapter.mockResolvedValue(importedData)
+
+  await PipelineExecution.executePipeline(pipelineConfig)
+
+  expect(mockExecuteNotification).toHaveBeenCalledTimes(2)
+})
+
 function generateTransformation (func: string, data: object): object {
   return {
     func,
@@ -101,7 +119,8 @@ function generateTransformation (func: string, data: object): object {
   }
 }
 
-function generateConfig (transformations: object[], periodic = true): PipelineConfig {
+function generateConfig (
+  transformations: object[], periodic = true, notifications: NotificationConfig[]): PipelineConfig {
   return {
     id: 123,
     adapter: {
@@ -117,6 +136,7 @@ function generateConfig (transformations: object[], periodic = true): PipelineCo
       periodic: periodic,
       firstExecution: new Date(Date.now() + 5000),
       interval: 5000
-    }
+    },
+    notifications
   }
 }
