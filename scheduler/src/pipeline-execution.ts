@@ -19,6 +19,7 @@ export async function executePipeline (pipelineConfig: PipelineConfig, maxRetrie
       const importedData: object = await executeAdapter(pipelineConfig)
       const transformedData = await executeTransformations(pipelineConfig, importedData)
       await executeStorage(pipelineConfig, transformedData)
+      await executeNotifications(pipelineConfig, transformedData)
       pipelineSuccess = true
       console.log(`Successfully executed Pipeline ${pipelineConfig.id}`)
     } catch (e) {
@@ -90,6 +91,23 @@ async function executeStorage (pipelineConfig: PipelineConfig, data: object): Pr
   }
 }
 
+async function executeNotifications (pipelineConfig: PipelineConfig, data: object): Promise<void> {
+  try {
+    for (const notification of pipelineConfig.notifications) {
+      notification.data = data
+      TransformationClient.executeNotification(notification)
+    }
+    console.log(`Successfully delivered notification requests to transformation-service for ${pipelineConfig.id}`)
+  } catch (e) {
+    if (e.code === 'ECONNREFUSED' || e.code === 'ENOTFOUND') {
+      console.log(`Failed to trigger notifications for Pipeline ${pipelineConfig.id}. Transformation Service not reachable`)
+    } else {
+      console.log(`Failed to trigger notifications for Pipeline ${pipelineConfig.id}. Unknown error!`)
+      console.error(e)
+    }
+    throw Error('Failed to trigger notifications via Transformation Service')
+  }
+}
 function sleep (ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
