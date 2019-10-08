@@ -22,8 +22,8 @@ describe('Scheduler', () => {
     const response = await request(URL).get('/version')
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('text/plain')
-    expect(response.text).toMatch(new RegExp('^(0|[1-9]d*).(0|[1-9]d*).(0|[1-9]d*)'))
-    // for semantic version
+    const semanticVersionReExp = '^(0|[1-9]d*).(0|[1-9]d*).(0|[1-9]d*)'
+    expect(response.text).toMatch(new RegExp(semanticVersionReExp))
   })
 
   test('POST /job numerical', async () => {
@@ -38,7 +38,9 @@ describe('Scheduler', () => {
 
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('application/json')
-    expect(response.body).toEqual(1)
+    const { data, stats } = response.body
+    expect(data).toEqual(1)
+    expect(stats.executionTime).toBeGreaterThan(0)
   })
 
   test('POST /job', async () => {
@@ -53,7 +55,9 @@ describe('Scheduler', () => {
 
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('application/json')
-    expect(response.body).toEqual({ number: 1 })
+    const { data, stats } = response.body
+    expect(data).toEqual({ number: 1 })
+    expect(stats.executionTime).toBeGreaterThan(0)
   })
 
   test('POST /job with transformation', async () => {
@@ -68,7 +72,9 @@ describe('Scheduler', () => {
 
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('application/json')
-    expect(response.body).toEqual({ numberTwo: 2 })
+    const { data, stats } = response.body
+    expect(data).toEqual({ numberTwo: 2 })
+    expect(stats.executionTime).toBeGreaterThan(0)
   })
 
   test('POST /notification triggers webhook', async () => {
