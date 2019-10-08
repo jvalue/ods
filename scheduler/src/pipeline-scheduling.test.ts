@@ -234,11 +234,11 @@ function generateConfig (periodic: boolean, firstExecution: Date, interval: numb
       creationTimestamp: firstExecution,
       license: 'license'
     },
-
     trigger: {
       periodic,
       firstExecution,
       interval
-    }
+    },
+    notifications: []
   }
 }

@@ -2,6 +2,7 @@ import TriggerConfig from './trigger-config'
 // import TransformationConfig from './transformation-config'
 import Metadata from './metadata'
 import AdapterConfig from './adapter-config'
+import NotificationConfig from './notification-config'
 export default interface PipelineConfig {
   id: number;
 
@@ -10,4 +11,5 @@ export default interface PipelineConfig {
   persistence: object;
   metadata: Metadata;
   trigger: TriggerConfig;
+  notifications: NotificationConfig[];
 }

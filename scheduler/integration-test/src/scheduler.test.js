@@ -20,6 +20,16 @@ const MOCK_STORAGE_PORT = process.env.MOCK_STORAGE_PORT || 8084
 const MOCK_STORAGE_HOST = process.env.MOCK_STORAGE_HOST || 'localhost'
 const MOCK_STORAGE_URL = 'http://' + MOCK_STORAGE_HOST + ':' + MOCK_STORAGE_PORT
 
+const data = {
+  field1: 'abc', // 'field' variables from adapter data
+  field2: 123,
+  field3: {
+    name: 'simpleObject'
+  },
+  field4: [3, 5, 'a', 'z'],
+  test: 'abc' // from transformation service
+}
+
 describe('Scheduler', () => {
   console.log('Scheduler-Service URL= ' + URL)
 
@@ -59,12 +69,12 @@ describe('Scheduler', () => {
       }],
       persistence: {},
       metadata: {},
-
       trigger: {
         periodic: true,
         firstExecution: '2018-10-07T01:32:00.123Z',
         interval: 10000
-      }
+      },
+      notifications: []
     })
     expect(response.body[1].pipelineConfig).toEqual({
       id: 125,
@@ -75,12 +85,23 @@ describe('Scheduler', () => {
       ],
       persistence: {},
       metadata: {},
-
       trigger: {
         periodic: true,
         firstExecution: '2018-10-07T01:32:00.123Z',
         interval: 10000
-      }
+      },
+      notifications: [{
+        notificationType: 'WEBHOOK',
+        data,
+        condition: 'data.field2 === 123',
+        url: 'should-be-triggered'
+      },
+      {
+        notificationType: 'WEBHOOK',
+        data,
+        condition: 'data.field2 < 0',
+        url: 'should-also-be-triggered'
+      }]
     })
   })
 
@@ -89,15 +110,31 @@ describe('Scheduler', () => {
     const response = await request(MOCK_STORAGE_URL).get('/123') // see what got stored
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('application/json')
-    expect(response.body.data).toEqual({
-      field1: 'abc', // 'field' variables from adapter data
-      field2: 123,
-      field3: {
-        name: 'simpleObject'
-      },
-      field4: [3, 5, 'a', 'z'],
-      test: 'abc' // from transformation service
-    })
+    expect(response.body.data).toEqual(data)
+  }, 12000)
+
+  test('Pipeline triggers correct notifications', async () => {
+    await sleep(10000) // pipeline should have been exicuting until now!
+    const triggered = await request(MOCK_TRANSFORMATION_URL).get('/notifications/should-also-be-triggered')
+    expect(triggered.status).toEqual(200)
+    expect(triggered.body).toEqual(
+      {
+        notificationType: 'WEBHOOK',
+        data,
+        condition: 'data.field2 < 0',
+        url: 'should-also-be-triggered'
+      })
+
+    const alsoTriggered = await request(MOCK_TRANSFORMATION_URL).get('/notifications/should-be-triggered')
+    expect(alsoTriggered.status).toEqual(200)
+    expect(alsoTriggered.type).toEqual('application/json')
+    expect(alsoTriggered.body).toEqual(
+      {
+        notificationType: 'WEBHOOK',
+        data,
+        condition: 'data.field2 === 123',
+        url: 'should-be-triggered'
+      })
   }, 12000)
 
   test('Pipeline processes events', async () => {
@@ -109,7 +146,7 @@ describe('Scheduler', () => {
   })
 })
 
-const sleep = (ms) => {
+function sleep (ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
