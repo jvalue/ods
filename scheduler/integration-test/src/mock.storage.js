@@ -1,44 +1,44 @@
-const Koa = require("koa");
-const Router = require("koa-router");
-const bodyParser = require("koa-bodyparser");
+const Koa = require('koa')
+const Router = require('koa-router')
+const bodyParser = require('koa-bodyparser')
 
-const PORT = process.env.MOCK_STORAGE_PORT || 8084;
+const PORT = process.env.MOCK_STORAGE_PORT || 8084
 
-const router = new Router();
-const app = new Koa();
+const router = new Router()
+const app = new Koa()
 app.use(bodyParser())
 
-const dataStore = new Map()     // pipelineId -> data
+const dataStore = new Map() // pipelineId -> data
 
-router.get("/", async ctx => {
-  ctx.type = 'text/plain';
+router.get('/', async ctx => {
+  ctx.type = 'text/plain'
   ctx.body = 'ok'
 })
 
-router.post("/:path", async ctx => {
-  const path = ctx.params.path;
-  dataStore.set(path, ctx.request.body);
-  ctx.status = 201;
+router.post('/:path', async ctx => {
+  const path = ctx.params.path
+  dataStore.set(path, ctx.request.body)
+  ctx.status = 201
 })
 
-router.get("/:path", async ctx => {
-  const path = ctx.params.path;
-  ctx.status = 200;
-  ctx.type = 'application/json';
-  ctx.body = dataStore.get(path);
+router.get('/:path', async ctx => {
+  const path = ctx.params.path
+  ctx.status = 200
+  ctx.type = 'application/json'
+  ctx.body = dataStore.get(path)
 })
 
-router.post("/rpc/createstructurefordatasource", async ctx => {
-  ctx.status = 201;
+router.post('/rpc/createstructurefordatasource', async ctx => {
+  ctx.status = 201
 })
 
-app.use(router.routes());
+app.use(router.routes())
 
-const server = app.listen(PORT, () => console.log("Starting mock storage server on port " + PORT));
+const server = app.listen(PORT, () => console.log('Starting mock storage server on port ' + PORT))
 
-process.on("SIGTERM", async () => {
-  console.info("Mock-Storage-Server: SIGTERM signal received.");
-  await server.close();
-});
+process.on('SIGTERM', async () => {
+  console.info('Mock-Storage-Server: SIGTERM signal received.')
+  await server.close()
+})
 
-module.exports = server;
+module.exports = server
