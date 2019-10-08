@@ -35,19 +35,20 @@
     "@types/express-session": "^1.15.14",
     "@types/jest": "^24.0.18",
     "@types/keycloak-connect": "^4.5.1",
+    "@types/supertest": "^2.0.8",
     "@typescript-eslint/eslint-plugin": "^2.0.0",
     "@typescript-eslint/parser": "^2.0.0",
     "concurrently": "^4.1.2",
-    "jest": "^24.9.0",
-    "nodemon": "^1.19.1",
-    "ts-jest": "^24.0.2",
-    "tslib": "^1.10.0",
-    "typescript": "^3.6.2",
     "eslint": "^6.2.2",
     "eslint-config-standard": "^14.1.0",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-node": "^9.1.0",
     "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1"
+    "eslint-plugin-standard": "^4.0.1",
+    "jest": "^24.9.0",
+    "nodemon": "^1.19.1",
+    "ts-jest": "^24.0.2",
+    "tslib": "^1.10.0",
+    "typescript": "^3.6.2"
   }
 }
