@@ -88,3 +88,6 @@ typings/
 
 # JS Files created by tsc
 dist/
+
+# Idea files
+.idea/
