@@ -177,7 +177,7 @@ services:
 
 # -------------------- EDGE SERVER (PORT 9000) -----------------------------
   edge-server:
-    image: traefik # The official Traefik docker image
+    image: traefik:v1.7-alpine # The official Traefik docker image
     command: --api --docker # Enables the web UI and tells Traefik to listen to docker
     ports:
       - "9000:80"     # The HTTP port

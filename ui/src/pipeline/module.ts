@@ -1,6 +1,7 @@
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
 import Pipeline from './pipeline'
 import * as RestService from './pipelineRest'
+import NotificationConfig from '@/pipeline/notificationConfig'
 
 @Module({ namespaced: true })
 export default class PipelineModule extends VuexModule {
@@ -8,7 +9,7 @@ export default class PipelineModule extends VuexModule {
 
   private selectedPipeline: Pipeline = {} as unknown as Pipeline
 
-  private isLoadingPipelines: boolean = true
+  private isLoadingPipelines = true
 
   @Mutation
   public setPipelines (pipelines: Pipeline[]): void {
@@ -54,5 +55,33 @@ export default class PipelineModule extends VuexModule {
   public async deletePipeline (pipelineId: number): Promise<Pipeline[]> {
     await RestService.deletePipeline(pipelineId)
     return RestService.getAllPipelines()
+  }
+
+  @Action({ commit: 'setSelectedPipeline' })
+  public async addNotification (notification: NotificationConfig): Promise<Pipeline> {
+    const newPipeline: Pipeline = Object.assign({}, this.selectedPipeline)
+    newPipeline.notifications.push(Object.assign({}, notification))
+    await RestService.updatePipeline(newPipeline)
+    return RestService.getPipelineById(newPipeline.id)
+  }
+
+  @Action({ commit: 'setSelectedPipeline' })
+  public async updateNotification (notification: NotificationConfig): Promise<Pipeline> {
+    console.log('update')
+    const newPipeline: Pipeline = Object.assign({}, this.selectedPipeline)
+    const nIdx = this.selectedPipeline.notifications
+      .findIndex(n => n.notificationId === notification.notificationId)
+    newPipeline.notifications[nIdx] = notification
+    await RestService.updatePipeline(newPipeline)
+    return RestService.getPipelineById(newPipeline.id)
+  }
+
+  @Action({ commit: 'setSelectedPipeline' })
+  public async removeNotification (notification: NotificationConfig): Promise<Pipeline> {
+    const newPipeline: Pipeline = Object.assign({}, this.selectedPipeline)
+    newPipeline.notifications = this.selectedPipeline.notifications
+      .filter(n => n.notificationId !== notification.notificationId)
+    await RestService.updatePipeline(newPipeline)
+    return RestService.getPipelineById(newPipeline.id)
   }
 }
