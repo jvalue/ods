@@ -56,7 +56,9 @@ export async function updatePipelines (): Promise<void> {
       console.log(`Applying ${events.length} updates from core service:`)
     }
 
-    Array.from(events).forEach(async event => applyChanges(event))
+    for(let event of events) {
+      await applyChanges(event)
+    }
 
     currentEventId = nextEventId
   } catch (e) {
@@ -73,8 +75,7 @@ async function applyChanges (event: PipelineEvent): Promise<void> {
   console.log(event)
   switch (event.eventType) {
     case EventType.PIPELINE_DELETE: { applyDeleteEvent(event); break }
-    case EventType.PIPELINE_CREATE:
-    case EventType.PIPELINE_UPDATE: { applyCreateOrUpdateEvent(event); break }
+    case EventType.PIPELINE_CREATE || EventType.PIPELINE_UPDATE: { await applyCreateOrUpdateEvent(event); break }
   }
 }
 
