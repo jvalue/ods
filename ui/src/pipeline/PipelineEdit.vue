@@ -223,7 +223,8 @@ export default class PipelineEdit extends Vue {
       periodic: true,
       firstExecution: new Date(Date.now() + 600000),
       interval: 60000
-    }
+    },
+    notifications: []
   }
 
   private dialogIntervalHours: number = 1
