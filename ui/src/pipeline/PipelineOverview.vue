@@ -65,6 +65,10 @@
             Delete
             <v-icon dark right>mdi mdi-delete</v-icon>
           </v-btn>
+          <v-btn depressed small @click="onNotifications(item)" class="ma-2">
+            Notifications
+            <v-icon dark right>mdi mdi-alarm</v-icon>
+          </v-btn>
         </template>
 
       </v-data-table>
@@ -122,6 +126,10 @@ export default class PipelineOverview extends Vue {
 
   private onDeletePipeline (pipeline: Pipeline) {
     this.deletePipelineAction(pipeline.id);
+  }
+
+  private onNotifications (pipeline: Pipeline) {
+    this.$router.push({ name: 'notification-overview', params: { pipelineId: `${pipeline.id}` } })
   }
 
   private filterOnlyDisplayName (value: any, search: string, item: Pipeline): boolean {
