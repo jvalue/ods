@@ -27,19 +27,29 @@ export async function executeStorage (pipelineConfig: PipelineConfig, data: obje
 
 export async function createStructure (pipelineId: number): Promise<void> {
   const requestBody: object = {
-    pipelineId
+    pipelineid: pipelineId + ''
   }
   const requestURI = `${STORAGE_SERVICE_URL}/rpc/createstructurefordatasource`
 
-  await axios.post<void>(
-    requestURI,
-    requestBody,
-    {
-      headers: {
-        'Content-Type': 'application/json'
+  try {
+    await axios.post<void>(
+      requestURI,
+      requestBody,
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
       }
+    )
+  } catch (e) {
+    if(e.response.data.code === '42P07') {
+      // the structure already exists
+      console.log(`Database structure for pipeline {pipelineId} already exists.`)
+      return;
+    } else {
+      throw e
     }
-  )
+  }
 }
 
 function getDataRequestUrl (pipelineId: number): string {
