@@ -27,7 +27,7 @@ public class PipelineEvent {
     @JsonCreator
     public PipelineEvent(
             @JsonProperty("eventType") @NotNull EventType eventType,
-            @JsonProperty("pipelineConfig")@NotNull Long pipelineId) {
+            @JsonProperty("pipelineId")@NotNull Long pipelineId) {
         this.eventType = eventType;
         this.pipelineId = pipelineId;
     }
