@@ -74,8 +74,20 @@ export async function updatePipelines (): Promise<void> {
 async function applyChanges (event: PipelineEvent): Promise<void> {
   console.log(event)
   switch (event.eventType) {
-    case EventType.PIPELINE_DELETE: { applyDeleteEvent(event); break }
-    case EventType.PIPELINE_CREATE || EventType.PIPELINE_UPDATE: { await applyCreateOrUpdateEvent(event); break }
+    case EventType.PIPELINE_DELETE: {
+      applyDeleteEvent(event)
+      break
+    }
+    case EventType.PIPELINE_CREATE:
+    case EventType.PIPELINE_UPDATE: {
+      await applyCreateOrUpdateEvent(event)
+      break
+    }
+    default: {
+      console.error(`Received unknown event type: ${event.eventType}`)
+      console.error(event)
+      break
+    }
   }
 }
 
