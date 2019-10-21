@@ -5,7 +5,7 @@ export default interface PipelineEvent {
 }
 
 export enum EventType {
-  PIPELINE_CREATE,
-  PIPELINE_UPDATE,
-  PIPELINE_DELETE
+  PIPELINE_CREATE = 'PIPELINE_CREATE',
+  PIPELINE_UPDATE = 'PIPELINE_UPDATE',
+  PIPELINE_DELETE = 'PIPELINE_DELETE'
 }
