@@ -144,26 +144,26 @@ describe('Scheduler', () => {
     expect(PipelineScheduling.determineExecutionDate(pipelineConfig)).toEqual(expectedExecution)
   })
 
-  test('should insert new pipeline', () => {
+  test('should insert new pipeline', async () => {
     const timestampInFuture = Date.now() + 5000
     const pipelineConfig = generateConfig(true, new Date(timestampInFuture), 10000)
-    const pipelineJob = PipelineScheduling.upsertPipelineJob(pipelineConfig)
+    const pipelineJob = await PipelineScheduling.upsertPipelineJob(pipelineConfig)
 
     expect(pipelineJob.pipelineConfig).toEqual(pipelineConfig)
     expect(pipelineJob.scheduleJob).toBeDefined()
     expect(PipelineScheduling.getPipelineJob(pipelineConfig.id)).toEqual(pipelineJob)
   })
 
-  test('should update existing pipeline', () => {
+  test('should update existing pipeline', async () => {
     const timestampInFuture1 = Date.now() + 5000
     const timestampInFuture2 = Date.now() + 100000
     const pipelineConfig1 = generateConfig(true, new Date(timestampInFuture1), 10000)
 
-    const pipelineJob1 = PipelineScheduling.upsertPipelineJob(pipelineConfig1)
+    const pipelineJob1 = await PipelineScheduling.upsertPipelineJob(pipelineConfig1)
     expect(PipelineScheduling.existsPipelineJob(pipelineConfig1.id)).toBeTruthy()
 
     const pipelineConfig2 = generateConfig(true, new Date(timestampInFuture2), 10000)
-    PipelineScheduling.upsertPipelineJob(pipelineConfig2)
+    await PipelineScheduling.upsertPipelineJob(pipelineConfig2)
 
     expect(PipelineScheduling.existsPipelineJob(pipelineConfig1.id)).toBeTruthy()
     expect(PipelineScheduling.existsEqualPipelineJob(pipelineConfig2)).toBeTruthy()
@@ -172,10 +172,10 @@ describe('Scheduler', () => {
     expect(pipelineJob1).not.toEqual(pipelineConfig2)
   })
 
-  test('should be equal', () => {
+  test('should be equal', async () => {
     const timestampInFuture = Date.now() + 5000
     const pipelineConfig1 = generateConfig(true, new Date(timestampInFuture), 10000)
-    const pipelineJob1 = PipelineScheduling.upsertPipelineJob(pipelineConfig1)
+    const pipelineJob1 = await PipelineScheduling.upsertPipelineJob(pipelineConfig1)
     const pipelineConfig2 = generateConfig(true, new Date(timestampInFuture), 10000)
 
     expect(PipelineScheduling.existsEqualPipelineJob(pipelineConfig2)).toBeTruthy()
@@ -187,7 +187,7 @@ describe('Scheduler', () => {
   test('should execute pipeline once', async () => {
     const timestampInFuture = Date.now() + 200
     const pipelineConfig = generateConfig(false, new Date(timestampInFuture), 500)
-    PipelineScheduling.upsertPipelineJob(pipelineConfig)
+    await PipelineScheduling.upsertPipelineJob(pipelineConfig)
     await sleep(250)
 
     expect(PipelineScheduling.getPipelineJob(pipelineConfig.id)).toBeUndefined()
@@ -200,7 +200,7 @@ describe('Scheduler', () => {
   test('should execute pipeline periodic', async () => {
     const timestampInFuture = Date.now() + 200
     const pipelineConfig = generateConfig(true, new Date(timestampInFuture), 500)
-    const pipelineJob1 = PipelineScheduling.upsertPipelineJob(pipelineConfig)
+    const pipelineJob1 = await PipelineScheduling.upsertPipelineJob(pipelineConfig)
     const nextInvocation1: Date = pipelineJob1.scheduleJob.nextInvocation()
     await sleep(250)
     const pipelineJob2 = PipelineScheduling.getPipelineJob(pipelineConfig.id)
