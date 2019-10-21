@@ -16,12 +16,12 @@ describe("Core", () => {
       process.exit(1);
     }
   }, 60000);
-  
+
   test("GET /version", async () => {
     const response = await request(URL).get("/version");
     expect(response.status).toEqual(200);
     expect(response.type).toEqual("text/plain");
-    
+
     const semanticVersionRegEx = '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)';
     expect(response.text).toMatch(new RegExp(semanticVersionRegEx));
   });
@@ -132,9 +132,9 @@ describe("Core", () => {
     expect(eventsResponse.status).toEqual(200);
     expect(eventsResponse.type).toEqual("application/json");
     expect(eventsResponse.body.length).toBe(2);
-    expect(eventsResponse.body[0].pipelineConfig).toBe(pipelineId);
+    expect(eventsResponse.body[0].pipelineId).toBe(pipelineId);
     expect(eventsResponse.body[0].eventType).toEqual("PIPELINE_CREATE");
-    expect(eventsResponse.body[1].pipelineConfig).toBe(pipelineId);
+    expect(eventsResponse.body[1].pipelineId).toBe(pipelineId);
     expect(eventsResponse.body[1].eventType).toEqual("PIPELINE_DELETE");
   });
 
@@ -160,7 +160,7 @@ describe("Core", () => {
     expect(eventsAfter.type).toEqual("application/json");
     expect(eventsAfter.body.length).toBe(1);
     expect(eventsAfter.body[0].eventId).toBe(eventId+1);
-    expect(eventsAfter.body[0].pipelineConfig).toBe(pipelineId);
+    expect(eventsAfter.body[0].pipelineId).toBe(pipelineId);
     expect(eventsAfter.body[0].eventType).toEqual("PIPELINE_DELETE");
   });
 
@@ -182,7 +182,7 @@ describe("Core", () => {
     expect(response.type).toEqual("application/json");
     expect(Object.keys(response.body)).toHaveLength(3);
     expect(response.body.eventId).toBeTruthy();
-    expect(response.body.pipelineConfig).toBe(pipelineId);
+    expect(response.body.pipelineId).toBe(pipelineId);
     expect(response.body.eventType).toEqual("PIPELINE_DELETE");
   });
 
@@ -217,7 +217,7 @@ describe("Core", () => {
         .send();
 
     expect(eventsResponse.body.eventType).toEqual("PIPELINE_UPDATE");
-    expect(eventsResponse.body.pipelineConfig).toEqual(pipelineId);
+    expect(eventsResponse.body.pipelineId).toEqual(pipelineId);
 
     //check if pipeline config was updated correctly
     const pipelineResponse = await request(URL)
@@ -254,7 +254,7 @@ describe("Core", () => {
         .send();
 
     expect(eventsResponse.body.eventType).toEqual("PIPELINE_UPDATE");
-    expect(eventsResponse.body.pipelineConfig).toEqual(pipelineId);
+    expect(eventsResponse.body.pipelineId).toEqual(pipelineId);
 
     //check if pipeline config was updated correctly
     const pipelineResponse = await request(URL)

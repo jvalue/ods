@@ -25,10 +25,10 @@ export async function initializeJobs (retries = 30): Promise<void> {
 
     console.log(`Received ${pipelineConfigurations.length} pipelines from core-service`)
 
-    pipelineConfigurations.forEach(pipelineConfig => {
+    for(let pipelineConfig of pipelineConfigurations) {
       pipelineConfig.trigger.firstExecution = new Date(pipelineConfig.trigger.firstExecution)
-      PipelineScheduling.upsertPipelineJob(pipelineConfig) // assuming core service checks for duplicates
-    })
+      await PipelineScheduling.upsertPipelineJob(pipelineConfig) // assuming core service checks for duplicates
+    }
   } catch (e) {
     if (retries === 0) {
       return Promise.reject(new Error('Failed to initialize pipeline scheduler.'))
@@ -56,7 +56,9 @@ export async function updatePipelines (): Promise<void> {
       console.log(`Applying ${events.length} updates from core service:`)
     }
 
-    Array.from(events).forEach(async event => applyChanges(event))
+    for(let event of events) {
+      await applyChanges(event)
+    }
 
     currentEventId = nextEventId
   } catch (e) {
@@ -70,10 +72,22 @@ export async function updatePipelines (): Promise<void> {
 }
 
 async function applyChanges (event: PipelineEvent): Promise<void> {
+  console.log(event)
   switch (event.eventType) {
-    case EventType.PIPELINE_DELETE: { applyDeleteEvent(event); break }
+    case EventType.PIPELINE_DELETE: {
+      applyDeleteEvent(event)
+      break
+    }
     case EventType.PIPELINE_CREATE:
-    case EventType.PIPELINE_UPDATE: { applyCreateOrUpdateEvent(event); break }
+    case EventType.PIPELINE_UPDATE: {
+      await applyCreateOrUpdateEvent(event)
+      break
+    }
+    default: {
+      console.error(`Received unknown event type: ${event.eventType}`)
+      console.error(event)
+      break
+    }
   }
 }
 
@@ -85,7 +99,7 @@ function applyDeleteEvent (event: PipelineEvent): void {
 async function applyCreateOrUpdateEvent (event: PipelineEvent): Promise<void> {
   const pipeline = await CoreClient.getPipeline(event.pipelineId)
   pipeline.trigger.firstExecution = new Date(pipeline.trigger.firstExecution)
-  PipelineScheduling.upsertPipelineJob(pipeline)
+  await PipelineScheduling.upsertPipelineJob(pipeline)
 }
 
 export function getPipelineJob (pipelineId: number): PipelineJob | undefined {
@@ -132,19 +146,41 @@ export function schedulePipeline (pipelineConfig: PipelineConfig): PipelineJob {
   return pipelineJob
 }
 
-export function upsertPipelineJob (pipelineConfig: PipelineConfig): PipelineJob {
+export async function upsertPipelineJob (pipelineConfig: PipelineConfig): Promise<PipelineJob> {
   const isNewPipeline = !existsPipelineJob(pipelineConfig.id)
   const pipelineState = isNewPipeline ? 'New' : 'Updated'
 
   console.log(`[${pipelineState}] pipeline detected with id ${pipelineConfig.id}.`)
 
   if (isNewPipeline) {
-    StorageClient.createStructure(pipelineConfig.id)
+    await PipelineScheduling.createStorageStructure(pipelineConfig.id)
   } else {
     cancelJob(pipelineConfig.id)
   }
 
   return schedulePipeline(pipelineConfig)
+}
+
+export async function createStorageStructure(pipelineId: number, retries: number = 10): Promise<void> {
+  try {
+    console.log(`Creating storage structur for pipeline ${pipelineId}`)
+    return await StorageClient.createStructure(pipelineId)
+  } catch (e) {
+    if (retries === 0) {
+      return Promise.reject(new Error(`Could not create storage structure for pipeline ${pipelineId}.`))
+    }
+    if (e.code === '400') {
+      console.log(e.message)
+    }
+    if (e.code === '404') {
+      console.error(`Failed to communicate with Storage Service (${retries}) . Retrying ... `)
+    } else {
+      console.error(e)
+      console.error(`Retrying (${retries})...`)
+    }
+    await sleep(1000)
+    return createStorageStructure(retries - 1)
+  }
 }
 
 export function getAllJobs (): PipelineJob[] {
