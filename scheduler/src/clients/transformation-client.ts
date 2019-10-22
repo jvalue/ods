@@ -15,6 +15,6 @@ export async function executeTransformation (transformationConfig: object): Prom
 export async function executeNotification (notificationConfig: object): Promise<void> {
   const response = await http.post('/notifications', notificationConfig)
   if (response.status !== 202) {
-    Promise.reject(new Error('Error contacting transformation-service'))
+    return Promise.reject(new Error('Error contacting transformation-service'))
   }
 }

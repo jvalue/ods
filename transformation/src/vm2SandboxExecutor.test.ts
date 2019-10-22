@@ -8,7 +8,7 @@ import VM2SandboxExecutor from './vm2SandboxExecutor'
  * @param object The object to be checked
  * @param name The name of the type to check against, e.g. 'SyntaxError'
  */
-function isInstance (object: any, name: string): boolean {
+function isInstance (object: any, name: string): boolean { // eslint-disable-line @typescript-eslint/no-explicit-any
   return (object.constructor.name) === name
 }
 

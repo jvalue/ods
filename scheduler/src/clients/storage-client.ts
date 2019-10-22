@@ -42,10 +42,9 @@ export async function createStructure (pipelineId: number): Promise<void> {
       }
     )
   } catch (e) {
-    if(e.response.data.code === '42P07') {
+    if (e.response.data.code === '42P07') {
       // the structure already exists
-      console.log(`Database structure for pipeline {pipelineId} already exists.`)
-      return;
+      console.log('Database structure for pipeline {pipelineId} already exists.')
     } else {
       throw e
     }

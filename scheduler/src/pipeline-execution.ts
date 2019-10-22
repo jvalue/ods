@@ -95,12 +95,13 @@ async function executeNotifications (pipelineConfig: PipelineConfig, data: objec
   try {
     for (const notification of pipelineConfig.notifications) {
       notification.data = data
-      TransformationClient.executeNotification(notification)
+      await TransformationClient.executeNotification(notification)
     }
     console.log(`Successfully delivered notification requests to transformation-service for ${pipelineConfig.id}`)
   } catch (e) {
     if (e.code === 'ECONNREFUSED' || e.code === 'ENOTFOUND') {
-      console.log(`Failed to trigger notifications for Pipeline ${pipelineConfig.id}. Transformation Service not reachable`)
+      console.log(`Failed to trigger notifications for Pipeline ${pipelineConfig.id}. ` +
+                  'Transformation Service not reachable')
     } else {
       console.log(`Failed to trigger notifications for Pipeline ${pipelineConfig.id}. Unknown error!`)
       console.error(e)
