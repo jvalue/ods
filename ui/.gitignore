@@ -91,3 +91,4 @@ dist/
 
 # Idea files
 .idea/
+build/
