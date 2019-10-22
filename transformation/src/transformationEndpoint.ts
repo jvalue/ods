@@ -67,10 +67,10 @@ export class TransformationEndpoint {
     res.end()
   }
 
-  postNotification = (req: Request, res: Response): void => {
+  postNotification = async (req: Request, res: Response): Promise<void> => {
     const notification: NotificationRequest = req.body
 
-    this.transformationService.handleNotification(notification)
+    await this.transformationService.handleNotification(notification)
     // Result of notification handling is ignored for now.
 
     res.status(202).send()
