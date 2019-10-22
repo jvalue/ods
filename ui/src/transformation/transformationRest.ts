@@ -1,16 +1,16 @@
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
 import { useBearer } from '@/keycloak'
+
+import JobResult from './interfaces/jobResult'
+import TransformationRequest from './interfaces/transformationRequest'
 
 const TRANSFORMATION_SERVICE_URL = process.env.VUE_APP_TRANSFORMATION_SERVICE_URL as string
 
-export async function transformData (inputFunc: string): Promise<object> {
+export async function transformData (request: TransformationRequest): Promise<JobResult> {
   const token = await useBearer().catch(error => {
     console.error('Unable to get keycloak token. Error: ' + error)
+    return Promise.reject(error)
   })
-
-  if (token === undefined) {
-    return {}
-  }
 
   const http = axios.create({
     baseURL: TRANSFORMATION_SERVICE_URL,
@@ -20,6 +20,6 @@ export async function transformData (inputFunc: string): Promise<object> {
     }
   })
 
-  const response = await http.post('/', inputFunc)
+  const response = await http.post('/job', request) as AxiosResponse<JobResult>
   return response.data
 }
