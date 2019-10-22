@@ -17,6 +17,7 @@ variables:
   DOCKER_DRIVER: "overlay2"
 
   ADAPTER_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/adapter-service
+  AUTH_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/auth-service
   UI_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/ui-service
   SCHEDULER_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/scheduler-service
   STORAGE_POSTGREST_DOCKER_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/storage-service-postgrest
@@ -78,6 +79,43 @@ publish-docker-adapter:
     - docker push ${ADAPTER_DOCKER_IMAGE_NAME}:latest
 
 
+# ----------------- AUTH SERVICE --------------------
+
+# BUILD
+build-auth:
+  stage: build
+  image: docker:stable
+  before_script:
+    - cd auth
+  script:
+    - docker build -t ${AUTH_DOCKER_IMAGE_NAME} .
+    - mkdir image # Store built image for following CI steps
+    - docker save ${AUTH_DOCKER_IMAGE_NAME} > image/auth.tar
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - ./auth/image/auth.tar
+
+# PUBLISH
+publish-docker-auth:
+  stage: publish
+  image: docker:stable
+  dependencies:
+    - build-auth
+  when: manual
+  before_script:
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+    - cd auth
+  script:
+    - docker load -i image/auth.tar
+    - export AUTH_VERSION=$(cat version.txt | grep "VERSION" | awk '{print $3}' | sed 's/[,"]//g')
+    # Tag as version and push
+    - docker tag ${AUTH_DOCKER_IMAGE_NAME} ${AUTH_DOCKER_IMAGE_NAME}:${AUTH_VERSION}
+    - docker tag ${AUTH_DOCKER_IMAGE_NAME} ${AUTH_DOCKER_IMAGE_NAME}:latest
+    - docker push ${AUTH_DOCKER_IMAGE_NAME}:${AUTH_VERSION}
+    - docker push ${AUTH_DOCKER_IMAGE_NAME}:latest
+
+
 # ----------------- UI SERVICE --------------------
 
 # BUILD
@@ -124,8 +162,8 @@ build-storage:
   before_script:
     - cd storage
   script:
-    - "docker build -t ${STORAGE_POSTGREST_DOCKER_IMAGE_NAME} ./docker/postgrest/"
-    - "docker build -t ${STORAGE_LIQUIBASE_DOCKER_IMAGE_NAME} ./docker/liquibase/"
+    - "docker build -t ${STORAGE_POSTGREST_DOCKER_IMAGE_NAME} ./postgrest/"
+    - "docker build -t ${STORAGE_LIQUIBASE_DOCKER_IMAGE_NAME} ./liquibase/"
     - mkdir image # Store built image for following CI steps
     - docker save ${STORAGE_POSTGREST_DOCKER_IMAGE_NAME} > image/storage_postgrest.tar
     - docker save ${STORAGE_LIQUIBASE_DOCKER_IMAGE_NAME} > image/storage_liquibase.tar

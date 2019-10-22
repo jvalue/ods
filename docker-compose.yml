@@ -40,7 +40,9 @@ services:
       - "traefik.enable=false"
 
   auth-service:
-    image: jboss/keycloak
+    image: registry.gitlab.com/profoss/open-data-service/ods-main/auth-service
+    build:
+      context: ./auth/
     environment:
       DB_VENDOR: POSTGRES
       DB_ADDR: auth-service-db
@@ -50,13 +52,6 @@ services:
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: Pa55w0rd
       KEYCLOAK_LOGLEVEL: INFO
-
-      #import realm
-      KEYCLOAK_IMPORT: /tmp/realm.json
-
-      #realm volume
-    volumes:
-      - "./auth/ods-userservice-realm.json:/tmp/realm.json"
     labels: # traefic reverse-proxy config
       - "traefik.backend=auth-service"
       - "traefik.frontend.rule=PathPrefix:/auth"
@@ -89,8 +84,10 @@ services:
 
   # ----------------- STORAGE SERVICE (/scheduler) --------------------
   storage-service: # Wraps postgres database with API
-    build: ./storage/docker/postgrest/
+    image: registry.gitlab.com/profoss/open-data-service/ods-main/storage-service-postgrest
+    build: ./storage/postgrest/
     environment:
+      DATABASE_URL: jdbc:postgresql://storage-service-db:5432/ods
       PGRST_DB_URI: postgres://postgrest:postgres-wrapper-pw@storage-service-db:5432/ods
       PGRST_DB_SCHEMA: storage
       PGRST_DB_ANON_ROLE: postgrest #In production this role should not be the same as the one used for the connection
@@ -121,14 +118,12 @@ services:
       - "traefik.enable=false"
 
   storage-service-db-liquibase: # perform database migration on start up
-    build: ./storage/docker/liquibase/
+    image: registry.gitlab.com/profoss/open-data-service/ods-main/storage-service-liquibase
+    build: ./storage/liquibase/ # TODO: Sql Injection is currently
     environment:
       LIQUIBASE_URL: jdbc:postgresql://storage-service-db:5432/ods
       LIQUIBASE_USERNAME: ods_admin
       LIQUIBASE_PASSWORD: ods_pw
-      LIQUIBASE_CHANGELOG: /liquibase/changelog.xml
-    volumes:
-      - ./storage/changelog.xml:/liquibase/changelog.xml # TODO: Sql Injection is currently
     depends_on:
       - storage-service-db
     labels: # traefic reverse-proxy config
