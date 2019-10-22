@@ -4,20 +4,22 @@
     "es6": true
   },
   "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "module",
+    "project": "./tsconfig.json"
+  },
   "extends": ["standard", "plugin:@typescript-eslint/recommended"],
   "globals": {
     "Atomics": "readonly",
     "SharedArrayBuffer": "readonly"
   },
-  "parserOptions": {
-    "ecmaVersion": 2018,
-    "sourceType": "module"
-  },
   "plugins": ["@typescript-eslint"],
   "rules": {
     "@typescript-eslint/indent": [2, 2],
-    "@typescript-eslint/no-use-before-define": ["warn", { "functions": false, "classes": true }], 
+    "@typescript-eslint/no-use-before-define": ["warn", { "functions": false, "classes": true }],
     "max-len": [2, 120, 4, { "ignoreUrls": true }],
-    "@typescript-eslint/explicit-function-return-type": [1, { "allowExpressions": true }]
+    "@typescript-eslint/explicit-function-return-type": [1, { "allowExpressions": true }],
+    "@typescript-eslint/no-floating-promises": "warn"
   }
 }

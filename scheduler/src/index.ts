@@ -54,6 +54,7 @@ async function initPipelineJobs (): Promise<void> {
     updatePipelines)
 }
 
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 initPipelineJobs()
 
 process.on('SIGTERM', async () => {

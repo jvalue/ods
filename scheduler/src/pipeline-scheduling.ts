@@ -25,7 +25,7 @@ export async function initializeJobs (retries = 30): Promise<void> {
 
     console.log(`Received ${pipelineConfigurations.length} pipelines from core-service`)
 
-    for(let pipelineConfig of pipelineConfigurations) {
+    for (const pipelineConfig of pipelineConfigurations) {
       pipelineConfig.trigger.firstExecution = new Date(pipelineConfig.trigger.firstExecution)
       await PipelineScheduling.upsertPipelineJob(pipelineConfig) // assuming core service checks for duplicates
     }
@@ -56,7 +56,7 @@ export async function updatePipelines (): Promise<void> {
       console.log(`Applying ${events.length} updates from core service:`)
     }
 
-    for(let event of events) {
+    for (const event of events) {
       await applyChanges(event)
     }
 
@@ -161,7 +161,7 @@ export async function upsertPipelineJob (pipelineConfig: PipelineConfig): Promis
   return schedulePipeline(pipelineConfig)
 }
 
-export async function createStorageStructure(pipelineId: number, retries: number = 10): Promise<void> {
+export async function createStorageStructure (pipelineId: number, retries = 10): Promise<void> {
   try {
     console.log(`Creating storage structur for pipeline ${pipelineId}`)
     return await StorageClient.createStructure(pipelineId)
