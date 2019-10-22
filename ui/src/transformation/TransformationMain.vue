@@ -1,21 +1,27 @@
 <template>
   <div class="transformation-main">
-    <h1>transformation service</h1>
-    <v-card>
-      <v-form>
-        <v-textarea
-          v-model="functionInput"
-          full-width
-        />
-      </v-form>
+    <v-card class="mx-auto">
+      <v-card-title>Data Input</v-card-title>
+      <MonacoDataProvider v-model="dataInput" />
+      <v-divider class="mx-4"/>
+
+      <v-card-title>Transformation Function</v-card-title>
+      <CodeEditor v-model="functionInput" />
+      <v-divider class="mx-4"/>
+
+      <v-card-title>Transformation Results</v-card-title>
+      <v-progress-linear
+        :active="isLoading"
+        indeterminate
+        bottom
+      />
+      <ResultView v-bind:result="transformationResult" />
+      <v-divider class="mx-4"/>
+
+      <v-card-actions>
+        <v-btn text color="success" @click="submit">Run Transformation</v-btn>
+      </v-card-actions>
     </v-card>
-    <v-btn
-      color="success"
-      @click="submit"
-    >
-      submit
-    </v-btn>
-    <h2>{{ transformationResult }}</h2>
   </div>
 </template>
 
@@ -24,21 +30,45 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Action, State } from 'vuex-class'
 
+import JobResult from './interfaces/jobResult'
+import TransformationRequest from './interfaces/transformationRequest'
+
+import MonacoDataProvider from './MonacoDataProvider.vue'
+import TextAreaDataProvider from './TextAreaDataProvider.vue'
+import CodeEditor from './CodeEditor.vue'
+import ResultView from './ResultView.vue'
+
 const namespace = { namespace: 'transformation' }
 
-@Component
+@Component({
+  components: {
+    TextAreaDataProvider,
+    MonacoDataProvider,
+    CodeEditor,
+    ResultView
+  }
+})
 export default class TransformationMain extends Vue {
-  @State('transformationResult', namespace)
+  private editorOptions = {
+    minimap: {
+      enabled: false
+    }
+  }
 
-  private transformationResult!: object;
+  @State('transformationResult', namespace)
+  private transformationResult!: JobResult
+
+  @State('isLoadingResults', namespace)
+  private isLoading!: boolean
 
   @Action('transformData', namespace)
-  private transformData!: (functionInput: string) => void;
+  private transformData!: (request: TransformationRequest) => void
 
-  private functionInput: string = '{"func":"return 42", "data":null}';
+  private dataInput: object = { "a": 1, "b": 2, "c": 3 }
+  private functionInput: string = 'return data;'
 
   private submit () {
-    this.transformData(this.functionInput)
+    this.transformData({ func: this.functionInput, data: this.dataInput })
   }
 }
 </script>
