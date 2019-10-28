@@ -12,15 +12,14 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
+import { Prop } from 'vue-property-decorator'
 
-const Props = Vue.extend({
-  props: {
-    value: Object,
-  }
-})
+import { Data } from './interfaces/data'
 
 @Component({})
-export default class TextAreaDataProvider extends Props {
+export default class TextAreaDataProvider extends Vue {
+  @Prop() readonly value!: Data
+
   object = this.value
   text = this.formatJson(this.value)
   error: Error | null = null

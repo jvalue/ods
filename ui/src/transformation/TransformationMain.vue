@@ -6,7 +6,7 @@
       <v-divider class="mx-4"/>
 
       <v-card-title>Transformation Function</v-card-title>
-      <CodeEditor v-model="functionInput" />
+      <CodeEditor v-model="functionInput" v-bind:data="dataInput"/>
       <v-divider class="mx-4"/>
 
       <v-card-title>Transformation Results</v-card-title>
@@ -37,6 +37,7 @@ import MonacoDataProvider from './MonacoDataProvider.vue'
 import TextAreaDataProvider from './TextAreaDataProvider.vue'
 import CodeEditor from './CodeEditor.vue'
 import ResultView from './ResultView.vue'
+import { Data } from './interfaces/data'
 
 const namespace = { namespace: 'transformation' }
 
@@ -64,7 +65,7 @@ export default class TransformationMain extends Vue {
   @Action('transformData', namespace)
   private transformData!: (request: TransformationRequest) => void
 
-  private dataInput: object = { "a": 1, "b": 2, "c": 3 }
+  private dataInput: Data = { "a": 1, "b": 2, "c": 3 }
   private functionInput: string = 'return data;'
 
   private submit () {

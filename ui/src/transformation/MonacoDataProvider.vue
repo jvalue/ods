@@ -13,21 +13,20 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
+import { Prop } from 'vue-property-decorator'
 
 import MonacoEditor from 'vue-monaco'
 
-const Props = Vue.extend({
-  props: {
-    value: Object
-  }
-})
+import { Data } from './interfaces/data'
 
 @Component({
   components: {
     MonacoEditor
   }
 })
-export default class MonacoDataProvider extends Props {
+export default class MonacoDataProvider extends Vue {
+  @Prop() readonly value!: Data
+
   editorOptions = {
     minimap: {
       enabled: false
