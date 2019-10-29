@@ -40,7 +40,8 @@ describe('Scheduler', () => {
     expect(response.type).toEqual('application/json')
     const { data, stats } = response.body
     expect(data).toEqual(1)
-    expect(stats.executionTime).toBeGreaterThan(0)
+    expect(stats.durationInMilliSeconds).toBeGreaterThan(0)
+    expect(stats.endTimestamp).toBeGreaterThanOrEqual(stats.startTimestamp)
   })
 
   test('POST /job', async () => {
@@ -57,7 +58,8 @@ describe('Scheduler', () => {
     expect(response.type).toEqual('application/json')
     const { data, stats } = response.body
     expect(data).toEqual({ number: 1 })
-    expect(stats.executionTime).toBeGreaterThan(0)
+    expect(stats.durationInMilliSeconds).toBeGreaterThan(0)
+    expect(stats.endTimestamp).toBeGreaterThanOrEqual(stats.startTimestamp)
   })
 
   test('POST /job with transformation', async () => {
@@ -74,7 +76,8 @@ describe('Scheduler', () => {
     expect(response.type).toEqual('application/json')
     const { data, stats } = response.body
     expect(data).toEqual({ numberTwo: 2 })
-    expect(stats.executionTime).toBeGreaterThan(0)
+    expect(stats.durationInMilliSeconds).toBeGreaterThan(0)
+    expect(stats.endTimestamp).toBeGreaterThanOrEqual(stats.startTimestamp)
   })
 
   test('POST /notification triggers webhook', async () => {

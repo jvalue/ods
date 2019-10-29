@@ -31,8 +31,8 @@ describe('JSTransformationService', () => {
 
     it('should return an object with stats', () => {
       const jobResult = transformationService.executeJob('return 1;', {})
-      expect(jobResult.stats.executionTime).toBeGreaterThan(0)
-      console.log(jobResult)
+      expect(jobResult.stats.durationInMilliSeconds).toBeGreaterThan(0)
+      expect(jobResult.stats.endTimestamp).toBeGreaterThanOrEqual(jobResult.stats.startTimestamp)
     })
   })
 
