@@ -87,10 +87,11 @@ services:
     image: registry.gitlab.com/profoss/open-data-service/ods-main/storage-service-postgrest
     build: ./storage/postgrest/
     environment:
-      DATABASE_URL: jdbc:postgresql://storage-service-db:5432/ods
-      PGRST_DB_URI: postgres://postgrest:postgres-wrapper-pw@storage-service-db:5432/ods
-      PGRST_DB_SCHEMA: storage
-      PGRST_DB_ANON_ROLE: postgrest #In production this role should not be the same as the one used for the connection
+      DATABASE_HOST: storage-service-db
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ods
+      DATABASE_USER: postgrest
+      DATABASE_PW: postgres-wrapper-pw
     depends_on:
       - storage-service-db
       - storage-service-db-liquibase # TODO: make sure the migration runs through before reading db structure
@@ -121,9 +122,11 @@ services:
     image: registry.gitlab.com/profoss/open-data-service/ods-main/storage-service-liquibase
     build: ./storage/liquibase/ # TODO: Sql Injection is currently
     environment:
-      LIQUIBASE_URL: jdbc:postgresql://storage-service-db:5432/ods
-      LIQUIBASE_USERNAME: ods_admin
-      LIQUIBASE_PASSWORD: ods_pw
+      DATABASE_HOST: storage-service-db
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ods
+      DATABASE_USER: ods_admin
+      DATABASE_PW: ods_pw
     depends_on:
       - storage-service-db
     labels: # traefic reverse-proxy config
