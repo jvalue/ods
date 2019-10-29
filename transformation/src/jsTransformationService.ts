@@ -31,10 +31,16 @@ export default class JSTransformationService implements TransformationService {
   }
 
   executeJob (code: string, data: object): JobResult {
-    const [time, result] = this.executionTimeInMillis(() =>
-      this.executor.execute(code, data)
-    )
-    const stats: Stats = { executionTime: time }
+    const startTimestamp = Date.now()
+
+    const [time, result] = this.executionTimeInMillis(() => this.executor.execute(code, data))
+
+    const endTimestamp = Date.now()
+    const stats: Stats = {
+      durationInMilliSeconds: time,
+      startTimestamp,
+      endTimestamp
+    }
     const jobResult: JobResult = { ...result, stats }
     return jobResult
   }
