@@ -1,0 +1,40 @@
+@baseURL = http://localhost:9000/transformation
+
+### Get version
+GET {{baseURL}}/version  HTTP/1.1
+
+### Perform job
+POST {{baseURL}}/job  HTTP/1.1
+Content-Type: application/json
+
+{
+  "data": {
+    "a": 1,
+    "b": "example text",
+    "c": 3
+  },
+  "func": "data.c *= 2;\nreturn data;"
+}
+
+### Perform long job
+POST {{baseURL}}/job  HTTP/1.1
+Content-Type: application/json
+
+{
+  "data": {
+    "runs": 5e6
+  },
+  "func": "while(data.runs){const date = Date.now();data.runs--;};return data;"
+}
+
+### Perform memory-hungry job
+POST {{baseURL}}/job  HTTP/1.1
+Content-Type: application/json
+
+{
+  "data": {
+    "n": 1e7,
+    "content": "some string"
+  },
+  "func": "let arr = Array(data.n).fill(data.content);arr.reverse();return arr.length;"
+}
