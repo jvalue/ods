@@ -341,7 +341,7 @@ build-transformation:
       - ./transformation/image
 
 
-# INEGRATION-TEST
+# INTEGRATION-TEST
 integrationtest-transformation:
   stage: integrationtest
   image: mykiwi/docker
@@ -375,3 +375,20 @@ publish-docker-transformation:
     - docker tag ${TRANSFORMATION_DOCKER_IMAGE_NAME} ${TRANSFORMATION_DOCKER_IMAGE_NAME}:latest
     - docker push ${TRANSFORMATION_DOCKER_IMAGE_NAME}:${TRANSFORMATION_VERSION}
     - docker push ${TRANSFORMATION_DOCKER_IMAGE_NAME}:latest
+
+# ------------------------ SYSTEM TEST ---------------------------------
+system-test:
+  stage: integrationtest
+  image: mykiwi/docker
+  script:
+    - docker load -i ./core/image/core.tar
+    - docker load -i ./scheduler/image/scheduler.tar
+    - docker load -i ./storage/image/storage_postgrest.tar
+    - docker load -i ./storage/image/storage_liquibase.tar
+    - docker load -i ./transformation/image/transformation.tar
+    - docker load -i ./adapter/image/adapter.tar
+    - docker-compose -f docker-compose.yml up -d --scale ui-service=0
+    - docker-compose -f docker-compose.yml -f docker-compose.st.yml up --exit-code-from system-test
+  after_script:
+    - docker-compose logs
+    - docker-compose -f docker-compose.yml -f docker-compose.st.yml down

@@ -1,9 +1,9 @@
 export interface NotificationRequest {
-  callbackUrl: string;
+  url: string;
   data: object;
   dataLocation: string;
   condition: string;
-  type: NotificationType;
+  notificationType: NotificationType;
 }
 
 export enum NotificationType {

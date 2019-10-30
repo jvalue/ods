@@ -1,0 +1,25 @@
+{
+  "name": "system-test",
+  "version": "1.0.0",
+  "description": "Open Data Service System Test",
+  "scripts": {
+    "mock:receiver": "node src/mock.receiver.js",
+    "mock:source": "node src/mock.source.js",
+    "pretest": "(npm run mock:receiver &) && (npm run mock:source &)",
+    "test": "jest",
+    "posttest": "killall node"
+  },
+  "devDependencies": {
+    "jest": "^24.9.0",
+    "supertest": "^4.0.2"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "dependencies": {
+    "koa": "^2.8.1",
+    "koa-bodyparser": "^4.2.1",
+    "koa-router": "^7.4.0",
+    "wait-on": "^3.3.0"
+  }
+}
