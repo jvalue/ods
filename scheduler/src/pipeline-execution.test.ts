@@ -98,10 +98,12 @@ test('Should ignore empty transformation arrays', async () => {
 
 test('Should trigger notifications', async () => {
   const notification1: NotificationConfig = {
-    data: { value1: 1 }
+    data: { value1: 1 },
+    dataLocation: 'some.where/over/the/rainbow'
   }
   const notification2: NotificationConfig = {
-    data: { schtring: 'text' }
+    data: { schtring: 'text' },
+    dataLocation: 'way.up/high'
   }
   const pipelineConfig = generateConfig([], false, [notification1, notification2])
 
