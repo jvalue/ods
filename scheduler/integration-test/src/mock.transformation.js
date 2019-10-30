@@ -21,12 +21,12 @@ router.post('/job', async ctx => {
   ctx.body.test = 'abc'
 })
 
-router.post('/notifications', async ctx => {
+router.post('/notification', async ctx => {
   notifications.set(ctx.request.body.url, ctx.request.body)
   ctx.status = 202
 })
 
-router.get('/notifications/:url', async ctx => {
+router.get('/notification/:url', async ctx => {
   const url = ctx.params.url
   ctx.type = 'application/json'
   ctx.body = notifications.get(url)

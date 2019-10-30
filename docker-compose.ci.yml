@@ -68,4 +68,3 @@ services:
     image: open-data-service/ods-main/core-service-it
     environment:
       CORE_API: http://core-service:8080
-
