@@ -39,7 +39,8 @@ describe('Scheduler', () => {
     console.log('Waiting for service with URL: ' + MOCK_ADAPTER_URL)
     console.log('Waiting for service with URL: ' + MOCK_TRANSFORMATION_URL)
     console.log('Waiting for service with URL: ' + MOCK_STORAGE_URL)
-    await waitOn({ resources: [MOCK_CORE_URL, MOCK_ADAPTER_URL, MOCK_TRANSFORMATION_URL, MOCK_STORAGE_URL], timeout: 50000 })
+    await waitOn(
+      { resources: [MOCK_CORE_URL, MOCK_ADAPTER_URL, MOCK_TRANSFORMATION_URL, MOCK_STORAGE_URL], timeout: 50000 })
     console.log('Waiting for service with URL: ' + pingUrl)
     await waitOn({ resources: [pingUrl], timeout: 50000 })
   }, 60000)
@@ -59,55 +60,13 @@ describe('Scheduler', () => {
     expect(response.type).toEqual('application/json')
     expect(response.body.length).toEqual(2)
     expect(response.body[0].scheduleJob).toBeDefined() // TODO: make explicit
-    expect(response.body[0].pipelineConfig).toEqual({
-      id: 123,
-      adapter: {},
-      transformations: [{
-        func: 'return data;'
-      }, {
-        func: 'return 1;'
-      }],
-      persistence: {},
-      metadata: {},
-      trigger: {
-        periodic: true,
-        firstExecution: '2018-10-07T01:32:00.123Z',
-        interval: 10000
-      },
-      notifications: []
-    })
-    expect(response.body[1].pipelineConfig).toEqual({
-      id: 125,
-      adapter: {},
-      transformations: [{
-        func: 'return 1;'
-      }
-      ],
-      persistence: {},
-      metadata: {},
-      trigger: {
-        periodic: true,
-        firstExecution: '2018-10-07T01:32:00.123Z',
-        interval: 10000
-      },
-      notifications: [{
-        notificationType: 'WEBHOOK',
-        data,
-        condition: 'data.field2 === 123',
-        url: 'should-be-triggered'
-      },
-      {
-        notificationType: 'WEBHOOK',
-        data,
-        condition: 'data.field2 < 0',
-        url: 'should-also-be-triggered'
-      }]
-    })
+    expect(response.body[0].pipelineConfig.id).toEqual(123)
+    expect(response.body[1].pipelineConfig.id).toEqual(125)
   })
 
   test('Pipeline runs with dummy data', async () => {
     await sleep(10000) // pipeline should have been exicuting until now!
-    const response = await request(MOCK_STORAGE_URL).get('/123') // see what got stored
+    const response = await request(MOCK_STORAGE_URL).get('/125') // see what got stored
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('application/json')
     expect(response.body.data).toEqual(data)
@@ -115,17 +74,18 @@ describe('Scheduler', () => {
 
   test('Pipeline triggers correct notifications', async () => {
     await sleep(10000) // pipeline should have been exicuting until now!
-    const triggered = await request(MOCK_TRANSFORMATION_URL).get('/notifications/should-also-be-triggered')
+    const triggered = await request(MOCK_TRANSFORMATION_URL).get('/notification/should-also-be-triggered')
     expect(triggered.status).toEqual(200)
     expect(triggered.body).toEqual(
       {
         notificationType: 'WEBHOOK',
         data,
+        dataLocation: MOCK_STORAGE_URL + '/125',
         condition: 'data.field2 < 0',
         url: 'should-also-be-triggered'
       })
 
-    const alsoTriggered = await request(MOCK_TRANSFORMATION_URL).get('/notifications/should-be-triggered')
+    const alsoTriggered = await request(MOCK_TRANSFORMATION_URL).get('/notification/should-be-triggered')
     expect(alsoTriggered.status).toEqual(200)
     expect(alsoTriggered.type).toEqual('application/json')
     expect(alsoTriggered.body).toEqual(
@@ -133,6 +93,7 @@ describe('Scheduler', () => {
         notificationType: 'WEBHOOK',
         data,
         condition: 'data.field2 === 123',
+        dataLocation: MOCK_STORAGE_URL + '/125',
         url: 'should-be-triggered'
       })
   }, 12000)

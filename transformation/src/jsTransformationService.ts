@@ -46,17 +46,19 @@ export default class JSTransformationService implements TransformationService {
   }
 
   async handleNotification (notificationRequest: NotificationRequest): Promise<void> {
-    const success = this.executor.evaluate(notificationRequest.condition, notificationRequest.data)
-    if (!success) { // no need to trigger notification
+    console.log('NotificationRequest received: ' + JSON.stringify(notificationRequest))
+    const conditionHolds = this.executor.evaluate(notificationRequest.condition, notificationRequest.data)
+    console.log('Condition is ' + conditionHolds)
+    if (!conditionHolds) { // no need to trigger notification
       return Promise.resolve()
     }
 
     // different notification types might be implemented later
-    if (notificationRequest.type !== NotificationType.WEBHOOK) {
+    if (notificationRequest.notificationType !== NotificationType.WEBHOOK) {
       throw new Error('notification type not implemented')
     }
 
-    return this.executeWebhook(notificationRequest.callbackUrl, notificationRequest.dataLocation)
+    return this.executeWebhook(notificationRequest.url, notificationRequest.dataLocation)
   }
 
   private async executeWebhook (callbackUrl: string, dataLocation: string): Promise<void> {

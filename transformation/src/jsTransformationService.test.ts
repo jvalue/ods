@@ -56,28 +56,28 @@ describe('JSTransformationService', () => {
       post.mockReturnValue(Promise.resolve())
 
       const notificationRequest: NotificationRequest = {
-        callbackUrl: 'callback',
+        url: 'callback',
         dataLocation: 'data',
         data: data,
         condition: 'data.value1 > 0',
-        type: NotificationType.WEBHOOK
+        notificationType: NotificationType.WEBHOOK
       }
 
       await transformationService.handleNotification(notificationRequest)
 
       expect(post).toHaveBeenCalledTimes(1)
       // check arguments for axios post
-      expect(post.mock.calls[0][0]).toEqual(notificationRequest.callbackUrl)
+      expect(post.mock.calls[0][0]).toEqual(notificationRequest.url)
       expect(post.mock.calls[0][1].location).toEqual(notificationRequest.dataLocation)
     })
 
     test('Notification does not trigger when condition is not met', async () => {
       const notificationRequest: NotificationRequest = {
-        callbackUrl: 'callback',
+        url: 'callback',
         dataLocation: 'data',
         data: data,
         condition: 'data.value1 < 0',
-        type: NotificationType.WEBHOOK
+        notificationType: NotificationType.WEBHOOK
       }
 
       await transformationService.handleNotification(notificationRequest)
@@ -87,11 +87,11 @@ describe('JSTransformationService', () => {
 
     test('Notification does not trigger when condition is malformed', async () => {
       const notificationRequest: NotificationRequest = {
-        callbackUrl: 'callback',
+        url: 'callback',
         dataLocation: 'data',
         data: data,
         condition: 'asdfa;',
-        type: NotificationType.WEBHOOK
+        notificationType: NotificationType.WEBHOOK
       }
 
       await transformationService.handleNotification(notificationRequest)

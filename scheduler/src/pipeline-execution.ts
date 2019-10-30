@@ -18,8 +18,8 @@ export async function executePipeline (pipelineConfig: PipelineConfig, maxRetrie
     try {
       const importedData: object = await executeAdapter(pipelineConfig)
       const transformedData = await executeTransformations(pipelineConfig, importedData)
-      await executeStorage(pipelineConfig, transformedData)
-      await executeNotifications(pipelineConfig, transformedData)
+      const dataLocation = await executeStorage(pipelineConfig, transformedData)
+      await executeNotifications(pipelineConfig, transformedData, dataLocation)
       pipelineSuccess = true
       console.log(`Successfully executed Pipeline ${pipelineConfig.id}`)
     } catch (e) {
@@ -33,6 +33,7 @@ export async function executePipeline (pipelineConfig: PipelineConfig, maxRetrie
   } else {
     console.log(`Pipeline ${pipelineConfig.id}  is not periodic. Removing it from scheduling.`)
     Scheduler.removePipelineJob(pipelineConfig.id)
+    console.log(`Succesfully removed pipeline ${pipelineConfig.id} from scheduling.`)
   }
 }
 
@@ -76,10 +77,11 @@ async function executeTransformations (pipelineConfig: PipelineConfig, data: obj
   }
 }
 
-async function executeStorage (pipelineConfig: PipelineConfig, data: object): Promise<void> {
+async function executeStorage (pipelineConfig: PipelineConfig, data: object): Promise<string> {
   try {
-    await StorageClient.executeStorage(pipelineConfig, data)
+    const dataLocation = await StorageClient.executeStorage(pipelineConfig, data)
     console.log(`Sucessfully stored Data for Pipeline ${pipelineConfig.id}`)
+    return dataLocation
   } catch (e) {
     if (e.code === 'ECONNREFUSED' || e.code === 'ENOTFOUND') {
       console.log(`Failed to store Data for Pipeline ${pipelineConfig.id}. Storage Service not reachable`)
@@ -91,17 +93,20 @@ async function executeStorage (pipelineConfig: PipelineConfig, data: object): Pr
   }
 }
 
-async function executeNotifications (pipelineConfig: PipelineConfig, data: object): Promise<void> {
+async function executeNotifications (
+  pipelineConfig: PipelineConfig, data: object, dataLocation: string): Promise<void> {
   try {
-    for (const notification of pipelineConfig.notifications) {
-      notification.data = data
-      await TransformationClient.executeNotification(notification)
-    }
+    pipelineConfig.notifications.map(async n => {
+      n.data = data
+      n.dataLocation = dataLocation
+      await TransformationClient.executeNotification(n)
+    })
     console.log(`Successfully delivered notification requests to transformation-service for ${pipelineConfig.id}`)
   } catch (e) {
     if (e.code === 'ECONNREFUSED' || e.code === 'ENOTFOUND') {
-      console.log(`Failed to trigger notifications for Pipeline ${pipelineConfig.id}. ` +
-                  'Transformation Service not reachable')
+      console.log(e)
+      console.log(
+        `Failed to trigger notifications for Pipeline ${pipelineConfig.id}. Transformation Service not reachable`)
     } else {
       console.log(`Failed to trigger notifications for Pipeline ${pipelineConfig.id}. Unknown error!`)
       console.error(e)

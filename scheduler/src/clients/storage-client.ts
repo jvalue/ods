@@ -4,7 +4,8 @@ import PipelineConfig from './../interfaces/pipeline-config'
 
 const STORAGE_SERVICE_URL = process.env.STORAGE_SERVICE_URL || 'http://localhost:8084'
 
-export async function executeStorage (pipelineConfig: PipelineConfig, data: object): Promise<void> {
+export async function executeStorage (pipelineConfig: PipelineConfig, data: object): Promise<string> {
+  const dataLocation: string = getDataRequestUrl(pipelineConfig.id)
   const requestBody: object = {
     data,
     pipelineId: pipelineConfig.id,
@@ -15,7 +16,7 @@ export async function executeStorage (pipelineConfig: PipelineConfig, data: obje
   }
 
   await axios.post<object>(
-    getDataRequestUrl(pipelineConfig.id),
+    dataLocation,
     requestBody,
     {
       headers: {
@@ -23,6 +24,8 @@ export async function executeStorage (pipelineConfig: PipelineConfig, data: obje
       }
     }
   )
+
+  return dataLocation
 }
 
 export async function createStructure (pipelineId: number): Promise<void> {

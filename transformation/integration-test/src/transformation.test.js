@@ -83,13 +83,13 @@ describe('Scheduler', () => {
   test('POST /notification triggers webhook', async () => {
     const dataLocation = 'storage/1234'
     const notificationJob = {
-      callbackUrl: MOCK_RECEIVER_URL + '/webhook1',
+      url: MOCK_RECEIVER_URL + '/webhook1',
       dataLocation: dataLocation,
       data: {
         value1: 1
       },
       condition: 'data.value1 > 0',
-      type: 'WEBHOOK'
+      notificationType: 'WEBHOOK'
     }
 
     const transformationResponse = await request(URL)
@@ -108,7 +108,7 @@ describe('Scheduler', () => {
 
   test('POST /notification does not trigger webhook when condition is false', async () => {
     const notificationJob = {
-      callbackUrl: MOCK_RECEIVER_URL + '/webhook2',
+      url: MOCK_RECEIVER_URL + '/webhook2',
       dataLocation: 'storage/1234',
       data: {
         value1: 1
@@ -130,7 +130,7 @@ describe('Scheduler', () => {
     expect(receiverResponse.status).toEqual(404)
   })
 
-  const sleep = (ms) => {
+  function sleep (ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
   }
 })
