@@ -4,6 +4,7 @@ import * as StorageClient from './clients/storage-client'
 import * as Scheduler from './pipeline-scheduling'
 
 import PipelineConfig from './interfaces/pipeline-config'
+import { AxiosError } from 'axios'
 
 export async function executePipeline (pipelineConfig: PipelineConfig, maxRetries = 3): Promise<void> {
   console.log(`Execute Pipeline ${pipelineConfig.id}`)
@@ -44,12 +45,7 @@ async function executeAdapter (pipelineConfig: PipelineConfig): Promise<object> 
     console.log(`Sucessful import via Adapter for Pipeline ${pipelineConfig.id}`)
     return importedData
   } catch (e) {
-    if (e.code === 'ECONNREFUSED' || e.code === 'ENOTFOUND') {
-      console.log(`Failed to import data via Adapter for Pipeline ${pipelineConfig.id}. Adapter Service not reachable`)
-    } else {
-      console.log(`Failed to import data via Adapter for Pipeline ${pipelineConfig.id}. Unknown error!`)
-      console.error(e)
-    }
+    handleError(e)
     throw Error('Failed to import data via Adapter Service')
   }
 }
@@ -67,12 +63,7 @@ async function executeTransformations (pipelineConfig: PipelineConfig, data: obj
     console.log(`Sucessfully transformed data for Pipeline ${pipelineConfig.id}`)
     return lastPartialResult
   } catch (e) {
-    if (e.code === 'ECONNREFUSED' || e.code === 'ENOTFOUND') {
-      console.log(`Failed to transform data for Pipeline ${pipelineConfig.id}. Transformation Service not reachable`)
-    } else {
-      console.log(`Failed to transform data for Pipeline ${pipelineConfig.id}. Unknown error!`)
-      console.error(e)
-    }
+    handleError(e)
     throw Error('Failed to transform data via Transformation Service')
   }
 }
@@ -83,12 +74,7 @@ async function executeStorage (pipelineConfig: PipelineConfig, data: object): Pr
     console.log(`Sucessfully stored Data for Pipeline ${pipelineConfig.id}`)
     return dataLocation
   } catch (e) {
-    if (e.code === 'ECONNREFUSED' || e.code === 'ENOTFOUND') {
-      console.log(`Failed to store Data for Pipeline ${pipelineConfig.id}. Storage Service not reachable`)
-    } else {
-      console.log(`Failed to store Data for Pipeline ${pipelineConfig.id}. Unknown error!`)
-      console.error(e)
-    }
+    handleError(e)
     throw Error('Failed to store data via Storage Service')
   }
 }
@@ -103,17 +89,24 @@ async function executeNotifications (
     })
     console.log(`Successfully delivered notification requests to transformation-service for ${pipelineConfig.id}`)
   } catch (e) {
-    if (e.code === 'ECONNREFUSED' || e.code === 'ENOTFOUND') {
-      console.log(e)
-      console.log(
-        `Failed to trigger notifications for Pipeline ${pipelineConfig.id}. Transformation Service not reachable`)
-    } else {
-      console.log(`Failed to trigger notifications for Pipeline ${pipelineConfig.id}. Unknown error!`)
-      console.error(e)
-    }
+    handleError(e)
     throw Error('Failed to trigger notifications via Transformation Service')
   }
 }
+
 function sleep (ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+function handleError (e: AxiosError): void {
+  if (e.response) {
+    // Request was made and Response code is not 2xx
+    console.log(`${e.message}: Requesting ${e.config.method} ${e.config.url} 
+      the server responded with ${e.response.status}, data: ${e.response.status}`)
+  } else if (e.request) {
+    // Request was made but no response received
+    console.log(`${e.message}: Request ${e.config.method} ${e.config.url} did not receive a response`)
+  } else {
+    console.log(`Unknown error: ${e.message}`)
+  }
 }
