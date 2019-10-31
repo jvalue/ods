@@ -39,7 +39,7 @@ export async function initializeJobs (retries = 30): Promise<void> {
       console.error(e)
       console.error(`Retrying (${retries})...`)
     }
-    await sleep(1000)
+    await sleep(3000)
     return initializeJobs(retries - 1)
   }
 }
