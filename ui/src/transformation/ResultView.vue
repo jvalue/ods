@@ -16,8 +16,11 @@
 
     <v-subheader>Meta-Data</v-subheader>
     <v-card-text style="text-align:left">
-      <p>last execution: hh:mm:ss</p>
-      <span>execution time in ms: {{result.stats.executionTime}}</span>
+      <p>
+        start: {{result.stats.startTimestamp | timestamp}}<br/>
+        end: {{result.stats.endTimestamp | timestamp}}<br/>
+        job duration: {{result.stats.durationInMilliSeconds | duration}}
+      </p>
     </v-card-text>
   </div>
 </template>
@@ -34,7 +37,23 @@ const Props = Vue.extend({
   }
 })
 
-@Component({})
+@Component({
+  filters: {
+    duration(milliseconds: number): string {
+      return `${milliseconds.toFixed(1)} ms`
+    },
+    timestamp(timestamp: number): string {
+      return new Date(timestamp).toLocaleString('en-GB', {
+        day: 'numeric',
+        month: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric'
+      })
+    }
+  }
+})
 export default class TextAreaDataProvider extends Props {
 
 }

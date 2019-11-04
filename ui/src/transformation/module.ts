@@ -9,7 +9,9 @@ export default class TransformationModule extends VuexModule {
   private transformationResult: JobResult = {
     data: {},
     stats: {
-      executionTime: 0.0
+      durationInMilliSeconds: 0.0,
+      startTimestamp: 0,
+      endTimestamp: 0
     }
   }
 
