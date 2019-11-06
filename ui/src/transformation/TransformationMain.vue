@@ -57,7 +57,7 @@ export default class TransformationMain extends Vue {
   }
 
   @State('transformationResult', namespace)
-  private transformationResult!: JobResult
+  private transformationResult!: JobResult | null
 
   @State('isLoadingResults', namespace)
   private isLoading!: boolean

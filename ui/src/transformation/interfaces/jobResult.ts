@@ -5,5 +5,7 @@ export default interface JobResult {
 }
 
 interface Stats {
-  executionTime: number;
+  durationInMilliSeconds: number;
+  startTimestamp: number;
+  endTimestamp: number;
 }
