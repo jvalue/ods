@@ -6,14 +6,7 @@ import TransformationRequest from './interfaces/transformationRequest'
 
 @Module({ namespaced: true })
 export default class TransformationModule extends VuexModule {
-  private transformationResult: JobResult = {
-    data: {},
-    stats: {
-      durationInMilliSeconds: 0.0,
-      startTimestamp: 0,
-      endTimestamp: 0
-    }
-  }
+  private transformationResult: JobResult | null = null
 
   private isLoadingResults = false
 
