@@ -29,6 +29,7 @@
 import Vue, { PropType } from 'vue'
 import Component from 'vue-class-component'
 
+import { duration, timestamp } from '../filters'
 import JobResult from './interfaces/jobResult'
 
 const Props = Vue.extend({
@@ -38,21 +39,7 @@ const Props = Vue.extend({
 })
 
 @Component({
-  filters: {
-    duration(milliseconds: number): string {
-      return `${milliseconds.toFixed(1)} ms`
-    },
-    timestamp(timestamp: number): string {
-      return new Date(timestamp).toLocaleString('en-GB', {
-        day: 'numeric',
-        month: 'numeric',
-        year: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric'
-      })
-    }
-  }
+  filters: { duration, timestamp }
 })
 export default class TextAreaDataProvider extends Props {
 
