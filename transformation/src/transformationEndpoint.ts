@@ -7,6 +7,7 @@ import TransformationService from './interfaces/transformationService'
 import TransformationRequest from './interfaces/transformationRequest'
 import { NotificationRequest } from './interfaces/notificationRequest'
 import { Server } from 'http'
+import JobResult from './interfaces/jobResult'
 
 export class TransformationEndpoint {
   port: number
@@ -59,8 +60,10 @@ export class TransformationEndpoint {
 
   postJob = (req: Request, res: Response): void => {
     const transformation: TransformationRequest = req.body
-    const result: object = this.transformationService.executeJob(transformation.func, transformation.data)
+    console.log(`Transformation request received. Body: ${JSON.stringify(transformation)}`)
+    const result: JobResult = this.transformationService.executeJob(transformation.func, transformation.data)
     const answer: string = JSON.stringify(result)
+    console.log(`JobResult: ${answer}`)
     res.setHeader('Content-Type', 'application/json')
     res.writeHead(200)
     res.write(answer)

@@ -17,8 +17,8 @@ router.get('/', async ctx => {
 
 router.post('/job', async ctx => {
   ctx.type = 'text/json'
-  ctx.body = ctx.request.body.data
-  ctx.body.test = 'abc'
+  ctx.body = { data: ctx.request.body.data }
+  ctx.body.data.test = 'abc'
 })
 
 router.post('/notification', async ctx => {
