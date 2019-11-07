@@ -52,16 +52,19 @@ async function executeAdapter (pipelineConfig: PipelineConfig): Promise<object> 
 
 async function executeTransformations (pipelineConfig: PipelineConfig, data: object): Promise<object> {
   console.log(`Execute Pipeline Transformation ${pipelineConfig.id}`)
-  let lastPartialResult = data
+  let lastData = data
 
   try {
     for (const transformation of pipelineConfig.transformations) {
       const currentTransformation = JSON.parse(JSON.stringify(transformation)) // deeply copy object
-      currentTransformation.data = lastPartialResult
-      lastPartialResult = await TransformationClient.executeTransformation(currentTransformation)
+      currentTransformation.data = lastData
+      const jobResult = await TransformationClient.executeTransformation(currentTransformation)
+      lastData = jobResult.data
+      console.log(`Transformation executed for Pipeline ${pipelineConfig.id},
+       resulting data: ${JSON.stringify(lastData)}.`)
     }
     console.log(`Sucessfully transformed data for Pipeline ${pipelineConfig.id}`)
-    return lastPartialResult
+    return lastData
   } catch (e) {
     handleError(e)
     throw Error('Failed to transform data via Transformation Service')

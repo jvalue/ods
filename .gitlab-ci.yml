@@ -387,8 +387,8 @@ system-test:
     - docker load -i ./storage/image/storage_liquibase.tar
     - docker load -i ./transformation/image/transformation.tar
     - docker load -i ./adapter/image/adapter.tar
-    - docker-compose -f docker-compose.yml up -d --scale ui-service=0
-    - docker-compose -f docker-compose.yml -f docker-compose.st.yml up --exit-code-from system-test
+    - docker-compose -f docker-compose.yml up -d core-service adapter-service transformation-service storage-service scheduler-service
+    - docker-compose -f docker-compose.yml -f docker-compose.st.yml up --exit-code-from system-test system-test
   after_script:
     - docker-compose logs
     - docker-compose -f docker-compose.yml -f docker-compose.st.yml down
