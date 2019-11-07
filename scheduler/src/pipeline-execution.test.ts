@@ -33,11 +33,11 @@ afterEach(() => {
 })
 
 test('Should execute pipeline once', async () => {
-  const transformation = generateTransformation('return data + 1', importedData)
+  const transformation = generateTransformation('return { value2: data.value2 }', importedData)
   const pipelineConfig = generateConfig([transformation], false, [])
 
   mockExecuteAdapter.mockResolvedValue(importedData)
-  mockExecuteTransformation.mockResolvedValue(transformedData)
+  mockExecuteTransformation.mockResolvedValue({ data: transformedData })
 
   await PipelineExecution.executePipeline(pipelineConfig)
 
@@ -55,7 +55,7 @@ test('Should execute pipeline periodic', async () => {
   const pipelineConfig = generateConfig([transformation], true, [])
 
   mockExecuteAdapter.mockResolvedValue(importedData)
-  mockExecuteTransformation.mockResolvedValue(transformedData)
+  mockExecuteTransformation.mockResolvedValue({ data: transformedData })
 
   await PipelineExecution.executePipeline(pipelineConfig)
 
@@ -75,7 +75,7 @@ test('Should execute multiple transformations', async () => {
   const pipelineConfig = generateConfig([transformation1, transformation2, transformation3], false, [])
 
   mockExecuteAdapter.mockResolvedValue(importedData)
-  mockExecuteTransformation.mockResolvedValue(transformedData)
+  mockExecuteTransformation.mockResolvedValue({ data: transformedData })
 
   await PipelineExecution.executePipeline(pipelineConfig)
 
@@ -89,7 +89,7 @@ test('Should ignore empty transformation arrays', async () => {
   const pipelineConfig = generateConfig([], false, [])
 
   mockExecuteAdapter.mockResolvedValue(importedData)
-  mockExecuteTransformation.mockResolvedValue(transformedData)
+  mockExecuteTransformation.mockResolvedValue({ data: transformedData })
 
   await PipelineExecution.executePipeline(pipelineConfig)
 
