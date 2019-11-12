@@ -7,6 +7,9 @@ import java.net.URI;
 import java.util.Map;
 
 public class HttpImporter extends Importer {
+
+  public final Map<String, String> parameters = Map.of("location", "String of the URL for the HTTP call");
+
   private final RestTemplate restTemplate;
 
   public HttpImporter(RestTemplate restTemplate) {
