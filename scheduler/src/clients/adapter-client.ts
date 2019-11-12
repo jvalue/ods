@@ -16,7 +16,9 @@ export async function executeAdapter (pipelineConfig: CorePipelineConfig): Promi
   const adapterConig: AdapterConfig = {
     protocol: {
       type: pipelineConfig.adapter.protocol,
-      location: pipelineConfig.adapter.location,
+      parameters: {
+        location: pipelineConfig.adapter.location,
+      }
     },
     format: {
       type: pipelineConfig.adapter.format
