@@ -50,7 +50,7 @@ public class HttpImporterTest {
 
     @Test
     public void testSerialization() throws IOException {
-        JsonNode expected = mapper.readTree("{\"type\":\"HTTP\",\"description\":\"Plain HTTP\"}");
+        JsonNode expected = mapper.readTree("{\"parameters\":{\"location\": \"String of the URL for the HTTP call\"}, \"type\":\"HTTP\",\"description\":\"Plain HTTP\"}");
         JsonNode result = mapper.valueToTree(importer);
 
         assertEquals(expected, result);
