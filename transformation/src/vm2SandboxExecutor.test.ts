@@ -2,16 +2,6 @@
 import SandboxExecutor from './interfaces/sandboxExecutor'
 import VM2SandboxExecutor from './vm2SandboxExecutor'
 
-/**
- * Checks if the supplied object is of type name.
- * This method uses the constructor name for this check in order to also work across contexts.
- * @param object The object to be checked
- * @param name The name of the type to check against, e.g. 'SyntaxError'
- */
-function isInstance (object: any, name: string): boolean { // eslint-disable-line @typescript-eslint/no-explicit-any
-  return (object.constructor.name) === name
-}
-
 describe('VM2SandboxExecutor', () => {
   let e: SandboxExecutor
 
@@ -48,16 +38,56 @@ describe('VM2SandboxExecutor', () => {
       expect(error).toBe(undefined)
     })
 
-    it('should throw syntax errors', () => {
+    it('should throw syntax errors: unexpected identifier', () => {
       const { data: result, error } = e.execute('syntax error', {})
       expect(result).toEqual(undefined)
-      expect(isInstance(error, 'SyntaxError')).toBe(true)
+      if (error === undefined) {
+        fail()
+        return
+      }
+      expect(error.name).toBe('SyntaxError')
+      expect(error.lineNumber).toBe(1)
+      expect(error.position).toBe(7)
+    })
+
+    it('should throw syntax errors: missing bracket', () => {
+      const { data: result, error } = e.execute('c = Math.max(a', {})
+      expect(result).toEqual(undefined)
+      if (error === undefined) {
+        fail()
+        return
+      }
+      expect(error.name).toBe('SyntaxError')
+      expect(error.lineNumber).toBe(1)
+      expect(error.position).toBe(13)
     })
 
     it('should throw reference errors', () => {
       const { data: result, error } = e.execute('return somethingThatIsntThere;', {})
       expect(result).toEqual(undefined)
-      expect(isInstance(error, 'ReferenceError')).toBe(true)
+      if (error === undefined) {
+        fail()
+        return
+      }
+      expect(error.name).toBe('ReferenceError')
+      expect(error.lineNumber).toBe(1)
+      expect(error.position).toBe(1)
+    })
+
+    it('should throw type errors with rewritten stacktrace', () => {
+      const { data: result, error } = e.execute(`
+function test(data) {
+  data.d.e = 0;
+}
+return test(data);`, {})
+      expect(result).toEqual(undefined)
+      if (error === undefined) {
+        fail()
+        return
+      }
+      expect(error.name).toBe('TypeError')
+      expect(error.stacktrace[0]).toBe('    at test (main:3:12)')
+      expect(error.stacktrace[1]).toBe('    at main (main:5:8)')
     })
   })
 
