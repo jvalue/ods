@@ -7,7 +7,6 @@ import org.jvalue.ods.adapterservice.model.AdapterConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
 import java.io.IOException;
 
 public class Adapter {
@@ -25,7 +24,7 @@ public class Adapter {
 
     public JsonNode executeJob(AdapterConfig config){
         try {
-            String raw = importer.fetch(URI.create(config.protocolConfig.location));
+            String raw = importer.fetch(config.protocolConfig.parameters);
             logger.debug("Fetched: {}", raw);
             return interpreter.interpret(raw);
         } catch (IOException e) {

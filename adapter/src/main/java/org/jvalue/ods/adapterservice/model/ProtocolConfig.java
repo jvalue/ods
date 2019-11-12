@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.constraints.NotNull;
+
+import java.util.Map;
 import java.util.Objects;
 
 public class ProtocolConfig {
@@ -12,14 +14,14 @@ public class ProtocolConfig {
     public final String protocol;
 
     @NotNull
-    public final String location;
+    public final Map<String, Object> parameters;
 
     @JsonCreator
     public ProtocolConfig(
             @JsonProperty("type") String protocol,
-            @JsonProperty("location") String location) {
+            @JsonProperty("parameters") Map<String, Object> parameters) {
         this.protocol = protocol;
-        this.location = location;
+        this.parameters = parameters;
     }
 
     @Override
@@ -28,11 +30,11 @@ public class ProtocolConfig {
         if (o == null || getClass() != o.getClass()) return false;
         ProtocolConfig config = (ProtocolConfig) o;
         return protocol.equals(config.protocol) &&
-                location.equals(config.location);
+            parameters.equals(config.parameters);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(protocol, location);
+        return Objects.hash(protocol, parameters);
     }
 }
