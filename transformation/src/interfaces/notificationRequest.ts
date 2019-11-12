@@ -1,4 +1,6 @@
 export interface NotificationRequest {
+  pipelineId: number,
+  pipelineName: string;
   url: string;
   data: object;
   dataLocation: string;
@@ -7,5 +9,6 @@ export interface NotificationRequest {
 }
 
 export enum NotificationType {
-  WEBHOOK = 'WEBHOOK'
+  WEBHOOK = 'WEBHOOK',
+  SLACK = 'SLACK'
 }
