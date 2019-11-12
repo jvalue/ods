@@ -77,6 +77,8 @@ services:
       ADAPTER_SERVICE_URL: http://adapter-service:8080
       TRANSFORMATION_SERVICE_URL: http://transformation-service:8080
       STORAGE_SERVICE_URL: http://storage-service:3000
+      INITIAL_CONNECTION_RETRIES: 20
+      INITIAL_CONNECTION_RETRY_BACKOFF: 5000
     labels: # traefic reverse-proxy config
       - "traefik.backend=scheduler-service"
       - "traefik.frontend.rule=PathPrefixStrip:/scheduler"

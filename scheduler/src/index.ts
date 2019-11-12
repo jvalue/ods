@@ -12,6 +12,9 @@ const API_VERSION = '0.0.1'
 
 const CHRONJOB_EVERY_2_SECONDS = '*/2 * * * * *'
 
+const INITIAL_CONNECTION_RETRIES = parseInt(process.env.INITIAL_CONNECTION_RETRIES || '30')
+const INITIAL_CONNECTION_RETRY_BACKOFF = parseInt(process.env.INITIAL_CONNECTION_RETRY_BACKOFF || '3000')
+
 const server = app.listen(port, () => {
   console.log('listening on port ' + port)
 })
@@ -41,7 +44,7 @@ async function updatePipelines (): Promise<void> {
 
 async function initPipelineJobs (): Promise<void> {
   console.log('Starting sync with Configuration Service on URL ' + CONFIG_SERVICE_URL)
-  await PipelineScheduling.initializeJobs()
+  await PipelineScheduling.initializeJobs(INITIAL_CONNECTION_RETRIES, INITIAL_CONNECTION_RETRY_BACKOFF)
     .catch(() => {
       console.error('Scheduler: Initialization failed. Shutting down server...')
       server.close()
