@@ -8,6 +8,7 @@ import WebhookCallback from './interfaces/webhookCallback'
 
 import TransformationService from './interfaces/transformationService'
 import SandboxExecutor from './interfaces/sandboxExecutor'
+import SlackCallback from './interfaces/slackCallback'
 
 const VERSION = '0.0.2'
 
@@ -65,12 +66,21 @@ export default class JSTransformationService implements TransformationService {
       return Promise.resolve()
     }
 
-    // different notification types might be implemented later
-    if (notificationRequest.notificationType !== NotificationType.WEBHOOK) {
-      throw new Error('notification type not implemented')
+    switch (notificationRequest.notificationType) {
+      case NotificationType.WEBHOOK:
+        return this.executeWebhook(notificationRequest.url, notificationRequest.dataLocation)
+      case NotificationType.SLACK:
+        return this.executeSlackNotification(notificationRequest)
+      default:
+        throw new Error(`Notification type ${notificationRequest.notificationType} not implemented.`)
     }
+  }
 
-    return this.executeWebhook(notificationRequest.url, notificationRequest.dataLocation)
+  private async executeSlackNotification (request: NotificationRequest): Promise<void> {
+    const callbackObject: SlackCallback = {
+      text: `New data available for pipeline ${request.pipelineName}(${request.pipelineId}). Fetch at ${request.dataLocation}.`
+    }
+    await axios.post(request.url, callbackObject)
   }
 
   private async executeWebhook (callbackUrl: string, dataLocation: string): Promise<void> {
