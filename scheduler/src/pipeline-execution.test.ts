@@ -126,6 +126,8 @@ function generateConfig (
   return {
     id: 123,
     adapter: {
+      format: 'XML',
+      protocol: 'HTTP',
       location: 'somewhere'
     },
     transformations,
