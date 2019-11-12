@@ -3,7 +3,7 @@ import * as TransformationClient from './clients/transformation-client'
 import * as StorageClient from './clients/storage-client'
 import * as Scheduler from './pipeline-scheduling'
 
-import PipelineConfig from './interfaces/pipeline-config'
+import PipelineConfig from './interfaces/core/pipeline-config'
 import { AxiosError } from 'axios'
 
 export async function executePipeline (pipelineConfig: PipelineConfig, maxRetries = 3): Promise<void> {
