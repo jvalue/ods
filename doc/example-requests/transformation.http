@@ -1,5 +1,4 @@
 @baseURL = http://localhost:9000/transformation
-
 ### Get version
 GET {{baseURL}}/version  HTTP/1.1
 
@@ -37,4 +36,37 @@ Content-Type: application/json
     "content": "some string"
   },
   "func": "let arr = Array(data.n).fill(data.content);arr.reverse();return arr.length;"
+}
+
+### Perform syntax error job
+POST {{baseURL}}/job  HTTP/1.1
+Content-Type: application/json
+
+{
+  "data": {
+    "a": 1
+  },
+  "func": "const x = 2;\nlet array = [];"
+}
+
+### Perform runtime error job
+POST {{baseURL}}/job  HTTP/1.1
+Content-Type: application/json
+
+{
+  "data": {
+    "a": 1
+  },
+  "func": "data.b.c += 2;return data;"
+}
+
+### Perform long stacktrace error job
+POST {{baseURL}}/job  HTTP/1.1
+Content-Type: application/json
+
+{
+  "data": {
+    "a": 1
+  },
+  "func": "function accessMember(object) {\nreturn object.splice(a);\n}\n  data.a = accessMember(data.a);\nreturn data;"
 }
