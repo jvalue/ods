@@ -1,5 +1,6 @@
-// TODO: do like this or use | type?
+import JobError from './jobError'
+
 export default interface ExecutionResult {
-  error?: Error;
+  error?: JobError;
   data?: object;
 }

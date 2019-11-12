@@ -2,6 +2,9 @@ import { VM, VMScript } from 'vm2'
 
 import SandboxExecutor from './interfaces/sandboxExecutor'
 import ExecutionResult from './interfaces/executionResult'
+import { convertRuntimeError, convertSyntaxError } from './vm2StacktraceParser'
+
+const FUNCTION_WRAP_PREFIX_LENGTH = 1
 
 export default class VM2SandboxExecutor implements SandboxExecutor {
   vm: VM;
@@ -27,19 +30,16 @@ export default class VM2SandboxExecutor implements SandboxExecutor {
     script.wrap('function main(data) {\n', `\n}\nmain(${json});`)
 
     try {
-      // TODO: fork vm2 or wait for PR to see compilation errors code
       script.compile()
     } catch (err) {
-      // TODO: stacktrace prettifying
-      return { data: undefined, error: err }
+      return { data: undefined, error: convertSyntaxError(err, FUNCTION_WRAP_PREFIX_LENGTH) }
     }
 
     try {
       const result = this.vm.run(script)
       return { data: result, error: undefined }
     } catch (err) {
-      // TODO: stacktrace prettifying
-      return { data: undefined, error: err }
+      return { data: undefined, error: convertRuntimeError(err, FUNCTION_WRAP_PREFIX_LENGTH) }
     }
   }
 

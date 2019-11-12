@@ -65,7 +65,11 @@ export class TransformationEndpoint {
     const answer: string = JSON.stringify(result)
     console.log(`JobResult: ${answer}`)
     res.setHeader('Content-Type', 'application/json')
-    res.writeHead(200)
+    if (result.data) {
+      res.writeHead(200)
+    } else {
+      res.writeHead(400)
+    }
     res.write(answer)
     res.end()
   }
