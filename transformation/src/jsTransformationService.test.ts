@@ -80,6 +80,8 @@ describe('JSTransformationService', () => {
       post.mockReturnValue(Promise.resolve())
 
       const notificationRequest: NotificationRequest = {
+        pipelineName: 'nordstream',
+        pipelineId: 1,
         url: 'callback',
         dataLocation: 'data',
         data: data,
@@ -97,6 +99,8 @@ describe('JSTransformationService', () => {
 
     test('Notification does not trigger when condition is not met', async () => {
       const notificationRequest: NotificationRequest = {
+        pipelineName: 'southstream',
+        pipelineId: 2,
         url: 'callback',
         dataLocation: 'data',
         data: data,
@@ -111,6 +115,8 @@ describe('JSTransformationService', () => {
 
     test('Notification does not trigger when condition is malformed', async () => {
       const notificationRequest: NotificationRequest = {
+        pipelineName: 'weststream',
+        pipelineId: 3,
         url: 'callback',
         dataLocation: 'data',
         data: data,
