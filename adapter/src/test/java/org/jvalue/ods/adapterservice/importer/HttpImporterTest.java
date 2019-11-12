@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
@@ -13,8 +14,11 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Map;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -28,13 +32,16 @@ public class HttpImporterTest {
     @Before
     public void setUp() {
         ResponseEntity<String> response = new ResponseEntity<>("{\"content\":\"the internet as a string\"}", HttpStatus.OK);
-        when(restTemplate.getForEntity(from, String.class)).thenReturn(response);
+
+        ArgumentMatcher<URI> uriMatcher = (URI uri) -> uri.getPath().equals(this.from.getPath());
+
+        when(restTemplate.getForEntity(argThat(uriMatcher), eq(String.class))).thenReturn(response);
         importer = new HttpImporter(restTemplate);
     }
 
     @Test
     public void testFetch() throws IOException {
-        String result = importer.fetch(from);
+        String result = importer.fetch(Map.of("location", from.getPath()));
 
         JsonNode resultNode = mapper.readTree(result);
         assertEquals(1, resultNode.size());
@@ -43,7 +50,7 @@ public class HttpImporterTest {
 
     @Test
     public void testSerialization() throws IOException {
-        JsonNode expected = mapper.readTree("{\"parameters\":{},\"type\":\"HTTP\",\"description\":\"Plain HTTP\"}");
+        JsonNode expected = mapper.readTree("{\"type\":\"HTTP\",\"description\":\"Plain HTTP\"}");
         JsonNode result = mapper.valueToTree(importer);
 
         assertEquals(expected, result);

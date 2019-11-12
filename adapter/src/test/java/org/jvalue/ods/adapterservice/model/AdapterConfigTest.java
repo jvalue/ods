@@ -15,7 +15,9 @@ public class AdapterConfigTest {
         final String adapterJson = "{" +
                 "\"protocol\":{" +
                   "\"type\":\"HTTP\"," +
-                  "\"location\":\"URL\"" +
+                  "\"parameters\":{" +
+                    "\"location\":\"URL\"" +
+                  "}" +
                 "}," +
                 "\"format\":{" +
                   "\"type\":\"JSON\"" +
@@ -25,6 +27,6 @@ public class AdapterConfigTest {
 
         assertEquals("HTTP", result.protocolConfig.protocol);
         assertEquals("JSON", result.formatConfig.format);
-        assertEquals("URL", result.protocolConfig.location);
+        assertEquals("URL", result.protocolConfig.parameters.get("location"));
     }
 }
