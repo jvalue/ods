@@ -2,6 +2,8 @@ package org.jvalue.ods.adapterservice.adapter;
 
 import org.junit.Test;
 import org.jvalue.ods.adapterservice.model.AdapterConfig;
+import org.jvalue.ods.adapterservice.model.FormatConfig;
+import org.jvalue.ods.adapterservice.model.ProtocolConfig;
 
 import static org.junit.Assert.assertEquals;
 
@@ -9,7 +11,7 @@ public class AdapterManagerTest {
 
     @Test
     public void testGetHTTPJSONAdapter() {
-        AdapterConfig config = new AdapterConfig("HTTP", "JSON", "location");
+        AdapterConfig config = new AdapterConfig(new ProtocolConfig("HTTP", "location"), new FormatConfig("JSON"));
         Adapter result = AdapterManager.getAdapter(config);
         assertEquals("HTTP", result.protocol());
         assertEquals("JSON", result.format());
@@ -17,7 +19,7 @@ public class AdapterManagerTest {
 
     @Test
     public void testGetHTTPXMLAdapter() {
-        AdapterConfig config = new AdapterConfig("HTTP", "XML", "location");
+        AdapterConfig config = new AdapterConfig(new ProtocolConfig("HTTP", "location"), new FormatConfig("XML"));
         Adapter result = AdapterManager.getAdapter(config);
         assertEquals("HTTP", result.protocol());
         assertEquals("XML", result.format());
@@ -25,13 +27,13 @@ public class AdapterManagerTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testNotExistingProtocol() {
-        AdapterConfig config = new AdapterConfig("N/A", "XML", "location");
+        AdapterConfig config = new AdapterConfig(new ProtocolConfig("N/A", "location"), new FormatConfig("XML"));
         AdapterManager.getAdapter(config);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testNotExistingFormat() {
-        AdapterConfig config = new AdapterConfig("HTTP", "N/A", "location");
+        AdapterConfig config = new AdapterConfig(new ProtocolConfig("HTTP", "N/A"), new FormatConfig("location"));
         AdapterManager.getAdapter(config);
     }
 }

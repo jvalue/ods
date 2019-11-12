@@ -25,11 +25,11 @@ public class Adapter {
 
     public JsonNode executeJob(AdapterConfig config){
         try {
-            String raw = importer.fetch(URI.create(config.location));
+            String raw = importer.fetch(URI.create(config.protocolConfig.location));
             logger.debug("Fetched: {}", raw);
             return interpreter.interpret(raw);
         } catch (IOException e) {
-            throw new IllegalArgumentException("Not able to parse data as format: " + config.format, e);
+            throw new IllegalArgumentException("Not able to parse data as format: " + config.formatConfig.format, e);
         }
     }
 
