@@ -80,6 +80,69 @@ describe('Scheduler', () => {
     expect(stats.endTimestamp).toBeGreaterThanOrEqual(stats.startTimestamp)
   })
 
+  test('POST /job with syntax error', async () => {
+    const transformationJob = {
+      func: 'syntax error;\nreturn data;',
+      data: { number: 1 }
+    }
+
+    const response = await request(URL)
+      .post('/job')
+      .send(transformationJob)
+
+    expect(response.status).toEqual(400)
+    expect(response.type).toEqual('application/json')
+    const { data, error, stats } = response.body
+    expect(data).toBe(undefined)
+    expect(error.name).toEqual('SyntaxError')
+    expect(error.lineNumber).toBe(1)
+    expect(error.position).toBe(7)
+    expect(stats.durationInMilliSeconds).toBeGreaterThan(0)
+    expect(stats.endTimestamp).toBeGreaterThanOrEqual(stats.startTimestamp)
+  })
+
+  test('POST /job with reference error', async () => {
+    const transformationJob = {
+      func: 'return somethingThatIsntThere;',
+      data: { number: 1 }
+    }
+
+    const response = await request(URL)
+      .post('/job')
+      .send(transformationJob)
+
+    expect(response.status).toEqual(400)
+    expect(response.type).toEqual('application/json')
+    const { data, error, stats } = response.body
+    expect(data).toBe(undefined)
+    expect(error.name).toEqual('ReferenceError')
+    expect(error.lineNumber).toBe(1)
+    expect(error.position).toBe(1)
+    expect(stats.durationInMilliSeconds).toBeGreaterThan(0)
+    expect(stats.endTimestamp).toBeGreaterThanOrEqual(stats.startTimestamp)
+  })
+
+  test('POST /job with no return data', async () => {
+    const transformationJob = {
+      func: 'data.a *= 2;',
+      data: { a: 1 }
+    }
+
+    const response = await request(URL)
+      .post('/job')
+      .send(transformationJob)
+
+    expect(response.status).toEqual(400)
+    expect(response.type).toEqual('application/json')
+    const { data, error, stats } = response.body
+    expect(data).toBe(undefined)
+    expect(error.name).toEqual('MissingReturnError')
+    expect(error.lineNumber).toBe(0)
+    expect(error.position).toBe(0)
+    expect(stats.durationInMilliSeconds).toBeGreaterThan(0)
+    expect(stats.endTimestamp).toBeGreaterThanOrEqual(stats.startTimestamp)
+  })
+
   test('POST /notification triggers webhook', async () => {
     const dataLocation = 'storage/1234'
     const notificationJob = {

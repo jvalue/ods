@@ -2,7 +2,7 @@ import axios from 'axios'
 
 import ExecutionResult from './interfaces/executionResult'
 import JobResult from './interfaces/jobResult'
-import { Stats } from './interfaces/stats'
+import Stats from './interfaces/stats'
 import { NotificationRequest, NotificationType } from './interfaces/notificationRequest'
 import WebhookCallback from './interfaces/webhookCallback'
 
@@ -36,6 +36,18 @@ export default class JSTransformationService implements TransformationService {
     const [time, result] = this.executionTimeInMillis(() => this.executor.execute(code, data))
 
     const endTimestamp = Date.now()
+
+    if (result.error === undefined && (result.data === undefined || result.data === null)) {
+      result.data = undefined
+      result.error = {
+        name: 'MissingReturnError',
+        message: 'Code snippet is not returning valid data',
+        lineNumber: 0,
+        position: 0,
+        stacktrace: []
+      }
+    }
+
     const stats: Stats = {
       durationInMilliSeconds: time,
       startTimestamp,
