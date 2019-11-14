@@ -6,7 +6,7 @@ const STORAGE_URL = process.env.STORAGE_API || 'http://localhost:9000/storage'
 const SCHEDULER_URL = process.env.SCHEDULER_API || 'http://localhost:9000/scheduler'
 const ADAPTER_URL = process.env.ADAPTER_API || 'http://localhost:9000/adapter'
 const TRANSFORMATION_URL = process.env.TRANSFORMATION_API || 'http://localhost:9000/transformation'
-const MOCK_SERVER_URL = process.env.MOCK_SERVER_API || 'http://localhost:9000/system-test-mocks'
+const MOCK_SERVER_URL = process.env.MOCK_SERVER_API || 'http://localhost:9000/mock-server'
 
 const sourceData = {
   one: 1,
