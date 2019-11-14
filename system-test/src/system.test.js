@@ -210,9 +210,9 @@ describe('System-Test', () => {
 
     // Create updated pipeline
     pipelineConfig.id = pipelineId
-    const anotherNotification = generateNotification('data.two === \"two\"', MOCK_SERVER_URL+'/notifications/test4_2')
+    const anotherNotification = generateNotification('data.two === \"two\"', MOCK_SERVER_DOCKER+'/notifications/test4_2')
     pipelineConfig.notifications = [notification, anotherNotification]
-    pipelineConfig.adapter.location = MOCK_SERVER_URL+'/data/test4_updated'
+    pipelineConfig.adapter.location = MOCK_SERVER_DOCKER+'/data/test4_updated'
 
     console.log(`Test 4: Pipeline ${pipelineId} update request triggered.`)
     // Update pipeline
@@ -235,7 +235,7 @@ describe('System-Test', () => {
     expect(updatedStorageResponse.body.length).toBeGreaterThan(1)
     const dataArray = updatedStorageResponse.body.map( b => b.data)
     expect(dataArray[0]).toEqual(sourceData)
-    expect(dataArray).toContain(updatedSourceData)
+    expect(dataArray).toContainEqual(updatedSourceData)
 
     console.log(`Test 4: Removing pipeline ${pipelineId} after test execution.`)
     const deletionResponse = await request(CORE_URL)
@@ -244,9 +244,6 @@ describe('System-Test', () => {
     expect(deletionResponse.status).toEqual(204)
 
   }, 20000)
-
-
-
 
   test('Test 5: Create pipeline with multiple notifications', async () => {
     // Prepare datasource mock
