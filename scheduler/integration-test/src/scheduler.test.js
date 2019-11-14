@@ -78,6 +78,8 @@ describe('Scheduler', () => {
     expect(triggered.status).toEqual(200)
     expect(triggered.body).toEqual(
       {
+        pipelineId: 125,
+        pipelineName: 'nordstream',
         notificationType: 'WEBHOOK',
         data,
         dataLocation: MOCK_STORAGE_URL + '/125',
@@ -90,6 +92,8 @@ describe('Scheduler', () => {
     expect(alsoTriggered.type).toEqual('application/json')
     expect(alsoTriggered.body).toEqual(
       {
+        pipelineId: 125,
+        pipelineName: 'nordstream',
         notificationType: 'WEBHOOK',
         data,
         condition: 'data.field2 === 123',
