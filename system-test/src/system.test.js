@@ -8,6 +8,7 @@ const ADAPTER_URL = process.env.ADAPTER_API || 'http://localhost:9000/adapter'
 const TRANSFORMATION_URL = process.env.TRANSFORMATION_API || 'http://localhost:9000/transformation'
 const MOCK_SERVER_URL = process.env.MOCK_SERVER_API || 'http://localhost:9000/mock-server'
 
+const STORAGE_DOCKER = process.env.STORAGE_API || 'http://storage-service:3000' // needed to run tests outside of docker environment
 const MOCK_SERVER_DOCKER = process.env.MOCK_SERVER_API || 'http://mock-server:8080'
 
 const sourceData = {
@@ -67,7 +68,7 @@ describe('System-Test', () => {
     // Wait for webhook notification
     const webhookResponse = await checkWebhook('test1', 1000)
     console.log(`Test 1: Webhook response body: ${JSON.stringify(webhookResponse.body)}`)
-    expect(webhookResponse.body.location).toEqual(STORAGE_URL+'/'+pipelineId)
+    expect(webhookResponse.body.location).toEqual(STORAGE_DOCKER+'/'+pipelineId)
     expect(webhookResponse.body.timestamp).toBeDefined()
 
     // Check if data has been stored correctly
@@ -145,8 +146,8 @@ describe('System-Test', () => {
       two: "two",
       newField: 12
     }
-    const notification = generateNotification('data.newField === 12',MOCK_SERVER_URL+'/notifications/test3')
-    let pipelineConfig = generateConfig(MOCK_SERVER_URL+'/data/test3',false)
+    const notification = generateNotification('data.newField === 12',MOCK_SERVER_DOCKER+'/notifications/test3')
+    let pipelineConfig = generateConfig(MOCK_SERVER_DOCKER+'/data/test3',false)
     pipelineConfig.transformations = [{"func": "data.one = data.one + 1;return data;"}, {"func": "data.newField = 12;return data;"}, {"func": "delete data.objecticus;return data;"}]
     pipelineConfig.notifications = [notification]
 
@@ -159,9 +160,9 @@ describe('System-Test', () => {
     const pipelineId = pipelineResponse.body.id
 
     // Wait for webhook notification
-    const webhookResponse = await checkWebhook('/test3', 1000)
+    const webhookResponse = await checkWebhook('test3', 1000)
     console.log(`Test 3: Webhook response body: ${JSON.stringify(webhookResponse.body)}`)
-    expect(webhookResponse.body.location).toEqual(STORAGE_URL+'/'+pipelineId)
+    expect(webhookResponse.body.location).toEqual(STORAGE_DOCKER+'/'+pipelineId)
     expect(webhookResponse.body.timestamp).toBeDefined()
 
     // Check if data has been stored correctly
