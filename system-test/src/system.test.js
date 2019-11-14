@@ -81,7 +81,7 @@ describe('System-Test', () => {
 
   }, 10000)
 
-  test('Test 2: Create periodic pipeline without transformations', async () => {
+  test('Test 2: Create and delete periodic pipeline without transformations', async () => {
     // Prepare datasource mock
     await request(MOCK_SERVER_URL)
       .post('/sequences/test2')
@@ -295,57 +295,6 @@ describe('System-Test', () => {
       .get('/notifications/test5_3')
     expect(webhookResponse3.status).toEqual(404)
   }, 10000)
-
-  test('Test 6: Delete periodic pipeline', async () => {
-    // Prepare datasource mock
-    await request(MOCK_SERVER_URL)
-      .post('/sequences/test6')
-      .send(sourceData)
-
-    const notification = generateNotification('data.two === "two"', MOCK_SERVER_URL+'/sequences/test6')
-    let pipelineConfig = generateConfig(MOCK_SERVER_URL+'/sequences/test6', true, 5000)
-    pipelineConfig.notifications = [notification]
-
-    console.log(`Test 6: Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
-
-    // Add pipeline to core service
-    const pipelineResponse = await request(CORE_URL)
-      .post('/pipelines')
-      .send(pipelineConfig)
-    const pipelineId = pipelineResponse.body.id
-
-    // Wait for one execution of the pipeline
-    await sleep(4000)
-
-    // Remove periodic pipeline from ods-core
-    const deletionResponse = await request(CORE_URL)
-      .delete(`/pipelines/${pipelineId}`)
-      .send()
-    expect(deletionResponse.status).toEqual(204)
-    console.log(`Test 6: Pipeline ${pipelineId} should have been executed once. Deletion request triggered.`)
-
-    // Wait to check if pipeline really stopped executing
-
-    // Check if data has been stored correctly
-    const storageResponse = await request(STORAGE_URL)
-      .get('/'+pipelineId)
-    expect(storageResponse.status).toEqual(200)
-    expect(storageResponse.type).toEqual('application/json')
-    console.log(`Test 6: Storage response response body: ${JSON.stringify(storageResponse.body)}`)
-    expect(storageResponse.body.length).toEqual(1)
-    expect(storageResponse.body[0].data).toEqual(expect.objectContaining(sourceData))
-    expect(storageResponse.body[0].data.count).toEqual(0)
-
-    // Check if webhook has been triggered correctly
-    const webhookResponse = await request(MOCK_SERVER_URL)
-      .get('/sequences/test6')
-    expect(webhookResponse.status).toEqual(200)
-    expect(webhookResponse.type).toEqual('application/json')
-    console.log(`Test 6: Webhook response body ${JSON.stringify(webhookResponse.body)}`)
-    expect(webhookResponse.body.length).toEqual(1)
-    expect(webhookResponse.body[0].location).toEqual(STORAGE_URL+'/'+pipelineId)
-    expect(webhookResponse.body[0].timestamp).toBeDefined()
-  })
 })
 
 function generateNotification(condition, url) {
