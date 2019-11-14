@@ -256,10 +256,10 @@ describe('System-Test', () => {
       .post('/data/test5')
       .send(sourceData)
 
-    let pipelineConfig = generateConfig(MOCK_SERVER_URL+'/data/test5', false)
-    const notification1 = generateNotification('data.one === 1', MOCK_SERVER_URL+'/notifications/test5_1')
-    const notification2 = generateNotification('data.one === 1', MOCK_SERVER_URL+'/notifications/test5_2')
-    const notification3 = generateNotification('data.one < 1', MOCK_SERVER_URL+'/notifications/test5_3')
+    let pipelineConfig = generateConfig(MOCK_SERVER_DOCKER+'/data/test5', false)
+    const notification1 = generateNotification('data.one === 1', MOCK_SERVER_DOCKER+'/notifications/test5_1')
+    const notification2 = generateNotification('data.one === 1', MOCK_SERVER_DOCKER+'/notifications/test5_2')
+    const notification3 = generateNotification('data.one < 1', MOCK_SERVER_DOCKER+'/notifications/test5_3')
     pipelineConfig.notifications = [notification1, notification2, notification3]
 
     console.log(`Test 5: Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
@@ -270,8 +270,10 @@ describe('System-Test', () => {
       .send(pipelineConfig)
     const pipelineId = pipelineResponse.body.id
 
-    // Give the ODS time to process the pipeline
-    await sleep(6000)
+    // Wait for webhook notification
+    const webhookResponse1 = await checkWebhook('test5_1', 1000)
+    expect(webhookResponse1.body.location).toEqual(STORAGE_DOCKER+'/'+pipelineId)
+    expect(webhookResponse1.body.timestamp).toBeDefined()
 
     // Check if data has been stored correctly
     const storageResponse = await request(STORAGE_URL)
@@ -281,22 +283,14 @@ describe('System-Test', () => {
     console.log(`Test 5: Storage response body: ${JSON.stringify(storageResponse.body)}`)
     expect(storageResponse.body[0].data).toEqual(sourceData)
 
-    // Check if webhooks were triggered
-    const webhookResponse1 = await request(MOCK_SERVER_URL)
-      .get('/notifications/test5_1')
-    expect(webhookResponse1.status).toEqual(200)
-    expect(webhookResponse1.type).toEqual('application/json')
-    expect(webhookResponse1.body.location).toEqual(STORAGE_URL+'/'+pipelineId)
-    expect(webhookResponse1.body.timestamp).toBeDefined()
-
+    // Check if second webhook was triggered as well
     const webhookResponse2 = await request(MOCK_SERVER_URL)
       .get('/notifications/test5_2')
     expect(webhookResponse2.status).toEqual(200)
-    expect(webhookResponse2.type).toEqual('application/json')
-    expect(webhookResponse2.body.location).toEqual(STORAGE_URL+'/'+pipelineId)
+    expect(webhookResponse2.body.location).toEqual(STORAGE_DOCKER+'/'+pipelineId)
     expect(webhookResponse2.body.timestamp).toBeDefined()
 
-    // Check if webhooks were triggered
+    // Check if third webhook was triggered
     const webhookResponse3 = await request(MOCK_SERVER_URL)
       .get('/notifications/test5_3')
     expect(webhookResponse3.status).toEqual(404)
