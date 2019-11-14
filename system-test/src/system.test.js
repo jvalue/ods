@@ -8,6 +8,8 @@ const ADAPTER_URL = process.env.ADAPTER_API || 'http://localhost:9000/adapter'
 const TRANSFORMATION_URL = process.env.TRANSFORMATION_API || 'http://localhost:9000/transformation'
 const MOCK_SERVER_URL = process.env.MOCK_SERVER_API || 'http://localhost:9000/mock-server'
 
+const MOCK_SERVER_DOCKER = process.env.MOCK_SERVER_API || 'http://mock-server:8080'
+
 const sourceData = {
   one: 1,
   two: "two",
@@ -20,6 +22,9 @@ describe('System-Test', () => {
 
   beforeAll(async () => {
     console.log('Waiting for core-service with URL: ' + CORE_URL)
+    console.log('Waiting for scheduler-service with URL: ' + SCHEDULER_URL)
+    console.log('Waiting for transformation-service with URL: ' + TRANSFORMATION_URL)
+    console.log('Waiting for adapter-service with URL: ' + ADAPTER_URL)
     console.log('Waiting for storage-service with URL: ' + STORAGE_URL)
     console.log('Waiting for mock server with URL: ' + MOCK_SERVER_URL)
     await waitOn(
@@ -47,8 +52,8 @@ describe('System-Test', () => {
       .post('/data/test1')
       .send(sourceData)
 
-    const pipelineConfig = generateConfig(MOCK_SERVER_URL+'/data/test1', false)
-    let notification = generateNotification('data.one === 1', MOCK_SERVER_URL+'/notifications/test1')
+    const pipelineConfig = generateConfig(MOCK_SERVER_DOCKER+'/data/test1', false)
+    let notification = generateNotification('data.one === 1', MOCK_SERVER_DOCKER+'/notifications/test1')
     pipelineConfig.notifications = [notification]
 
     console.log(`Test 1: Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
@@ -60,7 +65,7 @@ describe('System-Test', () => {
     const pipelineId = pipelineResponse.body.id
 
     // Wait for webhook notification
-    const webhookResponse = await checkWebhook('/test1', 1000)
+    const webhookResponse = await checkWebhook('test1', 1000)
     console.log(`Test 1: Webhook response body: ${JSON.stringify(webhookResponse.body)}`)
     expect(webhookResponse.body.location).toEqual(STORAGE_URL+'/'+pipelineId)
     expect(webhookResponse.body.timestamp).toBeDefined()
