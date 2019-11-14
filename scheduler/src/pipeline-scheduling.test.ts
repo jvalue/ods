@@ -231,6 +231,7 @@ function generateConfig (periodic: boolean, firstExecution: Date, interval: numb
     transformations: [],
     persistence: {},
     metadata: {
+      displayName: 'pipiline',
       creationTimestamp: firstExecution,
       license: 'license'
     },

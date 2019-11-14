@@ -28,5 +28,16 @@ Content-Type: application/json
   "metadata": {
     "author": "icke",
     "license": "none"
-  }
+  },
+  "notifications": [
+    {
+    "notificationType": "WEBHOOK",
+    "condition": "data.test === 'abc'",
+    "url": "http://www.mocky.io/v2/5dc94f7a2f0000680073eb96"
+    }
+  ]
 }
+
+
+### Delete all pipelines
+DELETE {{baseURL}}/pipelines/ HTTP/1.1

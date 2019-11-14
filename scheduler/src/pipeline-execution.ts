@@ -88,6 +88,8 @@ async function executeNotifications (
     pipelineConfig.notifications.map(async n => {
       n.data = data
       n.dataLocation = dataLocation
+      n.pipelineId = pipelineConfig.id
+      n.pipelineName = pipelineConfig.metadata.displayName
       await TransformationClient.executeNotification(n)
     })
     console.log(`Successfully delivered notification requests to transformation-service for ${pipelineConfig.id}`)
