@@ -26,7 +26,7 @@ services:
   mock-server:
     labels:
       - "traefik.backend=mock-server"
-      - "traefik.frontend.rule=PathPrefixStrip:/system-test-mocks"
+      - "traefik.frontend.rule=PathPrefixStrip:/mock-server"
       - "traefik.frontend.passHostHeader=true"
 
     build:
