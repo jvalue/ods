@@ -48,9 +48,14 @@ public class HttpImporterTest {
         assertEquals("the internet as a string", resultNode.get("content").textValue());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testFetchMissingURI() throws IOException {
+        importer.fetch(Map.of());
+    }
+
     @Test
     public void testSerialization() throws IOException {
-        JsonNode expected = mapper.readTree("{\"parameters\":{\"location\": \"String of the URL for the HTTP call\"}, \"type\":\"HTTP\",\"description\":\"Plain HTTP\"}");
+        JsonNode expected = mapper.readTree("{\"parameters\":{\"location\": \"String of the URI for the HTTP call\"}, \"type\":\"HTTP\",\"description\":\"Plain HTTP\"}");
         JsonNode result = mapper.valueToTree(importer);
 
         assertEquals(expected, result);
