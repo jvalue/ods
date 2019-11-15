@@ -3,29 +3,20 @@ version: '3.7'
 services:
 # --------------------- SYSTEM TEST ----------------------------------------
   system-test:
-    labels: # traefic reverse-proxy config
-      - "traefik.backend=system-test"
-      - "traefik.frontend.rule=PathPrefixStrip:/system-test"
-      - "traefik.frontend.passHostHeader=true"
-
+    image: open-data-service/ods-main/system-test
     build:
       context: ./system-test/
-
-    image: open-data-service/ods-main/system-test
-
     ports:
       - "9700:8080"
       - "9701:8081"
       - "9702:8082"
-
     environment:
-      CORE_API: http://core-service:8080
-      STORAGE_API: http://storage-service:3000
-      TRANSFORMATION_API: http://transformation-service:8080
-      SCHEDULER_API: http://scheduler-service:8080
-      ADAPTER_API: http://adapter-service:8080
+      CORE_API: http://core:8080
+      STORAGE_API: http://storage:3000
+      TRANSFORMATION_API: http://transformation:8080
+      SCHEDULER_API: http://scheduler:8080
+      ADAPTER_API: http://adapter:8080
       MOCK_RECEIVER_HOST: system-test
       MOCK_RECEIVER_PORT: 8081
       MOCK_SOURCE_HOST: system-test
       MOCK_SOURCE_PORT: 8082
-
