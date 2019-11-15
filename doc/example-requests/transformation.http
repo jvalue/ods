@@ -1,4 +1,4 @@
-@baseURL = http://localhost:9000/transformation
+@baseURL = http://localhost:9000/api/transformation
 ### Get version
 GET {{baseURL}}/version  HTTP/1.1
 
