@@ -322,8 +322,8 @@ describe('System-Test', () => {
 
     expect(waitForWebhookChange('test6', webhookResponse1, 1000))
       .rejects.toThrow(`Webhook was not triggered within 10 retries.`)
-  })
-}, 15000)
+  }, 15000)
+})
 
 function generateNotification(condition, url) {
   return {
