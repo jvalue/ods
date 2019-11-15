@@ -290,7 +290,40 @@ describe('System-Test', () => {
       .get('/notifications/test5_3')
     expect(webhookResponse3.status).toEqual(404)
   }, 10000)
-})
+
+  test('Test 6: Delete periodic pipeline', async () => {
+    // Prepare dataource mock
+    await request(MOCK_SERVER_URL)
+      .post('/data/test6')
+      .send(sourceData)
+
+    const pipelineConfig = generateConfig(MOCK_SERVER_DOCKER+'/data/test6', true)
+    const notification = generateNotification('data.one === 1', MOCK_SERVER_DOCKER+'/notifications/test6')
+    pipelineConfig.notifications = [notification]
+
+    console.log(`Test 6: Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
+
+    // Add pipeline to core service
+    const pipelineResponse = await request(CORE_URL)
+      .post('/pipelines')
+      .send(pipelineConfig)
+    const pipelineId = pipelineResponse.body.id
+
+    // Wait for webhook notification
+    const webhookResponse1 = await checkWebhook('test6', 1000)
+    expect(webhookResponse1.body.location).toEqual(STORAGE_DOCKER+'/'+pipelineId)
+    expect(webhookResponse1.body.timestamp).toBeDefined()
+
+    // Delete pipeline from core service
+    const deletionResponse = await request(CORE_URL)
+      .delete(`/pipelines/${pipelineId}`)
+    expect(deletionResponse.status).toEqual(204)
+    console.log(`Test 6: Pipeline ${pipelineId} deletion request triggered`)
+
+    expect(waitForWebhookChange('test6', webhookResponse1, 1000))
+      .rejects.toThrow(`Webhook was not triggered within 10 retries.`)
+  })
+}, 15000)
 
 function generateNotification(condition, url) {
   return {
@@ -337,6 +370,7 @@ async function checkWebhook(uri, pollingInterval, maxRetries = 10) {
       await sleep(pollingInterval)
     }
   }
+  await Promise.reject(`Webhook was not triggered within ${maxRetries} retries.`)
 }
 
 async function waitForWebhookChange(uri, original, pollingInterval, maxRetries = 10) {
@@ -350,5 +384,5 @@ async function waitForWebhookChange(uri, original, pollingInterval, maxRetries =
       await sleep(pollingInterval)
     }
   }
-  Promise.reject(`Webhook was not triggered within ${maxRetries} retries.`)
+  await Promise.reject(`Webhook was not triggered within ${maxRetries} retries.`)
 }
