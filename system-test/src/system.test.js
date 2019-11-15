@@ -54,7 +54,7 @@ describe('System-Test', () => {
       .send(sourceData)
 
     const pipelineConfig = generateConfig(MOCK_SERVER_DOCKER+'/data/test1', false)
-    let notification = generateNotification('data.one === 1', MOCK_SERVER_DOCKER+'/notifications/test1')
+    const notification = generateNotification('data.one === 1', MOCK_SERVER_DOCKER+'/notifications/test1')
     pipelineConfig.notifications = [notification]
 
     console.log(`Test 1: Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
@@ -88,7 +88,7 @@ describe('System-Test', () => {
       .send(sourceData)
 
     const notification = generateNotification('data.count < 2', MOCK_SERVER_DOCKER+'/notifications/test2')
-    let pipelineConfig = generateConfig(MOCK_SERVER_DOCKER+'/sequences/test2', true, 5000)
+    const pipelineConfig = generateConfig(MOCK_SERVER_DOCKER+'/sequences/test2', true, 5000)
     pipelineConfig.notifications = [notification]
 
     console.log(`Test 2: Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
@@ -144,7 +144,7 @@ describe('System-Test', () => {
       newField: 12
     }
     const notification = generateNotification('data.newField === 12',MOCK_SERVER_DOCKER+'/notifications/test3')
-    let pipelineConfig = generateConfig(MOCK_SERVER_DOCKER+'/data/test3',false)
+    const pipelineConfig = generateConfig(MOCK_SERVER_DOCKER+'/data/test3',false)
     pipelineConfig.transformations = [{"func": "data.one = data.one + 1;return data;"}, {"func": "data.newField = 12;return data;"}, {"func": "delete data.objecticus;return data;"}]
     pipelineConfig.notifications = [notification]
 
@@ -251,7 +251,7 @@ describe('System-Test', () => {
       .post('/data/test5')
       .send(sourceData)
 
-    let pipelineConfig = generateConfig(MOCK_SERVER_DOCKER+'/data/test5', false)
+    const pipelineConfig = generateConfig(MOCK_SERVER_DOCKER+'/data/test5', false)
     const notification1 = generateNotification('data.one === 1', MOCK_SERVER_DOCKER+'/notifications/test5_1')
     const notification2 = generateNotification('data.one === 1', MOCK_SERVER_DOCKER+'/notifications/test5_2')
     const notification3 = generateNotification('data.one < 1', MOCK_SERVER_DOCKER+'/notifications/test5_3')
@@ -350,4 +350,5 @@ async function waitForWebhookChange(uri, original, pollingInterval, maxRetries =
       await sleep(pollingInterval)
     }
   }
+  Promise.reject(`Webhook was not triggered within ${maxRetries} retries.`)
 }
