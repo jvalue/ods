@@ -52,9 +52,9 @@ integrationtest-adapter:
     - build-adapter
   script:
     - docker load -i ./adapter/image/adapter.tar
-    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml build adapter-service-it
-    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d adapter-service
-    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from adapter-service-it adapter-service-it
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml build adapter-it
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d adapter
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from adapter-it adapter-it
   after_script:
     - docker-compose logs
     - docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
@@ -182,11 +182,11 @@ integrationtest-storage:
   script:
     - docker load -i ./storage/image/storage_postgrest.tar
     - docker load -i ./storage/image/storage_liquibase.tar
-    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml build storage-service-it
-    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d storage-service-db
-    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up storage-service-db-liquibase
-    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d storage-service
-    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from storage-service-it storage-service-it
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml build storage-it
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d storage-db
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up storage-db-liquibase
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d storage
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from storage-it storage-it
   after_script:
     - docker-compose logs
     - docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
@@ -242,9 +242,9 @@ integrationtest-core:
     - build-core
   script:
     - docker load -i ./core/image/core.tar
-    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml build core-service-it
-    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d core-service
-    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from core-service-it core-service-it
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml build core-it
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d core
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from core-it core-it
   after_script:
     - docker-compose logs
     - docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
@@ -296,9 +296,9 @@ integrationtest-scheduler:
     - build-scheduler
   script:
     - docker load -i ./scheduler/image/scheduler.tar
-    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml build scheduler-service-it
-    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d scheduler-service
-    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from scheduler-service-it scheduler-service-it
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml build scheduler-it
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d scheduler
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from scheduler-it scheduler-it
   after_script:
     - docker-compose logs
     - docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
@@ -349,9 +349,9 @@ integrationtest-transformation:
     - build-transformation
   script:
     - docker load -i ./transformation/image/transformation.tar
-    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml build transformation-service-it
-    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d transformation-service
-    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from transformation-service-it transformation-service-it
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml build transformation-it
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d transformation
+    - docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from transformation-it transformation-it
   after_script:
     - docker-compose logs
     - docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
@@ -387,7 +387,7 @@ system-test:
     - docker load -i ./storage/image/storage_liquibase.tar
     - docker load -i ./transformation/image/transformation.tar
     - docker load -i ./adapter/image/adapter.tar
-    - docker-compose -f docker-compose.yml up -d core-service adapter-service transformation-service storage-service scheduler-service
+    - docker-compose -f docker-compose.yml up -d core adapter transformation storage scheduler
     - docker-compose -f docker-compose.yml -f docker-compose.st.yml up --exit-code-from system-test system-test
   after_script:
     - docker-compose logs

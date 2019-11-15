@@ -1,11 +1,11 @@
 const request = require('supertest')
 const waitOn = require('wait-on')
 
-const CORE_URL = process.env.CORE_API || 'http://localhost:9000/core'
-const STORAGE_URL = process.env.STORAGE_API || 'http://localhost:9000/storage'
-const SCHEDULER_URL = process.env.SCHEDULER_API || 'http://localhost:9000/scheduler'
-const ADAPTER_URL = process.env.ADAPTER_API || 'http://localhost:9000/adapter'
-const TRANSFORMATION_URL = process.env.TRANSFORMATION_API || 'http://localhost:9000/transformation'
+const CORE_URL = process.env.CORE_API || 'http://localhost:9000/api/core'
+const STORAGE_URL = process.env.STORAGE_API || 'http://localhost:9000/api/storage'
+const SCHEDULER_URL = process.env.SCHEDULER_API || 'http://localhost:9000/api/scheduler'
+const ADAPTER_URL = process.env.ADAPTER_API || 'http://localhost:9000/api/adapter'
+const TRANSFORMATION_URL = process.env.TRANSFORMATION_API || 'http://localhost:9000/api/transformation'
 const MOCK_SERVER_URL = process.env.MOCK_SERVER_API || 'http://localhost:9000/mock-server'
 
 const STORAGE_DOCKER = process.env.STORAGE_API || 'http://storage-service:3000' // needed to run tests outside of docker environment
