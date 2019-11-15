@@ -1,4 +1,4 @@
-@baseURL = http://localhost:9000/adapter
+@baseURL = http://localhost:9000/api/adapter
 
 ### Perform Data Import
 POST {{baseURL}}/dataImport  HTTP/1.1
