@@ -4,12 +4,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.Map;
 
 public class HttpImporter extends Importer {
 
-  public final Map<String, String> parameters = Map.of("location", "String of the URL for the HTTP call");
-
+  private final Map<String, String> parameters =  Collections.unmodifiableMap(Map.of("location", "String of the URI for the HTTP call"));
   private final RestTemplate restTemplate;
 
   public HttpImporter(RestTemplate restTemplate) {
@@ -27,18 +27,17 @@ public class HttpImporter extends Importer {
   }
 
   @Override
-  public String fetch(Map<String, Object> parameters) {
+  public Map<String, String> getAvailableParameters() {
+    return parameters;
+  }
+
+  @Override
+  protected String doFetch(Map<String, Object> parameters) {
     validateParameters(parameters);
     String location = parameters.get("location").toString();
 
     URI uri = URI.create(location);
     ResponseEntity<String> responseEntity = restTemplate.getForEntity(uri, String.class);
     return responseEntity.getBody();
-  }
-
-  private void validateParameters(Map<String, Object> parameters) {
-    if(parameters.get("location") == null) {
-      throw new IllegalArgumentException("HTTP importer requires parameter location");
-    }
   }
 }
