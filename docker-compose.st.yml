@@ -29,4 +29,4 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.to-mock-server.rule=PathPrefix(`/api/system-tests/mock-server/`)"
       - "traefik.http.routers.to-mock-server.middlewares=mock-server-stripprefix@docker"
-      - "traefik.http.middlewares.mock-server-stripprefix.stripprefix.prefixes=/api/mock-server"
+      - "traefik.http.middlewares.mock-server-stripprefix.stripprefix.prefixes=/api/system-tests/mock-server"
