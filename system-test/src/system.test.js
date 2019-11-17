@@ -40,11 +40,14 @@ describe('System-Test', () => {
   }, 12000)
 
   afterAll(async () => {
-    console.log('All tests done, removing pipelines from ods.')
+    console.log('All tests done, removing pipelines from ods...')
     await request(CORE_URL)
       .delete('/')
       .send()
-    console.log('Deletion triggered.')
+    console.log('Cleaning up mock server...')
+    await request(MOCK_SERVER_URL)
+      .delete('/')
+      .send()
   })
 
   test('Test 1: Create non-periodic pipeline without transformations', async () => {

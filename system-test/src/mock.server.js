@@ -12,7 +12,7 @@ const dataStore = new Map()
 const dataSequences = new Map()
 const sequenceCounters = new Map()
 
-const singleNotifications = new Map()
+const notificationStore = new Map()
 
 router.get('/', async ctx => {
   ctx.type = 'text/plain'
@@ -66,14 +66,14 @@ router.get('/sequences/:path', async ctx => {
 router.post('/notifications/:path', async ctx => {
   const path = ctx.params.path
   console.log(`POST on /notifications/${path} received by mock server.`)
-  singleNotifications.set(path, ctx.request.body)
+  notificationStore.set(path, ctx.request.body)
   ctx.status = 201
 })
 
 router.get('/notifications/:path', async ctx => {
   const path = ctx.params.path
   console.log(`GET on /notifications/${path} received by mock server.`)
-  const notification = singleNotifications.get(path)
+  const notification = notificationStore.get(path)
   if(!notification) {
     ctx.throw(404, `No notification has been stored on /notifications/${path}.`)
   } else {
@@ -81,6 +81,13 @@ router.get('/notifications/:path', async ctx => {
     ctx.type = 'application/json'
     ctx.status = 200
   }
+})
+
+router.del('/', async ctx => {
+  dataStore.clear()
+  dataSequences.clear()
+  sequenceCounters.clear()
+  notificationStore.clear()
 })
 
 app.use(router.routes())
