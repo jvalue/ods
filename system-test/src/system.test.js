@@ -27,7 +27,7 @@ describe('System-Test', () => {
     console.log('Waiting for transformation-service with URL: ' + TRANSFORMATION_URL)
     console.log('Waiting for adapter-service with URL: ' + ADAPTER_URL)
     console.log('Waiting for storage-service with URL: ' + STORAGE_URL)
-    console.log('Waiting for mock server with URL: ' + MOCK_SERVER_URL)
+    console.log('Waiting for mock server with URL: ' + MOCK_SERVER_URL +'/')
     await waitOn(
       { resources:
       [STORAGE_URL,
@@ -35,7 +35,7 @@ describe('System-Test', () => {
       SCHEDULER_URL,
       TRANSFORMATION_URL,
       ADAPTER_URL + '/version',
-      MOCK_SERVER_URL
+      MOCK_SERVER_URL + '/'
       ], timeout: 10000 })
   }, 12000)
 
