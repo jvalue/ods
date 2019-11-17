@@ -6,9 +6,9 @@ const STORAGE_URL = process.env.STORAGE_API || 'http://localhost:9000/api/storag
 const SCHEDULER_URL = process.env.SCHEDULER_API || 'http://localhost:9000/api/scheduler'
 const ADAPTER_URL = process.env.ADAPTER_API || 'http://localhost:9000/api/adapter'
 const TRANSFORMATION_URL = process.env.TRANSFORMATION_API || 'http://localhost:9000/api/transformation'
-const MOCK_SERVER_URL = process.env.MOCK_SERVER_API || 'http://localhost:9000/mock-server'
+const MOCK_SERVER_URL = process.env.MOCK_SERVER_API || 'http://localhost:9000/api/system-tests/mock-server'
 
-const STORAGE_DOCKER = process.env.STORAGE_API || 'http://storage-service:3000' // needed to run tests outside of docker environment
+const STORAGE_DOCKER = process.env.STORAGE_API || 'http://storage:3000' // needed to run tests outside of docker environment
 const MOCK_SERVER_DOCKER = process.env.MOCK_SERVER_API || 'http://mock-server:8080'
 
 const sourceData = {
@@ -297,7 +297,7 @@ describe('System-Test', () => {
       .post('/data/test6')
       .send(sourceData)
 
-    const pipelineConfig = generateConfig(MOCK_SERVER_DOCKER+'/data/test6', true)
+    const pipelineConfig = generateConfig(MOCK_SERVER_DOCKER+'/data/test6', true, 10000)
     const notification = generateNotification('data.one === 1', MOCK_SERVER_DOCKER+'/notifications/test6')
     pipelineConfig.notifications = [notification]
 
@@ -320,9 +320,10 @@ describe('System-Test', () => {
     expect(deletionResponse.status).toEqual(204)
     console.log(`Test 6: Pipeline ${pipelineId} deletion request triggered`)
 
-    expect(waitForWebhookChange('test6', webhookResponse1, 1000))
-      .rejects.toThrow(`Webhook was not triggered within 10 retries.`)
-  }, 15000)
+    const unchanged = await webhookRemainsUnchanged('test6', 5000)
+    console.log(unchanged)
+    expect(unchanged).toEqual(true)
+  }, 10000)
 })
 
 function generateNotification(condition, url) {
@@ -370,7 +371,20 @@ async function checkWebhook(uri, pollingInterval, maxRetries = 10) {
       await sleep(pollingInterval)
     }
   }
-  await Promise.reject(`Webhook was not triggered within ${maxRetries} retries.`)
+  await Promise.reject(`Webhook ${uri} was not triggered within ${maxRetries} retries.`)
+}
+
+async function webhookRemainsUnchanged(uri, ms) {
+  const ref = await request(MOCK_SERVER_URL)
+    .get(`/notifications/${uri}`)
+  await sleep(ms)
+  const latest = await request(MOCK_SERVER_URL)
+    .get(`/notifications/${uri}`)
+  if(JSON.stringify(latest.body) === JSON.stringify(ref.body)) {
+    return Promise.resolve(true)
+  } else {
+    return Promise.resolve(false)
+  }
 }
 
 async function waitForWebhookChange(uri, original, pollingInterval, maxRetries = 10) {
@@ -384,5 +398,5 @@ async function waitForWebhookChange(uri, original, pollingInterval, maxRetries =
       await sleep(pollingInterval)
     }
   }
-  await Promise.reject(`Webhook was not triggered within ${maxRetries} retries.`)
+  await Promise.reject(`Webhook ${uri} was not triggered within ${maxRetries} retries.`)
 }
