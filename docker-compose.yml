@@ -78,6 +78,11 @@ services:
       STORAGE_SERVICE_URL: http://storage:3000
       INITIAL_CONNECTION_RETRIES: 20
       INITIAL_CONNECTION_RETRY_BACKOFF: 5000
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.to-scheduler.rule=PathPrefix(`/api/scheduler`)"
+      - "traefik.http.routers.to-scheduler.middlewares=scheduler-stripprefix@docker"
+      - "traefik.http.middlewares.scheduler-stripprefix.stripprefix.prefixes=/api/scheduler"
 
   # ----------------- STORAGE SERVICE (/scheduler) --------------------
   storage: # Wraps postgres database with API

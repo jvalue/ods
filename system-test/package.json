@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "description": "Open Data Service System Test",
   "scripts": {
-    "mock:receiver": "node src/mock.receiver.js",
-    "mock:source": "node src/mock.source.js",
-    "pretest": "(npm run mock:receiver &) && (npm run mock:source &)",
+    "mockServer": "node src/mock.server.js",
     "test": "jest",
     "posttest": "killall node"
   },
