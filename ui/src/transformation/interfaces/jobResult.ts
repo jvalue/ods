@@ -1,6 +1,8 @@
+import JobError from './jobError'
+
 export default interface JobResult {
   data?: object;
-  error?: Error;
+  error?: JobError;
   stats: Stats;
 }
 

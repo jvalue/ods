@@ -6,7 +6,7 @@
       <v-divider class="mx-4"/>
 
       <v-card-title>Transformation Function</v-card-title>
-      <CodeEditor v-model="functionInput" v-bind:data="dataInput"/>
+      <CodeEditor v-model="functionInput" v-bind:data="dataInput" v-bind:result="transformationResult"/>
       <v-divider class="mx-4"/>
 
       <v-card-title>Transformation Results</v-card-title>
