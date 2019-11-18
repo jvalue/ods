@@ -2,14 +2,16 @@
   <div class="pipeline">
     <v-card>
       <v-card-title>
-
         <v-btn
           class="ma-2"
           color="success"
           @click="onCreatePipeline()"
         >
           Create new pipeline
-          <v-icon dark right>
+          <v-icon
+            dark
+            right
+          >
             mdi mdi-pipe
           </v-icon>
         </v-btn>
@@ -49,28 +51,71 @@
         </template>
 
         <template v-slot:item.trigger.periodic="{ item }">
-          <v-switch v-model="item.trigger.periodic" class="ma-2" disabled></v-switch>
+          <v-switch
+            v-model="item.trigger.periodic"
+            class="ma-2"
+            disabled
+          />
         </template>
 
         <template v-slot:item.action="{ item }">
-          <v-btn depressed small @click="onShowPipelineData(item)" class="ma-2">
-              Data
-              <v-icon dark right >mdi mdi-database</v-icon>
+          <v-btn
+            depressed
+            small
+            class="ma-2"
+            @click="onShowPipelineData(item)"
+          >
+            Data
+            <v-icon
+              dark
+              right
+            >
+              mdi mdi-database
+            </v-icon>
           </v-btn>
-          <v-btn depressed small @click="onEditPipeline(item)" class="ma-2">
+          <v-btn
+            depressed
+            small
+            class="ma-2"
+            @click="onEditPipeline(item)"
+          >
             Edit
-            <v-icon dark right >mdi mdi-pencil</v-icon>
+            <v-icon
+              dark
+              right
+            >
+              mdi mdi-pencil
+            </v-icon>
           </v-btn>
-          <v-btn depressed small @click="onDeletePipeline(item)" class="ma-2">
+          <v-btn
+            depressed
+            small
+            class="ma-2"
+            @click="onDeletePipeline(item)"
+          >
             Delete
-            <v-icon dark right>mdi mdi-delete</v-icon>
+            <v-icon
+              dark
+              right
+            >
+              mdi mdi-delete
+            </v-icon>
           </v-btn>
-          <v-btn depressed small @click="onNotifications(item)" class="ma-2">
+          <v-btn
+            depressed
+            small
+            class="ma-2"
+            @click="onNotifications(item)"
+          >
             Notifications
-            <v-icon dark right>mdi mdi-alarm</v-icon>
+            <v-icon
+              dark
+              right
+            >
+              mdi mdi-alarm
+            </v-icon>
           </v-btn>
         </template>
-
       </v-data-table>
     </v-card>
   </div>
@@ -80,7 +125,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { State, Action } from 'vuex-class'
-import Pipeline from './pipeline';
+import Pipeline from './pipeline'
 
 const namespace = { namespace: 'pipeline' }
 
@@ -90,7 +135,6 @@ const ONE_MINUTE_IN_MS = 60 * 1000
 
 @Component({})
 export default class PipelineOverview extends Vue {
-
   @Action('loadPipelines', namespace) private loadPipelinesAction!: () => void;
   @Action('deletePipeline', namespace) private deletePipelineAction!: (id: number) => void;
 
@@ -99,10 +143,10 @@ export default class PipelineOverview extends Vue {
 
   private headers = [
     { text: 'Id', value: 'id' },
-    { text: 'Pipeline Name', value: 'metadata.displayName', sortable: false}, // sorting to be implemented
+    { text: 'Pipeline Name', value: 'metadata.displayName', sortable: false }, // sorting to be implemented
     { text: 'Author', value: 'metadata.author', sortable: false },
-    { text: 'Interval', value: 'trigger.interval', sortable: false},
-    { text: 'Periodic', value: 'trigger.periodic', sortable: false},
+    { text: 'Interval', value: 'trigger.interval', sortable: false },
+    { text: 'Periodic', value: 'trigger.periodic', sortable: false },
     { text: 'Action', value: 'action', sortable: false }
   ];
 
@@ -117,15 +161,15 @@ export default class PipelineOverview extends Vue {
   }
 
   private onCreatePipeline () {
-    this.$router.push({ name: 'pipeline-new'})
+    this.$router.push({ name: 'pipeline-new' })
   }
 
   private onEditPipeline (pipeline: Pipeline) {
-    this.$router.push({ name: 'pipeline-edit',  params: { pipelineId: `${pipeline.id}` } })
+    this.$router.push({ name: 'pipeline-edit', params: { pipelineId: `${pipeline.id}` } })
   }
 
   private onDeletePipeline (pipeline: Pipeline) {
-    this.deletePipelineAction(pipeline.id);
+    this.deletePipelineAction(pipeline.id)
   }
 
   private onNotifications (pipeline: Pipeline) {
@@ -144,7 +188,7 @@ export default class PipelineOverview extends Vue {
   }
 
   private getMinutesFromMS (intervalInMS: number): number {
-    return Math.floor((intervalInMS % ONE_HOUR_IN_MS ) / ONE_MINUTE_IN_MS )
+    return Math.floor((intervalInMS % ONE_HOUR_IN_MS) / ONE_MINUTE_IN_MS)
   }
 }
 </script>

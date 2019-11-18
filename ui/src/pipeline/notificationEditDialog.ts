@@ -2,6 +2,6 @@ import NotificationConfig, { NotificationType } from '@/pipeline/notificationCon
 
 export default interface NotificationEditDialog {
 
-  openDialog(notifcationConfig?: NotificationConfig): void
-  closeDialog(): void
+  openDialog(notifcationConfig?: NotificationConfig): void;
+  closeDialog(): void;
 }

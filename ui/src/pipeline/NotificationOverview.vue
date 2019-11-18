@@ -1,10 +1,16 @@
 <template>
   <div class="notification">
-    <v-toolbar flat color="white">
+    <v-toolbar
+      flat
+      color="white"
+    >
       <v-toolbar-title>
         Notifications for Pipeline {{ selectedPipeline.metadata.displayName }} ({{ selectedPipeline.id }})
       </v-toolbar-title>
-      <notification-edit @pipelineSaved="onSave" ref="notificationEdit"/>
+      <notification-edit
+        ref="notificationEdit"
+        @pipelineSaved="onSave"
+      />
     </v-toolbar>
     <v-card>
       <v-card-title>
@@ -14,7 +20,10 @@
           @click="onCreateNotification()"
         >
           Add notification
-          <v-icon dark right>
+          <v-icon
+            dark
+            right
+          >
             mdi mdi-alarm
           </v-icon>
         </v-btn>
@@ -35,7 +44,8 @@
       >
         <v-progress-linear
           slot="progress"
-          indeterminate/>
+          indeterminate
+        />
         <template v-slot:item.notificationId="{ item }">
           {{ item.notificationId }}
         </template>
@@ -43,13 +53,33 @@
           {{ item.url }}
         </template>
         <template v-slot:item.action="{ item }">
-          <v-btn depressed small @click="onEditNotification(item)" class="ma-2">
+          <v-btn
+            depressed
+            small
+            class="ma-2"
+            @click="onEditNotification(item)"
+          >
             Edit
-            <v-icon dark right> mdi-pencil</v-icon>
+            <v-icon
+              dark
+              right
+            >
+              mdi-pencil
+            </v-icon>
           </v-btn>
-          <v-btn depressed small @click="onDeleteNotification(item)" class="ma-2">
+          <v-btn
+            depressed
+            small
+            class="ma-2"
+            @click="onDeleteNotification(item)"
+          >
             Delete
-            <v-icon dark right> mdi-delete</v-icon>
+            <v-icon
+              dark
+              right
+            >
+              mdi-delete
+            </v-icon>
           </v-btn>
         </template>
       </v-data-table>
@@ -71,7 +101,7 @@ const namespace = { namespace: 'pipeline' }
 
 @Component({
   components: {
-    'NotificationEdit': NotificationEdit
+    NotificationEdit: NotificationEdit
   }
 })
 export default class PipelineNotifications extends Vue {
