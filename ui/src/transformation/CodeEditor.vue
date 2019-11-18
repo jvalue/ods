@@ -1,11 +1,12 @@
 <template>
   <MonacoEditor
     ref="editor"
-    class="codeEditor"
     v-model="code"
-    v-bind:options="editorOptions"
+    class="codeEditor"
+    :options="editorOptions"
     language="javascript"
-    @editorDidMount="editorDidMount"/>
+    @editorDidMount="editorDidMount"
+  />
 </template>
 
 <script lang="ts">
@@ -13,7 +14,7 @@ import Vue, { PropType } from 'vue'
 import Component from 'vue-class-component'
 import { Watch } from 'vue-property-decorator'
 
-import MonacoEditor, { MonacoEditorConstructor, Monaco } from 'vue-monaco'
+import MonacoEditor, { MonacoEditorConstructor } from 'vue-monaco'
 import * as monaco from 'monaco-editor'
 
 import { Data } from './interfaces/data'
@@ -24,7 +25,7 @@ const Props = Vue.extend({
   props: {
     value: String,
     data: [Object, Array],
-    result: Object as PropType<JobResult | null>,
+    result: Object as PropType<JobResult | null>
   }
 })
 
@@ -35,26 +36,27 @@ const Props = Vue.extend({
 })
 export default class CodeEditor extends Props {
   public $refs!: Vue['$refs'] & {
-    editor: MonacoEditorConstructor,
+    editor: MonacoEditorConstructor;
   }
 
   private editorOptions = {
     minimap: {
       enabled: false
-    },
+    }
   }
+
   private lib: monaco.IDisposable | null = null
   private decorations: string[] = []
 
-  get code() {
+  get code (): string {
     return this.value
   }
 
-  set code(code: string) {
+  set code (code: string) {
     this.$emit('input', code)
   }
 
-  setEditorJavascriptDefaults(data: Data) {
+  setEditorJavascriptDefaults (data: Data): void {
     const monaco = this.$refs.editor.monaco
     const json = JSON.stringify(data)
     const code = `let data = ${json}`
@@ -62,13 +64,19 @@ export default class CodeEditor extends Props {
     this.lib = monaco.languages.typescript.javascriptDefaults.addExtraLib(code)
   }
 
-  private buildRange(error: JobError): monaco.Range {
-    console.log(error);
+  /**
+   * Buils the range that gets highlighted from an error.
+   * The whole line from the specified position until the end gets highlighted.
+   * For MissingReturnErrors, the last line in the code gets highlighted.
+   * @param {JobError} error the specified error
+   * @returns {monaco.Range} the range to be highlighted
+   */
+  private buildRange (error: JobError): monaco.Range {
+    console.log(error)
     const lines: string[] = this.code.split('\n')
 
     let lineNumber: number
     if (error.name === 'MissingReturnError') {
-      // highlight last row
       lineNumber = lines.length
     } else {
       lineNumber = error.lineNumber
@@ -85,12 +93,12 @@ export default class CodeEditor extends Props {
    * @param {JobError | undefined} error the error from the JobResult
    * @returns {monaco.editor.IModelDeltaDecoration[]} a list of decorations (normally 0 or 1 entries)
    */
-  private buildDecorations(error: JobError | undefined): monaco.editor.IModelDeltaDecoration[] {
+  private buildDecorations (error: JobError | undefined): monaco.editor.IModelDeltaDecoration[] {
     if (error === undefined) {
       return []
     }
 
-    const range = this.buildRange(error);
+    const range = this.buildRange(error)
 
     const hoverMessage: monaco.IMarkdownString[] = [
       { value: `**${error.name}**` },
@@ -113,7 +121,7 @@ export default class CodeEditor extends Props {
    * It keeps track of the previous decorations and uses deltaDecorations to limit the number of operations.
    * @param {JobError | undefined} error the provided error
    */
-  private displayError(error: JobError | undefined) {
+  private displayError (error: JobError | undefined): void {
     const editor = this.$refs.editor.getEditor()
 
     const newDecorations = this.buildDecorations(error)
@@ -122,16 +130,16 @@ export default class CodeEditor extends Props {
   }
 
   @Watch('data')
-  onDataChanged(val: Data, oldVal: Data) {
+  onDataChanged (val: Data): void {
     this.setEditorJavascriptDefaults(val)
   }
 
   @Watch('result')
-  onResultChanged(val: JobResult, oldVal: JobResult) {
+  onResultChanged (val: JobResult): void {
     this.displayError(val.error)
   }
 
-  editorDidMount(editor: Monaco) {
+  editorDidMount (): void {
     this.setEditorJavascriptDefaults(this.data)
   }
 }

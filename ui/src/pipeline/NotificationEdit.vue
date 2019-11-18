@@ -1,35 +1,63 @@
 <template>
   <v-dialog
     v-model="dialogOpen"
-    max-width="500px">
+    max-width="500px"
+  >
     <v-card>
       <v-card-title>
         <span class="headline">Notification</span>
       </v-card-title>
       <v-card-text>
         <v-container>
-          <v-row cols="20" sm="6" md="4">
+          <v-row
+            cols="20"
+            sm="6"
+            md="4"
+          >
             <v-text-field
               v-model="editedNotification.condition"
-              label="Condition"/>
+              label="Condition"
+            />
           </v-row>
-          <v-row cols="30" sm="6" md="4">
+          <v-row
+            cols="30"
+            sm="6"
+            md="4"
+          >
             <v-select
               v-model="editedNotification.notificationType"
               :items="notificationTypes"
-              label="Type"/>
+              label="Type"
+            />
           </v-row>
-          <v-row cols="10" sm="6" md="4">
+          <v-row
+            cols="10"
+            sm="6"
+            md="4"
+          >
             <v-text-field
               v-model="editedNotification.url"
-              label="URL"/>
+              label="URL"
+            />
           </v-row>
         </v-container>
       </v-card-text>
       <v-card-actions>
-        <v-spacer/>
-        <v-btn color="primary" @click="onSave()" class="ma-2">Save</v-btn>
-        <v-btn color="error" @click="closeDialog()" class="ma-2">Cancel</v-btn>
+        <v-spacer />
+        <v-btn
+          color="primary"
+          class="ma-2"
+          @click="onSave()"
+        >
+          Save
+        </v-btn>
+        <v-btn
+          color="error"
+          class="ma-2"
+          @click="closeDialog()"
+        >
+          Cancel
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -42,14 +70,11 @@ import NotificationConfig, { NotificationType } from '@/pipeline/notificationCon
 import NotificationEditDialog from '@/pipeline/notificationEditDialog'
 import { Emit, Prop } from 'vue-property-decorator'
 
-
-
 @Component({})
 export default class PipelineNotifications extends Vue implements NotificationEditDialog {
-
   @Emit('pipelineSaved')
-  onPipelineSave() {
-    return this.editedNotification;
+  onPipelineSave () {
+    return this.editedNotification
   }
 
   private notificationTypes = ['WEBHOOK']
@@ -61,10 +86,11 @@ export default class PipelineNotifications extends Vue implements NotificationEd
     condition: '',
     url: ''
   }
+
   private editedNotification: NotificationConfig = Object.assign({}, this.defaultNotification)
 
-  openDialog(notifcationConfig?: NotificationConfig) {
-    if(!!notifcationConfig) { // edit
+  openDialog (notifcationConfig?: NotificationConfig) {
+    if (notifcationConfig) { // edit
       this.editedNotification = Object.assign({}, notifcationConfig)
     } else { // create
       this.editedNotification = Object.assign({}, this.defaultNotification)
@@ -72,7 +98,7 @@ export default class PipelineNotifications extends Vue implements NotificationEd
     this.dialogOpen = true
   }
 
-  closeDialog() {
+  closeDialog () {
     this.editedNotification = Object.assign({}, this.defaultNotification)
     this.dialogOpen = false
   }
