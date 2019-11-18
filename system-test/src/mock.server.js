@@ -2,7 +2,7 @@ const Koa = require('koa')
 const KoaRouter = require('koa-router')
 const bodyParser = require('koa-bodyparser')
 
-const PORT = process.env.MOCK_SOURCE_PORT || 8082
+const PORT = process.env.MOCK_SERVER_PORT || 8081
 
 const router = new KoaRouter()
 const app = new Koa()
@@ -12,6 +12,8 @@ const dataStore = new Map()
 const dataSequences = new Map()
 const sequenceCounters = new Map()
 
+const notificationStore = new Map()
+
 router.get('/', async ctx => {
   ctx.type = 'text/plain'
   ctx.body = 'ok'
@@ -19,14 +21,14 @@ router.get('/', async ctx => {
 
 router.post('/data/:path', async ctx => {
   const path = ctx.params.path
-  console.log(`POST on /data/${path} received by source mock.`)
+  console.log(`POST on /data/${path} received by mock server.`)
   dataStore.set(path, ctx.request.body)
   ctx.status = 201
 })
 
 router.get('/data/:path', async ctx => {
   const path = ctx.params.path
-  console.log(`GET on /data/${path} received by source mock.`)
+  console.log(`GET on /data/${path} received by mock server.`)
   const data = dataStore.get(path)
   if(!data) {
     ctx.throw(404, `No data available for /data/${path}`)
@@ -39,7 +41,7 @@ router.get('/data/:path', async ctx => {
 
 router.post('/sequences/:path', async ctx => {
   const path = ctx.params.path
-  console.log(`POST on /sequences/${path} received by source mock.`)
+  console.log(`POST on /sequences/${path} received by mock server.`)
   dataSequences.set(path, ctx.request.body)
   sequenceCounters.set(path, 0)
   ctx.status = 201
@@ -47,7 +49,7 @@ router.post('/sequences/:path', async ctx => {
 
 router.get('/sequences/:path', async ctx => {
   const path = ctx.params.path
-  console.log(`GET on /sequences/${path} received by source mock.`)
+  console.log(`GET on /sequences/${path} received by mock server.`)
   const sequenceCounter = sequenceCounters.get(path)
   if(typeof sequenceCounter === "undefined") {
     ctx.throw(404, `No data available for /sequences/${path}`)
@@ -60,12 +62,40 @@ router.get('/sequences/:path', async ctx => {
   }
 })
 
+
+router.post('/notifications/:path', async ctx => {
+  const path = ctx.params.path
+  console.log(`POST on /notifications/${path} received by mock server.`)
+  notificationStore.set(path, ctx.request.body)
+  ctx.status = 201
+})
+
+router.get('/notifications/:path', async ctx => {
+  const path = ctx.params.path
+  console.log(`GET on /notifications/${path} received by mock server.`)
+  const notification = notificationStore.get(path)
+  if(!notification) {
+    ctx.throw(404, `No notification has been stored on /notifications/${path}.`)
+  } else {
+    ctx.body = notification
+    ctx.type = 'application/json'
+    ctx.status = 200
+  }
+})
+
+router.del('/', async ctx => {
+  dataStore.clear()
+  dataSequences.clear()
+  sequenceCounters.clear()
+  notificationStore.clear()
+})
+
 app.use(router.routes())
 
-const server = app.listen(PORT, () => console.log('Starting source mock on port ' + PORT))
+const server = app.listen(PORT, () => console.log('Starting mock server on port ' + PORT))
 
 process.on('SIGTERM', async () => {
-  console.info('Mock-Storage-Server: SIGTERM signal received.')
+  console.info('Mock-Server: SIGTERM signal received.')
   await server.close()
 })
 
