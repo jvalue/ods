@@ -84,7 +84,8 @@ export default class JSTransformationService implements TransformationService {
 
   private async executeSlackNotification (request: NotificationRequest): Promise<void> {
     const callbackObject: SlackCallback = {
-      text: `New data available for pipeline ${request.pipelineName}(${request.pipelineId}). Fetch at ${request.dataLocation}.`
+      text: `New data available for pipeline ${request.pipelineName}(${request.pipelineId}). ` +
+        `Fetch at ${request.dataLocation}.`
     }
     await axios.post(request.url, callbackObject)
   }
