@@ -8,6 +8,7 @@ import JSTransformationService from './jsTransformationService'
 import VM2SandboxExecutor from './vm2SandboxExecutor'
 import SandboxExecutor from './interfaces/sandboxExecutor'
 import SlackCallback from './interfaces/slackCallback'
+import fcmCallback from "@/interfaces/fcmCallback";
 
 jest.mock('axios')
 
@@ -141,9 +142,22 @@ describe('JSTransformationService', () => {
         pipelineName: 'AnswerToEverything-Pipeline',
         url: 'yo'
       }
-      await expect(transformationService.handleNotification(request))
-        .rejects
-        .toThrowError('Notification type FCM exists but is not implemented.')
+      const expectedObject: fcmCallback = {
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        validate_only: false,
+        message: {
+          notification: {
+            title: 'New Data Available',
+            body: `Pipeline ${request.pipelineName}(${request.pipelineId}) has new data available.` +
+              `Fetch at ${request.dataLocation}.`
+          }
+        }
+      }
+      await transformationService.handleNotification(request)
+
+      expect(post).toHaveBeenCalledTimes(1)
+      expect(post.mock.calls[0][0]).toEqual(request.url)
+      expect(post.mock.calls[0][1]).toEqual(expectedObject)
     })
 
     test('SLACK request', async () => {
