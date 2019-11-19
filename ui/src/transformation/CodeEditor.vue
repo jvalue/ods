@@ -17,7 +17,6 @@ import { Watch } from 'vue-property-decorator'
 import MonacoEditor, { MonacoEditorConstructor } from 'vue-monaco'
 import * as monaco from 'monaco-editor'
 
-import { Data } from './interfaces/data'
 import JobResult from './interfaces/jobResult'
 import JobError from './interfaces/jobError'
 
@@ -56,7 +55,7 @@ export default class CodeEditor extends Props {
     this.$emit('input', code)
   }
 
-  setEditorJavascriptDefaults (data: Data): void {
+  setEditorJavascriptDefaults (data: object): void {
     const monaco = this.$refs.editor.monaco
     const json = JSON.stringify(data)
     const code = `let data = ${json}`
@@ -130,7 +129,7 @@ export default class CodeEditor extends Props {
   }
 
   @Watch('data')
-  onDataChanged (val: Data): void {
+  onDataChanged (val: object): void {
     this.setEditorJavascriptDefaults(val)
   }
 
