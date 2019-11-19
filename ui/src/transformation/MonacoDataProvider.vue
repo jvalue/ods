@@ -1,12 +1,16 @@
 <template>
   <div>
     <MonacoEditor
-      class="jsonEditor"
       v-model="text"
-      v-bind:options="editorOptions"
-      v-on:change="onChange"
-      language="json" />
-    <span v-if="error" class="red--text">{{error}}</span>
+      class="jsonEditor"
+      :options="editorOptions"
+      language="json"
+      @change="onChange"
+    />
+    <span
+      v-if="error"
+      class="red--text"
+    >{{ error }}</span>
   </div>
 </template>
 
@@ -37,11 +41,11 @@ export default class MonacoDataProvider extends Vue {
   text = this.formatJson(this.value)
   error: Error | null = null
 
-  private formatJson(o: object): string {
+  private formatJson (o: object): string {
     return JSON.stringify(o, null, '  ')
   }
 
-  onChange(value: string) {
+  onChange (): void {
     try {
       const newObject = JSON.parse(this.text)
       this.object = newObject

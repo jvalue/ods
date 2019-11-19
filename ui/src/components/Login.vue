@@ -68,7 +68,7 @@ const namespace = { namespace: 'auth' }
 
 @Component
 export default class Login extends Vue {
-  private menu: boolean = false;
+  private menu = false;
 
   @State('isAuth', namespace)
   private isAuthenticated!: boolean;

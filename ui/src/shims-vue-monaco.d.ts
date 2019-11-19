@@ -18,6 +18,7 @@ declare module 'vue-monaco' {
     props: MonacoEditorProps;
     data: () => void;
     monaco: Monaco;
+    getEditor: () => monaco.editor.IStandaloneCodeEditor;
   }
 
   export const MonacoEditor: MonacoEditorConstructor
