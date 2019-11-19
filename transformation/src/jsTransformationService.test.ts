@@ -159,7 +159,8 @@ describe('JSTransformationService', () => {
       await transformationService.handleNotification(request)
 
       const expectedObject: SlackCallback = {
-        text: `New data available for pipeline ${request.pipelineName}(${request.pipelineId}). Fetch at ${request.dataLocation}.`
+        text: `New data available for pipeline ${request.pipelineName}(${request.pipelineId}). ` +
+          `Fetch at ${request.dataLocation}.`
       }
       expect(post).toHaveBeenCalledTimes(1)
       expect(post.mock.calls[0][0]).toEqual(request.url)
