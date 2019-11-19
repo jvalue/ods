@@ -9,6 +9,7 @@ import WebhookCallback from './interfaces/webhookCallback'
 import TransformationService from './interfaces/transformationService'
 import SandboxExecutor from './interfaces/sandboxExecutor'
 import SlackCallback from './interfaces/slackCallback'
+import fcmCallback from './interfaces/fcmCallback'
 
 const VERSION = '0.0.2'
 
@@ -79,7 +80,18 @@ export default class JSTransformationService implements TransformationService {
   }
 
   private async executeFirebaseNotification (request: NotificationRequest): Promise<void> {
-    throw new Error(`Notification type ${request.notificationType} exists but is not implemented.`)
+    const callbackObject: fcmCallback = {
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      validate_only: false,
+      message: {
+        notification: {
+          title: 'New Data Available',
+          body: `Pipeline ${request.pipelineName}(${request.pipelineId}) has new data available.` +
+            `Fetch at ${request.dataLocation}.`
+        }
+      }
+    }
+    await axios.post(request.url, callbackObject)
   }
 
   private async executeSlackNotification (request: NotificationRequest): Promise<void> {
