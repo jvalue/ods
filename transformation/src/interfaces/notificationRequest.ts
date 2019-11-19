@@ -1,5 +1,5 @@
 export interface NotificationRequest {
-  pipelineId: number,
+  pipelineId: number;
   pipelineName: string;
   url: string;
   data: object;
