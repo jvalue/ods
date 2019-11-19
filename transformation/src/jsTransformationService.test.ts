@@ -128,5 +128,18 @@ describe('JSTransformationService', () => {
 
       expect(post).not.toHaveBeenCalled()
     })
+
+    test('FCM request', async () => {
+      const request: NotificationRequest = {
+        condition: 'data.value1 > 0',
+        data,
+        dataLocation: 'data',
+        notificationType: NotificationType.FCM,
+        pipelineId: 42,
+        pipelineName: 'AnswerToEverything-Pipeline',
+        url: 'yo'
+      }
+      expect(transformationService.handleNotification(request)).toThrowError('exists but is not implemented');
+    })
   })
 })

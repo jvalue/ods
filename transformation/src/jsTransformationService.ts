@@ -71,9 +71,15 @@ export default class JSTransformationService implements TransformationService {
         return this.executeWebhook(notificationRequest.url, notificationRequest.dataLocation)
       case NotificationType.SLACK:
         return this.executeSlackNotification(notificationRequest)
+      case NotificationType.FCM:
+        return this.executeFirebaseNotification(notificationRequest)
       default:
         throw new Error(`Notification type ${notificationRequest.notificationType} not implemented.`)
     }
+  }
+
+  private async executeFirebaseNotification (request: NotificationRequest): Promise<void> {
+    throw new Error (`Notification type ${request.notificationType} exists but is not implemented.` )
   }
 
   private async executeSlackNotification (request: NotificationRequest): Promise<void> {
