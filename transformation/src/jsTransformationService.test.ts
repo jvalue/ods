@@ -139,7 +139,9 @@ describe('JSTransformationService', () => {
         pipelineName: 'AnswerToEverything-Pipeline',
         url: 'yo'
       }
-      expect(transformationService.handleNotification(request)).toThrowError('exists but is not implemented');
+      await expect(transformationService.handleNotification(request))
+        .rejects
+        .toThrowError('Notification type FCM exists but is not implemented.')
     })
   })
 })
