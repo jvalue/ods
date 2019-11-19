@@ -80,34 +80,6 @@ describe('Scheduler', () => {
     expect(stats.endTimestamp).toBeGreaterThanOrEqual(stats.startTimestamp)
   })
 
-  test('POST /notification triggers slack notification', async () => {
-    const dataLocation = 'storage/234'
-    const slackJob = {
-      pipelineName: "peterchens pipeline",
-      pipelineId: 666,
-      url: MOCK_RECEIVER_URL + '/slack',
-      dataLocation,
-      data: {
-        niceString: "nice"
-      },
-      condition: "typeof data.niceString === \"string\"",
-      notificationType: 'SLACK'
-    }
-
-    const transformationResponse = await request(URL)
-      .post('/notification')
-      .send(slackJob)
-    expect(transformationResponse.status).toEqual(202)
-
-    await sleep(3000)
-
-    const receiverResponse = await request(MOCK_RECEIVER_URL)
-      .get('/slack')
-
-    expect(receiverResponse.status).toEqual(200)
-    expect(receiverResponse.body.text).toEqual(`New data available for pipeline ${slackJob.pipelineName}(${slackJob.pipelineId}). Fetch at ${dataLocation}.`)
-  })
-
   test('POST /job with syntax error', async () => {
     const transformationJob = {
       func: 'syntax error;\nreturn data;',
@@ -219,6 +191,67 @@ describe('Scheduler', () => {
       .get('/webhook2')
 
     expect(receiverResponse.status).toEqual(404)
+  })
+
+  test('POST /notification triggers slack notification', async () => {
+    const dataLocation = 'storage/234'
+    const slackJob = {
+      pipelineName: "peterchens pipeline",
+      pipelineId: 666,
+      url: MOCK_RECEIVER_URL + '/slack',
+      dataLocation,
+      data: {
+        niceString: "nice"
+      },
+      condition: "typeof data.niceString === \"string\"",
+      notificationType: 'SLACK'
+    }
+
+    const transformationResponse = await request(URL)
+      .post('/notification')
+      .send(slackJob)
+    expect(transformationResponse.status).toEqual(202)
+
+    await sleep(3000)
+
+    const receiverResponse = await request(MOCK_RECEIVER_URL)
+      .get('/slack')
+
+    expect(receiverResponse.status).toEqual(200)
+    expect(receiverResponse.body.text)
+      .toEqual(`New data available for pipeline ${slackJob.pipelineName}(${slackJob.pipelineId}). Fetch at ${dataLocation}.`)
+  })
+
+  test('POST /notification triggers firebase notification', async () => {
+    const dataLocation = 'storage/567'
+    const fcmJob = {
+      pipelineName: "fire",
+      pipelineId: 23,
+      url: MOCK_RECEIVER_URL + '/fcm',
+      dataLocation,
+      data: {
+        niceNumber: 23
+      },
+      condition: "data.niceNumber > 0",
+      notificationType: 'FCM'
+    }
+
+    const transformationResponse = await request(URL)
+      .post('/notification')
+      .send(fcmJob)
+    expect(transformationResponse.status).toEqual(202)
+
+    await sleep(3000)
+
+    const receiverResponse = await request(MOCK_RECEIVER_URL)
+      .get('/fcm')
+
+    expect(receiverResponse.status).toEqual(200)
+    expect(receiverResponse.body.validate_only).toEqual(false)
+    expect(receiverResponse.body.message.notification.title).toEqual('New Data Available')
+    expect(receiverResponse.body.message.notification.body).toEqual(`Pipeline ${fcmJob.pipelineName}(${fcmJob.pipelineId}) has new data available.` +
+                  `Fetch at ${fcmJob.dataLocation}.`)
+
   })
 
   function sleep (ms) {
