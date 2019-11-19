@@ -10,5 +10,6 @@ export interface NotificationRequest {
 
 export enum NotificationType {
   WEBHOOK = 'WEBHOOK',
-  SLACK = 'SLACK'
+  SLACK = 'SLACK',
+  FCM = 'FCM'
 }
