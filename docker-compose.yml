@@ -100,8 +100,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-storage.rule=PathPrefix(`/api/storage`)"
-      - "traefik.http.routers.to-storage.middlewares=storage-stripprefix@docker"
+      - "traefik.http.routers.to-storage.middlewares=storage-stripprefix@docker,storage-addaccept@docker"
       - "traefik.http.middlewares.storage-stripprefix.stripprefix.prefixes=/api/storage"
+      - "traefik.http.middlewares.storage-addaccept.headers.customrequestheaders.Accept=application/json" # Firefox Browser Support
       - "traefik.http.services.storage.loadbalancer.server.port=3000"
 
   storage-db:
