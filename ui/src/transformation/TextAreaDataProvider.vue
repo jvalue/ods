@@ -2,10 +2,13 @@
   <v-form>
     <v-textarea
       v-model="text"
-      v-on:change="onChange"
       full-width
+      @change="onChange"
     />
-    <span v-if="error" class="red--text">{{error}}</span>
+    <span
+      v-if="error"
+      class="red--text"
+    >{{ error }}</span>
   </v-form>
 </template>
 
@@ -24,11 +27,11 @@ export default class TextAreaDataProvider extends Vue {
   text = this.formatJson(this.value)
   error: Error | null = null
 
-  private formatJson(o: object): string {
+  private formatJson (o: object): string {
     return JSON.stringify(o, null, '  ')
   }
 
-  onChange(value: string) {
+  onChange (): void {
     try {
       const newObject = JSON.parse(this.text)
       this.object = newObject

@@ -133,6 +133,7 @@ function generateConfig (
     transformations,
     persistence: {},
     metadata: {
+      displayName: 'pipiline',
       creationTimestamp: new Date(Date.now() + 5000),
       license: 'license'
     },

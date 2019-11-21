@@ -3,29 +3,30 @@ version: '3.7'
 services:
 # --------------------- SYSTEM TEST ----------------------------------------
   system-test:
-    labels: # traefic reverse-proxy config
-      - "traefik.backend=system-test"
-      - "traefik.frontend.rule=PathPrefixStrip:/system-test"
-      - "traefik.frontend.passHostHeader=true"
-
+    image: open-data-service/ods-main/system-test
+    depends_on:
+      - mock-server
     build:
       context: ./system-test/
 
-    image: open-data-service/ods-main/system-test
+    environment:
+      CORE_API: http://core:8080
+      STORAGE_API: http://storage:3000
+      TRANSFORMATION_API: http://transformation:8080
+      SCHEDULER_API: http://scheduler:8080
+      ADAPTER_API: http://adapter:8080
+      MOCK_SERVER_API: http://mock-server:8080
 
-    ports:
-      - "9700:8080"
-      - "9701:8081"
-      - "9702:8082"
+  mock-server:
+    build:
+      context: ./system-test/
+      dockerfile: Dockerfile.mocks
 
     environment:
-      CORE_API: http://core-service:8080
-      STORAGE_API: http://storage-service:3000
-      TRANSFORMATION_API: http://transformation-service:8080
-      SCHEDULER_API: http://scheduler-service:8080
-      ADAPTER_API: http://adapter-service:8080
-      MOCK_RECEIVER_HOST: system-test
-      MOCK_RECEIVER_PORT: 8081
-      MOCK_SOURCE_HOST: system-test
-      MOCK_SOURCE_PORT: 8082
+      MOCK_SERVER_PORT: 8080
 
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.to-mock-server.rule=PathPrefix(`/api/system-tests/mock-server/`)"
+      - "traefik.http.routers.to-mock-server.middlewares=mock-server-stripprefix@docker"
+      - "traefik.http.middlewares.mock-server-stripprefix.stripprefix.prefixes=/api/system-tests/mock-server"

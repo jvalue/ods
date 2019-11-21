@@ -88,6 +88,8 @@ async function executeNotifications (
     pipelineConfig.notifications.map(async n => {
       n.data = data
       n.dataLocation = dataLocation
+      n.pipelineId = pipelineConfig.id
+      n.pipelineName = pipelineConfig.metadata.displayName
       await TransformationClient.executeNotification(n)
     })
     console.log(`Successfully delivered notification requests to transformation-service for ${pipelineConfig.id}`)
@@ -104,8 +106,8 @@ function sleep (ms: number): Promise<void> {
 function handleError (e: AxiosError): void {
   if (e.response) {
     // Request was made and Response code is not 2xx
-    console.log(`${e.message}: Requesting ${e.config.method} ${e.config.url}
-      the server responded with ${e.response.status}, data: ${e.response.data}`)
+    console.log(`${e.message}: Request ${e.config.method} ${e.config.url} failed.
+      The server responded with ${e.response.status}, data: ${JSON.stringify(e.response.data)}`)
   } else if (e.request) {
     // Request was made but no response received
     console.log(`${e.message}: Request ${e.config.method} ${e.config.url} did not receive a response`)

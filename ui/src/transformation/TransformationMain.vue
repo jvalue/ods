@@ -3,11 +3,15 @@
     <v-card class="mx-auto">
       <v-card-title>Data Input</v-card-title>
       <MonacoDataProvider v-model="dataInput" />
-      <v-divider class="mx-4"/>
+      <v-divider class="mx-4" />
 
       <v-card-title>Transformation Function</v-card-title>
-      <CodeEditor v-model="functionInput" v-bind:data="dataInput"/>
-      <v-divider class="mx-4"/>
+      <CodeEditor
+        v-model="functionInput"
+        :data="dataInput"
+        :result="transformationResult"
+      />
+      <v-divider class="mx-4" />
 
       <v-card-title>Transformation Results</v-card-title>
       <v-progress-linear
@@ -15,11 +19,17 @@
         indeterminate
         bottom
       />
-      <ResultView v-bind:result="transformationResult" />
-      <v-divider class="mx-4"/>
+      <ResultView :result="transformationResult" />
+      <v-divider class="mx-4" />
 
       <v-card-actions>
-        <v-btn text color="success" @click="submit">Run Transformation</v-btn>
+        <v-btn
+          text
+          color="success"
+          @click="submit"
+        >
+          Run Transformation
+        </v-btn>
       </v-card-actions>
     </v-card>
   </div>
@@ -65,10 +75,10 @@ export default class TransformationMain extends Vue {
   @Action('transformData', namespace)
   private transformData!: (request: TransformationRequest) => void
 
-  private dataInput: Data = { "a": 1, "b": 2, "c": 3 }
-  private functionInput: string = 'return data;'
+  private dataInput: Data = { a: 1, b: 2, c: 3 }
+  private functionInput = 'return data;'
 
-  private submit () {
+  private submit (): void {
     this.transformData({ func: this.functionInput, data: this.dataInput })
   }
 }

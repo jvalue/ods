@@ -20,6 +20,9 @@ export async function transformData (request: TransformationRequest): Promise<Jo
     }
   })
 
-  const response = await http.post('/job', request) as AxiosResponse<JobResult>
+  const response = await http.post('/job', request, {
+    validateStatus: status => (status >= 200 && status <= 400)
+  }) as AxiosResponse<JobResult>
+
   return response.data
 }
