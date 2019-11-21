@@ -17,11 +17,9 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Prop } from 'vue-property-decorator'
 
-import { Data } from './interfaces/data'
-
 @Component({})
 export default class TextAreaDataProvider extends Vue {
-  @Prop() readonly value!: Data
+  @Prop() readonly value!: object
 
   object = this.value
   text = this.formatJson(this.value)
