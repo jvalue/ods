@@ -16,7 +16,7 @@ let currentEventId: number
 /**
  * Initially receive all pipelines from core service and start them up.
  */
-export async function initializeJobs (retries = 30): Promise<void> {
+export async function initializeJobs (retries = 30, retryBackoff = 3000): Promise<void> {
   try {
     console.log('Starting initialization pipeline scheduler')
     currentEventId = await CoreClient.getLatestEventId()
@@ -34,13 +34,13 @@ export async function initializeJobs (retries = 30): Promise<void> {
       return Promise.reject(new Error('Failed to initialize pipeline scheduler.'))
     }
     if (e.code === 'ECONNREFUSED' || e.code === 'ENOTFOUND') {
-      console.error(`Failed to sync with Config Service on initialization (${retries}) . Retrying ... `)
+      console.error(`Failed to sync with Config Service on initialization (${retries}) . Retrying after ${retryBackoff}ms... `)
     } else {
       console.error(e)
       console.error(`Retrying (${retries})...`)
     }
-    await sleep(3000)
-    return initializeJobs(retries - 1)
+    await sleep(retryBackoff)
+    return initializeJobs(retries - 1, retryBackoff)
   }
 }
 

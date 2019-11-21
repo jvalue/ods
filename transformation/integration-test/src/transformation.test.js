@@ -2,7 +2,7 @@
 const request = require('supertest')
 const waitOn = require('wait-on')
 
-const URL = process.env.TRANSFORMATION_API || 'http://localhost:9000/transformation'
+const URL = process.env.TRANSFORMATION_API || 'http://localhost:8080'
 
 const MOCK_RECEIVER_PORT = process.env.MOCK_RECEIVER_PORT || 8081
 const MOCK_RECEIVER_HOST = process.env.MOCK_RECEIVER_HOST || 'localhost'
@@ -78,6 +78,34 @@ describe('Scheduler', () => {
     expect(data).toEqual({ numberTwo: 2 })
     expect(stats.durationInMilliSeconds).toBeGreaterThan(0)
     expect(stats.endTimestamp).toBeGreaterThanOrEqual(stats.startTimestamp)
+  })
+
+  test('POST /notification triggers slack notification', async () => {
+    const dataLocation = 'storage/234'
+    const slackJob = {
+      pipelineName: "peterchens pipeline",
+      pipelineId: 666,
+      url: MOCK_RECEIVER_URL + '/slack',
+      dataLocation,
+      data: {
+        niceString: "nice"
+      },
+      condition: "typeof data.niceString === \"string\"",
+      notificationType: 'SLACK'
+    }
+
+    const transformationResponse = await request(URL)
+      .post('/notification')
+      .send(slackJob)
+    expect(transformationResponse.status).toEqual(202)
+
+    await sleep(3000)
+
+    const receiverResponse = await request(MOCK_RECEIVER_URL)
+      .get('/slack')
+
+    expect(receiverResponse.status).toEqual(200)
+    expect(receiverResponse.body.text).toEqual(`New data available for pipeline ${slackJob.pipelineName}(${slackJob.pipelineId}). Fetch at ${dataLocation}.`)
   })
 
   test('POST /job with syntax error', async () => {
@@ -163,7 +191,7 @@ describe('Scheduler', () => {
     await sleep(3000) // wait for processing
 
     const receiverResponse = await request(MOCK_RECEIVER_URL)
-      .get('/data1')
+      .get('/webhook1')
 
     expect(receiverResponse.status).toEqual(200)
     expect(receiverResponse.body.location).toEqual(dataLocation)
@@ -188,7 +216,7 @@ describe('Scheduler', () => {
     await sleep(3000)
 
     const receiverResponse = await request(MOCK_RECEIVER_URL)
-      .get('/data2')
+      .get('/webhook2')
 
     expect(receiverResponse.status).toEqual(404)
   })

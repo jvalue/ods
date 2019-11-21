@@ -76,17 +76,17 @@ export default class DateTimePicker extends Vue {
   @Prop({ default: null })
   private value!: Date;
 
-  private dateTimeString: string = '';
+  private dateTimeString = '';
 
-  private date: string = '';
+  private date = '';
 
-  private time: string = '';
+  private time = '';
 
-  private pickDateTimeModal: boolean = false;
+  private pickDateTimeModal = false;
 
-  private pickDateModal: boolean = true;
+  private pickDateModal = true;
 
-  private pickTimeModal: boolean = false;
+  private pickTimeModal = false;
 
   constructor () {
     super()

@@ -1,45 +1,44 @@
 <template>
+  <v-app id="app">
+    <v-navigation-drawer
+      v-model="drawer"
+      clipped
+      app
+    >
+      <v-list>
+        <v-list-item
+          v-for="item in items"
+          :key="item.title"
+          :to="item.route"
+        >
+          <v-list-item-content>
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+    </v-navigation-drawer>
 
-    <v-app id="app">
-      <v-navigation-drawer
-        v-model="drawer"
-        clipped
-        app
-      >
-        <v-list>
-          <v-list-item
-            v-for="item in items"
-            :key="item.title"
-            :to="item.route"
-          >
-            <v-list-item-content>
-              <v-list-item-title>{{ item.title }}</v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list>
-      </v-navigation-drawer>
+    <v-app-bar
+      app
+      dense
+      dark
+      clipped-left
+      color="primary"
+    >
+      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
+      <v-toolbar-title>{{ title }}</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-title>{{ routerTitle }}</v-toolbar-title>
+      <v-spacer />
+      <login />
+    </v-app-bar>
 
-      <v-app-bar
-        app
-        dense
-        dark
-        clipped-left
-        color="primary"
-      >
-        <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-        <v-toolbar-title>{{ title }}</v-toolbar-title>
-        <v-spacer />
-        <v-toolbar-title>{{ routerTitle }}</v-toolbar-title>
-        <v-spacer />
-        <login />
-      </v-app-bar>
-
-      <v-content>
-        <v-container fluid>
-          <router-view />
-        </v-container>
-      </v-content>
-    </v-app>
+    <v-content>
+      <v-container fluid>
+        <router-view />
+      </v-container>
+    </v-content>
+  </v-app>
 </template>
 
 <script lang="ts">
@@ -54,9 +53,9 @@ import Router from '@/router'
   }
 })
 export default class App extends Vue {
-  private title: string = 'Open-Data-Service';
+  private title = 'Open-Data-Service';
 
-  private routerTitle: string = '';
+  private routerTitle = '';
 
   private drawer = null;
 

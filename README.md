@@ -35,7 +35,7 @@ You can finde example requests for the api under [doc/example-requests](./doc/ex
 
 ### Using the UI
 
-The easiest way to use the ODS is via the UI. If you started the ODS with docker-compose you can access the UI under `http://localhost:9000/ui/index.html`.  If you click on any of the pages you need to authenticate yourself to proceed to the pages. For that, you can use the already existing user `demo` with the password `demo`.
+The easiest way to use the ODS is via the UI. If you started the ODS with docker-compose you can access the UI under `http://localhost:9000/`.  If you click on any of the pages you need to authenticate yourself to proceed to the pages. For that, you can use the already existing user `demo` with the password `demo`.
 
 To demonstrate the ODS we will create a new pipeline to fetch water level data for German rivers and have a look at the collected data.
 

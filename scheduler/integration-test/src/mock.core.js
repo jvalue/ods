@@ -29,7 +29,9 @@ const PIPELINES = [
       func: 'return 1;' // not peformed in integration testing
     }],
     persistence: {},
-    metadata: {},
+    metadata: {
+      displayName: 'nordstream'
+    },
     trigger: {
       periodic: true,
       firstExecution: '2018-10-07T01:32:00.123Z',
