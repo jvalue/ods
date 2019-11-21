@@ -29,7 +29,7 @@ public abstract class Importer {
         }
       }
       if(illegalArguments) {
-        throw new IllegalArgumentException();
+        throw new IllegalArgumentException(illegalArgumentsMessage);
       }
     }
 

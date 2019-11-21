@@ -26,7 +26,7 @@ public class Adapter {
         try {
             String raw = importer.fetch(config.protocolConfig.parameters);
             logger.debug("Fetched: {}", raw);
-            return interpreter.interpret(raw);
+            return interpreter.interpret(raw, config.formatConfig.parameters);
         } catch (IOException e) {
             throw new IllegalArgumentException("Not able to parse data as format: " + config.formatConfig.format, e);
         }

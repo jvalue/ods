@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -15,7 +16,7 @@ public class XmlInterpreterTest {
 
     @Test
     public void interpretXmlData() throws IOException {
-        JsonNode result = interpreter.interpret(XML_STRING);
+        JsonNode result = interpreter.interpret(XML_STRING, Map.of());
 
         assertEquals(2, result.size());
         assertEquals("Walter Frosch", result.get("to").textValue());
@@ -24,12 +25,12 @@ public class XmlInterpreterTest {
 
     @Test(expected = IOException.class)
     public void interpretMalformedData() throws IOException {
-        interpreter.interpret("{\"this is\":\"no xml\"");
+        interpreter.interpret("{\"this is\":\"no xml\"", Map.of());
     }
 
     @Test
     public void testSerialization() throws IOException {
-        JsonNode expected = mapper.readTree("{\"type\":\"XML\",\"parameters\":{}}");
+        JsonNode expected = mapper.readTree("{\"type\":\"XML\",\"description\":\"Interpret data as XML data\",\"parameters\":{}}");
         JsonNode result = mapper.valueToTree(interpreter);
 
         assertEquals(expected, result);
