@@ -47,7 +47,6 @@ import MonacoDataProvider from './MonacoDataProvider.vue'
 import TextAreaDataProvider from './TextAreaDataProvider.vue'
 import CodeEditor from './CodeEditor.vue'
 import ResultView from './ResultView.vue'
-import { Data } from './interfaces/data'
 
 const namespace = { namespace: 'transformation' }
 
@@ -75,7 +74,7 @@ export default class TransformationMain extends Vue {
   @Action('transformData', namespace)
   private transformData!: (request: TransformationRequest) => void
 
-  private dataInput: Data = { a: 1, b: 2, c: 3 }
+  private dataInput: object = { a: 1, b: 2, c: 3 }
   private functionInput = 'return data;'
 
   private submit (): void {
