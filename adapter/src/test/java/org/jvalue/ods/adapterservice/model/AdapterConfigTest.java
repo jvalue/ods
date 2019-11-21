@@ -20,7 +20,8 @@ public class AdapterConfigTest {
                   "}" +
                 "}," +
                 "\"format\":{" +
-                  "\"type\":\"JSON\"" +
+                  "\"type\":\"JSON\"," +
+                  "\"parameters\":{}" +
                 "}" +
               "}";
         AdapterConfig result = mapper.readValue(adapterJson, AdapterConfig.class);

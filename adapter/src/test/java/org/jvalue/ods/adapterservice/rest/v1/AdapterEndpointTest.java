@@ -16,7 +16,7 @@ public class AdapterEndpointTest {
 
     @Test
     public void testExecuteDataImportHTTPJSON() {
-        final AdapterConfig config = new AdapterConfig(new ProtocolConfig("HTTP", Map.of("location", "https://gturnquist-quoters.cfapps.io/api/random")), new FormatConfig("JSON"));
+        final AdapterConfig config = new AdapterConfig(new ProtocolConfig("HTTP", Map.of("location", "https://gturnquist-quoters.cfapps.io/api/random")), new FormatConfig("JSON", Map.of()));
         JsonNode result = endpoint.executeDataImport(config);
 
         assertEquals("success", result.get("type").asText());
@@ -25,13 +25,13 @@ public class AdapterEndpointTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testExecuteDataImportFTPJSON() {
-      final AdapterConfig config = new AdapterConfig(new ProtocolConfig("FTP", Map.of("location", "https://gturnquist-quoters.cfapps.io/api/random")), new FormatConfig("JSON"));
+      final AdapterConfig config = new AdapterConfig(new ProtocolConfig("FTP", Map.of("location", "https://gturnquist-quoters.cfapps.io/api/random")), new FormatConfig("JSON", Map.of()));
         endpoint.executeDataImport(config);
     }
 
     @Test()
     public void testExecuteDataImportHTTPXML() {
-      final AdapterConfig config = new AdapterConfig(new ProtocolConfig("HTTP", Map.of("location", "http://www.mocky.io/v2/5cf4f8352f000081724f05bf")), new FormatConfig("XML"));
+      final AdapterConfig config = new AdapterConfig(new ProtocolConfig("HTTP", Map.of("location", "http://www.mocky.io/v2/5cf4f8352f000081724f05bf")), new FormatConfig("XML", Map.of()));
         JsonNode result = endpoint.executeDataImport(config);
 
         assertEquals("{\"to\":\"Tove\",\"from\":\"Jani\",\"heading\":\"Reminder\",\"body\":\"Don't forget me this weekend!\"}", result.toString());
@@ -39,7 +39,7 @@ public class AdapterEndpointTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testExecuteMalformedDataImport() {
-      final AdapterConfig config = new AdapterConfig(new ProtocolConfig("HTTP", Map.of("location", "http://www.mocky.io/v2/5cf4f8352f000081724f05bf")), new FormatConfig("JSON"));
+      final AdapterConfig config = new AdapterConfig(new ProtocolConfig("HTTP", Map.of("location", "http://www.mocky.io/v2/5cf4f8352f000081724f05bf")), new FormatConfig("JSON", Map.of()));
         endpoint.executeDataImport(config);
     }
 }
