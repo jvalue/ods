@@ -76,6 +76,10 @@ export class TransformationEndpoint {
 
   postNotification = async (req: Request, res: Response): Promise<void> => {
     const notification: NotificationRequest = req.body
+    if (!this.isValidNotificationRequest(notification)) {
+      res.statusMessage = 'Notification request has wrong format. Valid data object and condition string required.'
+      res.status(400).send()
+    }
 
     await this.transformationService.handleNotification(notification)
     // Result of notification handling is ignored for now.
@@ -89,5 +93,9 @@ export class TransformationEndpoint {
     } else {
       return []
     }
+  }
+
+  private isValidNotificationRequest(obj: any): obj is NotificationRequest {
+    return typeof obj.data !== 'undefined' && typeof obj.condition === 'string'
   }
 }
