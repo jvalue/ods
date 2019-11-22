@@ -184,7 +184,7 @@ describe('Scheduler', () => {
       .post('/notification')
       .send(notificationJob)
 
-    expect(transformationResponse.status).toEqual(202)
+    expect(transformationResponse.status).toEqual(200)
     await sleep(3000)
 
     const receiverResponse = await request(MOCK_RECEIVER_URL)
@@ -210,7 +210,7 @@ describe('Scheduler', () => {
     const transformationResponse = await request(URL)
       .post('/notification')
       .send(slackJob)
-    expect(transformationResponse.status).toEqual(202)
+    expect(transformationResponse.status).toEqual(200)
 
     await sleep(3000)
 
@@ -239,7 +239,7 @@ describe('Scheduler', () => {
     const transformationResponse = await request(URL)
       .post('/notification')
       .send(fcmJob)
-    expect(transformationResponse.status).toEqual(202)
+    expect(transformationResponse.status).toEqual(200)
 
     await sleep(3000)
 

@@ -8,6 +8,8 @@ import TransformationRequest from './interfaces/transformationRequest'
 import { NotificationRequest, NotificationType } from './interfaces/notificationRequest'
 import { Server } from 'http'
 import JobResult from './interfaces/jobResult'
+import { AxiosError } from 'axios'
+import e from 'express'
 
 export class TransformationEndpoint {
   port: number
@@ -80,10 +82,17 @@ export class TransformationEndpoint {
       res.status(400).send('Malformed request body: Valid data object, condition string and notificationType required.')
     }
 
-    await this.transformationService.handleNotification(notification)
-    // Result of notification handling is ignored for now.
 
-    res.status(202).send()
+    try {
+      await this.transformationService.handleNotification(notification)
+    } catch (e) {
+      if (e instanceof Error) {
+        res.status(500).send(`Notification handling failed. Nested cause is: ${e.name}: ${e.message}`)
+      } else {
+        res.status(500).send
+      }
+    }
+    res.status(200).send()
   }
 
   determineAuth = (): express.RequestHandler | [] => {
