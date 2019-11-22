@@ -5,7 +5,7 @@ import cors from 'cors'
 import Keycloak from 'keycloak-connect'
 import TransformationService from './interfaces/transformationService'
 import TransformationRequest from './interfaces/transformationRequest'
-import { NotificationRequest } from './interfaces/notificationRequest'
+import { NotificationRequest, NotificationType } from './interfaces/notificationRequest'
 import { Server } from 'http'
 import JobResult from './interfaces/jobResult'
 
@@ -77,8 +77,7 @@ export class TransformationEndpoint {
   postNotification = async (req: Request, res: Response): Promise<void> => {
     const notification: NotificationRequest = req.body
     if (!this.isValidNotificationRequest(notification)) {
-      res.statusMessage = 'Notification request has wrong format. Valid data object and condition string required.'
-      res.status(400).send()
+      res.status(400).send('Malformed request body: Valid data object, condition string and notificationType required.')
     }
 
     await this.transformationService.handleNotification(notification)
@@ -96,6 +95,8 @@ export class TransformationEndpoint {
   }
 
   private isValidNotificationRequest(obj: any): obj is NotificationRequest {
-    return typeof obj.data !== 'undefined' && typeof obj.condition === 'string'
+    return typeof obj.data !== 'undefined' &&
+    typeof obj.condition === 'string' &&
+    Object.values(NotificationType).includes(obj.notificationType)
   }
 }
