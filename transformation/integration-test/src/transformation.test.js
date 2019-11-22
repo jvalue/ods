@@ -159,7 +159,7 @@ describe('Scheduler', () => {
       .post('/notification')
       .send(notificationJob)
 
-    expect(transformationResponse.status).toEqual(202)
+    expect(transformationResponse.status).toEqual(200)
     await sleep(3000) // wait for processing
 
     const receiverResponse = await request(MOCK_RECEIVER_URL)
