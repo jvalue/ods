@@ -82,14 +82,13 @@ export class TransformationEndpoint {
       res.status(400).send('Malformed request body: Valid data object, condition string and notificationType required.')
     }
 
-
     try {
       await this.transformationService.handleNotification(notification)
     } catch (e) {
       if (e instanceof Error) {
         res.status(500).send(`Notification handling failed. Nested cause is: ${e.name}: ${e.message}`)
       } else {
-        res.status(500).send
+        res.status(500).send()
       }
     }
     res.status(200).send()
