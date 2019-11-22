@@ -86,6 +86,7 @@ export class TransformationEndpoint {
       await this.transformationService.handleNotification(notification)
     } catch (e) {
       if (e instanceof Error) {
+        console.log(`Notification handling failed. Nested cause is: ${e.name}: ${e.message}`)
         res.status(500).send(`Notification handling failed. Nested cause is: ${e.name}: ${e.message}`)
       } else {
         res.status(500).send()
