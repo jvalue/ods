@@ -8,7 +8,7 @@ import JSTransformationService from './jsTransformationService'
 import VM2SandboxExecutor from './vm2SandboxExecutor'
 import SandboxExecutor from './interfaces/sandboxExecutor'
 import SlackCallback from './interfaces/slackCallback'
-import fcmCallback from "@/interfaces/fcmCallback";
+import fcmCallback from './interfaces/fcmCallback'
 
 jest.mock('axios')
 
@@ -179,7 +179,6 @@ describe('JSTransformationService', () => {
       expect(post).toHaveBeenCalledTimes(1)
       expect(post.mock.calls[0][0]).toEqual(request.url)
       expect(post.mock.calls[0][1]).toEqual(expectedObject)
-
     })
   })
 })
