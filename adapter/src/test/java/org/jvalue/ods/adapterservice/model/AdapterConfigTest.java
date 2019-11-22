@@ -13,13 +13,21 @@ public class AdapterConfigTest {
     @Test
     public void testAdapterSerialization() throws IOException {
         final String adapterJson = "{" +
-                "\"protocol\":\"HTTP\"," +
-                "\"format\":\"JSON\"," +
-                "\"location\":\"URL\"}";
+                "\"protocol\":{" +
+                  "\"type\":\"HTTP\"," +
+                  "\"parameters\":{" +
+                    "\"location\":\"URL\"" +
+                  "}" +
+                "}," +
+                "\"format\":{" +
+                  "\"type\":\"JSON\"," +
+                  "\"parameters\":{}" +
+                "}" +
+              "}";
         AdapterConfig result = mapper.readValue(adapterJson, AdapterConfig.class);
 
-        assertEquals("HTTP", result.protocol);
-        assertEquals("JSON", result.format);
-        assertEquals("URL", result.location);
+        assertEquals("HTTP", result.protocolConfig.protocol);
+        assertEquals("JSON", result.formatConfig.format);
+        assertEquals("URL", result.protocolConfig.parameters.get("location"));
     }
 }

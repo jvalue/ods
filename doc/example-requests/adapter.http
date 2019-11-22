@@ -5,7 +5,13 @@ POST {{baseURL}}/dataImport  HTTP/1.1
 Content-Type: application/json
 
 {
-    "protocol": "HTTP",
-    "format": "JSON",
-    "location": "https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json"
+    "protocol": {
+      "type": "HTTP",
+      "parameters": {
+        "location": "https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json"
+      }
+    },
+    "format": {
+      "type": "JSON"
+    }
 }

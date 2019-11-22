@@ -1,7 +1,7 @@
 import deepEqual from 'deep-equal'
-import PipelineJob from './interfaces/pipeline-job'
-import PipelineConfig from './interfaces/pipeline-config'
-import PipelineEvent, { EventType } from './interfaces/pipeline-event'
+import PipelineJob from './interfaces/core/pipeline-job'
+import PipelineConfig from './interfaces/core/pipeline-config'
+import PipelineEvent, { EventType } from './interfaces/core/pipeline-event'
 import schedule from 'node-schedule'
 
 import * as StorageClient from './clients/storage-client'

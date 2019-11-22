@@ -9,22 +9,17 @@ import java.util.Objects;
 public class AdapterConfig {
 
     @NotNull
-    public final String protocol;
+    public final ProtocolConfig protocolConfig;
 
     @NotNull
-    public final String format;
-
-    @NotNull
-    public final String location;
+    public final FormatConfig formatConfig;
 
     @JsonCreator
     public AdapterConfig(
-            @JsonProperty("protocol") String protocol,
-            @JsonProperty("format") String format,
-            @JsonProperty("location") String location) {
-        this.protocol = protocol;
-        this.format = format;
-        this.location = location;
+            @JsonProperty("protocol") ProtocolConfig protocolConfig,
+            @JsonProperty("format") FormatConfig formatConfig) {
+        this.protocolConfig = protocolConfig;
+        this.formatConfig = formatConfig;
     }
 
     @Override
@@ -32,13 +27,12 @@ public class AdapterConfig {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AdapterConfig config = (AdapterConfig) o;
-        return protocol.equals(config.protocol) &&
-                format.equals(config.format) &&
-                location.equals(config.location);
+        return protocolConfig.equals(config.protocolConfig) &&
+            formatConfig.equals(config.formatConfig);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(protocol, format, location);
+        return Objects.hash(protocolConfig, formatConfig);
     }
 }
