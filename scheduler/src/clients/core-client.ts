@@ -1,6 +1,6 @@
 import axios from 'axios'
-import PipelineConfig from './../interfaces/pipeline-config'
-import PipelineEvent from './../interfaces/pipeline-event'
+import PipelineConfig from '../interfaces/core/pipeline-config'
+import PipelineEvent from '../interfaces/core/pipeline-event'
 
 export const CONFIG_SERVICE_URL = process.env.CONFIG_SERVICE_URL || 'http://localhost:8081'
 const CONFIG_SERVICE_PIPELINES_URL = CONFIG_SERVICE_URL + '/pipelines'

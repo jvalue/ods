@@ -1,20 +1,22 @@
 package org.jvalue.ods.adapterservice.rest.v1;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.jvalue.ods.adapterservice.model.AdapterConfig;
+import org.jvalue.ods.adapterservice.model.FormatConfig;
+import org.jvalue.ods.adapterservice.model.ProtocolConfig;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Map;
+
 
 public class AdapterEndpointTest {
-    private static final ObjectMapper mapper = new ObjectMapper();
     private final AdapterEndpoint endpoint = new AdapterEndpoint();
 
     @Test
     public void testExecuteDataImportHTTPJSON() {
-        final AdapterConfig config = new AdapterConfig("HTTP", "JSON", "https://gturnquist-quoters.cfapps.io/api/random");
+        final AdapterConfig config = new AdapterConfig(new ProtocolConfig("HTTP", Map.of("location", "https://gturnquist-quoters.cfapps.io/api/random")), new FormatConfig("JSON", Map.of()));
         JsonNode result = endpoint.executeDataImport(config);
 
         assertEquals("success", result.get("type").asText());
@@ -23,13 +25,13 @@ public class AdapterEndpointTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testExecuteDataImportFTPJSON() {
-        final AdapterConfig config = new AdapterConfig("FTP", "JSON", "https://gturnquist-quoters.cfapps.io/api/random");
+      final AdapterConfig config = new AdapterConfig(new ProtocolConfig("FTP", Map.of("location", "https://gturnquist-quoters.cfapps.io/api/random")), new FormatConfig("JSON", Map.of()));
         endpoint.executeDataImport(config);
     }
 
     @Test()
     public void testExecuteDataImportHTTPXML() {
-        final AdapterConfig config = new AdapterConfig("HTTP", "XML", "http://www.mocky.io/v2/5cf4f8352f000081724f05bf");
+      final AdapterConfig config = new AdapterConfig(new ProtocolConfig("HTTP", Map.of("location", "http://www.mocky.io/v2/5cf4f8352f000081724f05bf")), new FormatConfig("XML", Map.of()));
         JsonNode result = endpoint.executeDataImport(config);
 
         assertEquals("{\"to\":\"Tove\",\"from\":\"Jani\",\"heading\":\"Reminder\",\"body\":\"Don't forget me this weekend!\"}", result.toString());
@@ -37,7 +39,7 @@ public class AdapterEndpointTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testExecuteMalformedDataImport() {
-        final AdapterConfig config = new AdapterConfig("HTTP", "JSON", "http://www.mocky.io/v2/5cf4f8352f000081724f05bf");
+      final AdapterConfig config = new AdapterConfig(new ProtocolConfig("HTTP", Map.of("location", "http://www.mocky.io/v2/5cf4f8352f000081724f05bf")), new FormatConfig("JSON", Map.of()));
         endpoint.executeDataImport(config);
     }
 }

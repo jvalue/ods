@@ -4,8 +4,8 @@ import * as AdapterClient from './clients/adapter-client'
 import * as StorageClient from './clients/storage-client'
 import * as TransformationClient from './clients/transformation-client'
 import * as PipelineScheduling from './pipeline-scheduling'
-import PipelineConfig from './interfaces/pipeline-config'
-import NotificationConfig from './interfaces/notification-config'
+import PipelineConfig from './interfaces/core/pipeline-config'
+import NotificationConfig from './interfaces/core/notification-config'
 
 jest.mock('./clients/adapter-client')
 jest.mock('./clients/storage-client')
@@ -126,6 +126,8 @@ function generateConfig (
   return {
     id: 123,
     adapter: {
+      format: 'XML',
+      protocol: 'HTTP',
       location: 'somewhere'
     },
     transformations,
