@@ -177,7 +177,7 @@ describe('Scheduler', () => {
         value1: 1
       },
       condition: 'data.value1 < 0',
-      type: 'WEBHOOK'
+      notificationType: 'WEBHOOK'
     }
 
     const transformationResponse = await request(URL)
