@@ -4,12 +4,12 @@ import ExecutionResult from './interfaces/executionResult'
 import JobResult from './interfaces/jobResult'
 import Stats from './interfaces/stats'
 import { NotificationRequest, NotificationType } from './interfaces/notificationRequest'
-import WebhookCallback from './interfaces/webhookCallback'
 
 import TransformationService from './interfaces/transformationService'
 import SandboxExecutor from './interfaces/sandboxExecutor'
 import SlackCallback from './interfaces/slackCallback'
-import fcmCallback from './interfaces/fcmCallback'
+import FcmCallback from './interfaces/fcmCallback'
+import WebhookCallback from './interfaces/webhookCallback'
 
 const VERSION = '0.0.2'
 
@@ -67,46 +67,37 @@ export default class JSTransformationService implements TransformationService {
       return Promise.resolve()
     }
 
-    switch (notificationRequest.notificationType) {
-      case NotificationType.WEBHOOK:
-        return this.executeWebhook(notificationRequest.url, notificationRequest.dataLocation)
-      case NotificationType.SLACK:
-        return this.executeSlackNotification(notificationRequest)
-      case NotificationType.FCM:
-        return this.executeFirebaseNotification(notificationRequest)
-      default:
-        throw new Error(`Notification type ${notificationRequest.notificationType} not implemented.`)
-    }
+    const callbackObject = JSTransformationService.createCallbackObject(notificationRequest)
+
+    await axios.post(notificationRequest.url, callbackObject)
   }
 
-  private async executeFirebaseNotification (request: NotificationRequest): Promise<void> {
-    const callbackObject: fcmCallback = {
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      validate_only: false,
-      message: {
-        notification: {
-          title: 'New Data Available',
-          body: `Pipeline ${request.pipelineName}(${request.pipelineId}) has new data available.` +
+  private static createCallbackObject (request: NotificationRequest): SlackCallback | WebhookCallback | FcmCallback {
+    switch (request.notificationType) {
+      case NotificationType.WEBHOOK:
+        return {
+          location: request.dataLocation,
+          timestamp: new Date(Date.now())
+        }
+      case NotificationType.SLACK:
+        return {
+          text: `New data available for pipeline ${request.pipelineName}(${request.pipelineId}). ` +
             `Fetch at ${request.dataLocation}.`
         }
-      }
+      case NotificationType.FCM:
+        return {
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          validate_only: false,
+          message: {
+            notification: {
+              title: 'New Data Available',
+              body: `Pipeline ${request.pipelineName}(${request.pipelineId}) has new data available.` +
+                `Fetch at ${request.dataLocation}.`
+            }
+          }
+        }
+      default:
+        throw new Error(`Notification type ${request.notificationType} not implemented.`)
     }
-    await axios.post(request.url, callbackObject)
-  }
-
-  private async executeSlackNotification (request: NotificationRequest): Promise<void> {
-    const callbackObject: SlackCallback = {
-      text: `New data available for pipeline ${request.pipelineName}(${request.pipelineId}). ` +
-        `Fetch at ${request.dataLocation}.`
-    }
-    await axios.post(request.url, callbackObject)
-  }
-
-  private async executeWebhook (callbackUrl: string, dataLocation: string): Promise<void> {
-    const callbackObject: WebhookCallback = {
-      location: dataLocation,
-      timestamp: new Date(Date.now())
-    }
-    await axios.post(callbackUrl, callbackObject)
   }
 }
