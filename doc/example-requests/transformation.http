@@ -38,40 +38,6 @@ Content-Type: application/json
   "func": "let arr = Array(data.n).fill(data.content);arr.reverse();return arr.length;"
 }
 
-### Trigger webhook notification
-POST {{baseURL}}/notification HTTP/1.1
-Content-Type: application/json
-
-{
-  "pipelineId": 666,
-  "pipelineName": "peterchens pipeline",
-  "url": "http://www.mocky.io/v2/5185415ba171ea3a00704eed",
-  "data": {
-    "eins": "one",
-    "zwei": 2
-  },
-  "dataLocation": "ods-storage",
-  "condition": "data.zwei > 1",
-  "notificationType": "WEBHOOK"
-}
-
-### Trigger slack notification
-POST {{baseURL}}/notification HTTP/1.1
-Content-Type: application/json
-
-{
-  "pipelineId": 666,
-  "pipelineName": "peterchens pipeline",
-  "url": "https://hooks.slack.com/services/{{slackCallback}}", // please set slackCallback environment variable according to the slack webhook you want to use
-  "data": {
-    "eins": "one",
-    "zwei": 2
-  },
-  "dataLocation": "ods-storage",
-  "condition": "data.zwei > 1",
-  "notificationType": "SLACK"
-}
-
 ### Perform syntax error job
 POST {{baseURL}}/job  HTTP/1.1
 Content-Type: application/json
@@ -103,4 +69,58 @@ Content-Type: application/json
     "a": 1
   },
   "func": "function accessMember(object) {\nreturn object.splice(a);\n}\n  data.a = accessMember(data.a);\nreturn data;"
+}
+
+
+### Trigger webhook notification
+POST {{baseURL}}/notification HTTP/1.1
+Content-Type: application/json
+
+{
+  "pipelineId": 666,
+  "pipelineName": "peterchens pipeline",
+  "url": "http://www.mocky.io/v2/5185415ba171ea3a00704eed",
+  "data": {
+    "eins": "one",
+    "zwei": 2
+  },
+  "dataLocation": "ods-storage",
+  "condition": "data.zwei > 1",
+  "notificationType": "WEBHOOK"
+}
+
+### Trigger slack notification
+### Please set slackCallback environment variable according to the slack webhook you want to use
+POST {{baseURL}}/notification HTTP/1.1
+Content-Type: application/json
+
+{
+  "pipelineId": 666,
+  "pipelineName": "peterchens pipeline",
+  "url": "https://hooks.slack.com/services/{{slackCallback}}",
+  "data": {
+    "eins": "one",
+    "zwei": 2
+  },
+  "dataLocation": "ods-storage",
+  "condition": "data.zwei > 1",
+  "notificationType": "SLACK"
+}
+
+### Trigger firebase notification
+### please set fcbCallback environment variable according to the project id of your firebase project
+POST {{baseURL}}/notification HTTP/1.1
+Content-Type: application/json
+
+{
+  "pipelineId": 666,
+  "pipelineName": "peterchens pipeline",
+  "url": "https://fcm.googleapis.com/v1/projects-{{fcmCallback}}/messages:send",
+  "data": {
+    "eins": "one",
+    "zwei": 2
+  },
+  "dataLocation": "ods-storage",
+  "condition": "data.zwei > 1",
+  "notificationType": "SLACK"
 }
