@@ -8,8 +8,6 @@ import TransformationRequest from './interfaces/transformationRequest'
 import { NotificationRequest, NotificationType } from './interfaces/notificationRequest'
 import { Server } from 'http'
 import JobResult from './interfaces/jobResult'
-import { AxiosError } from 'axios'
-import e from 'express'
 
 export class TransformationEndpoint {
   port: number
