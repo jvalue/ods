@@ -26,6 +26,7 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-session": "^1.16.2",
+    "firebase-admin": "^8.8.0",
     "keycloak-connect": "^7.0.0",
     "vm2": "^3.8.3"
   },
