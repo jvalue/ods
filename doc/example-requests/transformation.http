@@ -1,4 +1,5 @@
-@baseURL = http://localhost:9000/api/transformation
+# @baseURL = http://localhost:9000/api/transformation
+@baseURL = http://localhost:8080
 ### Get version
 GET {{baseURL}}/version  HTTP/1.1
 
@@ -122,5 +123,5 @@ Content-Type: application/json
   },
   "dataLocation": "ods-storage",
   "condition": "data.zwei > 1",
-  "notificationType": "SLACK"
+  "notificationType": "FCM"
 }
