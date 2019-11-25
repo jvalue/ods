@@ -1,6 +1,5 @@
 import axios from 'axios'
 import * as firebaseAdmin from 'firebase-admin'
-import Message from 'firebase-admin'
 
 import ExecutionResult from './interfaces/executionResult'
 import JobResult from './interfaces/jobResult'
@@ -12,7 +11,6 @@ import SandboxExecutor from './interfaces/sandboxExecutor'
 import SlackCallback from './interfaces/slackCallback'
 import FcmCallback from './interfaces/fcmCallback'
 import WebhookCallback from './interfaces/webhookCallback'
-import admin = require('firebase-admin')
 
 const VERSION = '0.0.2'
 
@@ -70,58 +68,49 @@ export default class JSTransformationService implements TransformationService {
       return Promise.resolve()
     }
 
-    const callbackObject = JSTransformationService.createCallbackObject(notificationRequest)
-    const serviceAccount = require('/home/mathias/ods/nebelalarm/nebelalarm-firebase-adminsdk-th6w9-b1b9d8cd24.json')
-
-    if(notificationRequest.notificationType == NotificationType.FCM) {
-      firebaseAdmin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-        databaseURL: 'https://nebelalarm.firebaseio.com'
-      })
-      console.log('aaa')
-      var message = {
-        data: {
-          score: '123'
-        },
-        topic: 'test'
-      }
-
-      console.log('premessaging')
-      const messaging = firebaseAdmin.messaging()
-      console.log('aftermessaging')
-      const response = await messaging.send(message, true)
-      console.log(`success: ${response}`)
-      return
+    switch (notificationRequest.notificationType) {
+      case NotificationType.WEBHOOK:
+        await this.handleWebhook(notificationRequest)
+        break
+      case NotificationType.FCM:
+        await this.handleFCM(notificationRequest)
+        break
+      case NotificationType.SLACK:
+        await this.handleSlack(notificationRequest)
+        break
+      default:
+        throw new Error(`Notification type ${notificationRequest.notificationType} not implemented.`)
     }
-    await axios.post(notificationRequest.url, callbackObject)
   }
 
-  private static createCallbackObject (request: NotificationRequest): SlackCallback | WebhookCallback | FcmCallback {
-    switch (request.notificationType) {
-      case NotificationType.WEBHOOK:
-        return {
-          location: request.dataLocation,
-          timestamp: new Date(Date.now())
-        }
-      case NotificationType.SLACK:
-        return {
-          text: `New data available for pipeline ${request.pipelineName}(${request.pipelineId}). ` +
+  private async handleWebhook (request: NotificationRequest): Promise<void> {
+    const callbackObject: WebhookCallback = {
+      location: request.dataLocation,
+      timestamp: new Date(Date.now())
+    }
+    await axios.post(request.url, callbackObject)
+  }
+
+  private async handleSlack (request: NotificationRequest): Promise<void> {
+    const callbackObject: SlackCallback = {
+      text: `New data available for pipeline ${request.pipelineName}(${request.pipelineId}). ` +
+        `Fetch at ${request.dataLocation}.`
+    }
+    await axios.post(request.url, callbackObject)
+  }
+
+  private async handleFCM (request: NotificationRequest): Promise<void> {
+    const callbackObject: FcmCallback = {
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      validate_only: false,
+      message: {
+        notification: {
+          title: 'New Data Available',
+          body: `Pipeline ${request.pipelineName}(${request.pipelineId}) has new data available.` +
             `Fetch at ${request.dataLocation}.`
         }
-      case NotificationType.FCM:
-        return {
-          // eslint-disable-next-line @typescript-eslint/camelcase
-          validate_only: false,
-          message: {
-            notification: {
-              title: 'New Data Available',
-              body: `Pipeline ${request.pipelineName}(${request.pipelineId}) has new data available.` +
-                `Fetch at ${request.dataLocation}.`
-            }
-          }
-        }
-      default:
-        throw new Error(`Notification type ${request.notificationType} not implemented.`)
+      }
     }
+    throw new Error('Notification type FCM not implemented.')
   }
 }
