@@ -1,4 +1,6 @@
 import axios from 'axios'
+import * as firebaseAdmin from 'firebase-admin'
+import Message from 'firebase-admin'
 
 import ExecutionResult from './interfaces/executionResult'
 import JobResult from './interfaces/jobResult'
@@ -10,6 +12,7 @@ import SandboxExecutor from './interfaces/sandboxExecutor'
 import SlackCallback from './interfaces/slackCallback'
 import FcmCallback from './interfaces/fcmCallback'
 import WebhookCallback from './interfaces/webhookCallback'
+import admin = require('firebase-admin')
 
 const VERSION = '0.0.2'
 
@@ -68,7 +71,28 @@ export default class JSTransformationService implements TransformationService {
     }
 
     const callbackObject = JSTransformationService.createCallbackObject(notificationRequest)
+    const serviceAccount = require('/home/mathias/ods/nebelalarm/nebelalarm-firebase-adminsdk-th6w9-b1b9d8cd24.json')
 
+    if(notificationRequest.notificationType == NotificationType.FCM) {
+      firebaseAdmin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: 'https://nebelalarm.firebaseio.com'
+      })
+      console.log('aaa')
+      var message = {
+        data: {
+          score: '123'
+        },
+        topic: 'test'
+      }
+
+      console.log('premessaging')
+      const messaging = firebaseAdmin.messaging()
+      console.log('aftermessaging')
+      const response = await messaging.send(message, true)
+      console.log(`success: ${response}`)
+      return
+    }
     await axios.post(notificationRequest.url, callbackObject)
   }
 
