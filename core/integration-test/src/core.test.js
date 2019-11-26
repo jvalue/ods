@@ -276,7 +276,7 @@ const pipelineConfig = {
   "adapter": {
     "protocol": {
       "type": "HTTP",
-      "paramters": {
+      "parameters": {
         "location": "http://www.nodisrespect.org"
       }
     },
