@@ -17,7 +17,7 @@ describe("Adapter", () => {
     } catch(err) {
       process.exit(1);
     }
-    
+
     try {
       const pingUrl = URL + "/version";
       console.log("Waiting for service with URL: " + pingUrl);
@@ -27,12 +27,12 @@ describe("Adapter", () => {
       process.exit(1);
     }
   }, 60000);
-  
+
   test("GET /version", async () => {
     const response = await request(URL).get("/version");
     expect(response.status).toEqual(200);
     expect(response.type).toEqual("text/plain");
-    
+
     const semanticVersionRegEx = '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)';
     expect(response.text).toMatch(new RegExp(semanticVersionRegEx));
   });
@@ -63,9 +63,15 @@ describe("Adapter", () => {
 
   test("POST /dataImport JSON-Adapter", async () => {
     const reqBody = {
-      protocol: "HTTP",
-      format: "JSON",
-      location: MOCK_SERVER_URL + "/json"
+      protocol: {
+        type: "HTTP",
+        parameters: {
+          location: MOCK_SERVER_URL + "/json"
+        }
+      },
+      format: {
+        type: "JSON"
+      }
     };
 
     const response = await request(URL)
@@ -77,9 +83,15 @@ describe("Adapter", () => {
 
   test("POST /dataImport XML-Adapter", async () => {
     const reqBody = {
-      protocol: "HTTP",
-      format: "XML",
-      location: MOCK_SERVER_URL + "/xml"
+      protocol: {
+        type: "HTTP",
+        parameters: {
+          location: MOCK_SERVER_URL + "/xml"
+        }
+      },
+      format: {
+        type: "XML"
+      }
     };
 
     const response = await request(URL)
