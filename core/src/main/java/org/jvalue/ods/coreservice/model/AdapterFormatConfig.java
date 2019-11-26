@@ -3,7 +3,7 @@ package org.jvalue.ods.coreservice.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.persistence.Embeddable;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 import java.util.Map;
@@ -13,9 +13,15 @@ import java.util.Objects;
 public class AdapterFormatConfig {
 
   @NotNull
+  @Column(name = "format_type")
   private String type;
 
   @NotNull
+  @ElementCollection
+  @CollectionTable(name = "adapter_format_parameter_mapping",
+          joinColumns = {@JoinColumn(name = "pipelineconfig_id", referencedColumnName = "id")})
+  @MapKeyColumn(name = "parameter_name")
+  @Column(name = "value")
   private Map<String, String> parameters;
 
   // Constructor for JPA
