@@ -11,6 +11,7 @@ import SandboxExecutor from './interfaces/sandboxExecutor'
 import SlackCallback from './interfaces/slackCallback'
 import FcmCallback from './interfaces/fcmCallback'
 import WebhookCallback from './interfaces/webhookCallback'
+import { stringLiteral } from '@babel/types'
 
 const VERSION = '0.0.2'
 
@@ -100,16 +101,14 @@ export default class JSTransformationService implements TransformationService {
   }
 
   private async handleFCM (request: NotificationRequest): Promise<void> {
-    const callbackObject: FcmCallback = {
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      validate_only: false,
-      message: {
-        notification: {
-          title: 'New Data Available',
-          body: `Pipeline ${request.pipelineName}(${request.pipelineId}) has new data available.` +
-            `Fetch at ${request.dataLocation}.`
-        }
-      }
+
+    var firebaseMessage: FcmCallback = {
+      notification: {
+        title: 'New Data Available',
+        body: `Pipeline ${request.pipelineName}(${request.pipelineId}) has new data available.` +
+          `Fetch at ${request.dataLocation}.`
+      },
+      topic: 'test'
     }
 
     // Providing a service account object inline
@@ -120,6 +119,8 @@ export default class JSTransformationService implements TransformationService {
       }),
       databaseURL: "https://nebelalarm.firebaseio.com"
     });
+
+    firebaseAdmin.messaging().send(firebaseMessage)
     throw new Error('Notification type FCM not implemented.')
   }
 }

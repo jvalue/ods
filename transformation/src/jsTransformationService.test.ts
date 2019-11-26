@@ -143,15 +143,12 @@ describe('JSTransformationService', () => {
         url: 'yo'
       }
       const expectedObject: fcmCallback = {
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        validate_only: false,
-        message: {
-          notification: {
-            title: 'New Data Available',
-            body: `Pipeline ${request.pipelineName}(${request.pipelineId}) has new data available.` +
-              `Fetch at ${request.dataLocation}.`
-          }
-        }
+        notification: {
+          title: 'New Data Available',
+          body: `Pipeline ${request.pipelineName}(${request.pipelineId}) has new data available.` +
+            `Fetch at ${request.dataLocation}.`
+        },
+        topic: 'test'
       }
       await transformationService.handleNotification(request)
 
