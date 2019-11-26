@@ -38,6 +38,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
+import { Watch } from 'vue-property-decorator'
 import { Action, State } from 'vuex-class'
 
 import JobResult from './interfaces/jobResult'
@@ -47,7 +48,6 @@ import MonacoDataProvider from './MonacoDataProvider.vue'
 import TextAreaDataProvider from './TextAreaDataProvider.vue'
 import CodeEditor from './CodeEditor.vue'
 import ResultView from './ResultView.vue'
-import { Data } from './interfaces/data'
 
 const namespace = { namespace: 'transformation' }
 
@@ -66,6 +66,10 @@ export default class TransformationMain extends Vue {
     }
   }
 
+  private dataInput: object = { a: 1, b: 2, c: 3 }
+  private functionInput = 'return data;'
+  private timeoutHandle: number | null = null
+
   @State('transformationResult', namespace)
   private transformationResult!: JobResult | null
 
@@ -75,8 +79,22 @@ export default class TransformationMain extends Vue {
   @Action('transformData', namespace)
   private transformData!: (request: TransformationRequest) => void
 
-  private dataInput: Data = { a: 1, b: 2, c: 3 }
-  private functionInput = 'return data;'
+  @Watch('dataInput')
+  onDataInputChanged (): void {
+    this.scheduleSubmit()
+  }
+
+  @Watch('functionInput')
+  onFunctionInputChanged (): void {
+    this.scheduleSubmit();
+  }
+
+  private scheduleSubmit (): void {
+    if (this.timeoutHandle !== null) {
+      window.clearTimeout(this.timeoutHandle)
+    }
+    this.timeoutHandle = window.setTimeout(this.submit, 1500)
+  }
 
   private submit (): void {
     this.transformData({ func: this.functionInput, data: this.dataInput })

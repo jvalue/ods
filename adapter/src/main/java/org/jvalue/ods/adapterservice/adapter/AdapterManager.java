@@ -22,17 +22,17 @@ public class AdapterManager {
     private static final Map<String, Interpreter> interpreters = Map.ofEntries(
             entry("JSON", new JsonInterpreter()),
             entry("XML", new XmlInterpreter())
-    );
+   );
 
 
     public static Adapter getAdapter(AdapterConfig config) {
-        Importer importer = importers.get(config.protocol);
+        Importer importer = importers.get(config.protocolConfig.protocol);
         if(importer == null) {
-            throw new IllegalArgumentException("Importer for protocol " + config.protocol + " does not exist");
+            throw new IllegalArgumentException("Importer for protocol " + config.protocolConfig.protocol + " does not exist");
         }
-        Interpreter interpreter = interpreters.get(config.format);
+        Interpreter interpreter = interpreters.get(config.formatConfig.format);
         if(interpreter == null) {
-            throw new IllegalArgumentException("Interpreter for format " + config.format + " does not exist");
+            throw new IllegalArgumentException("Interpreter for format " + config.formatConfig.format + " does not exist");
         }
 
         return new Adapter(importer, interpreter);

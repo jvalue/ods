@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-import PipelineConfig from './../interfaces/pipeline-config'
+import PipelineConfig from '../interfaces/core/pipeline-config'
 
 const STORAGE_SERVICE_URL = process.env.STORAGE_SERVICE_URL || 'http://localhost:8084'
 
