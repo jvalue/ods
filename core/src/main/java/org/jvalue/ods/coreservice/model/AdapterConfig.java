@@ -11,13 +11,10 @@ import java.util.Objects;
 public class AdapterConfig {
 
     @NotNull
-    private String protocol;
+    private AdapterProtocolConfig protocol;
 
     @NotNull
-    private String format;
-
-    @NotNull
-    private String location;
+    private AdapterFormatConfig format;
 
 
     //Constructor for JPA
@@ -26,24 +23,18 @@ public class AdapterConfig {
 
     @JsonCreator
     public AdapterConfig(
-            @JsonProperty("protocol") String protocol,
-            @JsonProperty("format") String format,
-            @JsonProperty("location") String location) {
+            @JsonProperty("protocol") AdapterProtocolConfig protocol,
+            @JsonProperty("format") AdapterFormatConfig format) {
         this.protocol = protocol;
         this.format = format;
-        this.location = location;
     }
 
-    public String getProtocol() {
+    public AdapterProtocolConfig getProtocol() {
         return protocol;
     }
 
-    public String getFormat() {
+    public AdapterFormatConfig getFormat() {
         return format;
-    }
-
-    public String getLocation() {
-        return location;
     }
 
     @Override
@@ -51,7 +42,6 @@ public class AdapterConfig {
         return "AdapterConfig{" +
                 "protocol='" + protocol + '\'' +
                 ", format='" + format + '\'' +
-                ", location='" + location + '\'' +
                 '}';
     }
 
@@ -61,12 +51,11 @@ public class AdapterConfig {
         if (o == null || getClass() != o.getClass()) return false;
         AdapterConfig config = (AdapterConfig) o;
         return protocol.equals(config.protocol) &&
-                format.equals(config.format) &&
-                location.equals(config.location);
+                format.equals(config.format);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(protocol, format, location);
+        return Objects.hash(protocol, format);
     }
 }
