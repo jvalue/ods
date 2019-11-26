@@ -49,6 +49,8 @@ services:
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: Pa55w0rd
       KEYCLOAK_LOGLEVEL: INFO
+    depends_on:
+      - auth-db
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-auth.rule=PathPrefix(`/auth`)"
