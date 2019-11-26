@@ -122,6 +122,5 @@ export default class JSTransformationService implements TransformationService {
     });
 
     firebaseAdmin.messaging().send(firebaseMessage)
-    throw new Error('Notification type FCM not implemented.')
   }
 }
