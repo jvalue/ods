@@ -2,7 +2,7 @@ import NotificationConfig from '@/pipeline/notificationConfig'
 
 export default interface Pipeline {
   id: number;
-  adapter: object;
+  adapter: AdapterConfig;
   metadata: PipelineMetaData;
   transformations: object[];
   trigger: Trigger;
@@ -20,4 +20,15 @@ export interface Trigger {
   periodic: boolean;
   interval: number;
   firstExecution: Date;
+}
+
+export interface AdapterConfig {
+  format: {
+    type: string;
+    parameters: object;
+  };
+  protocol: {
+    type: string;
+    parameters: object;
+  }
 }

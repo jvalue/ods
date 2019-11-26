@@ -56,19 +56,19 @@
               v-model="validStep2"
             >
               <v-select
-                v-model="dialogPipeline.adapter.protocol"
+                v-model="dialogPipeline.adapter.protocol.type"
                 :items="availableAdapterProtocols"
                 label="Protocol"
                 :rules="[required]"
               />
               <v-select
-                v-model="dialogPipeline.adapter.format"
+                v-model="dialogPipeline.adapter.format.type"
                 :items="availableAdapterFormats"
                 label="Format"
                 :rules="[required]"
               />
               <v-text-field
-                v-model="dialogPipeline.adapter.location"
+                v-model="dialogPipeline.adapter.protocol.parameters.location"
                 label="URL"
                 :rules="[required]"
               />
@@ -339,10 +339,17 @@ export default class PipelineEdit extends Vue {
   private dialogPipeline: Pipeline = {
     id: -1,
     adapter: {
-      protocol: this.availableAdapterProtocols[0],
-      format: this.availableAdapterFormats[0],
-      location:
-        'https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json'
+      protocol: {
+        type: this.availableAdapterProtocols[0],
+        parameters: {
+          location:
+            'https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json'
+        }
+      },
+      format: {
+        type: this.availableAdapterFormats[0],
+        parameters: {}
+      }
     },
     transformations: [{ func: "data.test = 'abc'; return data;" }],
     metadata: {
