@@ -340,9 +340,16 @@ function generateNotification(condition, url) {
 function generateConfig(sourceLocation, periodic, interval = 5000) {
   return {
     adapter: {
-      protocol: "HTTP",
-      format: "JSON",
-      location: sourceLocation
+      protocol: {
+        type: "HTTP",
+        parameters: {
+          location: sourceLocation
+        }
+      },
+      format: {
+        type: "JSON",
+        parameters: {}
+      }
     },
     transformations: [],
     trigger: {
