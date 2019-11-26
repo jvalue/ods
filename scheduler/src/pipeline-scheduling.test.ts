@@ -226,9 +226,16 @@ function generateConfig (periodic: boolean, firstExecution: Date, interval: numb
   return {
     id: 123,
     adapter: {
-      format: 'XML',
-      protocol: 'HTTP',
-      location: 'somewhere'
+      format: {
+        type: 'XML',
+        parameters: {}
+      },
+      protocol: {
+        type: 'HTTP',
+        parameters: {
+          location: 'somewhere'
+        }
+      }
     },
     transformations: [],
     persistence: {},

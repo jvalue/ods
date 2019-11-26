@@ -41,7 +41,7 @@ test('Should execute pipeline once', async () => {
 
   await PipelineExecution.executePipeline(pipelineConfig)
 
-  expect(mockExecuteAdapter).toHaveBeenCalledWith(pipelineConfig)
+  expect(mockExecuteAdapter).toHaveBeenCalledWith(pipelineConfig.adapter)
   expect(mockExecuteTransformation).toHaveBeenCalledWith(transformation)
   expect(mockExecuteTransformation).toHaveBeenCalledTimes(1)
   expect(mockExecuteStorage).toHaveBeenCalledWith(pipelineConfig, transformedData)
@@ -59,7 +59,7 @@ test('Should execute pipeline periodic', async () => {
 
   await PipelineExecution.executePipeline(pipelineConfig)
 
-  expect(mockExecuteAdapter).toHaveBeenCalledWith(pipelineConfig)
+  expect(mockExecuteAdapter).toHaveBeenCalledWith(pipelineConfig.adapter)
   expect(mockExecuteTransformation).toHaveBeenCalledWith(transformation)
   expect(mockExecuteStorage).toHaveBeenCalledWith(pipelineConfig, transformedData)
 
@@ -126,9 +126,16 @@ function generateConfig (
   return {
     id: 123,
     adapter: {
-      format: 'XML',
-      protocol: 'HTTP',
-      location: 'somewhere'
+      format: {
+        type: 'XML',
+        parameters: {}
+      },
+      protocol: {
+        type: 'HTTP',
+        parameters: {
+          location: 'somewhere'
+        }
+      }
     },
     transformations,
     persistence: {},
