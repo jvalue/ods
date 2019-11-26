@@ -10,7 +10,7 @@ export async function executeStorage (pipelineConfig: PipelineConfig, data: obje
     data,
     pipelineId: pipelineConfig.id,
     timestamp: new Date(Date.now()),
-    origin: !!pipelineConfig.adapter && !!pipelineConfig.adapter.location ? pipelineConfig.adapter.location : 'UNKNOWN',
+    origin: !!pipelineConfig.adapter && !!pipelineConfig.adapter.protocol.parameters.location ? pipelineConfig.adapter.protocol.parameters.location : 'UNKNOWN',
     license: !!pipelineConfig.metadata && !!pipelineConfig.metadata.license
       ? pipelineConfig.metadata.license : 'UNKNOWN'
   }
