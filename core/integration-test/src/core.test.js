@@ -274,9 +274,16 @@ describe("Core", () => {
 const pipelineConfig = {
   "id": 12345,
   "adapter": {
-    "protocol": "HTTP",
-    "format": "XML",
-    "location": "http://www.nodisrespect.org"
+    "protocol": {
+      "type": "HTTP",
+      "paramters": {
+        "location": "http://www.nodisrespect.org"
+      }
+    },
+    "format": {
+      "type": "XML",
+      "parameters": {}
+    }
   },
   "transformations": [
     {
