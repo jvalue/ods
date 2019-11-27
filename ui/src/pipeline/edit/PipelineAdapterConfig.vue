@@ -20,7 +20,7 @@
       v-model="adapterConfig.protocol.parameters.location"
       label="URL"
       :rules="[required]"
-      @change="formChanged"
+      @keyup="formChanged"
     />
   </v-form>
 </template>

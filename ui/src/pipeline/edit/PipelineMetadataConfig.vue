@@ -5,17 +5,17 @@
       <v-text-field
         v-model="metadataConfig.description"
         label="Pipeline Description"
-        @change="formChanged"
+        @keyup="formChanged"
       />
       <v-text-field
         v-model="metadataConfig.author"
         label="Author"
-        @change="formChanged"
+        @keyup="formChanged"
       />
       <v-text-field
         v-model="metadataConfig.license"
         label="License"
-        @change="formChanged"
+        @keyup="formChanged"
       />
     </v-form>
 </template>
