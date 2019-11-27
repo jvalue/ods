@@ -31,15 +31,8 @@
                 label="Pipeline Name"
                 :rules="[required]"
               />
-              <v-btn
-                :disabled="!validStep1"
-                color="primary"
-                class="ma-2"
-                @click="dialogStep = 2"
-              >
-                Next
-              </v-btn>
             </v-form>
+            <pipeline-edit-stepper-button-group v-bind:step="1" v-bind:nextEnabled="validStep1" v-bind:previousVisible="false" v-on:stepChanged="dialogStep = $event" />
           </v-stepper-content>
 
           <v-stepper-step
@@ -86,30 +79,7 @@
           </v-stepper-step>
           <v-stepper-content step="5">
             <pipeline-trigger-config v-model="dialogPipeline.trigger" v-on:validityChanged="validStep5 = $event" />
-            <v-btn
-              class="ma-2"
-              @click="dialogStep = 4"
-            >
-              Back
-            </v-btn>
-            <v-btn
-              v-if="isEditMode"
-              :disabled="!validStep5"
-              color="primary"
-              class="ma-2"
-              @click="onUpdate"
-            >
-              Update
-            </v-btn>
-            <v-btn
-              v-else
-              :disabled="!validStep5"
-              color="primary"
-              class="ma-2"
-              @click="onSave"
-            >
-              Save
-            </v-btn>
+            <pipeline-edit-stepper-button-group v-bind:step="5" v-bind:nextEnabled="validStep5" v-bind:nextVisible="false" v-on:stepChanged="dialogStep = $event" />
           </v-stepper-content>
         </v-stepper>
       </v-card-text>
@@ -121,6 +91,24 @@
           @click="onCancel"
         >
           Cancel
+        </v-btn>
+        <v-btn
+          v-if="isEditMode"
+          :disabled="!evaluateAllForms()"
+          color="primary"
+          class="ma-2"
+          @click="onUpdate"
+        >
+          Update
+        </v-btn>
+        <v-btn
+          v-else
+          :disabled="!evaluateAllForms()"
+          color="primary"
+          class="ma-2"
+          @click="onSave"
+        >
+          Save
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -237,6 +225,14 @@ export default class PipelineEdit extends Vue {
 
   private required (val: string) {
     return !!val || 'required.'
+  }
+
+  private evaluateAllForms() {
+    return this.validStep1
+        && this.validStep2
+        && this.validStep3
+        && this.validStep4
+        && this.validStep5;
   }
 }
 </script>

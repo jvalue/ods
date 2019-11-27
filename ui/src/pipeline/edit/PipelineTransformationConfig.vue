@@ -7,7 +7,7 @@
         label="Transformation function"
         rows="3"
         :rules="[required]"
-        @change="formChanged"
+        @keyup="formChanged"
       />
   </v-form>
 </template>

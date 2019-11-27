@@ -1,12 +1,14 @@
 <template>
   <div>
     <v-btn
+      v-if="previousVisible"
       class="ma-2"
       @click="previousStep"
     >
       Back
     </v-btn>
     <v-btn
+      v-if="nextVisible"
       :disabled="!nextEnabled"
       color="primary"
       class="ma-2"
@@ -30,8 +32,12 @@ export default class PipelineEditStepperButtonGroup extends Vue {
   @Prop(Number)
   private readonly step!: number;
 
-  @Prop(Boolean)
-  private readonly nextEnabled = true;
+  @Prop({ default: "true" })
+  private readonly nextEnabled!: boolean;
+  @Prop({ default: "true" })
+  private readonly nextVisible!: boolean;
+  @Prop({ default: "true" })
+  private readonly previousVisible!: boolean;
 
   @Emit("stepChanged")
   private nextStep() {
