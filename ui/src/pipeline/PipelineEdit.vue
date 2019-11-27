@@ -51,42 +51,21 @@
             <small>Configure the data import</small>
           </v-stepper-step>
           <v-stepper-content step="2">
-            <v-form
-              ref="formStep2"
-              v-model="validStep2"
+            <pipeline-adapter-config v-model="dialogPipeline.adapter" v-on:validityChanged="validStep2 = $event"/>
+            <v-btn
+              class="ma-2"
+              @click="dialogStep = 1"
             >
-              <v-select
-                v-model="dialogPipeline.adapter.protocol.type"
-                :items="availableAdapterProtocols"
-                label="Protocol"
-                :rules="[required]"
-              />
-              <v-select
-                v-model="dialogPipeline.adapter.format.type"
-                :items="availableAdapterFormats"
-                label="Format"
-                :rules="[required]"
-              />
-              <v-text-field
-                v-model="dialogPipeline.adapter.protocol.parameters.location"
-                label="URL"
-                :rules="[required]"
-              />
-              <v-btn
-                class="ma-2"
-                @click="dialogStep = 1"
-              >
-                Back
-              </v-btn>
-              <v-btn
-                :disabled="!validStep2"
-                color="primary"
-                class="ma-2"
-                @click="dialogStep = 3"
-              >
-                Next
-              </v-btn>
-            </v-form>
+              Back
+            </v-btn>
+            <v-btn
+              :disabled="!validStep2"
+              color="primary"
+              class="ma-2"
+              @click="dialogStep = 3"
+            >
+              Next
+            </v-btn>
           </v-stepper-content>
 
           <v-stepper-step
@@ -298,6 +277,7 @@ import { Action, State } from 'vuex-class'
 import Pipeline from './pipeline'
 
 import DateTimePicker from '@/components/DateTimePicker.vue'
+import PipelineAdapterConfig from './edit/PipelineAdapterConfig.vue'
 
 const namespace = { namespace: 'pipeline' }
 
@@ -306,7 +286,7 @@ const ONE_HOUR_IN_MS = 3600 * 1000
 const ONE_MINUTE_IN_MS = 60 * 1000
 
 @Component({
-  components: { DateTimePicker }
+  components: { DateTimePicker, PipelineAdapterConfig }
 })
 export default class PipelineEdit extends Vue {
   @Action('loadPipelineById', namespace) private loadPipelineByIdAction!: (
@@ -333,21 +313,18 @@ export default class PipelineEdit extends Vue {
   private validStep4 = true // no fields required
   private validStep5 = true // starts with valid default values
 
-  private availableAdapterProtocols = ['HTTP']
-  private availableAdapterFormats = ['JSON', 'XML']
-
   private dialogPipeline: Pipeline = {
     id: -1,
     adapter: {
       protocol: {
-        type: this.availableAdapterProtocols[0],
+        type: 'HTTP',
         parameters: {
           location:
             'https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json'
         }
       },
       format: {
-        type: this.availableAdapterFormats[0],
+        type: 'JSON',
         parameters: {}
       }
     },
