@@ -24,7 +24,6 @@
           </v-stepper-step>
           <v-stepper-content step="1">
             <v-form
-              ref="formStep1"
               v-model="validStep1"
             >
               <v-text-field
@@ -86,107 +85,31 @@
             <small>Configure Execution Details</small>
           </v-stepper-step>
           <v-stepper-content step="5">
-            <v-form
-              ref="formStep5"
-              v-model="validStep5"
+            <pipeline-trigger-config v-model="dialogPipeline.trigger" v-on:validityChanged="validStep5 = $event" />
+            <v-btn
+              class="ma-2"
+              @click="dialogStep = 4"
             >
-              <v-switch
-                v-model="dialogPipeline.trigger.periodic"
-                label="Periodic execution"
-              />
-              <date-time-picker
-                v-model="dialogPipeline.trigger.firstExecution"
-              />
-
-              <span class="subheading font-weight-light mr-1">Interval: {{ dialogIntervalHours }}h {{ dialogIntervalMinutes }}m</span>
-              <v-subheader>Hours</v-subheader>
-              <v-slider
-                v-model="dialogIntervalHours"
-                track-color="grey"
-                always-dirty
-                step="1"
-                ticks="always"
-                thumb-label="always"
-                tick-size="3"
-                :tick-labels="hoursTickLabels"
-                min="0"
-                max="24"
-              >
-                <template v-slot:prepend>
-                  <v-icon
-                    color="error"
-                    @click="dialogIntervalHours--"
-                  >
-                    mdi-minus
-                  </v-icon>
-                </template>
-
-                <template v-slot:append>
-                  <v-icon
-                    color="primary"
-                    @click="dialogIntervalHours++"
-                  >
-                    mdi-plus
-                  </v-icon>
-                </template>
-              </v-slider>
-
-              <v-subheader>Minutes</v-subheader>
-              <v-slider
-                v-model="dialogIntervalMinutes"
-                track-color="grey"
-                always-dirty
-                step="1"
-                ticks="always"
-                thumb-label="always"
-                :tick-labels="minutesTickLabels()"
-                min="0"
-                max="60"
-              >
-                <template v-slot:prepend>
-                  <v-icon
-                    color="error"
-                    @click="dialogIntervalMinutes--"
-                  >
-                    mdi-minus
-                  </v-icon>
-                </template>
-
-                <template v-slot:append>
-                  <v-icon
-                    color="primary"
-                    @click="dialogIntervalMinutes++"
-                  >
-                    mdi-plus
-                  </v-icon>
-                </template>
-              </v-slider>
-
-              <v-btn
-                class="ma-2"
-                @click="dialogStep = 4"
-              >
-                Back
-              </v-btn>
-              <v-btn
-                v-if="isEditMode"
-                :disabled="!validStep5"
-                color="primary"
-                class="ma-2"
-                @click="onUpdate"
-              >
-                Update
-              </v-btn>
-              <v-btn
-                v-else
-                :disabled="!validStep5"
-                color="primary"
-                class="ma-2"
-                @click="onSave"
-              >
-                Save
-              </v-btn>
-            </v-form>
+              Back
+            </v-btn>
+            <v-btn
+              v-if="isEditMode"
+              :disabled="!validStep5"
+              color="primary"
+              class="ma-2"
+              @click="onUpdate"
+            >
+              Update
+            </v-btn>
+            <v-btn
+              v-else
+              :disabled="!validStep5"
+              color="primary"
+              class="ma-2"
+              @click="onSave"
+            >
+              Save
+            </v-btn>
           </v-stepper-content>
         </v-stepper>
       </v-card-text>
@@ -211,20 +134,17 @@ import { Watch } from 'vue-property-decorator'
 import { Action, State } from 'vuex-class'
 import Pipeline from './pipeline'
 
-import DateTimePicker from '@/components/DateTimePicker.vue'
 import PipelineAdapterConfig from './edit/PipelineAdapterConfig.vue'
 import PipelineEditStepperButtonGroup from './edit/PipelineEditStepperButtonGroup.vue'
 import PipelineMetadataConfig from './edit/PipelineMetadataConfig.vue'
 import PipelineTransformationConfig from './edit/PipelineTransformationConfig.vue'
+import PipelineTriggerConfig from './edit/PipelineTriggerConfig.vue'
+
 
 const namespace = { namespace: 'pipeline' }
 
-const ONE_HOUR_IN_MS = 3600 * 1000
-
-const ONE_MINUTE_IN_MS = 60 * 1000
-
 @Component({
-  components: { DateTimePicker, PipelineAdapterConfig, PipelineEditStepperButtonGroup, PipelineMetadataConfig, PipelineTransformationConfig }
+  components: { PipelineAdapterConfig, PipelineEditStepperButtonGroup, PipelineMetadataConfig, PipelineTransformationConfig, PipelineTriggerConfig }
 })
 export default class PipelineEdit extends Vue {
   @Action('loadPipelineById', namespace) private loadPipelineByIdAction!: (
@@ -281,20 +201,6 @@ export default class PipelineEdit extends Vue {
     notifications: []
   }
 
-  private dialogIntervalHours = 1
-  private dialogIntervalMinutes = 0
-
-  private hoursTickLabels = ['0h', '', '', '', '', '', '6h', '', '', '', '', '', '12h', '', '', '', '', '', '18h', '', '', '', '', '', '24h']
-  private minutesTickLabels = () => {
-    const ticks = new Array(61)
-    ticks[0] = '0m'
-    ticks[15] = '15m'
-    ticks[30] = '30m'
-    ticks[45] = '45m'
-    ticks[60] = '60m'
-    return ticks
-  }
-
   created () {
     this.isEditMode = this.$route.meta.isEditMode
 
@@ -308,44 +214,15 @@ export default class PipelineEdit extends Vue {
   onSelectedPipelineChange (value: Pipeline, oldValue: Pipeline) {
     if (value != oldValue) {
       this.dialogPipeline = value
-      this.loadDialogIntervalForSlider()
     }
-  }
-
-  private setDialogInterval () {
-    const hoursInMS = this.dialogIntervalHours * ONE_HOUR_IN_MS
-    const minutesInMS = this.dialogIntervalMinutes * ONE_MINUTE_IN_MS
-    this.dialogPipeline.trigger.interval = hoursInMS + minutesInMS
-  }
-
-  private loadDialogIntervalForSlider () {
-    if (this.dialogPipeline.trigger.interval <= 1) {
-      this.dialogIntervalHours = 0
-      this.dialogIntervalMinutes = 0
-      return
-    }
-
-    const intervalInMS = this.dialogPipeline.trigger.interval
-    this.dialogIntervalHours = this.getHoursFromMS(intervalInMS)
-    this.dialogIntervalMinutes = this.getMinutesFromMS(intervalInMS)
-  }
-
-  private getHoursFromMS (intervalInMS: number): number {
-    return Math.floor(intervalInMS / ONE_HOUR_IN_MS)
-  }
-
-  private getMinutesFromMS (intervalInMS: number): number {
-    return Math.floor((intervalInMS % ONE_HOUR_IN_MS) / ONE_MINUTE_IN_MS)
   }
 
   private onSave () {
-    this.setDialogInterval()
     this.createPipelineAction(this.dialogPipeline)
     this.routeToOverview()
   }
 
   private onUpdate () {
-    this.setDialogInterval()
     this.updatePipelineAction(this.dialogPipeline)
     this.routeToOverview()
   }
