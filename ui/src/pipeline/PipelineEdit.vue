@@ -51,21 +51,8 @@
             <small>Configure the data import</small>
           </v-stepper-step>
           <v-stepper-content step="2">
-            <pipeline-adapter-config v-model="dialogPipeline.adapter" v-on:validityChanged="validStep2 = $event"/>
-            <v-btn
-              class="ma-2"
-              @click="dialogStep = 1"
-            >
-              Back
-            </v-btn>
-            <v-btn
-              :disabled="!validStep2"
-              color="primary"
-              class="ma-2"
-              @click="dialogStep = 3"
-            >
-              Next
-            </v-btn>
+            <pipeline-adapter-config v-model="dialogPipeline.adapter" v-on:validityChanged="validStep2 = $event" />
+            <pipeline-edit-setpper-button-group v-bind:step="2" v-bind:nextEnabled="validStep2" v-on:stepChanged="dialogStep = $event" />
           </v-stepper-content>
 
           <v-stepper-step
@@ -77,20 +64,7 @@
           </v-stepper-step>
           <v-stepper-content step="3">
               <pipeline-transformation-config v-model="dialogPipeline.transformations" v-on:validityChanged="validStep3 = $event"/>
-              <v-btn
-                class="ma-2"
-                @click="dialogStep = 2"
-              >
-                Back
-              </v-btn>
-              <v-btn
-                :disabled="!validStep3"
-                color="primary"
-                class="ma-2"
-                @click="dialogStep = 4"
-              >
-                Next
-              </v-btn>
+              <pipeline-edit-setpper-button-group v-bind:step="3" v-bind:nextEnabled="validStep3" v-on:stepChanged="dialogStep = $event" />
           </v-stepper-content>
 
           <v-stepper-step
@@ -116,21 +90,8 @@
                 v-model="dialogPipeline.metadata.license"
                 label="License"
               />
-              <v-btn
-                class="ma-2"
-                @click="dialogStep = 3"
-              >
-                Back
-              </v-btn>
-              <v-btn
-                :disabled="!validStep4"
-                color="primary"
-                class="ma-2"
-                @click="dialogStep = 5"
-              >
-                Next
-              </v-btn>
             </v-form>
+            <pipeline-edit-setpper-button-group v-bind:step="4" v-bind:nextEnabled="validStep4" v-on:stepChanged="dialogStep = $event" />
           </v-stepper-content>
 
           <v-stepper-step
@@ -268,6 +229,7 @@ import Pipeline from './pipeline'
 
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import PipelineAdapterConfig from './edit/PipelineAdapterConfig.vue'
+import PipelineEditSetpperButtonGroup from './edit/PipelineEditStepperButtonGroup.vue'
 import PipelineTransformationConfig from './edit/PipelineTransformationConfig.vue'
 
 const namespace = { namespace: 'pipeline' }
@@ -277,7 +239,7 @@ const ONE_HOUR_IN_MS = 3600 * 1000
 const ONE_MINUTE_IN_MS = 60 * 1000
 
 @Component({
-  components: { DateTimePicker, PipelineAdapterConfig, PipelineTransformationConfig }
+  components: { DateTimePicker, PipelineAdapterConfig, PipelineEditSetpperButtonGroup, PipelineTransformationConfig }
 })
 export default class PipelineEdit extends Vue {
   @Action('loadPipelineById', namespace) private loadPipelineByIdAction!: (
