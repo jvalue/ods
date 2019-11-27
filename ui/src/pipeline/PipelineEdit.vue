@@ -76,16 +76,7 @@
             <small>Customize data transformations</small>
           </v-stepper-step>
           <v-stepper-content step="3">
-            <v-form
-              ref="formStep3"
-              v-model="validStep3"
-            >
-              <v-textarea
-                v-model="dialogPipeline.transformations[0].func"
-                label="Transformation function"
-                rows="3"
-                :rules="[required]"
-              />
+              <pipeline-transformation-config v-model="dialogPipeline.transformations" v-on:validityChanged="validStep3 = $event"/>
               <v-btn
                 class="ma-2"
                 @click="dialogStep = 2"
@@ -100,7 +91,6 @@
               >
                 Next
               </v-btn>
-            </v-form>
           </v-stepper-content>
 
           <v-stepper-step
@@ -278,6 +268,7 @@ import Pipeline from './pipeline'
 
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import PipelineAdapterConfig from './edit/PipelineAdapterConfig.vue'
+import PipelineTransformationConfig from './edit/PipelineTransformationConfig.vue'
 
 const namespace = { namespace: 'pipeline' }
 
@@ -286,7 +277,7 @@ const ONE_HOUR_IN_MS = 3600 * 1000
 const ONE_MINUTE_IN_MS = 60 * 1000
 
 @Component({
-  components: { DateTimePicker, PipelineAdapterConfig }
+  components: { DateTimePicker, PipelineAdapterConfig, PipelineTransformationConfig }
 })
 export default class PipelineEdit extends Vue {
   @Action('loadPipelineById', namespace) private loadPipelineByIdAction!: (

@@ -4,7 +4,7 @@ export default interface Pipeline {
   id: number;
   adapter: AdapterConfig;
   metadata: PipelineMetaData;
-  transformations: object[];
+  transformations: TransformationConfig[];
   trigger: Trigger;
   notifications: NotificationConfig[];
 }
@@ -31,4 +31,8 @@ export interface AdapterConfig {
     type: string;
     parameters: object;
   }
+}
+
+export interface TransformationConfig {
+  func: string;
 }
