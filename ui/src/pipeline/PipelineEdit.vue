@@ -52,7 +52,7 @@
           </v-stepper-step>
           <v-stepper-content step="2">
             <pipeline-adapter-config v-model="dialogPipeline.adapter" v-on:validityChanged="validStep2 = $event" />
-            <pipeline-edit-setpper-button-group v-bind:step="2" v-bind:nextEnabled="validStep2" v-on:stepChanged="dialogStep = $event" />
+            <pipeline-edit-stepper-button-group v-bind:step="2" v-bind:nextEnabled="validStep2" v-on:stepChanged="dialogStep = $event" />
           </v-stepper-content>
 
           <v-stepper-step
@@ -64,7 +64,7 @@
           </v-stepper-step>
           <v-stepper-content step="3">
               <pipeline-transformation-config v-model="dialogPipeline.transformations" v-on:validityChanged="validStep3 = $event"/>
-              <pipeline-edit-setpper-button-group v-bind:step="3" v-bind:nextEnabled="validStep3" v-on:stepChanged="dialogStep = $event" />
+              <pipeline-edit-stepper-button-group v-bind:step="3" v-bind:nextEnabled="validStep3" v-on:stepChanged="dialogStep = $event" />
           </v-stepper-content>
 
           <v-stepper-step
@@ -74,24 +74,8 @@
             Meta-Data
           </v-stepper-step>
           <v-stepper-content step="4">
-            <v-form
-              ref="formStep4"
-              v-model="validStep4"
-            >
-              <v-text-field
-                v-model="dialogPipeline.metadata.description"
-                label="Pipeline Description"
-              />
-              <v-text-field
-                v-model="dialogPipeline.metadata.author"
-                label="Author"
-              />
-              <v-text-field
-                v-model="dialogPipeline.metadata.license"
-                label="License"
-              />
-            </v-form>
-            <pipeline-edit-setpper-button-group v-bind:step="4" v-bind:nextEnabled="validStep4" v-on:stepChanged="dialogStep = $event" />
+            <pipeline-metadata-config v-model="dialogPipeline.metadata" v-on:validityChanged="validStep4 = $event"/>
+            <pipeline-edit-stepper-button-group v-bind:step="4" v-bind:nextEnabled="validStep4" v-on:stepChanged="dialogStep = $event" />
           </v-stepper-content>
 
           <v-stepper-step
@@ -229,7 +213,8 @@ import Pipeline from './pipeline'
 
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import PipelineAdapterConfig from './edit/PipelineAdapterConfig.vue'
-import PipelineEditSetpperButtonGroup from './edit/PipelineEditStepperButtonGroup.vue'
+import PipelineEditStepperButtonGroup from './edit/PipelineEditStepperButtonGroup.vue'
+import PipelineMetadataConfig from './edit/PipelineMetadataConfig.vue'
 import PipelineTransformationConfig from './edit/PipelineTransformationConfig.vue'
 
 const namespace = { namespace: 'pipeline' }
@@ -239,7 +224,7 @@ const ONE_HOUR_IN_MS = 3600 * 1000
 const ONE_MINUTE_IN_MS = 60 * 1000
 
 @Component({
-  components: { DateTimePicker, PipelineAdapterConfig, PipelineEditSetpperButtonGroup, PipelineTransformationConfig }
+  components: { DateTimePicker, PipelineAdapterConfig, PipelineEditStepperButtonGroup, PipelineMetadataConfig, PipelineTransformationConfig }
 })
 export default class PipelineEdit extends Vue {
   @Action('loadPipelineById', namespace) private loadPipelineByIdAction!: (
