@@ -215,7 +215,7 @@ describe('System-Test', () => {
     pipelineConfig.id = pipelineId
     const anotherNotification = generateNotification('data.two === \"two\"', MOCK_SERVER_DOCKER+'/notifications/test4_2')
     pipelineConfig.notifications = [notification, anotherNotification]
-    pipelineConfig.adapter.location = MOCK_SERVER_DOCKER+'/data/test4_updated'
+    pipelineConfig.adapter.protocol.parameters.location = MOCK_SERVER_DOCKER+'/data/test4_updated'
 
     console.log(`Test 4: Pipeline ${pipelineId} update request triggered.`)
     // Update pipeline
