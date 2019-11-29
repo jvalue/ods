@@ -5,11 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 public class JsonInterpreter extends Interpreter {
 
-  private final Map<String, String> parameters =  Collections.unmodifiableMap(Map.of());
+  private final List<InterpreterParameterDescription> parameters =  Collections.unmodifiableList(List.of());
   private final ObjectMapper mapper = new ObjectMapper();
 
   @Override
@@ -23,7 +24,7 @@ public class JsonInterpreter extends Interpreter {
   }
 
   @Override
-  public Map<String, String> getAvailableParameters() {
+  public List<InterpreterParameterDescription> getAvailableParameters() {
     return parameters;
   }
 
