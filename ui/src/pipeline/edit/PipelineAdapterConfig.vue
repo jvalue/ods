@@ -9,18 +9,18 @@
       :rules="[required]"
       @change="formChanged"
     />
+    <v-text-field
+      v-model="adapterConfig.protocol.parameters.location"
+      label="URL"
+      :rules="[required]"
+      @keyup="formChanged"
+    />
     <v-select
       v-model="adapterConfig.format.type"
       :items="availableAdapterFormats"
       label="Format"
       :rules="[required]"
       @change="formChanged"
-    />
-    <v-text-field
-      v-model="adapterConfig.protocol.parameters.location"
-      label="URL"
-      :rules="[required]"
-      @keyup="formChanged"
     />
   </v-form>
 </template>
