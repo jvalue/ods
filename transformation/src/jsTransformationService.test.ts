@@ -1,6 +1,6 @@
 /* eslint-env jest */
 import axios from 'axios'
-import * as firebase from 'firebase-admin'
+import {initializeApp as firebaseInit, messaging as firebaseMessaging}from 'firebase-admin'
 
 import { NotificationRequest, NotificationType } from './interfaces/notificationRequest'
 import TransformationService from './interfaces/transformationService'
@@ -12,7 +12,7 @@ import SlackCallback from './interfaces/slackCallback'
 import fcmCallback from './interfaces/fcmCallback'
 
 jest.mock('axios')
-jest.mock('firebase')
+jest.mock('firebase-admin')
 
 describe('JSTransformationService', () => {
   describe('valid execution', () => {
@@ -69,9 +69,8 @@ describe('JSTransformationService', () => {
       value1: 5
     }
 
+
     const post = axios.post as jest.Mock
-    const init = firebase.initializeApp as jest.Mock
-    const send = firebase.messaging().send as jest.Mock
 
     let transformationService: TransformationService
 
@@ -156,8 +155,8 @@ describe('JSTransformationService', () => {
       }
       await transformationService.handleNotification(request)
 
-      expect(firebase.initializeApp).toHaveBeenCalledTimes(1)
-      expect(firebase.messaging().send).toHaveBeenCalledWith({
+      expect(init).toHaveBeenCalledTimes(1)
+      expect(send).toHaveBeenCalledWith({
         notification: {
           title: 'New Data Available',
           body: `Pipeline ${request.pipelineName}(${request.pipelineId}) has new data available.` +
