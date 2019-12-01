@@ -165,9 +165,6 @@ describe('JSTransformationService', () => {
         },
         topic: 'test'
       })
-      expect(post).toHaveBeenCalledTimes(1)
-      expect(post.mock.calls[0][0]).toEqual(request.url)
-      expect(post.mock.calls[0][1]).toEqual(expectedObject)
     })
 
     test('SLACK request', async () => {
