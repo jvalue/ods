@@ -222,38 +222,6 @@ describe('Scheduler', () => {
       .toEqual(`New data available for pipeline ${slackJob.pipelineName}(${slackJob.pipelineId}). Fetch at ${dataLocation}.`)
   })
 
-  test('POST /notification triggers firebase notification', async () => {
-    const dataLocation = 'storage/567'
-    const fcmJob = {
-      pipelineName: "fire",
-      pipelineId: 23,
-      url: MOCK_RECEIVER_URL + '/fcm',
-      dataLocation,
-      data: {
-        niceNumber: 23
-      },
-      condition: "data.niceNumber > 0",
-      notificationType: 'FCM'
-    }
-
-    const transformationResponse = await request(URL)
-      .post('/notification')
-      .send(fcmJob)
-    expect(transformationResponse.status).toEqual(200)
-
-    await sleep(3000)
-
-    const receiverResponse = await request(MOCK_RECEIVER_URL)
-      .get('/fcm')
-
-    expect(receiverResponse.status).toEqual(200)
-    expect(receiverResponse.body.validate_only).toEqual(false)
-    expect(receiverResponse.body.message.notification.title).toEqual('New Data Available')
-    expect(receiverResponse.body.message.notification.body).toEqual(`Pipeline ${fcmJob.pipelineName}(${fcmJob.pipelineId}) has new data available.` +
-                  `Fetch at ${fcmJob.dataLocation}.`)
-
-  })
-
   function sleep (ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
   }
