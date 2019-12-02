@@ -1,6 +1,5 @@
 /* eslint-env jest */
 import axios from 'axios'
-import {initializeApp as firebaseInit, messaging as firebaseMessaging}from 'firebase-admin'
 
 import { NotificationRequest, NotificationType } from './interfaces/notificationRequest'
 import TransformationService from './interfaces/transformationService'
@@ -9,10 +8,8 @@ import JSTransformationService from './jsTransformationService'
 import VM2SandboxExecutor from './vm2SandboxExecutor'
 import SandboxExecutor from './interfaces/sandboxExecutor'
 import SlackCallback from './interfaces/slackCallback'
-import fcmCallback from './interfaces/fcmCallback'
 
 jest.mock('axios')
-jest.mock('firebase-admin')
 
 describe('JSTransformationService', () => {
   describe('valid execution', () => {
@@ -133,37 +130,6 @@ describe('JSTransformationService', () => {
       await transformationService.handleNotification(notificationRequest)
 
       expect(post).not.toHaveBeenCalled()
-    })
-
-    test('FCM request', async () => {
-      const request: NotificationRequest = {
-        condition: 'data.value1 > 0',
-        data,
-        dataLocation: 'data',
-        notificationType: NotificationType.FCM,
-        pipelineId: 42,
-        pipelineName: 'AnswerToEverything-Pipeline',
-        url: 'yo'
-      }
-      const expectedObject: fcmCallback = {
-        notification: {
-          title: 'New Data Available',
-          body: `Pipeline ${request.pipelineName}(${request.pipelineId}) has new data available.` +
-            `Fetch at ${request.dataLocation}.`
-        },
-        topic: 'test'
-      }
-      await transformationService.handleNotification(request)
-
-      expect(init).toHaveBeenCalledTimes(1)
-      expect(send).toHaveBeenCalledWith({
-        notification: {
-          title: 'New Data Available',
-          body: `Pipeline ${request.pipelineName}(${request.pipelineId}) has new data available.` +
-            `Fetch at ${request.dataLocation}.`
-        },
-        topic: 'test'
-      })
     })
 
     test('SLACK request', async () => {
