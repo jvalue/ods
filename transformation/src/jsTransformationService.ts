@@ -106,6 +106,9 @@ export default class JSTransformationService implements TransformationService {
         body: `Pipeline ${request.pipelineName}(${request.pipelineId}) has new data available.` +
           `Fetch at ${request.dataLocation}.`
       },
+      data: {
+        textfield: 'textvalue'
+      },
       topic: 'test'
     }
 
@@ -118,6 +121,8 @@ export default class JSTransformationService implements TransformationService {
       databaseURL: 'https://nebelalarm.firebaseio.com'
     })
 
-    firebase.messaging().send(firebaseMessage)
+    const firebaseResponse = await firebase.messaging().send(firebaseMessage)
+    console.log(`type of response ${typeof firebaseResponse}`)
+    console.log(`response: ${firebaseResponse}`)
   }
 }
