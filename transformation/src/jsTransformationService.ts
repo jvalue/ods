@@ -100,7 +100,7 @@ export default class JSTransformationService implements TransformationService {
   }
 
   private async handleFCM (request: NotificationRequest): Promise<void> {
-    var firebaseMessage: FcmCallback = {
+    const firebaseMessage: FcmCallback = {
       notification: {
         title: 'New Data Available',
         body: `Pipeline ${request.pipelineName}(${request.pipelineId}) has new data available.` +
