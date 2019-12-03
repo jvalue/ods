@@ -33,6 +33,24 @@ router.post('/:path', async ctx => {
   notifications.set(path, ctx.request.body)
   ctx.status = 201
 })
+
+router.get('/slack/*', async ctx => {
+  const notification = notifications.get('slack')
+  if(!notification) {
+    ctx.throw(404)
+  } else {
+    ctx.body = notification
+    ctx.type = 'application/json'
+    ctx.status = 200
+  }
+})
+
+router.post('/slack/*', async ctx => {
+  console.log(`Slack notification triggered.`)
+  notifications.set('slack', ctx.request.body)
+  ctx.status = 201
+})
+
 app.use(router.routes())
 
 const server = app.listen(PORT, () => console.log(`Starting mock notification receiver on port ${PORT}`))
@@ -41,5 +59,7 @@ process.on('SIGTERM', async () => {
   console.info('Mock-Notification-Receiver: SIGTERM signal received.')
   await server.close()
 })
+
+
 
 module.exports = server
