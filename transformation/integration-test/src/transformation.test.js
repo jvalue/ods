@@ -227,7 +227,7 @@ describe('Scheduler', () => {
 
     expect(receiverResponse.status).toEqual(200)
     expect(receiverResponse.body.text)
-      .toEqual(`New data available for pipeline ${slackJob.pipelineName}(${slackJob.pipelineId}). Fetch at ${dataLocation}.`)
+      .toEqual(`Pipeline ${slackJob.pipelineName}(${slackJob.pipelineId}) has new data available.Fetch at ${dataLocation}.`)
   })
 
   function sleep (ms) {
