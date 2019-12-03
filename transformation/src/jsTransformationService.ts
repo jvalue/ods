@@ -125,7 +125,6 @@ export default class JSTransformationService implements TransformationService {
     }
 
     const firebaseResponse = await firebase.messaging().send(firebaseMessage)
-    console.log(`type of response ${typeof firebaseResponse}`)
-    console.log(`response: ${firebaseResponse}`)
+    console.log(`Firebase message sent to: ${firebaseResponse}`)
   }
 }
