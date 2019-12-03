@@ -30,16 +30,23 @@ Note that you need to delete existing docker images from your local docker daemo
 | *base_url*/protocols  | GET  | -  | JsonArray of protocols available for importing and possible parameters  |
 | *base_url*/dataImport  | POST  | AdapterConfig file  | JSON representation of the imported data  |
 
-When nothing is changed *base_url* is `http://localhost/8080`
+When started via docker-compose *base_url* is `http://localhost:9000/api/adapter`
 ### Adapter Config
 Currently the AdapterConfig is JSON File consisting of only three nodes:
 
 
 ```
 {
-    "protocol": $$Data source protocol as string$$,
-    "format": $$Format of the data from the external source as string$$,
-    "location": $$URL of the data source as string$$
+    "protocol": {
+      "type": "HTTP",
+      "parameters": {
+        "location": String
+      }
+    }
+    "format": {
+      "type": "JSON" | "XML"
+      "parameters": { }
+    }
   }
   ```
 
