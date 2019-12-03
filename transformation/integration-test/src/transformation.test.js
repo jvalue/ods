@@ -146,13 +146,15 @@ describe('Scheduler', () => {
   test('POST /notification triggers webhook', async () => {
     const dataLocation = 'storage/1234'
     const notificationJob = {
-      url: MOCK_RECEIVER_URL + '/webhook1',
       dataLocation: dataLocation,
       data: {
         value1: 1
       },
       condition: 'data.value1 > 0',
-      notificationType: 'WEBHOOK'
+      params: {
+        type: 'WEBHOOK',
+        url: MOCK_RECEIVER_URL + '/webhook1'
+      }
     }
 
     const transformationResponse = await request(URL)
@@ -171,13 +173,15 @@ describe('Scheduler', () => {
 
   test('POST /notification does not trigger webhook when condition is false', async () => {
     const notificationJob = {
-      url: MOCK_RECEIVER_URL + '/webhook2',
       dataLocation: 'storage/1234',
       data: {
         value1: 1
       },
       condition: 'data.value1 < 0',
-      notificationType: 'WEBHOOK'
+      params: {
+        url: MOCK_RECEIVER_URL + '/webhook2',
+        type: 'WEBHOOK'
+      }
     }
 
     const transformationResponse = await request(URL)
@@ -198,13 +202,17 @@ describe('Scheduler', () => {
     const slackJob = {
       pipelineName: "peterchens pipeline",
       pipelineId: 666,
-      url: MOCK_RECEIVER_URL + '/slack',
       dataLocation,
       data: {
         niceString: "nice"
       },
       condition: "typeof data.niceString === \"string\"",
-      notificationType: 'SLACK'
+      params: {
+        type: 'SLACK',
+        projectId: '12',
+        workspaceId: '34',
+        secret: '56'
+      }
     }
 
     const transformationResponse = await request(URL)
@@ -215,7 +223,7 @@ describe('Scheduler', () => {
     await sleep(3000)
 
     const receiverResponse = await request(MOCK_RECEIVER_URL)
-      .get('/slack')
+      .get('/slack/12/34/56')
 
     expect(receiverResponse.status).toEqual(200)
     expect(receiverResponse.body.text)
