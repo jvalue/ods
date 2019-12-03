@@ -97,7 +97,7 @@ export default class JSTransformationService implements TransformationService {
   private async handleSlack (params: SlackParams, message: string): Promise<void> {
     let slackBaseUri = 'https://hooks.slack.com/services'
     if(process.env.MOCK_RECEIVER_HOST && process.env.MOCK_RECEIVER_PORT) {
-      slackBaseUri = `http://${process.env.MOCK_RECEIVER_HOST}:${process.env.MOCK_RECEIVER_PORT}`
+      slackBaseUri = `http://${process.env.MOCK_RECEIVER_HOST}:${process.env.MOCK_RECEIVER_PORT}/slack`
     }
     const callbackObject: SlackCallback = {
       text: message
