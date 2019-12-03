@@ -12,7 +12,7 @@ services:
 
   # ----------------- UI SERVICE (/ui) --------------------
   ui:
-    image: registry.gitlab.com/profoss/open-data-service/ods-main/ui-service
+    image: registry.gitlab.com/profoss/open-data-service/ods-main/ui
     build:
       context: ./ui/
       args:
@@ -37,7 +37,7 @@ services:
       POSTGRES_PASSWORD: password
 
   auth:
-    image: registry.gitlab.com/profoss/open-data-service/ods-main/auth-service
+    image: registry.gitlab.com/profoss/open-data-service/ods-main/auth
     build:
       context: ./auth/
     environment:
@@ -58,7 +58,7 @@ services:
 
   # ----------------- ADAPTER SERVICE (/adapter) --------------------
   adapter:
-    image: registry.gitlab.com/profoss/open-data-service/ods-main/adapter-service
+    image: registry.gitlab.com/profoss/open-data-service/ods-main/adapter
     build:
       context: ./adapter/
     labels:
@@ -70,7 +70,7 @@ services:
 
   # ----------------- SCHEDULER SERVICE (/scheduler) --------------------
   scheduler:
-    image: registry.gitlab.com/profoss/open-data-service/ods-main/scheduler-service
+    image: registry.gitlab.com/profoss/open-data-service/ods-main/scheduler
     build:
       context: ./scheduler/
     environment:
@@ -86,9 +86,9 @@ services:
       - "traefik.http.routers.to-scheduler.middlewares=scheduler-stripprefix@docker"
       - "traefik.http.middlewares.scheduler-stripprefix.stripprefix.prefixes=/api/scheduler"
 
-  # ----------------- STORAGE SERVICE (/scheduler) --------------------
+  # ----------------- STORAGE SERVICE (/storage) --------------------
   storage: # Wraps postgres database with API
-    image: registry.gitlab.com/profoss/open-data-service/ods-main/storage-service-postgrest
+    image: registry.gitlab.com/profoss/open-data-service/ods-main/storage
     build: ./storage/postgrest/
     environment:
       DATABASE_HOST: storage-db
@@ -121,7 +121,7 @@ services:
     image: adminer
 
   storage-db-liquibase: # perform database migration on start up
-    image: registry.gitlab.com/profoss/open-data-service/ods-main/storage-service-liquibase
+    image: registry.gitlab.com/profoss/open-data-service/ods-main/storage-db-liquibase
     build: ./storage/liquibase/ # TODO: Sql Injection is currently
     environment:
       DATABASE_HOST: storage-db
@@ -137,7 +137,7 @@ services:
 
   # ----------------- TRANSFORMATION SERVICE (/transformation) --------------------
   transformation:
-    image: registry.gitlab.com/profoss/open-data-service/ods-main/transformation-service
+    image: registry.gitlab.com/profoss/open-data-service/ods-main/transformation
     build:
       context: ./transformation/
     environment:
@@ -152,7 +152,7 @@ services:
 
   # ----------------- CORE SERVICE (/core) --------------------
   core:
-    image: registry.gitlab.com/profoss/open-data-service/ods-main/core-service
+    image: registry.gitlab.com/profoss/open-data-service/ods-main/core
     build:
       context: ./core/
     environment:
