@@ -84,7 +84,7 @@ services:
       - "traefik.http.routers.to-scheduler.middlewares=scheduler-stripprefix@docker"
       - "traefik.http.middlewares.scheduler-stripprefix.stripprefix.prefixes=/api/scheduler"
 
-  # ----------------- STORAGE SERVICE (/scheduler) --------------------
+  # ----------------- STORAGE SERVICE (/storage) --------------------
   storage: # Wraps postgres database with API
     image: registry.gitlab.com/profoss/open-data-service/ods-main/storage
     build: ./storage/postgrest/
