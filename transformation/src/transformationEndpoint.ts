@@ -5,9 +5,10 @@ import cors from 'cors'
 import Keycloak from 'keycloak-connect'
 import TransformationService from './interfaces/transformationService'
 import TransformationRequest from './interfaces/transformationRequest'
-import { NotificationRequest, NotificationType } from './interfaces/notificationRequest'
+import { NotificationRequest } from './interfaces/notificationRequest'
 import { Server } from 'http'
 import JobResult from './interfaces/jobResult'
+import { objectTypeSpreadProperty } from '@babel/types'
 
 export class TransformationEndpoint {
   port: number
@@ -104,6 +105,6 @@ export class TransformationEndpoint {
   private isValidNotificationRequest(obj: any): obj is NotificationRequest {
     return typeof obj.data !== 'undefined' &&
     typeof obj.condition === 'string' &&
-    Object.values(NotificationType).includes(obj.notificationType)
+    typeof obj.params.type === 'string'
   }
 }
