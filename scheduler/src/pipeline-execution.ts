@@ -3,7 +3,7 @@ import * as TransformationClient from './clients/transformation-client'
 import * as StorageClient from './clients/storage-client'
 import * as Scheduler from './pipeline-scheduling'
 
-import PipelineConfig from './interfaces/core/pipeline-config'
+import PipelineConfig from './interfaces/pipeline-config'
 import { AxiosError } from 'axios'
 
 export async function executePipeline (pipelineConfig: PipelineConfig, maxRetries = 3): Promise<void> {
@@ -41,7 +41,7 @@ export async function executePipeline (pipelineConfig: PipelineConfig, maxRetrie
 async function executeAdapter (pipelineConfig: PipelineConfig): Promise<object> {
   console.log(`Execute Adapter for Pipeline ${pipelineConfig.id}`)
   try {
-    const importedData = await AdapterClient.executeAdapter(pipelineConfig)
+    const importedData = await AdapterClient.executeAdapter(pipelineConfig.adapter)
     console.log(`Sucessful import via Adapter for Pipeline ${pipelineConfig.id}`)
     return importedData
   } catch (e) {
