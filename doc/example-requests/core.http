@@ -9,9 +9,16 @@ Content-Type: application/json
 
 {
   "adapter": {
-    "protocol": "HTTP",
-    "format": "JSON",
-    "location": "https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json"
+    "protocol": {
+      "type": "HTTP",
+      "parameters": {
+        "location": "https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json"
+      }
+    },
+    "format": {
+      "type": "JSON",
+      "parameters": {}
+    }
   },
   "transformations": [
     {

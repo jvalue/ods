@@ -2,10 +2,11 @@ export default interface AdapterConfig {
   protocol: {
     type: String,
     parameters: {
-      location: string
+      location?: String
     }
   }
   format: {
-    type: String
+    type: String,
+    parameters: object
   }
 }

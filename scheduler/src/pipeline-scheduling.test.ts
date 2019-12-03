@@ -5,8 +5,8 @@ import { executeAdapter } from './clients/adapter-client'
 import { executeTransformation } from './clients/transformation-client'
 import { executeStorage } from './clients/storage-client'
 import { getLatestEventId, getAllPipelines, getEventsAfter, getPipeline } from './clients/core-client'
-import { EventType } from './interfaces/core/pipeline-event'
-import PipelineConfig from './interfaces/core/pipeline-config'
+import { EventType } from './interfaces/pipeline-event'
+import PipelineConfig from './interfaces/pipeline-config'
 
 jest.mock('./clients/adapter-client')
 const mockedExecuteAdapter = executeAdapter as jest.Mock
@@ -226,9 +226,16 @@ function generateConfig (periodic: boolean, firstExecution: Date, interval: numb
   return {
     id: 123,
     adapter: {
-      format: 'XML',
-      protocol: 'HTTP',
-      location: 'somewhere'
+      format: {
+        type: 'XML',
+        parameters: {}
+      },
+      protocol: {
+        type: 'HTTP',
+        parameters: {
+          location: 'somewhere'
+        }
+      }
     },
     transformations: [],
     persistence: {},
