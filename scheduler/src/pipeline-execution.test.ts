@@ -4,8 +4,8 @@ import * as AdapterClient from './clients/adapter-client'
 import * as StorageClient from './clients/storage-client'
 import * as TransformationClient from './clients/transformation-client'
 import * as PipelineScheduling from './pipeline-scheduling'
-import PipelineConfig from './interfaces/core/pipeline-config'
-import NotificationConfig from './interfaces/core/notification-config'
+import PipelineConfig from './interfaces/pipeline-config'
+import NotificationConfig from './interfaces/notification-config'
 
 jest.mock('./clients/adapter-client')
 jest.mock('./clients/storage-client')
@@ -41,7 +41,7 @@ test('Should execute pipeline once', async () => {
 
   await PipelineExecution.executePipeline(pipelineConfig)
 
-  expect(mockExecuteAdapter).toHaveBeenCalledWith(pipelineConfig)
+  expect(mockExecuteAdapter).toHaveBeenCalledWith(pipelineConfig.adapter)
   expect(mockExecuteTransformation).toHaveBeenCalledWith(transformation)
   expect(mockExecuteTransformation).toHaveBeenCalledTimes(1)
   expect(mockExecuteStorage).toHaveBeenCalledWith(pipelineConfig, transformedData)
@@ -59,7 +59,7 @@ test('Should execute pipeline periodic', async () => {
 
   await PipelineExecution.executePipeline(pipelineConfig)
 
-  expect(mockExecuteAdapter).toHaveBeenCalledWith(pipelineConfig)
+  expect(mockExecuteAdapter).toHaveBeenCalledWith(pipelineConfig.adapter)
   expect(mockExecuteTransformation).toHaveBeenCalledWith(transformation)
   expect(mockExecuteStorage).toHaveBeenCalledWith(pipelineConfig, transformedData)
 
@@ -126,9 +126,16 @@ function generateConfig (
   return {
     id: 123,
     adapter: {
-      format: 'XML',
-      protocol: 'HTTP',
-      location: 'somewhere'
+      format: {
+        type: 'XML',
+        parameters: {}
+      },
+      protocol: {
+        type: 'HTTP',
+        parameters: {
+          location: 'somewhere'
+        }
+      }
     },
     transformations,
     persistence: {},

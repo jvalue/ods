@@ -7,7 +7,17 @@ const PORT = process.env.MOCK_CORE_PORT || 8081
 const PIPELINES = [
   {
     id: 123,
-    adapter: {},
+    adapter: {
+      protocol: {
+        type: "HTTP",
+        parameters: {
+          location: "testlocation.de/api"
+        },
+      },
+      format: {
+        type: "XML"
+      }
+    },
     transformations: [{
       func: 'return data;' // not performed in integration testing
     }, {
@@ -24,7 +34,17 @@ const PIPELINES = [
   },
   {
     id: 125,
-    adapter: {},
+    adapter: {
+      protocol: {
+        type: "HTTP",
+        parameters: {
+          location: "testlocation.de/api"
+        },
+      },
+      format: {
+        type: "XML"
+      }
+    },
     transformations: [{
       func: 'return 1;' // not peformed in integration testing
     }],

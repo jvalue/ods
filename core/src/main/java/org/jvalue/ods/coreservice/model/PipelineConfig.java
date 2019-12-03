@@ -14,6 +14,7 @@ public class PipelineConfig implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id") // referenced by embedded adapter config for format and protocol
     private Long id;
 
     @Embedded @NotNull

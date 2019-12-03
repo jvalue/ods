@@ -1,9 +1,16 @@
 {
   "id": 123,
   "adapter": {
-    "protocol": "HTTP",
-    "format": "XML",
-    "location": "http://www.the-inder.net"
+    "protocol": {
+      "type": "HTTP",
+      "parameters": {
+        "location": "http://www.the-inder.net"
+      }
+    },
+    "format": {
+      "type": "XML",
+      "parameters": {}
+    }
   },
   "transformations": [
     {
