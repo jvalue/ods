@@ -1,5 +1,5 @@
 import TriggerConfig from './trigger-config'
-import Metadata from '../metadata'
+import Metadata from './metadata'
 import AdapterConfig from './adapter-config'
 import NotificationConfig from './notification-config'
 
