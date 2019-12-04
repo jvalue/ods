@@ -1,7 +1,10 @@
 package org.jvalue.ods.coreservice.model;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -19,6 +22,57 @@ public class NotificationConfigTest {
       "\"params\":{" +
         "\"type\":\"WEBHOOK\"," +
         "\"url\":\"URRRRRL\"" +
+      "}}";
+
+    NotificationConfig result = mapper.readValue(configString, NotificationConfig.class);
+
+    System.out.println(result);
+    assertEquals("ifthisthenthat", result.getCondition());
+    assertTrue(result.getParams() instanceof NotificationConfig.WebhookParams);
+    assertEquals("URRRRRL", result.getParams().asWebhook().getUrl());
+  }
+
+  @Test(expected = InvalidTypeIdException.class)
+  public void testDeserializationOfInvalidType() throws IOException {
+    final String configString = "{ " +
+      "\"condition\":\"ifthisthenthat\"," +
+      "\"params\":{" +
+      "\"type\":\"lol\"," +
+      "\"url\":\"URRRRRL\"" +
+      "}}";
+
+    NotificationConfig result = mapper.readValue(configString, NotificationConfig.class);
+
+    System.out.println(result);
+    assertEquals("ifthisthenthat", result.getCondition());
+    assertTrue(result.getParams() instanceof NotificationConfig.WebhookParams);
+    assertEquals("URRRRRL", result.getParams().asWebhook().getUrl());
+  }
+
+  @Test(expected = JsonMappingException.class)
+  public void testDeserializationOfInvalidParams() throws IOException {
+    final String configString = "{ " +
+      "\"condition\":\"ifthisthenthat\"," +
+      "\"params\":{" +
+      "\"type\":\"WEBHOOK\"," +
+      "\"url\":\"URRRRRL\"" +
+      "\"extra\":\"bonus\"" +
+      "}}";
+
+    NotificationConfig result = mapper.readValue(configString, NotificationConfig.class);
+
+    System.out.println(result);
+    assertEquals("ifthisthenthat", result.getCondition());
+    assertTrue(result.getParams() instanceof NotificationConfig.WebhookParams);
+    assertEquals("URRRRRL", result.getParams().asWebhook().getUrl());
+  }
+
+  @Test(expected = MismatchedInputException.class)
+  public void testDeserializationMissingParams() throws IOException {
+    final String configString = "{ " +
+      "\"condition\":\"ifthisthenthat\"," +
+      "\"params\":{" +
+        "\"type\":\"WEBHOOK\"" +
       "}}";
 
     NotificationConfig result = mapper.readValue(configString, NotificationConfig.class);

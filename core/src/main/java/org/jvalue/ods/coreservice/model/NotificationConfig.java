@@ -44,8 +44,8 @@ public class NotificationConfig {
     }
 
     public NotificationConfig(
-            @JsonProperty("condition") String condition,
-            @JsonProperty("params") NotificationParams params) {
+            @JsonProperty(value = "condition", required = true) String condition,
+            @JsonProperty(value = "params", required = true) NotificationParams params) {
         this.condition = condition;
         this.params = params;
     }
@@ -67,9 +67,9 @@ public class NotificationConfig {
     }
 
     public static class WebhookParams extends NotificationParams {
-      private final String url;
+      @NotNull private final String url;
 
-      public WebhookParams(@JsonProperty("url") String url) {
+      public WebhookParams(@JsonProperty(value = "url", required = true) String url) {
         this.url = url;
       }
 
