@@ -20,7 +20,7 @@ public class NotificationConfig {
     private String condition;
 
     @NotNull
-    @Embedded
+    @OneToOne
     private NotificationParams params;
 
     //Constructor for JPA
@@ -61,11 +61,11 @@ public class NotificationConfig {
     @Entity
     @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
     @DiscriminatorColumn(name = "Notification_Type")
-    public static class NotificationParams {
+    public abstract static class NotificationParams {
       @Id
       @GeneratedValue
       @JsonIgnore
-      private Long paramsId; // necessary for persistence
+      protected Long paramsId; // necessary for persistence
 
       public WebhookParams asWebhook() {
         if(this instanceof WebhookParams) {
