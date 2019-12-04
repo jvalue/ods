@@ -16,7 +16,7 @@ public class NotificationConfigTest {
   private final ObjectMapper mapper = new ObjectMapper();
 
   @Test
-  public void testDeserialization() throws IOException {
+  public void testWebhookDeserialization() throws IOException {
     final String configString = "{ " +
       "\"condition\":\"ifthisthenthat\"," +
       "\"params\":{" +
@@ -26,10 +26,47 @@ public class NotificationConfigTest {
 
     NotificationConfig result = mapper.readValue(configString, NotificationConfig.class);
 
-    System.out.println(result);
     assertEquals("ifthisthenthat", result.getCondition());
     assertTrue(result.getParams() instanceof NotificationConfig.WebhookParams);
     assertEquals("URRRRRL", result.getParams().asWebhook().getUrl());
+  }
+
+  @Test
+  public void testSlackDeserialization() throws IOException {
+    final String configString = "{ " +
+      "\"condition\":\"ifthenelse\"," +
+      "\"params\":{" +
+        "\"type\":\"SLACK\"," +
+        "\"workspaceId\":\"12\"," +
+      "\"channelId\":\"34\"," +
+      "\"secret\":\"56\"}}";
+
+    NotificationConfig result = mapper.readValue(configString, NotificationConfig.class);
+    assertEquals("ifthenelse", result.getCondition());
+    NotificationConfig.SlackParams params = result.getParams().asSlack();
+    assertEquals("12", params.getWorkspaceId());
+    assertEquals("34", params.getChannelId());
+    assertEquals("56", params.getSecret());
+  }
+
+  @Test
+  public void testFirebaseDeserialization() throws IOException {
+    final String configString = "{ " +
+      "\"condition\":\"ifthenelse\"," +
+      "\"params\":{" +
+      "\"type\":\"FCM\"," +
+      "\"projectId\":\"12\"," +
+      "\"clientEmail\":\"fire@base.com\"," +
+      "\"privateKey\":\"1234\"," +
+      "\"topic\":\"weather\"}}";
+
+    NotificationConfig result = mapper.readValue(configString, NotificationConfig.class);
+    assertEquals("ifthenelse", result.getCondition());
+    NotificationConfig.FirebaseParams params = result.getParams().asFirebase();
+    assertEquals("12", params.getProjectId());
+    assertEquals("fire@base.com", params.getClientEmail());
+    assertEquals("1234", params.getPrivateKey());
+    assertEquals("weather", params.getTopic());
   }
 
   @Test(expected = InvalidTypeIdException.class)
@@ -40,13 +77,7 @@ public class NotificationConfigTest {
       "\"type\":\"lol\"," +
       "\"url\":\"URRRRRL\"" +
       "}}";
-
-    NotificationConfig result = mapper.readValue(configString, NotificationConfig.class);
-
-    System.out.println(result);
-    assertEquals("ifthisthenthat", result.getCondition());
-    assertTrue(result.getParams() instanceof NotificationConfig.WebhookParams);
-    assertEquals("URRRRRL", result.getParams().asWebhook().getUrl());
+    mapper.readValue(configString, NotificationConfig.class);
   }
 
   @Test(expected = JsonMappingException.class)
@@ -58,13 +89,7 @@ public class NotificationConfigTest {
       "\"url\":\"URRRRRL\"" +
       "\"extra\":\"bonus\"" +
       "}}";
-
-    NotificationConfig result = mapper.readValue(configString, NotificationConfig.class);
-
-    System.out.println(result);
-    assertEquals("ifthisthenthat", result.getCondition());
-    assertTrue(result.getParams() instanceof NotificationConfig.WebhookParams);
-    assertEquals("URRRRRL", result.getParams().asWebhook().getUrl());
+    mapper.readValue(configString, NotificationConfig.class);
   }
 
   @Test(expected = MismatchedInputException.class)
@@ -74,13 +99,20 @@ public class NotificationConfigTest {
       "\"params\":{" +
         "\"type\":\"WEBHOOK\"" +
       "}}";
+    mapper.readValue(configString, NotificationConfig.class);
+  }
 
-    NotificationConfig result = mapper.readValue(configString, NotificationConfig.class);
-
-    System.out.println(result);
-    assertEquals("ifthisthenthat", result.getCondition());
-    assertTrue(result.getParams() instanceof NotificationConfig.WebhookParams);
-    assertEquals("URRRRRL", result.getParams().asWebhook().getUrl());
+  @Test(expected = JsonMappingException.class)
+  public void testDeserializationWrongType() throws IOException {
+    final String configString = "{ " +
+      "\"condition\":\"ifthenelse\"," +
+      "\"params\":{" +
+      "\"type\":\"SLACK\"," +
+      "\"projectId\":\"12\"," +
+      "\"clientEmail\":\"fire@base.com\"," +
+      "\"privateKey\":\"1234\"," +
+      "\"topic\":\"weather\"}}";
+    mapper.readValue(configString, NotificationConfig.class);
   }
 
   @Test
