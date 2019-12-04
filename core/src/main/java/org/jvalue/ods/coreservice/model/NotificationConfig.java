@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
@@ -21,6 +19,7 @@ public class NotificationConfig {
     private String condition;
 
     @NotNull
+    @Embedded
     private NotificationParams params;
 
     @JsonTypeInfo(
@@ -82,6 +81,7 @@ public class NotificationConfig {
       return params;
     }
 
+    @Embeddable
     public static class WebhookParams extends NotificationParams {
       private final String url;
 
@@ -107,6 +107,7 @@ public class NotificationConfig {
       }
     }
 
+    @Embeddable
     public static class SlackParams extends NotificationParams {
       @NotNull private final String workspaceId;
       @NotNull private final String channelId;
@@ -149,6 +150,7 @@ public class NotificationConfig {
       }
     }
 
+    @Embeddable
     public static class FirebaseParams extends NotificationParams {
       private final String projectId;
       private final String clientEmail;
