@@ -19,7 +19,6 @@ public class NotificationConfig {
     @NotNull
     private String condition;
 
-    @NotNull
     @OneToOne
     private NotificationParams params;
 
