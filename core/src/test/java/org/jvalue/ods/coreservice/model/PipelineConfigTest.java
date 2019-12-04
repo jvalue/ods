@@ -41,9 +41,9 @@ public class PipelineConfigTest {
     cal.setTime(result.getMetadata().getCreationTimestamp());
     assertEquals(LocalDateTime.now().getDayOfYear(), cal.get(Calendar.DAY_OF_YEAR));
     assertEquals(1, result.getNotifications().size());
-    assertEquals(NotificationType.WEBHOOK, result.getNotifications().get(0).getNotificationType());
+    assertNotNull(result.getNotifications().get(0).getParams().asWebhook());
     assertEquals("data.value1 > 10", result.getNotifications().get(0).getCondition());
-    assertEquals("http://www.webhookland.com", result.getNotifications().get(0).getUrl());
+    assertEquals("http://www.webhookland.com", result.getNotifications().get(0).getParams().asWebhook().getUrl());
   }
 
   @Test
@@ -54,8 +54,8 @@ public class PipelineConfigTest {
     PipelineTriggerConfig trigger = new PipelineTriggerConfig(false, new Date(), 10L);
     PipelineMetadata metadata = new PipelineMetadata("icke", "none", "Display", "description");
     List<NotificationConfig> notifications = List.of(
-        new NotificationConfig(NotificationType.WEBHOOK, "data.value1 > 10", "http://www.webhookland.com/1"),
-        new NotificationConfig(NotificationType.WEBHOOK, "data.value1 < 0", "http://www.webhookland.com/2"));
+        new NotificationConfig("data.value1 > 10", new NotificationConfig.WebhookParams("http://www.webhookland.com/1")),
+        new NotificationConfig("data.value1 < 0", new NotificationConfig.WebhookParams("http://www.webhookland.com/2")));
     PipelineConfig config = new PipelineConfig(adapter, transformations, trigger, metadata, notifications);
 
     JsonNode result = mapper.valueToTree(config);
@@ -70,10 +70,10 @@ public class PipelineConfigTest {
     assertEquals("return 1+1", result.get("transformations").get(0).get("func").textValue());
     assertEquals("[2]", result.get("transformations").get(1).get("data").textValue());
     assertEquals(2, result.get("notifications").size());
-    assertEquals(4, result.get("notifications").get(0).size());
-    assertEquals("WEBHOOK", result.get("notifications").get(0).get("notificationType").textValue());
+    assertEquals(3, result.get("notifications").get(0).size());
     assertEquals("data.value1 > 10", result.get("notifications").get(0).get("condition").textValue());
-    assertEquals("http://www.webhookland.com/2", result.get("notifications").get(1).get("url").textValue());
+    assertEquals("WEBHOOK", result.get("notifications").get(0).get("params").get("type").textValue());
+    assertEquals("http://www.webhookland.com/2", result.get("notifications").get(1).get("params").get("url").textValue());
   }
 
   private AdapterConfig generateAdapterConfig(String protocol, String format, String location) {
