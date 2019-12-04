@@ -23,6 +23,33 @@ public class NotificationConfig {
     @Embedded
     private NotificationParams params;
 
+    //Constructor for JPA
+    public NotificationConfig() {
+    }
+
+    public NotificationConfig(
+            @JsonProperty(value = "condition", required = true) String condition,
+            @JsonProperty(value = "params", required = true) NotificationParams params) {
+        this.condition = condition;
+        this.params = params;
+    }
+
+    public Long getNotificationId() {
+        return notificationId;
+    }
+
+    public void setNotificationId(Long notificationId) {
+        this.notificationId = notificationId;
+    }
+
+    public String getCondition() {
+        return condition;
+    }
+
+    public NotificationParams getParams() {
+      return params;
+    }
+
     @JsonTypeInfo(
       use = JsonTypeInfo.Id.NAME,
       property = "type")
@@ -31,8 +58,10 @@ public class NotificationConfig {
       @JsonSubTypes.Type(value = SlackParams.class, name = "SLACK"),
       @JsonSubTypes.Type(value = FirebaseParams.class, name = "FCM")
     })
-    @MappedSuperclass
-    public abstract static class NotificationParams {
+    @Entity
+    @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+    @DiscriminatorColumn(name = "Notification_Type")
+    public static class NotificationParams {
       @Id
       @GeneratedValue
       @JsonIgnore
@@ -61,34 +90,8 @@ public class NotificationConfig {
       }
     }
 
-    //Constructor for JPA
-    public NotificationConfig() {
-    }
-
-    public NotificationConfig(
-            @JsonProperty(value = "condition", required = true) String condition,
-            @JsonProperty(value = "params", required = true) NotificationParams params) {
-        this.condition = condition;
-        this.params = params;
-    }
-
-    public Long getNotificationId() {
-        return notificationId;
-    }
-
-    public void setNotificationId(Long notificationId) {
-        this.notificationId = notificationId;
-    }
-
-    public String getCondition() {
-        return condition;
-    }
-
-    public NotificationParams getParams() {
-      return params;
-    }
-
     @Entity
+    @DiscriminatorValue("Webhook")
     public static class WebhookParams extends NotificationParams {
       private final String url;
 
@@ -115,6 +118,7 @@ public class NotificationConfig {
     }
 
     @Entity
+    @DiscriminatorValue("Slack")
     public static class SlackParams extends NotificationParams {
       @NotNull private final String workspaceId;
       @NotNull private final String channelId;
@@ -158,6 +162,7 @@ public class NotificationConfig {
     }
 
     @Entity
+    @DiscriminatorValue("Firebase")
     public static class FirebaseParams extends NotificationParams {
       private final String projectId;
       private final String clientEmail;
@@ -209,18 +214,18 @@ public class NotificationConfig {
       }
     }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    NotificationConfig that = (NotificationConfig) o;
-    return Objects.equals(notificationId, that.notificationId) &&
-      Objects.equals(condition, that.condition) &&
-      Objects.equals(params, that.params);
-  }
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      NotificationConfig that = (NotificationConfig) o;
+      return Objects.equals(notificationId, that.notificationId) &&
+        Objects.equals(condition, that.condition) &&
+        Objects.equals(params, that.params);
+    }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(notificationId, condition, params);
-  }
+    @Override
+    public int hashCode() {
+      return Objects.hash(notificationId, condition, params);
+    }
 }
