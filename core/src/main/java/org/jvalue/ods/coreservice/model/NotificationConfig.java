@@ -1,5 +1,6 @@
 package org.jvalue.ods.coreservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -32,6 +33,11 @@ public class NotificationConfig {
     })
     @MappedSuperclass
     public abstract static class NotificationParams {
+      @Id
+      @GeneratedValue
+      @JsonIgnore
+      private Long paramsId; // necessary for persistence
+
       public WebhookParams asWebhook() {
         if(this instanceof WebhookParams) {
           return (WebhookParams) this;
