@@ -27,12 +27,28 @@ public class NotificationConfig {
       use = JsonTypeInfo.Id.NAME,
       property = "type")
     @JsonSubTypes({
-      @JsonSubTypes.Type(value = WebhookParams.class, name = "WEBHOOK")
+      @JsonSubTypes.Type(value = WebhookParams.class, name = "WEBHOOK"),
+      @JsonSubTypes.Type(value = SlackParams.class, name = "SLACK"),
+      @JsonSubTypes.Type(value = FirebaseParams.class, name = "FCM")
     })
     public static class NotificationParams {
       public WebhookParams asWebhook() {
         if(this instanceof WebhookParams) {
           return (WebhookParams) this;
+        } else {
+          throw new IllegalArgumentException("Wrong runtime class for NotificationParams, was " + this.getClass().getCanonicalName());
+        }
+      }
+      public SlackParams asSlack() {
+        if(this instanceof SlackParams) {
+          return (SlackParams) this;
+        } else {
+          throw new IllegalArgumentException("Wrong runtime class for NotificationParams, was " + this.getClass().getCanonicalName());
+        }
+      }
+      public FirebaseParams asFirebase() {
+        if(this instanceof FirebaseParams) {
+          return (FirebaseParams) this;
         } else {
           throw new IllegalArgumentException("Wrong runtime class for NotificationParams, was " + this.getClass().getCanonicalName());
         }
@@ -67,7 +83,7 @@ public class NotificationConfig {
     }
 
     public static class WebhookParams extends NotificationParams {
-      @NotNull private final String url;
+      private final String url;
 
       public WebhookParams(@JsonProperty(value = "url", required = true) String url) {
         this.url = url;
@@ -88,6 +104,99 @@ public class NotificationConfig {
       @Override
       public int hashCode() {
         return Objects.hash(url);
+      }
+    }
+
+    public static class SlackParams extends NotificationParams {
+      @NotNull private final String workspaceId;
+      @NotNull private final String channelId;
+      @NotNull private final String secret;
+
+      public SlackParams(
+        @JsonProperty(value = "workspaceId", required = true) String workspaceId,
+        @JsonProperty(value = "channelId", required = true) String channelId,
+        @JsonProperty(value = "secret", required = true) String secret) {
+        this.workspaceId = workspaceId;
+        this.channelId = channelId;
+        this.secret = secret;
+      }
+
+      public String getWorkspaceId() {
+        return workspaceId;
+      }
+
+      public String getChannelId() {
+        return channelId;
+      }
+
+      public String getSecret() {
+        return secret;
+      }
+
+      @Override
+      public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SlackParams that = (SlackParams) o;
+        return Objects.equals(workspaceId, that.workspaceId) &&
+          Objects.equals(channelId, that.channelId) &&
+          Objects.equals(secret, that.secret);
+      }
+
+      @Override
+      public int hashCode() {
+        return Objects.hash(workspaceId, channelId, secret);
+      }
+    }
+
+    public static class FirebaseParams extends NotificationParams {
+      private final String projectId;
+      private final String clientEmail;
+      private final String privateKey;
+      private final String topic;
+
+
+      public FirebaseParams(
+        @JsonProperty(value = "projectId", required = true) String projectId,
+        @JsonProperty(value = "clientEmail", required = true) String clientEmail,
+        @JsonProperty(value = "privateKey", required = true) String privateKey,
+        @JsonProperty(value = "topic", required = true) String topic) {
+        this.projectId = projectId;
+        this.clientEmail = clientEmail;
+        this.privateKey = privateKey;
+        this.topic = topic;
+      }
+
+      public String getProjectId() {
+        return projectId;
+      }
+
+      public String getClientEmail() {
+        return clientEmail;
+      }
+
+      public String getPrivateKey() {
+        return privateKey;
+      }
+
+      public String getTopic() {
+        return topic;
+      }
+
+      @Override
+      public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FirebaseParams that = (FirebaseParams) o;
+        return Objects.equals(projectId, that.projectId) &&
+          Objects.equals(clientEmail, that.clientEmail) &&
+          Objects.equals(privateKey, that.privateKey) &&
+          Objects.equals(topic, that.topic);
+      }
+
+      @Override
+      public int hashCode() {
+        return Objects.hash(projectId, clientEmail, privateKey, topic);
       }
     }
 
