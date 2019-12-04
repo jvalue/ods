@@ -30,7 +30,7 @@ public class NotificationConfig {
       @JsonSubTypes.Type(value = SlackParams.class, name = "SLACK"),
       @JsonSubTypes.Type(value = FirebaseParams.class, name = "FCM")
     })
-    public static class NotificationParams {
+    public abstract static class NotificationParams {
       public WebhookParams asWebhook() {
         if(this instanceof WebhookParams) {
           return (WebhookParams) this;
