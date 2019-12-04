@@ -1,6 +1,8 @@
 package org.jvalue.ods.coreservice.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -16,26 +18,36 @@ public class NotificationConfig {
     private Long notificationId;
 
     @NotNull
-    private NotificationType notificationType;
-
-    @NotNull
     private String condition;
 
     @NotNull
-    private String url;
+    private NotificationParams params;
 
+    @JsonTypeInfo(
+      use = JsonTypeInfo.Id.NAME,
+      property = "type")
+    @JsonSubTypes({
+      @JsonSubTypes.Type(value = WebhookParams.class, name = "WEBHOOK")
+    })
+    public static class NotificationParams {
+      public WebhookParams asWebhook() {
+        if(this instanceof WebhookParams) {
+          return (WebhookParams) this;
+        } else {
+          throw new IllegalArgumentException("Wrong runtime class for NotificationParams, was " + this.getClass().getCanonicalName());
+        }
+      }
+    }
 
     //Constructor for JPA
     public NotificationConfig() {
     }
 
     public NotificationConfig(
-            @JsonProperty("notificationType") NotificationType notificationType,
             @JsonProperty("condition") String condition,
-            @JsonProperty("url") String url) {
-        this.notificationType = notificationType;
+            @JsonProperty("params") NotificationParams params) {
         this.condition = condition;
-        this.url = url;
+        this.params = params;
     }
 
     public Long getNotificationId() {
@@ -46,30 +58,51 @@ public class NotificationConfig {
         this.notificationId = notificationId;
     }
 
-    public NotificationType getNotificationType() {
-        return notificationType;
-    }
-
     public String getCondition() {
         return condition;
     }
 
-    public String getUrl() {
-        return url;
+    public NotificationParams getParams() {
+      return params;
     }
 
-    @Override
-    public boolean equals(Object o) {
+    public static class WebhookParams extends NotificationParams {
+      private final String url;
+
+      public WebhookParams(@JsonProperty("url") String url) {
+        this.url = url;
+      }
+
+      public String getUrl() {
+        return url;
+      }
+
+      @Override
+      public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        NotificationConfig that = (NotificationConfig) o;
-        return Objects.equals(notificationType, that.notificationType) &&
-                Objects.equals(condition, that.condition) &&
-                Objects.equals(url, that.url);
+        WebhookParams that = (WebhookParams) o;
+        return Objects.equals(url, that.url);
+      }
+
+      @Override
+      public int hashCode() {
+        return Objects.hash(url);
+      }
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(notificationType, condition, url);
-    }
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    NotificationConfig that = (NotificationConfig) o;
+    return Objects.equals(notificationId, that.notificationId) &&
+      Objects.equals(condition, that.condition) &&
+      Objects.equals(params, that.params);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(notificationId, condition, params);
+  }
 }

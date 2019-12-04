@@ -35,9 +35,11 @@
   },
   "notifications": [
     {
-      "notificationType": "WEBHOOK",
       "condition": "data.value1 > 10",
-      "url": "http://www.webhookland.com"
+      "params": {
+        "type": "WEBHOOK",
+        "url": "http://www.webhookland.com"
+      }
     }
   ]
 }

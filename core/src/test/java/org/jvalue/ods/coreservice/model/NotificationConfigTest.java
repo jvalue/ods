@@ -15,30 +15,32 @@ public class NotificationConfigTest {
   @Test
   public void testDeserialization() throws IOException {
     final String configString = "{ " +
-      "\"notificationType\":\"WEBHOOK\"," +
       "\"condition\":\"ifthisthenthat\"," +
-      "\"url\":\"URRRRRL\"" +
-      "}";
+      "\"params\":{" +
+        "\"type\":\"WEBHOOK\"," +
+        "\"url\":\"URRRRRL\"" +
+      "}}";
 
     NotificationConfig result = mapper.readValue(configString, NotificationConfig.class);
 
     System.out.println(result);
-    assertEquals("WEBHOOK", result.getNotificationType().toString());
     assertEquals("ifthisthenthat", result.getCondition());
-    assertEquals("URRRRRL", result.getUrl());
+    assertTrue(result.getParams() instanceof NotificationConfig.WebhookParams);
+    assertEquals("URRRRRL", result.getParams().asWebhook().getUrl());
   }
 
   @Test
-  public void testSerialization() throws IOException {
-    NotificationConfig notification = new NotificationConfig(NotificationType.WEBHOOK, "1>2", "URRL");
+  public void testSerialization() {
+    NotificationConfig notification = new NotificationConfig("1>2", new NotificationConfig.WebhookParams("URRL"));
 
     JsonNode result = mapper.valueToTree(notification);
 
     System.out.println(result);
-    assertEquals(4, result.size());
-    assertEquals("WEBHOOK", result.get("notificationType").asText());
+    assertEquals(3, result.size());
     assertEquals("1>2", result.get("condition").asText());
-    assertEquals("URRL", result.get("url").asText());
     assertTrue(result.has("notificationId")); // is always <null> in testing because it is set by the JPA
+    assertEquals(2, result.get("params").size());
+    assertEquals("URRL", result.get("params").get("url").asText());
+    assertEquals("WEBHOOK", result.get("params").get("type").asText());
   }
 }
