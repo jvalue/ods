@@ -30,6 +30,7 @@ public class NotificationConfig {
       @JsonSubTypes.Type(value = SlackParams.class, name = "SLACK"),
       @JsonSubTypes.Type(value = FirebaseParams.class, name = "FCM")
     })
+    @MappedSuperclass
     public abstract static class NotificationParams {
       public WebhookParams asWebhook() {
         if(this instanceof WebhookParams) {
@@ -81,7 +82,7 @@ public class NotificationConfig {
       return params;
     }
 
-    @Embeddable
+    @Entity
     public static class WebhookParams extends NotificationParams {
       private final String url;
 
@@ -107,7 +108,7 @@ public class NotificationConfig {
       }
     }
 
-    @Embeddable
+    @Entity
     public static class SlackParams extends NotificationParams {
       @NotNull private final String workspaceId;
       @NotNull private final String channelId;
@@ -150,7 +151,7 @@ public class NotificationConfig {
       }
     }
 
-    @Embeddable
+    @Entity
     public static class FirebaseParams extends NotificationParams {
       private final String projectId;
       private final String clientEmail;
