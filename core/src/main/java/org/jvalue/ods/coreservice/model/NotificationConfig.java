@@ -92,7 +92,9 @@ public class NotificationConfig {
     @Entity
     @DiscriminatorValue("Webhook")
     public static class WebhookParams extends NotificationParams {
-      private final String url;
+      private String url;
+
+      public WebhookParams() { } // Default constructor for JPA
 
       public WebhookParams(@JsonProperty(value = "url", required = true) String url) {
         this.url = url;
@@ -119,9 +121,11 @@ public class NotificationConfig {
     @Entity
     @DiscriminatorValue("Slack")
     public static class SlackParams extends NotificationParams {
-      @NotNull private final String workspaceId;
-      @NotNull private final String channelId;
-      @NotNull private final String secret;
+      @NotNull private String workspaceId;
+      @NotNull private String channelId;
+      @NotNull private String secret;
+
+      public SlackParams() { } // Default constructor for JPA
 
       public SlackParams(
         @JsonProperty(value = "workspaceId", required = true) String workspaceId,
@@ -163,11 +167,12 @@ public class NotificationConfig {
     @Entity
     @DiscriminatorValue("Firebase")
     public static class FirebaseParams extends NotificationParams {
-      private final String projectId;
-      private final String clientEmail;
-      private final String privateKey;
-      private final String topic;
+      private String projectId;
+      private String clientEmail;
+      private String privateKey;
+      private String topic;
 
+      public FirebaseParams() { } // Default constructor for JPA
 
       public FirebaseParams(
         @JsonProperty(value = "projectId", required = true) String projectId,
