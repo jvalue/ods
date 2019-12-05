@@ -69,7 +69,7 @@ export default class JSTransformationService implements TransformationService {
       return Promise.resolve()
     }
 
-    const message = `Pipeline ${notificationRequest.pipelineName}(${notificationRequest.pipelineId})` +
+    const message = `Pipeline ${notificationRequest.pipelineName}(${notificationRequest.pipelineId}) ` +
     `has new data available. Fetch at ${notificationRequest.dataLocation}.`
 
     switch (notificationRequest.params.type) {
