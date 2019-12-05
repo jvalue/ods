@@ -94,6 +94,7 @@ Content-Type: application/json
 
 ### Trigger slack notification
 ### Please environment variables according to the slack workspace/channel you want to use
+### For further informations on the fields see readme of the "core" subproject.
 POST {{baseURL}}/notification HTTP/1.1
 Content-Type: application/json
 
@@ -116,6 +117,7 @@ Content-Type: application/json
 
 ### Trigger firebase notification
 ### please set environment variables according to the credentials of your firebase project
+### For further informations on the fields see readme of the "core" subproject.
 POST {{baseURL}}/notification HTTP/1.1
 Content-Type: application/json
 
