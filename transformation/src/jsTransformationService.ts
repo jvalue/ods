@@ -11,6 +11,7 @@ import SandboxExecutor from './interfaces/sandboxExecutor'
 import SlackCallback from './interfaces/slackCallback'
 import FcmCallback from './interfaces/fcmCallback'
 import WebhookCallback from './interfaces/webhookCallback'
+import App = firebase.app.App;
 
 const VERSION = '0.0.2'
 
@@ -68,8 +69,8 @@ export default class JSTransformationService implements TransformationService {
       return Promise.resolve()
     }
 
-    const message = `Pipeline ${notificationRequest.pipelineName}(${notificationRequest.pipelineId}) has new data available.` +
-    `Fetch at ${notificationRequest.dataLocation}.`
+    const message = `Pipeline ${notificationRequest.pipelineName}(${notificationRequest.pipelineId})` +
+    `has new data available. Fetch at ${notificationRequest.dataLocation}.`
 
     switch (notificationRequest.params.type) {
       case 'WEBHOOK':
@@ -82,7 +83,7 @@ export default class JSTransformationService implements TransformationService {
         await this.handleSlack(notificationRequest.params, message)
         break
       default:
-        throw new Error(`Notification type not implemented.`)
+        throw new Error('Notification type not implemented.')
     }
   }
 
@@ -96,7 +97,7 @@ export default class JSTransformationService implements TransformationService {
 
   private async handleSlack (params: SlackParams, message: string): Promise<void> {
     let slackBaseUri = 'https://hooks.slack.com/services'
-    if(process.env.MOCK_RECEIVER_HOST && process.env.MOCK_RECEIVER_PORT) {
+    if (process.env.MOCK_RECEIVER_HOST && process.env.MOCK_RECEIVER_PORT) {
       slackBaseUri = `http://${process.env.MOCK_RECEIVER_HOST}:${process.env.MOCK_RECEIVER_PORT}/slack`
     }
     const callbackObject: SlackCallback = {
@@ -107,8 +108,11 @@ export default class JSTransformationService implements TransformationService {
   }
 
   private async handleFCM (params: FirebaseParams, message: string): Promise<void> {
-    if(!firebase.app(params.clientEmail)) {
-      firebase.initializeApp({
+    let app: App
+    try {
+      app = firebase.app(params.clientEmail)
+    } catch (e) { // app does not exist yet
+      app = firebase.initializeApp({
         credential: firebase.credential.cert({
           projectId: params.projectId,
           clientEmail: params.clientEmail,
@@ -128,7 +132,7 @@ export default class JSTransformationService implements TransformationService {
       },
       topic: params.topic
     }
-    const firebaseResponse = await firebase.messaging().send(firebaseMessage)
+    const firebaseResponse = await firebase.messaging(app).send(firebaseMessage)
     console.log(`Firebase message sent to: ${firebaseResponse}`)
   }
 }
