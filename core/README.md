@@ -93,8 +93,33 @@ Note that you need to delete existing docker images from your local docker daemo
 ### NotificationConfig
 ```
 {
-    "notificationType":"WEBHOOK",
-    "condition":String (Javascript boolean expression),
-    "url":String
+  "condition":String (Javascript boolean expression),
+  "params": WebhookParams || SlackParams || FirebaseParams
+}
+```
+
+### WebhookParams
+```
+{
+  "url": String (the url of the webhook you want to be triggered)
+}
+```
+
+### SlackParams
+```
+{
+  "workspaceId": String (id of your slack workspace),
+  "channelId": String (id of the channel where the notification is to be posted),
+  "secret": String (secret part of the slack webhook, get it at slack management console)
+}
+```
+
+### FirebaseParams
+```
+{
+  "projectId": String (id of your firebase project),
+  "clientEmail": String (email of the firebase service account),
+  "privateKey: String (secret key associated with the service account),
+  "topic": String (topic under which the notification is to be posted)
 }
 ```
