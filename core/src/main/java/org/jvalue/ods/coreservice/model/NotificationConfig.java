@@ -19,7 +19,7 @@ public class NotificationConfig {
     @NotNull
     private String condition;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private NotificationParams params;
 
     //Constructor for JPA
