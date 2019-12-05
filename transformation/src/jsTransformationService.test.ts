@@ -155,7 +155,7 @@ describe('JSTransformationService', () => {
       await transformationService.handleNotification(request)
 
       const expectedObject: SlackCallback = {
-        text: `Pipeline ${request.pipelineName}(${request.pipelineId}) has new data available.Fetch at ${request.dataLocation}.`
+        text: `Pipeline ${request.pipelineName}(${request.pipelineId}) has new data available. Fetch at ${request.dataLocation}.`
       }
       expect(post).toHaveBeenCalledTimes(1)
       const slackParams = request.params as SlackParams
