@@ -38,9 +38,11 @@ Content-Type: application/json
   },
   "notifications": [
     {
-    "notificationType": "WEBHOOK",
     "condition": "data.test === 'abc'",
-    "url": "http://www.mocky.io/v2/5dc94f7a2f0000680073eb96"
+    "params": {
+      "type": "WEBHOOK",
+      "url": "http://www.mocky.io/v2/5dc94f7a2f0000680073eb96"
+    }
     }
   ]
 }
