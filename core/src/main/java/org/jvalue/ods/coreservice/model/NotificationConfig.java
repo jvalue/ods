@@ -169,7 +169,7 @@ public class NotificationConfig {
     public static class FirebaseParams extends NotificationParams {
       private String projectId;
       private String clientEmail;
-      @Column(columnDefinition = "LONGTEXT")
+      @Column(length = 2000)
       private String privateKey;
       private String topic;
 
