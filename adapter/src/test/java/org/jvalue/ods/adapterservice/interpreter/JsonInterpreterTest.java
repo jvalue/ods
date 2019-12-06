@@ -29,7 +29,7 @@ public class JsonInterpreterTest {
 
     @Test
     public void testSerialization() throws IOException {
-        JsonNode expected = mapper.readTree("{\"type\":\"JSON\",\"description\":\"Interpret data as JSON data\",\"parameters\":{}}");
+        JsonNode expected = mapper.readTree("{\"type\":\"JSON\",\"description\":\"Interpret data as JSON data\",\"parameters\":[]}");
         JsonNode result = mapper.valueToTree(interpreter);
 
         assertEquals(expected, result);

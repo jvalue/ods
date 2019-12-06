@@ -30,7 +30,7 @@ public class XmlInterpreterTest {
 
     @Test
     public void testSerialization() throws IOException {
-        JsonNode expected = mapper.readTree("{\"type\":\"XML\",\"description\":\"Interpret data as XML data\",\"parameters\":{}}");
+        JsonNode expected = mapper.readTree("{\"type\":\"XML\",\"description\":\"Interpret data as XML data\",\"parameters\":[]}");
         JsonNode result = mapper.valueToTree(interpreter);
 
         assertEquals(expected, result);
