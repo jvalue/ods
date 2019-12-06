@@ -103,4 +103,40 @@ describe("Adapter", () => {
       to: "Morty"
     });
   });
+
+  test("POST /dataImport CSV-Adapter", async () => {
+    const reqBody = {
+      protocol: {
+        type: "HTTP",
+        parameters: {
+          location: MOCK_SERVER_URL + "/csv"
+        }
+      },
+      format: {
+        type: "CSV",
+        parameters: {
+          columnSeparator: ",",
+          lineSeparator: "\n",
+          skipFirstDataRow: false,
+          firstRowAsHeader: true
+        }
+      }
+    };
+
+    const response = await request(URL)
+      .post("/dataImport")
+      .send(reqBody);
+    expect(response.status).toEqual(200);
+    expect(response.body).toEqual([
+      {
+        col1: "val11",
+        col2: "val12",
+        col3: "val13"
+      }, {
+        col1: "val21",
+        col2: "val22",
+        col3: "val23"
+      }
+    ]);
+  });
 });
