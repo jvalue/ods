@@ -16,7 +16,7 @@ import java.util.Map;
 public class CsvInterpreter extends Interpreter {
 
   private final List<InterpreterParameterDescription> parameters =  Collections.unmodifiableList(List.of(
-    new InterpreterParameterDescription("columnSeparator", "Column delimiter character", Character.class),
+    new InterpreterParameterDescription("columnSeparator", "Column delimiter character, only one character supported", String.class),
     new InterpreterParameterDescription("lineSeparator", "Line delimiter character, only \\r, \\r\\n, and \\n supported", String.class),
     new InterpreterParameterDescription("skipFirstDataRow", "Skip first data row (after header)", Boolean.class),
     new InterpreterParameterDescription("firstRowAsHeader", "Interpret first row as header for columns", Boolean.class)
@@ -48,6 +48,12 @@ public class CsvInterpreter extends Interpreter {
       throw new IllegalArgumentException(getType() + " interpreter requires parameter lineSeparator to have" +
         " value \\n, \\r, or \\r\\n. Your given value " + lineSeparator + " is invalid!");
     }
+
+    String columnSeparator = (String) inputParameters.get("columnSeparator");
+    if (columnSeparator.length() != 1) {
+      throw new IllegalArgumentException(getType() + " interpreter requires parameter columnSeparator to have" +
+        " length 1. Your given value " + columnSeparator + " is invalid!");
+    }
   }
 
   @Override
@@ -63,7 +69,7 @@ public class CsvInterpreter extends Interpreter {
   private CsvSchema createSchema(Map<String, Object> parameters) {
     CsvSchema csvSchema = CsvSchema
       .emptySchema()
-      .withColumnSeparator((char) parameters.get("columnSeparator"))
+      .withColumnSeparator(((String) parameters.get("columnSeparator")).charAt(0))
       .withLineSeparator((String) parameters.get("lineSeparator"))
       .withSkipFirstDataRow((boolean) parameters.get("skipFirstDataRow"));
     if((boolean) parameters.get("firstRowAsHeader")) {

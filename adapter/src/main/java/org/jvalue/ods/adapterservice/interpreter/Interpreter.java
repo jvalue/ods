@@ -31,7 +31,7 @@ public abstract class Interpreter {
       if (inputParameters.get(requiredParameter.getName()) == null) {
         illegalArguments = true;
         illegalArgumentsMessage = illegalArgumentsMessage + getType() + " interpreter requires parameter "
-            + requiredParameter.getName() + "/n";
+          + requiredParameter.getName() + "/n";
 
       } else if (inputParameters.get(requiredParameter.getName()).getClass() != requiredParameter.getType()) {
         illegalArguments = true;
