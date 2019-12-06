@@ -16,11 +16,12 @@
       :rules="[required, validateColumnSeparator]"
       @keyup="formChanged"
     />
-    <v-text-field
+    <v-select
       v-model="csvConfig.lineSeparator"
+      :items="availableLineSeparators"
       label="Line separator"
-      :rules="[required, validateLineSeparator]"
-      @keyup="formChanged"
+      :rules="[required]"
+      @change="formChanged"
     />
   </div>
 </template>
@@ -32,7 +33,7 @@ import Component from 'vue-class-component'
 
 import { Emit, PropSync } from 'vue-property-decorator'
 
-class CsvConfig {
+type CsvConfig = {
   lineSeparator: string;
   columnSeparator: string;
   firstRowAsHeader: boolean;
@@ -43,6 +44,11 @@ class CsvConfig {
 export default class PipelineCsvAdapterConfig extends Vue {
 
   private validForm: boolean = true;
+  private availableLineSeparators = [
+    { value: '\n', text: '\\n' },
+    { value: '\r', text: '\\r' },
+    { value: '\r\n', text: '\\r\\n' },
+  ]
 
   @PropSync('value')
   private csvConfig!: CsvConfig;
@@ -64,10 +70,6 @@ export default class PipelineCsvAdapterConfig extends Vue {
 
   private required (val: string) {
     return !!val || 'required.'
-  }
-
-  private validateLineSeparator (val: string) {
-    return !!val && (val === '\n' || val === '\r' || val === '\r\n')
   }
 
   private validateColumnSeparator (val: string) {

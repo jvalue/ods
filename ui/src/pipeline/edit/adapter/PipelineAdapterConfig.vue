@@ -68,8 +68,8 @@ export default class PipelineAdapterConfig extends Vue {
   formChanged() {
     if(this.adapterConfig.format.type === 'CSV') {
       this.adapterConfig.format.parameters = {
-        lineSeparator: ';',
-        columnSeparator: '\\n',
+        lineSeparator: '\n',
+        columnSeparator: ';',
         firstRowAsHeader: true,
         skipFirstDataRow: false
       }
