@@ -122,7 +122,7 @@ import { Watch } from 'vue-property-decorator'
 import { Action, State } from 'vuex-class'
 import Pipeline from './pipeline'
 
-import PipelineAdapterConfig from './edit/PipelineAdapterConfig.vue'
+import PipelineAdapterConfig from './edit/adapter/PipelineAdapterConfig.vue'
 import PipelineEditStepperButtonGroup from './edit/PipelineEditStepperButtonGroup.vue'
 import PipelineMetadataConfig from './edit/PipelineMetadataConfig.vue'
 import PipelineTransformationConfig from './edit/PipelineTransformationConfig.vue'
