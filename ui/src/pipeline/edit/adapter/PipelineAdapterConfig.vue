@@ -12,6 +12,7 @@
     <v-text-field
       v-model="adapterConfig.protocol.parameters.location"
       label="URL"
+      class="pl-7"
       :rules="[required]"
       @keyup="formChanged"
     />
@@ -26,6 +27,7 @@
       v-if="adapterConfig.format.type === 'CSV'"
       v-model="adapterConfig.format.parameters"
       v-on:validityChanged="validFormatParameters = $event"
+      class="pl-7"
     />
   </v-form>
 </template>
