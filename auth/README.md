@@ -10,6 +10,10 @@ Keycload configuration UI is available on url `http://localhost:8080/auth/`. The
 
 A demo user with username `demo` and password `demo` is also created.
 
+## Changing the Configuration
+
+Make sure to delete the database volume, e.g. by `docker volume prune`, otherwise the old configuration is still active!
+
 ## Shutting down
 
 Use `docker-compose -f ../docker-compose.yml -f ../docker-compose.ci.yml up down` to stop the auth service.
