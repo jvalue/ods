@@ -2,6 +2,7 @@ package org.jvalue.ods.coreservice.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jvalue.ods.coreservice.repository.GenericParameterConverter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -17,20 +18,16 @@ public class AdapterFormatConfig {
   private String type;
 
   @NotNull
-  @ElementCollection
-  @CollectionTable(name = "adapter_format_parameter_mapping",
-          joinColumns = {@JoinColumn(name = "pipelineconfig_id", referencedColumnName = "id")})
-  @MapKeyColumn(name = "parameter_name")
-  @Column(name = "value")
-  private Map<String, String> parameters;
+  @Column(name = "format_parameters")
+  @Convert(converter = GenericParameterConverter.class)
+  private Map<String, Object> parameters;
 
   // Constructor for JPA
-  private AdapterFormatConfig() {
-  }
+  private AdapterFormatConfig() {  }
 
   @JsonCreator
   public AdapterFormatConfig(@JsonProperty("type") String type,
-      @JsonProperty("parameters") Map<String, String> parameters) {
+      @JsonProperty("parameters") Map<String, Object> parameters) {
     this.type = type;
     this.parameters = parameters;
   }
@@ -39,7 +36,7 @@ public class AdapterFormatConfig {
     return type;
   }
 
-  public Map<String, String> getParameters() {
+  public Map<String, Object> getParameters() {
     return parameters;
   }
 
