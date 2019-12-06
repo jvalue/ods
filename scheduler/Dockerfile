@@ -8,7 +8,7 @@ COPY ./tsconfig.json ./
 COPY ./jest.config.js ./
 
 # Install dependencies and run build
-RUN npm install
+RUN npm ci
 RUN npm run tsc
 RUN npm run test
 
@@ -21,7 +21,7 @@ WORKDIR /app
 COPY --from=builder /build/dist/ ./dist/
 COPY --from=builder /build/package*.json ./
 
-RUN npm install --only=production
+RUN npm ci --only=production
 EXPOSE 8080
 
 CMD [ "npm", "run", "start:transpiled" ]
