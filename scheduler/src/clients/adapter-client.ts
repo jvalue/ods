@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios'
 
-import { default as AdapterConfig } from '../interfaces/core/adapter-config'
+import { default as AdapterConfig } from '../interfaces/adapter-config'
 
 const ADAPTER_SERVICE_URL = process.env.ADAPTER_SERVICE_URL || 'http://localhost:8082'
 const ADAPTER_SERVICE_IMPORT_URL = ADAPTER_SERVICE_URL + '/dataImport'
