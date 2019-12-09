@@ -30,7 +30,7 @@ Content-Type: application/json
   "trigger": {
     "firstExecution": "2018-10-07T01:32:00.123Z",
     "periodic": true,
-    "interval": 60000
+    "interval": 1000
   },
   "metadata": {
     "author": "icke",
@@ -38,9 +38,21 @@ Content-Type: application/json
   },
   "notifications": [
     {
-    "notificationType": "WEBHOOK",
-    "condition": "data.test === 'abc'",
-    "url": "http://www.mocky.io/v2/5dc94f7a2f0000680073eb96"
+      "condition": "data.test === 'abc'",
+      "params": {
+        "type": "WEBHOOK",
+        "url": "http://www.mocky.io/v2/5dc94f7a2f0000680073eb96"
+      }
+    },
+    {
+      "condition": "typeof data.test === 'string'",
+      "params": {
+        "type": "FCM",
+        "projectId": "{{fcmProjectId}}",
+        "clientEmail": "{{fcmClientEmail}}",
+        "privateKey": "{{fcmKey}}",
+        "topic": "{{fcmTopic}}"
+      }
     }
   ]
 }

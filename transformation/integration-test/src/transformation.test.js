@@ -80,34 +80,6 @@ describe('Scheduler', () => {
     expect(stats.endTimestamp).toBeGreaterThanOrEqual(stats.startTimestamp)
   })
 
-  test('POST /notification triggers slack notification', async () => {
-    const dataLocation = 'storage/234'
-    const slackJob = {
-      pipelineName: "peterchens pipeline",
-      pipelineId: 666,
-      url: MOCK_RECEIVER_URL + '/slack',
-      dataLocation,
-      data: {
-        niceString: "nice"
-      },
-      condition: "typeof data.niceString === \"string\"",
-      notificationType: 'SLACK'
-    }
-
-    const transformationResponse = await request(URL)
-      .post('/notification')
-      .send(slackJob)
-    expect(transformationResponse.status).toEqual(202)
-
-    await sleep(3000)
-
-    const receiverResponse = await request(MOCK_RECEIVER_URL)
-      .get('/slack')
-
-    expect(receiverResponse.status).toEqual(200)
-    expect(receiverResponse.body.text).toEqual(`New data available for pipeline ${slackJob.pipelineName}(${slackJob.pipelineId}). Fetch at ${dataLocation}.`)
-  })
-
   test('POST /job with syntax error', async () => {
     const transformationJob = {
       func: 'syntax error;\nreturn data;',
@@ -174,20 +146,22 @@ describe('Scheduler', () => {
   test('POST /notification triggers webhook', async () => {
     const dataLocation = 'storage/1234'
     const notificationJob = {
-      url: MOCK_RECEIVER_URL + '/webhook1',
       dataLocation: dataLocation,
       data: {
         value1: 1
       },
       condition: 'data.value1 > 0',
-      notificationType: 'WEBHOOK'
+      params: {
+        type: 'WEBHOOK',
+        url: MOCK_RECEIVER_URL + '/webhook1'
+      }
     }
 
     const transformationResponse = await request(URL)
       .post('/notification')
       .send(notificationJob)
 
-    expect(transformationResponse.status).toEqual(202)
+    expect(transformationResponse.status).toEqual(200)
     await sleep(3000) // wait for processing
 
     const receiverResponse = await request(MOCK_RECEIVER_URL)
@@ -199,26 +173,61 @@ describe('Scheduler', () => {
 
   test('POST /notification does not trigger webhook when condition is false', async () => {
     const notificationJob = {
-      url: MOCK_RECEIVER_URL + '/webhook2',
       dataLocation: 'storage/1234',
       data: {
         value1: 1
       },
       condition: 'data.value1 < 0',
-      type: 'WEBHOOK'
+      params: {
+        url: MOCK_RECEIVER_URL + '/webhook2',
+        type: 'WEBHOOK'
+      }
     }
 
     const transformationResponse = await request(URL)
       .post('/notification')
       .send(notificationJob)
 
-    expect(transformationResponse.status).toEqual(202)
+    expect(transformationResponse.status).toEqual(200)
     await sleep(3000)
 
     const receiverResponse = await request(MOCK_RECEIVER_URL)
       .get('/webhook2')
 
     expect(receiverResponse.status).toEqual(404)
+  })
+
+  test('POST /notification triggers slack notification', async () => {
+    const dataLocation = 'storage/234'
+    const slackJob = {
+      pipelineName: "peterchens pipeline",
+      pipelineId: 666,
+      dataLocation,
+      data: {
+        niceString: "nice"
+      },
+      condition: "typeof data.niceString === \"string\"",
+      params: {
+        type: 'SLACK',
+        projectId: '12',
+        workspaceId: '34',
+        secret: '56'
+      }
+    }
+
+    const transformationResponse = await request(URL)
+      .post('/notification')
+      .send(slackJob)
+    expect(transformationResponse.status).toEqual(200)
+
+    await sleep(3000)
+
+    const receiverResponse = await request(MOCK_RECEIVER_URL)
+      .get('/slack/12/34/56')
+
+    expect(receiverResponse.status).toEqual(200)
+    expect(receiverResponse.body.text)
+      .toEqual(`Pipeline ${slackJob.pipelineName}(${slackJob.pipelineId}) has new data available. Fetch at ${dataLocation}.`)
   })
 
   function sleep (ms) {

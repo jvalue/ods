@@ -8,6 +8,7 @@ import TransformationRequest from './interfaces/transformationRequest'
 import { NotificationRequest } from './interfaces/notificationRequest'
 import { Server } from 'http'
 import JobResult from './interfaces/jobResult'
+import { objectTypeSpreadProperty } from '@babel/types'
 
 export class TransformationEndpoint {
   port: number
@@ -76,11 +77,21 @@ export class TransformationEndpoint {
 
   postNotification = async (req: Request, res: Response): Promise<void> => {
     const notification: NotificationRequest = req.body
+    if (!this.isValidNotificationRequest(notification)) {
+      res.status(400).send('Malformed request body: Valid data object, condition string and notificationType required.')
+    }
 
-    await this.transformationService.handleNotification(notification)
-    // Result of notification handling is ignored for now.
-
-    res.status(202).send()
+    try {
+      await this.transformationService.handleNotification(notification)
+    } catch (e) {
+      if (e instanceof Error) {
+        console.log(`Notification handling failed. Nested cause is: ${e.name}: ${e.message}`)
+        res.status(500).send(`Notification handling failed. Nested cause is: ${e.name}: ${e.message}`)
+      } else {
+        res.status(500).send()
+      }
+    }
+    res.status(200).send()
   }
 
   determineAuth = (): express.RequestHandler | [] => {
@@ -89,5 +100,11 @@ export class TransformationEndpoint {
     } else {
       return []
     }
+  }
+
+  private isValidNotificationRequest(obj: any): obj is NotificationRequest {
+    return typeof obj.data !== 'undefined' &&
+    typeof obj.condition === 'string' &&
+    typeof obj.params.type === 'string'
   }
 }
