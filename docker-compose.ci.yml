@@ -54,6 +54,8 @@ services:
   transformation:
     environment:
       AUTH_ENABLED: 'false'
+      MOCK_RECEIVER_HOST: transformation-it
+      MOCK_RECEIVER_PORT: 8081
 
   transformation-it:
     image: open-data-service/ods-main/transformation-it

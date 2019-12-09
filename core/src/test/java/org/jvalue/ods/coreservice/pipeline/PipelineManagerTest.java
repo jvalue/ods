@@ -133,7 +133,7 @@ public class PipelineManagerTest {
 
         when(pipelineRepository.findById(21L)).thenReturn(Optional.of(pipelineConfig));
 
-        NotificationConfig notificationConfig = new NotificationConfig(NotificationType.WEBHOOK, "data.value2 === 1", "http://www.hook.org");
+        NotificationConfig notificationConfig = new NotificationConfig("data.value2 === 1", new NotificationConfig.WebhookParams("http://www.hook.org"));
 
         when(pipelineRepository.save(pipelineConfig)).thenReturn(pipelineConfig);
 
@@ -143,7 +143,7 @@ public class PipelineManagerTest {
 
         assertEquals(2, result.getNotifications().size());
         assertEquals("data.value2 === 1", result.getNotifications().get(1).getCondition());
-        assertEquals("http://www.hook.org", result.getNotifications().get(1).getUrl());
+        assertEquals("http://www.hook.org", result.getNotifications().get(1).getParams().asWebhook().getUrl());
         verify(eventRepository).save(argThat(event -> event.getEventType().equals("PIPELINE_UPDATE")));
     }
 
