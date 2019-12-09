@@ -25,7 +25,7 @@ Content-Type: application/json
     "protocol": {
       "type": "HTTP",
       "parameters": {
-        "location": "https://www.bka.de/SharedDocs/Downloads/DE/Publikationen/PolizeilicheKriminalstatistik/2018/BKATabellen/FaelleLaenderKreiseStaedte/BKA-LKS-F-03-T01-Kreise_csv.csv?__blob=publicationFile&v=3"
+        "location": "http://daten.transparenz.hamburg.de/Dataport.HmbTG.ZS.Webservice.GetRessource100/GetRessource100.svc/10dfeb66-e756-4322-bf22-0535b6ef1bdd/Indikatorpflanzen__Gras.csv"
       }
     },
     "format": {
