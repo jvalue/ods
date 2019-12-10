@@ -5,8 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "jest",
-    "start": "tsc && node --max-http-header-size 1000000 dist/index.js",
-    "start:transpiled": "node --max-http-header-size 1000000 dist/index.js",
+    "start": "tsc && node --max-http-header-size 10000000 dist/index.js",
+    "start:transpiled": "node --max-http-header-size 10000000 dist/index.js",
     "tsc": "tsc",
     "watch:node": "nodemon dist/src/index.js",
     "watch:ts": "tsc -w",

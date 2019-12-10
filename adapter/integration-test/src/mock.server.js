@@ -23,6 +23,16 @@ router.get("/xml", async ctx => {
     "<root><from>Rick</from><to>Morty</to></root>";
 });
 
+router.get("/csv", async ctx => {
+  console.log("GET /CSV");
+
+  ctx.type = "text/csv";
+  ctx.body =
+    'col1,col2,col3\n' +
+    'val11,val12,val13\n' +
+    'val21,val22,val23';
+});
+
 app.use(router.routes());
 
 const server = app.listen(PORT, () => console.log("Starting mock server on port " + PORT));

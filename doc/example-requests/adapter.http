@@ -1,6 +1,6 @@
 @baseURL = http://localhost:9000/api/adapter
 
-### Perform Data Import
+### Perform Data Import JSON
 POST {{baseURL}}/dataImport  HTTP/1.1
 Content-Type: application/json
 
@@ -12,6 +12,29 @@ Content-Type: application/json
       }
     },
     "format": {
-      "type": "JSON"
+      "type": "JSON",
+      "parameters": {}
+    }
+}
+
+### Perform Data Import CSV
+POST {{baseURL}}/dataImport  HTTP/1.1
+Content-Type: application/json
+
+{
+    "protocol": {
+      "type": "HTTP",
+      "parameters": {
+        "location": "http://daten.transparenz.hamburg.de/Dataport.HmbTG.ZS.Webservice.GetRessource100/GetRessource100.svc/10dfeb66-e756-4322-bf22-0535b6ef1bdd/Indikatorpflanzen__Gras.csv"
+      }
+    },
+    "format": {
+      "type": "CSV",
+      "parameters": {
+        "columnSeparator": ";",
+        "lineSeparator": "\n",
+        "skipFirstDataRow": false,
+        "firstRowAsHeader": true
+      }
     }
 }
