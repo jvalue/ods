@@ -2,6 +2,7 @@ package org.jvalue.ods.adapterservice.adapter;
 
 import org.jvalue.ods.adapterservice.importer.HttpImporter;
 import org.jvalue.ods.adapterservice.importer.Importer;
+import org.jvalue.ods.adapterservice.interpreter.CsvInterpreter;
 import org.jvalue.ods.adapterservice.interpreter.Interpreter;
 import org.jvalue.ods.adapterservice.interpreter.JsonInterpreter;
 import org.jvalue.ods.adapterservice.interpreter.XmlInterpreter;
@@ -21,7 +22,8 @@ public class AdapterManager {
     );
     private static final Map<String, Interpreter> interpreters = Map.ofEntries(
             entry("JSON", new JsonInterpreter()),
-            entry("XML", new XmlInterpreter())
+            entry("XML", new XmlInterpreter()),
+            entry("CSV", new CsvInterpreter())
    );
 
 
