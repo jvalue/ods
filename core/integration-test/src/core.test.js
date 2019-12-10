@@ -47,6 +47,14 @@ describe("Core", () => {
     expect(response.body.id).toBeDefined();
     expect(response.body.id).not.toEqual(pipelineConfig.id); // id not under control of client
 
+    //Check if notifications were stored correctly
+    expect(response.body.notifications).toHaveLength(pipelineConfig.notifications.length)
+    pipelineConfig.notifications.forEach(n => {
+      expect(response.body.notifications).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining(n)]))
+    })
+
     const delResponse = await request(URL)
         .delete("/pipelines/" + response.body.id)
         .send();
@@ -224,7 +232,7 @@ describe("Core", () => {
         .get('/pipelines/' + pipelineId)
         .send();
 
-    expect(pipelineResponse.body.notifications.length).toEqual(2);
+    expect(pipelineResponse.body.notifications.length).toEqual(4);
 
     //clean up
     await request(URL)
@@ -261,7 +269,7 @@ describe("Core", () => {
         .get('/pipelines/' + pipelineId)
         .send();
 
-    expect(pipelineResponse.body.notifications.length).toEqual(0);
+    expect(pipelineResponse.body.notifications.length).toEqual(2);
 
     //clean up
     await request(URL)
@@ -312,6 +320,25 @@ const pipelineConfig = {
       "params": {
         "type": "WEBHOOK",
         "url": "http://www.webhookland.com"
+      }
+    },
+    {
+      "condition": "false",
+      "params": {
+        "type": "SLACK",
+        "workspaceId": "123",
+        "channelId": "456",
+        "secret": "789"
+      },
+    },
+    {
+      "condition": "1 === 2",
+      "params": {
+        "type": "FCM",
+        "projectId": "nebelalarm",
+        "clientEmail": "client@mail.yeah",
+        "privateKey": "verylongverysecretkey",
+        "topic": "interestingstuff"
       }
     }
   ]
