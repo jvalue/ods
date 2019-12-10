@@ -150,8 +150,8 @@ public class CsvInterpreterTest {
   @Test(expected = IllegalArgumentException.class)
   public void interpretInvalidColumnSeparator() throws IOException {
     interpreter.interpret(CSV_STRING, Map.of(
-      "columnSeparator", ",asd",
-      "lineSeparator", "\n", // only \n, \r, or \r\n
+      "columnSeparator", ",asd",  // only one char
+      "lineSeparator", "\n",
       "skipFirstDataRow", false,
       "firstRowAsHeader", false
     ));
