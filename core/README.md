@@ -101,6 +101,7 @@ Note that you need to delete existing docker images from your local docker daemo
 ### WebhookParams
 ```
 {
+  "type": "WEBHOOK",
   "url": String (the url of the webhook you want to be triggered)
 }
 ```
@@ -108,6 +109,7 @@ Note that you need to delete existing docker images from your local docker daemo
 ### SlackParams
 ```
 {
+  "type": "SLACK",
   "workspaceId": String (id of your slack workspace),
   "channelId": String (id of the channel where the notification is to be posted),
   "secret": String (secret part of the slack webhook, get it at slack management console)
@@ -117,6 +119,7 @@ Note that you need to delete existing docker images from your local docker daemo
 ### FirebaseParams
 ```
 {
+  "type": "FCM",
   "projectId": String (id of your firebase project),
   "clientEmail": String (email of the firebase service account),
   "privateKey: String (secret key associated with the service account),
