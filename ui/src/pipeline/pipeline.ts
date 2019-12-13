@@ -30,7 +30,7 @@ export interface AdapterConfig {
   protocol: {
     type: string;
     parameters: object;
-  }
+  };
 }
 
 export interface TransformationConfig {
