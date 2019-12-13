@@ -86,7 +86,7 @@ export default class TransformationMain extends Vue {
 
   @Watch('functionInput')
   onFunctionInputChanged (): void {
-    this.scheduleSubmit();
+    this.scheduleSubmit()
   }
 
   private scheduleSubmit (): void {

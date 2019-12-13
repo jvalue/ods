@@ -26,12 +26,11 @@
     <pipeline-csv-adapter-config
       v-if="adapterConfig.format.type === 'CSV'"
       v-model="adapterConfig.format.parameters"
-      v-on:validityChanged="validFormatParameters = $event"
       class="pl-7"
+      @validityChanged="validFormatParameters = $event"
     />
   </v-form>
 </template>
-
 
 <script lang="ts">
 import Vue from 'vue'
@@ -46,24 +45,22 @@ import PipelineCsvAdapterConfig from './PipelineCsvAdapterConfig.vue'
   components: { PipelineCsvAdapterConfig }
 })
 export default class PipelineAdapterConfig extends Vue {
-
   private availableAdapterProtocols = ['HTTP']
   private availableAdapterFormats = ['JSON', 'XML', 'CSV']
 
-  private validForm: boolean = true;
-  private validFormatParameters: boolean = true;
-
+  private validForm = true;
+  private validFormatParameters = true;
 
   @PropSync('value')
   private adapterConfig!: AdapterConfig;
 
-  @Emit("value")
-  emitValue() {
-    return this.adapterConfig;
+  @Emit('value')
+  emitValue () {
+    return this.adapterConfig
   }
 
-  @Watch("adapterConfig.format.type")
-  private formatChanged(val: string) {
+  @Watch('adapterConfig.format.type')
+  private formatChanged (val: string) {
     switch (val) {
       case 'CSV': {
         this.adapterConfig.format.parameters = {
@@ -75,20 +72,20 @@ export default class PipelineAdapterConfig extends Vue {
         break
       } case 'JSON' || 'XML': {
         this.adapterConfig.format.parameters = {}
-        this.validFormatParameters = true;
+        this.validFormatParameters = true
         break
       }
     }
   }
 
-  @Emit("validityChanged")
-  emitValid() {
+  @Emit('validityChanged')
+  emitValid () {
     return this.validForm && this.validFormatParameters
   }
 
-  formChanged() {
-    this.emitValue();
-    this.emitValid();
+  formChanged () {
+    this.emitValue()
+    this.emitValid()
   }
 
   private required (val: string) {

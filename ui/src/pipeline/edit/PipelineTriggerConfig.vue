@@ -77,9 +77,8 @@
         </v-icon>
       </template>
     </v-slider>
-    </v-form>
+  </v-form>
 </template>
-
 
 <script lang="ts">
 import Vue from 'vue'
@@ -95,8 +94,7 @@ const ONE_MINUTE_IN_MS = 60 * 1000
 
 @Component({ components: { DateTimePicker } })
 export default class PipelineMetadataConfig extends Vue {
-
-  private validForm: boolean = true;
+  private validForm = true;
 
   private dialogIntervalHours = 1
   private dialogIntervalMinutes = 0
@@ -116,28 +114,28 @@ export default class PipelineMetadataConfig extends Vue {
   private triggerConfig!: Trigger;
 
   @Watch('triggerConfig')
-  private triggerConfigChanged() {
-    this.loadDialogIntervalForSlider();
+  private triggerConfigChanged () {
+    this.loadDialogIntervalForSlider()
   }
 
-  @Emit("value")
-  emitValue() {
-    return this.triggerConfig;
+  @Emit('value')
+  emitValue () {
+    return this.triggerConfig
   }
 
-  @Emit("validityChanged")
-  emitValid() {
-    return this.validForm;
+  @Emit('validityChanged')
+  emitValid () {
+    return this.validForm
   }
 
-  formChanged() {
-    this.setTriggerInterval();
+  formChanged () {
+    this.setTriggerInterval()
 
-    this.emitValue();
-    this.emitValid();
+    this.emitValue()
+    this.emitValid()
   }
 
-  private setTriggerInterval() {
+  private setTriggerInterval () {
     const hoursInMS = this.dialogIntervalHours * ONE_HOUR_IN_MS
     const minutesInMS = this.dialogIntervalMinutes * ONE_MINUTE_IN_MS
     this.triggerConfig.interval = hoursInMS + minutesInMS
@@ -162,6 +160,5 @@ export default class PipelineMetadataConfig extends Vue {
   private getMinutesFromMS (intervalInMS: number): number {
     return Math.floor((intervalInMS % ONE_HOUR_IN_MS) / ONE_MINUTE_IN_MS)
   }
-
 }
 </script>

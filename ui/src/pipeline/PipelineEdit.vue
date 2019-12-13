@@ -32,7 +32,12 @@
                 :rules="[required]"
               />
             </v-form>
-            <pipeline-edit-stepper-button-group v-bind:step="1" v-bind:nextEnabled="validStep1" v-bind:previousVisible="false" v-on:stepChanged="dialogStep = $event" />
+            <pipeline-edit-stepper-button-group
+              :step="1"
+              :next-enabled="validStep1"
+              :previous-visible="false"
+              @stepChanged="dialogStep = $event"
+            />
           </v-stepper-content>
 
           <v-stepper-step
@@ -43,8 +48,15 @@
             <small>Configure the data import</small>
           </v-stepper-step>
           <v-stepper-content step="2">
-            <pipeline-adapter-config v-model="dialogPipeline.adapter" v-on:validityChanged="validStep2 = $event" />
-            <pipeline-edit-stepper-button-group v-bind:step="2" v-bind:nextEnabled="validStep2" v-on:stepChanged="dialogStep = $event" />
+            <pipeline-adapter-config
+              v-model="dialogPipeline.adapter"
+              @validityChanged="validStep2 = $event"
+            />
+            <pipeline-edit-stepper-button-group
+              :step="2"
+              :next-enabled="validStep2"
+              @stepChanged="dialogStep = $event"
+            />
           </v-stepper-content>
 
           <v-stepper-step
@@ -55,8 +67,15 @@
             <small>Customize data transformations</small>
           </v-stepper-step>
           <v-stepper-content step="3">
-              <pipeline-transformation-config v-model="dialogPipeline.transformations" v-on:validityChanged="validStep3 = $event"/>
-              <pipeline-edit-stepper-button-group v-bind:step="3" v-bind:nextEnabled="validStep3" v-on:stepChanged="dialogStep = $event" />
+            <pipeline-transformation-config
+              v-model="dialogPipeline.transformations"
+              @validityChanged="validStep3 = $event"
+            />
+            <pipeline-edit-stepper-button-group
+              :step="3"
+              :next-enabled="validStep3"
+              @stepChanged="dialogStep = $event"
+            />
           </v-stepper-content>
 
           <v-stepper-step
@@ -66,8 +85,15 @@
             Meta-Data
           </v-stepper-step>
           <v-stepper-content step="4">
-            <pipeline-metadata-config v-model="dialogPipeline.metadata" v-on:validityChanged="validStep4 = $event"/>
-            <pipeline-edit-stepper-button-group v-bind:step="4" v-bind:nextEnabled="validStep4" v-on:stepChanged="dialogStep = $event" />
+            <pipeline-metadata-config
+              v-model="dialogPipeline.metadata"
+              @validityChanged="validStep4 = $event"
+            />
+            <pipeline-edit-stepper-button-group
+              :step="4"
+              :next-enabled="validStep4"
+              @stepChanged="dialogStep = $event"
+            />
           </v-stepper-content>
 
           <v-stepper-step
@@ -78,8 +104,16 @@
             <small>Configure Execution Details</small>
           </v-stepper-step>
           <v-stepper-content step="5">
-            <pipeline-trigger-config v-model="dialogPipeline.trigger" v-on:validityChanged="validStep5 = $event" />
-            <pipeline-edit-stepper-button-group v-bind:step="5" v-bind:nextEnabled="validStep5" v-bind:nextVisible="false" v-on:stepChanged="dialogStep = $event" />
+            <pipeline-trigger-config
+              v-model="dialogPipeline.trigger"
+              @validityChanged="validStep5 = $event"
+            />
+            <pipeline-edit-stepper-button-group
+              :step="5"
+              :next-enabled="validStep5"
+              :next-visible="false"
+              @stepChanged="dialogStep = $event"
+            />
           </v-stepper-content>
         </v-stepper>
       </v-card-text>
@@ -127,7 +161,6 @@ import PipelineEditStepperButtonGroup from './edit/PipelineEditStepperButtonGrou
 import PipelineMetadataConfig from './edit/PipelineMetadataConfig.vue'
 import PipelineTransformationConfig from './edit/PipelineTransformationConfig.vue'
 import PipelineTriggerConfig from './edit/PipelineTriggerConfig.vue'
-
 
 const namespace = { namespace: 'pipeline' }
 
@@ -227,12 +260,12 @@ export default class PipelineEdit extends Vue {
     return !!val || 'required.'
   }
 
-  private evaluateAllForms() {
-    return this.validStep1
-        && this.validStep2
-        && this.validStep3
-        && this.validStep4
-        && this.validStep5;
+  private evaluateAllForms () {
+    return this.validStep1 &&
+        this.validStep2 &&
+        this.validStep3 &&
+        this.validStep4 &&
+        this.validStep5
   }
 }
 </script>
