@@ -1,4 +1,4 @@
-FROM postgrest/postgrest:v6.0.0
+FROM postgrest/postgrest
 
 # overwrite:
 ENV DATABASE_HOST=localhost
