@@ -1,5 +1,5 @@
 {
-  "name": "core-service-it",
+  "name": "core-it",
   "version": "1.0.0",
   "description": "Core-Service Integration-Tests",
   "scripts": {
