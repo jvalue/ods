@@ -26,7 +26,6 @@
   </div>
 </template>
 
-
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
@@ -42,30 +41,29 @@ type CsvConfig = {
 
 @Component({ })
 export default class PipelineCsvAdapterConfig extends Vue {
-
-  private validForm: boolean = true;
+  private validForm = true;
   private availableLineSeparators = [
     { value: '\n', text: '\\n' },
     { value: '\r', text: '\\r' },
-    { value: '\r\n', text: '\\r\\n' },
+    { value: '\r\n', text: '\\r\\n' }
   ]
 
   @PropSync('value')
   private csvConfig!: CsvConfig;
 
-  @Emit("value")
-  emitValue() {
-    return this.csvConfig;
+  @Emit('value')
+  emitValue () {
+    return this.csvConfig
   }
 
-  @Emit("validityChanged")
-  emitValid() {
-    return this.validForm;
+  @Emit('validityChanged')
+  emitValid () {
+    return this.validForm
   }
 
-  formChanged() {
-    this.emitValue();
-    this.emitValid();
+  formChanged () {
+    this.emitValue()
+    this.emitValid()
   }
 
   private required (val: string) {
