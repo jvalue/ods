@@ -7,13 +7,13 @@
     "posttest": "killall node"
   },
   "devDependencies": {
-    "jest": "^24.8.0",
+    "jest": "^24.9.0",
     "supertest": "^4.0.2"
   },
   "jest": {
     "testEnvironment": "node"
   },
   "dependencies": {
-    "wait-on": "^3.2.0"
+    "wait-on": "^3.3.0"
   }
 }
