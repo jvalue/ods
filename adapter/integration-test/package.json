@@ -1,7 +1,7 @@
 {
-  "name": "adapter-service-it",
+  "name": "adapter-it",
   "version": "1.0.0",
-  "description": "Adapter-Service Integration-Tests",
+  "description": "Adapter Integration-Tests",
   "scripts": {
     "mock": "node src/mock.server.js",
     "pretest": "npm run mock &",
@@ -9,15 +9,15 @@
     "posttest": "killall node"
   },
   "devDependencies": {
-    "jest": "^24.8.0",
+    "jest": "^24.9.0",
     "supertest": "^4.0.2"
   },
   "jest": {
     "testEnvironment": "node"
   },
   "dependencies": {
-    "koa": "^2.7.0",
+    "koa": "^2.11.0",
     "koa-router": "^7.4.0",
-    "wait-on": "^3.2.0"
+    "wait-on": "^3.3.0"
   }
 }
