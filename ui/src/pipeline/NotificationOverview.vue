@@ -119,7 +119,7 @@ export default class PipelineNotifications extends Vue {
   @State('selectedPipeline', namespace) private selectedPipeline!: Pipeline
 
   @Ref('notificationEdit')
-  private notificationEdit!: NotificationEdit
+  private notificationEdit!: NotificationEditDialog
 
   private headers = [
     { text: 'Id', value: 'notificationId' },
@@ -139,12 +139,12 @@ export default class PipelineNotifications extends Vue {
 
   private onCreateNotification () {
     this.isEdit = false;
-    (this.notificationEdit as NotificationEditDialog).openDialog()
+    this.notificationEdit.openDialog()
   }
 
   private onEditNotification (notification: NotificationConfig) {
     this.isEdit = true;
-    (this.notificationEdit as NotificationEditDialog).openDialog(notification)
+    this.notificationEdit.openDialog(notification)
   }
 
   private onDeleteNotification (notification: NotificationConfig) {
