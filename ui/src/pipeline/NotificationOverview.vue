@@ -1,19 +1,11 @@
 <template>
   <div class="notification">
-    <v-toolbar
-      flat
-      color="white"
-    >
-      <v-toolbar-title>
-        Notifications for Pipeline {{ selectedPipeline.metadata.displayName }} ({{ selectedPipeline.id }})
-      </v-toolbar-title>
-      <notification-edit
-        ref="notificationEdit"
-        @pipelineSaved="onSave"
-      />
-    </v-toolbar>
     <v-card>
       <v-card-title>
+        <notification-edit
+          ref="notificationEdit"
+          @pipelineSaved="onSave"
+        />
         <v-btn
           class="ma-2"
           color="success"
