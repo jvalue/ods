@@ -105,6 +105,16 @@ export function convertRuntimeError (error: Error, prefixLength: number): JobErr
   if (error.stack === undefined) {
     throw new Error('Undefined stacktrace')
   }
+
+  if (error.message.startsWith('Script execution timed out')) {
+    return {
+      name: 'TimeoutError',
+      message: error.message,
+      lineNumber: 0,
+      position: 0,
+      stacktrace: []
+    }
+  }
   const lines = error.stack.split('\n')
 
   const message = lines[0]
