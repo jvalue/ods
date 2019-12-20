@@ -4,7 +4,7 @@ export interface NotificationRequest {
   data: object;
   dataLocation: string;
   condition: string;
-  params: WebhookParams | SlackParams | FirebaseParams
+  params: WebhookParams | SlackParams | FirebaseParams;
 }
 
 export interface WebhookParams {
@@ -20,10 +20,9 @@ export interface SlackParams {
 }
 
 export interface FirebaseParams {
-  type: 'FCM',
+  type: 'FCM';
   projectId: string;
   clientEmail: string;
   privateKey: string;
-  topic: string
+  topic: string;
 }
-
