@@ -36,10 +36,10 @@
             md="4"
           >
             <webhook-edit
-            v-if="editedNotification.params.type === 'WEBHOOK'"
-            v-model="editedNotification.params"
-            class="pl-7"
-            @validityChanged="validForm = $event"
+              v-if="editedNotification.params.type === 'WEBHOOK'"
+              v-model="editedNotification.params"
+              class="pl-7"
+              @validityChanged="validForm = $event"
             />
           </v-row>
         </v-container>
@@ -89,10 +89,10 @@ export default class PipelineNotifications extends Vue implements NotificationEd
 
   private defaultNotification: NotificationConfig = {
     notificationId: -1,
-    condition: "true",
+    condition: 'true',
     params: {
-      type: "WEBHOOK",
-      url: ""
+      type: 'WEBHOOK',
+      url: ''
     }
   }
 
