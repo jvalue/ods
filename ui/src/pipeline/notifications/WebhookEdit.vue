@@ -50,7 +50,7 @@ export default class WebhookEdit extends Vue {
         '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
         '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
         '(\\#[-a-z\\d_]*)?$', 'i') // fragment locator
-    return !!url && url.match(urlRegex) || 'lol'
+    return !!url && url.match(urlRegex) || 'URL invalid'
   }
 }
 </script>
