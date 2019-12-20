@@ -130,12 +130,12 @@ export default class PipelineNotifications extends Vue {
   }
 
   private onCreateNotification () {
-    this.isEdit = false;
+    this.isEdit = false
     this.notificationEdit.openDialog()
   }
 
   private onEditNotification (notification: NotificationConfig) {
-    this.isEdit = true;
+    this.isEdit = true
     this.notificationEdit.openDialog(notification)
   }
 
