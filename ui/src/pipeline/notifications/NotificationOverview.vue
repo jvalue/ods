@@ -42,7 +42,7 @@
           {{ item.notificationId }}
         </template>
         <template v-slot:item.url="{ item }">
-          {{ item.url }}
+          {{ item.params.url }}
         </template>
         <template v-slot:item.action="{ item }">
           <v-btn
