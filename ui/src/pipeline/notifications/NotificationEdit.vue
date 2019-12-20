@@ -25,7 +25,7 @@
             md="4"
           >
             <v-select
-              v-model="editedNotification.notificationType"
+              v-model="editedNotification.params.type"
               :items="notificationTypes"
               label="Type"
             />
@@ -36,7 +36,7 @@
             md="4"
           >
             <v-text-field
-              v-model="editedNotification.url"
+              v-model="editedNotification.params.url"
               label="URL"
             />
           </v-row>
@@ -66,7 +66,7 @@
 <script lang="ts">
 import Component from 'vue-class-component'
 import Vue from 'vue'
-import NotificationConfig, { NotificationType } from '@/pipeline/notifications/notificationConfig'
+import NotificationConfig from '@/pipeline/notifications/notificationConfig'
 import NotificationEditDialog from '@/pipeline/notifications/notificationEditDialog'
 import { Emit } from 'vue-property-decorator'
 
@@ -82,16 +82,18 @@ export default class PipelineNotifications extends Vue implements NotificationEd
 
   private defaultNotification: NotificationConfig = {
     notificationId: -1,
-    notificationType: NotificationType.WEBHOOK,
-    condition: '',
-    url: ''
+    condition: "true",
+    params: {
+      type: "WEBHOOK",
+      url: ""
+    }
   }
 
   private editedNotification: NotificationConfig = Object.assign({}, this.defaultNotification)
 
-  openDialog (notifcationConfig?: NotificationConfig) {
-    if (notifcationConfig) { // edit
-      this.editedNotification = Object.assign({}, notifcationConfig)
+  openDialog (notificationConfig?: NotificationConfig) {
+    if (notificationConfig) { // edit
+      this.editedNotification = Object.assign({}, notificationConfig)
     } else { // create
       this.editedNotification = Object.assign({}, this.defaultNotification)
     }
