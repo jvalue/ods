@@ -84,9 +84,9 @@ import Component from 'vue-class-component'
 import Vue from 'vue'
 import { Action, State } from 'vuex-class'
 import Pipeline from '@/pipeline/pipeline'
-import NotificationConfig from '@/pipeline/notificationConfig'
-import NotificationEditDialog from '@/pipeline/notificationEditDialog'
-import NotificationEdit from '@/pipeline/NotificationEdit.vue'
+import NotificationConfig from '@/pipeline/notifications/notificationConfig'
+import NotificationEditDialog from '@/pipeline/notifications/notificationEditDialog'
+import NotificationEdit from '@/pipeline/notifications/NotificationEdit.vue'
 import { Ref } from 'vue-property-decorator'
 
 const namespace = { namespace: 'pipeline' }

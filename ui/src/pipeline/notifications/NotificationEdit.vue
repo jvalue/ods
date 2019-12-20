@@ -66,9 +66,9 @@
 <script lang="ts">
 import Component from 'vue-class-component'
 import Vue from 'vue'
-import NotificationConfig, { NotificationType } from '@/pipeline/notificationConfig'
-import NotificationEditDialog from '@/pipeline/notificationEditDialog'
-import { Emit, Prop } from 'vue-property-decorator'
+import NotificationConfig, { NotificationType } from '@/pipeline/notifications/notificationConfig'
+import NotificationEditDialog from '@/pipeline/notifications/notificationEditDialog'
+import { Emit } from 'vue-property-decorator'
 
 @Component({})
 export default class PipelineNotifications extends Vue implements NotificationEditDialog {
