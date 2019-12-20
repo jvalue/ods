@@ -1,7 +1,7 @@
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
 import Pipeline from './pipeline'
 import * as RestService from './pipelineRest'
-import NotificationConfig from '@/pipeline/notificationConfig'
+import NotificationConfig from '@/pipeline/notifications/notificationConfig'
 
 @Module({ namespaced: true })
 export default class PipelineModule extends VuexModule {

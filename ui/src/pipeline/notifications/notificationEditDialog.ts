@@ -1,4 +1,4 @@
-import NotificationConfig, { NotificationType } from '@/pipeline/notificationConfig'
+import NotificationConfig from '@/pipeline/notifications/notificationConfig'
 
 export default interface NotificationEditDialog {
 
