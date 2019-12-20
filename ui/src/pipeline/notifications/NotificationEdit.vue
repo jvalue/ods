@@ -35,9 +35,11 @@
             sm="6"
             md="4"
           >
-            <v-text-field
-              v-model="editedNotification.params.url"
-              label="URL"
+            <webhook-edit
+            v-if="editedNotification.params.type === 'WEBHOOK'"
+            v-model="editedNotification.params"
+            class="pl-7"
+            @validityChanged="validForm = $event"
             />
           </v-row>
         </v-container>
@@ -47,6 +49,7 @@
         <v-btn
           color="primary"
           class="ma-2"
+          :disabled="!validForm"
           @click="onSave()"
         >
           Save
@@ -69,9 +72,13 @@ import Vue from 'vue'
 import NotificationConfig from '@/pipeline/notifications/notificationConfig'
 import NotificationEditDialog from '@/pipeline/notifications/notificationEditDialog'
 import { Emit } from 'vue-property-decorator'
+import WebhookEdit from '@/pipeline/notifications/WebhookEdit.vue'
 
-@Component({})
+@Component({
+  components: { WebhookEdit: WebhookEdit }
+})
 export default class PipelineNotifications extends Vue implements NotificationEditDialog {
+  private validForm = false;
   @Emit('pipelineSaved')
   onPipelineSave () {
     return this.editedNotification
