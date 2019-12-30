@@ -5,7 +5,7 @@
     <v-text-field
       v-model="webhookParams.url"
       label="URL to trigger the Webhook at"
-      :rules="[ validateURL ]"
+      :rules="[ validURL ]"
       @keyup="formChanged"
     />
   </v-form>
@@ -43,7 +43,7 @@ export default class WebhookEdit extends Vue {
     return !!val || 'required.'
   }
 
-  private validateURL (url: string) {
+  private validURL (url: string) {
     const urlRegex = new RegExp('^(https?:\\/\\/)?' + // protocol
         '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
         '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
