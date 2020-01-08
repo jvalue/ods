@@ -47,6 +47,12 @@
               class="pl-7"
               @validityChanged="validForm = $event"
             />
+            <slack-edit
+              v-if="editedNotification.params.type === 'SLACK'"
+              v-model="editedNotification.params"
+              class="pl-7"
+              @validityChanged="validForm = $event"
+            />
           </v-row>
         </v-container>
       </v-card-text>
@@ -80,9 +86,10 @@ import NotificationEditDialog from '@/pipeline/notifications/notificationEditDia
 import { Emit } from 'vue-property-decorator'
 import WebhookEdit from '@/pipeline/notifications/WebhookEdit.vue'
 import FirebaseEdit from '@/pipeline/notifications/FirebaseEdit.vue'
+import SlackEdit from '@/pipeline/notifications/SlackEdit.vue'
 
 @Component({
-  components: { WebhookEdit, FirebaseEdit }
+  components: {SlackEdit, WebhookEdit, FirebaseEdit }
 })
 export default class PipelineNotifications extends Vue implements NotificationEditDialog {
   private validForm = false;
@@ -91,7 +98,7 @@ export default class PipelineNotifications extends Vue implements NotificationEd
     return this.editedNotification
   }
 
-  private notificationTypes = ['WEBHOOK', 'FCM']
+  private notificationTypes = ['WEBHOOK', 'FCM', 'SLACK']
   private dialogOpen = false
 
   private defaultNotification: NotificationConfig = {
