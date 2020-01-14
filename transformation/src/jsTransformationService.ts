@@ -119,7 +119,7 @@ export default class JSTransformationService implements TransformationService {
         credential: firebase.credential.cert({
           projectId: params.projectId,
           clientEmail: params.clientEmail,
-          privateKey: params.privateKey
+          privateKey: params.privateKey.replace(/\\n/g, '\n')
         }),
         databaseURL: `https://${params.projectId}.firebaseio.com`
       },
