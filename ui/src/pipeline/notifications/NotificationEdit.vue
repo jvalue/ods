@@ -38,20 +38,20 @@
             <webhook-edit
               v-if="editedNotification.params.type === 'WEBHOOK'"
               v-model="editedNotification.params"
-              class="pl-7"
               @validityChanged="validForm = $event"
+              style="flex: 1 1 auto"
             />
             <firebase-edit
               v-if="editedNotification.params.type === 'FCM'"
               v-model="editedNotification.params"
-              class="pl-7"
               @validityChanged="validForm = $event"
+              style="flex: 1 1 auto"
             />
             <slack-edit
               v-if="editedNotification.params.type === 'SLACK'"
               v-model="editedNotification.params"
-              class="pl-7"
               @validityChanged="validForm = $event"
+              style="flex: 1 1 auto"
             />
           </v-row>
         </v-container>
