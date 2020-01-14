@@ -20,7 +20,7 @@
       :rules="[ required ]"
       @keyup="formChanged"
     />
-    <v-text-field
+    <v-textarea
       v-model="firebaseParams.privateKey"
       label="private key of the service account"
       :rules="[ required ]"
