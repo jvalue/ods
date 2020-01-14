@@ -25,7 +25,7 @@
             md="4"
           >
             <v-select
-              v-model="editedNotification.notificationType"
+              v-model="editedNotification.params.type"
               :items="notificationTypes"
               label="Type"
             />
@@ -35,9 +35,11 @@
             sm="6"
             md="4"
           >
-            <v-text-field
-              v-model="editedNotification.url"
-              label="URL"
+            <webhook-edit
+              v-if="editedNotification.params.type === 'WEBHOOK'"
+              v-model="editedNotification.params"
+              class="pl-7"
+              @validityChanged="validForm = $event"
             />
           </v-row>
         </v-container>
@@ -47,6 +49,7 @@
         <v-btn
           color="primary"
           class="ma-2"
+          :disabled="!validForm"
           @click="onSave()"
         >
           Save
@@ -66,12 +69,16 @@
 <script lang="ts">
 import Component from 'vue-class-component'
 import Vue from 'vue'
-import NotificationConfig, { NotificationType } from '@/pipeline/notificationConfig'
-import NotificationEditDialog from '@/pipeline/notificationEditDialog'
-import { Emit, Prop } from 'vue-property-decorator'
+import NotificationConfig from '@/pipeline/notifications/notificationConfig'
+import NotificationEditDialog from '@/pipeline/notifications/notificationEditDialog'
+import { Emit } from 'vue-property-decorator'
+import WebhookEdit from '@/pipeline/notifications/WebhookEdit.vue'
 
-@Component({})
+@Component({
+  components: { WebhookEdit: WebhookEdit }
+})
 export default class PipelineNotifications extends Vue implements NotificationEditDialog {
+  private validForm = false;
   @Emit('pipelineSaved')
   onPipelineSave () {
     return this.editedNotification
@@ -82,16 +89,18 @@ export default class PipelineNotifications extends Vue implements NotificationEd
 
   private defaultNotification: NotificationConfig = {
     notificationId: -1,
-    notificationType: NotificationType.WEBHOOK,
-    condition: '',
-    url: ''
+    condition: 'true',
+    params: {
+      type: 'WEBHOOK',
+      url: ''
+    }
   }
 
   private editedNotification: NotificationConfig = Object.assign({}, this.defaultNotification)
 
-  openDialog (notifcationConfig?: NotificationConfig) {
-    if (notifcationConfig) { // edit
-      this.editedNotification = Object.assign({}, notifcationConfig)
+  openDialog (notificationConfig?: NotificationConfig) {
+    if (notificationConfig) { // edit
+      this.editedNotification = Object.assign({}, notificationConfig)
     } else { // create
       this.editedNotification = Object.assign({}, this.defaultNotification)
     }

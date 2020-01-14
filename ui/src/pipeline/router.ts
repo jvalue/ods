@@ -1,6 +1,6 @@
 import PipelineOverview from './PipelineOverview.vue'
 import PipelineEdit from './PipelineEdit.vue'
-import PipelineNotifications from '@/pipeline/NotificationOverview.vue'
+import PipelineNotifications from '@/pipeline/notifications/NotificationOverview.vue'
 
 export default [
   {
