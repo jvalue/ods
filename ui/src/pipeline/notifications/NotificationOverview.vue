@@ -1,19 +1,11 @@
 <template>
   <div class="notification">
-    <v-toolbar
-      flat
-      color="white"
-    >
-      <v-toolbar-title>
-        Notifications for Pipeline {{ selectedPipeline.metadata.displayName }} ({{ selectedPipeline.id }})
-      </v-toolbar-title>
-      <notification-edit
-        ref="notificationEdit"
-        @pipelineSaved="onSave"
-      />
-    </v-toolbar>
     <v-card>
       <v-card-title>
+        <notification-edit
+          ref="notificationEdit"
+          @pipelineSaved="onSave"
+        />
         <v-btn
           class="ma-2"
           color="success"
@@ -50,7 +42,7 @@
           {{ item.notificationId }}
         </template>
         <template v-slot:item.url="{ item }">
-          {{ item.url }}
+          {{ item.params.url }}
         </template>
         <template v-slot:item.action="{ item }">
           <v-btn
@@ -92,9 +84,9 @@ import Component from 'vue-class-component'
 import Vue from 'vue'
 import { Action, State } from 'vuex-class'
 import Pipeline from '@/pipeline/pipeline'
-import NotificationConfig, { NotificationType } from '@/pipeline/notificationConfig'
-import NotificationEditDialog from '@/pipeline/notificationEditDialog'
-import NotificationEdit from '@/pipeline/NotificationEdit.vue'
+import NotificationConfig from '@/pipeline/notifications/notificationConfig'
+import NotificationEditDialog from '@/pipeline/notifications/notificationEditDialog'
+import NotificationEdit from '@/pipeline/notifications/NotificationEdit.vue'
 import { Ref } from 'vue-property-decorator'
 
 const namespace = { namespace: 'pipeline' }
@@ -119,7 +111,7 @@ export default class PipelineNotifications extends Vue {
   @State('selectedPipeline', namespace) private selectedPipeline!: Pipeline
 
   @Ref('notificationEdit')
-  private notificationEdit!: NotificationEdit
+  private notificationEdit!: NotificationEditDialog
 
   private headers = [
     { text: 'Id', value: 'notificationId' },
@@ -138,13 +130,13 @@ export default class PipelineNotifications extends Vue {
   }
 
   private onCreateNotification () {
-    this.isEdit = false;
-    (this.notificationEdit as NotificationEditDialog).openDialog()
+    this.isEdit = false
+    this.notificationEdit.openDialog()
   }
 
   private onEditNotification (notification: NotificationConfig) {
-    this.isEdit = true;
-    (this.notificationEdit as NotificationEditDialog).openDialog(notification)
+    this.isEdit = true
+    this.notificationEdit.openDialog(notification)
   }
 
   private onDeleteNotification (notification: NotificationConfig) {

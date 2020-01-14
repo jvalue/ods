@@ -1,8 +1,5 @@
-export interface NotificationRequest {
-  pipelineId: number;
-  pipelineName: string;
-  data: object;
-  dataLocation: string;
+export default interface NotificationConfig {
+  notificationId: number;
   condition: string;
   params: WebhookParams | SlackParams | FirebaseParams;
 }
