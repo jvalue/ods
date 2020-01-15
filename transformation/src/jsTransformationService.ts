@@ -62,7 +62,8 @@ export default class JSTransformationService implements TransformationService {
   }
 
   async handleNotification (notificationRequest: NotificationRequest): Promise<void> {
-    console.log('NotificationRequest received: ' + JSON.stringify(notificationRequest))
+    console.log(`NotificationRequest received for pipeline: ${notificationRequest.pipelineId}:
+    ${JSON.stringify(notificationRequest.params)}.`)
     const conditionHolds = this.executor.evaluate(notificationRequest.condition, notificationRequest.data)
     console.log('Condition is ' + conditionHolds)
     if (!conditionHolds) { // no need to trigger notification
@@ -92,6 +93,7 @@ export default class JSTransformationService implements TransformationService {
       location,
       timestamp: new Date(Date.now())
     }
+    console.log(`Posting webhook to ${params.url}, callback object: ${JSON.stringify(callbackObject)}.`)
     await axios.post(params.url, callbackObject)
   }
 
@@ -104,6 +106,7 @@ export default class JSTransformationService implements TransformationService {
       text: message
     }
     const url = `${slackBaseUri}/${params.workspaceId}/${params.channelId}/${params.secret}`
+    console.log(`Posting slack notification to ${url}, callbackObject: ${JSON.stringify(callbackObject)}`)
     await axios.post(url, callbackObject)
   }
 
@@ -116,7 +119,7 @@ export default class JSTransformationService implements TransformationService {
         credential: firebase.credential.cert({
           projectId: params.projectId,
           clientEmail: params.clientEmail,
-          privateKey: params.privateKey
+          privateKey: params.privateKey.replace(/\\n/g, '\n')
         }),
         databaseURL: `https://${params.projectId}.firebaseio.com`
       },
@@ -132,6 +135,7 @@ export default class JSTransformationService implements TransformationService {
       },
       topic: params.topic
     }
+    console.log(`Sending firebase message, callback object: ${JSON.stringify(firebaseMessage)}.`)
     const firebaseResponse = await firebase.messaging(app).send(firebaseMessage)
     console.log(`Firebase message sent to: ${firebaseResponse}`)
   }

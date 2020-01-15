@@ -8,7 +8,6 @@ import TransformationRequest from './interfaces/transformationRequest'
 import { NotificationRequest } from './interfaces/notificationRequest'
 import { Server } from 'http'
 import JobResult from './interfaces/jobResult'
-import { objectTypeSpreadProperty } from '@babel/types'
 
 export class TransformationEndpoint {
   port: number
@@ -61,10 +60,8 @@ export class TransformationEndpoint {
 
   postJob = (req: Request, res: Response): void => {
     const transformation: TransformationRequest = req.body
-    console.log(`Transformation request received. Body: ${JSON.stringify(transformation)}`)
     const result: JobResult = this.transformationService.executeJob(transformation.func, transformation.data)
     const answer: string = JSON.stringify(result)
-    console.log(`JobResult: ${answer}`)
     res.setHeader('Content-Type', 'application/json')
     if (result.data) {
       res.writeHead(200)
@@ -102,7 +99,7 @@ export class TransformationEndpoint {
     }
   }
 
-  private isValidNotificationRequest(obj: any): obj is NotificationRequest {
+  private isValidNotificationRequest (obj: any): obj is NotificationRequest {
     return typeof obj.data !== 'undefined' &&
     typeof obj.condition === 'string' &&
     typeof obj.params.type === 'string'
