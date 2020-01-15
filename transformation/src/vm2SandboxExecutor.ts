@@ -9,9 +9,9 @@ const FUNCTION_WRAP_PREFIX_LENGTH = 1
 export default class VM2SandboxExecutor implements SandboxExecutor {
   vm: VM;
 
-  constructor () {
+  constructor (timeout = 5000) {
     this.vm = new VM({
-      timeout: 5000
+      timeout
     })
   }
 
@@ -56,7 +56,7 @@ export default class VM2SandboxExecutor implements SandboxExecutor {
     try {
       result = this.vm.run(wrapper)
     } catch (err) {
-      console.error('Malformed expression received: ' + expression, err)
+      // console.error('Malformed expression received: ' + expression, err)
     }
     if (typeof result !== 'boolean') {
       return false
