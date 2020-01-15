@@ -19,7 +19,7 @@ import { WebhookParams } from '@/pipeline/notifications/notificationConfig'
 
 @Component({ })
 export default class WebhookEdit extends Vue {
-  private validForm = false;
+  private validForm = false
 
   @PropSync('value')
   private webhookParams!: WebhookParams
@@ -37,10 +37,6 @@ export default class WebhookEdit extends Vue {
   formChanged () {
     this.emitValue()
     this.emitValid()
-  }
-
-  private required (val: string) {
-    return !!val || 'required.'
   }
 
   private validURL (url: string) {
