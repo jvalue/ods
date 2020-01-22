@@ -103,30 +103,6 @@ public class XmlInterpreterTest {
       assertEquals(12, result.get("pizza").get(1).get("price").asInt());
     }
 
-  @Test
-  public void interpretXMLCollectionRoot() throws IOException {
-    final String collectionString =
-      "<pizza>" +
-        "<type>funghi</type>" +
-        "<taste>good</taste>" +
-      "</pizza>" +
-      "<pizza>" +
-        "<price>12</price>" +
-      "</pizza>";
-
-
-    JsonNode result = interpreter.interpret(collectionString, Map.of());
-
-    System.out.println(result);
-    assertTrue(result.isArray());
-    assertEquals(2, result.size());
-    assertEquals(2, result.get(0).size());
-    assertEquals("funghi", result.get(0).get("type").asText());
-    assertEquals("good", result.get(0).get("taste").asText());
-    assertEquals(1, result.get(1).size());
-    assertEquals(12, result.get(1).get("price").asInt());
-  }
-
     @Test(expected = IOException.class)
     public void interpretMalformedData() throws IOException {
         interpreter.interpret("{\"this is\":\"no xml\"", Map.of());
