@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class XmlInterpreterTest {
     private final Interpreter interpreter = new XmlInterpreter();
@@ -21,6 +22,56 @@ public class XmlInterpreterTest {
         assertEquals(2, result.size());
         assertEquals("Walter Frosch", result.get("to").textValue());
         assertEquals("Nice game!", result.get("body").textValue());
+    }
+
+    @Test
+    public void interpretXmlCollection() throws IOException {
+      final String collectionString =
+        "<menuItems>" +
+          "<pizza>" +
+            "<price>2</price>" +
+            "<taste>good</taste>" +
+          "</pizza>" +
+          "<pizza>" +
+            "<price>12</price>" +
+            "<taste>disgusting</taste>" +
+          "</pizza>" +
+        "</menuItems>";
+
+      JsonNode result = interpreter.interpret(collectionString, Map.of());
+
+      assertTrue(result.isArray());
+      assertEquals(2, result.size());
+      assertEquals(2, result.get(0).size());
+      assertEquals(2, result.get(0).get("price").asInt());
+      assertEquals("good", result.get(0).get("taste").asText());
+      assertEquals(2, result.get(1).size());
+      assertEquals(12, result.get(1).get("price").asInt());
+      assertEquals("disgusting", result.get(1).get("taste").asText());
+    }
+
+    @Test
+    public void interpretInconsistentXMLCollection() throws IOException {
+      final String collectionString =
+        "<menuItems>" +
+          "<pizza>" +
+            "<type>funghi</type>" +
+            "<taste>good</taste>" +
+          "</pizza>" +
+          "<pizza>" +
+            "<price>12</price>" +
+          "</pizza>" +
+        "</menuItems>";
+
+      JsonNode result = interpreter.interpret(collectionString, Map.of());
+
+      assertTrue(result.isArray());
+      assertEquals(2, result.size());
+      assertEquals(2, result.get(0).size());
+      assertEquals("funghi", result.get(0).get("type").asText());
+      assertEquals("good", result.get(0).get("taste").asText());
+      assertEquals(1, result.get(1).size());
+      assertEquals(12, result.get(1).get("price").asInt());
     }
 
     @Test(expected = IOException.class)
