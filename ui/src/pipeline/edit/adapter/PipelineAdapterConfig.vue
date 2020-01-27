@@ -17,6 +17,14 @@
       @keyup="formChanged"
     />
     <v-select
+      v-model="adapterConfig.protocol.parameters.encoding"
+      :items="availableEncodings"
+      label="Encoding"
+      class="pl-7"
+      :rules="[required]"
+      @keyup="formChanged"
+    />
+    <v-select
       v-model="adapterConfig.format.type"
       :items="availableAdapterFormats"
       label="Format"
@@ -46,6 +54,7 @@ import PipelineCsvAdapterConfig from './PipelineCsvAdapterConfig.vue'
 })
 export default class PipelineAdapterConfig extends Vue {
   private availableAdapterProtocols = ['HTTP']
+  private availableEncodings = ['UTF-8', 'ISO-8859-1', 'US-ASCII']
   private availableAdapterFormats = ['JSON', 'XML', 'CSV']
 
   private validForm = true;

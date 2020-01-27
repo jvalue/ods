@@ -31,17 +31,17 @@ public class HttpImporterTest {
 
     @Before
     public void setUp() {
-        ResponseEntity<String> response = new ResponseEntity<>("{\"content\":\"the internet as a string\"}", HttpStatus.OK);
+        ResponseEntity<byte[]> response = new ResponseEntity<>("{\"content\":\"the internet as a string\"}".getBytes(), HttpStatus.OK);
 
         ArgumentMatcher<URI> uriMatcher = (URI uri) -> uri.getPath().equals(this.from.getPath());
 
-        when(restTemplate.getForEntity(argThat(uriMatcher), eq(String.class))).thenReturn(response);
+        when(restTemplate.getForEntity(argThat(uriMatcher), eq(byte[].class))).thenReturn(response);
         importer = new HttpImporter(restTemplate);
     }
 
     @Test
     public void testFetch() throws IOException {
-        String result = importer.fetch(Map.of("location", from.getPath()));
+        String result = importer.fetch(Map.of("location", from.getPath(), "encoding", "UTF-8"));
 
         JsonNode resultNode = mapper.readTree(result);
         assertEquals(1, resultNode.size());
@@ -55,7 +55,10 @@ public class HttpImporterTest {
 
     @Test
     public void testSerialization() throws IOException {
-        JsonNode expected = mapper.readTree("{\"parameters\":{\"location\": \"String of the URI for the HTTP call\"}, \"type\":\"HTTP\",\"description\":\"Plain HTTP\"}");
+        JsonNode expected = mapper.readTree("{\"parameters\":[" +
+            "{\"name\":\"location\", \"description\":\"String of the URI for the HTTP call\", \"type\":\"java.lang.String\"}," +
+            "{\"name\":\"encoding\", \"description\":\"Encoding of the source. Available encodings: ISO-8859-1, US-ASCII, UTF-8\", \"type\":\"java.lang.String\"}" +
+          "], \"type\":\"HTTP\",\"description\":\"Plain HTTP\"}");
         JsonNode result = mapper.valueToTree(importer);
 
         assertEquals(expected, result);
