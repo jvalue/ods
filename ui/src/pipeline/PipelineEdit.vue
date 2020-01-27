@@ -199,7 +199,8 @@ export default class PipelineEdit extends Vue {
         type: 'HTTP',
         parameters: {
           location:
-            'https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json'
+            'https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json',
+          encoding: 'UTF-8'
         }
       },
       format: {

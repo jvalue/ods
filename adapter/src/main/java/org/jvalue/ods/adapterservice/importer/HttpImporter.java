@@ -4,12 +4,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 public class HttpImporter extends Importer {
 
-  private final Map<String, String> parameters =  Collections.unmodifiableMap(Map.of("location", "String of the URI for the HTTP call"));
+  private final List<ImporterParameterDescription> parameters =  Collections.unmodifiableList(List.of(
+    new ImporterParameterDescription("location", "String of the URI for the HTTP call", String.class),
+    new ImporterParameterDescription("encoding", "Encoding of the source. Available encodings: ISO-8859-1, US-ASCII, UTF-8", String.class)));
   private final RestTemplate restTemplate;
 
   public HttpImporter(RestTemplate restTemplate) {
@@ -27,7 +32,21 @@ public class HttpImporter extends Importer {
   }
 
   @Override
-  public Map<String, String> getAvailableParameters() {
+  protected void validateParameters(Map<String, Object> inputParameters) {
+    super.validateParameters(inputParameters);
+
+    String encoding = (String) inputParameters.get("encoding");
+    if (!encoding.equals(StandardCharsets.ISO_8859_1.name()) && !encoding.equals(StandardCharsets.US_ASCII.name()) && !encoding.equals(StandardCharsets.UTF_8.name())) {
+      throw new IllegalArgumentException(getType() + " interpreter requires parameter encoding to have value " +
+        StandardCharsets.ISO_8859_1 + ", " +
+        StandardCharsets.US_ASCII + ", " +
+        StandardCharsets.UTF_8
+          + ". Your given value " + encoding + " is invalid!");
+    }
+  }
+
+  @Override
+  public List<ImporterParameterDescription> getAvailableParameters() {
     return parameters;
   }
 
@@ -37,7 +56,7 @@ public class HttpImporter extends Importer {
     String location = parameters.get("location").toString();
 
     URI uri = URI.create(location);
-    ResponseEntity<String> responseEntity = restTemplate.getForEntity(uri, String.class);
-    return responseEntity.getBody();
+    byte[] rawResponse = restTemplate.getForEntity(uri, byte[].class).getBody();
+    return new String(rawResponse, Charset.forName((String) parameters.get("encoding")));
   }
 }
