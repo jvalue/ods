@@ -66,7 +66,8 @@ describe("Adapter", () => {
       protocol: {
         type: "HTTP",
         parameters: {
-          location: MOCK_SERVER_URL + "/json"
+          location: MOCK_SERVER_URL + "/json",
+          encoding: "UTF-8"
         }
       },
       format: {
@@ -86,7 +87,8 @@ describe("Adapter", () => {
       protocol: {
         type: "HTTP",
         parameters: {
-          location: MOCK_SERVER_URL + "/xml"
+          location: MOCK_SERVER_URL + "/xml",
+          encoding: "UTF-8"
         }
       },
       format: {
@@ -109,7 +111,8 @@ describe("Adapter", () => {
       protocol: {
         type: "HTTP",
         parameters: {
-          location: MOCK_SERVER_URL + "/csv"
+          location: MOCK_SERVER_URL + "/csv",
+          encoding: "UTF-8"
         }
       },
       format: {

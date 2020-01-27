@@ -345,7 +345,8 @@ function generateConfig(sourceLocation, periodic, interval = 5000) {
       protocol: {
         type: "HTTP",
         parameters: {
-          location: sourceLocation
+          location: sourceLocation,
+          encoding: 'UTF-8'
         }
       },
       format: {
