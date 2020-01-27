@@ -8,6 +8,16 @@
         />
         <v-btn
           class="ma-2"
+          @click="onNavigateBack()"
+        >
+          <v-icon
+            dark
+            right>
+              mdi mdi-arrow-left
+          </v-icon>
+        </v-btn>
+        <v-btn
+          class="ma-2"
           color="success"
           @click="onCreateNotification()"
         >
@@ -148,6 +158,10 @@ export default class PipelineNotifications extends Vue {
 
   private onLoadNotifications () {
     this.loadPipelineByIdAction(this.pipelineId)
+  }
+
+  private onNavigateBack() {
+    this.$router.push({ name: 'pipeline-overview' })
   }
 
   onSave (editedNotification: NotificationConfig) {
