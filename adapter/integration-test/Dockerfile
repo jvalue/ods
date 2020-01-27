@@ -1,7 +1,7 @@
 FROM node:12-alpine
 
 COPY . .
-RUN npm install 
+RUN npm ci
 
 EXPOSE 8080
 
