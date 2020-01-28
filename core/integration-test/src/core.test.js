@@ -285,6 +285,7 @@ describe("Core", () => {
     }
     configToPersist.transformations = [ crazyLongTransformation ]
 
+    // create pipeline to persist
     const creationResponse = await request(URL)
       .post('/pipelines')
       .send(configToPersist)
@@ -292,15 +293,17 @@ describe("Core", () => {
     expect(creationResponse.status).toEqual(201)
     const pipelineId = creationResponse.body.id
 
+    // check persisted pipeline config
     const pipelineResponse = await request(URL)
-      .get(`/pipelines/${id}`)
+      .get(`/pipelines/${pipelineId}`)
       .send()
 
     expect(pipelineResponse.body.transformations).toHaveLength(1)
-    expect(pipelineResponse.body[0]).toEqual(crazyLongTransformation)
+    expect(pipelineResponse.body.transformations[0]).toEqual(crazyLongTransformation)
 
+    // clean up
     const deletionResponse = await request(URL)
-      .delete(`/pipeline/${id}`)
+      .delete(`/pipelines/${pipelineId}`)
       .send()
   })
 });
