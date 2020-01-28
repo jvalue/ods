@@ -3,6 +3,7 @@ package org.jvalue.ods.coreservice.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
 import java.util.Objects;
@@ -11,6 +12,7 @@ import java.util.Objects;
 public class TransformationConfig {
 
     @NotNull
+    @Column(length = 10000)
     private String func;
 
     private String data;
