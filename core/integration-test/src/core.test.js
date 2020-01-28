@@ -277,6 +277,35 @@ describe("Core", () => {
         .send();
   });
 
+  test('Persist long transformation function', async () => {
+    let configToPersist = Object.assign({}, pipelineConfig)
+    const crazyLongTransformation = {
+      'func': 'a'.repeat(256),
+      'data': '{}'
+    }
+    configToPersist.transformations = [ crazyLongTransformation ]
+
+    // create pipeline to persist
+    const creationResponse = await request(URL)
+      .post('/pipelines')
+      .send(configToPersist)
+
+    expect(creationResponse.status).toEqual(201)
+    const pipelineId = creationResponse.body.id
+
+    // check persisted pipeline config
+    const pipelineResponse = await request(URL)
+      .get(`/pipelines/${pipelineId}`)
+      .send()
+
+    expect(pipelineResponse.body.transformations).toHaveLength(1)
+    expect(pipelineResponse.body.transformations[0]).toEqual(crazyLongTransformation)
+
+    // clean up
+    const deletionResponse = await request(URL)
+      .delete(`/pipelines/${pipelineId}`)
+      .send()
+  })
 });
 
 const pipelineConfig = {
