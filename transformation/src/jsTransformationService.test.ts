@@ -94,7 +94,7 @@ describe('JSTransformationService', () => {
         }
       }
 
-      await transformationService.handleNotification(notificationRequest)
+      await transformationService.handleNotificationv1(notificationRequest)
 
       expect(post).toHaveBeenCalledTimes(1)
       // check arguments for axios post
@@ -115,7 +115,7 @@ describe('JSTransformationService', () => {
         }
       }
 
-      await transformationService.handleNotification(notificationRequest)
+      await transformationService.handleNotificationv1(notificationRequest)
 
       expect(post).not.toHaveBeenCalled()
     })
@@ -133,7 +133,7 @@ describe('JSTransformationService', () => {
         }
       }
 
-      await transformationService.handleNotification(notificationRequest)
+      await transformationService.handleNotificationv1(notificationRequest)
 
       expect(post).not.toHaveBeenCalled()
     })
@@ -152,7 +152,7 @@ describe('JSTransformationService', () => {
           secret: '42'
         }
       }
-      await transformationService.handleNotification(request)
+      await transformationService.handleNotificationv1(request)
 
       const expectedObject: SlackCallback = {
         text: `Pipeline ${request.pipelineName}(${request.pipelineId}) has new data available. Fetch at ${request.dataLocation}.`
