@@ -1,5 +1,7 @@
 <template>
-  <div>
+  <v-form
+    v-model="validForm"
+    >
     <v-switch
       v-model="csvConfig.firstRowAsHeader"
       label="Use first row as header"
@@ -24,7 +26,7 @@
       :rules="[required]"
       @change="formChanged"
     />
-  </div>
+  </v-form>
 </template>
 
 <script lang="ts">
@@ -62,6 +64,7 @@ export default class PipelineCsvAdapterConfig extends Vue {
     return this.validForm
   }
 
+  @Emit('change')
   formChanged () {
     this.emitValue()
     this.emitValid()
