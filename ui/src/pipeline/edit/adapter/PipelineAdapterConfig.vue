@@ -44,7 +44,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 
-import { Emit, PropSync, Watch } from 'vue-property-decorator'
+import {Emit, Prop, PropSync, Watch} from 'vue-property-decorator'
 
 import { AdapterConfig } from '../../pipeline'
 import PipelineCsvAdapterConfig from './PipelineCsvAdapterConfig.vue'
@@ -60,6 +60,9 @@ export default class PipelineAdapterConfig extends Vue {
   private validForm = true;
   private validFormatParameters = true;
 
+  @Prop(Boolean)
+  private isEditMode!: boolean
+
   @PropSync('value')
   private adapterConfig!: AdapterConfig;
 
@@ -72,11 +75,13 @@ export default class PipelineAdapterConfig extends Vue {
   private formatChanged (val: string) {
     switch (val) {
       case 'CSV': {
-        this.adapterConfig.format.parameters = {
-          lineSeparator: '\n',
-          columnSeparator: ';',
-          firstRowAsHeader: true,
-          skipFirstDataRow: false
+        if(!this.isEditMode) { // otherwise csv params don't need reassignment of default values
+          this.adapterConfig.format.parameters = {
+            lineSeparator: '\n',
+            columnSeparator: ';',
+            firstRowAsHeader: true,
+            skipFirstDataRow: false
+          }
         }
         break
       } case 'JSON' || 'XML': {
