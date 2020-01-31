@@ -8,6 +8,7 @@ import TransformationRequest from './interfaces/transformationRequest'
 import { NotificationRequest_v1 } from './interfaces/notificationRequest_v1'
 import { Server } from 'http'
 import JobResult from './interfaces/jobResult'
+import {Firebase, NotificationRequest, Slack, Webhook} from '@/interfaces/notificationRequest'
 
 export class TransformationEndpoint {
   port: number
@@ -38,6 +39,9 @@ export class TransformationEndpoint {
     this.app.get('/version', this.getVersion)
     this.app.post('/job', this.determineAuth(), this.postJob)
     this.app.post('/notification', this.determineAuth(), this.postNotification)
+    this.app.post('/notification/webhook', this.determineAuth(), this.postWebhook)
+    this.app.post('/notification/slack', this.determineAuth(), this.postSlack)
+    this.app.post('/notification/fcm', this.determineAuth(), this.postFirebase)
   }
 
   listen (): Server {
@@ -72,14 +76,52 @@ export class TransformationEndpoint {
     res.end()
   }
 
+  postWebhook = async (req: Request, res: Response): Promise<void> => {
+    const webhookRequest = req.body as Webhook
+    if (!TransformationEndpoint.isValidWebhookRequest(webhookRequest)) {
+      res.status(400).send('Malformed webhook request.')
+    }
+    await this.processNotificationRequest(webhookRequest, res)
+  }
+
+  postSlack = async (req: Request, res: Response): Promise<void> => {
+    const slackRequest = req.body as Slack
+    if (!TransformationEndpoint.isValidSlackRequest(slackRequest)) {
+      res.status(400).send('Malformed webhook request.')
+    }
+    await this.processNotificationRequest(slackRequest, res)
+  }
+
+  postFirebase = async (req: Request, res: Response): Promise<void> => {
+    const firebaseRequest = req.body as Firebase
+    if (!TransformationEndpoint.isValidFirebaseRequest(firebaseRequest)) {
+      res.status(400).send('Malformed webhook request.')
+    }
+    await this.processNotificationRequest(firebaseRequest, res)
+  }
+
+  processNotificationRequest = async (notification: NotificationRequest, res: Response): Promise<void> => {
+    try {
+      await this.transformationService.handleNotification(notification)
+    } catch (e) {
+      if (e instanceof Error) {
+        console.log(`Notification handling failed. Nested cause is: ${e.name}: ${e.message}`)
+        res.status(500).send(`Notification handling failed. Nested cause is: ${e.name}: ${e.message}`)
+      } else {
+        res.status(500).send()
+      }
+    }
+    res.status(200).send()
+  }
+
   postNotification = async (req: Request, res: Response): Promise<void> => {
     const notification: NotificationRequest_v1 = req.body
-    if (!this.isValidNotificationRequest(notification)) {
+    if (!this.isValidNotificationRequestv1(notification)) {
       res.status(400).send('Malformed request body: Valid data object, condition string and notificationType required.')
     }
 
     try {
-      await this.transformationService.handleNotification(notification)
+      await this.transformationService.handleNotificationv1(notification)
     } catch (e) {
       if (e instanceof Error) {
         console.log(`Notification handling failed. Nested cause is: ${e.name}: ${e.message}`)
@@ -99,7 +141,26 @@ export class TransformationEndpoint {
     }
   }
 
-  private isValidNotificationRequest (obj: any): obj is NotificationRequest_v1 {
+  private static isValidWebhookRequest (obj: Webhook): boolean {
+    return this.isValidNotificationRequest(obj) &&
+      obj.type === 'WEBHOOK'
+  }
+
+  private static isValidSlackRequest (obj: Slack): boolean {
+    return this.isValidNotificationRequest(obj) &&
+      obj.type === 'SLACK' && !!obj.channelId && !!obj.secret && !!obj.workspaceId
+  }
+
+  private static isValidFirebaseRequest (obj: Firebase): boolean {
+    return this.isValidNotificationRequest(obj) &&
+      obj.type === 'FCM' && !!obj.clientEmail && !!obj.privateKey && !!obj.projectId && !!obj.topic
+  }
+
+  private static isValidNotificationRequest (obj: NotificationRequest): boolean {
+    return !!obj.data && !!obj.pipelineName && !!obj.pipelineId && !!obj.condition && !!obj.dataLocation
+  }
+
+  private isValidNotificationRequestv1 (obj: any): obj is NotificationRequest_v1 {
     return typeof obj.data !== 'undefined' &&
     typeof obj.condition === 'string' &&
     typeof obj.params.type === 'string'
