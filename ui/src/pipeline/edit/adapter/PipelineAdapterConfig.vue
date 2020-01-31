@@ -36,6 +36,7 @@
       v-model="adapterConfig.format.parameters"
       class="pl-7"
       @validityChanged="validFormatParameters = $event"
+      @change="formChanged"
     />
   </v-form>
 </template>
