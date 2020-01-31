@@ -13,7 +13,8 @@
     <v-text-field
       v-model="csvConfig.columnSeparator"
       label="Column separator"
-      :rules="[required, validateColumnSeparator]"
+      :rules="[required]"
+      :maxlength="1"
       @keyup="formChanged"
     />
     <v-select
@@ -68,10 +69,6 @@ export default class PipelineCsvAdapterConfig extends Vue {
 
   private required (val: string) {
     return !!val || 'required.'
-  }
-
-  private validateColumnSeparator (val: string) {
-    return !!val && val.length == 1
   }
 }
 </script>
