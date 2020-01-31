@@ -34,7 +34,7 @@ TBD
 | *base_url*/job | POST | transformationRequest | jobResult | Trigger execution |
 |  *base_url*/notification | POST | notificationRequest | - | Trigger notification |
 
-### NotificationRequest
+### NotificationRequest_v1
 ```
 {
   "pipelineName": string,

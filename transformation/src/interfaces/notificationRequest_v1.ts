@@ -1,4 +1,4 @@
-export interface NotificationRequest {
+export interface NotificationRequest_v1 {
   pipelineId: number;
   pipelineName: string;
   data: object;
