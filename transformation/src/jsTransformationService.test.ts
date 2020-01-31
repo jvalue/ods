@@ -1,7 +1,7 @@
 /* eslint-env jest */
 import axios from 'axios'
 
-import { NotificationRequest, WebhookParams, SlackParams } from './interfaces/notificationRequest'
+import { NotificationRequest_v1, WebhookParams, SlackParams } from './interfaces/notificationRequest_v1'
 import TransformationService from './interfaces/transformationService'
 
 import JSTransformationService from './jsTransformationService'
@@ -82,7 +82,7 @@ describe('JSTransformationService', () => {
     it('should trigger notification when condition is met', async () => {
       post.mockReturnValue(Promise.resolve())
 
-      const notificationRequest: NotificationRequest = {
+      const notificationRequest: NotificationRequest_v1 = {
         pipelineName: 'nordstream',
         pipelineId: 1,
         dataLocation: 'data',
@@ -103,7 +103,7 @@ describe('JSTransformationService', () => {
     })
 
     test('Notification does not trigger when condition is not met', async () => {
-      const notificationRequest: NotificationRequest = {
+      const notificationRequest: NotificationRequest_v1 = {
         pipelineName: 'southstream',
         pipelineId: 2,
         dataLocation: 'data',
@@ -121,7 +121,7 @@ describe('JSTransformationService', () => {
     })
 
     test('Notification does not trigger when condition is malformed', async () => {
-      const notificationRequest: NotificationRequest = {
+      const notificationRequest: NotificationRequest_v1 = {
         pipelineName: 'weststream',
         pipelineId: 3,
         dataLocation: 'data',
@@ -139,7 +139,7 @@ describe('JSTransformationService', () => {
     })
 
     test('SLACK request', async () => {
-      const request: NotificationRequest = {
+      const request: NotificationRequest_v1 = {
         condition: 'data.value1 > 0',
         data,
         dataLocation: 'data',

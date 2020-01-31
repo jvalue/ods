@@ -4,7 +4,7 @@ import * as firebase from 'firebase-admin'
 import ExecutionResult from './interfaces/executionResult'
 import JobResult from './interfaces/jobResult'
 import Stats from './interfaces/stats'
-import { NotificationRequest, FirebaseParams, SlackParams, WebhookParams } from './interfaces/notificationRequest'
+import { NotificationRequest_v1, FirebaseParams, SlackParams, WebhookParams } from './interfaces/notificationRequest_v1'
 
 import TransformationService from './interfaces/transformationService'
 import SandboxExecutor from './interfaces/sandboxExecutor'
@@ -61,7 +61,7 @@ export default class JSTransformationService implements TransformationService {
     return jobResult
   }
 
-  async handleNotification (notificationRequest: NotificationRequest): Promise<void> {
+  async handleNotification (notificationRequest: NotificationRequest_v1): Promise<void> {
     console.log(`NotificationRequest received for pipeline: ${notificationRequest.pipelineId}:
     ${JSON.stringify(notificationRequest.params)}.`)
     const conditionHolds = this.executor.evaluate(notificationRequest.condition, notificationRequest.data)
