@@ -74,7 +74,7 @@ describe('Scheduler', () => {
 
   test('Pipeline triggers correct notifications', async () => {
     await sleep(10000) // pipeline should have been exicuting until now!
-    const triggered = await request(MOCK_TRANSFORMATION_URL).get('/notification/webhook/should-also-be-triggered')
+    const triggered = await request(MOCK_TRANSFORMATION_URL).get('/notification/webhook/nordstream')
     expect(triggered.status).toEqual(200)
     expect(triggered.body).toEqual(
       {
@@ -87,7 +87,7 @@ describe('Scheduler', () => {
         url: 'should-also-be-triggered'
       })
 
-    const alsoTriggered = await request(MOCK_TRANSFORMATION_URL).get('/notification/slack/should-be-triggered')
+    const alsoTriggered = await request(MOCK_TRANSFORMATION_URL).get('/notification/slack/nordstream')
     expect(alsoTriggered.status).toEqual(200)
     expect(alsoTriggered.type).toEqual('application/json')
     expect(alsoTriggered.body).toEqual(
@@ -100,7 +100,7 @@ describe('Scheduler', () => {
         dataLocation: MOCK_STORAGE_URL + '/125',
         url: 'should-be-triggered'
       })
-    const alsoTriggeredToo = await request(MOCK_TRANSFORMATION_URL).get('/notification/fcm/should-be-triggered')
+    const alsoTriggeredToo = await request(MOCK_TRANSFORMATION_URL).get('/notification/fcm/nordstream')
     expect(alsoTriggeredToo.status).toEqual(200)
     expect(alsoTriggeredToo.type).toEqual('application/json')
     expect(alsoTriggeredToo.body).toEqual(
