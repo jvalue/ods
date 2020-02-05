@@ -100,10 +100,10 @@ describe('Scheduler', () => {
         dataLocation: MOCK_STORAGE_URL + '/125',
         url: 'should-be-triggered'
       })
-    const alsoTriggered = await request(MOCK_TRANSFORMATION_URL).get('/notification/fcm/should-be-triggered')
-    expect(alsoTriggered.status).toEqual(200)
-    expect(alsoTriggered.type).toEqual('application/json')
-    expect(alsoTriggered.body).toEqual(
+    const alsoTriggeredToo = await request(MOCK_TRANSFORMATION_URL).get('/notification/fcm/should-be-triggered')
+    expect(alsoTriggeredToo.status).toEqual(200)
+    expect(alsoTriggeredToo.type).toEqual('application/json')
+    expect(alsoTriggeredToo.body).toEqual(
       {
         pipelineId: 125,
         pipelineName: 'nordstream',
@@ -113,19 +113,6 @@ describe('Scheduler', () => {
         dataLocation: MOCK_STORAGE_URL + '/125',
         url: 'should-be-triggered'
       })
-      const alsoTriggered = await request(MOCK_TRANSFORMATION_URL).get('/notification/webhook/should-be-triggered')
-      expect(alsoTriggered.status).toEqual(200)
-      expect(alsoTriggered.type).toEqual('application/json')
-      expect(alsoTriggered.body).toEqual(
-        {
-          pipelineId: 125,
-          pipelineName: 'nordstream',
-          type: 'WEBHOOK',
-          data,
-          condition: 'data.field2 === 123',
-          dataLocation: MOCK_STORAGE_URL + '/125',
-          url: 'should-be-triggered'
-        })
     }, 12000)
 
   test('Pipeline processes events', async () => {
