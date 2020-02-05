@@ -195,10 +195,8 @@ describe("Core", () => {
   test('POST /{pipelineId}/notifications', async () => {
     const notificationConfig = {
       "condition": "data.value1 === 5",
-      "params": {
-        "url": "www.some-url.net",
-        "type": "WEBHOOK"
-      }
+      "url": "www.some-url.net",
+      "type": "WEBHOOK"
     };
 
     //add pipeline
@@ -346,29 +344,23 @@ const pipelineConfig = {
   "notifications": [
     {
       "condition": "data.value1 > 10",
-      "params": {
-        "type": "WEBHOOK",
-        "url": "http://www.webhookland.com"
-      }
+      "type": "WEBHOOK",
+      "url": "http://www.webhookland.com"
     },
     {
       "condition": "false",
-      "params": {
-        "type": "SLACK",
-        "workspaceId": "123",
-        "channelId": "456",
-        "secret": "789"
-      },
+      "type": "SLACK",
+      "workspaceId": "123",
+      "channelId": "456",
+      "secret": "789"
     },
     {
       "condition": "1 === 2",
-      "params": {
-        "type": "FCM",
-        "projectId": "nebelalarm",
-        "clientEmail": "client@mail.yeah",
-        "privateKey": "verylongverysecretkey",
-        "topic": "interestingstuff"
-      }
+      "type": "FCM",
+      "projectId": "nebelalarm",
+      "clientEmail": "client@mail.yeah",
+      "privateKey": "verylongverysecretkey",
+      "topic": "interestingstuff"
     }
   ]
 };
