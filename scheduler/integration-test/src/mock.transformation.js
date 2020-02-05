@@ -38,11 +38,22 @@ router.post('/notification/fcm', async ctx => {
   ctx.status = 202
 })
 
-
-router.get('/notification/:url', async ctx => {
+router.get('/notification/webhook/:url', async ctx => {
   const url = ctx.params.url
   ctx.type = 'application/json'
-  ctx.body = notifications.get(url)
+  ctx.body = webhooks.get(url)
+})
+
+router.get('/notification/slack/:url', async ctx => {
+  const url = ctx.params.url
+  ctx.type = 'application/json'
+  ctx.body = slacks.get(url)
+})
+
+router.get('/notification/fcm/:url', async ctx => {
+  const url = ctx.params.url
+  ctx.type = 'application/json'
+  ctx.body = firebases.get(url)
 })
 
 app.use(router.routes())
