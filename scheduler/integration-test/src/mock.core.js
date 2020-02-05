@@ -59,14 +59,19 @@ const PIPELINES = [
     },
     notifications: [
       {
-        notificationType: 'WEBHOOK',
+        type: 'SLACK',
         condition: 'data.field2 === 123',
         url: 'should-be-triggered'
       },
       {
-        notificationType: 'WEBHOOK',
+        type: 'WEBHOOK',
         condition: 'data.field2 < 0',
         url: 'should-also-be-triggered'
+      },
+      {
+        type: 'FCM',
+        condition: 'data.field2 === 123',
+        url: 'should-be-triggered'
       }
     ]
   }

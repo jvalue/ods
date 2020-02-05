@@ -74,33 +74,59 @@ describe('Scheduler', () => {
 
   test('Pipeline triggers correct notifications', async () => {
     await sleep(10000) // pipeline should have been exicuting until now!
-    const triggered = await request(MOCK_TRANSFORMATION_URL).get('/notification/should-also-be-triggered')
+    const triggered = await request(MOCK_TRANSFORMATION_URL).get('/notification/webhook/should-also-be-triggered')
     expect(triggered.status).toEqual(200)
     expect(triggered.body).toEqual(
       {
         pipelineId: 125,
         pipelineName: 'nordstream',
-        notificationType: 'WEBHOOK',
+        type: 'WEBHOOK',
         data,
         dataLocation: MOCK_STORAGE_URL + '/125',
         condition: 'data.field2 < 0',
         url: 'should-also-be-triggered'
       })
 
-    const alsoTriggered = await request(MOCK_TRANSFORMATION_URL).get('/notification/should-be-triggered')
+    const alsoTriggered = await request(MOCK_TRANSFORMATION_URL).get('/notification/slack/should-be-triggered')
     expect(alsoTriggered.status).toEqual(200)
     expect(alsoTriggered.type).toEqual('application/json')
     expect(alsoTriggered.body).toEqual(
       {
         pipelineId: 125,
         pipelineName: 'nordstream',
-        notificationType: 'WEBHOOK',
+        type: 'SLACK',
         data,
         condition: 'data.field2 === 123',
         dataLocation: MOCK_STORAGE_URL + '/125',
         url: 'should-be-triggered'
       })
-  }, 12000)
+    const alsoTriggered = await request(MOCK_TRANSFORMATION_URL).get('/notification/fcm/should-be-triggered')
+    expect(alsoTriggered.status).toEqual(200)
+    expect(alsoTriggered.type).toEqual('application/json')
+    expect(alsoTriggered.body).toEqual(
+      {
+        pipelineId: 125,
+        pipelineName: 'nordstream',
+        type: 'FCM',
+        data,
+        condition: 'data.field2 === 123',
+        dataLocation: MOCK_STORAGE_URL + '/125',
+        url: 'should-be-triggered'
+      })
+      const alsoTriggered = await request(MOCK_TRANSFORMATION_URL).get('/notification/webhook/should-be-triggered')
+      expect(alsoTriggered.status).toEqual(200)
+      expect(alsoTriggered.type).toEqual('application/json')
+      expect(alsoTriggered.body).toEqual(
+        {
+          pipelineId: 125,
+          pipelineName: 'nordstream',
+          type: 'WEBHOOK',
+          data,
+          condition: 'data.field2 === 123',
+          dataLocation: MOCK_STORAGE_URL + '/125',
+          url: 'should-be-triggered'
+        })
+    }, 12000)
 
   test('Pipeline processes events', async () => {
     await sleep(3000)
