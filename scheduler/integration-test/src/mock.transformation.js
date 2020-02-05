@@ -8,7 +8,9 @@ const PORT = process.env.MOCK_TRANSFORMATION_PORT || 8083
 const app = new Koa()
 app.use(bodyParser())
 
-const notifications = new Map()
+const webhooks = new Map()
+const slacks = new Map()
+const firebases = new Map()
 
 router.get('/', async ctx => {
   ctx.type = 'text/plain'
@@ -21,10 +23,21 @@ router.post('/job', async ctx => {
   ctx.body.data.test = 'abc'
 })
 
-router.post('/notification', async ctx => {
-  notifications.set(ctx.request.body.url, ctx.request.body)
+router.post('/notification/webhook', async ctx => {
+  webhooks.set(ctx.request.body.pipelineName, ctx.request.body)
   ctx.status = 202
 })
+
+router.post('/notification/slack', async ctx => {
+  slacks.set(ctx.request.body.pipelineName, ctx.request.body)
+  ctx.status = 202
+})
+
+router.post('/notification/fcm', async ctx => {
+  firebases.set(ctx.request.body.pipelineName, ctx.request.body)
+  ctx.status = 202
+})
+
 
 router.get('/notification/:url', async ctx => {
   const url = ctx.params.url
