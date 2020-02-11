@@ -2,6 +2,8 @@ package org.jvalue.ods.coreservice.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jvalue.ods.coreservice.model.adapter.AdapterConfig;
+import org.jvalue.ods.coreservice.model.notification.NotificationConfig;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;

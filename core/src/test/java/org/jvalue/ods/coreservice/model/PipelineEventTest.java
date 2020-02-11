@@ -3,6 +3,8 @@ package org.jvalue.ods.coreservice.model;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
+import org.jvalue.ods.coreservice.model.event.EventType;
+import org.jvalue.ods.coreservice.model.event.PipelineEvent;
 
 import static org.junit.Assert.assertEquals;
 
