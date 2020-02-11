@@ -32,7 +32,6 @@ TBD
 | *base_url*/ | GET | - | text | Get health status |
 | *base_url*/version | GET | - | text | Get service version |
 | *base_url*/job | POST | transformationRequest | jobResult | Trigger execution |
-|  *base_url*/notification | POST | notificationRequest_v1 | - | Trigger notification (deprecated)|
 | *base_url*/notification/webhook | POST | webhookRequest | - | Trigger webhook |
 | *base_url*/notification/slack | POST | slackRequest | - | Trigger slack notification |
 | *base_url*/notification/fcm | POST | firebaseRequest | - | Trigger firebase notification |

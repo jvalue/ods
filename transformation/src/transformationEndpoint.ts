@@ -38,7 +38,6 @@ export class TransformationEndpoint {
     this.app.get('/', this.getHealthCheck)
     this.app.get('/version', this.getVersion)
     this.app.post('/job', this.determineAuth(), this.postJob)
-    this.app.post('/notification', this.determineAuth(), this.postNotification)
     this.app.post('/notification/webhook', this.determineAuth(), this.postWebhook)
     this.app.post('/notification/slack', this.determineAuth(), this.postSlack)
     this.app.post('/notification/fcm', this.determineAuth(), this.postFirebase)
@@ -114,25 +113,6 @@ export class TransformationEndpoint {
     res.status(200).send()
   }
 
-  postNotification = async (req: Request, res: Response): Promise<void> => {
-    const notification: NotificationRequest_v1 = req.body
-    if (!this.isValidNotificationRequestv1(notification)) {
-      res.status(400).send('Malformed request body: Valid data object, condition string and notificationType required.')
-    }
-
-    try {
-      await this.transformationService.handleNotificationv1(notification)
-    } catch (e) {
-      if (e instanceof Error) {
-        console.log(`Notification handling failed. Nested cause is: ${e.name}: ${e.message}`)
-        res.status(500).send(`Notification handling failed. Nested cause is: ${e.name}: ${e.message}`)
-      } else {
-        res.status(500).send()
-      }
-    }
-    res.status(200).send()
-  }
-
   determineAuth = (): express.RequestHandler | [] => {
     if (this.keycloak !== undefined) {
       return this.keycloak.protect()
@@ -158,11 +138,5 @@ export class TransformationEndpoint {
 
   private static isValidNotificationRequest (obj: NotificationRequest): boolean {
     return !!obj.data && !!obj.pipelineName && !!obj.pipelineId && !!obj.condition && !!obj.dataLocation
-  }
-
-  private isValidNotificationRequestv1 (obj: any): obj is NotificationRequest_v1 {
-    return typeof obj.data !== 'undefined' &&
-    typeof obj.condition === 'string' &&
-    typeof obj.params.type === 'string'
   }
 }
