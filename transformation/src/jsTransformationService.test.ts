@@ -1,7 +1,6 @@
 /* eslint-env jest */
 import axios from 'axios'
 
-import { NotificationRequest_v1, WebhookParams, SlackParams } from './interfaces/notificationRequest_v1'
 import TransformationService from './interfaces/transformationService'
 
 import JSTransformationService from './jsTransformationService'
