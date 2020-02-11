@@ -28,6 +28,7 @@ public abstract class NotificationConfig {
   private Long notificationId;
 
   @NotNull
+  @Column(length = 10000)
   private String condition;
 
   private NotificationType type;
