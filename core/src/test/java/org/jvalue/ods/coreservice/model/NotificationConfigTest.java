@@ -19,10 +19,9 @@ public class NotificationConfigTest {
   public void testWebhookDeserialization() throws IOException {
     final String configString = "{ " +
       "\"condition\":\"ifthisthenthat\"," +
-      "\"params\":{" +
-        "\"type\":\"WEBHOOK\"," +
-        "\"url\":\"URRRRRL\"" +
-      "}}";
+      "\"type\":\"WEBHOOK\"," +
+      "\"url\":\"URRRRRL\"" +
+      "}";
 
     NotificationConfig result = mapper.readValue(configString, NotificationConfig.class);
 
@@ -35,11 +34,10 @@ public class NotificationConfigTest {
   public void testSlackDeserialization() throws IOException {
     final String configString = "{ " +
       "\"condition\":\"ifthenelse\"," +
-      "\"params\":{" +
-        "\"type\":\"SLACK\"," +
-        "\"workspaceId\":\"12\"," +
+      "\"type\":\"SLACK\"," +
+      "\"workspaceId\":\"12\"," +
       "\"channelId\":\"34\"," +
-      "\"secret\":\"56\"}}";
+      "\"secret\":\"56\"}";
 
     NotificationConfig result = mapper.readValue(configString, NotificationConfig.class);
     assertEquals("ifthenelse", result.getCondition());
@@ -73,10 +71,9 @@ public class NotificationConfigTest {
   public void testDeserializationOfInvalidType() throws IOException {
     final String configString = "{ " +
       "\"condition\":\"ifthisthenthat\"," +
-      "\"params\":{" +
       "\"type\":\"lol\"," +
       "\"url\":\"URRRRRL\"" +
-      "}}";
+      "}";
     mapper.readValue(configString, NotificationConfig.class);
   }
 
@@ -106,12 +103,11 @@ public class NotificationConfigTest {
   public void testDeserializationWrongType() throws IOException {
     final String configString = "{ " +
       "\"condition\":\"ifthenelse\"," +
-      "\"params\":{" +
       "\"type\":\"SLACK\"," +
       "\"projectId\":\"12\"," +
       "\"clientEmail\":\"fire@base.com\"," +
       "\"privateKey\":\"1234\"," +
-      "\"topic\":\"weather\"}}";
+      "\"topic\":\"weather\"}";
     mapper.readValue(configString, NotificationConfig.class);
   }
 
@@ -122,11 +118,10 @@ public class NotificationConfigTest {
     JsonNode result = mapper.valueToTree(notification);
 
     System.out.println(result);
-    assertEquals(3, result.size());
+    assertEquals(4, result.size());
     assertEquals("1>2", result.get("condition").asText());
     assertTrue(result.has("notificationId")); // is always <null> in testing because it is set by the JPA
-    assertEquals(2, result.get("params").size());
-    assertEquals("URRL", result.get("params").get("url").asText());
-    assertEquals("WEBHOOK", result.get("params").get("type").asText());
+    assertEquals("URRL", result.get("url").asText());
+    assertEquals("WEBHOOK", result.get("type").asText());
   }
 }
