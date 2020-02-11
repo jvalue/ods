@@ -49,6 +49,7 @@
           </v-stepper-step>
           <v-stepper-content step="2">
             <pipeline-adapter-config
+              v-bind:isEditMode = "isEditMode"
               v-model="dialogPipeline.adapter"
               @validityChanged="validStep2 = $event"
             />
