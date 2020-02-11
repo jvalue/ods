@@ -9,7 +9,8 @@ import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 @Entity
-@DiscriminatorColumn(name = "type")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "Notification_Type")
 @JsonTypeInfo(
   use = JsonTypeInfo.Id.NAME,
   include = JsonTypeInfo.As.PROPERTY,
