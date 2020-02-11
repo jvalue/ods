@@ -39,20 +39,16 @@ Content-Type: application/json
   "notifications": [
     {
       "condition": "data.test === 'abc'",
-      "params": {
-        "type": "WEBHOOK",
-        "url": "http://www.mocky.io/v2/5dc94f7a2f0000680073eb96"
-      }
+      "type": "WEBHOOK",
+      "url": "http://www.mocky.io/v2/5dc94f7a2f0000680073eb96"
     },
     {
       "condition": "typeof data.test === 'string'",
-      "params": {
-        "type": "FCM",
-        "projectId": "{{fcmProjectId}}",
-        "clientEmail": "{{fcmClientEmail}}",
-        "privateKey": "{{fcmKey}}",
-        "topic": "{{fcmTopic}}"
-      }
+      "type": "FCM",
+      "projectId": "{{fcmProjectId}}",
+      "clientEmail": "{{fcmClientEmail}}",
+      "privateKey": "{{fcmKey}}",
+      "topic": "{{fcmTopic}}"
     }
   ]
 }
