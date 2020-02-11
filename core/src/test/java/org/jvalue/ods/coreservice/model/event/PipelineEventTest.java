@@ -1,4 +1,4 @@
-package org.jvalue.ods.coreservice.model;
+package org.jvalue.ods.coreservice.model.event;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -59,33 +59,6 @@ public abstract class NotificationConfig {
     return type;
   }
 
-  public WebhookNotification asWebhook() {
-    if(this instanceof WebhookNotification) {
-      return (WebhookNotification) this;
-    } else {
-      throw new IllegalArgumentException("Wrong runtime class for NotificationConfig. " +
-        "Expected WebhookNotification.class, but was " + this.getClass().getCanonicalName());
-    }
-  }
-
-  public SlackNotification asSlack() {
-    if(this instanceof SlackNotification) {
-      return (SlackNotification) this;
-    } else {
-      throw new IllegalArgumentException("Wrong runtime class for NotificationConfig. " +
-        "Expected SlackNotification.class, but was " + this.getClass().getCanonicalName());
-    }
-  }
-
-  public FirebaseNotification asFirebase() {
-    if(this instanceof FirebaseNotification) {
-      return (FirebaseNotification) this;
-    } else {
-      throw new IllegalArgumentException("Wrong runtime class for NotificationConfig. " +
-        "Expected FirebaseNotification.class, but was " + this.getClass().getCanonicalName());
-    }
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
