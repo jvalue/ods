@@ -7,6 +7,7 @@ import org.jvalue.ods.coreservice.model.*;
 import org.jvalue.ods.coreservice.model.event.EventType;
 import org.jvalue.ods.coreservice.model.event.PipelineEvent;
 import org.jvalue.ods.coreservice.model.notification.NotificationConfig;
+import org.jvalue.ods.coreservice.model.notification.WebhookNotification;
 import org.jvalue.ods.coreservice.repository.EventRepository;
 import org.jvalue.ods.coreservice.repository.PipelineRepository;
 import org.mockito.InjectMocks;
@@ -136,7 +137,7 @@ public class PipelineManagerTest {
 
         when(pipelineRepository.findById(21L)).thenReturn(Optional.of(pipelineConfig));
 
-        NotificationConfig notificationConfig = new NotificationConfig("data.value2 === 1", new NotificationConfig.WebhookParams("http://www.hook.org"));
+        NotificationConfig notificationConfig = new WebhookNotification("data.value2 === 1", "http://www.hook.org");
 
         when(pipelineRepository.save(pipelineConfig)).thenReturn(pipelineConfig);
 
@@ -146,7 +147,7 @@ public class PipelineManagerTest {
 
         assertEquals(2, result.getNotifications().size());
         assertEquals("data.value2 === 1", result.getNotifications().get(1).getCondition());
-        assertEquals("http://www.hook.org", result.getNotifications().get(1).getParams().asWebhook().getUrl());
+        assertEquals("http://www.hook.org", result.getNotifications().get(1).asWebhook().getUrl());
         verify(eventRepository).save(argThat(event -> event.getEventType().equals("PIPELINE_UPDATE")));
     }
 
