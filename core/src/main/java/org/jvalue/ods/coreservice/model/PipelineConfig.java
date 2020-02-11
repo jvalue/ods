@@ -35,7 +35,7 @@ public class PipelineConfig implements Serializable {
     private List<NotificationConfig> notifications;
 
     //Constructor for JPA
-    private PipelineConfig() {}
+    public PipelineConfig() {}
 
     @JsonCreator
     public PipelineConfig(
