@@ -48,7 +48,7 @@ public class PipelineConfigTest {
     assertEquals(1, result.getNotifications().size());
     assertNotNull(result.getNotifications().get(0));
     assertEquals("data.value1 > 10", result.getNotifications().get(0).getCondition());
-    assertEquals("http://www.webhookland.com", result.getNotifications().get(0).asWebhook().getUrl());
+    assertEquals("http://www.webhookland.com", ((WebhookNotification) result.getNotifications().get(0)).getUrl());
   }
 
   @Test

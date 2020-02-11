@@ -147,7 +147,7 @@ public class PipelineManagerTest {
 
         assertEquals(2, result.getNotifications().size());
         assertEquals("data.value2 === 1", result.getNotifications().get(1).getCondition());
-        assertEquals("http://www.hook.org", result.getNotifications().get(1).asWebhook().getUrl());
+        assertEquals("http://www.hook.org", ((WebhookNotification) result.getNotifications().get(1)).getUrl());
         verify(eventRepository).save(argThat(event -> event.getEventType().equals("PIPELINE_UPDATE")));
     }
 

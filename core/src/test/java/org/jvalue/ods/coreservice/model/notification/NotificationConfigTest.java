@@ -1,4 +1,4 @@
-package org.jvalue.ods.coreservice.model;
+package org.jvalue.ods.coreservice.model.notification;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
