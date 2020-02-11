@@ -51,8 +51,8 @@
         <template v-slot:item.notificationId="{ item }">
           {{ item.notificationId }}
         </template>
-        <template v-slot:item.params.type="{ item }">
-          {{ item.params.type }}
+        <template v-slot:item.type="{ item }">
+          {{ item.type }}
         </template>
         <template v-slot:item.condition="{ item }">
           {{ item.condition }}
@@ -128,7 +128,7 @@ export default class PipelineNotifications extends Vue {
 
   private headers = [
     { text: 'Id', value: 'notificationId' },
-    { text: 'Type', value: 'params.type' },
+    { text: 'Type', value: 'type' },
     { text: 'Condition', value: 'condition' },
     { text: 'Actions', value: 'action' }
   ]
