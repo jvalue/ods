@@ -5,10 +5,9 @@ import cors from 'cors'
 import Keycloak from 'keycloak-connect'
 import TransformationService from './interfaces/transformationService'
 import TransformationRequest from './interfaces/transformationRequest'
-import { NotificationRequest_v1 } from './interfaces/notificationRequest_v1'
 import { Server } from 'http'
 import JobResult from './interfaces/jobResult'
-import {Firebase, NotificationRequest, Slack, Webhook} from '@/interfaces/notificationRequest'
+import { Firebase, NotificationRequest, Slack, Webhook } from '@/interfaces/notificationRequest'
 
 export class TransformationEndpoint {
   port: number
