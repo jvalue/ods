@@ -213,9 +213,9 @@ describe("Core", () => {
     //check if notification post worked
     expect(notificationCreationResponse.status).toEqual(200);
     expect(notificationCreationResponse.type).toEqual('application/json');
-    expect(notificationCreationResponse.body.params.type).toEqual("WEBHOOK");
+    expect(notificationCreationResponse.body.type).toEqual("WEBHOOK");
     expect(notificationCreationResponse.body.condition).toEqual("data.value1 === 5");
-    expect(notificationCreationResponse.body.params.url).toEqual("www.some-url.net");
+    expect(notificationCreationResponse.body.url).toEqual("www.some-url.net");
 
     //check if update event worked
     const eventsResponse = await request(URL)
