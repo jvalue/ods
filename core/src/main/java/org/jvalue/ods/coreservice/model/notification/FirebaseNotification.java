@@ -2,6 +2,7 @@ package org.jvalue.ods.coreservice.model.notification;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;
@@ -13,6 +14,7 @@ public class FirebaseNotification extends NotificationConfig {
 
   @NotNull private String projectId;
   @NotNull private String clientEmail;
+  @Column(length = 2000)
   @NotNull private String privateKey;
   @NotNull private String topic;
 
