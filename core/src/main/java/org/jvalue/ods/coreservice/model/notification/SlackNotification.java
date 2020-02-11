@@ -2,11 +2,13 @@ package org.jvalue.ods.coreservice.model.notification;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 @Entity
+@DiscriminatorValue("Slack")
 public class SlackNotification extends NotificationConfig {
 
   @NotNull private String workspaceId;
