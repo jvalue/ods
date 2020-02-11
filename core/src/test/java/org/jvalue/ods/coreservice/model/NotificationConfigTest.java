@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import org.junit.Test;
+import org.jvalue.ods.coreservice.model.notification.NotificationConfig;
 
 import java.io.IOException;
 

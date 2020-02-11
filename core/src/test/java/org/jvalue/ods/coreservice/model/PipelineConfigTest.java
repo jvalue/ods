@@ -3,6 +3,10 @@ package org.jvalue.ods.coreservice.model;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
+import org.jvalue.ods.coreservice.model.adapter.AdapterConfig;
+import org.jvalue.ods.coreservice.model.adapter.AdapterFormatConfig;
+import org.jvalue.ods.coreservice.model.adapter.AdapterProtocolConfig;
+import org.jvalue.ods.coreservice.model.notification.NotificationConfig;
 import org.springframework.format.datetime.DateFormatter;
 
 import java.io.File;
