@@ -25,7 +25,7 @@
             md="4"
           >
             <v-select
-              v-model="editedNotification.params.type"
+              v-model="editedNotification.type"
               :items="notificationTypes"
               label="Type"
             />
@@ -36,20 +36,20 @@
             md="4"
           >
             <webhook-edit
-              v-if="editedNotification.params.type === 'WEBHOOK'"
-              v-model="editedNotification.params"
+              v-if="editedNotification.type === 'WEBHOOK'"
+              v-model="editedNotification"
               @validityChanged="validForm = $event"
               style="flex: 1 1 auto"
             />
             <firebase-edit
-              v-if="editedNotification.params.type === 'FCM'"
-              v-model="editedNotification.params"
+              v-if="editedNotification.type === 'FCM'"
+              v-model="editedNotification"
               @validityChanged="validForm = $event"
               style="flex: 1 1 auto"
             />
             <slack-edit
-              v-if="editedNotification.params.type === 'SLACK'"
-              v-model="editedNotification.params"
+              v-if="editedNotification.type === 'SLACK'"
+              v-model="editedNotification"
               @validityChanged="validForm = $event"
               style="flex: 1 1 auto"
             />
@@ -81,7 +81,7 @@
 <script lang="ts">
 import Component from 'vue-class-component'
 import Vue from 'vue'
-import NotificationConfig from '@/pipeline/notifications/notificationConfig'
+import NotificationConfig, {WebhookNotification} from '@/pipeline/notifications/notificationConfig'
 import NotificationEditDialog from '@/pipeline/notifications/notificationEditDialog'
 import { Emit } from 'vue-property-decorator'
 import WebhookEdit from '@/pipeline/notifications/WebhookEdit.vue'
@@ -101,13 +101,11 @@ export default class PipelineNotifications extends Vue implements NotificationEd
   private notificationTypes = ['WEBHOOK', 'FCM', 'SLACK']
   private dialogOpen = false
 
-  private defaultNotification: NotificationConfig = {
+  private defaultNotification: WebhookNotification = {
     notificationId: -1,
     condition: 'true',
-    params: {
-      type: 'WEBHOOK',
-      url: ''
-    }
+    url: '',
+    type: "WEBHOOK"
   }
 
   private editedNotification: NotificationConfig = Object.assign({}, this.defaultNotification)
