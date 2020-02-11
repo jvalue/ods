@@ -75,7 +75,7 @@ public class PipelineConfigTest {
     assertEquals("return 1+1", result.get("transformations").get(0).get("func").textValue());
     assertEquals("[2]", result.get("transformations").get(1).get("data").textValue());
     assertEquals(2, result.get("notifications").size());
-    assertEquals(3, result.get("notifications").get(0).size());
+    assertEquals(4, result.get("notifications").get(0).size());
     assertEquals("data.value1 > 10", result.get("notifications").get(0).get("condition").textValue());
     assertEquals("WEBHOOK", result.get("notifications").get(0).get("type").textValue());
     assertEquals("http://www.webhookland.com/2", result.get("notifications").get(1).get("url").textValue());
