@@ -47,7 +47,3 @@ dependencies {
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
-
-processResources {
-	expand(project.properties)
-}
