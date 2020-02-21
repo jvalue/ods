@@ -41,7 +41,8 @@ test {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+  implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+  implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
