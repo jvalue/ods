@@ -21,4 +21,8 @@ public class DataBlob {
   public Long getId() {
     return id;
   }
+
+  public Object getData() {
+    return data;
+  }
 }
