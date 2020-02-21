@@ -19,12 +19,12 @@ public class Adapter {
 
     private final Interpreter interpreter;
 
-    private final DataBlobRepository blobRepository;
+    @Autowired
+    private DataBlobRepository blobRepository;
 
-    public Adapter(Importer importer, Interpreter interpreter, @Autowired DataBlobRepository blobRepository) {
+    public Adapter(Importer importer, Interpreter interpreter) {
         this.importer = importer;
         this.interpreter = interpreter;
-        this.blobRepository = blobRepository;
     }
 
 
