@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-deployment
+  namespace: {{NAMESPACE}}
+  labels:
+    app: ods
+    service: auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ods
+      service: auth
+  template:
+    metadata:
+      labels:
+        app: ods
+        service: auth
+    spec:
+      imagePullSecrets:
+      - name: ods-registry-secret
+      containers:
+      - env:
+        - name: DB_VENDOR
+          value: "POSTGRES"
+        - name: DB_ADDR
+          value: "auth-db-service"
+        - name: DB_DATABASE
+          value: "keycloak"
+        - name: DB_USER
+          value: "keycloak"
+        - name: DB_PASSWORD
+          value: "password"
+        - name: KEYCLOAK_USER
+          value: "admin"
+        - name: KEYCLOAK_PASSWORD
+          value: "Pa55w0rd"
+        - name: KEYCLOAK_LOGLEVEL
+          value: "INFO"
+        image: registry.gitlab.com/profoss/open-data-service/ods-main/auth:{{IMAGE_TAG}}
+        imagePullPolicy: Always
+        name: auth
+        resources: {}
+        ports:
+        - containerPort: 8080
+      restartPolicy: Always
+status: {}

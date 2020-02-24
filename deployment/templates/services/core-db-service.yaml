@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: core-db-service
+  namespace: {{NAMESPACE}}
+  labels:
+    app: ods
+spec:
+  selector:
+    service: core-db
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+status:
+  loadBalancer: {}
+
