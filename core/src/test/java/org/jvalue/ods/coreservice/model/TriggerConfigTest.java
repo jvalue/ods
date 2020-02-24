@@ -3,11 +3,9 @@ package org.jvalue.ods.coreservice.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.datetime.DateFormatter;
 
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
 

@@ -1,13 +1,13 @@
 /* eslint-env jest */
 import axios from 'axios'
 
-import { NotificationRequest, WebhookParams, SlackParams } from './interfaces/notificationRequest'
 import TransformationService from './interfaces/transformationService'
 
 import JSTransformationService from './jsTransformationService'
 import VM2SandboxExecutor from './vm2SandboxExecutor'
 import SandboxExecutor from './interfaces/sandboxExecutor'
 import SlackCallback from './interfaces/slackCallback'
+import { Webhook, Slack } from './interfaces/notificationRequest'
 
 jest.mock('axios')
 
@@ -66,7 +66,6 @@ describe('JSTransformationService', () => {
       value1: 5
     }
 
-
     const post = axios.post as jest.Mock
 
     let transformationService: TransformationService
@@ -82,37 +81,33 @@ describe('JSTransformationService', () => {
     it('should trigger notification when condition is met', async () => {
       post.mockReturnValue(Promise.resolve())
 
-      const notificationRequest: NotificationRequest = {
+      const notificationRequest: Webhook = {
         pipelineName: 'nordstream',
         pipelineId: 1,
         dataLocation: 'data',
         data: data,
         condition: 'data.value1 > 0',
-        params: {
-          type: 'WEBHOOK',
-          url: 'callback'
-        }
+        type: 'WEBHOOK',
+        url: 'callback'
       }
 
       await transformationService.handleNotification(notificationRequest)
 
       expect(post).toHaveBeenCalledTimes(1)
       // check arguments for axios post
-      expect(post.mock.calls[0][0]).toEqual((notificationRequest.params as WebhookParams).url)
+      expect(post.mock.calls[0][0]).toEqual(notificationRequest.url)
       expect(post.mock.calls[0][1].location).toEqual(notificationRequest.dataLocation)
     })
 
     test('Notification does not trigger when condition is not met', async () => {
-      const notificationRequest: NotificationRequest = {
+      const notificationRequest: Webhook = {
         pipelineName: 'southstream',
         pipelineId: 2,
         dataLocation: 'data',
         data: data,
         condition: 'data.value1 < 0',
-        params: {
-          type: 'WEBHOOK',
-          url: 'callback'
-        }
+        type: 'WEBHOOK',
+        url: 'callback'
       }
 
       await transformationService.handleNotification(notificationRequest)
@@ -121,16 +116,14 @@ describe('JSTransformationService', () => {
     })
 
     test('Notification does not trigger when condition is malformed', async () => {
-      const notificationRequest: NotificationRequest = {
+      const notificationRequest: Webhook = {
         pipelineName: 'weststream',
         pipelineId: 3,
         dataLocation: 'data',
         data: data,
         condition: 'asdfa;',
-        params: {
-          type: 'WEBHOOK',
-          url: 'callback'
-        }
+        type: 'WEBHOOK',
+        url: 'callback'
       }
 
       await transformationService.handleNotification(notificationRequest)
@@ -139,18 +132,16 @@ describe('JSTransformationService', () => {
     })
 
     test('SLACK request', async () => {
-      const request: NotificationRequest = {
+      const request: Slack = {
         condition: 'data.value1 > 0',
         data,
         dataLocation: 'data',
         pipelineId: 42,
         pipelineName: 'AnswerToEverything-Pipeline',
-        params: {
-          type: 'SLACK',
-          workspaceId: '012',
-          channelId: '123',
-          secret: '42'
-        }
+        type: 'SLACK',
+        workspaceId: '012',
+        channelId: '123',
+        secret: '42'
       }
       await transformationService.handleNotification(request)
 
@@ -158,8 +149,7 @@ describe('JSTransformationService', () => {
         text: `Pipeline ${request.pipelineName}(${request.pipelineId}) has new data available. Fetch at ${request.dataLocation}.`
       }
       expect(post).toHaveBeenCalledTimes(1)
-      const slackParams = request.params as SlackParams
-      const expectedUrl = `https://hooks.slack.com/services/${slackParams.workspaceId}/${slackParams.channelId}/${slackParams.secret}`
+      const expectedUrl = `https://hooks.slack.com/services/${request.workspaceId}/${request.channelId}/${request.secret}`
       expect(post.mock.calls[0][0]).toEqual(expectedUrl)
       expect(post.mock.calls[0][1]).toEqual(expectedObject)
     })

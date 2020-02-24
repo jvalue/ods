@@ -1,6 +1,6 @@
 package org.jvalue.ods.coreservice.rest.v1;
 
-import org.jvalue.ods.coreservice.model.NotificationConfig;
+import org.jvalue.ods.coreservice.model.notification.NotificationConfig;
 import org.jvalue.ods.coreservice.model.PipelineConfig;
 import org.jvalue.ods.coreservice.pipeline.PipelineManager;
 import org.springframework.beans.factory.annotation.Autowired;

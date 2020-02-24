@@ -4,13 +4,13 @@ import * as firebase from 'firebase-admin'
 import ExecutionResult from './interfaces/executionResult'
 import JobResult from './interfaces/jobResult'
 import Stats from './interfaces/stats'
-import { NotificationRequest, FirebaseParams, SlackParams, WebhookParams } from './interfaces/notificationRequest'
 
 import TransformationService from './interfaces/transformationService'
 import SandboxExecutor from './interfaces/sandboxExecutor'
 import SlackCallback from './interfaces/slackCallback'
 import FcmCallback from './interfaces/fcmCallback'
 import WebhookCallback from './interfaces/webhookCallback'
+import { Firebase, NotificationRequest, Slack, Webhook } from '@/interfaces/notificationRequest'
 import App = firebase.app.App;
 
 const VERSION = '0.0.2'
@@ -61,43 +61,42 @@ export default class JSTransformationService implements TransformationService {
     return jobResult
   }
 
-  async handleNotification (notificationRequest: NotificationRequest): Promise<void> {
-    console.log(`NotificationRequest received for pipeline: ${notificationRequest.pipelineId}:
-    ${JSON.stringify(notificationRequest.params)}.`)
-    const conditionHolds = this.executor.evaluate(notificationRequest.condition, notificationRequest.data)
+  async handleNotification (notification: NotificationRequest): Promise<void> {
+    console.log(`NotificationRequest received for pipeline: ${notification.pipelineId}.`)
+    const conditionHolds = this.executor.evaluate(notification.condition, notification.data)
     console.log('Condition is ' + conditionHolds)
     if (!conditionHolds) { // no need to trigger notification
       return Promise.resolve()
     }
 
-    const message = `Pipeline ${notificationRequest.pipelineName}(${notificationRequest.pipelineId}) ` +
-    `has new data available. Fetch at ${notificationRequest.dataLocation}.`
+    const message = `Pipeline ${notification.pipelineName}(${notification.pipelineId}) ` +
+      `has new data available. Fetch at ${notification.dataLocation}.`
 
-    switch (notificationRequest.params.type) {
+    switch (notification.type) {
       case 'WEBHOOK':
-        await this.handleWebhook(notificationRequest.params, notificationRequest.dataLocation)
+        await this.handleWebhook(notification as Webhook)
         break
       case 'FCM':
-        await this.handleFCM(notificationRequest.params, message)
+        await this.handleFCM(notification as Firebase, message)
         break
       case 'SLACK':
-        await this.handleSlack(notificationRequest.params, message)
+        await this.handleSlack(notification as Slack, message)
         break
       default:
         throw new Error('Notification type not implemented.')
     }
   }
 
-  private async handleWebhook (params: WebhookParams, location: string): Promise<void> {
+  private async handleWebhook (webhook: Webhook): Promise<void> {
     const callbackObject: WebhookCallback = {
-      location,
+      location: webhook.dataLocation,
       timestamp: new Date(Date.now())
     }
-    console.log(`Posting webhook to ${params.url}, callback object: ${JSON.stringify(callbackObject)}.`)
-    await axios.post(params.url, callbackObject)
+    console.log(`Posting webhook to ${webhook.url}, callback object: ${JSON.stringify(callbackObject)}.`)
+    await axios.post(webhook.url, callbackObject)
   }
 
-  private async handleSlack (params: SlackParams, message: string): Promise<void> {
+  private async handleSlack (slack: Slack, message: string): Promise<void> {
     let slackBaseUri = 'https://hooks.slack.com/services'
     if (process.env.MOCK_RECEIVER_HOST && process.env.MOCK_RECEIVER_PORT) {
       slackBaseUri = `http://${process.env.MOCK_RECEIVER_HOST}:${process.env.MOCK_RECEIVER_PORT}/slack`
@@ -105,25 +104,25 @@ export default class JSTransformationService implements TransformationService {
     const callbackObject: SlackCallback = {
       text: message
     }
-    const url = `${slackBaseUri}/${params.workspaceId}/${params.channelId}/${params.secret}`
+    const url = `${slackBaseUri}/${slack.workspaceId}/${slack.channelId}/${slack.secret}`
     console.log(`Posting slack notification to ${url}, callbackObject: ${JSON.stringify(callbackObject)}`)
     await axios.post(url, callbackObject)
   }
 
-  private async handleFCM (params: FirebaseParams, message: string): Promise<void> {
+  private async handleFCM (firebaseRequest: Firebase, message: string): Promise<void> {
     let app: App
     try {
-      app = firebase.app(params.clientEmail)
+      app = firebase.app(firebaseRequest.clientEmail)
     } catch (e) { // app does not exist yet
       app = firebase.initializeApp({
         credential: firebase.credential.cert({
-          projectId: params.projectId,
-          clientEmail: params.clientEmail,
-          privateKey: params.privateKey.replace(/\\n/g, '\n')
+          projectId: firebaseRequest.projectId,
+          clientEmail: firebaseRequest.clientEmail,
+          privateKey: firebaseRequest.privateKey.replace(/\\n/g, '\n')
         }),
-        databaseURL: `https://${params.projectId}.firebaseio.com`
+        databaseURL: `https://${firebaseRequest.projectId}.firebaseio.com`
       },
-      params.clientEmail)
+      firebaseRequest.clientEmail)
     }
     const firebaseMessage: FcmCallback = {
       notification: {
@@ -133,7 +132,7 @@ export default class JSTransformationService implements TransformationService {
       data: {
         textfield: 'textvalue'
       },
-      topic: params.topic
+      topic: firebaseRequest.topic
     }
     console.log(`Sending firebase message, callback object: ${JSON.stringify(firebaseMessage)}.`)
     const firebaseResponse = await firebase.messaging(app).send(firebaseMessage)

@@ -42,6 +42,7 @@ Note that you need to delete existing docker images from your local docker daemo
   "id": number,
   "adapter": AdapterConfig,
   "transformations": [*TransformationConfig],
+  "notifications": [*NotificationConfig]
   "trigger":TriggerConfig,
   "metadata":PipelineMetadata
 }
@@ -92,15 +93,13 @@ Note that you need to delete existing docker images from your local docker daemo
 
 ### NotificationConfig
 ```
-{
-  "condition":String (Javascript boolean expression),
-  "params": WebhookParams || SlackParams || FirebaseParams
-}
+WebhookNotification | SlackNotification | FirebaseNotification
 ```
 
 ### WebhookParams
 ```
 {
+  "condition": String,
   "type": "WEBHOOK",
   "url": String (the url of the webhook you want to be triggered)
 }
@@ -109,6 +108,7 @@ Note that you need to delete existing docker images from your local docker daemo
 ### SlackParams
 ```
 {
+  "condition": String,
   "type": "SLACK",
   "workspaceId": String (id of your slack workspace),
   "channelId": String (id of the channel where the notification is to be posted),
@@ -119,6 +119,7 @@ Note that you need to delete existing docker images from your local docker daemo
 ### FirebaseParams
 ```
 {
+  "condition": String,
   "type": "FCM",
   "projectId": String (id of your firebase project),
   "clientEmail": String (email of the firebase service account),
