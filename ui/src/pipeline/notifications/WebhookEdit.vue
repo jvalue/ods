@@ -3,7 +3,7 @@
     v-model="validForm"
   >
     <v-text-field
-      v-model="webhookParams.url"
+      v-model="webhookNotification.url"
       label="URL to trigger the Webhook at"
       :rules="[ validURL ]"
       @keyup="formChanged"
@@ -15,18 +15,18 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Emit, PropSync } from 'vue-property-decorator'
-import { WebhookParams } from '@/pipeline/notifications/notificationConfig'
+import { WebhookNotification } from '@/pipeline/notifications/notificationConfig'
 
 @Component({ })
 export default class WebhookEdit extends Vue {
   private validForm = false
 
   @PropSync('value')
-  private webhookParams!: WebhookParams
+  private webhookNotification!: WebhookNotification
 
   @Emit('value')
   emitValue () {
-    return this.webhookParams
+    return this.webhookNotification
   }
 
   @Emit('validityChanged')

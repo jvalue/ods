@@ -143,22 +143,22 @@ describe('Scheduler', () => {
     expect(stats.endTimestamp).toBeGreaterThanOrEqual(stats.startTimestamp)
   })
 
-  test('POST /notification triggers webhook', async () => {
+  test('POST /notification/webhook triggers webhook', async () => {
     const dataLocation = 'storage/1234'
     const notificationJob = {
+      pipelineName: 'webhookpipeline',
+      pipelineId: 1,
       dataLocation: dataLocation,
       data: {
         value1: 1
       },
       condition: 'data.value1 > 0',
-      params: {
-        type: 'WEBHOOK',
-        url: MOCK_RECEIVER_URL + '/webhook1'
-      }
+      type: 'WEBHOOK',
+      url: MOCK_RECEIVER_URL + '/webhook1'
     }
 
     const transformationResponse = await request(URL)
-      .post('/notification')
+      .post('/notification/webhook')
       .send(notificationJob)
 
     expect(transformationResponse.status).toEqual(200)
@@ -171,21 +171,21 @@ describe('Scheduler', () => {
     expect(receiverResponse.body.location).toEqual(dataLocation)
   })
 
-  test('POST /notification does not trigger webhook when condition is false', async () => {
+  test('POST /notification/webhook does not trigger webhook when condition is false', async () => {
     const notificationJob = {
+      pipelineName: 'do not trigger',
+      pipelineId: 2,
       dataLocation: 'storage/1234',
       data: {
         value1: 1
       },
       condition: 'data.value1 < 0',
-      params: {
-        url: MOCK_RECEIVER_URL + '/webhook2',
-        type: 'WEBHOOK'
-      }
+      url: MOCK_RECEIVER_URL + '/webhook2',
+      type: 'WEBHOOK'
     }
 
     const transformationResponse = await request(URL)
-      .post('/notification')
+      .post('/notification/webhook')
       .send(notificationJob)
 
     expect(transformationResponse.status).toEqual(200)
@@ -197,7 +197,7 @@ describe('Scheduler', () => {
     expect(receiverResponse.status).toEqual(404)
   })
 
-  test('POST /notification triggers slack notification', async () => {
+  test('POST /notification/slack triggers slack notification', async () => {
     const dataLocation = 'storage/234'
     const slackJob = {
       pipelineName: "peterchens pipeline",
@@ -207,16 +207,14 @@ describe('Scheduler', () => {
         niceString: "nice"
       },
       condition: "typeof data.niceString === \"string\"",
-      params: {
-        type: 'SLACK',
-        projectId: '12',
-        workspaceId: '34',
-        secret: '56'
-      }
+      type: 'SLACK',
+      channelId: '12',
+      workspaceId: '34',
+      secret: '56'
     }
 
     const transformationResponse = await request(URL)
-      .post('/notification')
+      .post('/notification/slack')
       .send(slackJob)
     expect(transformationResponse.status).toEqual(200)
 

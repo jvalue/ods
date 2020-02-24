@@ -74,7 +74,7 @@ Content-Type: application/json
 
 
 ### Trigger webhook notification
-POST {{baseURL}}/notification HTTP/1.1
+POST {{baseURL}}/notification/webhook HTTP/1.1
 Content-Type: application/json
 
 {
@@ -86,16 +86,14 @@ Content-Type: application/json
   },
   "dataLocation": "ods-storage",
   "condition": "data.zwei > 1",
-  "params": {
-    "type": "WEBHOOK",
-    "url": "http://www.mocky.io/v2/5185415ba171ea3a00704eed"
-  }
+  "type": "WEBHOOK",
+  "url": "http://www.mocky.io/v2/5185415ba171ea3a00704eed"
 }
 
 ### Trigger slack notification
 ### Please environment variables according to the slack workspace/channel you want to use
 ### For further informations on the fields see readme of the "core" subproject.
-POST {{baseURL}}/notification HTTP/1.1
+POST {{baseURL}}/notification/slack HTTP/1.1
 Content-Type: application/json
 
 {
@@ -107,18 +105,16 @@ Content-Type: application/json
   },
   "dataLocation": "ods-storage",
   "condition": "data.zwei > 1",
-  "params": {
-    "type": "SLACK",
-    "workspaceId": "{{slackWorkspaceId}}",
-    "channelId": "{{slackChannelId}}",
-    "secret": "{{slackSecret}}"
-  }
+  "type": "SLACK",
+  "workspaceId": "{{slackWorkspaceId}}",
+  "channelId": "{{slackChannelId}}",
+  "secret": "{{slackSecret}}"
 }
 
 ### Trigger firebase notification
 ### please set environment variables according to the credentials of your firebase project
 ### For further informations on the fields see readme of the "core" subproject.
-POST {{baseURL}}/notification HTTP/1.1
+POST {{baseURL}}/notification/fcm HTTP/1.1
 Content-Type: application/json
 
 {
@@ -130,11 +126,9 @@ Content-Type: application/json
   },
   "dataLocation": "ods-storage",
   "condition": "data.zwei > 1",
-  "params": {
-    "type": "FCM",
-    "projectId": "{{fcmProjectId}}",
-    "clientEmail": "{{fcmClientEmail}}",
-    "privateKey": "{{fcmKey}}",
-    "topic": "{{fcmTopic}}"
-  }
+  "type": "FCM",
+  "projectId": "{{fcmProjectId}}",
+  "clientEmail": "{{fcmClientEmail}}",
+  "privateKey": "{{fcmKey}}",
+  "topic": "{{fcmTopic}}"
 }

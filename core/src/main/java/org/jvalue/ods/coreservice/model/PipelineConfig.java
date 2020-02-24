@@ -2,6 +2,8 @@ package org.jvalue.ods.coreservice.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jvalue.ods.coreservice.model.adapter.AdapterConfig;
+import org.jvalue.ods.coreservice.model.notification.NotificationConfig;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -33,7 +35,7 @@ public class PipelineConfig implements Serializable {
     private List<NotificationConfig> notifications;
 
     //Constructor for JPA
-    private PipelineConfig() {}
+    public PipelineConfig() {}
 
     @JsonCreator
     public PipelineConfig(

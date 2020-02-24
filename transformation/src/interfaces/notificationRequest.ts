@@ -4,23 +4,20 @@ export interface NotificationRequest {
   data: object;
   dataLocation: string;
   condition: string;
-  params: WebhookParams | SlackParams | FirebaseParams;
+  type: string;
 }
 
-export interface WebhookParams {
-  type: 'WEBHOOK';
+export interface Webhook extends NotificationRequest{
   url: string;
 }
 
-export interface SlackParams {
-  type: 'SLACK';
+export interface Slack extends NotificationRequest {
   workspaceId: string;
   channelId: string;
   secret: string;
 }
 
-export interface FirebaseParams {
-  type: 'FCM';
+export interface Firebase extends NotificationRequest{
   projectId: string;
   clientEmail: string;
   privateKey: string;
