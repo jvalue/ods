@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ui-deployment
+  namespace: {{NAMESPACE}}
+  labels:
+    app: ods
+    service: ui 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ods
+      service: ui
+  template:
+    metadata:
+      labels:
+        app: ods
+        service: ui
+    spec:
+      imagePullSecrets:
+      - name: ods-registry-secret
+      containers:
+      - env:
+        - name: AUTH_SERVICE_URL
+          value: "{{BASE_URL}}auth"
+        - name: UI_BASE_URL
+          value: "{{BASE_URL}}"
+        - name: CORE_SERVICE_URL
+          value: "{{BASE_URL}}api/core"
+        - name: STORAGE_SERVICE_URL
+          value: "{{BASE_URL}}api/storage"
+        - name: TRANSFORMATION_SERVICE_URL
+          value: "{{BASE_URL}}api/transformation"
+        image: registry.gitlab.com/profoss/open-data-service/ods-main/ui:{{IMAGE_TAG}}
+        imagePullPolicy: Always
+        name: ui-service
+        resources: {}
+        ports:
+        - containerPort: 8080
+      restartPolicy: Always
+status: {}

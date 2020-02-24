@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-db-deployment
+  namespace: {{NAMESPACE}}
+  labels:
+    app: ods
+    service: auth-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ods
+      service: auth-db
+  template:
+    metadata:
+      labels:
+        app: ods
+        service: auth-db
+    spec:
+      containers:
+      - env:
+        - name: POSTGRES_DB
+          value: "keycloak"
+        - name: POSTGRES_USER
+          value: "keycloak"
+        - name: POSTGRES_PASSWORD
+          value: "password"
+        image: postgres
+        imagePullPolicy: Always
+        name: auth-db
+        resources: {}
+        ports:
+        - containerPort: 5432 
+      restartPolicy: Always
+status: {}

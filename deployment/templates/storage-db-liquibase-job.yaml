@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: storage-db-liquibase-job
+  namespace: {{NAMESPACE}}
+  labels:
+    app: ods
+spec:
+  template:
+    spec:
+      imagePullSecrets:
+      - name: ods-registry-secret
+      containers:
+      - image: registry.gitlab.com/profoss/open-data-service/ods-main/storage-db-liquibase
+        imagePullPolicy: Always
+        name: storage-db-liquibase
+        resources: {}
+        env:
+        - name: DATABASE_HOST
+          value: "storage-db-service"
+        - name: DATABASE_PORT
+          value: "5432"
+        - name: DATABASE_NAME
+          value: "ods"
+        - name: DATABASE_USER
+          value: "ods_admin"
+        - name: DATABASE_PW
+          value: "ods_pw"
+      restartPolicy: Never
+  backoffLimit: 4
