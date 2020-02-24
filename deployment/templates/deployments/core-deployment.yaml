@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: core-deployment
+  namespace: {{NAMESPACE}}
+  labels:
+    app: ods
+    service: core
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ods
+      service: core
+  template:
+    metadata:
+      labels:
+        app: ods
+        service: core
+    spec:
+      imagePullSecrets:
+      - name: ods-registry-secret
+      containers:
+      - env:
+        - name: DB_URL 
+          value: "jdbc:postgresql://core-db-service/coreservice"
+        image: registry.gitlab.com/profoss/open-data-service/ods-main/core:{{IMAGE_TAG}}
+        imagePullPolicy: Always
+        name: core-service
+        resources: {}
+        ports:
+        - containerPort: 8080
+      restartPolicy: Always
+status: {}
