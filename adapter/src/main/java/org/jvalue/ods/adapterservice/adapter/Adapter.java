@@ -26,13 +26,13 @@ public class Adapter {
         this.blobRepository = dataRepository;
     }
 
-    public JsonNode executeJob(AdapterConfig config){
+    public DataBlob executeJob(AdapterConfig config){
         try {
             String raw = importer.fetch(config.protocolConfig.parameters);
             logger.debug("Fetched: {}", raw);
             JsonNode result = interpreter.interpret(raw, config.formatConfig.parameters);
             DataBlob blob = blobRepository.save(new DataBlob(result.asText()));
-            return result;
+            return blob;
         } catch (IOException e) {
             throw new IllegalArgumentException("Not able to parse data as format: " + config.formatConfig.format, e);
         }
