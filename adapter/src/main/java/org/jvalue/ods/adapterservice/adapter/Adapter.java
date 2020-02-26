@@ -8,32 +8,30 @@ import org.jvalue.ods.adapterservice.model.DataBlob;
 import org.jvalue.ods.adapterservice.repository.DataBlobRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 
 public class Adapter {
     private static final Logger logger = LoggerFactory.getLogger(Adapter.class);
 
-    private final Importer importer;
+    private Importer importer;
 
-    private final Interpreter interpreter;
+    private Interpreter interpreter;
 
-    @Autowired
     private DataBlobRepository blobRepository;
 
-    public Adapter(Importer importer, Interpreter interpreter) {
+    public Adapter(Importer importer, Interpreter interpreter, DataBlobRepository dataRepository) {
         this.importer = importer;
         this.interpreter = interpreter;
+        this.blobRepository = dataRepository;
     }
-
 
     public JsonNode executeJob(AdapterConfig config){
         try {
             String raw = importer.fetch(config.protocolConfig.parameters);
             logger.debug("Fetched: {}", raw);
             JsonNode result = interpreter.interpret(raw, config.formatConfig.parameters);
-            DataBlob blob = blobRepository.save(new DataBlob(result));
+            DataBlob blob = blobRepository.save(new DataBlob(result.asText()));
             return result;
         } catch (IOException e) {
             throw new IllegalArgumentException("Not able to parse data as format: " + config.formatConfig.format, e);

@@ -11,14 +11,16 @@ public class DataBlobTest {
   private final ObjectMapper mapper = new ObjectMapper();
 
   @Test
-  public void testSerialization() throws JsonProcessingException {
-    JsonNode jsonNode = mapper.readTree("{ \"whateverwillbe\": \"willbe\", \"quesera\": \"sera\" }");
-    DataBlob blob = new DataBlob(jsonNode);
+  public void testSerialization() {
+    String jsonString ="{\"whateverwillbe\":\"willbe\",\"quesera\":\"sera\"}";
+    DataBlob blob = new DataBlob(jsonString);
 
     JsonNode result = mapper.valueToTree(blob);
 
     System.out.println(result.toString());
-    assertEquals("{\"id\":null,\"data\":{\"whateverwillbe\":\"willbe\",\"quesera\":\"sera\"}}", result.toString());
+    assertEquals(2, result.size());
+    assertEquals("{\"whateverwillbe\":\"willbe\",\"quesera\":\"sera\"}", result.get("data").asText());
+    assertEquals("null", result.get("id").asText());
   }
 
 }
