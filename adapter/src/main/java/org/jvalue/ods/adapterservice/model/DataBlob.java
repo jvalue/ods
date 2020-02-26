@@ -9,12 +9,12 @@ public class DataBlob {
   @GeneratedValue
   private Long id;
 
-  private Object data;
+  private String data;
 
   public DataBlob() {
   }
 
-  public DataBlob(Object data) {
+  public DataBlob(String data) {
     this.data = data;
   }
 
@@ -22,7 +22,7 @@ public class DataBlob {
     return id;
   }
 
-  public Object getData() {
+  public String getData() {
     return data;
   }
 }
