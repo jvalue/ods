@@ -17,8 +17,20 @@ public class DataBlobTest {
     JsonNode result = mapper.valueToTree(blob);
 
     System.out.println(result.toString());
-    assertEquals(1, result.size());
+    assertEquals(2, result.size());
     assertEquals("null", result.get("id").asText());
+    assertEquals("{\"whateverwillbe\":\"willbe\",\"quesera\":\"sera\"}", result.get("data").asText());
+  }
+
+  @Test
+  public void testMetaDataSerialization() {
+    String jsonString ="{\"whateverwillbe\":\"willbe\",\"quesera\":\"sera\"}";
+    DataBlob blob = new DataBlob(jsonString);
+
+    JsonNode result = mapper.valueToTree(blob.getMetaData());
+
+    assertEquals(1, result.size());
+    assertEquals("null", result.get("id"));
   }
 
 }
