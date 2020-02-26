@@ -17,8 +17,7 @@ public class DataBlobTest {
     JsonNode result = mapper.valueToTree(blob);
 
     System.out.println(result.toString());
-    assertEquals(2, result.size());
-    assertEquals("{\"whateverwillbe\":\"willbe\",\"quesera\":\"sera\"}", result.get("data").asText());
+    assertEquals(1, result.size());
     assertEquals("null", result.get("id").asText());
   }
 
