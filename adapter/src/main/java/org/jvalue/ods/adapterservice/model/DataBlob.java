@@ -1,5 +1,7 @@
 package org.jvalue.ods.adapterservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 
 @Entity
@@ -22,6 +24,7 @@ public class DataBlob {
     return id;
   }
 
+  @JsonIgnore
   public String getData() {
     return data;
   }
