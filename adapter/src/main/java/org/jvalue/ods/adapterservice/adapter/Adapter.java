@@ -32,7 +32,7 @@ public class Adapter {
             String raw = importer.fetch(config.protocolConfig.parameters);
             logger.debug("Fetched: {}", raw);
             JsonNode result = interpreter.interpret(raw, config.formatConfig.parameters);
-            DataBlob blob = blobRepository.save(new DataBlob(result.asText()));
+            DataBlob blob = blobRepository.save(new DataBlob(result.toString().getBytes()));
             return blob.getMetaData();
         } catch (IOException e) {
             throw new IllegalArgumentException("Not able to parse data as format: " + config.formatConfig.format, e);
