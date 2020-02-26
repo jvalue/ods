@@ -3,7 +3,7 @@ package org.jvalue.ods.adapterservice.rest.v1;
 import org.jvalue.ods.adapterservice.adapter.Adapter;
 import org.jvalue.ods.adapterservice.adapter.AdapterManager;
 import org.jvalue.ods.adapterservice.model.AdapterConfig;
-import org.jvalue.ods.adapterservice.model.DataBlob;
+import org.jvalue.ods.adapterservice.model.MetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,7 +22,7 @@ public class AdapterEndpoint {
     }
 
     @PostMapping("/dataImport")
-    public DataBlob executeDataImport(@RequestBody AdapterConfig config) {
+    public MetaData executeDataImport(@RequestBody AdapterConfig config) {
         Adapter adapter = adapterManager.getAdapter(config);
         return adapter.executeJob(config);
     }
