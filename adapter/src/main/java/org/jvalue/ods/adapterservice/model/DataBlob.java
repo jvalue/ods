@@ -1,15 +1,13 @@
 package org.jvalue.ods.adapterservice.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 public class DataBlob {
 
-  @Id
-  @GeneratedValue
-  private Long id;
+  @EmbeddedId
+  private MetaData metaData;
 
   private String data;
 
@@ -20,12 +18,25 @@ public class DataBlob {
     this.data = data;
   }
 
-  public Long getId() {
-    return id;
-  }
-
-  @JsonIgnore
   public String getData() {
     return data;
+  }
+
+  public MetaData getMetaData() {
+    return metaData;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    DataBlob dataBlob = (DataBlob) o;
+    return Objects.equals(metaData, dataBlob.metaData) &&
+            Objects.equals(data, dataBlob.data);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(metaData, data);
   }
 }
