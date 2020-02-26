@@ -5,12 +5,12 @@ import org.jvalue.ods.adapterservice.importer.Importer;
 import org.jvalue.ods.adapterservice.interpreter.Interpreter;
 import org.jvalue.ods.adapterservice.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.model.DataBlob;
-import org.jvalue.ods.adapterservice.model.MetaData;
 import org.jvalue.ods.adapterservice.repository.DataBlobRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class Adapter {
     private static final Logger logger = LoggerFactory.getLogger(Adapter.class);
@@ -27,7 +27,7 @@ public class Adapter {
         this.blobRepository = dataRepository;
     }
 
-    public MetaData executeJob(AdapterConfig config){
+    public DataBlob.MetaData executeJob(AdapterConfig config){
         try {
             String raw = importer.fetch(config.protocolConfig.parameters);
             logger.debug("Fetched: {}", raw);
@@ -45,5 +45,20 @@ public class Adapter {
 
     public String format() {
         return interpreter.getType();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Adapter adapter = (Adapter) o;
+        return Objects.equals(importer, adapter.importer) &&
+                Objects.equals(interpreter, adapter.interpreter) &&
+                Objects.equals(blobRepository, adapter.blobRepository);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(importer, interpreter, blobRepository);
     }
 }

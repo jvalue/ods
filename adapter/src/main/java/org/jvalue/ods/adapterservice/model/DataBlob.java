@@ -29,6 +29,7 @@ public class DataBlob {
     return id;
   }
 
+  @JsonIgnore
   public MetaData getMetaData() {
     return new MetaData(this);
   }
@@ -48,12 +49,15 @@ public class DataBlob {
   }
 
   // json representation without the actual data (as response for adapter trigger)
-  public static class MetaData extends DataBlob {
+  public static class MetaData {
     private final Long id;
-
 
     public MetaData(DataBlob dataBlob) {
       this.id = dataBlob.id;
+    }
+
+    public Long getId() {
+      return id;
     }
   }
 }
