@@ -1,7 +1,7 @@
 const request = require("supertest");
 const waitOn = require("wait-on");
 
-const URL = process.env.ADAPTER_API || "http://localhost:9000/adapter";
+const URL = process.env.ADAPTER_API || "http://localhost:9000/api/adapter";
 const MOCK_SERVER_PORT = process.env.MOCK_SERVER_PORT || 8081;
 const MOCK_SERVER_HOST = process.env.MOCK_SERVER_HOST || "localhost";
 const MOCK_SERVER_URL = "http://" + MOCK_SERVER_HOST + ":" + MOCK_SERVER_PORT;
@@ -74,12 +74,19 @@ describe("Adapter", () => {
         type: "JSON"
       }
     };
-
     const response = await request(URL)
       .post("/dataImport")
       .send(reqBody);
     expect(response.status).toEqual(200);
-    expect(response.body).toEqual({ whateverwillbe: "willbe", quesera: "sera" });
+
+    const dataBlobId = response.body.id
+    const dataResponse = await request(URL)
+        .get(`/data/${dataBlobId}`)
+        .send()
+    expect(dataResponse.status).toEqual(200)
+    expect(dataResponse.body.id).toEqual(dataBlobId)
+    console.log(`bytes: ${dataResponse.body.data}`)
+    expect(dataResponse.body.data).toEqual({ whateverwillbe: "willbe", quesera: "sera" })
   });
 
   test("POST /dataImport XML-Adapter", async () => {
@@ -95,15 +102,18 @@ describe("Adapter", () => {
         type: "XML"
       }
     };
-
     const response = await request(URL)
       .post("/dataImport")
       .send(reqBody);
     expect(response.status).toEqual(200);
-    expect(response.body).toEqual({
-      from: "Rick",
-      to: "Morty"
-    });
+
+    const dataBlobId = response.body.id
+    const dataResponse = await request(URL)
+        .get(`data/${dataBlobId}`)
+        .send()
+    expect(dataResponse.status).toEqual(200)
+    expect(dataResponse.body.id).toEqual(dataBlobId)
+
   });
 
   test("POST /dataImport CSV-Adapter", async () => {

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -14,20 +15,20 @@ public class DataBlobTest {
   @Test
   public void testSerialization() throws IOException {
     String jsonString ="{\"whateverwillbe\":\"willbe\",\"quesera\":\"sera\"}";
-    DataBlob blob = new DataBlob(jsonString.getBytes());
+    DataBlob blob = new DataBlob(jsonString);
 
     JsonNode result = mapper.valueToTree(blob);
 
     System.out.println(result.toString());
     assertEquals(2, result.size());
     assertEquals("null", result.get("id").asText());
-    assertEquals("{\"whateverwillbe\":\"willbe\",\"quesera\":\"sera\"}", new String(result.get("data").binaryValue()));
+    assertEquals("{\"whateverwillbe\":\"willbe\",\"quesera\":\"sera\"}", result.get("data").asText());
   }
 
   @Test
   public void testMetaDataSerialization() {
     String jsonString ="{\"whateverwillbe\":\"willbe\",\"quesera\":\"sera\"}";
-    DataBlob blob = new DataBlob(jsonString.getBytes());
+    DataBlob blob = new DataBlob(jsonString);
 
     JsonNode result = mapper.valueToTree(blob.getMetaData());
 
@@ -36,4 +37,12 @@ public class DataBlobTest {
     assertEquals("null", result.get("id").asText());
   }
 
+  @Test
+  public void bla() throws UnsupportedEncodingException {
+    String bla = "{\"whateverwillbe\":\"willbe\",\"quesera\":\"sera\"}";
+    byte[] bytes = bla.getBytes();
+    JsonNode js = mapper.valueToTree(bytes);
+    JsonNode working = mapper.valueToTree(new String(bytes));
+    System.out.println("yeah");
+  }
 }
