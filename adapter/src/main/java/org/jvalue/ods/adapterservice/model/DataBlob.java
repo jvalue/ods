@@ -3,7 +3,6 @@ package org.jvalue.ods.adapterservice.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
-import java.util.Arrays;
 import java.util.Objects;
 
 @Entity
@@ -13,17 +12,18 @@ public class DataBlob {
   @GeneratedValue
   private Long id;
 
-  private byte[] data;
+  @Column(length = 100000)
+  private String data;
 
   public DataBlob() {
   }
 
-  public DataBlob(byte[] data) {
+  public DataBlob(String data) {
     this.data = data;
   }
 
-  public byte[] getData() {
-    return data;
+  public String getData() {
+    return new String(data);
   }
 
   public Long getId() {
@@ -41,7 +41,7 @@ public class DataBlob {
     if (o == null || getClass() != o.getClass()) return false;
     DataBlob dataBlob = (DataBlob) o;
     return Objects.equals(id, dataBlob.id) &&
-            Arrays.equals(data, dataBlob.data);
+            data.equals(dataBlob.data);
   }
 
   @Override
