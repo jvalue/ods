@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Objects;
 
 public class Adapter {
@@ -33,9 +32,7 @@ public class Adapter {
             String raw = importer.fetch(config.protocolConfig.parameters);
             logger.debug("Fetched: {}", raw);
             JsonNode result = interpreter.interpret(raw, config.formatConfig.parameters);
-            System.out.println("Bytes " + Arrays.toString(result.toString().getBytes()));
             DataBlob blob = blobRepository.save(new DataBlob(result.toString()));
-            System.out.println("Saved bytes " + blob.getData());
             return blob.getMetaData();
         } catch (IOException e) {
             throw new IllegalArgumentException("Not able to parse data as format: " + config.formatConfig.format, e);
