@@ -3,6 +3,8 @@ package org.jvalue.ods.adapterservice.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Objects;
 
 @Entity
@@ -12,18 +14,17 @@ public class DataBlob {
   @GeneratedValue
   private Long id;
 
-  @Column(length = 100000)
-  private String data;
+  private byte[] data;
 
   public DataBlob() {
   }
 
   public DataBlob(String data) {
-    this.data = data;
+    this.data = data.getBytes(StandardCharsets.UTF_8);
   }
 
   public String getData() {
-    return new String(data);
+    return new String(data, StandardCharsets.UTF_8);
   }
 
   public Long getId() {
@@ -41,7 +42,7 @@ public class DataBlob {
     if (o == null || getClass() != o.getClass()) return false;
     DataBlob dataBlob = (DataBlob) o;
     return Objects.equals(id, dataBlob.id) &&
-            data.equals(dataBlob.data);
+            Arrays.equals(data, dataBlob.data);
   }
 
   @Override
