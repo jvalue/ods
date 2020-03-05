@@ -1,6 +1,5 @@
 package org.jvalue.ods.adapterservice.rest.v1;
 
-import org.jvalue.ods.adapterservice.model.DataBlob;
 import org.jvalue.ods.adapterservice.repository.DataBlobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,7 +20,7 @@ public class DataEndpoint {
     this.blobRepository = blobRepository;
   }
 
-  @GetMapping("/{id}")
+  @GetMapping(value = "/{id}", produces = "application/json")
   public String getData(@PathVariable() Long id) {
     return blobRepository.findById(id)
       .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No data stored with id " + id))
