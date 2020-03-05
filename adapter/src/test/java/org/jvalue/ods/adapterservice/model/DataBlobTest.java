@@ -36,13 +36,4 @@ public class DataBlobTest {
     assertEquals(1, result.size());
     assertEquals("null", result.get("id").asText());
   }
-
-  @Test
-  public void bla() throws UnsupportedEncodingException {
-    String bla = "{\"whateverwillbe\":\"willbe\",\"quesera\":\"sera\"}";
-    byte[] bytes = bla.getBytes();
-    JsonNode js = mapper.valueToTree(bytes);
-    JsonNode working = mapper.valueToTree(new String(bytes));
-    System.out.println("yeah");
-  }
 }
