@@ -22,9 +22,10 @@ public class DataEndpoint {
   }
 
   @GetMapping("/{id}")
-  public DataBlob getData(@PathVariable() Long id) {
+  public String getData(@PathVariable() Long id) {
     return blobRepository.findById(id)
-      .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No data stored with id " + id));
+      .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No data stored with id " + id))
+      .getData();
   }
 
 }
