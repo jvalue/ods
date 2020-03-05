@@ -78,15 +78,13 @@ describe("Adapter", () => {
       .post("/dataImport")
       .send(reqBody);
     expect(response.status).toEqual(200);
-
     const dataBlobId = response.body.id
+
     const dataResponse = await request(URL)
         .get(`/data/${dataBlobId}`)
         .send()
     expect(dataResponse.status).toEqual(200)
-    expect(dataResponse.body.id).toEqual(dataBlobId)
-    console.log(`bytes: ${dataResponse.body.data}`)
-    expect(dataResponse.body.data).toEqual({ whateverwillbe: "willbe", quesera: "sera" })
+    expect(dataResponse.body).toEqual({ whateverwillbe: "willbe", quesera: "sera" })
   });
 
   test("POST /dataImport XML-Adapter", async () => {
@@ -102,6 +100,7 @@ describe("Adapter", () => {
         type: "XML"
       }
     };
+
     const response = await request(URL)
       .post("/dataImport")
       .send(reqBody);
@@ -109,10 +108,11 @@ describe("Adapter", () => {
 
     const dataBlobId = response.body.id
     const dataResponse = await request(URL)
-        .get(`data/${dataBlobId}`)
+        .get(`/data/${dataBlobId}`)
         .send()
+
     expect(dataResponse.status).toEqual(200)
-    expect(dataResponse.body.id).toEqual(dataBlobId)
+    expect(dataResponse.body).toEqual({ from: "Rick", to: "Morty"})
 
   });
 
@@ -135,12 +135,17 @@ describe("Adapter", () => {
         }
       }
     };
-
     const response = await request(URL)
       .post("/dataImport")
       .send(reqBody);
     expect(response.status).toEqual(200);
-    expect(response.body).toEqual([
+
+    const dataBlobId = response.body.id
+    const dataResponse = await request(URL)
+        .get(`/data/${dataBlobId}`)
+        .send()
+    expect(dataResponse.status).toEqual(200)
+    expect(dataResponse.body).toEqual([
       {
         col1: "val11",
         col2: "val12",
