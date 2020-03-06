@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - env:
-          ADAPTER_DOCKER_IMAGE_NAME: docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
+          ADAPTER_DOCKER_IMAGE_NAME: docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME  
       - name: Build $IMAGE_NAME
         run: |
           cd adapter
@@ -47,6 +47,8 @@ jobs:
     runs-on: [ubuntu-latest]
     
     steps:
+      - uses: actions/checkout@v2
+        
       - name: Download artifact from $IMAGE_NAME build
         uses: actions/download-artifact@v1
         with:
