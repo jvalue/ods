@@ -2,30 +2,23 @@ name: Adapter Build & Test
 
 on:
   push:
-    # Publish `master` as Docker `latest` image.
     branches:
-      - master
-
-    # Publish `v1.2.3` tags as releases.
-    tags:
-      - v*
-
-  # Run tests for any PRs.
-  pull_request:
+    - master
+    - github-ci
 
 env:
   IMAGE_NAME: adapter
 
 jobs:
   build:
-    runs-on: [ubuntu-latest]
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
-      - env:
-          ADAPTER_DOCKER_IMAGE_NAME: docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
 
       - name: Build $IMAGE_NAME
+        env:
+          ADAPTER_DOCKER_IMAGE_NAME: docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
         run: |
           cd adapter
           docker build -t $ADAPTER_DOCKER_IMAGE_NAME .
@@ -39,9 +32,9 @@ jobs:
           path: adapter/image/adapter.tar
     
   test:
-    needs: [build]
+    needs: build
     
-    runs-on: [ubuntu-latest]
+    runs-on: ubuntu-latest
     
     steps:
       - uses: actions/checkout@v2
