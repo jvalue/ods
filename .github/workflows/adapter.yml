@@ -1,4 +1,4 @@
-name: adapter
+name: Adapter Build & Test
 
 on:
   push:
