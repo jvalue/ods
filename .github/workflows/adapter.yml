@@ -16,14 +16,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build $IMAGE_NAME
-        env:
-          ADAPTER_DOCKER_IMAGE_NAME: docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
+      - name: Build adapter
         run: |
           cd adapter
-          docker build -t $ADAPTER_DOCKER_IMAGE_NAME .
+          docker build -t docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME .
           mkdir image
-          docker save $ADAPTER_DOCKER_IMAGE_NAME > image/adapter.tar
+          docker save docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME > image/adapter.tar
       
       - name: Upload $IMAGE_NAME artifacts
         uses: actions/upload-artifact@v1
@@ -39,7 +37,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         
-      - name: Download artifact from $IMAGE_NAME build
+      - name: Download artifact from adapter build
         uses: actions/download-artifact@v1
         with:
           name: build-artifact
