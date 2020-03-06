@@ -23,7 +23,7 @@ jobs:
           mkdir image
           docker save docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME > image/adapter.tar
       
-      - name: Upload $IMAGE_NAME artifacts
+      - name: Upload adapter artifacts
         uses: actions/upload-artifact@v1
         with:
           name: build-artifact
