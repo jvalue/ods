@@ -15,7 +15,6 @@ on:
 
 env:
   IMAGE_NAME: adapter
-  ADAPTER_DOCKER_IMAGE_NAME: docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
 
 jobs:
   build:
@@ -23,6 +22,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - env:
+          ADAPTER_DOCKER_IMAGE_NAME: docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
 
       - name: Build $IMAGE_NAME
         run: |
