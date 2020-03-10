@@ -1,4 +1,4 @@
-package org.jvalue.ods.coreservice.model;
+package org.jvalue.ods.coreservice.model.adapter;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,22 +11,22 @@ import java.util.Map;
 import java.util.Objects;
 
 @Embeddable
-public class AdapterProtocolConfig {
+public class AdapterFormatConfig {
 
   @NotNull
-  @Column(name = "protocol_type")
+  @Column(name = "format_type")
   private String type;
 
   @NotNull
-  @Column(name = "protocol_parameters")
+  @Column(name = "format_parameters")
   @Convert(converter = GenericParameterConverter.class)
   private Map<String, Object> parameters;
 
   // Constructor for JPA
-  private AdapterProtocolConfig() {  }
+  private AdapterFormatConfig() {  }
 
   @JsonCreator
-  public AdapterProtocolConfig(@JsonProperty("type") String type,
+  public AdapterFormatConfig(@JsonProperty("type") String type,
       @JsonProperty("parameters") Map<String, Object> parameters) {
     this.type = type;
     this.parameters = parameters;
@@ -42,7 +42,7 @@ public class AdapterProtocolConfig {
 
   @Override
   public String toString() {
-    return "AdapterProtocolConfig {" + "type='" + type + '\'' + ", parameters='" + parameters + '\'' + '}';
+    return "AdapterFormatConfig {" + "type='" + type + '\'' + ", parameters='" + parameters + '\'' + '}';
   }
 
   @Override
@@ -51,7 +51,7 @@ public class AdapterProtocolConfig {
       return true;
     if (o == null || getClass() != o.getClass())
       return false;
-    AdapterProtocolConfig config = (AdapterProtocolConfig) o;
+    AdapterFormatConfig config = (AdapterFormatConfig) o;
     return type.equals(config.type) && parameters.equals(config.parameters);
   }
 

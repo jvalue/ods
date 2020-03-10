@@ -1,6 +1,6 @@
 package org.jvalue.ods.coreservice.rest.v1;
 
-import org.jvalue.ods.coreservice.model.PipelineEvent;
+import org.jvalue.ods.coreservice.model.event.PipelineEvent;
 import org.jvalue.ods.coreservice.pipeline.PipelineManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 @RestController
 @RequestMapping("/events")

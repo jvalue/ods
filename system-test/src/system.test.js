@@ -332,10 +332,8 @@ describe('System-Test', () => {
 function generateNotification(condition, url) {
   return {
     condition,
-    params: {
-      url,
-      type: "WEBHOOK"
-    }
+    url,
+    type: "WEBHOOK"
   }
 }
 

@@ -32,20 +32,55 @@ TBD
 | *base_url*/ | GET | - | text | Get health status |
 | *base_url*/version | GET | - | text | Get service version |
 | *base_url*/job | POST | transformationRequest | jobResult | Trigger execution |
-|  *base_url*/notification | POST | notificationRequest | - | Trigger notification |
+| *base_url*/notification/webhook | POST | webhookRequest | - | Trigger webhook |
+| *base_url*/notification/slack | POST | slackRequest | - | Trigger slack notification |
+| *base_url*/notification/fcm | POST | firebaseRequest | - | Trigger firebase notification |
 
-### NotificationRequest
+
+### WebhookRequest
 ```
 {
   "pipelineName": string,
   "pipelineId": string,
-  "url": string,
   "data": object,
   "dataLocation": string,
   "condition": string,
-  "notificationType": "WEBHOOK"|"SLACK"
+  "type": "WEBHOOK"
+  "url": string
 }
 ```
+
+### SlackRequest
+```
+{
+  "pipelineName": string,
+  "pipelineId": string,
+  "data": object,
+  "dataLocation": string,
+  "condition": string,
+  "notificationType": "SLACK",
+  "workspaceId": string,
+  "channelId": string,
+  "secret": string
+}
+```
+
+### FirebaseRequest
+```
+{
+  "pipelineName": string,
+  "pipelineId": string,
+  "data": object,
+  "dataLocation": string,
+  "condition": string,
+  "notificationType": "FCM",
+  "projectId": string,
+  "clientEmail": string,
+  "privateKey": string,
+  "topic": string
+}
+```
+
 
 ### TransformationRequest
 ```
@@ -67,7 +102,7 @@ TBD
 ### Slack notification walkthrough
 * Create a slack app for your slack channel and enable activations as discribed [here](https://api.slack.com/messaging/webhooks).
 * Determine your apps' incoming webhook url at the slack [dashboard](https://api.slack.com/apps).
-* POST a notificationRequest with this url at the url field and notificationType SLACK.
+* POST a slackRequest under the endpoint ```/notification/slack```. The workspaceId, channelId and secret fields can be taken from the parts of the incoming webhook url (separated by '/', in the given order).
 * Go to your configured channel and be stunned by the magic. 
 
 ## License
