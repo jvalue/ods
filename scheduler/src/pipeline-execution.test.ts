@@ -109,21 +109,28 @@ test('Should ignore empty transformation arrays', async () => {
 
 test('Should trigger notifications', async () => {
   const notification1: NotificationConfig = {
+    type: 'WEBHOOK',
     data: { value1: 1 },
     dataLocation: 'some.where/over/the/rainbow'
   }
   const notification2: NotificationConfig = {
+    type: 'SLACK',
     data: { schtring: 'text' },
     dataLocation: 'way.up/high'
   }
-  const pipelineConfig = generateConfig([], false, [notification1, notification2])
+  const notification3: NotificationConfig = {
+    type: 'FCM',
+    data: { schtring: 'text' },
+    dataLocation: 'way.up/high'
+  }
+  const pipelineConfig = generateConfig([], false, [notification1, notification2, notification3])
 
   mockExecuteAdapter.mockResolvedValue(adapterResponse)
   mockFetchImportedData.mockResolvedValue(importedData)
 
   await PipelineExecution.executePipeline(pipelineConfig)
 
-  expect(mockExecuteNotification).toHaveBeenCalledTimes(2)
+  expect(mockExecuteNotification).toHaveBeenCalledTimes(3)
 })
 
 function generateTransformation (func: string, data: object): object {

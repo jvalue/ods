@@ -1,6 +1,6 @@
 package org.jvalue.ods.coreservice.repository;
 
-import org.jvalue.ods.coreservice.model.PipelineEvent;
+import org.jvalue.ods.coreservice.model.event.PipelineEvent;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

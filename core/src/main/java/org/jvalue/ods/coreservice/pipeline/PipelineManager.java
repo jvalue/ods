@@ -1,6 +1,9 @@
 package org.jvalue.ods.coreservice.pipeline;
 
 import org.jvalue.ods.coreservice.model.*;
+import org.jvalue.ods.coreservice.model.event.EventType;
+import org.jvalue.ods.coreservice.model.event.PipelineEvent;
+import org.jvalue.ods.coreservice.model.notification.NotificationConfig;
 import org.jvalue.ods.coreservice.repository.EventRepository;
 import org.jvalue.ods.coreservice.repository.PipelineRepository;
 import org.springframework.beans.factory.annotation.Autowired;

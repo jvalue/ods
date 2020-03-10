@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: storage-deployment
+  namespace: {{NAMESPACE}}
+  labels:
+    app: ods
+    service: storage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ods
+      service: storage
+  template:
+    metadata:
+      labels:
+        app: ods
+        service: storage
+    spec:
+      imagePullSecrets:
+      - name: ods-registry-secret
+      containers:
+      - image: registry.gitlab.com/profoss/open-data-service/ods-main/storage:{{IMAGE_TAG}}
+        imagePullPolicy: Always
+        name: storage
+        resources: {}
+        ports:
+        - containerPort: 3000
+        env:
+        - name: DATABASE_HOST
+          value: "storage-db-service"
+        - name: DATABBASE_PORT
+          value: "5432"
+        - name: DATABASE_NAME
+          value: "ods"
+        - name: DATABASE_USER
+          value: "postgrest"
+        - name: DATABASE_PW_
+          value: "postgres-wrapper-pw"
+      restartPolicy: Always
+status: {}

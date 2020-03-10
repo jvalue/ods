@@ -1,4 +1,4 @@
-package org.jvalue.ods.coreservice.model;
+package org.jvalue.ods.coreservice.model.adapter;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
