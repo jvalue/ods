@@ -4,6 +4,10 @@ const router = new Router()
 const app = new Koa()
 const PORT = process.env.MOCK_ADAPTER_PORT || 8082
 
+const dataImportResponse = {
+  id: 1
+}
+
 const importedData = {
   field1: 'abc',
   field2: 123,
@@ -19,6 +23,11 @@ router.get('/', async ctx => {
 })
 
 router.post('/dataImport', async ctx => {
+  ctx.type = 'text/json'
+  ctx.body = dataImportResponse
+})
+
+router.get('/data/:id', async  ctx => {
   ctx.type = 'text/json'
   ctx.body = importedData
 })
