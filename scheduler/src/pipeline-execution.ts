@@ -5,6 +5,7 @@ import * as Scheduler from './pipeline-scheduling'
 
 import PipelineConfig from './interfaces/pipeline-config'
 import { AxiosError } from 'axios'
+import AdapterResponse from '@/interfaces/adapter-response'
 
 export async function executePipeline (pipelineConfig: PipelineConfig, maxRetries = 3): Promise<void> {
   console.log(`Execute Pipeline ${pipelineConfig.id}`)
@@ -17,7 +18,8 @@ export async function executePipeline (pipelineConfig: PipelineConfig, maxRetrie
       console.log(`Starting retry ${retryNumber} of Pipeline ${pipelineConfig.id}`)
     }
     try {
-      const importedData: object = await executeAdapter(pipelineConfig)
+      const adapterResponse: AdapterResponse = await executeAdapter(pipelineConfig)
+      const importedData: object = await AdapterClient.fetchImportedData(adapterResponse.id)
       const transformedData = await executeTransformations(pipelineConfig, importedData)
       const dataLocation = await executeStorage(pipelineConfig, transformedData)
       await executeNotifications(pipelineConfig, transformedData, dataLocation)
@@ -38,7 +40,7 @@ export async function executePipeline (pipelineConfig: PipelineConfig, maxRetrie
   }
 }
 
-async function executeAdapter (pipelineConfig: PipelineConfig): Promise<object> {
+async function executeAdapter (pipelineConfig: PipelineConfig): Promise<AdapterResponse> {
   console.log(`Execute Adapter for Pipeline ${pipelineConfig.id}`)
   try {
     const importedData = await AdapterClient.executeAdapter(pipelineConfig.adapter)
