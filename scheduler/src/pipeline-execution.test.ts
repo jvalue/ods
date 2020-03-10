@@ -6,6 +6,7 @@ import * as TransformationClient from './clients/transformation-client'
 import * as PipelineScheduling from './pipeline-scheduling'
 import PipelineConfig from './interfaces/pipeline-config'
 import NotificationConfig from './interfaces/notification-config'
+import AdapterResponse from '@/interfaces/adapter-response'
 
 jest.mock('./clients/adapter-client')
 jest.mock('./clients/storage-client')
@@ -13,12 +14,17 @@ jest.mock('./clients/transformation-client')
 jest.mock('./pipeline-scheduling')
 
 const mockExecuteAdapter = AdapterClient.executeAdapter as jest.Mock
+const mockFetchImportedData = AdapterClient.fetchImportedData as jest.Mock
 const mockExecuteTransformation = TransformationClient.executeTransformation as jest.Mock
 const mockExecuteStorage = StorageClient.executeStorage as jest.Mock
 const mockExecuteNotification = TransformationClient.executeNotification as jest.Mock
 
 const mockSchedulePipeline = PipelineScheduling.schedulePipeline as jest.Mock
 const mockRemovePipelineJob = PipelineScheduling.removePipelineJob as jest.Mock
+
+const adapterResponse: AdapterResponse = {
+  id: 42
+}
 
 const importedData = {
   value1: 1,
@@ -36,12 +42,14 @@ test('Should execute pipeline once', async () => {
   const transformation = generateTransformation('return { value2: data.value2 }', importedData)
   const pipelineConfig = generateConfig([transformation], false, [])
 
-  mockExecuteAdapter.mockResolvedValue(importedData)
+  mockExecuteAdapter.mockResolvedValue(adapterResponse)
+  mockFetchImportedData.mockResolvedValue(importedData)
   mockExecuteTransformation.mockResolvedValue({ data: transformedData })
 
   await PipelineExecution.executePipeline(pipelineConfig)
 
   expect(mockExecuteAdapter).toHaveBeenCalledWith(pipelineConfig.adapter)
+  expect(mockFetchImportedData).toHaveBeenCalledWith(adapterResponse.id)
   expect(mockExecuteTransformation).toHaveBeenCalledWith(transformation)
   expect(mockExecuteTransformation).toHaveBeenCalledTimes(1)
   expect(mockExecuteStorage).toHaveBeenCalledWith(pipelineConfig, transformedData)
@@ -54,12 +62,14 @@ test('Should execute pipeline periodic', async () => {
   const transformation = generateTransformation('return data + 1', importedData)
   const pipelineConfig = generateConfig([transformation], true, [])
 
-  mockExecuteAdapter.mockResolvedValue(importedData)
+  mockExecuteAdapter.mockResolvedValue(adapterResponse)
+  mockFetchImportedData.mockResolvedValue(importedData)
   mockExecuteTransformation.mockResolvedValue({ data: transformedData })
 
   await PipelineExecution.executePipeline(pipelineConfig)
 
   expect(mockExecuteAdapter).toHaveBeenCalledWith(pipelineConfig.adapter)
+  expect(mockFetchImportedData).toHaveBeenCalledWith(adapterResponse.id)
   expect(mockExecuteTransformation).toHaveBeenCalledWith(transformation)
   expect(mockExecuteStorage).toHaveBeenCalledWith(pipelineConfig, transformedData)
 
@@ -74,7 +84,8 @@ test('Should execute multiple transformations', async () => {
 
   const pipelineConfig = generateConfig([transformation1, transformation2, transformation3], false, [])
 
-  mockExecuteAdapter.mockResolvedValue(importedData)
+  mockExecuteAdapter.mockResolvedValue(adapterResponse)
+  mockFetchImportedData.mockResolvedValue(importedData)
   mockExecuteTransformation.mockResolvedValue({ data: transformedData })
 
   await PipelineExecution.executePipeline(pipelineConfig)
@@ -88,11 +99,11 @@ test('Should execute multiple transformations', async () => {
 test('Should ignore empty transformation arrays', async () => {
   const pipelineConfig = generateConfig([], false, [])
 
-  mockExecuteAdapter.mockResolvedValue(importedData)
+  mockExecuteAdapter.mockResolvedValue(adapterResponse)
+  mockFetchImportedData.mockResolvedValue(importedData)
   mockExecuteTransformation.mockResolvedValue({ data: transformedData })
 
   await PipelineExecution.executePipeline(pipelineConfig)
-
   expect(mockExecuteTransformation).not.toHaveBeenCalled()
 })
 
@@ -107,7 +118,8 @@ test('Should trigger notifications', async () => {
   }
   const pipelineConfig = generateConfig([], false, [notification1, notification2])
 
-  mockExecuteAdapter.mockResolvedValue(importedData)
+  mockExecuteAdapter.mockResolvedValue(adapterResponse)
+  mockFetchImportedData.mockResolvedValue(importedData)
 
   await PipelineExecution.executePipeline(pipelineConfig)
 
