@@ -56,12 +56,30 @@ Note that you need to delete existing docker images from your local docker daemo
 }
 ```
 
-### AdapterConfig
+### Adapter Config
 ```
 {
-  "protocol": String,
-  "format": String,
-  "location": String
+    "protocol": {
+      "type": "HTTP",
+      "parameters": {
+        "location": String,
+        "encoding": String
+      }
+    }
+    "format": {
+      "type": "JSON" | "XML" | "CSV"
+      "parameters": { } | CSVParameters
+    }
+  }
+  ```
+
+### CSV Parameters
+```
+{
+  "columnSeparator": char,
+  "lineSeparator": char,
+  "skipFirstDataRow": boolean,
+  "firstRowAsHeader": boolean
 }
 ```
 
