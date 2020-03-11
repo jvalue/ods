@@ -1,9 +1,10 @@
 package org.jvalue.ods.adapterservice.rest.v1;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import org.jvalue.ods.adapterservice.adapter.Adapter;
-import org.jvalue.ods.adapterservice.adapter.AdapterManager;
+import org.jvalue.ods.adapterservice.adapter.AdapterRepository;
 import org.jvalue.ods.adapterservice.model.AdapterConfig;
+import org.jvalue.ods.adapterservice.model.DataBlob;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,9 +14,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/")
 public class AdapterEndpoint {
 
+    private final AdapterRepository adapterRepository;
+
+    @Autowired
+    public AdapterEndpoint(AdapterRepository adapterRepository) {
+        this.adapterRepository = adapterRepository;
+    }
+
     @PostMapping("/dataImport")
-    public JsonNode executeDataImport(@RequestBody AdapterConfig config) {
-        Adapter adapter = AdapterManager.getAdapter(config);
+    public DataBlob.MetaData executeDataImport(@RequestBody AdapterConfig config) {
+        Adapter adapter = adapterRepository.getAdapter(config);
         return adapter.executeJob(config);
     }
 }

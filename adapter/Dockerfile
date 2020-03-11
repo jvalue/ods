@@ -21,6 +21,8 @@ FROM adoptopenjdk/openjdk13-openj9:alpine-slim
 RUN mkdir /app
 WORKDIR /app
 
+ENV SPRING_PROFILES_ACTIVE prod
+
 # Pull the dist files from the builder container
 COPY --from=builder /builder/build/libs/* app.jar
 

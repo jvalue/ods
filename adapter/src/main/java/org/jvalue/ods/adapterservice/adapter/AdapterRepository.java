@@ -7,6 +7,9 @@ import org.jvalue.ods.adapterservice.interpreter.Interpreter;
 import org.jvalue.ods.adapterservice.interpreter.JsonInterpreter;
 import org.jvalue.ods.adapterservice.interpreter.XmlInterpreter;
 import org.jvalue.ods.adapterservice.model.AdapterConfig;
+import org.jvalue.ods.adapterservice.repository.DataBlobRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Collection;
@@ -15,7 +18,10 @@ import java.util.Map;
 
 import static java.util.Map.entry;
 
-public class AdapterManager {
+@Service
+public class AdapterRepository {
+
+    private final DataBlobRepository dataRepository;
 
     private static final Map<String, Importer> importers = Map.ofEntries(
             entry("HTTP", new HttpImporter(new RestTemplate()))
@@ -26,8 +32,13 @@ public class AdapterManager {
             entry("CSV", new CsvInterpreter())
    );
 
+    @Autowired
+    public AdapterRepository(DataBlobRepository dataRepository) {
+        this.dataRepository = dataRepository;
+    }
 
-    public static Adapter getAdapter(AdapterConfig config) {
+
+    public Adapter getAdapter(AdapterConfig config) {
         Importer importer = importers.get(config.protocolConfig.protocol);
         if(importer == null) {
             throw new IllegalArgumentException("Importer for protocol " + config.protocolConfig.protocol + " does not exist");
@@ -37,14 +48,14 @@ public class AdapterManager {
             throw new IllegalArgumentException("Interpreter for format " + config.formatConfig.format + " does not exist");
         }
 
-        return new Adapter(importer, interpreter);
+        return new Adapter(importer, interpreter, dataRepository);
     }
 
-    public static Collection<Importer> getAllImporters() {
+    public Collection<Importer> getAllImporters() {
         return importers.values();
     }
 
-    public static Collection<Interpreter> getAllInterpreters() {
+    public Collection<Interpreter> getAllInterpreters() {
         return interpreters.values();
     }
 }
