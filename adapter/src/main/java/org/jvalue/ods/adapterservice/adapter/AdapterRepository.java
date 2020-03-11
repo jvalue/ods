@@ -19,7 +19,7 @@ import java.util.Map;
 import static java.util.Map.entry;
 
 @Service
-public class AdapterManager {
+public class AdapterRepository {
 
     private final DataBlobRepository dataRepository;
 
@@ -33,7 +33,7 @@ public class AdapterManager {
    );
 
     @Autowired
-    public AdapterManager(DataBlobRepository dataRepository) {
+    public AdapterRepository(DataBlobRepository dataRepository) {
         this.dataRepository = dataRepository;
     }
 

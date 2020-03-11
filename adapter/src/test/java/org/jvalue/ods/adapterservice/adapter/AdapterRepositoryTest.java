@@ -15,18 +15,18 @@ import static org.junit.Assert.assertEquals;
 import java.util.Map;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AdapterManagerTest {
+public class AdapterRepositoryTest {
 
     @Mock
     private DataBlobRepository dataBlobRepository;
 
     @InjectMocks
-    private AdapterManager adapterManager;
+    private AdapterRepository adapterRepository;
 
     @Test
     public void testGetHTTPJSONAdapter() {
         AdapterConfig config = new AdapterConfig(new ProtocolConfig("HTTP", Map.of("location", "location")), new FormatConfig("JSON", Map.of()));
-        Adapter result = adapterManager.getAdapter(config);
+        Adapter result = adapterRepository.getAdapter(config);
         assertEquals("HTTP", result.protocol());
         assertEquals("JSON", result.format());
     }
@@ -34,7 +34,7 @@ public class AdapterManagerTest {
     @Test
     public void testGetHTTPXMLAdapter() {
         AdapterConfig config = new AdapterConfig(new ProtocolConfig("HTTP", Map.of("location", "location")), new FormatConfig("XML", Map.of()));
-        Adapter result = adapterManager.getAdapter(config);
+        Adapter result = adapterRepository.getAdapter(config);
         assertEquals("HTTP", result.protocol());
         assertEquals("XML", result.format());
     }
@@ -42,12 +42,12 @@ public class AdapterManagerTest {
     @Test(expected = IllegalArgumentException.class)
     public void testNotExistingProtocol() {
         AdapterConfig config = new AdapterConfig(new ProtocolConfig("N/A", Map.of("location", "location")), new FormatConfig("XML", Map.of()));
-        adapterManager.getAdapter(config);
+        adapterRepository.getAdapter(config);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testNotExistingFormat() {
         AdapterConfig config = new AdapterConfig(new ProtocolConfig("HTTP", Map.of("location", "N/A")), new FormatConfig("location", Map.of()));
-        adapterManager.getAdapter(config);
+        adapterRepository.getAdapter(config);
     }
 }
