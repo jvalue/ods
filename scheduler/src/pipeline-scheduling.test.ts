@@ -10,7 +10,7 @@ import PipelineConfig from './interfaces/pipeline-config'
 
 jest.mock('./clients/adapter-client')
 const mockedExecuteAdapter = executeAdapter as jest.Mock
-mockedExecuteAdapter.mockResolvedValue({})
+mockedExecuteAdapter.mockResolvedValue({ id: 1 })
 
 jest.mock('./clients/transformation-client')
 const mockedExecuteTransformation = executeTransformation as jest.Mock

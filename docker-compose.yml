@@ -61,12 +61,22 @@ services:
     image: registry.gitlab.com/profoss/open-data-service/ods-main/adapter
     build:
       context: ./adapter/
+    depends_on:
+      - adapter-db
+    environment:
+      - DB_URL=jdbc:postgresql://adapter-db:5432/adapterservice
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-adapter.rule=PathPrefix(`/api/adapter`)"
       - "traefik.http.routers.to-adapter.middlewares=adapter-stripprefix@docker"
       - "traefik.http.middlewares.adapter-stripprefix.stripprefix.prefixes=/api/adapter"
       - "traefik.http.services.adapter.loadbalancer.server.port=8080"
+
+  adapter-db:
+    image: postgres
+    environment:
+      - POSTGRES_USER=adapterservice
+      - POSTGRES_PASSWORD=admin
 
   # ----------------- SCHEDULER SERVICE (/scheduler) --------------------
   scheduler:

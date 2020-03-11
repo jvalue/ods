@@ -2,10 +2,8 @@ package org.jvalue.ods.adapterservice.importer;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.jvalue.ods.adapterservice.interpreter.InterpreterParameterDescription;
 
 public abstract class Importer {
 
