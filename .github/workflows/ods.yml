@@ -10,15 +10,18 @@ jobs:
   adapter-build:
     runs-on: ubuntu-latest
 
+    env:
+      IMAGE_NAME: adapter
+
     steps:
       - uses: actions/checkout@v2
 
-      - name: build
+      - name: Build
         run: |
           cd adapter
           docker build -t docker.pkg.github.com/${{ github.repository }}/adapter .
       
-      - name: integrationtest
+      - name: Integrationtest
         run: |
           docker-compose -f docker-compose.yml -f docker-compose.ci.yml build adapter-service-it
           docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d adapter-service
@@ -26,40 +29,24 @@ jobs:
           docker-compose logs
           docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
     
-
-  # Push image to GitHub Packages.
-  # See also https://docs.docker.com/docker-hub/builds/
-  #push:
-  #  # Ensure test job passes before pushing image.
-  #  needs: test
-  #
-  #  runs-on: ubuntu-latest
-  #  if: github.event_name == 'push'
-  #
-  #  steps:
-  #    - uses: actions/checkout@v2
-  #
-  #    - name: Build image
-  #      run: docker build . --file Dockerfile --tag image
-  #
-  #    - name: Log into registry
-  #      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
-  #
-  #    - name: Push image
-  #      run: |
-  #        IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
-  #
-  #         # Strip git ref prefix from version
-  #        VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-  #
-  #        # Strip "v" prefix from tag name
-  #        [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-  #
-  #        # Use Docker `latest` tag convention
-  #        [ "$VERSION" == "master" ] && VERSION=latest
-  #
-  #        echo IMAGE_ID=$IMAGE_ID
-  #        echo VERSION=$VERSION
-  #
-  #        docker tag image $IMAGE_ID:$VERSION
-  #        docker push $IMAGE_ID:$VERSION
+      - name: Log into registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+  
+      - name: Push image
+        run: |
+          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
+  
+           # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+  
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+  
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "master" ] && VERSION=latest
+  
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+  
+          docker tag image $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
