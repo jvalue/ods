@@ -6,11 +6,8 @@ on:
     - master
     - github-ci
 
-env:
-  IMAGE_NAME: adapter
-
 jobs:
-  build:
+  adapter-build:
     runs-on: ubuntu-latest
 
     steps:
