@@ -1,4 +1,4 @@
-name: Adapter Build & Test
+name: ODS Build & Test & Publish
 
 on:
   push:
