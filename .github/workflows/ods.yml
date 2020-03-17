@@ -32,5 +32,5 @@ jobs:
 
           IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/adapter
   
-          docker tag image $IMAGE_ID:latest
+          docker tag $IMAGE_ID $IMAGE_ID:latest
           docker push $IMAGE_ID:latest
