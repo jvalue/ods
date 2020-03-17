@@ -20,9 +20,9 @@ jobs:
       
       - name: integrationtest
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml build adapter-it
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d adapter
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from adapter-it adapter-it
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml build adapter-service-it
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d adapter-service
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from adapter-service-it adapter-service-it
           docker-compose logs
           docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
     
