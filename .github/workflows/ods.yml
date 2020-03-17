@@ -17,6 +17,7 @@ jobs:
         run: |
           cd adapter
           docker build -t docker.pkg.github.com/${{ github.repository }}/adapter .
+          docker images
       
       - name: Integrationtest
         run: |
