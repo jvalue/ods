@@ -2,7 +2,7 @@
 The adapter service fetches data from external data sources and provides them via a HTTP API in JSON format. 
 The data coming from the external sources can be fetched over various protocols and can have various formats.
 ## Current Features
-* Currently the adapter service is only a prototype and can handle JSON and XML files that can be fetched over HTTP.
+* Currently the adapter service is only a prototype and can handle JSON, XML and CSV files that can be fetched over HTTP.
 ## Planned Features
 The handling of new protocols and formats is going to be implemented. 
 
@@ -10,7 +10,6 @@ Planned protocols:
 * ftp
 
 Planned formats:
-* csv
 
 ## Getting Started
 
@@ -28,27 +27,38 @@ Note that you need to delete existing docker images from your local docker daemo
 | *base_url*/version  | GET  | -  | String containing the application version  |
 | *base_url*/formats  | GET  | -  | JsonArray of data formats available for parsing and possible parameters |
 | *base_url*/protocols  | GET  | -  | JsonArray of protocols available for importing and possible parameters  |
-| *base_url*/dataImport  | POST  | AdapterConfig file  | JSON representation of the imported data  |
+| *base_url*/dataImport  | POST  | AdapterConfig file  | Id for the imported data  |
+| *base_url*/data/{id}  | GET  | -  | JSON representation of imported data with {id} |
+
 
 When started via docker-compose *base_url* is `http://localhost:9000/api/adapter`
+
 ### Adapter Config
-Currently the AdapterConfig is JSON File consisting of only three nodes:
-
-
 ```
 {
     "protocol": {
       "type": "HTTP",
       "parameters": {
-        "location": String
+        "location": String,
+        "encoding": String
       }
     }
     "format": {
-      "type": "JSON" | "XML"
-      "parameters": { }
+      "type": "JSON" | "XML" | "CSV"
+      "parameters": { } | CSVParameters
     }
   }
   ```
+
+### CSV Parameters
+```
+{
+  "columnSeparator": char,
+  "lineSeparator": char,
+  "skipFirstDataRow": boolean,
+  "firstRowAsHeader": boolean
+}
+```
 
 ## Architecture
 Each adapter consists of a importer that is responsible for the handling of the data source protocol and a interpreter that reformats the given data to json format.
