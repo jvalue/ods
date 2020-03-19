@@ -103,8 +103,8 @@ public class DatasourceManager {
     return eventRepository.getAllByEventIdAfter(id);
   }
 
-  public Iterable<DatasourceEvent> getEventsByDatasource(Long datasourceId) {
-    return eventRepository.getAllByDatasourceId(datasourceId);
+  public Iterable<DatasourceEvent> getEventsByDatasource(Long datasourceId, Long after) {
+    return eventRepository.getAllByDatasourceIdAndEventIdAfter(datasourceId, after);
   }
 
   public DatasourceEvent getLatestEvent() {
