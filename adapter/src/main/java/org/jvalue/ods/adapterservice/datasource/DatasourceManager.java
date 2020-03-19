@@ -88,7 +88,8 @@ public class DatasourceManager {
     Datasource updated = new Datasource(
       updateConfig.getProtocol(),
       updateConfig.getFormat(),
-      updateConfig.getMetadata());
+      updateConfig.getMetadata(),
+      updateConfig.getTrigger());
     updated.setId(existing.getId());
 
     return updated;

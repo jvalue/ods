@@ -1,0 +1,25 @@
+{
+  "id": 123,
+  "protocol": {
+    "type": "HTTP",
+    "parameters": {
+      "location": "http://www.the-inder.net"
+    }
+  },
+  "format": {
+    "type": "XML",
+    "parameters": {}
+
+  },
+  "trigger": {
+    "firstExecution": "1905-12-01T02:30:00.123Z",
+    "periodic": true,
+    "interval": 50000
+  },
+  "metadata": {
+    "author": "icke",
+    "license": "none",
+    "displayName": "TestName",
+    "description": "Describing..."
+  }
+}

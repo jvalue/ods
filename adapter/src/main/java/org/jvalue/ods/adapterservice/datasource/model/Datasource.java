@@ -24,6 +24,9 @@ public class Datasource {
     @NotNull
     private DatasourceMetadata metadata;
 
+    @NotNull
+    private DatasourceTrigger trigger;
+
     //Constructor for JPA
     private Datasource() {
     }
@@ -32,10 +35,12 @@ public class Datasource {
     public Datasource(
       @JsonProperty("protocol") DatasourceProtocol protocol,
       @JsonProperty("format") DatasourceFormat format,
-      @JsonProperty("metadata") DatasourceMetadata metadata) {
+      @JsonProperty("metadata") DatasourceMetadata metadata,
+      @JsonProperty("trigger") DatasourceTrigger trigger) {
         this.protocol = protocol;
         this.format = format;
         this.metadata = metadata;
+        this.trigger = trigger;
     }
 
     public Long getId() {
@@ -58,6 +63,10 @@ public class Datasource {
       return metadata;
     }
 
+    public DatasourceTrigger getTrigger() {
+      return trigger;
+    }
+
     @Override
     public String toString() {
       return "Datasource{" +
@@ -65,10 +74,11 @@ public class Datasource {
         ", protocol=" + protocol +
         ", format=" + format +
         ", metadata=" + metadata +
+        ", trigger=" + trigger +
         '}';
     }
 
-  @Override
+    @Override
     public boolean equals(Object o) {
       if (this == o) return true;
       if (!(o instanceof Datasource)) return false;
@@ -76,11 +86,12 @@ public class Datasource {
       return Objects.equals(id, that.id) &&
         Objects.equals(protocol, that.protocol) &&
         Objects.equals(format, that.format) &&
-        Objects.equals(metadata, that.metadata);
+        Objects.equals(metadata, that.metadata) &&
+        Objects.equals(trigger, that.trigger);
     }
 
-    @Override
-    public int hashCode() {
-      return Objects.hash(id, protocol, format, metadata);
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, protocol, format, metadata, trigger);
+  }
 }
