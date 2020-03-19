@@ -41,6 +41,7 @@ describe('System-Test', () => {
 
   afterAll(async () => {
     console.log('All tests done, removing pipelines from ods...')
+
     await request(CORE_URL)
       .delete('/')
       .send()
@@ -56,7 +57,7 @@ describe('System-Test', () => {
       .post('/data/test1')
       .send(sourceData)
 
-    const pipelineConfig = generateConfig(MOCK_SERVER_DOCKER+'/data/test1', false)
+    const pipelineConfig = generatePipelineConfig(MOCK_SERVER_DOCKER+'/data/test1', false)
     const notification = generateNotification('data.one === 1', MOCK_SERVER_DOCKER+'/notifications/test1')
     pipelineConfig.notifications = [notification]
 
@@ -91,7 +92,7 @@ describe('System-Test', () => {
       .send(sourceData)
 
     const notification = generateNotification('data.count < 2', MOCK_SERVER_DOCKER+'/notifications/test2')
-    const pipelineConfig = generateConfig(MOCK_SERVER_DOCKER+'/sequences/test2', true, 5000)
+    const pipelineConfig = generatePipelineConfig(MOCK_SERVER_DOCKER+'/sequences/test2', true, 5000)
     pipelineConfig.notifications = [notification]
 
     console.log(`Test 2: Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
@@ -147,7 +148,7 @@ describe('System-Test', () => {
       newField: 12
     }
     const notification = generateNotification('data.newField === 12',MOCK_SERVER_DOCKER+'/notifications/test3')
-    const pipelineConfig = generateConfig(MOCK_SERVER_DOCKER+'/data/test3',false)
+    const pipelineConfig = generatePipelineConfig(MOCK_SERVER_DOCKER+'/data/test3',false)
     pipelineConfig.transformations = [{"func": "data.one = data.one + 1;return data;"}, {"func": "data.newField = 12;return data;"}, {"func": "delete data.objecticus;return data;"}]
     pipelineConfig.notifications = [notification]
 
@@ -187,7 +188,7 @@ describe('System-Test', () => {
       .send(updatedSourceData)
 
     const notification = generateNotification('data.one === 1', MOCK_SERVER_DOCKER+'/notifications/test4_1')
-    const pipelineConfig = generateConfig(MOCK_SERVER_DOCKER+'/data/test4',true)
+    const pipelineConfig = generatePipelineConfig(MOCK_SERVER_DOCKER+'/data/test4',true)
     pipelineConfig.notifications = [notification]
 
     console.log(`Test 4: Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
@@ -254,7 +255,7 @@ describe('System-Test', () => {
       .post('/data/test5')
       .send(sourceData)
 
-    const pipelineConfig = generateConfig(MOCK_SERVER_DOCKER+'/data/test5', false)
+    const pipelineConfig = generatePipelineConfig(MOCK_SERVER_DOCKER+'/data/test5', false)
     const notification1 = generateNotification('data.one === 1', MOCK_SERVER_DOCKER+'/notifications/test5_1')
     const notification2 = generateNotification('data.one === 1', MOCK_SERVER_DOCKER+'/notifications/test5_2')
     const notification3 = generateNotification('data.one < 1', MOCK_SERVER_DOCKER+'/notifications/test5_3')
@@ -300,7 +301,7 @@ describe('System-Test', () => {
       .post('/data/test6')
       .send(sourceData)
 
-    const pipelineConfig = generateConfig(MOCK_SERVER_DOCKER+'/data/test6', true, 10000)
+    const pipelineConfig = generatePipelineConfig(MOCK_SERVER_DOCKER+'/data/test6', true, 10000)
     const notification = generateNotification('data.one === 1', MOCK_SERVER_DOCKER+'/notifications/test6')
     pipelineConfig.notifications = [notification]
 
@@ -337,7 +338,7 @@ function generateNotification(condition, url) {
   }
 }
 
-function generateConfig(sourceLocation, periodic, interval = 5000) {
+function generatePipelineConfig(sourceLocation, periodic, interval = 5000) {
   return {
     adapter: {
       protocol: {
