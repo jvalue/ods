@@ -27,13 +27,16 @@ public class EventsEndpoint {
     }
 
     @GetMapping
-    public Iterable<DatasourceEvent> getEvents(@RequestParam(value = "after", defaultValue = "0") Long after) {
+    public Iterable<DatasourceEvent> getEvents(@RequestParam(value = "after", defaultValue = "0") Long after,
+                                               @RequestParam(value = "datasourceId", required = false) Long datasourceId) {
+        if(datasourceId != null) {
+          return getEventsByDatasourceAfter(datasourceId, after);
+        }
         return datasourceManager.getEventsAfter(after);
     }
 
-    @GetMapping("/datasource/{id}")
-    public Iterable<DatasourceEvent> getEventsByDatasource(@NotNull @PathVariable Long id) {
-        return datasourceManager.getEventsByDatasource(id);
+    private Iterable<DatasourceEvent> getEventsByDatasourceAfter(Long id, Long after) {
+        return datasourceManager.getEventsByDatasource(id, after);
     }
 
     @GetMapping("/latest")

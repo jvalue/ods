@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 @Repository
 public interface DatasourceEventRepository extends CrudRepository<DatasourceEvent, Long> {
 
-    Iterable<DatasourceEvent> getAllByDatasourceId(@NotNull Long pipelineId);
+    Iterable<DatasourceEvent> getAllByDatasourceIdAndEventIdAfter(@NotNull Long datasourceId, @NotNull Long after);
 
     Iterable<DatasourceEvent> getAllByEventIdAfter(@NotNull Long eventId);
 

@@ -1,7 +1,7 @@
-const request = require("supertest");
-const waitOn = require("wait-on");
+const request = require("supertest")
+const waitOn = require("wait-on")
 
-const URL = process.env.CORE_API || "http://localhost:8080";
+const URL = process.env.ADAPTER_API || "http://localhost:9000/api/adapter";
 
 describe("Adapter Configuration", () => {
   console.log("Adapter-Service URL= " + URL);
@@ -65,7 +65,7 @@ describe("Adapter Configuration", () => {
       .get("/datasources/" + datasourceId);
 
     let updatedConfig = Object.assign({}, datasourceConfig);
-    updatedConfig.adapter.location = "http://www.disrespect.com";
+    updatedConfig.protocol.parameters.location = "http://www.disrespect.com";
 
     const putResponse = await request(URL)
       .put("/datasources/" + datasourceId)
@@ -105,16 +105,16 @@ describe("Adapter Configuration", () => {
     expect(delResponse.status).toEqual(204)
   });
 
-  test("GET /events", async () => {
+  test("GET /datasources/events", async () => {
     const response = await request(URL)
-        .get("/events")
+        .get("/datasources/events")
         .send();
 
     expect(response.status).toEqual(200);
     expect(response.type).toEqual("application/json");
   });
 
-  test("GET /events/datasources/{id}", async () => {
+  test("GET /datasources/events?datasourceId={id}", async () => {
     const datasourceResponse = await request(URL)
         .post("/datasources")
         .send(datasourceConfig);
@@ -124,7 +124,7 @@ describe("Adapter Configuration", () => {
         .delete("/datasources/" + datasourceId);
 
     const eventsResponse = await request(URL)
-        .get("/events/datasources/" + datasourceId)
+        .get("/datasources/events?datasourceId=" + datasourceId)
         .send();
 
     expect(eventsResponse.status).toEqual(200);
@@ -146,12 +146,12 @@ describe("Adapter Configuration", () => {
         .delete("/datasources/" + datasourceId);
 
     const eventsResponse = await request(URL)
-        .get("/events/datasources/" + datasourceId)
+        .get("/datasources/events" + datasourceId)
         .send();
     const eventId = eventsResponse.body[0].eventId;
 
     const eventsAfter = await request(URL)
-        .get("/events?after="+eventId)
+        .get("/datasources/events?after="+eventId)
         .send();
 
     expect(eventsAfter.status).toEqual(200);
@@ -173,7 +173,7 @@ describe("Adapter Configuration", () => {
         .send();
 
     const response = await request(URL)
-        .get("/events/latest")
+        .get("datasources/events/latest")
         .send();
 
     expect(response.status).toEqual(200);
@@ -183,20 +183,19 @@ describe("Adapter Configuration", () => {
     expect(response.body.datasourceId).toBe(datasourceId);
     expect(response.body.eventType).toEqual("DATASOURCE_DELETE");
   });
+});
 
 const datasourceConfig = {
   "id": 12345,
-  "adapter": {
-    "protocol": {
-      "type": "HTTP",
-      "parameters": {
-        "location": "http://www.nodisrespect.org"
-      }
-    },
-    "format": {
-      "type": "XML",
-      "parameters": {}
+  "protocol": {
+    "type": "HTTP",
+    "parameters": {
+      "location": "http://www.nodisrespect.org"
     }
+  },
+  "format": {
+    "type": "XML",
+    "parameters": {}
   },
   "trigger": {
     "firstExecution": "1905-12-01T02:30:00.123Z",
@@ -209,4 +208,4 @@ const datasourceConfig = {
     "displayName": "test datasource 1",
     "description": "integraiton testing datasources"
   },
-};
+}
