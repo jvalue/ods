@@ -1,11 +1,10 @@
 package org.jvalue.ods.adapterservice.adapter;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.jvalue.ods.adapterservice.importer.Importer;
-import org.jvalue.ods.adapterservice.interpreter.Interpreter;
-import org.jvalue.ods.adapterservice.model.AdapterConfig;
-import org.jvalue.ods.adapterservice.model.DataBlob;
-import org.jvalue.ods.adapterservice.repository.DataBlobRepository;
+import org.jvalue.ods.adapterservice.adapter.importer.Importer;
+import org.jvalue.ods.adapterservice.adapter.interpreter.Interpreter;
+import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
+import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
