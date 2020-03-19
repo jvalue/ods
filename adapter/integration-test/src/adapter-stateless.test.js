@@ -6,7 +6,7 @@ const MOCK_SERVER_PORT = process.env.MOCK_SERVER_PORT || 8081;
 const MOCK_SERVER_HOST = process.env.MOCK_SERVER_HOST || "localhost";
 const MOCK_SERVER_URL = "http://" + MOCK_SERVER_HOST + ":" + MOCK_SERVER_PORT;
 
-describe("Adapter", () => {
+describe("Adapter Stateless", () => {
   console.log("Adapter-Service URL= " + URL);
 
   beforeAll(async () => {
