@@ -42,10 +42,9 @@ describe("Core", () => {
     expect(response.status).toEqual(201);
     expect(response.header.location).toContain(response.body.id);
     expect(response.body.transformations).toEqual(pipelineConfig.transformations);
-    expect(response.body.adapter).toEqual(pipelineConfig.adapter);
-    expect(response.body.trigger).toEqual(pipelineConfig.trigger);
     expect(response.body.id).toBeDefined();
     expect(response.body.id).not.toEqual(pipelineConfig.id); // id not under control of client
+    expect(response.body.datasourceId).toEqual(pipelineConfig.datasourceId);
 
     //Check if notifications were stored correctly
     expect(response.body.notifications).toHaveLength(pipelineConfig.notifications.length)
@@ -73,8 +72,8 @@ describe("Core", () => {
     const originalGetResponse = await request(URL)
       .get("/pipelines/" + pipelineId);
 
-    let updatedConfig = pipelineConfig;
-    updatedConfig.adapter.location = "http://www.disrespect.com";
+    let updatedConfig = Object.assign({}, pipelineConfig);
+    updatedConfig.datasourceId = 999;
 
     const putResponse = await request(URL)
       .put("/pipelines/" + pipelineId)
@@ -88,7 +87,7 @@ describe("Core", () => {
     expect(originalGetResponse.body.transformations).toEqual(updatedGetResponse.body.transformations);
     expect(originalGetResponse.body.metadata).toEqual(updatedGetResponse.body.metadata);
     expect(originalGetResponse.body.id).toEqual(updatedGetResponse.body.id);
-    expect(originalGetResponse.body.adapter).toEqual(updatedGetResponse.body.adapter);
+    expect(originalGetResponse.datasourceId).not.toEqual(updatedGetResponse.datasourceId);
 
     const delResponse = await request(URL)
         .delete("/pipelines/" + pipelineId)
@@ -308,18 +307,7 @@ describe("Core", () => {
 
 const pipelineConfig = {
   "id": 12345,
-  "adapter": {
-    "protocol": {
-      "type": "HTTP",
-      "parameters": {
-        "location": "http://www.nodisrespect.org"
-      }
-    },
-    "format": {
-      "type": "XML",
-      "parameters": {}
-    }
-  },
+  "datasourceId": 1,
   "transformations": [
     {
       "func": "return data+data;",
@@ -330,11 +318,6 @@ const pipelineConfig = {
       "data": "[]"
     }
   ],
-  "trigger": {
-    "firstExecution": "1905-12-01T02:30:00.123Z",
-    "periodic": true,
-    "interval": 50000
-  },
   "metadata": {
     "author": "icke",
     "license": "none",
