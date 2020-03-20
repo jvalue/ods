@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.Optional;
 
 @Service
@@ -28,8 +29,11 @@ public class DatasourceManager {
 
   @Transactional
   public Datasource createDatasource(Datasource config) {
+    config.getMetadata().setCreationTimestamp(new Date()); // creation time documented by server
+
     Datasource savedConfig = datasourceRepository.save(config);
     eventRepository.save(new DatasourceEvent(EventType.DATASOURCE_CREATE, savedConfig.getId()));
+
     return savedConfig;
   }
 
@@ -88,7 +92,7 @@ public class DatasourceManager {
     Datasource updated = new Datasource(
       updateConfig.getProtocol(),
       updateConfig.getFormat(),
-      updateConfig.getMetadata(),
+      updatedMetadata,
       updateConfig.getTrigger());
     updated.setId(existing.getId());
 

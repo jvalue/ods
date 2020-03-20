@@ -18,7 +18,10 @@ public class DatasourceMetadata {
     @NotNull
     private String displayName;
 
+    @NotNull
     private String license;
+
+    @NotNull
     private String description;
 
     @NotNull

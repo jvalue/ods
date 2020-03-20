@@ -146,7 +146,7 @@ describe("Adapter Configuration", () => {
         .delete("/datasources/" + datasourceId);
 
     const eventsResponse = await request(URL)
-        .get("/datasources/events" + datasourceId)
+        .get("/datasources/events?datasourceId=" + datasourceId)
         .send();
     const eventId = eventsResponse.body[0].eventId;
 
