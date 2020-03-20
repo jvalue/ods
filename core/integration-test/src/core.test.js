@@ -87,7 +87,7 @@ describe("Core", () => {
     expect(originalGetResponse.body.transformations).toEqual(updatedGetResponse.body.transformations);
     expect(originalGetResponse.body.metadata).toEqual(updatedGetResponse.body.metadata);
     expect(originalGetResponse.body.id).toEqual(updatedGetResponse.body.id);
-    expect(originalGetResponse.datasourceId).not.toEqual(updatedGetResponse.datasourceId);
+    expect(originalGetResponse.body.datasourceId).not.toEqual(updatedGetResponse.body.datasourceId);
 
     const delResponse = await request(URL)
         .delete("/pipelines/" + pipelineId)
