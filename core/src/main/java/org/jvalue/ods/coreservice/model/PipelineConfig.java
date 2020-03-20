@@ -2,7 +2,6 @@ package org.jvalue.ods.coreservice.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.jvalue.ods.coreservice.model.adapter.AdapterConfig;
 import org.jvalue.ods.coreservice.model.notification.NotificationConfig;
 
 import javax.persistence.*;
@@ -19,14 +18,11 @@ public class PipelineConfig implements Serializable {
     @Column(name = "id") // referenced by embedded adapter config for format and protocol
     private Long id;
 
-    @Embedded @NotNull
-    private AdapterConfig adapter;
+    @NotNull
+    private Long datasourceId;
 
     @ElementCollection @NotNull
     private List<TransformationConfig> transformations;
-
-    @Embedded @NotNull
-    private PipelineTriggerConfig trigger;
 
     @Embedded @NotNull
     private PipelineMetadata metadata;
@@ -38,41 +34,14 @@ public class PipelineConfig implements Serializable {
     public PipelineConfig() {}
 
     @JsonCreator
-    public PipelineConfig(
-            @JsonProperty("adapter") AdapterConfig adapter,
-            @JsonProperty("transformations") List<TransformationConfig> transformations,
-            @JsonProperty("trigger") PipelineTriggerConfig trigger,
-            @JsonProperty("metadata") PipelineMetadata metadata,
-            @JsonProperty("notifications") List<NotificationConfig> notifications) {
-        this.adapter = adapter;
+    public PipelineConfig(@JsonProperty("datasourceId")  Long datasourceId,
+      @JsonProperty("transformations") List<TransformationConfig> transformations,
+      @JsonProperty("metadata") PipelineMetadata metadata,
+      @JsonProperty("notifications") List<NotificationConfig> notifications) {
+        this.datasourceId = datasourceId;
         this.transformations = transformations;
-        this.trigger = trigger;
         this.metadata = metadata;
         this.notifications = notifications;
-    }
-
-    @Override
-    public String toString() {
-        return "PipelineConfig{" +
-                "id=" + id +
-                ", adapter=" + adapter +
-                ", transformations=" + transformations.toString() +
-                ", trigger=" + trigger +
-                ", metadata=" + metadata +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        PipelineConfig that = (PipelineConfig) o;
-        return id.equals(that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 
     public Long getId() {
@@ -83,12 +52,12 @@ public class PipelineConfig implements Serializable {
         this.id = id;
     }
 
-    public AdapterConfig getAdapter() {
-        return adapter;
+    public Long getDatasourceId() {
+      return datasourceId;
     }
 
-    public void setAdapter(AdapterConfig adapter) {
-        this.adapter = adapter;
+    public void setDatasourceId(Long datasourceId) {
+      this.datasourceId = datasourceId;
     }
 
     public List<TransformationConfig> getTransformations() {
@@ -97,14 +66,6 @@ public class PipelineConfig implements Serializable {
 
     public void setTransformations(List<TransformationConfig> transformations) {
         this.transformations = transformations;
-    }
-
-    public PipelineTriggerConfig getTrigger() {
-        return trigger;
-    }
-
-    public void setTrigger(PipelineTriggerConfig trigger) {
-        this.trigger = trigger;
     }
 
     public PipelineMetadata getMetadata() {
@@ -122,4 +83,32 @@ public class PipelineConfig implements Serializable {
     public void removeNotification(NotificationConfig notification) {
         this.notifications.remove(notification);
     }
- }
+
+    @Override
+    public String toString() {
+        return "PipelineConfig{" +
+          "id=" + id +
+          ", datasourceId=" + datasourceId +
+          ", transformations=" + transformations +
+          ", metadata=" + metadata +
+          ", notifications=" + notifications +
+          '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PipelineConfig)) return false;
+        PipelineConfig that = (PipelineConfig) o;
+        return Objects.equals(id, that.id) &&
+          Objects.equals(datasourceId, that.datasourceId) &&
+          Objects.equals(transformations, that.transformations) &&
+          Objects.equals(metadata, that.metadata) &&
+          Objects.equals(notifications, that.notifications);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, datasourceId, transformations, metadata, notifications);
+    }
+}

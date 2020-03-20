@@ -1,17 +1,6 @@
 {
   "id": 123,
-  "adapter": {
-    "protocol": {
-      "type": "HTTP",
-      "parameters": {
-        "location": "http://www.the-inder.net"
-      }
-    },
-    "format": {
-      "type": "XML",
-      "parameters": {}
-    }
-  },
+  "datasourceId": 1,
   "transformations": [
     {
       "func": "return data+data;",
@@ -22,11 +11,6 @@
       "data": "[]"
     }
   ],
-  "trigger": {
-    "firstExecution": "1905-12-01T02:30:00.123Z",
-    "periodic": true,
-    "interval": 50000
-  },
   "metadata": {
     "author": "icke",
     "license": "none",
