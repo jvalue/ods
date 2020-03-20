@@ -87,9 +87,8 @@ public class PipelineManager {
         updatedMetadata.setCreationTimestamp(existing.getMetadata().getCreationTimestamp());
 
         PipelineConfig updated = new PipelineConfig(
-                updateConfig.getAdapter(),
+                updateConfig.getDatasourceId(),
                 updateConfig.getTransformations(),
-                updateConfig.getTrigger(),
                 updatedMetadata,
                 updateConfig.getNotifications());
         updated.setId(existing.getId());
