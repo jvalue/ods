@@ -93,6 +93,8 @@ DELETE {{baseURL}}/datasources/ HTTP/1.1
 ### Get all datasource events
 GET {{baseURL}}/datasources/events  HTTP/1.1
 
+### Get latest datasource events
+GET {{baseURL}}/datasources/events/latest  HTTP/1.1
 
 @datasourceId = 1
 ### Get all datasource events for datasource x
