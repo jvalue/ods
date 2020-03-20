@@ -162,7 +162,7 @@ describe("Adapter Configuration", () => {
     expect(eventsAfter.body[0].eventType).toEqual("DATASOURCE_DELETE");
   });
 
-  test("GET /events/latest", async () => {
+  test("GET datasources/events/latest", async () => {
     const postResponse = await request(URL)
         .post("/datasources")
         .send(datasourceConfig);
@@ -173,7 +173,7 @@ describe("Adapter Configuration", () => {
         .send();
 
     const response = await request(URL)
-        .get("datasources/events/latest")
+        .get("/datasources/events/latest")
         .send();
 
     expect(response.status).toEqual(200);
