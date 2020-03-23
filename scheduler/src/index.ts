@@ -2,8 +2,9 @@ import express from 'express'
 
 import schedule from 'node-schedule'
 
-import * as PipelineScheduling from './pipeline-scheduling'
-import { CONFIG_SERVICE_URL } from './clients/core-client'
+import * as Scheduling from './scheduling'
+import { ADAPTER_SERVICE_URL } from './clients/adapter-client'
+import * as CoreClient from './clients/core-client'
 
 const app = express()
 const port = 8080
@@ -29,40 +30,65 @@ app.get('/version', (req, res) => {
 })
 app.get('/jobs', (req, res) => {
   res.header('Content-Type', 'application/json')
-  res.json(PipelineScheduling.getAllJobs())
+  res.json(Scheduling.getAllJobs())
 })
 
-let pipelineConfigPollingJob: schedule.Job
+let datasourcePollingJob: schedule.Job
 
-async function updatePipelines (): Promise<void> {
+async function updateDatsources (): Promise<void> {
   try {
-    return PipelineScheduling.updatePipelines()
+    return Scheduling.updateDatasources()
   } catch (e) {
     return console.log(e)
   }
 }
 
-async function initPipelineJobs (): Promise<void> {
-  console.log('Starting sync with Configuration Service on URL ' + CONFIG_SERVICE_URL)
-  await PipelineScheduling.initializeJobs(INITIAL_CONNECTION_RETRIES, INITIAL_CONNECTION_RETRY_BACKOFF)
+async function initJobs (): Promise<void> {
+  console.log('Starting sync with Adapter Service on URL ' + ADAPTER_SERVICE_URL)
+  await Scheduling.initializeJobs(INITIAL_CONNECTION_RETRIES, INITIAL_CONNECTION_RETRY_BACKOFF)
     .catch(() => {
       console.error('Scheduler: Initialization failed. Shutting down server...')
       server.close()
       process.exit()
     })
 
-  pipelineConfigPollingJob = schedule.scheduleJob(
-    'PipelineEventPollingJob',
+  datasourcePollingJob = schedule.scheduleJob(
+    'DatasourceEventPollingJob',
     CHRONJOB_EVERY_2_SECONDS,
-    updatePipelines)
+    updateDatsources)
+}
+
+async function initPipelineConfigSync (retries = 30, retryBackoff = 3000): Promise<void> {
+  try {
+    console.log('Starting sync with Core Service')
+    await CoreClient.initSync()
+  } catch (e) {
+    if (retries === 0) {
+      return Promise.reject(new Error('Failed to initialize pipelineConfig sync.'))
+    }
+    if (e.code === 'ECONNREFUSED' || e.code === 'ENOTFOUND') {
+      console.error(`Failed to sync with Core Service on initialization (${retries}) . Retrying after ${retryBackoff}ms... `)
+    } else {
+      console.error(e)
+      console.error(`Retrying (${retries})...`)
+    }
+    await new Promise(resolve => setTimeout(resolve, retryBackoff)) // sleep
+    await initPipelineConfigSync(retries - 1, retryBackoff)
+  }
+
+  datasourcePollingJob = schedule.scheduleJob(
+    'PipelineConfigSyncJob',
+    CHRONJOB_EVERY_2_SECONDS,
+    CoreClient.sync)
 }
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
-initPipelineJobs()
+initJobs()
+initPipelineConfigSync()
 
 process.on('SIGTERM', async () => {
   console.info('Scheduler: SIGTERM signal received.')
-  schedule.cancelJob(pipelineConfigPollingJob)
-  PipelineScheduling.cancelAllJobs()
+  schedule.cancelJob(datasourcePollingJob)
+  Scheduling.cancelAllJobs()
   await server.close()
 })
