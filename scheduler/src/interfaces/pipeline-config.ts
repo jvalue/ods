@@ -1,15 +1,17 @@
-import TriggerConfig from './trigger-config'
-import Metadata from './metadata'
-import AdapterConfig from './adapter-config'
 import NotificationConfig from './notification-config'
 
 export default interface PipelineConfig {
   id: number;
+  datasourceId: number;
 
-  adapter: AdapterConfig;
   transformations: object[];
   persistence: object;
-  metadata: Metadata;
-  trigger: TriggerConfig;
+  metadata: PipelineMetadata;
   notifications: NotificationConfig[];
+}
+
+export interface PipelineMetadata {
+  displayName: string;
+  creationTimestamp: Date;
+  license: string;
 }
