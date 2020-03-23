@@ -61,10 +61,6 @@ describe('System-Test', () => {
       .send(sourceData)
 
     const datasourceConfig = generateDataSourceConfig(MOCK_SERVER_DOCKER+'/data/test1', false)
-    const pipelineConfig = generatePipelineConfig()
-
-    const notification = generateNotification('data.one === 1', MOCK_SERVER_DOCKER+'/notifications/test1')
-    pipelineConfig.notifications = [notification]
 
     console.log(`Test 1: Trying to create datasource: ${JSON.stringify(datasourceConfig)}`)
 
@@ -72,12 +68,14 @@ describe('System-Test', () => {
     const adapterResponse = await request(ADAPTER_URL)
     .post('/datasources')
     .send(datasourceConfig)
-    const datasourceId = adapterResponse.body.id
 
-    console.log(`Test 1: Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
 
     // Add pipeline to core service
-    pipelineConfig.datasourceId = datasourceId
+    const pipelineConfig = generatePipelineConfig(adapterResponse.body.id)
+    const notification = generateNotification('data.one === 1', MOCK_SERVER_DOCKER+'/notifications/test1')
+    pipelineConfig.notifications = [notification]
+
+    console.log(`Test 1: Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
     const pipelineResponse = await request(CORE_URL)
       .post('/pipelines')
       .send(pipelineConfig)
@@ -105,24 +103,22 @@ describe('System-Test', () => {
       .post('/sequences/test2')
       .send(sourceData)
 
-    const notification = generateNotification('data.count < 2', MOCK_SERVER_DOCKER+'/notifications/test2')
-
-    const datasourceConfig = generateDataSourceConfig(MOCK_SERVER_DOCKER+'/sequences/test2', true, 5000)
-    const pipelineConfig = generatePipelineConfig()
-    pipelineConfig.notifications = [notification]
-
-    console.log(`Test 2: Trying to create datasource: ${JSON.stringify(datasourceConfig)}`)
 
     // Add datasource to adapter service
+    const datasourceConfig = generateDataSourceConfig(MOCK_SERVER_DOCKER+'/sequences/test2', true, 5000)
+
+    console.log(`Test 2: Trying to create datasource: ${JSON.stringify(datasourceConfig)}`)
     const adapterResponse = await request(ADAPTER_URL)
     .post('/datasources')
     .send(datasourceConfig)
-    const datasourceId = adapterResponse.body.id
 
-    console.log(`Test 2: Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
 
     // Add pipeline to core service
-    pipelineConfig.datasourceId = datasourceId
+    const pipelineConfig = generatePipelineConfig(adapterResponse.body.id)
+    const notification = generateNotification('data.count < 2', MOCK_SERVER_DOCKER+'/notifications/test2')
+    pipelineConfig.notifications = [notification]
+
+    console.log(`Test 2: Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
     const pipelineResponse = await request(CORE_URL)
       .post('/pipelines')
       .send(pipelineConfig)
@@ -172,12 +168,8 @@ describe('System-Test', () => {
       two: "two",
       newField: 12
     }
-    const notification = generateNotification('data.newField === 12',MOCK_SERVER_DOCKER+'/notifications/test3')
 
     const datasourceConfig = generateDataSourceConfig(MOCK_SERVER_DOCKER+'/data/test3',false)
-    const pipelineConfig = generatePipelineConfig()
-    pipelineConfig.transformations = [{"func": "data.one = data.one + 1;return data;"}, {"func": "data.newField = 12;return data;"}, {"func": "delete data.objecticus;return data;"}]
-    pipelineConfig.notifications = [notification]
 
     console.log(`Test 3: Trying to create datasource: ${JSON.stringify(datasourceConfig)}`)
 
@@ -185,12 +177,15 @@ describe('System-Test', () => {
     const adapterResponse = await request(ADAPTER_URL)
     .post('/datasources')
     .send(datasourceConfig)
-    const datasourceId = adapterResponse.body.id
 
-    console.log(`Test 3: Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
 
     // Add pipeline to core service
-    pipelineConfig.datasourceId = datasourceId
+    const pipelineConfig = generatePipelineConfig(adapterResponse.body.id)
+    pipelineConfig.transformations = [{"func": "data.one = data.one + 1;return data;"}, {"func": "data.newField = 12;return data;"}, {"func": "delete data.objecticus;return data;"}]
+    const notification = generateNotification('data.newField === 12',MOCK_SERVER_DOCKER+'/notifications/test3')
+    pipelineConfig.notifications = [notification]
+
+    console.log(`Test 3: Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
     const pipelineResponse = await request(CORE_URL)
       .post('/pipelines')
       .send(pipelineConfig)
@@ -223,11 +218,7 @@ describe('System-Test', () => {
       .post('/data/test4_updated')
       .send(updatedSourceData)
 
-    const notification = generateNotification('data.one === 1', MOCK_SERVER_DOCKER+'/notifications/test4_1')
-
     const datasourceConfig = generateDataSourceConfig(MOCK_SERVER_DOCKER+'/data/test4',true)
-    const pipelineConfig = generatePipelineConfig()
-    pipelineConfig.notifications = [notification]
 
     console.log(`Test 4: Trying to create datasource: ${JSON.stringify(datasourceConfig)}`)
 
@@ -235,12 +226,13 @@ describe('System-Test', () => {
     const adapterResponse = await request(ADAPTER_URL)
     .post('/datasources')
     .send(datasourceConfig)
-    const datasourceId = adapterResponse.body.id
-
-    console.log(`Test 4: Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
 
     // Add pipeline to core service
-    pipelineConfig.datasourceId = datasourceId
+    const pipelineConfig = generatePipelineConfig(adapterResponse.body.id)
+    const notification = generateNotification('data.one === 1', MOCK_SERVER_DOCKER+'/notifications/test4_1')
+    pipelineConfig.notifications = [notification]
+
+    console.log(`Test 4: Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
     const pipelineResponse = await request(CORE_URL)
       .post('/pipelines')
       .send(pipelineConfig)
@@ -303,12 +295,6 @@ describe('System-Test', () => {
       .send(sourceData)
 
     const datasourceConfig = generateDataSourceConfig(MOCK_SERVER_DOCKER+'/data/test5', false)
-    const pipelineConfig = generatePipelineConfig()
-
-    const notification1 = generateNotification('data.one === 1', MOCK_SERVER_DOCKER+'/notifications/test5_1')
-    const notification2 = generateNotification('data.one === 1', MOCK_SERVER_DOCKER+'/notifications/test5_2')
-    const notification3 = generateNotification('data.one < 1', MOCK_SERVER_DOCKER+'/notifications/test5_3')
-    pipelineConfig.notifications = [notification1, notification2, notification3]
 
     console.log(`Test 5: Trying to create datasource: ${JSON.stringify(datasourceConfig)}`)
 
@@ -316,12 +302,15 @@ describe('System-Test', () => {
     const adapterResponse = await request(ADAPTER_URL)
     .post('/datasources')
     .send(datasourceConfig)
-    const datasourceId = adapterResponse.body.id
-
-    console.log(`Test 5: Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
 
     // Add pipeline to core service
-    pipelineConfig.datasourceId = datasourceId
+    const pipelineConfig = generatePipelineConfig(adapterResponse.body.id)
+    const notification1 = generateNotification('data.one === 1', MOCK_SERVER_DOCKER+'/notifications/test5_1')
+    const notification2 = generateNotification('data.one === 1', MOCK_SERVER_DOCKER+'/notifications/test5_2')
+    const notification3 = generateNotification('data.one < 1', MOCK_SERVER_DOCKER+'/notifications/test5_3')
+    pipelineConfig.notifications = [notification1, notification2, notification3]
+
+    console.log(`Test 5: Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
     const pipelineResponse = await request(CORE_URL)
       .post('/pipelines')
       .send(pipelineConfig)
@@ -360,7 +349,7 @@ describe('System-Test', () => {
       .send(sourceData)
 
     const datasourceConfig = generateDataSourceConfig(MOCK_SERVER_DOCKER+'/data/test6', true, 10000)
-    const pipelineConfig = generatePipelineConfig()
+    const pipelineConfig = generatePipelineConfig(datasourceConfig.id)
 
     const notification = generateNotification('data.one === 1', MOCK_SERVER_DOCKER+'/notifications/test6')
     pipelineConfig.notifications = [notification]
@@ -394,7 +383,6 @@ describe('System-Test', () => {
     console.log(`Test 6: Pipeline ${pipelineId} deletion request triggered`)
 
     const unchanged = await webhookRemainsUnchanged('test6', 5000)
-    console.log(unchanged)
     expect(unchanged).toEqual(true)
   }, 10000)
 })
@@ -409,18 +397,16 @@ function generateNotification(condition, url) {
 
 function generateDataSourceConfig(sourceLocation, periodic, interval = 5000) {
   return {
-    adapter: {
-      protocol: {
-        type: "HTTP",
-        parameters: {
-          location: sourceLocation,
-          encoding: 'UTF-8'
-        }
-      },
-      format: {
-        type: "JSON",
-        parameters: {}
+    protocol: {
+      type: "HTTP",
+      parameters: {
+        location: sourceLocation,
+        encoding: 'UTF-8'
       }
+    },
+    format: {
+      type: "JSON",
+      parameters: {}
     },
     trigger: {
       firstExecution: new Date(Date.now() + 2000),
@@ -433,10 +419,12 @@ function generateDataSourceConfig(sourceLocation, periodic, interval = 5000) {
       displayName: "test1",
       description: "system test 1"
     },
+  }
 }
 
-function generatePipelineConfig() {
+function generatePipelineConfig(datasourceId) {
   return {
+    datasourceId: datasourceId,
     transformations: [],
     metadata: {
       author: "Klaus Klausemeier",
