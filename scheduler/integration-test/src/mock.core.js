@@ -7,17 +7,7 @@ const PORT = process.env.MOCK_CORE_PORT || 8081
 const PIPELINES = [
   {
     id: 123,
-    adapter: {
-      protocol: {
-        type: "HTTP",
-        parameters: {
-          location: "testlocation.de/api"
-        },
-      },
-      format: {
-        type: "XML"
-      }
-    },
+    datasourceId: 1,
     transformations: [{
       func: 'return data;' // not performed in integration testing
     }, {
@@ -25,37 +15,17 @@ const PIPELINES = [
     }],
     persistence: {},
     metadata: {},
-    trigger: {
-      periodic: true,
-      firstExecution: '2018-10-07T01:32:00.123Z',
-      interval: 10000
-    },
     notifications: []
   },
   {
     id: 125,
-    adapter: {
-      protocol: {
-        type: "HTTP",
-        parameters: {
-          location: "testlocation.de/api"
-        },
-      },
-      format: {
-        type: "XML"
-      }
-    },
+    datasourceId: 2,
     transformations: [{
       func: 'return 1;' // not peformed in integration testing
     }],
     persistence: {},
     metadata: {
       displayName: 'nordstream'
-    },
-    trigger: {
-      periodic: true,
-      firstExecution: '2018-10-07T01:32:00.123Z',
-      interval: 10000
     },
     notifications: [
       {
