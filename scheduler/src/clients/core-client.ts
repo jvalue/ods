@@ -105,6 +105,7 @@ function addPipelineToCache(pipeline: PipelineConfig) {
 
 function deletePipelineFromCache(pipeline: PipelineConfig) {
   id_to_pipeline.delete(pipeline.id)
+
   const storedPipelines = datasourceid_to_pipelines.get(pipeline.datasourceId) || []
   const cleanedPipelines = storedPipelines.filter((x) => x.id != pipeline.id)
   datasourceid_to_pipelines.set(pipeline.datasourceId, cleanedPipelines)
