@@ -83,8 +83,8 @@ async function initPipelineConfigSync (retries = 30, retryBackoff = 3000): Promi
 }
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
-initJobs()
 initPipelineConfigSync()
+initJobs()
 
 process.on('SIGTERM', async () => {
   console.info('Scheduler: SIGTERM signal received.')
