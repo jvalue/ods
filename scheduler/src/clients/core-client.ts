@@ -57,14 +57,14 @@ export async function sync (): Promise<void> {
   const events = await getEventsAfter(lastSeenEventId)
 
   for(const event of events) {
-    handleEvent(event)
+    await handleEvent(event)
     if(event.eventId > lastSeenEventId) {
       lastSeenEventId = event.eventId
     }
   }
 }
 
-async function handleEvent(event: PipelineEvent) {
+async function handleEvent(event: PipelineEvent): Promise<void> {
   const pipeline = await getPipeline(event.pipelineId)
   switch (event.eventType) {
     case EventType.PIPELINE_DELETE: {
@@ -72,7 +72,7 @@ async function handleEvent(event: PipelineEvent) {
       break
     }
     case EventType.PIPELINE_CREATE:
-      createStorageStructure(pipeline.id)
+      await createStorageStructure(pipeline.id)
       addPipelineToCache(pipeline)
       break
     case EventType.PIPELINE_UPDATE: {
@@ -87,7 +87,7 @@ async function handleEvent(event: PipelineEvent) {
   }
 }
 
-export function getCachedPipelineById(pipelineId: number) {
+export function getCachedPipelineById(pipelineId: number): PipelineConfig | undefined {
   return id_to_pipeline.get(pipelineId)
 }
 
@@ -95,7 +95,7 @@ export function getCachedPipelinesByDatasourceId(datasourceId: number) : Pipelin
   return datasourceid_to_pipelines.get(datasourceId) || []
 }
 
-function addPipelineToCache(pipeline: PipelineConfig) {
+function addPipelineToCache(pipeline: PipelineConfig): void {
   id_to_pipeline.set(pipeline.id, pipeline)
 
   const storedPipelines = datasourceid_to_pipelines.get(pipeline.datasourceId) || []
@@ -103,7 +103,7 @@ function addPipelineToCache(pipeline: PipelineConfig) {
   datasourceid_to_pipelines.set(pipeline.datasourceId, storedPipelines)
 }
 
-function deletePipelineFromCache(pipeline: PipelineConfig) {
+function deletePipelineFromCache(pipeline: PipelineConfig): void {
   id_to_pipeline.delete(pipeline.id)
 
   const storedPipelines = datasourceid_to_pipelines.get(pipeline.datasourceId) || []
@@ -129,6 +129,6 @@ async function createStorageStructure (pipelineId: number, retries = 10): Promis
       console.error(`Retrying (${retries})...`)
     }
     await new Promise(resolve => setTimeout(resolve, 1000)) // sleep
-    return createStorageStructure(retries - 1)
+    return await createStorageStructure(retries - 1)
   }
 }
