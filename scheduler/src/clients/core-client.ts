@@ -55,8 +55,12 @@ export async function initSync (): Promise<void> {
 
 export async function sync (): Promise<void> {
   const events = await getEventsAfter(lastSeenEventId)
+  if(events.length > 0) {
+    console.log(`Applying ${events.length} updates for Pipelines:`)
+  }
 
   for(const event of events) {
+    console.log(event)
     await handleEvent(event)
     if(event.eventId > lastSeenEventId) {
       lastSeenEventId = event.eventId
