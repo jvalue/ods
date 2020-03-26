@@ -73,7 +73,7 @@ async function initPipelineConfigSync (retries = 30, retryBackoff = 3000): Promi
       console.error(`Retrying (${retries})...`)
     }
     await new Promise(resolve => setTimeout(resolve, retryBackoff)) // sleep
-    await initPipelineConfigSync(retries - 1, retryBackoff)
+    return await initPipelineConfigSync(retries - 1, retryBackoff)
   }
 
   datasourcePollingJob = schedule.scheduleJob(
