@@ -12,7 +12,7 @@ services:
 
   # ----------------- UI SERVICE (/ui) --------------------
   ui:
-    image: registry.gitlab.com/profoss/open-data-service/ods-main/ui
+    image: ${DOCKER_REGISTRY}/ui
     build:
       context: ./ui/
       args:
@@ -37,7 +37,7 @@ services:
       POSTGRES_PASSWORD: password
 
   auth:
-    image: registry.gitlab.com/profoss/open-data-service/ods-main/auth
+    image: ${DOCKER_REGISTRY}/auth
     build:
       context: ./auth/
     environment:
@@ -58,7 +58,7 @@ services:
 
   # ----------------- ADAPTER SERVICE (/adapter) --------------------
   adapter:
-    image: registry.gitlab.com/profoss/open-data-service/ods-main/adapter
+    image: ${DOCKER_REGISTRY}/adapter
     build:
       context: ./adapter/
     depends_on:
@@ -80,7 +80,7 @@ services:
 
   # ----------------- SCHEDULER SERVICE (/scheduler) --------------------
   scheduler:
-    image: registry.gitlab.com/profoss/open-data-service/ods-main/scheduler
+    image: ${DOCKER_REGISTRY}/scheduler
     build:
       context: ./scheduler/
     environment:
@@ -98,7 +98,7 @@ services:
 
   # ----------------- STORAGE SERVICE (/storage) --------------------
   storage: # Wraps postgres database with API
-    image: registry.gitlab.com/profoss/open-data-service/ods-main/storage
+    image: ${DOCKER_REGISTRY}/storage
     build: ./storage/postgrest/
     environment:
       DATABASE_HOST: storage-db
@@ -131,7 +131,7 @@ services:
     image: adminer
 
   storage-db-liquibase: # perform database migration on start up
-    image: registry.gitlab.com/profoss/open-data-service/ods-main/storage-db-liquibase
+    image: ${DOCKER_REGISTRY}/storage-db-liquibase
     build: ./storage/liquibase/ # TODO: Sql Injection is currently
     environment:
       DATABASE_HOST: storage-db
@@ -147,7 +147,7 @@ services:
 
   # ----------------- TRANSFORMATION SERVICE (/transformation) --------------------
   transformation:
-    image: registry.gitlab.com/profoss/open-data-service/ods-main/transformation
+    image: ${DOCKER_REGISTRY}/transformation
     build:
       context: ./transformation/
     environment:
@@ -162,7 +162,7 @@ services:
 
   # ----------------- CORE SERVICE (/core) --------------------
   core:
-    image: registry.gitlab.com/profoss/open-data-service/ods-main/core
+    image: ${DOCKER_REGISTRY}/core
     build:
       context: ./core/
     environment:
