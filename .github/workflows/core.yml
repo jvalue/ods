@@ -11,8 +11,7 @@ jobs:
 
       - name: Build and Test
         run: |
-          cd core
-          docker build -t docker.pkg.github.com/${{ github.repository }}/core .
+          docker-compose -f docker-compose.yml build core
 
       - name: Integration-test
         run: |
@@ -27,9 +26,9 @@ jobs:
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
 
-          CORE_VERSION=$(cat ./src/main/resources/application.properties | grep "version =" | awk '{print $3}' | sed "s/[']//g")
+          CORE_VERSION=$(grep "version =" ./core/src/main/resources/application.properties | awk '{print $3}' | sed "s/[']//g")
 
-          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/core-service
+          IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/core
 
           docker tag $IMAGE_ID $IMAGE_ID:$CORE_VERSION
           docker tag $IMAGE_ID $IMAGE_ID:latest
