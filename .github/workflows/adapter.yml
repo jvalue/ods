@@ -11,8 +11,7 @@ jobs:
 
       - name: Build and Test
         run: |
-          cd adapter
-          docker build -t docker.pkg.github.com/${{ github.repository }}/adapter .
+          docker-compose -f docker-compose.yml build adapter
 
       - name: Integration-test
         run: |
@@ -27,9 +26,9 @@ jobs:
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
 
-          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/adapter
+          IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/adapter
 
-          ADAPTER_VERSION=$(cat ./src/main/resources/application.properties | grep "version =" | awk '{print $3}' | sed "s/[']//g")
+          ADAPTER_VERSION=$(grep "version =" ./adapter/src/main/resources/application.properties | awk '{print $3}' | sed "s/[']//g")
 
           docker tag $IMAGE_ID $IMAGE_ID:$ADAPTER_VERSION
           docker tag $IMAGE_ID $IMAGE_ID:latest
