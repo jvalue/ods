@@ -12,7 +12,8 @@ Content-Type: application/json
     "protocol": {
       "type": "HTTP",
       "parameters": {
-        "location": "https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json"
+        "location": "https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json",
+        "encoding": "UTF-8"
       }
     },
     "format": {
