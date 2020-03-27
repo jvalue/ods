@@ -523,7 +523,7 @@ function sleep (ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-async function checkWebhook(uri, pollingInterval, maxRetries = 10) {
+async function checkWebhook(uri, pollingInterval, maxRetries = 20) {
   for (let i = 0; i < maxRetries; i++) {
     const response = await request(MOCK_SERVER_URL)
       .get(`/notifications/${uri}`)
@@ -549,7 +549,7 @@ async function webhookRemainsUnchanged(uri, ms) {
   }
 }
 
-async function waitForWebhookChange(uri, original, pollingInterval, maxRetries = 10) {
+async function waitForWebhookChange(uri, original, pollingInterval, maxRetries = 20) {
   const timestamp = original.timestamp
   for (let i = 0; i < maxRetries; i++) {
     const response = await request(MOCK_SERVER_URL)
