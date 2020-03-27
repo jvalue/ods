@@ -82,6 +82,11 @@ async function initPipelineConfigSync (retries = 30, retryBackoff = 3000): Promi
     CoreClient.sync)
 }
 
+// log all promise rejections that happen (mostly because they happen in async and don't log the point where it happened)
+process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
+  console.log('Caught unhandled promise:', reason);
+});
+
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 initPipelineConfigSync()
 initJobs()
