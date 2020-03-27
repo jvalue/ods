@@ -36,8 +36,8 @@ describe('System-Test', () => {
       TRANSFORMATION_URL,
       ADAPTER_URL + '/version',
       MOCK_SERVER_URL + '/'
-      ], timeout: 20000 })
-  }, 12000)
+      ], timeout: 20000, log: true })
+  }, 21000)
 
   afterAll(async () => {
     console.log('All tests done, removing adapter configs from ods...')
