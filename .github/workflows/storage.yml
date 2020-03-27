@@ -3,7 +3,7 @@ name: ODS Storage Services Build & Test & Publish
 on: [push]
 
 jobs:
-  storgae-services-build:
+  storage-services-build:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,7 +19,7 @@ jobs:
         run: |
           docker-compose -f docker-compose.yml -f docker-compose.ci.yml build storage-service-it
           docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d storage-service-db
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up storgae-service-db-liquibase
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up storage-service-db-liquibase
           docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d storage-service
           docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from storage-service-it storage-service-it
           docker-compose logs

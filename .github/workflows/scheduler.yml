@@ -18,7 +18,7 @@ jobs:
         run: |
           docker-compose -f docker-compose.yml -f docker-compose.ci.yml build scheduler-service-it
           docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d scheduler-service
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from scheduler-service-it schedular-service-it
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from scheduler-service-it scheduler-service-it
           docker-compose logs
           docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
     
