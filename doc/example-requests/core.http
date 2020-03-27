@@ -3,6 +3,10 @@
 ### Get all pipelines
 GET {{baseURL}}/pipelines  HTTP/1.1
 
+### Get pipeline x
+@pipelineid = 3
+GET {{baseURL}}/pipelines/{{pipelineid}}  HTTP/1.1
+
 ### Create a pipeline
 POST {{baseURL}}/pipelines  HTTP/1.1
 Content-Type: application/json

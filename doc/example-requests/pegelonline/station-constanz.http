@@ -1,27 +1,48 @@
 @baseURL = http://localhost:9000
 
-### Pegelonline data for Konstanz
-POST {{baseURL}}/core/pipelines HTTP/1.1
+
+
+### Create a datasource for PegelOnline mirror: Konstanz
+POST {{baseURL}}/adapter/datasources  HTTP/1.1
 Content-Type: application/json
 
 {
-  "adapter": {
-    "protocol": "HTTP",
-    "format": "JSON",
-    "location": "https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/Konstanz?includeTimeseries=true&includeCurrentMeasurement=true"
+  "protocol": {
+    "type": "HTTP",
+    "parameters": {
+      "location": "https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/Konstanz?includeTimeseries=true&includeCurrentMeasurement=true",
+      "encoding": "UTF-8"
+    }
   },
+  "format": {
+    "type": "JSON",
+    "parameters": {}
+  },
+  "trigger": {
+    "firstExecution": "2018-10-07T01:32:00.123Z",
+    "periodic": true,
+    "interval": 60000
+  },
+  "metadata": {
+    "author": "icke",
+    "license": "none"
+  }
+}
+
+### Create a pipeline cleaning up data for Konstanz
+POST {{baseURL}}/pipelines  HTTP/1.1
+Content-Type: application/json
+
+{
+  "datasourceId": {{datasourceid}},
   "transformations": [
     {
       "func": "result = {};result.name = data.shortname;result.timestamp = data.timeseries[0].currentMeasurement.timestamp;result.unit = \"mm\";result.pegel = data.timeseries[0].currentMeasurement.value*1000;return result;"
     }
   ],
-  "trigger": {
-    "firstExecution": "2018-10-15T11:12:00.123",
-    "periodic": false,
-    "interval": 60000
-  },
   "metadata": {
-    "author": "Examplicus",
-    "license": "ExampleLicense"
-  }
+    "author": "icke",
+    "license": "none"
+  },
+  "notifications": []
 }

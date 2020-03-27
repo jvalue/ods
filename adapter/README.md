@@ -21,45 +21,6 @@ Planned formats:
 Note that you need to delete existing docker images from your local docker daemon to have recent changes integrated. 
 * For integration testing run `docker-compose -f ../docker-compose.yml -f ../docker-compose.ci.yml up adapter-service adapter-service-it`
 
-## API
-| Endpoint  | Method  | Request Body  | Response Body |
-|---|---|---|---|
-| *base_url*/version  | GET  | -  | String containing the application version  |
-| *base_url*/formats  | GET  | -  | JsonArray of data formats available for parsing and possible parameters |
-| *base_url*/protocols  | GET  | -  | JsonArray of protocols available for importing and possible parameters  |
-| *base_url*/dataImport  | POST  | AdapterConfig file  | Id for the imported data  |
-| *base_url*/data/{id}  | GET  | -  | JSON representation of imported data with {id} |
-
-
-When started via docker-compose *base_url* is `http://localhost:9000/api/adapter`
-
-### Adapter Config
-```
-{
-    "protocol": {
-      "type": "HTTP",
-      "parameters": {
-        "location": String,
-        "encoding": String
-      }
-    }
-    "format": {
-      "type": "JSON" | "XML" | "CSV"
-      "parameters": { } | CSVParameters
-    }
-  }
-  ```
-
-### CSV Parameters
-```
-{
-  "columnSeparator": char,
-  "lineSeparator": char,
-  "skipFirstDataRow": boolean,
-  "firstRowAsHeader": boolean
-}
-```
-
 ## Architecture
 Each adapter consists of a importer that is responsible for the handling of the data source protocol and a interpreter that reformats the given data to json format.
 The implemented importers and interpreters are stored in a map in the AdapterManager.
@@ -70,3 +31,6 @@ Support for new protocols or data formats can easily be achieved by adding class
 ![basic architecture of the adapter service](doc/basic_arch.png)
 
 
+## API Docs
+
+Coming soon via Swagger UI
