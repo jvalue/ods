@@ -61,7 +61,12 @@ export async function sync (): Promise<void> {
 
   for(const event of events) {
     console.log(event)
-    await handleEvent(event)
+    try {
+      await handleEvent(event)
+    } catch (e) {
+      console.log(`Could not not handle pipeline event ${event.eventId}.\nReason: ${e.message}.\nRetrying in next sync cycle.`)
+      return; // making sure not to pull events forward (leave them in order!)
+    }
     if(event.eventId > lastSeenEventId) {
       lastSeenEventId = event.eventId
     }
@@ -69,17 +74,19 @@ export async function sync (): Promise<void> {
 }
 
 async function handleEvent(event: PipelineEvent): Promise<void> {
-  const pipeline = await getPipeline(event.pipelineId)
   switch (event.eventType) {
     case EventType.PIPELINE_DELETE: {
+      const pipeline = await getPipeline(event.pipelineId)
       deletePipelineFromCache(pipeline)
       break
     }
     case EventType.PIPELINE_CREATE:
+      const pipeline = await getPipeline(event.pipelineId)
       await createStorageStructure(pipeline.id)
       addPipelineToCache(pipeline)
       break
     case EventType.PIPELINE_UPDATE: {
+      const pipeline = await getPipeline(event.pipelineId)
       addPipelineToCache(pipeline)
       break
     }
