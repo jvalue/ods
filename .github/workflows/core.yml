@@ -1,0 +1,38 @@
+name: CORE Build & Test & Publish
+
+on: [push]
+
+jobs:
+  core-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build and Test
+        run: |
+          cd core
+          docker build -t docker.pkg.github.com/${{ github.repository }}/core .
+
+      - name: Integration-test
+        run: |
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml build core-it
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d core
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from core-it core-it
+          docker-compose logs
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
+
+      - name: Push to registry
+        if: github.ref == 'refs/heads/master'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
+          CORE_VERSION=$(cat ./src/main/resources/application.properties | grep "version =" | awk '{print $3}' | sed "s/[']//g")
+
+          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/core-service
+
+          docker tag $IMAGE_ID $IMAGE_ID:$CORE_VERSION
+          docker tag $IMAGE_ID $IMAGE_ID:latest
+
+          docker push $IMAGE_ID:$CORE_VERSION
+          docker push $IMAGE_ID:latest
