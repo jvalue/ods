@@ -1,0 +1,48 @@
+name: ODS Storage Services Build & Test & Publish
+
+on: [push]
+
+jobs:
+  storgae-services-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build and Test
+        run: |
+          cd storage
+          docker build -t docker.pkg.github.com/${{ github.repository }}/storage-service-postgrest ./docker/postgrest
+          docker build -t docker.pkg.github.com/${{ github.repository }}/storage-service-liquibase ./docker/liquibase
+      
+      - name: Integrationtest
+        run: |
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml build storage-service-it
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d storage-service-db
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up storgae-service-db-liquibase
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d storage-service
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from storage-service-it storage-service-it
+          docker-compose logs
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
+    
+      - name: Push to registry
+        if: github.ref == 'refs/heads/master'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
+          STORAGE_VERSION=$(cat version.txt | grep "VERSION" | awk '{print $3}' | sed 's/[,"]//g')
+
+          IMAGE_ID_POSTGREST=docker.pkg.github.com/${{ github.repository }}/storage-service-postgrest
+          IMAGE_ID_LIQUIBASE=docker.pkg.github.com/${{ github.repository }}/storage-service-liquibase
+
+          docker tag $IMAGE_ID_POSTGREST $IMAGE_ID_POSTGREST:$STORAGE_VERSION
+          docker tag $IMAGE_ID_POSTGREST $IMAGE_ID_POSTGREST:latest
+
+          docker tag $IMAGE_ID_LIQUIBASE $IMAGE_ID_LIQUIBASE:$STORAGE_VERSION
+          docker tag $IMAGE_ID_LIQUIBASE $IMAGE_ID_LIQUIBASE:latest
+          
+          docker push $IMAGE_ID_POSTGREST:$STORAGE_VERSION
+          docker push $IMAGE_ID_POSTGREST:latest
+
+          docker push $IMAGE_ID_LIQUIBASE:$STORAGE_VERSION
+          docker push $IMAGE_ID_LIQUIBASE:latest

@@ -1,0 +1,38 @@
+name: ODS Scheduler Service Build & Test & Publish
+
+on: [push]
+
+jobs:
+  scheduler-service-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build and Test
+        run: |
+          cd scheduler
+          docker build -t docker.pkg.github.com/${{ github.repository }}/scheduler-service .
+      
+      - name: Integrationtest
+        run: |
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml build scheduler-service-it
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d scheduler-service
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from scheduler-service-it schedular-service-it
+          docker-compose logs
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
+    
+      - name: Push to registry
+        if: github.ref == 'refs/heads/master'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
+          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/scheduler-service
+
+          SCHEDULER_VERSION=$(cat package.json | grep "version" | awk '{print $2}' | sed 's/[,"]//g')
+
+          docker tag $IMAGE_ID $IMAGE_ID:$SCHEDULER_VERSION
+          docker tag $IMAGE_ID $IMAGE_ID:latest
+
+          docker push $IMAGE_ID:$SCHDULER_VERSION
+          docker push $IMAGE_ID:latest

@@ -1,0 +1,38 @@
+name: ODS Transformation Service Build & Test & Publish
+
+on: [push]
+
+jobs:
+  transformation-service-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build and Test
+        run: |
+          cd transformation
+          docker build -t docker.pkg.github.com/${{ github.repository }}/transformation-service .
+      
+      - name: Integrationtest
+        run: |
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml build transformation-service-it
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d transformation-service
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from transformation-service-it transformation-service-it
+          docker-compose logs
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
+    
+      - name: Push to registry
+        if: github.ref == 'refs/heads/master'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
+          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/transformation-service
+
+          TRANSFORMATION_VERSION=$(cat package.json | grep "version" | awk '{print $2}' | sed 's/[,"]//g')
+
+          docker tag $IMAGE_ID $IMAGE_ID:$TRANSFORMATION_VERSION
+          docker tag $IMAGE_ID $IMAGE_ID:latest
+
+          docker push $IMAGE_ID:$TRANSFORMATION_VERSION
+          docker push $IMAGE_ID:latest
