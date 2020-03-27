@@ -76,8 +76,7 @@ export async function sync (): Promise<void> {
 async function handleEvent(event: PipelineEvent): Promise<void> {
   switch (event.eventType) {
     case EventType.PIPELINE_DELETE: {
-      const pipeline = await getPipeline(event.pipelineId)
-      deletePipelineFromCache(pipeline)
+      deletePipelineFromCache(event.pipelineId)
       break
     }
     case EventType.PIPELINE_CREATE:
@@ -114,12 +113,19 @@ function addPipelineToCache(pipeline: PipelineConfig): void {
   datasourceid_to_pipelines.set(pipeline.datasourceId, storedPipelines)
 }
 
-function deletePipelineFromCache(pipeline: PipelineConfig): void {
-  id_to_pipeline.delete(pipeline.id)
+function deletePipelineFromCache(pipelineId: number) {
+  const cachedPipeline = id_to_pipeline.get(pipelineId)
+  if(!! cachedPipeline) {
+    console.log(`Pipeline ${pipelineId} already deleted from cache.`)
+    return
+  }
 
-  const storedPipelines = datasourceid_to_pipelines.get(pipeline.datasourceId) || []
-  const cleanedPipelines = storedPipelines.filter((x) => x.id != pipeline.id)
-  datasourceid_to_pipelines.set(pipeline.datasourceId, cleanedPipelines)
+  const datasourceId = cachedPipeline!.datasourceId
+  id_to_pipeline.delete(pipelineId)
+
+  const storedPipelines = datasourceid_to_pipelines.get(datasourceId) || []
+  const cleanedPipelines = storedPipelines.filter((x) => x.id != pipelineId)
+  datasourceid_to_pipelines.set(datasourceId, cleanedPipelines)
 }
 
 async function createStorageStructure (pipelineId: number, retries = 10): Promise<void> {
