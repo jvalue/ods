@@ -8,7 +8,6 @@ It also exposes an event log of all modifications to the pipeline configurations
 
 ## Planned Features
 
-
 ## Getting Started
 
 * Build with `./gradlew build`
@@ -19,129 +18,6 @@ It also exposes an event log of all modifications to the pipeline configurations
 * For integration testing run `docker-compose -f ../docker-compose.yml -f ../docker-compose.ci.yml up core-service core-service-db core-service-it`
 Note that you need to delete existing docker images from your local docker daemon to have recent changes integrated. 
 
-## API
-| Endpoint  | Method  | Request Body  | Response Body | Description |
-|---|---|---|---|---|
-| *base_url*/version  | GET  | -  | String containing the application version  | Get current service version |
-| *base_url*/pipelines  | GET  | -  | Array of PipelineConfigs  | Get all saved pipelines |
-| *base_url*/pipelines/${id}  | GET  | -  | PipelineConfig  | Get pipeline with id ${id} | 
-| *base_url*/pipelines  | POST  | PipelineConfig | PipelineConfig | Create a new pipeline (id will be set by the core service) |
-| *base_url*/pipelines/${id}  | PUT  | PipelineConfig | - | Update existing pipeline |
-| *base_url*/pipelines/${id}  | DELETE  | - | - | Delete existing pipeline |
-| *base_url*/pipelines/${id}/notifications  | POST  | NotificationConfig | NotificationConfig | Create notification for a pipeline |
-| *base_url*/pipelines/${id}/notifications/${notificationId}  | DELETE  | - | - | Delete notification |
-| *base_url*/pipelines  | DELETE  | - | - | Delete all pipelines |
-| *base_url*/events  | GET  | -  | Array of PipelineEvents  | Get all events |
-| *base_url*/events/${id}  | GET  | -  | PipelineEvent  | Get a event with id ${id} |
-| *base_url*/events/pipeline/${id}  | GET  | -  | Array of PipelineEvents | Get all events that log modifications of pipeline with id ${id} |
-| *base_url*/events/latest  | GET  | -  | PipelineEvent  | Get latest event |
+## API Docs
 
-### Pipeline Config
-```
-{ 
-  "id": number,
-  "adapter": AdapterConfig,
-  "transformations": [*TransformationConfig],
-  "notifications": [*NotificationConfig]
-  "trigger":TriggerConfig,
-  "metadata":PipelineMetadata
-}
-```
-### Pipeline Event
-```
-{
-  "eventId": number,
-  "eventType": "PIPELINE UPDATE" | "PIPELINE_CREATE" | "PIPELINE_DELETE",
-  "pipelineId": number
-}
-```
-
-### Adapter Config
-```
-{
-    "protocol": {
-      "type": "HTTP",
-      "parameters": {
-        "location": String,
-        "encoding": String
-      }
-    }
-    "format": {
-      "type": "JSON" | "XML" | "CSV"
-      "parameters": { } | CSVParameters
-    }
-  }
-  ```
-
-### CSV Parameters
-```
-{
-  "columnSeparator": char,
-  "lineSeparator": char,
-  "skipFirstDataRow": boolean,
-  "firstRowAsHeader": boolean
-}
-```
-
-### TransformationConfig
-```
-{
-  "func":String,
-  "data":String
-}
-```
-
-### TriggerConfig
-```
-{
-  "firstExecution":Date (format: yyyy-MM-dd'T'HH:mm:ss.SSSXXX),
-  "interval":number
-}
-```
-
-### PipelineMetadata 
-```
-{
-  "author":String,
-  "displayName":String,
-  "license":String,
-  "description":String
-}
-```
-
-### NotificationConfig
-```
-WebhookNotification | SlackNotification | FirebaseNotification
-```
-
-### WebhookParams
-```
-{
-  "condition": String,
-  "type": "WEBHOOK",
-  "url": String (the url of the webhook you want to be triggered)
-}
-```
-
-### SlackParams
-```
-{
-  "condition": String,
-  "type": "SLACK",
-  "workspaceId": String (id of your slack workspace),
-  "channelId": String (id of the channel where the notification is to be posted),
-  "secret": String (secret part of the slack webhook, get it at slack management console)
-}
-```
-
-### FirebaseParams
-```
-{
-  "condition": String,
-  "type": "FCM",
-  "projectId": String (id of your firebase project),
-  "clientEmail": String (email of the firebase service account),
-  "privateKey: String (secret key associated with the service account),
-  "topic": String (topic under which the notification is to be posted)
-}
-```
+Coming soon via Swagger UI
