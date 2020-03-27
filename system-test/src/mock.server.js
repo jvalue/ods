@@ -19,6 +19,8 @@ router.get('/', async ctx => {
   ctx.body = 'ok'
 })
 
+// /data/:path as simple bucket
+
 router.post('/data/:path', async ctx => {
   const path = ctx.params.path
   console.log(`POST on /data/${path} received by mock server.`)
@@ -39,11 +41,14 @@ router.get('/data/:path', async ctx => {
   }
 })
 
+
+// /sequences/:path as simple bucket, but increases member 'count' with every GET
+
 router.post('/sequences/:path', async ctx => {
   const path = ctx.params.path
   console.log(`POST on /sequences/${path} received by mock server.`)
   dataSequences.set(path, ctx.request.body)
-  sequenceCounters.set(path, 0)
+  sequenceCounters.set(path, 0) // start with counter 0
   ctx.status = 201
 })
 
@@ -56,7 +61,7 @@ router.get('/sequences/:path', async ctx => {
   } else {
     let data = dataSequences.get(path)
     data.count = sequenceCounter
-    sequenceCounters.set(path, sequenceCounter + 1)
+    sequenceCounters.set(path, sequenceCounter + 1) // increase count after GET
     ctx.body = data
     ctx.status = 200
   }

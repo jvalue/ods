@@ -131,7 +131,7 @@ describe('System-Test', () => {
 
     // Add pipeline to core service
     const pipelineConfig = generatePipelineConfig(datasourceId)
-    const notification = generateNotification('data.count < 2', MOCK_SERVER_DOCKER + '/notifications/test2')
+    const notification = generateNotification('data.count <= 2', MOCK_SERVER_DOCKER + '/notifications/test2')
     pipelineConfig.notifications = [notification]
 
     console.log(`[Test 2] Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
@@ -242,7 +242,7 @@ describe('System-Test', () => {
 
   }, 20000)
 
-  test('Test 4: Update periodic pipeline', async () => {
+  test('Test 4: Update periodic datasource with pipeline', async () => {
     // Prepare datasource mock
     await request(MOCK_SERVER_URL)
       .post('/data/test4')
@@ -253,14 +253,14 @@ describe('System-Test', () => {
       .post('/data/test4_updated')
       .send(updatedSourceData)
 
-    const datasourceConfig = generateDataSourceConfig(MOCK_SERVER_DOCKER + '/data/test4',true)
+    const datasource = generateDataSourceConfig(MOCK_SERVER_DOCKER + '/data/test4',true)
 
-    console.log(`[Test 4] Trying to create datasource: ${JSON.stringify(datasourceConfig)}`)
+    console.log(`[Test 4] Trying to create datasource: ${JSON.stringify(datasource)}`)
 
     // Add datasource to adapter service
     const adapterResponse = await request(ADAPTER_URL)
       .post('/datasources')
-      .send(datasourceConfig)
+      .send(datasource)
     const datasourceId = adapterResponse.body.id
     console.log(`[Test 4] Successfully created datasource ${datasourceId}`)
 
@@ -289,18 +289,30 @@ describe('System-Test', () => {
     console.log(`[Test 4] Storage response body ${JSON.stringify(storageResponse.body)}`)
     expect(storageResponse.body[0].data).toEqual(sourceData)
 
+    // Create updated datasource
+    datasource.id = datasourceId
+    datasource.protocol.parameters.location = MOCK_SERVER_DOCKER + '/data/test4_updated'
+
+    console.log(`[Test 4] Datasource ${datasourceId} update request triggered.`)
+    // Update datasource
+    let updateResponse = await request(ADAPTER_URL)
+      .put(`/datasources/${datasourceId}`)
+      .send(datasource)
+    expect(updateResponse.status).toEqual(204)
+    console.log(`[Test 4] Successfully updatedd datasource ${datasourceId}.`)
+
     // Create updated pipeline
     pipelineConfig.id = pipelineId
     const anotherNotification = generateNotification('data.two === \"two\"', MOCK_SERVER_DOCKER + '/notifications/test4_2')
     pipelineConfig.notifications = [notification, anotherNotification]
-    pipelineConfig.protocol.parameters.location = MOCK_SERVER_DOCKER + '/data/test4_updated'
 
     console.log(`[Test 4] Pipeline ${pipelineId} update request triggered.`)
     // Update pipeline
-    const updateResponse = await request(CORE_URL)
+    updateResponse = await request(CORE_URL)
       .put(`/pipelines/${pipelineId}`)
       .send(pipelineConfig)
     expect(updateResponse.status).toEqual(204)
+    console.log(`[Test 4] Successfully updatedd pipeline ${pipelineId}.`)
 
     // Wait for webhook notification
     const secondWebhook = await checkWebhook('test4_2', 1000)

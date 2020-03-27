@@ -51,32 +51,38 @@ const EVENTS = [
   {
     eventId: 347,
     eventType: 'PIPELINE_CREATE',
-    pipelineId: 123
+    pipelineId: 123,
+    datasourceId: 321
   },
   {
     eventId: 348,
     eventType: 'PIPELINE_CREATE',
-    pipelineId: 124
+    pipelineId: 124,
+    datasourceId: 322
   },
   {
     eventId: 349,
     eventType: 'PIPELINE_CREATE',
-    pipelineId: 125
+    pipelineId: 125,
+    datasourceId: 323
   },
   {
     eventId: 350,
     eventType: 'PIPELINE_DELETE',
-    pipelineId: 124
+    pipelineId: 124,
+    datasourceId: 322
   },
   {
     eventId: 351,
     eventType: 'PIPELINE_UPDATE',
-    pipelineId: 123
+    pipelineId: 123,
+    datasourceId: 321
   },
   {
     eventId: 352,
     eventType: 'PIPELINE_DELETE',
-    pipelineId: 125
+    pipelineId: 125,
+    datasourceId: 323
   }
 ]
 
