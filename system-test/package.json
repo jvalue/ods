@@ -1,6 +1,6 @@
 {
   "name": "system-test",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Open Data Service System Test",
   "scripts": {
     "mockServer": "node src/mock.server.js",
