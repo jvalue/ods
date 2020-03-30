@@ -3,7 +3,7 @@
     v-model="validForm"
   >
     <v-textarea
-      v-model="transformationConfigs[0].func"
+      v-model="transformationConfig.func"
       label="Transformation function"
       rows="3"
       :rules="[required]"
@@ -25,11 +25,11 @@ export default class PipelineTransformationConfig extends Vue {
   private validForm = true;
 
   @PropSync('value')
-  private transformationConfigs!: TransformationConfig[];
+  private transformationConfig!: TransformationConfig;
 
   @Emit('value')
   emitValue () {
-    return this.transformationConfigs
+    return this.transformationConfig
   }
 
   @Emit('validityChanged')

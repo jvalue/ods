@@ -28,9 +28,10 @@ public class PipelineConfigTest {
     System.out.println(result);
     AdapterConfig expectedAdapter = generateAdapterConfig("HTTP", "XML", "http://www.the-inder.net");
     assertEquals(expectedAdapter, result.getAdapter());
-    assertEquals(2, result.getTransformations().size());
     assertNotNull(result.getId());
     assertTrue(result.getTrigger().isPeriodic());
+    assertEquals("return data+data;", result.getTransformation().getFunc());
+    assertEquals("[1]", result.getTransformation().getData());
 
     DateFormatter dateFormatter = new DateFormatter("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
     dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -54,14 +55,13 @@ public class PipelineConfigTest {
   @Test
   public void testSerialization() {
     AdapterConfig adapter = generateAdapterConfig("HTTP", "JSON", "http://www.the-inder.net");
-    List<TransformationConfig> transformations = List.of(new TransformationConfig("return 1+1", "[1]"),
-        new TransformationConfig("data * 10", "[2]"));
+    TransformationConfig transformation = new TransformationConfig("return 1+1", "[1]");
     PipelineTriggerConfig trigger = new PipelineTriggerConfig(false, new Date(), 10L);
     PipelineMetadata metadata = new PipelineMetadata("icke", "none", "Display", "description");
     List<NotificationConfig> notifications = List.of(
         new WebhookNotification("data.value1 > 10", "http://www.webhookland.com/1"),
         new WebhookNotification("data.value1 < 0", "http://www.webhookland.com/2"));
-    PipelineConfig config = new PipelineConfig(adapter, transformations, trigger, metadata, notifications);
+    PipelineConfig config = new PipelineConfig(adapter, transformation, trigger, metadata, notifications);
 
     JsonNode result = mapper.valueToTree(config);
 
@@ -71,9 +71,8 @@ public class PipelineConfigTest {
     assertEquals("JSON", result.get("adapter").get("format").get("type").textValue());
     assertEquals("http://www.the-inder.net",
         result.get("adapter").get("protocol").get("parameters").get("location").textValue());
-    assertEquals(2, result.get("transformations").size());
-    assertEquals("return 1+1", result.get("transformations").get(0).get("func").textValue());
-    assertEquals("[2]", result.get("transformations").get(1).get("data").textValue());
+    assertEquals("return 1+1", result.get("transformation").get("func").textValue());
+    assertEquals("[1]", result.get("transformation").get("data").textValue());
     assertEquals(2, result.get("notifications").size());
     assertEquals(4, result.get("notifications").get(0).size());
     assertEquals("data.value1 > 10", result.get("notifications").get(0).get("condition").textValue());

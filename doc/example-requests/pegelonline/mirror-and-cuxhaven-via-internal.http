@@ -10,11 +10,9 @@ Content-Type: application/json
     "format": "JSON",
     "location": "https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json?includeTimeseries=true&includeCurrentMeasurement=true"
   },
-  "transformations": [
-    {
+  "transformation": {
       "func": "data.forEach((x) => { var currentMeasurement = x.timeseries[0].currentMeasurement; currentMeasurement.value /= 100; currentMeasurement.unit = 'm'; x.timeseries = undefined; x.currentMeasurement = currentMeasurement;}); return data;"
-    }
-  ],
+    },
   "trigger": {
     "firstExecution": "2018-10-07T01:32:00.123",
     "periodic": true,
@@ -37,11 +35,10 @@ Content-Type: application/json
     "format": "JSON",
     "location": "http://storage-service:3000/{{pipelineId}}?select=data&order=id.desc&limit=1"
   },
-  "transformations": [
+  "transformation":
     {
       "func": "var data = data[0].data; var dataCuxhaven = data.filter((x) => x.shortname.toLowerCase().includes('cuxhaven')); return dataCuxhaven;"
-    }
-  ],
+    },
   "trigger": {
     "firstExecution": "2018-10-07T01:32:03.123",
     "periodic": true,

@@ -10,11 +10,10 @@ Content-Type: application/json
     "format": "JSON",
     "location": "https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/Konstanz?includeTimeseries=true&includeCurrentMeasurement=true"
   },
-  "transformations": [
+  "transformations":
     {
       "func": "result = {};result.name = data.shortname;result.timestamp = data.timeseries[0].currentMeasurement.timestamp;result.unit = \"mm\";result.pegel = data.timeseries[0].currentMeasurement.value*1000;return result;"
-    }
-  ],
+    },
   "trigger": {
     "firstExecution": "2018-10-15T11:12:00.123",
     "periodic": false,

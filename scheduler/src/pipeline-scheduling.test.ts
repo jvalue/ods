@@ -237,7 +237,7 @@ function generateConfig (periodic: boolean, firstExecution: Date, interval: numb
         }
       }
     },
-    transformations: [],
+    transformation: undefined,
     persistence: {},
     metadata: {
       displayName: 'pipiline',
