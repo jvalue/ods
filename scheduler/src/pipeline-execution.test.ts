@@ -6,7 +6,8 @@ import * as TransformationClient from './clients/transformation-client'
 import * as PipelineScheduling from './pipeline-scheduling'
 import PipelineConfig from './interfaces/pipeline-config'
 import NotificationConfig from './interfaces/notification-config'
-import AdapterResponse from '@/interfaces/adapter-response'
+import AdapterResponse from './interfaces/adapter-response'
+import TransformationConfig from './interfaces/transformation-config'
 
 jest.mock('./clients/adapter-client')
 jest.mock('./clients/storage-client')
@@ -39,8 +40,8 @@ afterEach(() => {
 })
 
 test('Should execute pipeline once', async () => {
-  const transformation = generateTransformation('return { value2: data.value2 }', importedData)
-  const pipelineConfig = generateConfig([transformation], false, [])
+  const transformation = { data: importedData }
+  const pipelineConfig = generateConfig(transformation, false, [])
 
   mockExecuteAdapter.mockResolvedValue(adapterResponse)
   mockFetchImportedData.mockResolvedValue(importedData)
@@ -59,8 +60,8 @@ test('Should execute pipeline once', async () => {
 })
 
 test('Should execute pipeline periodic', async () => {
-  const transformation = generateTransformation('return data + 1', importedData)
-  const pipelineConfig = generateConfig([transformation], true, [])
+  const transformation = { data: importedData }
+  const pipelineConfig = generateConfig(transformation, true, [])
 
   mockExecuteAdapter.mockResolvedValue(adapterResponse)
   mockFetchImportedData.mockResolvedValue(importedData)
@@ -77,34 +78,15 @@ test('Should execute pipeline periodic', async () => {
   expect(mockSchedulePipeline).toHaveBeenCalled()
 })
 
-test('Should execute multiple transformations', async () => {
-  const transformation1 = generateTransformation('return data + 1', importedData)
-  const transformation2 = generateTransformation('return data + 2', transformedData)
-  const transformation3 = generateTransformation('return data + 3', transformedData)
-
-  const pipelineConfig = generateConfig([transformation1, transformation2, transformation3], false, [])
+test('Should not execute undefined transformation', async () => {
+  const pipelineConfig = generateConfig(undefined, true, [])
 
   mockExecuteAdapter.mockResolvedValue(adapterResponse)
   mockFetchImportedData.mockResolvedValue(importedData)
-  mockExecuteTransformation.mockResolvedValue({ data: transformedData })
 
   await PipelineExecution.executePipeline(pipelineConfig)
 
-  expect(mockExecuteTransformation).toHaveBeenCalledTimes(3)
-  expect(mockExecuteTransformation).toHaveBeenNthCalledWith(1, transformation1)
-  expect(mockExecuteTransformation).toHaveBeenNthCalledWith(2, transformation2)
-  expect(mockExecuteTransformation).toHaveBeenNthCalledWith(3, transformation3)
-})
-
-test('Should ignore empty transformation arrays', async () => {
-  const pipelineConfig = generateConfig([], false, [])
-
-  mockExecuteAdapter.mockResolvedValue(adapterResponse)
-  mockFetchImportedData.mockResolvedValue(importedData)
-  mockExecuteTransformation.mockResolvedValue({ data: transformedData })
-
-  await PipelineExecution.executePipeline(pipelineConfig)
-  expect(mockExecuteTransformation).not.toHaveBeenCalled()
+  expect(mockExecuteNotification).not.toBeCalled()
 })
 
 test('Should trigger notifications', async () => {
@@ -123,7 +105,7 @@ test('Should trigger notifications', async () => {
     data: { schtring: 'text' },
     dataLocation: 'way.up/high'
   }
-  const pipelineConfig = generateConfig([], false, [notification1, notification2, notification3])
+  const pipelineConfig = generateConfig(undefined, false, [notification1, notification2, notification3])
 
   mockExecuteAdapter.mockResolvedValue(adapterResponse)
   mockFetchImportedData.mockResolvedValue(importedData)
@@ -133,15 +115,8 @@ test('Should trigger notifications', async () => {
   expect(mockExecuteNotification).toHaveBeenCalledTimes(3)
 })
 
-function generateTransformation (func: string, data: object): object {
-  return {
-    func,
-    data
-  }
-}
-
 function generateConfig (
-  transformations: object[], periodic = true, notifications: NotificationConfig[]): PipelineConfig {
+  transformation: TransformationConfig | undefined, periodic = true, notifications: NotificationConfig[]): PipelineConfig {
   return {
     id: 123,
     adapter: {
@@ -156,7 +131,7 @@ function generateConfig (
         }
       }
     },
-    transformations,
+    transformation: transformation,
     persistence: {},
     metadata: {
       displayName: 'pipiline',

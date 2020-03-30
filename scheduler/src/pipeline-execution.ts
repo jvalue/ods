@@ -20,7 +20,7 @@ export async function executePipeline (pipelineConfig: PipelineConfig, maxRetrie
     try {
       const adapterResponse: AdapterResponse = await executeAdapter(pipelineConfig)
       const importedData: object = await AdapterClient.fetchImportedData(adapterResponse.id)
-      const transformedData = await executeTransformations(pipelineConfig, importedData)
+      const transformedData = await executeTransformation(pipelineConfig, importedData)
       const dataLocation = await executeStorage(pipelineConfig, transformedData)
       await executeNotifications(pipelineConfig, transformedData, dataLocation)
       pipelineSuccess = true
@@ -52,24 +52,19 @@ async function executeAdapter (pipelineConfig: PipelineConfig): Promise<AdapterR
   }
 }
 
-async function executeTransformations (pipelineConfig: PipelineConfig, data: object): Promise<object> {
+async function executeTransformation (pipelineConfig: PipelineConfig, data: object): Promise<object> {
+  if (!pipelineConfig.transformation) {
+    console.log('No transformation specified, continuing..')
+    return data
+  }
   console.log(`Execute Pipeline Transformation ${pipelineConfig.id}`)
-  let lastData = data
-
   try {
-    for (const transformation of pipelineConfig.transformations) {
-      const currentTransformation = JSON.parse(JSON.stringify(transformation)) // deeply copy object
-      currentTransformation.data = lastData
-      const jobResult = await TransformationClient.executeTransformation(currentTransformation)
-      lastData = jobResult.data
-      console.log(`Transformation executed for Pipeline ${pipelineConfig.id},
-       resulting data: ${JSON.stringify(lastData)}.`)
-    }
-    console.log(`Sucessfully transformed data for Pipeline ${pipelineConfig.id}`)
-    return lastData
+    pipelineConfig.transformation.data = data
+    const jobResult = await TransformationClient.executeTransformation(pipelineConfig.transformation)
+    return jobResult.data
   } catch (e) {
     handleError(e)
-    throw Error('Failed to transform data via Transformation Service')
+    throw new Error('Failed to transform Data via Transformation Service')
   }
 }
 

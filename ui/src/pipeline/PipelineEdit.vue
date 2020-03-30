@@ -64,12 +64,12 @@
             :complete="dialogStep > 3"
             step="3"
           >
-            Transformations
-            <small>Customize data transformations</small>
+            Transformation
+            <small>Customize data transformation</small>
           </v-stepper-step>
           <v-stepper-content step="3">
             <pipeline-transformation-config
-              v-model="dialogPipeline.transformations"
+              v-model="dialogPipeline.transformation"
               @validityChanged="validStep3 = $event"
             />
             <pipeline-edit-stepper-button-group
@@ -209,7 +209,7 @@ export default class PipelineEdit extends Vue {
         parameters: {}
       }
     },
-    transformations: [{ func: "data.test = 'abc'; return data;" }],
+    transformation: { func: "data.test = 'abc'; return data;" },
     metadata: {
       author: '',
       license: '',

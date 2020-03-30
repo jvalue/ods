@@ -18,11 +18,9 @@ const PIPELINES = [
         type: "XML"
       }
     },
-    transformations: [{
+    transformation: {
       func: 'return data;' // not performed in integration testing
-    }, {
-      func: 'return 1;' // not peformed in integration testing
-    }],
+    },
     persistence: {},
     metadata: {},
     trigger: {
@@ -45,9 +43,9 @@ const PIPELINES = [
         type: "XML"
       }
     },
-    transformations: [{
+    transformation: {
       func: 'return 1;' // not peformed in integration testing
-    }],
+    },
     persistence: {},
     metadata: {
       displayName: 'nordstream'

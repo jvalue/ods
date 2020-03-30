@@ -21,13 +21,9 @@ Content-Type: application/json
       "parameters": {}
     }
   },
-  "transformations": [
-    {
-      "func": "return data[0];"
-    },{
+  "transformation": {
       "func": "data.test = 'abc'; return data;"
-    }
-  ],
+    },
   "trigger": {
     "firstExecution": "2018-10-07T01:32:00.123Z",
     "periodic": true,

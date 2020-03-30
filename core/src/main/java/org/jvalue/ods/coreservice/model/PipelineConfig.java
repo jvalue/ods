@@ -22,8 +22,8 @@ public class PipelineConfig implements Serializable {
     @Embedded @NotNull
     private AdapterConfig adapter;
 
-    @ElementCollection @NotNull
-    private List<TransformationConfig> transformations;
+    @Embedded
+    private TransformationConfig transformation;
 
     @Embedded @NotNull
     private PipelineTriggerConfig trigger;
@@ -40,12 +40,12 @@ public class PipelineConfig implements Serializable {
     @JsonCreator
     public PipelineConfig(
             @JsonProperty("adapter") AdapterConfig adapter,
-            @JsonProperty("transformations") List<TransformationConfig> transformations,
+            @JsonProperty("transformation") TransformationConfig transformation,
             @JsonProperty("trigger") PipelineTriggerConfig trigger,
             @JsonProperty("metadata") PipelineMetadata metadata,
             @JsonProperty("notifications") List<NotificationConfig> notifications) {
         this.adapter = adapter;
-        this.transformations = transformations;
+        this.transformation = transformation;
         this.trigger = trigger;
         this.metadata = metadata;
         this.notifications = notifications;
@@ -56,7 +56,7 @@ public class PipelineConfig implements Serializable {
         return "PipelineConfig{" +
                 "id=" + id +
                 ", adapter=" + adapter +
-                ", transformations=" + transformations.toString() +
+                ", transformation=" + transformation.toString() +
                 ", trigger=" + trigger +
                 ", metadata=" + metadata +
                 '}';
@@ -91,12 +91,12 @@ public class PipelineConfig implements Serializable {
         this.adapter = adapter;
     }
 
-    public List<TransformationConfig> getTransformations() {
-        return transformations;
+    public TransformationConfig getTransformation() {
+        return transformation;
     }
 
-    public void setTransformations(List<TransformationConfig> transformations) {
-        this.transformations = transformations;
+    public void setTransformation(TransformationConfig transformation) {
+        this.transformation = transformation;
     }
 
     public PipelineTriggerConfig getTrigger() {

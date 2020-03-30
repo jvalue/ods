@@ -88,7 +88,7 @@ public class PipelineManager {
 
         PipelineConfig updated = new PipelineConfig(
                 updateConfig.getAdapter(),
-                updateConfig.getTransformations(),
+                updateConfig.getTransformation(),
                 updateConfig.getTrigger(),
                 updatedMetadata,
                 updateConfig.getNotifications());

@@ -41,7 +41,7 @@ describe("Core", () => {
 
     expect(response.status).toEqual(201);
     expect(response.header.location).toContain(response.body.id);
-    expect(response.body.transformations).toEqual(pipelineConfig.transformations);
+    expect(response.body.transformation).toEqual(pipelineConfig.transformation);
     expect(response.body.adapter).toEqual(pipelineConfig.adapter);
     expect(response.body.trigger).toEqual(pipelineConfig.trigger);
     expect(response.body.id).toBeDefined();
@@ -85,7 +85,7 @@ describe("Core", () => {
     const updatedGetResponse = await request(URL)
       .get("/pipelines/" + pipelineId);
 
-    expect(originalGetResponse.body.transformations).toEqual(updatedGetResponse.body.transformations);
+    expect(originalGetResponse.body.transformation).toEqual(updatedGetResponse.body.transformation);
     expect(originalGetResponse.body.metadata).toEqual(updatedGetResponse.body.metadata);
     expect(originalGetResponse.body.id).toEqual(updatedGetResponse.body.id);
     expect(originalGetResponse.body.adapter).toEqual(updatedGetResponse.body.adapter);
@@ -281,7 +281,7 @@ describe("Core", () => {
       'func': 'a'.repeat(256),
       'data': '{}'
     }
-    configToPersist.transformations = [ crazyLongTransformation ]
+    configToPersist.transformation = crazyLongTransformation
 
     // create pipeline to persist
     const creationResponse = await request(URL)
@@ -296,11 +296,10 @@ describe("Core", () => {
       .get(`/pipelines/${pipelineId}`)
       .send()
 
-    expect(pipelineResponse.body.transformations).toHaveLength(1)
-    expect(pipelineResponse.body.transformations[0]).toEqual(crazyLongTransformation)
+    expect(pipelineResponse.body.transformation).toEqual(crazyLongTransformation)
 
     // clean up
-    const deletionResponse = await request(URL)
+    await request(URL)
       .delete(`/pipelines/${pipelineId}`)
       .send()
   })
@@ -320,16 +319,10 @@ const pipelineConfig = {
       "parameters": {}
     }
   },
-  "transformations": [
-    {
+  "transformation": {
       "func": "return data+data;",
       "data": "[1]"
     },
-    {
-      "func": "return 1",
-      "data": "[]"
-    }
-  ],
   "trigger": {
     "firstExecution": "1905-12-01T02:30:00.123Z",
     "periodic": true,
