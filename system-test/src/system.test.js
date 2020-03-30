@@ -36,8 +36,8 @@ describe('System-Test', () => {
       TRANSFORMATION_URL,
       ADAPTER_URL + '/version',
       MOCK_SERVER_URL + '/'
-      ], timeout: 10000 })
-  }, 12000)
+      ], timeout: 20000 })
+  }, 22000)
 
   afterAll(async () => {
     console.log('All tests done, removing pipelines from ods...')
@@ -50,7 +50,7 @@ describe('System-Test', () => {
       .send()
   })
 
-  test('Test 1: Create non-periodic pipeline without transformations', async () => {
+  test('Test 1: Create non-periodic pipeline without transformation', async () => {
     // Prepare datasource mock
     await request(MOCK_SERVER_URL)
       .post('/data/test1')
@@ -84,7 +84,7 @@ describe('System-Test', () => {
 
   }, 10000)
 
-  test('Test 2: Create periodic pipeline without transformations', async () => {
+  test('Test 2: Create periodic pipeline without transformation', async () => {
     // Prepare datasource mock
     await request(MOCK_SERVER_URL)
       .post('/sequences/test2')
@@ -135,20 +135,18 @@ describe('System-Test', () => {
 
   }, 20000)
 
-  test('Test 3: Create non-periodic pipeline with transformations', async () => {
+  test('Test 3: Create non-periodic pipeline with transformation', async () => {
     // Prepare datasource mock
     await request(MOCK_SERVER_URL)
       .post('/data/test3')
       .send(sourceData)
 
-    const expectedData = {
-      one: 2,
-      two: "two",
-      newField: 12
-    }
+    let expectedData = Object.assign({}, sourceData)
+    expectedData.newField = 12
+
     const notification = generateNotification('data.newField === 12',MOCK_SERVER_DOCKER+'/notifications/test3')
     const pipelineConfig = generateConfig(MOCK_SERVER_DOCKER+'/data/test3',false)
-    pipelineConfig.transformations = [{"func": "data.one = data.one + 1;return data;"}, {"func": "data.newField = 12;return data;"}, {"func": "delete data.objecticus;return data;"}]
+    pipelineConfig.transformation = {func: "data.newField = 12; return data;"}
     pipelineConfig.notifications = [notification]
 
     console.log(`Test 3: Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
@@ -160,7 +158,7 @@ describe('System-Test', () => {
     const pipelineId = pipelineResponse.body.id
 
     // Wait for webhook notification
-    const webhookResponse = await checkWebhook('test3', 1000)
+    const webhookResponse = await checkWebhook('test3', 2000)
     console.log(`Test 3: Webhook response body: ${JSON.stringify(webhookResponse.body)}`)
     expect(webhookResponse.body.location).toEqual(STORAGE_DOCKER+'/'+pipelineId)
     expect(webhookResponse.body.timestamp).toBeDefined()
@@ -173,7 +171,7 @@ describe('System-Test', () => {
     console.log(`Test 3: Storage response body: ${JSON.stringify(storageResponse.body)}`)
     expect(storageResponse.body[0].data).toEqual(expectedData)
 
-  }, 10000)
+  }, 20000)
 
   test('Test 4: Update periodic pipeline', async () => {
     // Prepare datasource mock
@@ -326,7 +324,7 @@ describe('System-Test', () => {
     const unchanged = await webhookRemainsUnchanged('test6', 5000)
     console.log(unchanged)
     expect(unchanged).toEqual(true)
-  }, 10000)
+  }, 20000)
 })
 
 function generateNotification(condition, url) {
@@ -352,7 +350,7 @@ function generateConfig(sourceLocation, periodic, interval = 5000) {
         parameters: {}
       }
     },
-    transformations: [],
+    transformation: {},
     trigger: {
       firstExecution: new Date(Date.now() + 2000),
       periodic,

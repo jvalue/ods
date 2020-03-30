@@ -41,7 +41,7 @@ Note that you need to delete existing docker images from your local docker daemo
 { 
   "id": number,
   "adapter": AdapterConfig,
-  "transformations": [*TransformationConfig],
+  "transformation": TransformationConfig,
   "notifications": [*NotificationConfig]
   "trigger":TriggerConfig,
   "metadata":PipelineMetadata
