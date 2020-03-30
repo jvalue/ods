@@ -12,16 +12,10 @@
       "parameters": {}
     }
   },
-  "transformations": [
-    {
+  "transformation": {
       "func": "return data+data;",
       "data": "[1]"
-    },
-    {
-      "func": "return 1",
-      "data": "[]"
-    }
-  ],
+  },
   "trigger": {
     "firstExecution": "1905-12-01T02:30:00.123Z",
     "periodic": true,
