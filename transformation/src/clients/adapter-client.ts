@@ -7,7 +7,7 @@ const http = axios.create({
   headers: { 'Content-Type': 'application/json' }
 })
 
-export async function fetchImportedData (dataBlobId: number): Promise<object> {
-  const response = await http.get(`/data/${dataBlobId}`)
+export async function fetchImportedData (location: string): Promise<object> {
+  const response = await http.get(location)
   return response.data
 }
