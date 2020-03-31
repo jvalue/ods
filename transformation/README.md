@@ -85,7 +85,8 @@ TBD
 ### TransformationRequest
 ```
 {
-  "data": object,
+  "data": object | undefined
+  "dataLocation": object | undefined
   "func": string [VALID JS CODE]
 }
 ```
