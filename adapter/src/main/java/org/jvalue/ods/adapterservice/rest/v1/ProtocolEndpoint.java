@@ -18,7 +18,7 @@ public class ProtocolEndpoint {
         this.adapterRepository = adapterRepository;
     }
 
-    @GetMapping("/protocols")
+    @GetMapping(Mappings.PROTOCOL_PATH)
     public Collection<Importer> getProtocols() {
         return adapterRepository.getAllImporters();
     }

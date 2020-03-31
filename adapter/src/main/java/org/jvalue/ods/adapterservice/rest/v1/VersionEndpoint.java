@@ -12,7 +12,7 @@ public class VersionEndpoint {
     @Value("${app.version}")
     private String VERSION;
 
-    @GetMapping("/version")
+    @GetMapping(Mappings.VERSION_PATH)
     public String getApplicationVersion() {
         return VERSION;
     }
