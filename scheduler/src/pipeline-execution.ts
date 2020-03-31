@@ -63,8 +63,7 @@ async function executeTransformation (pipelineConfig: PipelineConfig, dataLocati
     throw new Error('Illegal state: attempting to execute undefined transformation.')
   }
   try {
-    pipelineConfig.transformation.dataLocation = dataLocation
-    const jobResult = await TransformationClient.executeTransformation(pipelineConfig.transformation)
+    const jobResult = await TransformationClient.executeTransformation(pipelineConfig.transformation, dataLocation)
     return jobResult.data
   } catch (e) {
     handleError(e)
