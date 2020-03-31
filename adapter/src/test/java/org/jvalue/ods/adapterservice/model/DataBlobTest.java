@@ -33,7 +33,8 @@ public class DataBlobTest {
     JsonNode result = mapper.valueToTree(blob.getMetaData());
 
     System.out.println(result.toString());
-    assertEquals(1, result.size());
+    assertEquals(2, result.size());
     assertEquals("null", result.get("id").asText());
+    assertEquals("/data/null", result.get("location").asText());
   }
 }
