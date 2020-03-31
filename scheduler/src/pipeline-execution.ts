@@ -43,9 +43,9 @@ export async function executePipeline (pipelineConfig: PipelineConfig, maxRetrie
 async function executeAdapter (pipelineConfig: PipelineConfig): Promise<AdapterResponse> {
   console.log(`Execute Adapter for Pipeline ${pipelineConfig.id}`)
   try {
-    const importedData = await AdapterClient.executeAdapter(pipelineConfig.adapter)
+    const adapterResponse = await AdapterClient.executeAdapter(pipelineConfig.adapter)
     console.log(`Sucessful import via Adapter for Pipeline ${pipelineConfig.id}`)
-    return importedData
+    return adapterResponse
   } catch (e) {
     handleError(e)
     throw Error('Failed to import data via Adapter Service')
