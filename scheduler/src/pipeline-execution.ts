@@ -19,10 +19,15 @@ export async function executePipeline (pipelineConfig: PipelineConfig, maxRetrie
     }
     try {
       const adapterResponse: AdapterResponse = await executeAdapter(pipelineConfig)
-      const importedData: object = await AdapterClient.fetchImportedData(adapterResponse.id)
-      const transformedData = await executeTransformation(pipelineConfig, importedData)
-      const dataLocation = await executeStorage(pipelineConfig, transformedData)
-      await executeNotifications(pipelineConfig, transformedData, dataLocation)
+      let data: object
+      if (pipelineConfig.transformation) {
+        data = await executeTransformation(pipelineConfig, adapterResponse.location)
+      } else {
+        data = await AdapterClient.fetchImportedData(adapterResponse.id)
+        console.log('No transformation specified, fetching data from adapter.')
+      }
+      const dataLocation = await executeStorage(pipelineConfig, data)
+      await executeNotifications(pipelineConfig, data, dataLocation)
       pipelineSuccess = true
       console.log(`Successfully executed Pipeline ${pipelineConfig.id}`)
     } catch (e) {
@@ -44,7 +49,7 @@ async function executeAdapter (pipelineConfig: PipelineConfig): Promise<AdapterR
   console.log(`Execute Adapter for Pipeline ${pipelineConfig.id}`)
   try {
     const adapterResponse = await AdapterClient.executeAdapter(pipelineConfig.adapter)
-    console.log(`Sucessful import via Adapter for Pipeline ${pipelineConfig.id}`)
+    console.log(`Sucessfully triggered import via Adapter for Pipeline ${pipelineConfig.id}`)
     return adapterResponse
   } catch (e) {
     handleError(e)
@@ -52,14 +57,13 @@ async function executeAdapter (pipelineConfig: PipelineConfig): Promise<AdapterR
   }
 }
 
-async function executeTransformation (pipelineConfig: PipelineConfig, data: object): Promise<object> {
-  if (!pipelineConfig.transformation) {
-    console.log('No transformation specified, continuing..')
-    return data
-  }
+async function executeTransformation (pipelineConfig: PipelineConfig, dataLocation: string): Promise<object> {
   console.log(`Execute Pipeline Transformation ${pipelineConfig.id}`)
+  if (!pipelineConfig.transformation) {
+    throw new Error('Illegal state: attempting to execute undefined transformation.')
+  }
   try {
-    pipelineConfig.transformation.data = data
+    pipelineConfig.transformation.dataLocation = dataLocation
     const jobResult = await TransformationClient.executeTransformation(pipelineConfig.transformation)
     return jobResult.data
   } catch (e) {
