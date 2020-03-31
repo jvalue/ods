@@ -18,7 +18,7 @@ public class FormatEndpoint {
         this.adapterRepository = adapterRepository;
     }
 
-    @GetMapping("/formats")
+    @GetMapping(Mappings.FORMAT_PATH)
     public Collection<Interpreter> getFormats() {
         return adapterRepository.getAllInterpreters();
     }
