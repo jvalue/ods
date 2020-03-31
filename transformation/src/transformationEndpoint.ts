@@ -62,6 +62,9 @@ export class TransformationEndpoint {
 
   postJob = (req: Request, res: Response): void => {
     const transformation: TransformationRequest = req.body
+    if (!transformation.data && !transformation.dataLocation) {
+      res.writeHead(400);
+    }
     const result: JobResult = this.transformationService.executeJob(transformation.func, transformation.data)
     const answer: string = JSON.stringify(result)
     res.setHeader('Content-Type', 'application/json')
