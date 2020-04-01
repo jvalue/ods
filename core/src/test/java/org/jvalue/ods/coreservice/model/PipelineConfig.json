@@ -1,16 +1,10 @@
 {
   "id": 123,
   "datasourceId": 1,
-  "transformations": [
-    {
-      "func": "return data+data;",
-      "data": "[1]"
-    },
-    {
-      "func": "return 1",
-      "data": "[]"
-    }
-  ],
+  "transformation": {
+    "func": "return data+data;",
+    "data": "[1]"
+  },
   "metadata": {
     "author": "icke",
     "license": "none",

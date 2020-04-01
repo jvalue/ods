@@ -37,7 +37,7 @@ describe('System-Test', () => {
       ADAPTER_URL + '/version',
       MOCK_SERVER_URL + '/'
       ], timeout: 20000, log: true })
-  }, 21000)
+  }, 22000)
 
   afterAll(async () => {
     console.log('All tests done, removing adapter configs from ods...')
@@ -54,7 +54,7 @@ describe('System-Test', () => {
       .send()
   })
 
-  test('Test 1: Create non-periodic pipeline without transformations', async () => {
+  test('Test 1: Create non-periodic pipeline without transformation', async () => {
     // Prepare datasource mock
     await request(MOCK_SERVER_URL)
       .post('/data/test1')
@@ -112,7 +112,7 @@ describe('System-Test', () => {
 
   }, 20000)
 
-  test('Test 2: Create periodic pipeline without transformations', async () => {
+  test('Test 2: Create periodic pipeline without transformation', async () => {
     // Prepare datasource mock
     await request(MOCK_SERVER_URL)
       .post('/sequences/test2')
@@ -178,17 +178,14 @@ describe('System-Test', () => {
 
   }, 20000)
 
-  test('Test 3: Create non-periodic pipeline with transformations', async () => {
+  test('Test 3: Create non-periodic pipeline with transformation', async () => {
     // Prepare datasource mock
     await request(MOCK_SERVER_URL)
       .post('/data/test3')
       .send(sourceData)
 
-    const expectedData = {
-      one: 2,
-      two: "two",
-      newField: 12
-    }
+    let expectedData = Object.assign({}, sourceData)
+    expectedData.newField = 12
 
     const datasourceConfig = generateDataSourceConfig(MOCK_SERVER_DOCKER + '/data/test3',false)
 
@@ -204,7 +201,7 @@ describe('System-Test', () => {
 
     // Add pipeline to core service
     const pipelineConfig = generatePipelineConfig(datasourceId)
-    pipelineConfig.transformations = [{"func": "data.one = data.one + 1;return data;"}, {"func": "data.newField = 12;return data;"}, {"func": "delete data.objecticus;return data;"}]
+    pipelineConfig.transformation = {"func": "data.newField = 12;return data;"}
     const notification = generateNotification('data.newField === 12',MOCK_SERVER_DOCKER + '/notifications/test3')
     pipelineConfig.notifications = [notification]
 
@@ -216,7 +213,7 @@ describe('System-Test', () => {
     console.log(`[Test 3] Successfully created pipeline ${pipelineId} for datasource ${datasourceId}`)
 
     // Wait for webhook notification
-    const webhookResponse = await checkWebhook('test3', 1000)
+    const webhookResponse = await checkWebhook('test3', 2000)
     console.log(`[Test 3] Webhook response body: ${JSON.stringify(webhookResponse.body)}`)
     expect(webhookResponse.body.location).toEqual(STORAGE_DOCKER + '/' + pipelineId)
     expect(webhookResponse.body.timestamp).toBeDefined()
@@ -508,7 +505,7 @@ function generateDataSourceConfig(sourceLocation, periodic, interval = 5000) {
 function generatePipelineConfig(datasourceId) {
   return {
     datasourceId: datasourceId,
-    transformations: [],
+    transformation: undefined,
     metadata: {
       author: "Klaus Klausemeier",
       license: "AGPL v30",

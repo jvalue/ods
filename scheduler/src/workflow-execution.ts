@@ -19,7 +19,7 @@ export async function execute (datasourceConfig: DatasourceConfig, maxRetries = 
   const followingPipelines = CoreClient.getCachedPipelinesByDatasourceId(datasourceConfig.id)
   for(let pipelineConfig of followingPipelines) {
     const transformedData =
-        await retryableExecution(executeTransformations, { pipelineConfig: pipelineConfig, data: importedData }, `Executing transformatins for pipeline ${pipelineConfig.id}`)
+        await retryableExecution(executeTransformation, { pipelineConfig: pipelineConfig, data: importedData }, `Executing transformatins for pipeline ${pipelineConfig.id}`)
 
     const dataLocation =
         await retryableExecution(executeStorage, { pipelineConfig: pipelineConfig, data: transformedData }, `Storing data for pipeline ${pipelineConfig.id}`)
@@ -55,21 +55,23 @@ async function executeAdapter (dataousrceConfig: DatasourceConfig): Promise<Adap
   return importedData
 }
 
-async function executeTransformations (args: { pipelineConfig: PipelineConfig, data: object }): Promise<object> {
+async function executeTransformation (args: { pipelineConfig: PipelineConfig, data: object }): Promise<object> {
   const pipelineConfig = args.pipelineConfig
   const data = args.data
 
-  console.log(`Execute Pipeline Transformation ${pipelineConfig.id}`)
-  let lastData = data
-
-  for (const transformation of pipelineConfig.transformations) {
-    const currentTransformation = JSON.parse(JSON.stringify(transformation)) // deeply copy object
-    currentTransformation.data = lastData
-    const jobResult = await TransformationClient.executeTransformation(currentTransformation)
-    lastData = jobResult.data
+  if (!pipelineConfig.transformation) {
+    console.log('No transformation specified, continuing..')
+    return data
   }
-  console.log(`Sucessfully transformed data for Pipeline ${pipelineConfig.id}`)
-  return lastData
+  console.log(`Execute Pipeline Transformation ${pipelineConfig.id}`)
+  try {
+    pipelineConfig.transformation.data = data
+    const jobResult = await TransformationClient.executeTransformation(pipelineConfig.transformation)
+    return jobResult.data
+  } catch (e) {
+    handleError(e)
+    throw new Error('Failed to transform Data via Transformation Service')
+  }
 }
 
 async function executeStorage (args: { pipelineConfig: PipelineConfig, data: object }): Promise<string> {

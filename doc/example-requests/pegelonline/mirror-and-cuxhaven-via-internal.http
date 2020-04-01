@@ -33,11 +33,9 @@ Content-Type: application/json
 
 {
   "datasourceId": {{datasourceid}},
-  "transformations": [
-    {
-      "func": "data.forEach((x) => { var currentMeasurement = x.timeseries[0].currentMeasurement; currentMeasurement.value /= 100; currentMeasurement.unit = 'm'; x.timeseries = undefined; x.currentMeasurement = currentMeasurement;}); return data;"
-    }
-  ],
+  "transformation": {
+    "func": "data.forEach((x) => { var currentMeasurement = x.timeseries[0].currentMeasurement; currentMeasurement.value /= 100; currentMeasurement.unit = 'm'; x.timeseries = undefined; x.currentMeasurement = currentMeasurement;}); return data;"
+  },
   "metadata": {
     "author": "icke",
     "license": "none"
@@ -52,11 +50,9 @@ Content-Type: application/json
 
 {
   "datasourceId": {{datasourceid}},
-  "transformations": [
-    {
-      "func": "var data = data[0].data; var dataCuxhaven = data.filter((x) => x.shortname.toLowerCase().includes('cuxhaven')); return dataCuxhaven;"
-    }
-  ],
+  "transformation": {
+    "func": "var data = data[0].data; var dataCuxhaven = data.filter((x) => x.shortname.toLowerCase().includes('cuxhaven')); return dataCuxhaven;"
+  },
   "metadata": {
     "author": "icke",
     "license": "none"

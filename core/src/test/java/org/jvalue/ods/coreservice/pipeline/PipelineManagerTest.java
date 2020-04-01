@@ -43,7 +43,7 @@ public class PipelineManagerTest {
     public void testCreatePipeline() throws IOException {
         PipelineConfig config = mapper.readValue(configFile, PipelineConfig.class);
 
-        PipelineConfig expectedConfig = new PipelineConfig(config.getDatasourceId(), config.getTransformations(), config.getMetadata(), config.getNotifications());
+        PipelineConfig expectedConfig = new PipelineConfig(config.getDatasourceId(), config.getTransformation(), config.getMetadata(), config.getNotifications());
         expectedConfig.setId(123L);
 
         when(pipelineRepository.save(config)).thenReturn(expectedConfig);
@@ -60,7 +60,7 @@ public class PipelineManagerTest {
         PipelineConfig config = mapper.readValue(configFile, PipelineConfig.class);
         config.setId(123L);
 
-        PipelineConfig updated = new PipelineConfig(config.getDatasourceId(), Collections.emptyList(), config.getMetadata(), config.getNotifications());
+        PipelineConfig updated = new PipelineConfig(config.getDatasourceId(), null, config.getMetadata(), config.getNotifications());
         updated.setId(123L);
 
         when(pipelineRepository.findById(123L)).thenReturn(Optional.of(config));

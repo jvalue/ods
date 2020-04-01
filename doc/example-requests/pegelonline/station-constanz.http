@@ -35,11 +35,9 @@ Content-Type: application/json
 
 {
   "datasourceId": {{datasourceid}},
-  "transformations": [
-    {
-      "func": "result = {};result.name = data.shortname;result.timestamp = data.timeseries[0].currentMeasurement.timestamp;result.unit = \"mm\";result.pegel = data.timeseries[0].currentMeasurement.value*1000;return result;"
-    }
-  ],
+  "transformation": {
+    "func": "result = {};result.name = data.shortname;result.timestamp = data.timeseries[0].currentMeasurement.timestamp;result.unit = \"mm\";result.pegel = data.timeseries[0].currentMeasurement.value*1000;return result;"
+  }
   "metadata": {
     "author": "icke",
     "license": "none"

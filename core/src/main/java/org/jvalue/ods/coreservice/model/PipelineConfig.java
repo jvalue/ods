@@ -21,8 +21,8 @@ public class PipelineConfig implements Serializable {
     @NotNull
     private Long datasourceId;
 
-    @ElementCollection @NotNull
-    private List<TransformationConfig> transformations;
+    @Embedded
+    private TransformationConfig transformation;
 
     @Embedded @NotNull
     private PipelineMetadata metadata;
@@ -35,11 +35,11 @@ public class PipelineConfig implements Serializable {
 
     @JsonCreator
     public PipelineConfig(@JsonProperty("datasourceId")  Long datasourceId,
-      @JsonProperty("transformations") List<TransformationConfig> transformations,
+    @JsonProperty("transformation") TransformationConfig transformation,
       @JsonProperty("metadata") PipelineMetadata metadata,
       @JsonProperty("notifications") List<NotificationConfig> notifications) {
         this.datasourceId = datasourceId;
-        this.transformations = transformations;
+        this.transformation = transformation;
         this.metadata = metadata;
         this.notifications = notifications;
     }
@@ -60,12 +60,12 @@ public class PipelineConfig implements Serializable {
       this.datasourceId = datasourceId;
     }
 
-    public List<TransformationConfig> getTransformations() {
-        return transformations;
+    public TransformationConfig getTransformation() {
+        return transformation;
     }
 
-    public void setTransformations(List<TransformationConfig> transformations) {
-        this.transformations = transformations;
+    public void setTransformation(TransformationConfig transformation) {
+        this.transformation = transformation;
     }
 
     public PipelineMetadata getMetadata() {
@@ -89,7 +89,7 @@ public class PipelineConfig implements Serializable {
         return "PipelineConfig{" +
           "id=" + id +
           ", datasourceId=" + datasourceId +
-          ", transformations=" + transformations +
+          ", transformation=" + transformation +
           ", metadata=" + metadata +
           ", notifications=" + notifications +
           '}';
@@ -102,13 +102,13 @@ public class PipelineConfig implements Serializable {
         PipelineConfig that = (PipelineConfig) o;
         return Objects.equals(id, that.id) &&
           Objects.equals(datasourceId, that.datasourceId) &&
-          Objects.equals(transformations, that.transformations) &&
+          Objects.equals(transformation, that.transformation) &&
           Objects.equals(metadata, that.metadata) &&
           Objects.equals(notifications, that.notifications);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, datasourceId, transformations, metadata, notifications);
+        return Objects.hash(id, datasourceId, transformation, metadata, notifications);
     }
 }

@@ -41,7 +41,7 @@ describe("Core", () => {
 
     expect(response.status).toEqual(201);
     expect(response.header.location).toContain(response.body.id);
-    expect(response.body.transformations).toEqual(pipelineConfig.transformations);
+    expect(response.body.transformation).toEqual(pipelineConfig.transformation);
     expect(response.body.id).toBeDefined();
     expect(response.body.id).not.toEqual(pipelineConfig.id); // id not under control of client
     expect(response.body.datasourceId).toEqual(pipelineConfig.datasourceId);
@@ -84,7 +84,7 @@ describe("Core", () => {
     const updatedGetResponse = await request(URL)
       .get("/pipelines/" + pipelineId);
 
-    expect(originalGetResponse.body.transformations).toEqual(updatedGetResponse.body.transformations);
+    expect(originalGetResponse.body.transformation).toEqual(updatedGetResponse.body.transformation);
     expect(originalGetResponse.body.metadata).toEqual(updatedGetResponse.body.metadata);
     expect(originalGetResponse.body.id).toEqual(updatedGetResponse.body.id);
     expect(originalGetResponse.body.datasourceId).not.toEqual(updatedGetResponse.body.datasourceId);
@@ -280,7 +280,7 @@ describe("Core", () => {
       'func': 'a'.repeat(256),
       'data': '{}'
     }
-    configToPersist.transformations = [ crazyLongTransformation ]
+    configToPersist.transformation = crazyLongTransformation
 
     // create pipeline to persist
     const creationResponse = await request(URL)
@@ -295,11 +295,10 @@ describe("Core", () => {
       .get(`/pipelines/${pipelineId}`)
       .send()
 
-    expect(pipelineResponse.body.transformations).toHaveLength(1)
-    expect(pipelineResponse.body.transformations[0]).toEqual(crazyLongTransformation)
+    expect(pipelineResponse.body.transformation).toEqual(crazyLongTransformation)
 
     // clean up
-    const deletionResponse = await request(URL)
+    await request(URL)
       .delete(`/pipelines/${pipelineId}`)
       .send()
   })
@@ -308,16 +307,10 @@ describe("Core", () => {
 const pipelineConfig = {
   "id": 12345,
   "datasourceId": 1,
-  "transformations": [
-    {
+  "transformation": {
       "func": "return data+data;",
       "data": "[1]"
-    },
-    {
-      "func": "return 1",
-      "data": "[]"
-    }
-  ],
+  },
   "metadata": {
     "author": "icke",
     "license": "none",
