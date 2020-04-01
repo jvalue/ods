@@ -1,11 +1,10 @@
 const Koa = require('koa')
 const Router = require('koa-router')
 const bodyParser = require('koa-bodyparser')
-const axios = require('axios')
+const axios = require('axios').default
 const router = new Router()
 
 const PORT = process.env.MOCK_TRANSFORMATION_PORT || 8083
-const MOCK_ADAPTER_URL = 'http://' + process.env.MOCK_ADAPTER_HOST + ':' + process.env.MOCK_ADAPTER_PORT
 
 const app = new Koa()
 app.use(bodyParser())
@@ -20,12 +19,12 @@ router.get('/', async ctx => {
 })
 
 router.post('/job', async ctx => {
-  console.log(`POST /job request body: ${JSON.stringify(ctx.request.body)}`)
   ctx.type = 'text/json'
   const dataLocation = ctx.request.body.dataLocation;
-  const data = axios.get(MOCK_ADAPTER_URL+"/data/")
-  data.test = 'abc'
-  ctx.body = { data }
+  const fetchResponse = await axios.get(dataLocation)
+  let importedData = fetchResponse.data
+  importedData.test = 'abc'
+  ctx.body = { data: importedData }
 })
 
 router.post('/notification/webhook', async ctx => {
