@@ -1,13 +1,13 @@
 <template>
-  <div class="pipeline">
+  <div class="datasource">
     <v-card>
       <v-card-title>
         <v-btn
           class="ma-2"
           color="success"
-          @click="onCreatePipeline()"
+          @click="onCreate()"
         >
-          Create new pipeline
+          Create new Datasource
           <v-icon
             dark
             right
@@ -17,7 +17,7 @@
         </v-btn>
         <v-btn
           class="ma-2"
-          @click="loadPipelinesAction()"
+          @click="loadDatasourcesAction()"
         >
           <v-icon dark>
             mdi mdi-sync
@@ -35,10 +35,10 @@
 
       <v-data-table
         :headers="headers"
-        :items="pipelines"
+        :items="datasources"
         :search="search"
         :custom-filter="filterOnlyDisplayName"
-        :loading="isLoadingPipelines"
+        :loading="isLoadingDatasources"
         class="elevation-1"
       >
         <v-progress-linear
@@ -63,21 +63,7 @@
             depressed
             small
             class="ma-2"
-            @click="onShowPipelineData(item)"
-          >
-            Data
-            <v-icon
-              dark
-              right
-            >
-              mdi mdi-database
-            </v-icon>
-          </v-btn>
-          <v-btn
-            depressed
-            small
-            class="ma-2"
-            @click="onEditPipeline(item)"
+            @click="onEdit(item)"
           >
             Edit
             <v-icon
@@ -91,7 +77,7 @@
             depressed
             small
             class="ma-2"
-            @click="onDeletePipeline(item)"
+            @click="onDelete(item)"
           >
             Delete
             <v-icon
@@ -99,20 +85,6 @@
               right
             >
               mdi mdi-delete
-            </v-icon>
-          </v-btn>
-          <v-btn
-            depressed
-            small
-            class="ma-2"
-            @click="onNotifications(item)"
-          >
-            Notifications
-            <v-icon
-              dark
-              right
-            >
-              mdi mdi-alarm
             </v-icon>
           </v-btn>
         </template>
@@ -125,57 +97,61 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { State, Action } from 'vuex-class'
-import Pipeline from './pipeline'
+import Datasource from './datasource'
 
-const namespace = { namespace: 'pipeline' }
+const namespace = { namespace: 'datasource' }
+
+const ONE_HOUR_IN_MS = 3600 * 1000
+const ONE_MINUTE_IN_MS = 60 * 1000
 
 @Component({})
-export default class PipelineOverview extends Vue {
-  @Action('loadPipelines', namespace) private loadPipelinesAction!: () => void;
-  @Action('deletePipeline', namespace) private deletePipelineAction!: (id: number) => void;
+export default class DatsourceOverview extends Vue {
+  @Action('loadDatasources', namespace) private loadDatasourcesAction!: () => void;
+  @Action('deleteDatasource', namespace) private deleteDatasourceAction!: (id: number) => void;
 
-  @State('isLoadingPipelines', namespace) private isLoadingPipelines!: boolean;
-  @State('pipelines', namespace) private pipelines!: Pipeline[];
+  @State('isLoadingDatasources', namespace) private isLoadingDatasources!: boolean;
+  @State('datasources', namespace) private datasources!: object[];
 
   private headers = [
     { text: 'Id', value: 'id' },
-    { text: 'Datasource ID', value: 'datasourceId' },
-    { text: 'Pipeline Name', value: 'metadata.displayName', sortable: false }, // sorting to be implemented
+    { text: 'Datasource Name', value: 'metadata.displayName', sortable: false }, // sorting to be implemented
     { text: 'Author', value: 'metadata.author', sortable: false },
+    { text: 'Interval', value: 'trigger.interval', sortable: false },
+    { text: 'Periodic', value: 'trigger.periodic', sortable: false },
     { text: 'Action', value: 'action', sortable: false }
   ];
 
   private search = '';
 
   private mounted () {
-    this.loadPipelinesAction()
+    this.loadDatasourcesAction()
   }
 
-  private onShowPipelineData (pipeline: Pipeline) {
-    this.$router.push({ name: 'pipeline-storage-overview', params: { storageId: `${pipeline.id}` } })
+  private onCreate () {
+    this.$router.push({ name: 'datasource-new' })
   }
 
-  private onCreatePipeline () {
-    this.$router.push({ name: 'pipeline-new' })
+  private onEdit (datasource: Datasource) {
+    this.$router.push({ name: 'datasource-edit', params: { datasourceId: `${datasource.id}` } })
   }
 
-  private onEditPipeline (pipeline: Pipeline) {
-    this.$router.push({ name: 'pipeline-edit', params: { pipelineId: `${pipeline.id}` } })
+  private onDelete (datasource: Datasource) {
+    this.deleteDatasourceAction(datasource.id)
   }
 
-  private onDeletePipeline (pipeline: Pipeline) {
-    this.deletePipelineAction(pipeline.id)
-  }
-
-  private onNotifications (pipeline: Pipeline) {
-    this.$router.push({ name: 'notification-overview', params: { pipelineId: `${pipeline.id}` } })
-  }
-
-  private filterOnlyDisplayName (value: any, search: string, item: Pipeline): boolean {
+  private filterOnlyDisplayName (value: any, search: string, item: Datasource): boolean {
     return value != null &&
           search != null &&
           typeof value === 'string' &&
           item.metadata.displayName.toLocaleLowerCase().indexOf(search.toLocaleLowerCase()) !== -1
+  }
+
+  private getHoursFromMS (intervalInMS: number): number {
+    return Math.floor(intervalInMS / ONE_HOUR_IN_MS)
+  }
+
+  private getMinutesFromMS (intervalInMS: number): number {
+    return Math.floor((intervalInMS % ONE_HOUR_IN_MS) / ONE_MINUTE_IN_MS)
   }
 }
 </script>

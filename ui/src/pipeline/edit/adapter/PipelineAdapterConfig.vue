@@ -47,7 +47,7 @@ import Component from 'vue-class-component'
 
 import {Emit, Prop, PropSync, Watch} from 'vue-property-decorator'
 
-import { AdapterConfig } from '../../pipeline'
+import Datasource from '../../datasource'
 import PipelineCsvAdapterConfig from './PipelineCsvAdapterConfig.vue'
 
 @Component({
@@ -65,7 +65,7 @@ export default class PipelineAdapterConfig extends Vue {
   private isEditMode!: boolean
 
   @PropSync('value')
-  private adapterConfig!: AdapterConfig;
+  private adapterConfig!: Datasource;
 
   @Emit('value')
   emitValue () {
