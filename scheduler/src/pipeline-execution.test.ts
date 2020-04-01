@@ -24,7 +24,8 @@ const mockSchedulePipeline = PipelineScheduling.schedulePipeline as jest.Mock
 const mockRemovePipelineJob = PipelineScheduling.removePipelineJob as jest.Mock
 
 const adapterResponse: AdapterResponse = {
-  id: 42
+  id: 42,
+  location: '/data/42'
 }
 
 const importedData = {
@@ -40,18 +41,17 @@ afterEach(() => {
 })
 
 test('Should execute pipeline once', async () => {
-  const transformation = { data: importedData }
+  const transformation = { dataLocation: '/data/42' }
   const pipelineConfig = generateConfig(transformation, false, [])
 
   mockExecuteAdapter.mockResolvedValue(adapterResponse)
-  mockFetchImportedData.mockResolvedValue(importedData)
   mockExecuteTransformation.mockResolvedValue({ data: transformedData })
 
   await PipelineExecution.executePipeline(pipelineConfig)
 
   expect(mockExecuteAdapter).toHaveBeenCalledWith(pipelineConfig.adapter)
-  expect(mockFetchImportedData).toHaveBeenCalledWith(adapterResponse.id)
-  expect(mockExecuteTransformation).toHaveBeenCalledWith(transformation)
+  expect(mockFetchImportedData).not.toBeCalled()
+  expect(mockExecuteTransformation).toHaveBeenCalledWith(transformation, adapterResponse.location)
   expect(mockExecuteTransformation).toHaveBeenCalledTimes(1)
   expect(mockExecuteStorage).toHaveBeenCalledWith(pipelineConfig, transformedData)
 
@@ -60,18 +60,17 @@ test('Should execute pipeline once', async () => {
 })
 
 test('Should execute pipeline periodic', async () => {
-  const transformation = { data: importedData }
+  const transformation = { dataLocation: 'data/42' }
   const pipelineConfig = generateConfig(transformation, true, [])
 
   mockExecuteAdapter.mockResolvedValue(adapterResponse)
-  mockFetchImportedData.mockResolvedValue(importedData)
   mockExecuteTransformation.mockResolvedValue({ data: transformedData })
 
   await PipelineExecution.executePipeline(pipelineConfig)
 
   expect(mockExecuteAdapter).toHaveBeenCalledWith(pipelineConfig.adapter)
-  expect(mockFetchImportedData).toHaveBeenCalledWith(adapterResponse.id)
-  expect(mockExecuteTransformation).toHaveBeenCalledWith(transformation)
+  expect(mockFetchImportedData).not.toBeCalled()
+  expect(mockExecuteTransformation).toHaveBeenCalledWith(transformation, adapterResponse.location)
   expect(mockExecuteStorage).toHaveBeenCalledWith(pipelineConfig, transformedData)
 
   expect(mockRemovePipelineJob).not.toHaveBeenCalled()
@@ -86,6 +85,7 @@ test('Should not execute undefined transformation', async () => {
 
   await PipelineExecution.executePipeline(pipelineConfig)
 
+  expect(mockFetchImportedData).toHaveBeenCalledWith(adapterResponse.id)
   expect(mockExecuteNotification).not.toBeCalled()
 })
 
