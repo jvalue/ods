@@ -5,7 +5,8 @@ const app = new Koa()
 const PORT = process.env.MOCK_ADAPTER_PORT || 8082
 
 const dataImportResponse = {
-  id: 1
+  id: 1,
+  location: '/data/1'
 }
 
 const importedData = {
@@ -15,11 +16,6 @@ const importedData = {
     name: 'simpleObject'
   },
   field4: [3, 5, 'a', 'z']
-}
-
-const importResponse = {
-  id: 1,
-  dataLocation: '/data/1'
 }
 
 router.get('/', async ctx => {
