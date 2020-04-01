@@ -23,7 +23,8 @@ public class PipelineConfigTest {
     PipelineConfig result = mapper.readValue(pipelineConfig, PipelineConfig.class);
 
     System.out.println(result);
-    assertEquals(2, result.getTransformations().size());
+    assertEquals("return data+data;", result.getTransformation().getFunc());
+    assertEquals("[1]", result.getTransformation().getData());
     assertNotNull(result.getId());
 
     DateFormatter dateFormatter = new DateFormatter("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
@@ -44,21 +45,19 @@ public class PipelineConfigTest {
 
   @Test
   public void testSerialization() {
-    List<TransformationConfig> transformations = List.of(new TransformationConfig("return 1+1", "[1]"),
-        new TransformationConfig("data * 10", "[2]"));
+    TransformationConfig transformation = new TransformationConfig("return 1+1", "[1]");
     PipelineMetadata metadata = new PipelineMetadata("icke", "none", "Display", "description");
     List<NotificationConfig> notifications = List.of(
         new WebhookNotification("data.value1 > 10", "http://www.webhookland.com/1"),
         new WebhookNotification("data.value1 < 0", "http://www.webhookland.com/2"));
-    PipelineConfig config = new PipelineConfig(1L, transformations, metadata, notifications);
+    PipelineConfig config = new PipelineConfig(1L, transformation, metadata, notifications);
 
     JsonNode result = mapper.valueToTree(config);
 
     System.out.println(result);
     assertEquals(5, result.size());
-    assertEquals(2, result.get("transformations").size());
-    assertEquals("return 1+1", result.get("transformations").get(0).get("func").textValue());
-    assertEquals("[2]", result.get("transformations").get(1).get("data").textValue());
+    assertEquals("return 1+1", result.get("transformation").get("func").textValue());
+    assertEquals("[1]", result.get("transformation").get("data").textValue());
     assertEquals(2, result.get("notifications").size());
     assertEquals(4, result.get("notifications").get(0).size());
     assertEquals("data.value1 > 10", result.get("notifications").get(0).get("condition").textValue());

@@ -8,11 +8,9 @@ const PIPELINES = [
   {
     id: 123,
     datasourceId: 1,
-    transformations: [{
+    transformation: {
       func: 'return data;' // not performed in integration testing
-    }, {
-      func: 'return 1;' // not peformed in integration testing
-    }],
+    },
     persistence: {},
     metadata: {},
     notifications: []
@@ -20,9 +18,9 @@ const PIPELINES = [
   {
     id: 125,
     datasourceId: 2,
-    transformations: [{
+    transformation: {
       func: 'return 1;' // not peformed in integration testing
-    }],
+    },
     persistence: {},
     metadata: {
       displayName: 'nordstream'

@@ -88,7 +88,7 @@ public class PipelineManager {
 
         PipelineConfig updated = new PipelineConfig(
                 updateConfig.getDatasourceId(),
-                updateConfig.getTransformations(),
+                updateConfig.getTransformation(),
                 updatedMetadata,
                 updateConfig.getNotifications());
         updated.setId(existing.getId());

@@ -13,13 +13,9 @@ Content-Type: application/json
 
 {
   "datasourceId": 123,
-  "transformations": [
-    {
-      "func": "return data[0];"
-    },{
-      "func": "data.test = 'abc'; return data;"
-    }
-  ],
+  "transformation":  {
+    "func": "data.test = 'abc'; return data;"
+  },
   "metadata": {
     "author": "icke",
     "license": "none"
@@ -50,13 +46,9 @@ Content-Type: application/json
 
 {
   "datasourceId": 999,
-  "transformations": [
-    {
-      "func": "return data[0];"
-    },{
-      "func": "data.test = 'abc'; return data;"
-    }
-  ],
+  "transformation": {
+    "func": "data.test = 'abc'; return data;"
+  },
   "metadata": {
     "author": "icke",
     "license": "none"

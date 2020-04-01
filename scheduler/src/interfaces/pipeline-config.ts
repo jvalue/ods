@@ -1,10 +1,10 @@
 import NotificationConfig from './notification-config'
+import TransformationConfig from './transformation-config'
 
 export default interface PipelineConfig {
   id: number;
   datasourceId: number;
-
-  transformations: object[];
+  transformation: TransformationConfig | undefined;
   persistence: object;
   metadata: PipelineMetadata;
   notifications: NotificationConfig[];
