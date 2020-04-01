@@ -26,8 +26,12 @@ public class PipelinesEndpoint {
     }
 
     @GetMapping
-    public Iterable<PipelineConfig> getPipelines() {
-        return pipelineManager.getAllPipelines();
+    public Iterable<PipelineConfig> getPipelines(@RequestParam(name = "datasourceId", required = false) Long datasourceId) {
+        if (datasourceId == null) {
+            return pipelineManager.getAllPipelines();
+        } else {
+            return pipelineManager.getAllPipelinesByDatasourceId(datasourceId);
+        }
     }
 
     @GetMapping("/{id}")
