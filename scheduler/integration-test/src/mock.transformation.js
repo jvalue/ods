@@ -30,17 +30,17 @@ router.post('/job', async ctx => {
 
 router.post('/notification/webhook', async ctx => {
   webhooks.set(ctx.request.body.pipelineName, ctx.request.body)
-  ctx.status = 202
+  ctx.status = 200
 })
 
 router.post('/notification/slack', async ctx => {
   slacks.set(ctx.request.body.pipelineName, ctx.request.body)
-  ctx.status = 202
+  ctx.status = 200
 })
 
 router.post('/notification/fcm', async ctx => {
   firebases.set(ctx.request.body.pipelineName, ctx.request.body)
-  ctx.status = 202
+  ctx.status = 200
 })
 
 router.get('/notification/webhook/:url', async ctx => {
