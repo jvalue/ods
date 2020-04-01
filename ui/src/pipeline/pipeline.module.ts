@@ -5,10 +5,9 @@ import NotificationConfig from '@/pipeline/notifications/notificationConfig'
 
 @Module({ namespaced: true })
 export default class PipelineModule extends VuexModule {
+
   private pipelines: Pipeline[] = []
-
   private selectedPipeline: Pipeline = {} as unknown as Pipeline
-
   private isLoadingPipelines = true
 
   @Mutation
@@ -27,45 +26,51 @@ export default class PipelineModule extends VuexModule {
     this.isLoadingPipelines = value
   }
 
-  @Action({ commit: 'setPipelines' })
+  @Action({ commit: 'setPipelines', rawError: true })
   public async loadPipelines (): Promise<Pipeline[]> {
     this.context.commit('setIsLoadingPipelines', true)
 
-    return RestService.getAllPipelines()
+    return await RestService.getAllPipelines()
   }
 
-  @Action({ commit: 'setSelectedPipeline' })
+  @Action({ commit: 'setSelectedPipeline', rawError: true })
   public async loadPipelineById (id: number): Promise<Pipeline> {
-    return RestService.getPipelineById(id)
+    return await RestService.getPipelineById(id)
   }
 
-  @Action({ commit: 'setPipelines' })
+  @Action({ commit: 'setSelectedPipeline', rawError: true })
+  public async loadPipelineByDatasourceId (datasourceId: number): Promise<Pipeline> {
+    return await RestService.getPipelineByDatasourceId(datasourceId)
+  }
+
+
+  @Action({ commit: 'setPipelines', rawError: true })
   public async createPipeline (pipeline: Pipeline): Promise<Pipeline[]> {
     await RestService.createPipeline(pipeline)
-    return RestService.getAllPipelines()
+    return await RestService.getAllPipelines()
   }
 
-  @Action({ commit: 'setPipelines' })
+  @Action({ commit: 'setPipelines', rawError: true })
   public async updatePipeline (pipeline: Pipeline): Promise<Pipeline[]> {
     await RestService.updatePipeline(pipeline)
-    return RestService.getAllPipelines()
+    return await RestService.getAllPipelines()
   }
 
-  @Action({ commit: 'setPipelines' })
+  @Action({ commit: 'setPipelines', rawError: true })
   public async deletePipeline (pipelineId: number): Promise<Pipeline[]> {
     await RestService.deletePipeline(pipelineId)
-    return RestService.getAllPipelines()
+    return await RestService.getAllPipelines()
   }
 
-  @Action({ commit: 'setSelectedPipeline' })
+  @Action({ commit: 'setSelectedPipeline', rawError: true })
   public async addNotification (notification: NotificationConfig): Promise<Pipeline> {
     const newPipeline: Pipeline = Object.assign({}, this.selectedPipeline)
     newPipeline.notifications.push(Object.assign({}, notification))
     await RestService.updatePipeline(newPipeline)
-    return RestService.getPipelineById(newPipeline.id)
+    return await RestService.getPipelineById(newPipeline.id)
   }
 
-  @Action({ commit: 'setSelectedPipeline' })
+  @Action({ commit: 'setSelectedPipeline', rawError: true })
   public async updateNotification (notification: NotificationConfig): Promise<Pipeline> {
     console.log('update')
     const newPipeline: Pipeline = Object.assign({}, this.selectedPipeline)
@@ -73,15 +78,15 @@ export default class PipelineModule extends VuexModule {
       .findIndex(n => n.notificationId === notification.notificationId)
     newPipeline.notifications[nIdx] = notification
     await RestService.updatePipeline(newPipeline)
-    return RestService.getPipelineById(newPipeline.id)
+    return await RestService.getPipelineById(newPipeline.id)
   }
 
-  @Action({ commit: 'setSelectedPipeline' })
+  @Action({ commit: 'setSelectedPipeline', rawError: true })
   public async removeNotification (notification: NotificationConfig): Promise<Pipeline> {
     const newPipeline: Pipeline = Object.assign({}, this.selectedPipeline)
     newPipeline.notifications = this.selectedPipeline.notifications
       .filter(n => n.notificationId !== notification.notificationId)
     await RestService.updatePipeline(newPipeline)
-    return RestService.getPipelineById(newPipeline.id)
+    return await RestService.getPipelineById(newPipeline.id)
   }
 }
