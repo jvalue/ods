@@ -24,6 +24,7 @@
     "koa": "^2.8.1",
     "koa-bodyparser": "^4.2.1",
     "koa-router": "^7.4.0",
-    "wait-on": "^3.3.0"
+    "wait-on": "^3.3.0",
+    "axios": "^0.19.2"
   }
 }
