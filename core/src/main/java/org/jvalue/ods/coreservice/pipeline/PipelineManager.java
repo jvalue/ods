@@ -35,11 +35,13 @@ public class PipelineManager {
         return savedConfig;
     }
 
-
     public Optional<PipelineConfig> getPipeline(Long id) {
         return pipelineRepository.findById(id);
     }
 
+    public List<PipelineConfig> getAllPipelinesByDatasourceId(Long datasourceId) {
+      return pipelineRepository.findPipelineConfigsByDatasourceId(datasourceId);
+    }
 
     public Iterable<PipelineConfig> getAllPipelines() {
         return pipelineRepository.findAll();
