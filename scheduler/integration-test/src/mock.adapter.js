@@ -17,6 +17,11 @@ const importedData = {
   field4: [3, 5, 'a', 'z']
 }
 
+const importResponse = {
+  id: 1,
+  dataLocation: '/data/1'
+}
+
 router.get('/', async ctx => {
   ctx.type = 'text/plain'
   ctx.body = 'ok'
@@ -27,7 +32,7 @@ router.post('/dataImport', async ctx => {
   ctx.body = dataImportResponse
 })
 
-router.get('/data/:id', async  ctx => {
+router.get('/data/1', async  ctx => {
   ctx.type = 'text/json'
   ctx.body = importedData
 })
