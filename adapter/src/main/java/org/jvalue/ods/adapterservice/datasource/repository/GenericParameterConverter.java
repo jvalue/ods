@@ -9,6 +9,9 @@ import javax.persistence.AttributeConverter;
 import java.io.IOException;
 import java.util.Map;
 
+/**
+ * Serialize and deserialize map of objects (e.g. parameters) as a string
+ */
 public class GenericParameterConverter implements AttributeConverter<Map<String, Object>, String> {
 
   private ObjectMapper objectMapper = new ObjectMapper();
