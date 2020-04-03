@@ -43,7 +43,7 @@ type CsvConfig = {
 }
 
 @Component({ })
-export default class PipelineCsvAdapterConfig extends Vue {
+export default class CsvAdapterConfig extends Vue {
   private validForm = true;
   private availableLineSeparators = [
     { value: '\n', text: '\\n' },

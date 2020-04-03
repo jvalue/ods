@@ -31,7 +31,7 @@
       :rules="[required]"
       @change="formChanged"
     />
-    <pipeline-csv-adapter-config
+    <csv-adapter-config
       v-if="adapterConfig.format.type === 'CSV'"
       v-model="adapterConfig.format.parameters"
       class="pl-7"
@@ -48,12 +48,12 @@ import Component from 'vue-class-component'
 import {Emit, Prop, PropSync, Watch} from 'vue-property-decorator'
 
 import Datasource from '../../datasource'
-import PipelineCsvAdapterConfig from './PipelineCsvAdapterConfig.vue'
+import CsvAdapterConfig from './CsvAdapterConfig.vue'
 
 @Component({
-  components: { PipelineCsvAdapterConfig }
+  components: { CsvAdapterConfig }
 })
-export default class PipelineAdapterConfig extends Vue {
+export default class AdapterConfig extends Vue {
   private availableAdapterProtocols = ['HTTP']
   private availableEncodings = ['UTF-8', 'ISO-8859-1', 'US-ASCII']
   private availableAdapterFormats = ['JSON', 'XML', 'CSV']

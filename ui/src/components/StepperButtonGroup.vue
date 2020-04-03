@@ -26,7 +26,7 @@ import Component from 'vue-class-component'
 import { Emit, Prop, PropSync } from 'vue-property-decorator'
 
 @Component({ })
-export default class PipelineEditStepperButtonGroup extends Vue {
+export default class StepperButtonGroup extends Vue {
   @Prop(Number)
   private readonly step!: number;
 

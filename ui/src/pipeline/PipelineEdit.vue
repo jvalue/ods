@@ -37,7 +37,7 @@
                 :rules="[required]"
               />
             </v-form>
-            <pipeline-edit-stepper-button-group
+            <stepper-button-group
               :step="1"
               :next-enabled="validStep1"
               :previous-visible="false"
@@ -57,7 +57,7 @@
               v-model="dialogPipeline.transformation"
               @validityChanged="validStep2 = $event"
             />
-            <pipeline-edit-stepper-button-group
+            <stepper-button-group
               :step="2"
               :next-enabled="validStep2"
               @stepChanged="dialogStep = $event"
@@ -118,16 +118,14 @@ import { Watch } from 'vue-property-decorator'
 import { Action, State } from 'vuex-class'
 import Pipeline from './pipeline'
 
-import PipelineAdapterConfig from './edit/adapter/PipelineAdapterConfig.vue'
-import PipelineEditStepperButtonGroup from './edit/PipelineEditStepperButtonGroup.vue'
+import StepperButtonGroup from '../components/StepperButtonGroup.vue'
 import PipelineMetadataConfig from './edit/PipelineMetadataConfig.vue'
 import PipelineTransformationConfig from './edit/PipelineTransformationConfig.vue'
-import PipelineTriggerConfig from './edit/PipelineTriggerConfig.vue'
 
 const pipelineNamespace = { namespace: 'pipeline' }
 
 @Component({
-  components: { PipelineAdapterConfig, PipelineEditStepperButtonGroup, PipelineMetadataConfig, PipelineTransformationConfig, PipelineTriggerConfig }
+  components: { StepperButtonGroup, PipelineMetadataConfig, PipelineTransformationConfig }
 })
 export default class PipelineEdit extends Vue {
   @Action('loadPipelineById', pipelineNamespace) private loadPipelineByIdAction!: ( id: number ) => void
