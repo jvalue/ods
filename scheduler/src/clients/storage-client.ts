@@ -10,7 +10,7 @@ export async function executeStorage (pipelineConfig: PipelineConfig, data: obje
     data,
     pipelineId: pipelineConfig.id,
     timestamp: new Date(Date.now()),
-    origin: !!pipelineConfig.adapter && !!pipelineConfig.adapter.protocol.parameters.location ? pipelineConfig.adapter.protocol.parameters.location : 'UNKNOWN',
+    origin: 'CURRENTLY NOT SUPPORTED',
     license: !!pipelineConfig.metadata && !!pipelineConfig.metadata.license
       ? pipelineConfig.metadata.license : 'UNKNOWN'
   }
@@ -45,9 +45,9 @@ export async function createStructure (pipelineId: number): Promise<void> {
       }
     )
   } catch (e) {
-    if (e.response.data.code === '42P07') {
+    if (e.response.status === 409 || e.response.data.code === '42P07') {
       // the structure already exists
-      console.log('Database structure for pipeline {pipelineId} already exists.')
+      console.log(`Storage structure for pipeline ${pipelineId} already exists.`)
     } else {
       throw e
     }

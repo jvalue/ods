@@ -35,11 +35,13 @@ public class PipelineManager {
         return savedConfig;
     }
 
-
     public Optional<PipelineConfig> getPipeline(Long id) {
         return pipelineRepository.findById(id);
     }
 
+    public List<PipelineConfig> getAllPipelinesByDatasourceId(Long datasourceId) {
+      return pipelineRepository.findPipelineConfigsByDatasourceId(datasourceId);
+    }
 
     public Iterable<PipelineConfig> getAllPipelines() {
         return pipelineRepository.findAll();
@@ -87,9 +89,8 @@ public class PipelineManager {
         updatedMetadata.setCreationTimestamp(existing.getMetadata().getCreationTimestamp());
 
         PipelineConfig updated = new PipelineConfig(
-                updateConfig.getAdapter(),
+                updateConfig.getDatasourceId(),
                 updateConfig.getTransformation(),
-                updateConfig.getTrigger(),
                 updatedMetadata,
                 updateConfig.getNotifications());
         updated.setId(existing.getId());

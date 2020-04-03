@@ -87,7 +87,7 @@ import Component from 'vue-class-component'
 import { Emit, PropSync, Watch } from 'vue-property-decorator'
 import DateTimePicker from '@/components/DateTimePicker.vue'
 
-import { Trigger } from '../pipeline'
+import { Trigger } from '../datasource'
 
 const ONE_HOUR_IN_MS = 3600 * 1000
 const ONE_MINUTE_IN_MS = 60 * 1000
