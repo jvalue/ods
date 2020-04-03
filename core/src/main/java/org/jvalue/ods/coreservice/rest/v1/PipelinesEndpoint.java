@@ -25,6 +25,11 @@ public class PipelinesEndpoint {
         this.pipelineManager = pipelineManager;
     }
 
+    /**
+     * Returns all pipelines.
+     * @param datasourceId if defined, only return pipelines that are dependend on datasource with id
+     * @return all pipelines, if datasourceId defined: only dependend ones on datasource with id
+     */
     @GetMapping
     public Iterable<PipelineConfig> getPipelines(@RequestParam(name = "datasourceId", required = false) Long datasourceId) {
         if (datasourceId == null) {
