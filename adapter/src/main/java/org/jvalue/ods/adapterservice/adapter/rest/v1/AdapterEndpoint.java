@@ -27,7 +27,7 @@ public class AdapterEndpoint {
     }
 
     @PostMapping("/dataImport")
-    public DataBlob.MetaData executeDataImport(@RequestBody AdapterConfig config) {
+    public DataBlob.MetaData executeDataImport(@Valid @RequestBody AdapterConfig config) {
         try {
           Adapter adapter = adapterFactory.getAdapter(config);
             return adapter.executeJob(config);
