@@ -1,6 +1,13 @@
+![Scheduler Build & Test & Publish](https://github.com/jvalue/open-data-service-ms/workflows/Scheduler%20Build%20&%20Test%20&%20Publish/badge.svg)
+![CORE Build & Test & Publish](https://github.com/jvalue/open-data-service-ms/workflows/CORE%20Build%20&%20Test%20&%20Publish/badge.svg)
+![Adapter Build & Test & Publish](https://github.com/jvalue/open-data-service-ms/workflows/Adapter%20Build%20&%20Test%20&%20Publish/badge.svg)
+![UI Build & Test & Publish](https://github.com/jvalue/open-data-service-ms/workflows/UI%20Build%20&%20Test%20&%20Publish/badge.svg)
+![Transformation Build & Test & Publish](https://github.com/jvalue/open-data-service-ms/workflows/Transformation%20Build%20&%20Test%20&%20Publish/badge.svg)
+![Storage Build & Test & Publish](https://github.com/jvalue/open-data-service-ms/workflows/Storage%20Build%20&%20Test%20&%20Publish/badge.svg)
+
 # Open Data Service (ODS)
 
-The Open Data Service (ODS) is an application which can collect data from multiple sources simulataneously, process that data and then offer an improved (or "cleaned") version to its clients. 
+The Open Data Service (ODS) is an application which can collect data from multiple sources simulataneously, process that data and then offer an improved (or "cleaned") version to its clients.
 *We aim to establish the ODS as **the** go-to place for using Open Data!*
 
 ## Project Structure
@@ -11,7 +18,7 @@ We use the microservice architectural style in this project. The microservices a
 
 | Microservice | Description |
 |----|----|
-| Web-Client / UI | easy and seamless configuration of Sources, Pipelines | 
+| Web-Client / UI | easy and seamless configuration of Sources, Pipelines |
 | Core-Service | stores and manages configurations for Pipelines |
 | Scheduler | orchestrates the executions of Pipelines |
 | Adapter-Service | fetches data from Sources and imports them into the system |
@@ -40,7 +47,7 @@ The easiest way to use the ODS is via the UI. If you started the ODS with docker
 To demonstrate the ODS we will create a new pipeline to fetch water level data for German rivers and have a look at the collected data.
 
 First, go to the Pipelines page and click on `Create new Pipeline`.
-The configuration workflow for creating a new pipeline is divided into the following five steps. 
+The configuration workflow for creating a new pipeline is divided into the following five steps.
 
 ![alt](doc/configuration-example/01_overview.jpg)
 
@@ -54,7 +61,7 @@ Step 2: Configure an adapter to crawl the data. You can use the prefilled exampl
 ![alt](doc/configuration-example/03_adapter_config.jpg)
 
 Step 3: In this step, you can manipulate the raw data to fit your needs by writing JavaScript code.
-The `data` object represents the incoming raw data. 
+The `data` object represents the incoming raw data.
 In this example, the attribute `test` is added to the `data` object before returning it.
 
 ![alt](doc/configuration-example/04_transformation.jpg)
@@ -63,15 +70,15 @@ Step 4: Describe additional meta-data.
 
 ![alt](doc/configuration-example/05_meta-data.jpg)
 
-Step 5: Configure the interval of how often the data should be fetched. 
+Step 5: Configure the interval of how often the data should be fetched.
 If `Periodic execution` is disabled the data will be fetched only once.
-With the two sliders, you can choose the interval duration. 
+With the two sliders, you can choose the interval duration.
 The first execution of the pipeline will be after the `Time of First Execution` plus the interval time.
 Please choose 1 minute, so that you don't have to wait too long for the first data to arrive.
 
 ![alt](doc/configuration-example/06_trigger.jpg)
 
-The configuration of the pipeline is now finished. In the overview, you see now the recently created pipeline. 
+The configuration of the pipeline is now finished. In the overview, you see now the recently created pipeline.
 
 ![alt](doc/configuration-example/07_overview_with_data.jpg)
 
