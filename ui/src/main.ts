@@ -8,7 +8,7 @@ import '@mdi/font/css/materialdesignicons.css'
 import TransformationModule from '@/transformation/module'
 import StorageModule from '@/storage/module'
 import AuthModule from '@/components/auth/module'
-import DatasourceModule from '@/pipeline/datasource.module'
+import DatasourceModule from '@/datasource/datasource.module'
 import PipelineModule from '@/pipeline/pipeline.module'
 
 Vue.use(Vuetify)

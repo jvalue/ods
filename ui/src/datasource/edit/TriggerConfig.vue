@@ -93,7 +93,7 @@ const ONE_HOUR_IN_MS = 3600 * 1000
 const ONE_MINUTE_IN_MS = 60 * 1000
 
 @Component({ components: { DateTimePicker } })
-export default class PipelineMetadataConfig extends Vue {
+export default class TriggerConfig extends Vue {
   private validForm = true;
 
   private dialogIntervalHours = 1

@@ -32,7 +32,7 @@
                 :rules="[required]"
               />
             </v-form>
-            <pipeline-edit-stepper-button-group
+            <stepper-button-group
               :step="1"
               :next-enabled="validStep1"
               :previous-visible="false"
@@ -48,12 +48,12 @@
             <small>Configure the data import</small>
           </v-stepper-step>
           <v-stepper-content step="2">
-            <pipeline-adapter-config
+            <adapter-config
               v-bind:isEditMode = "isEditMode"
               v-model="dialogDatasource"
               @validityChanged="validStep2 = $event"
             />
-            <pipeline-edit-stepper-button-group
+            <stepper-button-group
               :step="2"
               :next-enabled="validStep2"
               @stepChanged="dialogStep = $event"
@@ -71,7 +71,7 @@
               v-model="dialogDatasource.metadata"
               @validityChanged="validStep3 = $event"
             />
-            <pipeline-edit-stepper-button-group
+            <stepper-button-group
               :step="3"
               :next-enabled="validStep3"
               @stepChanged="dialogStep = $event"
@@ -86,11 +86,11 @@
             <small>Configure Execution Details</small>
           </v-stepper-step>
           <v-stepper-content step="4">
-            <pipeline-trigger-config
+            <trigger-config
               v-model="dialogDatasource.trigger"
               @validityChanged="validStep4 = $event"
             />
-            <pipeline-edit-stepper-button-group
+            <stepper-button-group
               :step="4"
               :next-enabled="validStep4"
               :next-visible="false"
@@ -136,25 +136,22 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Watch } from 'vue-property-decorator'
 import { Action, State } from 'vuex-class'
-import Pipeline from './pipeline'
 
-import PipelineAdapterConfig from './edit/adapter/PipelineAdapterConfig.vue'
-import PipelineEditStepperButtonGroup from './edit/PipelineEditStepperButtonGroup.vue'
+import AdapterConfig from './edit/adapter/AdapterConfig.vue'
+import StepperButtonGroup from '../components/StepperButtonGroup.vue'
 import DatasourceMetadataConfig from './edit/DatasourceMetadataConfig.vue'
-import PipelineTransformationConfig from './edit/PipelineTransformationConfig.vue'
-import PipelineTriggerConfig from './edit/PipelineTriggerConfig.vue'
+import TriggerConfig from './edit/TriggerConfig.vue'
 import Datasource from './datasource'
 
-const pipelineNamespace = { namespace: 'pipeline' }
 const datasourceNamespace = { namespace: 'datasource' }
 
 @Component({
-  components: { PipelineAdapterConfig, PipelineEditStepperButtonGroup, DatasourceMetadataConfig, PipelineTransformationConfig, PipelineTriggerConfig }
+  components: { AdapterConfig, StepperButtonGroup, DatasourceMetadataConfig, TriggerConfig }
 })
 export default class DatasourceEdit extends Vue {
   @Action('loadDatasourceById', datasourceNamespace) private loadDatasourceByIdAction!: ( id: number ) => void
   @Action('createDatasource', datasourceNamespace) private createDatasourceAction!: ( d: Datasource ) => void
-  @Action('updateDatasrouce', datasourceNamespace) private updateDatsourceAction!: ( d: Datasource ) => void
+  @Action('updateDatasource', datasourceNamespace) private updateDatsourceAction!: ( d: Datasource ) => void
   @State('selectedDatasource', datasourceNamespace) private selectedDatasource!: Datasource
 
   private isEditMode = false
@@ -197,7 +194,7 @@ export default class DatasourceEdit extends Vue {
     this.isEditMode = this.$route.meta.isEditMode
 
     if (this.isEditMode) {
-      const id = (this.$route.params.pipelineId as unknown) as number
+      const id = (this.$route.params.datasourceId as unknown) as number
       this.loadDatasourceByIdAction(id)
     }
   }
