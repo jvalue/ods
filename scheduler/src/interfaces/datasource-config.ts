@@ -1,9 +1,9 @@
 export default interface DatasourceConfig {
   id: number;
   protocol: DatasourceProtocol;
-  format: DatasourceFormat;
+  format: object;
   trigger: DatasourceTrigger;
-  metadata: Object;
+  metadata: object;
 }
 
 export interface DatasourceProtocol {
@@ -11,11 +11,6 @@ export interface DatasourceProtocol {
   parameters: {
     location?: String
   }
-}
-
-export interface DatasourceFormat {
-  type: String,
-  parameters: object
 }
 
 export interface DatasourceTrigger {

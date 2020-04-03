@@ -157,7 +157,6 @@ function generatePipelineConfig (
     id: 555,
     datasourceId: 123,
     transformation: transformation,
-    persistence: {},
     metadata: {
       displayName: 'pipeline 555',
       creationTimestamp: new Date(Date.now() + 5000),
