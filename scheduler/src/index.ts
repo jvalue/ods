@@ -34,6 +34,7 @@ app.get('/jobs', (req, res) => {
 })
 
 let datasourcePollingJob: schedule.Job
+let pipelinePollingJob: schedule.Job
 
 async function updateDatsources (): Promise<void> {
   try {
@@ -76,7 +77,7 @@ async function initPipelineConfigSync (retries = 30, retryBackoff = 3000): Promi
     return await initPipelineConfigSync(retries - 1, retryBackoff)
   }
 
-  datasourcePollingJob = schedule.scheduleJob(
+  pipelinePollingJob = schedule.scheduleJob(
     'PipelineConfigSyncJob',
     CHRONJOB_EVERY_2_SECONDS,
     CoreClient.sync)
@@ -94,6 +95,7 @@ initJobs()
 process.on('SIGTERM', async () => {
   console.info('Scheduler: SIGTERM signal received.')
   schedule.cancelJob(datasourcePollingJob)
+  schedule.cancelJob(pipelinePollingJob)
   Scheduling.cancelAllJobs()
   await server.close()
 })
