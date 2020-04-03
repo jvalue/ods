@@ -7,8 +7,8 @@ import TransformationService from './interfaces/transformationService'
 import TransformationRequest from './interfaces/transformationRequest'
 import { Server } from 'http'
 import JobResult from './interfaces/jobResult'
-import { Firebase, NotificationRequest, Slack, Webhook } from '@/interfaces/notificationRequest'
-import * as AdapterClient from '@/clients/adapter-client'
+import { Firebase, NotificationRequest, Slack, Webhook } from './interfaces/notificationRequest'
+import * as AdapterClient from './clients/adapter-client'
 
 export class TransformationEndpoint {
   port: number
