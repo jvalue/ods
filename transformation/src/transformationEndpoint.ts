@@ -66,6 +66,7 @@ export class TransformationEndpoint {
     if (!transformation.data && !transformation.dataLocation) {
       res.writeHead(400)
       res.end()
+      return
     } else if (transformation.dataLocation) {
       if (transformation.data) {
         console.log(`Data and dataLocation fields both present.
