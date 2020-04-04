@@ -8,7 +8,7 @@ import TransformationRequest from './interfaces/transformationRequest'
 import { Server } from 'http'
 import JobResult from './interfaces/jobResult'
 import { Firebase, NotificationRequest, Slack, Webhook } from './interfaces/notificationRequest'
-import * as AdapterClient from './clients/adapter-client'
+import axios from 'axios'
 
 export class TransformationEndpoint {
   port: number
@@ -73,8 +73,9 @@ export class TransformationEndpoint {
          Overwriting existing data with data from ${transformation.dataLocation}`)
       }
       console.log(`Fetching data from adapter, location: ${transformation.dataLocation}`)
-      transformation.data = await AdapterClient.fetchImportedData(transformation.dataLocation)
+      const importResponse = await axios.get(transformation.dataLocation)
       console.log('Fetching successful.')
+      transformation.data = importResponse.data
     }
     const result: JobResult = this.transformationService.executeJob(transformation.func, transformation.data)
     const answer: string = JSON.stringify(result)
