@@ -129,24 +129,19 @@ import Pipeline from './pipeline'
 
 const namespace = { namespace: 'pipeline' }
 
-const ONE_HOUR_IN_MS = 3600 * 1000
-
-const ONE_MINUTE_IN_MS = 60 * 1000
-
 @Component({})
 export default class PipelineOverview extends Vue {
   @Action('loadPipelines', namespace) private loadPipelinesAction!: () => void;
   @Action('deletePipeline', namespace) private deletePipelineAction!: (id: number) => void;
 
   @State('isLoadingPipelines', namespace) private isLoadingPipelines!: boolean;
-  @State('pipelines', namespace) private pipelines!: object[];
+  @State('pipelines', namespace) private pipelines!: Pipeline[];
 
   private headers = [
     { text: 'Id', value: 'id' },
+    { text: 'Datasource ID', value: 'datasourceId' },
     { text: 'Pipeline Name', value: 'metadata.displayName', sortable: false }, // sorting to be implemented
     { text: 'Author', value: 'metadata.author', sortable: false },
-    { text: 'Interval', value: 'trigger.interval', sortable: false },
-    { text: 'Periodic', value: 'trigger.periodic', sortable: false },
     { text: 'Action', value: 'action', sortable: false }
   ];
 
@@ -181,14 +176,6 @@ export default class PipelineOverview extends Vue {
           search != null &&
           typeof value === 'string' &&
           item.metadata.displayName.toLocaleLowerCase().indexOf(search.toLocaleLowerCase()) !== -1
-  }
-
-  private getHoursFromMS (intervalInMS: number): number {
-    return Math.floor(intervalInMS / ONE_HOUR_IN_MS)
-  }
-
-  private getMinutesFromMS (intervalInMS: number): number {
-    return Math.floor((intervalInMS % ONE_HOUR_IN_MS) / ONE_MINUTE_IN_MS)
   }
 }
 </script>

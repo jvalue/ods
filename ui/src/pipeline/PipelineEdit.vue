@@ -6,8 +6,8 @@
         class="elevation-0"
       >
         <v-toolbar-title>
-          <span v-if="isEditMode">Update Pipeline with id: {{ dialogPipeline.id }}</span>
-          <span v-else>Create new Pipeline</span>
+          <span v-if="isEditMode">Update Pipeline {{ dialogPipeline.id }}</span>
+          <span v-else>Create new Pipeline for Datasource {{ dialogPipeline.datasourceId }}</span>
         </v-toolbar-title>
       </v-toolbar>
       <v-card-text>
@@ -31,8 +31,13 @@
                 label="Pipeline Name"
                 :rules="[required]"
               />
+              <v-text-field
+                v-model="dialogPipeline.datasourceId"
+                label="Referenced Datasource Id"
+                :rules="[required]"
+              />
             </v-form>
-            <pipeline-edit-stepper-button-group
+            <stepper-button-group
               :step="1"
               :next-enabled="validStep1"
               :previous-visible="false"
@@ -44,16 +49,15 @@
             :complete="dialogStep > 2"
             step="2"
           >
-            Adapter Configuration
-            <small>Configure the data import</small>
+            Transformation
+            <small>Customize data transformation</small>
           </v-stepper-step>
           <v-stepper-content step="2">
-            <pipeline-adapter-config
-              v-bind:isEditMode = "isEditMode"
-              v-model="dialogPipeline.adapter"
+            <pipeline-transformation-config
+              v-model="dialogPipeline.transformation"
               @validityChanged="validStep2 = $event"
             />
-            <pipeline-edit-stepper-button-group
+            <stepper-button-group
               :step="2"
               :next-enabled="validStep2"
               @stepChanged="dialogStep = $event"
@@ -64,58 +68,15 @@
             :complete="dialogStep > 3"
             step="3"
           >
-            Transformation
-            <small>Customize data transformation</small>
-          </v-stepper-step>
-          <v-stepper-content step="3">
-            <pipeline-transformation-config
-              v-model="dialogPipeline.transformation"
-              @validityChanged="validStep3 = $event"
-            />
-            <pipeline-edit-stepper-button-group
-              :step="3"
-              :next-enabled="validStep3"
-              @stepChanged="dialogStep = $event"
-            />
-          </v-stepper-content>
-
-          <v-stepper-step
-            :complete="dialogStep > 4"
-            step="4"
-          >
             Meta-Data
           </v-stepper-step>
-          <v-stepper-content step="4">
+          <v-stepper-content step="3">
             <pipeline-metadata-config
               v-model="dialogPipeline.metadata"
-              @validityChanged="validStep4 = $event"
-            />
-            <pipeline-edit-stepper-button-group
-              :step="4"
-              :next-enabled="validStep4"
-              @stepChanged="dialogStep = $event"
+              @validityChanged="validStep3 = $event"
             />
           </v-stepper-content>
 
-          <v-stepper-step
-            :complete="dialogStep > 5"
-            step="5"
-          >
-            Trigger Configuration
-            <small>Configure Execution Details</small>
-          </v-stepper-step>
-          <v-stepper-content step="5">
-            <pipeline-trigger-config
-              v-model="dialogPipeline.trigger"
-              @validityChanged="validStep5 = $event"
-            />
-            <pipeline-edit-stepper-button-group
-              :step="5"
-              :next-enabled="validStep5"
-              :next-visible="false"
-              @stepChanged="dialogStep = $event"
-            />
-          </v-stepper-content>
         </v-stepper>
       </v-card-text>
       <v-card-actions>
@@ -157,31 +118,20 @@ import { Watch } from 'vue-property-decorator'
 import { Action, State } from 'vuex-class'
 import Pipeline from './pipeline'
 
-import PipelineAdapterConfig from './edit/adapter/PipelineAdapterConfig.vue'
-import PipelineEditStepperButtonGroup from './edit/PipelineEditStepperButtonGroup.vue'
+import StepperButtonGroup from '../components/StepperButtonGroup.vue'
 import PipelineMetadataConfig from './edit/PipelineMetadataConfig.vue'
 import PipelineTransformationConfig from './edit/PipelineTransformationConfig.vue'
-import PipelineTriggerConfig from './edit/PipelineTriggerConfig.vue'
 
-const namespace = { namespace: 'pipeline' }
+const pipelineNamespace = { namespace: 'pipeline' }
 
 @Component({
-  components: { PipelineAdapterConfig, PipelineEditStepperButtonGroup, PipelineMetadataConfig, PipelineTransformationConfig, PipelineTriggerConfig }
+  components: { StepperButtonGroup, PipelineMetadataConfig, PipelineTransformationConfig }
 })
 export default class PipelineEdit extends Vue {
-  @Action('loadPipelineById', namespace) private loadPipelineByIdAction!: (
-    id: number
-  ) => void
-
-  @Action('createPipeline', namespace) private createPipelineAction!: (
-    p: Pipeline
-  ) => void
-
-  @Action('updatePipeline', namespace) private updatePipelineAction!: (
-    p: Pipeline
-  ) => void
-
-  @State('selectedPipeline', namespace) private selectedPipeline!: Pipeline
+  @Action('loadPipelineById', pipelineNamespace) private loadPipelineByIdAction!: ( id: number ) => void
+  @Action('createPipeline', pipelineNamespace) private createPipelineAction!: ( p: Pipeline ) => void
+  @Action('updatePipeline', pipelineNamespace) private updatePipelineAction!: ( p: Pipeline ) => void
+  @State('selectedPipeline', pipelineNamespace) private selectedPipeline!: Pipeline
 
   private isEditMode = false
 
@@ -190,36 +140,16 @@ export default class PipelineEdit extends Vue {
   private validStep1 = false
   private validStep2 = true // starts with valid default values
   private validStep3 = true // starts with valid default values
-  private validStep4 = true // no fields required
-  private validStep5 = true // starts with valid default values
 
-  private dialogPipeline: Pipeline = {
+    private dialogPipeline: Pipeline = {
     id: -1,
-    adapter: {
-      protocol: {
-        type: 'HTTP',
-        parameters: {
-          location:
-            'https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json',
-          encoding: 'UTF-8'
-        }
-      },
-      format: {
-        type: 'JSON',
-        parameters: {}
-      }
-    },
+    datasourceId: -1,
     transformation: { func: "data.test = 'abc'; return data;" },
     metadata: {
       author: '',
       license: '',
       description: '',
       displayName: ''
-    },
-    trigger: {
-      periodic: true,
-      firstExecution: new Date(Date.now() + 600000),
-      interval: 60000
     },
     notifications: []
   }
@@ -265,9 +195,7 @@ export default class PipelineEdit extends Vue {
   private evaluateAllForms () {
     return this.validStep1 &&
         this.validStep2 &&
-        this.validStep3 &&
-        this.validStep4 &&
-        this.validStep5
+        this.validStep3
   }
 }
 </script>

@@ -1,20 +1,23 @@
-@baseURL = http://localhost:9000
+@baseURL = http://localhost:9000/api
 
-### Create a pipeline for PegelOnline mirror
-POST {{baseURL}}/core/pipelines  HTTP/1.1
+### Create a datasource for PegelOnline mirror
+POST {{baseURL}}/adapter/datasources  HTTP/1.1
 Content-Type: application/json
 
 {
-  "adapter": {
-    "protocol": "HTTP",
-    "format": "JSON",
-    "location": "https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json?includeTimeseries=true&includeCurrentMeasurement=true"
+  "protocol": {
+    "type": "HTTP",
+    "parameters": {
+      "location": "https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json?includeTimeseries=true&includeCurrentMeasurement=true",
+      "encoding": "UTF-8"
+    }
   },
-  "transformation": {
-      "func": "data.forEach((x) => { var currentMeasurement = x.timeseries[0].currentMeasurement; currentMeasurement.value /= 100; currentMeasurement.unit = 'm'; x.timeseries = undefined; x.currentMeasurement = currentMeasurement;}); return data;"
-    },
+  "format": {
+    "type": "JSON",
+    "parameters": {}
+  },
   "trigger": {
-    "firstExecution": "2018-10-07T01:32:00.123",
+    "firstExecution": "2018-10-07T01:32:00.123Z",
     "periodic": true,
     "interval": 60000
   },
@@ -24,28 +27,35 @@ Content-Type: application/json
   }
 }
 
-@pipelineId = 4d49ac4a-0fe2-4bd2-9c28-428923755fd0
+### Create a pipeline for whole mirrored PegelOnline
+POST {{baseURL}}/pipelines  HTTP/1.1
+Content-Type: application/json
+
+{
+  "datasourceId": {{datasourceid}},
+  "transformation": {
+    "func": "data.forEach((x) => { var currentMeasurement = x.timeseries[0].currentMeasurement; currentMeasurement.value /= 100; currentMeasurement.unit = 'm'; x.timeseries = undefined; x.currentMeasurement = currentMeasurement;}); return data;"
+  },
+  "metadata": {
+    "author": "icke",
+    "license": "none"
+  },
+  "notifications": []
+}
+
+
 ### Create a pipeline for PegelOnline mirror -> Cuxhaven
 POST {{baseURL}}/core/pipelines  HTTP/1.1
 Content-Type: application/json
 
 {
-  "adapter": {
-    "protocol": "HTTP",
-    "format": "JSON",
-    "location": "http://storage-service:3000/{{pipelineId}}?select=data&order=id.desc&limit=1"
-  },
-  "transformation":
-    {
-      "func": "var data = data[0].data; var dataCuxhaven = data.filter((x) => x.shortname.toLowerCase().includes('cuxhaven')); return dataCuxhaven;"
-    },
-  "trigger": {
-    "firstExecution": "2018-10-07T01:32:03.123",
-    "periodic": true,
-    "interval": 60000
+  "datasourceId": {{datasourceid}},
+  "transformation": {
+    "func": "var data = data[0].data; var dataCuxhaven = data.filter((x) => x.shortname.toLowerCase().includes('cuxhaven')); return dataCuxhaven;"
   },
   "metadata": {
     "author": "icke",
     "license": "none"
-  }
+  },
+  "notifications": []
 }
