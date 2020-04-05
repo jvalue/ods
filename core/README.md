@@ -8,7 +8,6 @@ It also exposes an event log of all modifications to the pipeline configurations
 
 ## Planned Features
 
-
 ## Getting Started
 
 * Build with `./gradlew build`
@@ -19,7 +18,8 @@ It also exposes an event log of all modifications to the pipeline configurations
 * For integration testing run `docker-compose -f ../docker-compose.yml -f ../docker-compose.ci.yml up core-service core-service-db core-service-it`
 Note that you need to delete existing docker images from your local docker daemon to have recent changes integrated. 
 
-## API
+## API Docs
+
 | Endpoint  | Method  | Request Body  | Response Body | Description |
 |---|---|---|---|---|
 | *base_url*/version  | GET  | -  | String containing the application version  | Get current service version |
@@ -40,10 +40,9 @@ Note that you need to delete existing docker images from your local docker daemo
 ```
 { 
   "id": number,
-  "adapter": AdapterConfig,
+  "datasourceId": number,
   "transformation": TransformationConfig,
   "notifications": [*NotificationConfig]
-  "trigger":TriggerConfig,
   "metadata":PipelineMetadata
 }
 ```
@@ -56,33 +55,6 @@ Note that you need to delete existing docker images from your local docker daemo
 }
 ```
 
-### Adapter Config
-```
-{
-    "protocol": {
-      "type": "HTTP",
-      "parameters": {
-        "location": String,
-        "encoding": String
-      }
-    }
-    "format": {
-      "type": "JSON" | "XML" | "CSV"
-      "parameters": { } | CSVParameters
-    }
-  }
-  ```
-
-### CSV Parameters
-```
-{
-  "columnSeparator": char,
-  "lineSeparator": char,
-  "skipFirstDataRow": boolean,
-  "firstRowAsHeader": boolean
-}
-```
-
 ### TransformationConfig
 ```
 {
@@ -91,13 +63,6 @@ Note that you need to delete existing docker images from your local docker daemo
 }
 ```
 
-### TriggerConfig
-```
-{
-  "firstExecution":Date (format: yyyy-MM-dd'T'HH:mm:ss.SSSXXX),
-  "interval":number
-}
-```
 
 ### PipelineMetadata 
 ```

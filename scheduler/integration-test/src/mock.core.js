@@ -7,53 +7,23 @@ const PORT = process.env.MOCK_CORE_PORT || 8081
 const PIPELINES = [
   {
     id: 123,
-    adapter: {
-      protocol: {
-        type: "HTTP",
-        parameters: {
-          location: "testlocation.de/api"
-        },
-      },
-      format: {
-        type: "XML"
-      }
-    },
+    datasourceId: 1,
     transformation: {
       func: 'return data;' // not performed in integration testing
     },
     persistence: {},
     metadata: {},
-    trigger: {
-      periodic: true,
-      firstExecution: '2018-10-07T01:32:00.123Z',
-      interval: 10000
-    },
     notifications: []
   },
   {
     id: 125,
-    adapter: {
-      protocol: {
-        type: "HTTP",
-        parameters: {
-          location: "testlocation.de/api"
-        },
-      },
-      format: {
-        type: "XML"
-      }
-    },
+    datasourceId: 2,
     transformation: {
       func: 'return 1;' // not peformed in integration testing
     },
     persistence: {},
     metadata: {
       displayName: 'nordstream'
-    },
-    trigger: {
-      periodic: true,
-      firstExecution: '2018-10-07T01:32:00.123Z',
-      interval: 10000
     },
     notifications: [
       {
@@ -79,32 +49,38 @@ const EVENTS = [
   {
     eventId: 347,
     eventType: 'PIPELINE_CREATE',
-    pipelineId: 123
+    pipelineId: 123,
+    datasourceId: 321
   },
   {
     eventId: 348,
     eventType: 'PIPELINE_CREATE',
-    pipelineId: 124
+    pipelineId: 124,
+    datasourceId: 322
   },
   {
     eventId: 349,
     eventType: 'PIPELINE_CREATE',
-    pipelineId: 125
+    pipelineId: 125,
+    datasourceId: 323
   },
   {
     eventId: 350,
     eventType: 'PIPELINE_DELETE',
-    pipelineId: 124
+    pipelineId: 124,
+    datasourceId: 322
   },
   {
     eventId: 351,
     eventType: 'PIPELINE_UPDATE',
-    pipelineId: 123
+    pipelineId: 123,
+    datasourceId: 321
   },
   {
     eventId: 352,
     eventType: 'PIPELINE_DELETE',
-    pipelineId: 125
+    pipelineId: 125,
+    datasourceId: 323
   }
 ]
 

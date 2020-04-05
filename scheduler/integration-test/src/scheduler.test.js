@@ -60,8 +60,8 @@ describe('Scheduler', () => {
     expect(response.type).toEqual('application/json')
     expect(response.body.length).toEqual(2)
     expect(response.body[0].scheduleJob).toBeDefined() // TODO: make explicit
-    expect(response.body[0].pipelineConfig.id).toEqual(123)
-    expect(response.body[1].pipelineConfig.id).toEqual(125)
+    expect(response.body[0].datasourceConfig.id).toEqual(1)
+    expect(response.body[1].datasourceConfig.id).toEqual(2)
   })
 
   test('Pipeline runs with dummy data', async () => {
