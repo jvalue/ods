@@ -1,0 +1,22 @@
+{
+  "env": {
+      "browser": true,
+      "es6": true,
+      "jest/globals": true
+  },
+  "extends": [
+    "standard",
+    "plugin:jest/recommended",
+    "plugin:jest/style"
+  ],
+  "plugins": [ "jest" ],
+  "globals": {
+      "Atomics": "readonly",
+      "SharedArrayBuffer": "readonly"
+  },
+  "parserOptions": {
+      "ecmaVersion": 2018,
+      "sourceType": "module"
+  },
+  "rules": {  }
+}
