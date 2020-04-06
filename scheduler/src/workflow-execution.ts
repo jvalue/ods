@@ -60,10 +60,14 @@ async function executeTransformation (args: { pipelineConfig: PipelineConfig, da
 
   console.log(`Execute Pipeline Transformation ${pipelineConfig.id}`)
   if (!pipelineConfig.transformation) {
-    throw new Error('Illegal state: attempting to execute undefined transformation.')
+    pipelineConfig.transformation = {
+      dataLocation: AdapterClient.ADAPTER_SERVICE_URL + dataLocation
+    }
+    console.log('Transformation undefined. ')
   }
   try {
-    const jobResult = await TransformationClient.executeTransformation(pipelineConfig.transformation, dataLocation)
+    pipelineConfig.transformation.dataLocation = AdapterClient.ADAPTER_SERVICE_URL + dataLocation
+    const jobResult = await TransformationClient.executeTransformation(pipelineConfig.transformation)
     return jobResult.data
   } catch (e) {
     handleError(e)

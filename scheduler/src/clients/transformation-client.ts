@@ -3,15 +3,13 @@ import NotificationConfig from '@/interfaces/notification-config'
 import TransformationConfig from '@/interfaces/transformation-config'
 
 const TRANSFORMATION_SERVICE_URL = process.env.TRANSFORMATION_SERVICE_URL || 'http://localhost:8083'
-const ADAPTER_SERVICE_URL = process.env.ADAPTER_SERVICE_URL
 
 const http = axios.create({
   baseURL: TRANSFORMATION_SERVICE_URL,
   headers: { 'Content-Type': 'application/json' }
 })
 
-export async function executeTransformation (config: TransformationConfig, location: string): Promise<AxiosResponse> {
-  config.dataLocation = `${ADAPTER_SERVICE_URL}${location}`
+export async function executeTransformation (config: TransformationConfig): Promise<AxiosResponse> {
   const response = await http.post('/job', config)
   return response.data
 }
