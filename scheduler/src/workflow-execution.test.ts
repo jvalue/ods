@@ -54,7 +54,7 @@ test('Should execute pipeline once', async () => {
 
   expect(mockGetPipelinesForDatasource).toHaveBeenCalledWith(datasourceConfig.id)
 
-  expect(mockExecuteTransformation).toHaveBeenCalledWith(transformation, adapterResponse.location)
+  expect(mockExecuteTransformation).toHaveBeenCalledWith(transformation)
   expect(mockExecuteTransformation).toHaveBeenCalledTimes(1)
 
   expect(mockExecuteStorage).toHaveBeenCalledWith(pipelineConfig, transformedData)
@@ -76,7 +76,7 @@ test('Should execute pipeline periodic', async () => {
 
   expect(mockGetPipelinesForDatasource).toHaveBeenCalledWith(datasourceConfig.id)
 
-  expect(mockExecuteTransformation).toHaveBeenCalledWith(transformation, adapterResponse.location)
+  expect(mockExecuteTransformation).toHaveBeenCalledWith(transformation)
   expect(mockExecuteStorage).toHaveBeenCalledWith(pipelineConfig, transformedData)
 })
 
