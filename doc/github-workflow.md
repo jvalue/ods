@@ -13,14 +13,14 @@
 ## External Contributions
 - External contributions are to be encouraged
 - External contributors may stage issues or work on existing ones
+- Self staged issues may be discussed with the admin team to ensure later integration
 - For integration into ods codebase they need to sign a contributers agreement (via the CLA Assistant GitHub Plugin)
 - Code integration and review is to be done by pull requests. The pull requests have to be approved by at least one member of the repositories admins team. 
 
 ## Repositories
 - Master branch is protected: No direct push, only via reviewed pull request from separate branches
 - If possible, pull requests should be linked to issues
-- Students work on their own branches using regular pull requests to get fast feedback
-- Separate student forks only if the student projects makes it necessary. This enables fast integration of changes and prevents extensive integration effort
+- Students work on their own forks using regular pull requests to get fast feedback
 
 ## Branch Naming Scheme
 - *linked issue #*-*ods-subproject*-*short branch description*
