@@ -1,6 +1,7 @@
 package org.jvalue.ods.adapterservice.adapter.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.jvalue.ods.adapterservice.adapter.rest.v1.Mappings;
 
 import javax.persistence.*;
 import java.nio.charset.StandardCharsets;
@@ -60,6 +61,10 @@ public class DataBlob {
 
     public Long getId() {
       return id;
+    }
+
+    public String getLocation() {
+      return Mappings.DATA_PATH + "/" + id;
     }
   }
 }
