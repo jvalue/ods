@@ -92,7 +92,7 @@ test('Should not execute undefined transformation', async () => {
 
   await PipelineExecution.execute(datasourceConfig)
 
-  expect(mockFetchImportedData).toHaveBeenCalledWith(adapterResponse.id)
+  expect(mockFetchImportedData).not.toBeCalled()
   expect(mockExecuteNotification).not.toBeCalled()
 })
 
@@ -112,10 +112,13 @@ test('Should trigger notifications', async () => {
     data: { schtring: 'text' },
     dataLocation: 'way.up/high'
   }
+  const transformation: TransformationConfig = {
+    dataLocation: 'hier'
+  }
   const datasourceConfig = generateDatasourceConfig(false)
-  const pipelineConfig = generatePipelineConfig(undefined, [notification1, notification2, notification3])
-  mockGetPipelinesForDatasource.mockReturnValue([pipelineConfig]) // register pipeline to follow datasource import
+  const pipelineConfig = generatePipelineConfig(transformation, [notification1, notification2, notification3])
 
+  mockGetPipelinesForDatasource.mockReturnValue([pipelineConfig]) // register pipeline to follow datasource import
   mockExecuteAdapter.mockResolvedValue(adapterResponse)
   mockFetchImportedData.mockResolvedValue(importedData)
 

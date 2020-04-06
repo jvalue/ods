@@ -13,13 +13,12 @@ export async function execute (datasourceConfig: DatasourceConfig, maxRetries = 
   // adapter
   const adapterResponse: AdapterResponse =
       await retryableExecution(executeAdapter, datasourceConfig, `Executing adapter for datasource ${datasourceConfig.id}`)
-  const importedData: object = await AdapterClient.fetchImportedData(adapterResponse.id)
 
   // pipeline
   const followingPipelines = CoreClient.getCachedPipelinesByDatasourceId(datasourceConfig.id)
-  for(let pipelineConfig of followingPipelines) {
+  for (let pipelineConfig of followingPipelines) {
     const transformedData =
-        await retryableExecution(executeTransformation, { pipelineConfig: pipelineConfig, data: importedData }, `Executing transformatins for pipeline ${pipelineConfig.id}`)
+        await retryableExecution(executeTransformation, { pipelineConfig: pipelineConfig, dataLocation: adapterResponse.location }, `Executing transformatins for pipeline ${pipelineConfig.id}`)
 
     const dataLocation =
         await retryableExecution(executeStorage, { pipelineConfig: pipelineConfig, data: transformedData }, `Storing data for pipeline ${pipelineConfig.id}`)
@@ -55,18 +54,16 @@ async function executeAdapter (dataousrceConfig: DatasourceConfig): Promise<Adap
   return importedData
 }
 
-async function executeTransformation (args: { pipelineConfig: PipelineConfig, data: object }): Promise<object> {
+async function executeTransformation (args: { pipelineConfig: PipelineConfig, dataLocation: string }): Promise<object> {
   const pipelineConfig = args.pipelineConfig
-  const data = args.data
+  const dataLocation = args.dataLocation
 
-  if (!pipelineConfig.transformation) {
-    console.log('No transformation specified, continuing..')
-    return data
-  }
   console.log(`Execute Pipeline Transformation ${pipelineConfig.id}`)
+  if (!pipelineConfig.transformation) {
+    throw new Error('Illegal state: attempting to execute undefined transformation.')
+  }
   try {
-    pipelineConfig.transformation.data = data
-    const jobResult = await TransformationClient.executeTransformation(pipelineConfig.transformation)
+    const jobResult = await TransformationClient.executeTransformation(pipelineConfig.transformation, dataLocation)
     return jobResult.data
   } catch (e) {
     handleError(e)
