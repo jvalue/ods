@@ -29,45 +29,42 @@ router.post('/dataImport', async ctx => {
   ctx.body = dataImportResponse
 })
 
-router.get('/data/:id', async  ctx => {
+router.get('/data/:id', async ctx => {
   ctx.type = 'text/json'
   ctx.body = importedData
 })
 
-
-
 /** DATASOURCE + EVENTS SECTION **/
-
 
 const DATASOURCES = [
   {
     id: 1,
     protocol: {
-      type: "HTTP",
+      type: 'HTTP',
       parameters: {
-        location: "testlocation.de/api"
-      },
+        location: 'testlocation.de/api'
+      }
     },
     format: {
-      type: "XML"
+      type: 'XML'
     },
     metadata: {},
     trigger: {
       periodic: true,
       firstExecution: '2018-10-07T01:32:00.123Z',
       interval: 10000
-    },
+    }
   },
   {
     id: 2,
     protocol: {
-      type: "HTTP",
+      type: 'HTTP',
       parameters: {
-        location: "testlocation.de/api"
-      },
+        location: 'testlocation.de/api'
+      }
     },
     format: {
-      type: "XML"
+      type: 'XML'
     },
     metadata: {
       displayName: 'nordstream'
@@ -76,7 +73,7 @@ const DATASOURCES = [
       periodic: true,
       firstExecution: '2018-10-07T01:32:00.123Z',
       interval: 10000
-    },
+    }
   }
 ]
 
@@ -100,7 +97,7 @@ const EVENTS = [
     eventId: 350,
     eventType: 'DATASOURCE_DELETE',
     datasourceId: 3
-  },
+  }
 ]
 
 router.get('/datasources', async ctx => {
@@ -140,8 +137,6 @@ router.get('/datasources/events', async ctx => {
     ctx.body = EVENTS.slice(idx)
   }
 })
-
-
 
 app.use(router.routes())
 

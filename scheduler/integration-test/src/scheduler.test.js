@@ -49,7 +49,7 @@ describe('Scheduler', () => {
     const response = await request(URL).get('/version')
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('text/plain')
-    const semanticVersionRegEx = '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)'
+    const semanticVersionRegEx = '^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)'
     expect(response.text).toMatch(new RegExp(semanticVersionRegEx))
   })
 
@@ -58,7 +58,7 @@ describe('Scheduler', () => {
     const response = await request(URL).get('/jobs')
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('application/json')
-    expect(response.body.length).toEqual(2)
+    expect(response.body).toHaveLength(2)
     expect(response.body[0].scheduleJob).toBeDefined() // TODO: make explicit
     expect(response.body[0].datasourceConfig.id).toEqual(1)
     expect(response.body[1].datasourceConfig.id).toEqual(2)
@@ -113,7 +113,7 @@ describe('Scheduler', () => {
         dataLocation: MOCK_STORAGE_URL + '/125',
         url: 'should-be-triggered'
       })
-    }, 12000)
+  }, 12000)
 
   test('Pipeline processes events', async () => {
     await sleep(3000)
