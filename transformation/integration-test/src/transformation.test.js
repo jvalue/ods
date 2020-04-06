@@ -93,7 +93,7 @@ describe('Scheduler', () => {
     expect(response.status).toEqual(400)
     expect(response.type).toEqual('application/json')
     const { data, error, stats } = response.body
-    expect(data).toBe(undefined)
+    expect(data).toBeUndefined()
     expect(error.name).toEqual('SyntaxError')
     expect(error.lineNumber).toBe(1)
     expect(error.position).toBe(7)
@@ -114,7 +114,7 @@ describe('Scheduler', () => {
     expect(response.status).toEqual(400)
     expect(response.type).toEqual('application/json')
     const { data, error, stats } = response.body
-    expect(data).toBe(undefined)
+    expect(data).toBeUndefined()
     expect(error.name).toEqual('ReferenceError')
     expect(error.lineNumber).toBe(1)
     expect(error.position).toBe(1)
@@ -135,7 +135,7 @@ describe('Scheduler', () => {
     expect(response.status).toEqual(400)
     expect(response.type).toEqual('application/json')
     const { data, error, stats } = response.body
-    expect(data).toBe(undefined)
+    expect(data).toBeUndefined()
     expect(error.name).toEqual('MissingReturnError')
     expect(error.lineNumber).toBe(0)
     expect(error.position).toBe(0)
@@ -200,13 +200,13 @@ describe('Scheduler', () => {
   test('POST /notification/slack triggers slack notification', async () => {
     const dataLocation = 'storage/234'
     const slackJob = {
-      pipelineName: "peterchens pipeline",
+      pipelineName: 'peterchens pipeline',
       pipelineId: 666,
       dataLocation,
       data: {
-        niceString: "nice"
+        niceString: 'nice'
       },
-      condition: "typeof data.niceString === \"string\"",
+      condition: 'typeof data.niceString === "string"',
       type: 'SLACK',
       channelId: '12',
       workspaceId: '34',
