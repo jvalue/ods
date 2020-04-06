@@ -77,6 +77,9 @@ export class TransformationEndpoint {
       console.log('Fetching successful.')
       transformation.data = importResponse.data
     }
+    if (!transformation.func) {
+      transformation.func = 'return data;' // Undefined transformation functions are interpreted as identity function
+    }
     const result: JobResult = this.transformationService.executeJob(transformation.func, transformation.data)
     const answer: string = JSON.stringify(result)
     res.setHeader('Content-Type', 'application/json')
