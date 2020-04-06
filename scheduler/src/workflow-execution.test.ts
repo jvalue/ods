@@ -17,7 +17,6 @@ jest.mock('./clients/core-client')
 
 const mockGetPipelinesForDatasource = CoreClient.getCachedPipelinesByDatasourceId as jest.Mock
 const mockExecuteAdapter = AdapterClient.executeAdapter as jest.Mock
-const mockFetchImportedData = AdapterClient.fetchImportedData as jest.Mock
 const mockExecuteTransformation = TransformationClient.executeTransformation as jest.Mock
 const mockExecuteStorage = StorageClient.executeStorage as jest.Mock
 const mockExecuteNotification = TransformationClient.executeNotification as jest.Mock
@@ -52,7 +51,6 @@ test('Should execute pipeline once', async () => {
   await PipelineExecution.execute(datasourceConfig)
 
   expect(mockExecuteAdapter).toHaveBeenCalledWith(datasourceConfig)
-  expect(mockFetchImportedData).not.toBeCalled()
 
   expect(mockGetPipelinesForDatasource).toHaveBeenCalledWith(datasourceConfig.id)
 
@@ -75,7 +73,6 @@ test('Should execute pipeline periodic', async () => {
   await PipelineExecution.execute(datasourceConfig)
 
   expect(mockExecuteAdapter).toHaveBeenCalledWith(datasourceConfig)
-  expect(mockFetchImportedData).not.toBeCalled()
 
   expect(mockGetPipelinesForDatasource).toHaveBeenCalledWith(datasourceConfig.id)
 
@@ -88,11 +85,9 @@ test('Should not execute undefined transformation', async () => {
   const pipelineConfig = generatePipelineConfig(undefined, []) // transformation undefined
 
   mockExecuteAdapter.mockResolvedValue(adapterResponse)
-  mockFetchImportedData.mockResolvedValue(importedData)
 
   await PipelineExecution.execute(datasourceConfig)
 
-  expect(mockFetchImportedData).not.toBeCalled()
   expect(mockExecuteNotification).not.toBeCalled()
 })
 
@@ -120,7 +115,6 @@ test('Should trigger notifications', async () => {
 
   mockGetPipelinesForDatasource.mockReturnValue([pipelineConfig]) // register pipeline to follow datasource import
   mockExecuteAdapter.mockResolvedValue(adapterResponse)
-  mockFetchImportedData.mockResolvedValue(importedData)
 
   await PipelineExecution.execute(datasourceConfig)
 
