@@ -5,9 +5,16 @@
   "scripts": {
     "mockServer": "node src/mock.server.js",
     "test": "jest --runInBand",
-    "posttest": "killall node"
+    "posttest": "killall node",
+    "lint": "./node_modules/.bin/eslint src --ext .js --fix"
   },
   "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
     "jest": "^25.2.0",
     "supertest": "^4.0.2"
   },
@@ -15,6 +22,7 @@
     "testEnvironment": "node"
   },
   "dependencies": {
+    "eslint-plugin-jest": "^23.8.2",
     "koa": "^2.11.0",
     "koa-bodyparser": "^4.3.0",
     "koa-router": "^8.0.0",
