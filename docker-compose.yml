@@ -196,6 +196,8 @@ services:
 # --------------------- SWAGGER UI -----------------------------------------
   swagger:
     image: swaggerapi/swagger-ui
+    environment:
+      API_URLS: "[{ url: '/api/storage', name: 'storage' }]"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-swagger.rule=PathPrefix(`/api/docs`)"
