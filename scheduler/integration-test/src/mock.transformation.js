@@ -1,6 +1,7 @@
 const Koa = require('koa')
 const Router = require('koa-router')
 const bodyParser = require('koa-bodyparser')
+const axios = require('axios').default
 const router = new Router()
 
 const PORT = process.env.MOCK_TRANSFORMATION_PORT || 8083
@@ -19,23 +20,26 @@ router.get('/', async ctx => {
 
 router.post('/job', async ctx => {
   ctx.type = 'text/json'
-  ctx.body = { data: ctx.request.body.data }
-  ctx.body.data.test = 'abc'
+  const dataLocation = ctx.request.body.dataLocation;
+  const fetchResponse = await axios.get(dataLocation)
+  let importedData = fetchResponse.data
+  importedData.test = 'abc'
+  ctx.body = { data: importedData }
 })
 
 router.post('/notification/webhook', async ctx => {
   webhooks.set(ctx.request.body.pipelineName, ctx.request.body)
-  ctx.status = 202
+  ctx.status = 200
 })
 
 router.post('/notification/slack', async ctx => {
   slacks.set(ctx.request.body.pipelineName, ctx.request.body)
-  ctx.status = 202
+  ctx.status = 200
 })
 
 router.post('/notification/fcm', async ctx => {
   firebases.set(ctx.request.body.pipelineName, ctx.request.body)
-  ctx.status = 202
+  ctx.status = 200
 })
 
 router.get('/notification/webhook/:url', async ctx => {

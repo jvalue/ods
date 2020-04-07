@@ -7,7 +7,8 @@ import TransformationService from './interfaces/transformationService'
 import TransformationRequest from './interfaces/transformationRequest'
 import { Server } from 'http'
 import JobResult from './interfaces/jobResult'
-import { Firebase, NotificationRequest, Slack, Webhook } from '@/interfaces/notificationRequest'
+import { Firebase, NotificationRequest, Slack, Webhook } from './interfaces/notificationRequest'
+import axios from 'axios'
 
 export class TransformationEndpoint {
   port: number
@@ -60,8 +61,25 @@ export class TransformationEndpoint {
     res.end()
   }
 
-  postJob = (req: Request, res: Response): void => {
+  postJob = async (req: Request, res: Response): Promise<void> => {
     const transformation: TransformationRequest = req.body
+    if (!transformation.data && !transformation.dataLocation) {
+      res.writeHead(400)
+      res.end()
+      return
+    } else if (transformation.dataLocation) {
+      if (transformation.data) {
+        console.log(`Data and dataLocation fields both present.
+         Overwriting existing data with data from ${transformation.dataLocation}`)
+      }
+      console.log(`Fetching data from adapter, location: ${transformation.dataLocation}`)
+      const importResponse = await axios.get(transformation.dataLocation)
+      console.log('Fetching successful.')
+      transformation.data = importResponse.data
+    }
+    if (!transformation.func) {
+      transformation.func = 'return data;' // Undefined transformation functions are interpreted as identity function
+    }
     const result: JobResult = this.transformationService.executeJob(transformation.func, transformation.data)
     const answer: string = JSON.stringify(result)
     res.setHeader('Content-Type', 'application/json')

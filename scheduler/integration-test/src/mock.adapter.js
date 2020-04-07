@@ -7,7 +7,8 @@ const PORT = process.env.MOCK_ADAPTER_PORT || 8082
 /** DATA IMPORT SECTION **/
 
 const dataImportResponse = {
-  id: 1
+  id: 1,
+  location: '/data/1'
 }
 
 const importedData = {
@@ -29,7 +30,7 @@ router.post('/dataImport', async ctx => {
   ctx.body = dataImportResponse
 })
 
-router.get('/data/:id', async ctx => {
+router.get('/data/1', async  ctx => {
   ctx.type = 'text/json'
   ctx.body = importedData
 })

@@ -31,16 +31,10 @@ export async function getLatestEventId (): Promise<number> {
   return response.data.eventId || 0
 }
 
-
 /** IMPORT JOB RELATED **/
 
 export async function executeAdapter (adapterConfig: AdapterConfig): Promise<AdapterResponse> {
   const response = await http.post('/dataImport', adapterConfig)
-  return response.data
-}
-
-export async function fetchImportedData (dataBlobId: number): Promise<object> {
-  const response = await http.get(`/data/${dataBlobId}`)
   return response.data
 }
 
