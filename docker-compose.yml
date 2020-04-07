@@ -141,11 +141,6 @@ services:
       DATABASE_USER: ods_admin
       DATABASE_PW: ods_pw
 
-  storage-swagger: # API documentation for storage service
-    image: swaggerapi/swagger-ui
-    environment:
-      API_URL: http://localhost:9400/
-
   # ----------------- TRANSFORMATION SERVICE (/transformation) --------------------
   transformation:
     image: ${DOCKER_REGISTRY}/transformation
@@ -197,3 +192,15 @@ services:
       - "9001:8080"   # The Web UI (enabled by --api)
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
+
+# --------------------- SWAGGER UI -----------------------------------------
+  swagger:
+    image: swaggerapi/swagger-ui
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.to-swagger.rule=PathPrefix(`/api/docs`)"
+      - "traefik.http.routers.to-swagger.middlewares=swagger-stripprefix@docker"
+      - "traefik.http.middlewares.swagger-stripprefix.stripprefix.prefixes=/api/docs/" # without last slash: api/docs does not work, only api/docs/
+      - "traefik.http.services.swagger.loadbalancer.server.port=8080"
+    ports:
+      - "9009:8080"     # The HTTP port
