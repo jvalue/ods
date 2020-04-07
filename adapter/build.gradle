@@ -46,6 +46,7 @@ dependencies {
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv'
 	implementation 'org.postgresql:postgresql'
 
+  compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
