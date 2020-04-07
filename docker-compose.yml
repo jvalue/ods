@@ -202,5 +202,3 @@ services:
       - "traefik.http.routers.to-swagger.middlewares=swagger-stripprefix@docker"
       - "traefik.http.middlewares.swagger-stripprefix.stripprefix.prefixes=/api/docs/" # without last slash: api/docs does not work, only api/docs/
       - "traefik.http.services.swagger.loadbalancer.server.port=8080"
-    ports:
-      - "9009:8080"     # The HTTP port
