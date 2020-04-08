@@ -10,12 +10,6 @@
     "lint": "./node_modules/.bin/eslint src --ext .ts,.js --fix",
     "test": "jest"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jvalue/open-data-service.git"
-  },
-  "author": "",
-  "license": "AGPL-3.0",
   "dependencies": {
     "axios": "^0.19.2",
     "deep-equal": "^2.0.2",
@@ -41,5 +35,13 @@
     "ts-jest": "^25.3.0",
     "tslib": "^1.11.1",
     "typescript": "^3.8.3"
-  }
+  },
+  "homepage": "https://github.com/jvalue/open-data-service",
+  "licenses": [
+    {
+      "type": "GNU Affero General Public License 3",
+      "url": "https://opensource.org/licenses/AGPL-3.0"
+    }
+  ],
+  "repository": "https://github.com/jvalue/open-data-service.git"
 }
