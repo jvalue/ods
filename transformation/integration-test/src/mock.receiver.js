@@ -18,7 +18,7 @@ router.get('/', async ctx => {
 router.get('/:path', async ctx => {
   const path = ctx.params.path
   const notification = notifications.get(path)
-  if(!notification) {
+  if (!notification) {
     ctx.throw(404)
   } else {
     ctx.body = notification
@@ -36,7 +36,7 @@ router.post('/:path', async ctx => {
 
 router.get('/slack/*', async ctx => {
   const notification = notifications.get('slack')
-  if(!notification) {
+  if (!notification) {
     ctx.throw(404)
   } else {
     ctx.body = notification
@@ -46,7 +46,7 @@ router.get('/slack/*', async ctx => {
 })
 
 router.post('/slack/*', async ctx => {
-  console.log(`Slack notification triggered.`)
+  console.log('Slack notification triggered.')
   notifications.set('slack', ctx.request.body)
   ctx.status = 201
 })
@@ -59,7 +59,5 @@ process.on('SIGTERM', async () => {
   console.info('Mock-Notification-Receiver: SIGTERM signal received.')
   await server.close()
 })
-
-
 
 module.exports = server
