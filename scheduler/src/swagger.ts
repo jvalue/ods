@@ -7,8 +7,8 @@ const options: swaggerGen.Options = {
       version: '1.0.0',
       description: 'API of the ODS Scheduler',
     },
-    host: '/api/scheduler',
-
+    host: 'localhost:9000',
+    basePath: '/api/scheduler',
   },
   // path to files with swagger annotations
   // Note: relative to package.json

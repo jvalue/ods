@@ -13,9 +13,7 @@ import DatasourceConfig from './datasource-config'
    *       scheduleJob:
    *         type: object
    *       datasourceConfig:
-   *         type: object
-   *         schema:
-   *           $ref/#definitions/DatasourceConfig
+   *         $ref: '#/definitions/DatasourceConfig'
    */
 function swaggerDummy() { } // transpilation needs function to copy swagger annotation to dist directory
 

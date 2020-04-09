@@ -30,6 +30,8 @@ const server = app.listen(port, () => {
    *     responses:
    *       200:
    *         description: I am alive!
+   *         schema:
+   *           type: string
    */
 app.get('/', (req, res) => {
   res.send('I am alive!')
@@ -42,7 +44,9 @@ app.get('/', (req, res) => {
    *     description: Current API version
    *     responses:
    *       200:
-   *         description: Returns the current API version.
+   *         description: Returns the current API version (semantic versioning).
+   *         schema:
+   *           type: string
    */
 app.get('/version', (req, res) => {
   res.header('Content-Type', 'text/plain')
@@ -60,7 +64,9 @@ app.get('/version', (req, res) => {
    *       200:
    *         description: Scheduled jobs
    *         schema:
-   *           $ref/#definitions/ScheduledJobs
+   *           type: array
+   *           items:
+   *             $ref: '#/definitions/SchedulingJob'
    */
 app.get('/jobs', (req, res) => {
   res.header('Content-Type', 'application/json')
