@@ -1,3 +1,3 @@
 export default interface TransformationConfig {
-  data: object;
+  dataLocation: string;
 }

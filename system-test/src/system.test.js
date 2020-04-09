@@ -13,30 +13,33 @@ const MOCK_SERVER_DOCKER = process.env.MOCK_SERVER_API || 'http://mock-server:80
 
 const sourceData = {
   one: 1,
-  two: "two",
+  two: 'two',
   objecticus: {
-    inner: "value"
+    inner: 'value'
   }
 }
 
 describe('System-Test', () => {
-
   beforeAll(async () => {
     console.log('Waiting for core-service with URL: ' + CORE_URL)
     console.log('Waiting for scheduler-service with URL: ' + SCHEDULER_URL)
     console.log('Waiting for transformation-service with URL: ' + TRANSFORMATION_URL)
     console.log('Waiting for adapter-service with URL: ' + ADAPTER_URL)
     console.log('Waiting for storage-service with URL: ' + STORAGE_URL)
-    console.log('Waiting for mock server with URL: ' + MOCK_SERVER_URL +'/')
+    console.log('Waiting for mock server with URL: ' + MOCK_SERVER_URL + '/')
     await waitOn(
-      { resources:
+      {
+        resources:
       [STORAGE_URL,
-      CORE_URL + '/version',
-      SCHEDULER_URL,
-      TRANSFORMATION_URL,
-      ADAPTER_URL + '/version',
-      MOCK_SERVER_URL + '/'
-      ], timeout: 20000, log: true })
+        CORE_URL + '/version',
+        SCHEDULER_URL,
+        TRANSFORMATION_URL,
+        ADAPTER_URL + '/version',
+        MOCK_SERVER_URL + '/'
+      ],
+        timeout: 20000,
+        log: true
+      })
   }, 22000)
 
   afterAll(async () => {
@@ -61,7 +64,6 @@ describe('System-Test', () => {
       .send(sourceData)
 
     const datasourceConfig = generateDataSourceConfig(MOCK_SERVER_DOCKER + '/data/test1', false)
-
 
     // Add datasource to adapter service
     console.log(`[Test 1] Trying to create datasource: ${JSON.stringify(datasourceConfig)}`)
@@ -97,9 +99,8 @@ describe('System-Test', () => {
     console.log(`[Test 1] Storage response body: ${JSON.stringify(storageResponse.body)}`)
     expect(storageResponse.body[0].data).toEqual(sourceData)
 
-
     // CLEAN-UP
-    console.log(`[Test 1] Cleaning up...`)
+    console.log('[Test 1] Cleaning up...')
     let deletionResponse = await request(CORE_URL)
       .delete(`/pipelines/${pipelineId}`)
       .send()
@@ -109,7 +110,6 @@ describe('System-Test', () => {
       .send()
     expect(deletionResponse.status).toEqual(204)
     sleep(2000) // takes up to 2sec to reach scheduler
-
   }, 20000)
 
   test('Test 2: Create periodic pipeline without transformation', async () => {
@@ -127,7 +127,6 @@ describe('System-Test', () => {
       .send(datasourceConfig)
     const datasourceId = adapterResponse.body.id
     console.log(`[Test 2] Successfully created datasource ${datasourceId}`)
-
 
     // Add pipeline to core service
     const pipelineConfig = generatePipelineConfig(datasourceId)
@@ -165,7 +164,7 @@ describe('System-Test', () => {
     expect(storageResponse.body[1].data.count).toEqual(1) // counter increases with every datasource fetch by mock
 
     // CLEAN-UP
-    console.log(`[Test 2] Cleaning up...`)
+    console.log('[Test 2] Cleaning up...')
     let deletionResponse = await request(CORE_URL)
       .delete(`/pipelines/${pipelineId}`)
       .send()
@@ -175,7 +174,6 @@ describe('System-Test', () => {
       .send()
     expect(deletionResponse.status).toEqual(204)
     sleep(2000) // takes up to 2sec to reach scheduler
-
   }, 20000)
 
   test('Test 3: Create non-periodic pipeline with transformation', async () => {
@@ -184,10 +182,10 @@ describe('System-Test', () => {
       .post('/data/test3')
       .send(sourceData)
 
-    let expectedData = Object.assign({}, sourceData)
+    const expectedData = Object.assign({}, sourceData)
     expectedData.newField = 12
 
-    const datasourceConfig = generateDataSourceConfig(MOCK_SERVER_DOCKER + '/data/test3',false)
+    const datasourceConfig = generateDataSourceConfig(MOCK_SERVER_DOCKER + '/data/test3', false)
 
     console.log(`[Test 3] Trying to create datasource: ${JSON.stringify(datasourceConfig)}`)
 
@@ -198,11 +196,10 @@ describe('System-Test', () => {
     const datasourceId = adapterResponse.body.id
     console.log(`[Test 3] Successfully created datasource ${datasourceId}`)
 
-
     // Add pipeline to core service
     const pipelineConfig = generatePipelineConfig(datasourceId)
-    pipelineConfig.transformation = {"func": "data.newField = 12;return data;"}
-    const notification = generateNotification('data.newField === 12',MOCK_SERVER_DOCKER + '/notifications/test3')
+    pipelineConfig.transformation = { func: 'data.newField = 12;return data;' }
+    const notification = generateNotification('data.newField === 12', MOCK_SERVER_DOCKER + '/notifications/test3')
     pipelineConfig.notifications = [notification]
 
     console.log(`[Test 3] Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
@@ -236,7 +233,6 @@ describe('System-Test', () => {
       .send()
     expect(deletionResponse.status).toEqual(204)
     sleep(2000) // takes up to 2sec to reach scheduler
-
   }, 20000)
 
   test('Test 4: Update periodic datasource with pipeline', async () => {
@@ -250,7 +246,7 @@ describe('System-Test', () => {
       .post('/data/test4_updated')
       .send(updatedSourceData)
 
-    const datasource = generateDataSourceConfig(MOCK_SERVER_DOCKER + '/data/test4',true)
+    const datasource = generateDataSourceConfig(MOCK_SERVER_DOCKER + '/data/test4', true)
 
     console.log(`[Test 4] Trying to create datasource: ${JSON.stringify(datasource)}`)
 
@@ -300,7 +296,7 @@ describe('System-Test', () => {
 
     // Create updated pipeline
     pipelineConfig.id = pipelineId
-    const anotherNotification = generateNotification('data.two === \"two\"', MOCK_SERVER_DOCKER + '/notifications/test4_2')
+    const anotherNotification = generateNotification('data.two === "two"', MOCK_SERVER_DOCKER + '/notifications/test4_2')
     pipelineConfig.notifications = [notification, anotherNotification]
 
     console.log(`[Test 4] Pipeline ${pipelineId} update request triggered.`)
@@ -323,12 +319,12 @@ describe('System-Test', () => {
     expect(updatedStorageResponse.status).toEqual(200)
     console.log(`[Test 4] Updated storage response body ${JSON.stringify(updatedStorageResponse.body)}`)
     expect(updatedStorageResponse.body.length).toBeGreaterThan(1)
-    const dataArray = updatedStorageResponse.body.map( b => b.data)
+    const dataArray = updatedStorageResponse.body.map(b => b.data)
     expect(dataArray[0]).toEqual(sourceData)
     expect(dataArray).toContainEqual(updatedSourceData)
 
     // CLEAN-UP
-    console.log(`[Test 4] Cleaning up...`)
+    console.log('[Test 4] Cleaning up...')
     let deletionResponse = await request(CORE_URL)
       .delete(`/pipelines/${pipelineId}`)
       .send()
@@ -338,7 +334,6 @@ describe('System-Test', () => {
       .send()
     expect(deletionResponse.status).toEqual(204)
     sleep(2000) // takes up to 2sec to reach scheduler
-
   }, 20000)
 
   test('Test 5: Create pipeline with multiple notifications', async () => {
@@ -397,9 +392,8 @@ describe('System-Test', () => {
       .get('/notifications/test5_3')
     expect(webhookResponse3.status).toEqual(404)
 
-
     // CLEAN-UP
-    console.log(`[Test 5] Cleaning up...`)
+    console.log('[Test 5] Cleaning up...')
     let deletionResponse = await request(CORE_URL)
       .delete(`/pipelines/${pipelineId}`)
       .send()
@@ -409,7 +403,6 @@ describe('System-Test', () => {
       .send()
     expect(deletionResponse.status).toEqual(204)
     sleep(2000) // takes up to 2sec to reach scheduler
-
   }, 20000)
 
   test('Test 6: Delete periodic pipeline', async () => {
@@ -427,7 +420,6 @@ describe('System-Test', () => {
       .send(datasourceConfig)
     const datasourceId = adapterResponse.body.id
     console.log(`[Test 6] Successfully created datasource ${datasourceId}`)
-
 
     // Add pipeline to core service
     const pipelineConfig = generatePipelineConfig(datasourceId)
@@ -457,7 +449,7 @@ describe('System-Test', () => {
     expect(unchanged).toEqual(true)
 
     // CLEAN-UP
-    console.log(`[Test 6] Cleaning up...`)
+    console.log('[Test 6] Cleaning up...')
     expect(deletionResponse.status).toEqual(204)
     deletionResponse = await request(ADAPTER_URL)
       .delete(`/datasources/${datasourceId}`)
@@ -467,25 +459,25 @@ describe('System-Test', () => {
   }, 20000)
 })
 
-function generateNotification(condition, url) {
+function generateNotification (condition, url) {
   return {
     condition,
     url,
-    type: "WEBHOOK"
+    type: 'WEBHOOK'
   }
 }
 
-function generateDataSourceConfig(sourceLocation, periodic, interval = 5000) {
+function generateDataSourceConfig (sourceLocation, periodic, interval = 5000) {
   return {
     protocol: {
-      type: "HTTP",
+      type: 'HTTP',
       parameters: {
         location: sourceLocation,
         encoding: 'UTF-8'
       }
     },
     format: {
-      type: "JSON",
+      type: 'JSON',
       parameters: {}
     },
     trigger: {
@@ -494,25 +486,25 @@ function generateDataSourceConfig(sourceLocation, periodic, interval = 5000) {
       interval
     },
     metadata: {
-      author: "Klaus Klausemeier",
-      license: "AGPL v30",
-      displayName: "test1",
-      description: "system test 1"
-    },
+      author: 'Klaus Klausemeier',
+      license: 'AGPL v30',
+      displayName: 'test1',
+      description: 'system test 1'
+    }
   }
 }
 
-function generatePipelineConfig(datasourceId) {
+function generatePipelineConfig (datasourceId) {
   return {
     datasourceId: datasourceId,
     transformation: undefined,
     metadata: {
-      author: "Klaus Klausemeier",
-      license: "AGPL v30",
-      displayName: "test1",
-      description: "system test 1"
+      author: 'Klaus Klausemeier',
+      license: 'AGPL v30',
+      displayName: 'test1',
+      description: 'system test 1'
     },
-    notifications: [ ]
+    notifications: []
   }
 }
 
@@ -520,7 +512,7 @@ function sleep (ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-async function checkWebhook(uri, pollingInterval, maxRetries = 10) {
+async function checkWebhook (uri, pollingInterval, maxRetries = 10) {
   for (let i = 0; i < maxRetries; i++) {
     const response = await request(MOCK_SERVER_URL)
       .get(`/notifications/${uri}`)
@@ -530,23 +522,23 @@ async function checkWebhook(uri, pollingInterval, maxRetries = 10) {
       await sleep(pollingInterval)
     }
   }
-  await Promise.reject(`Webhook ${uri} was not triggered within ${maxRetries} retries.`)
+  await Promise.reject(new Error(`Webhook ${uri} was not triggered within ${maxRetries} retries.`))
 }
 
-async function webhookRemainsUnchanged(uri, ms) {
+async function webhookRemainsUnchanged (uri, ms) {
   const ref = await request(MOCK_SERVER_URL)
     .get(`/notifications/${uri}`)
   await sleep(ms)
   const latest = await request(MOCK_SERVER_URL)
     .get(`/notifications/${uri}`)
-  if(JSON.stringify(latest.body) === JSON.stringify(ref.body)) {
+  if (JSON.stringify(latest.body) === JSON.stringify(ref.body)) {
     return Promise.resolve(true)
   } else {
     return Promise.resolve(false)
   }
 }
 
-async function waitForWebhookChange(uri, original, pollingInterval, maxRetries = 10) {
+async function waitForWebhookChange (uri, original, pollingInterval, maxRetries = 10) {
   const timestamp = original.timestamp
   for (let i = 0; i < maxRetries; i++) {
     const response = await request(MOCK_SERVER_URL)
@@ -557,5 +549,5 @@ async function waitForWebhookChange(uri, original, pollingInterval, maxRetries =
       await sleep(pollingInterval)
     }
   }
-  await Promise.reject(`Webhook ${uri} was not triggered within ${maxRetries} retries.`)
+  await Promise.reject(new Error(`Webhook ${uri} was not triggered within ${maxRetries} retries.`))
 }
