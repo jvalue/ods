@@ -9,12 +9,10 @@
     "mock:storage": "node src/mock.storage.js",
     "pretest": "(npm run mock:adapter &) && (npm run mock:core &) && (npm run mock:transformation &) && (npm run mock:storage &)",
     "test": "jest",
-    "posttest": "killall node",
-    "watch:mock": "nodemon src/mock.server.js"
+    "posttest": "killall node"
   },
   "devDependencies": {
     "jest": "^25.2.4",
-    "nodemon": "^2.0.2",
     "supertest": "^4.0.2"
   },
   "jest": {
