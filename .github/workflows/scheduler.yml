@@ -27,6 +27,7 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
 
           IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/scheduler
+          echo ::set-env name=IMAGE_ID::$(echo $IMAGE_ID)
 
           SCHEDULER_VERSION=$(grep "version" scheduler/package.json | awk '{print $2}' | sed 's/[,"]//g')
 
@@ -35,3 +36,13 @@ jobs:
 
           docker push $IMAGE_ID:$SCHEDULER_VERSION
           docker push $IMAGE_ID:latest
+
+      - name: Save Docker image as artifact
+        run: |
+          docker save $IMAGE_ID > scheduler.tar
+
+      - name: Upload Docker image as artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: scheduler-artifact
+          path: scheduler.tar

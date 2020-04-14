@@ -27,6 +27,7 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
 
           IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/adapter
+          echo ::set-env name=IMAGE_ID::$(echo $IMAGE_ID)
 
           ADAPTER_VERSION=$(grep "version =" ./adapter/src/main/resources/application.properties | awk '{print $3}' | sed "s/[']//g")
 
@@ -35,3 +36,13 @@ jobs:
 
           docker push $IMAGE_ID:$ADAPTER_VERSION
           docker push $IMAGE_ID:latest
+
+      - name: Save Docker image as artifact
+        run: |
+          docker save $IMAGE_ID > adapter.tar
+
+      - name: Upload Docker image as artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: adapter-artifact
+          path: adapter.tar
