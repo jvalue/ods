@@ -328,6 +328,8 @@ jobs:
 
       - name: Run Systemtest
         run: |
+          ls -al
+          ls -al *
           docker load -i ./core.tar
           docker load -i ./scheduler.tar
           docker load -i ./storage_postgrest.tar
