@@ -305,51 +305,51 @@ jobs:
 
   # ----------------- SYSTEMTEST --------------------
 
-    systemtest:
-      name: Systemtest
-      runs-on: ubuntu-latest
+  systemtest:
+    name: Systemtest
+    runs-on: ubuntu-latest
 
-      needs: [adapter-build, core-build, scheduler-build, storage-build, transformation-build, ui-build]
+    needs: [adapter-build, core-build, scheduler-build, storage-build, transformation-build, ui-build]
 
-      steps:
-        - name: Download adapter artifact
-          uses: actions/download-artifact@v1
-          with:
-            name: adapter-artifact
-        - name: Download core artifact
-          uses: actions/download-artifact@v1
-          with:
-            name: core-artifact
-        - name: Download scheduler artifact
-          uses: actions/download-artifact@v1
-          with:
-            name: scheduler-artifact
-        - name: Download storage artifact
-          uses: actions/download-artifact@v1
-          with:
-            name: storage-artifact
-        - name: Download liquibase artifact
-          uses: actions/download-artifact@v1
-          with:
-            name: liquibase-artifact
-        - name: Download transformation artifact
-          uses: actions/download-artifact@v1
-          with:
-            name: transformation-artifact
-        - name: Download ui artifact
-          uses: actions/download-artifact@v1
-          with:
-            name: ui-artifact
+    steps:
+      - name: Download adapter artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: adapter-artifact
+      - name: Download core artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: core-artifact
+      - name: Download scheduler artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: scheduler-artifact
+      - name: Download storage artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: storage-artifact
+      - name: Download liquibase artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: liquibase-artifact
+      - name: Download transformation artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: transformation-artifact
+      - name: Download ui artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: ui-artifact
 
-        - name: Run Systemtest
-          run: |
-            docker load -i ./core.tar
-            docker load -i ./scheduler.tar
-            docker load -i ./storage_postgrest.tar
-            docker load -i ./storage_liquibase.tar
-            docker load -i ./transformation.tar
-            docker load -i ./adapter.tar
-            docker-compose -f docker-compose.yml up -d core adapter transformation storage scheduler
-            docker-compose -f docker-compose.yml -f docker-compose.st.yml up --exit-code-from system-test system-test
-            docker-compose logs
-            docker-compose -f docker-compose.yml -f docker-compose.st.yml down
+      - name: Run Systemtest
+        run: |
+          docker load -i ./core.tar
+          docker load -i ./scheduler.tar
+          docker load -i ./storage_postgrest.tar
+          docker load -i ./storage_liquibase.tar
+          docker load -i ./transformation.tar
+          docker load -i ./adapter.tar
+          docker-compose -f docker-compose.yml up -d core adapter transformation storage scheduler
+          docker-compose -f docker-compose.yml -f docker-compose.st.yml up --exit-code-from system-test system-test
+          docker-compose logs
+          docker-compose -f docker-compose.yml -f docker-compose.st.yml down
