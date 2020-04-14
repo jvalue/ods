@@ -1,0 +1,48 @@
+name: Scheduler Build & Test & Publish
+
+on: [push]
+
+jobs:
+  scheduler-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build and Test
+        run: |
+          docker-compose -f docker-compose.yml build scheduler
+
+      - name: Integration-test
+        run: |
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml build scheduler-it
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d scheduler
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from scheduler-it scheduler-it
+          docker-compose logs
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
+
+      - name: Push to registry
+        if: github.ref == 'refs/heads/master'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
+          IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/scheduler
+          echo ::set-env name=IMAGE_ID::$(echo $IMAGE_ID)
+
+          SCHEDULER_VERSION=$(grep "version" scheduler/package.json | awk '{print $2}' | sed 's/[,"]//g')
+
+          docker tag $IMAGE_ID $IMAGE_ID:$SCHEDULER_VERSION
+          docker tag $IMAGE_ID $IMAGE_ID:latest
+
+          docker push $IMAGE_ID:$SCHEDULER_VERSION
+          docker push $IMAGE_ID:latest
+
+      - name: Save Docker image as artifact
+        run: |
+          docker save $IMAGE_ID > scheduler.tar
+
+      - name: Upload Docker image as artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: scheduler-artifact
+          path: scheduler.tar
