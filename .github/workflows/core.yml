@@ -29,9 +29,20 @@ jobs:
           CORE_VERSION=$(grep "version =" ./core/src/main/resources/application.properties | awk '{print $3}' | sed "s/[']//g")
 
           IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/core
+          echo ::set-env name=IMAGE_ID::$(echo $IMAGE_ID)
 
           docker tag $IMAGE_ID $IMAGE_ID:$CORE_VERSION
           docker tag $IMAGE_ID $IMAGE_ID:latest
 
           docker push $IMAGE_ID:$CORE_VERSION
           docker push $IMAGE_ID:latest
+
+      - name: Save Docker image as artifact
+        run: |
+          docker save $IMAGE_ID > core.tar
+
+      - name: Upload Docker image as artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: core-artifact
+          path: core.tar
