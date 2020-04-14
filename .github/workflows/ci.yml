@@ -1,4 +1,4 @@
-name: ODS CI
+name: Open Data Service (ODS)
 
 on: [push]
 
