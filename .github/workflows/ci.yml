@@ -301,6 +301,8 @@ jobs:
     needs: [adapter-build, core-build, scheduler-build, storage-build, transformation-build, ui-build]
 
     steps:
+      - uses: actions/checkout@v2
+
       - name: Download adapter artifact
         uses: actions/download-artifact@v1
         with:
@@ -328,14 +330,12 @@ jobs:
 
       - name: Run Systemtest
         run: |
-          ls -al
-          ls -al *
-          docker load -i ./core.tar
-          docker load -i ./scheduler.tar
-          docker load -i ./storage_postgrest.tar
-          docker load -i ./storage_liquibase.tar
-          docker load -i ./transformation.tar
-          docker load -i ./adapter.tar
+          docker load -i ./core-artifact/core.tar
+          docker load -i ./scheduler-artifact/scheduler.tar
+          docker load -i ./storage-artifact/storage_postgrest.tar
+          docker load -i ./liquibase-artifact/storage_liquibase.tar
+          docker load -i ./transformation-artifact/transformation.tar
+          docker load -i ./adapter/artifact/adapter.tar
           docker-compose -f docker-compose.yml up -d core adapter transformation storage scheduler
           docker-compose -f docker-compose.yml -f docker-compose.st.yml up --exit-code-from system-test system-test
           docker-compose logs
