@@ -1,4 +1,4 @@
-![Open Data Service (ODS)](https://github.com/nxmyoz/open-data-service-ms/workflows/ODS%20CI/badge.svg)
+![Open Data Service (ODS)](https://github.com/nxmyoz/open-data-service-ms/workflows/Open%20Data%20Service%20(ODS)/badge.svg)
 
 # Open Data Service (ODS)
 
