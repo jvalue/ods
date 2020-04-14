@@ -10,6 +10,21 @@
 The Open Data Service (ODS) is an application which can collect data from multiple sources simulataneously, process that data and then offer an improved (or "cleaned") version to its clients.
 *We aim to establish the ODS as **the** go-to place for using Open Data!*
 
+## Contributing
+Contributions are welcome. Thank you if you want to contribute to the development of the ODS.
+There are several ways of contributing to the ODS:
+- by implementing new features
+- by fixing known bugs
+- by filing bug reports
+- by improving the documentation
+- by discussing use cases that are not covered yet
+
+You can check our [issue board](https://github.com/jvalue/open-data-service/issues) for open issues to work on or to create new issues with feature request, bug reports etc.
+To allow us integrating the contents of your contribution, you need to sign a contributers requirement via the CLA Assistant Plugin.
+
+## Development
+You can fork the ODS and create pull requests. The pull requests will be reviewed by us and you will get a feedback as soon as possible. Please make sure that commits related to an issue (e.g. closing an issue) contain the issue number in the commit message.
+
 ## Project Structure
 
 We use the microservice architectural style in this project. The microservices are located in the sub-directories and communicate at runtime over network with each other. Each Microservice has its own defined interface that has to be used by other services, direct access to the database of other microservices is strictly prohibited. In production, each microservice can be multiplied in order to scale the system (except the scheduler at the moment).
