@@ -23,7 +23,8 @@ You can check our [issue board](https://github.com/jvalue/open-data-service/issu
 Before we can merge your contribution you need to accept your Contributor License Agreement (CLA), integrated into the Pull Request process.
 
 ## Development
-You can fork the ODS and create pull requests. The pull requests will be reviewed by us and you will get a feedback as soon as possible. Please make sure that commits related to an issue (e.g. closing an issue) contain the issue number in the commit message.
+Please provide your contribution in the form of a pull request. We will then check your pull request as soon as possible and give you feedback if necessary.
+Please make sure that commits related to an issue (e.g. closing an issue) contains the issue number in the commit message.
 
 ## Project Structure
 
