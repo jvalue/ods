@@ -1,6 +1,7 @@
 {
   "editor.formatOnSave": false,
-  "eslint.workingDirectories": ["./transformation", "./ui", "./scheduler"],
+  "eslint.workingDirectories": ["./transformation", "./ui", "./scheduler", "./system-test",
+      "./adapter/integration-test", "./core/integration-test", "./scheduler/integration-test", "./storage/integration-test", "./transformation/integration-test"],
   "eslint.autoFixOnSave": true,
   "eslint.validate": [
     "javascript",
