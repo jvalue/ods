@@ -48,12 +48,12 @@
     "vue-template-compiler": "^2.6.10",
     "vuex-module-decorators": "^0.11.0"
   },
-  "homepage": "https://github.com/jvalue/ods-webclient",
+  "homepage": "https://github.com/jvalue/open-data-service",
   "licenses": [
     {
       "type": "GNU Affero General Public License 3",
       "url": "https://opensource.org/licenses/AGPL-3.0"
     }
   ],
-  "repository": "https://github.com/jvalue/ods-webclient.git"
+  "repository": "https://github.com/jvalue/open-data-service.git"
 }

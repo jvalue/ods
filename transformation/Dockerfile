@@ -9,7 +9,7 @@ COPY ./jest.config.js ./
 
 # Install dependencies and run build
 RUN npm ci
-RUN npm run tsc
+RUN npm run transpile
 RUN npm run test
 
 # Second stage: image to run node application
