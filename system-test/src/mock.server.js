@@ -32,7 +32,7 @@ router.get('/data/:path', async ctx => {
   const path = ctx.params.path
   console.log(`GET on /data/${path} received by mock server.`)
   const data = dataStore.get(path)
-  if(!data) {
+  if (!data) {
     ctx.throw(404, `No data available for /data/${path}`)
   } else {
     ctx.body = data
@@ -40,7 +40,6 @@ router.get('/data/:path', async ctx => {
     ctx.status = 200
   }
 })
-
 
 // /sequences/:path as simple bucket, but increases member 'count' with every GET
 
@@ -56,17 +55,16 @@ router.get('/sequences/:path', async ctx => {
   const path = ctx.params.path
   console.log(`GET on /sequences/${path} received by mock server.`)
   const sequenceCounter = sequenceCounters.get(path)
-  if(typeof sequenceCounter === "undefined") {
+  if (typeof sequenceCounter === 'undefined') {
     ctx.throw(404, `No data available for /sequences/${path}`)
   } else {
-    let data = dataSequences.get(path)
+    const data = dataSequences.get(path)
     data.count = sequenceCounter
     sequenceCounters.set(path, sequenceCounter + 1) // increase count after GET
     ctx.body = data
     ctx.status = 200
   }
 })
-
 
 router.post('/notifications/:path', async ctx => {
   const path = ctx.params.path
@@ -79,7 +77,7 @@ router.get('/notifications/:path', async ctx => {
   const path = ctx.params.path
   console.log(`GET on /notifications/${path} received by mock server.`)
   const notification = notificationStore.get(path)
-  if(!notification) {
+  if (!notification) {
     ctx.throw(404, `No notification has been stored on /notifications/${path}.`)
   } else {
     ctx.body = notification
