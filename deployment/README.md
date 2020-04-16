@@ -1,6 +1,5 @@
 # Kubernetes Deployment Files
 The deployment directory contains all files needed to deploy the ODS to a Kubernetes cluster.
-The scripts in this directory are used as part of the CI.
 
 ## Current Features
 * Generate deployment files for different namespaces and urls.
