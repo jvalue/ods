@@ -1,9 +1,4 @@
-![Scheduler Build & Test & Publish](https://github.com/jvalue/open-data-service-ms/workflows/Scheduler%20Build%20&%20Test%20&%20Publish/badge.svg)
-![CORE Build & Test & Publish](https://github.com/jvalue/open-data-service-ms/workflows/CORE%20Build%20&%20Test%20&%20Publish/badge.svg)
-![Adapter Build & Test & Publish](https://github.com/jvalue/open-data-service-ms/workflows/Adapter%20Build%20&%20Test%20&%20Publish/badge.svg)
-![UI Build & Test & Publish](https://github.com/jvalue/open-data-service-ms/workflows/UI%20Build%20&%20Test%20&%20Publish/badge.svg)
-![Transformation Build & Test & Publish](https://github.com/jvalue/open-data-service-ms/workflows/Transformation%20Build%20&%20Test%20&%20Publish/badge.svg)
-![Storage Build & Test & Publish](https://github.com/jvalue/open-data-service-ms/workflows/Storage%20Build%20&%20Test%20&%20Publish/badge.svg)
+![Open Data Service (ODS)](https://github.com/jvalue/open-data-service/workflows/Open%20Data%20Service%20(ODS)/badge.svg)
 
 # Open Data Service (ODS)
 
