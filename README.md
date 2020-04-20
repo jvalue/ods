@@ -1,14 +1,25 @@
-![Scheduler Build & Test & Publish](https://github.com/jvalue/open-data-service-ms/workflows/Scheduler%20Build%20&%20Test%20&%20Publish/badge.svg)
-![CORE Build & Test & Publish](https://github.com/jvalue/open-data-service-ms/workflows/CORE%20Build%20&%20Test%20&%20Publish/badge.svg)
-![Adapter Build & Test & Publish](https://github.com/jvalue/open-data-service-ms/workflows/Adapter%20Build%20&%20Test%20&%20Publish/badge.svg)
-![UI Build & Test & Publish](https://github.com/jvalue/open-data-service-ms/workflows/UI%20Build%20&%20Test%20&%20Publish/badge.svg)
-![Transformation Build & Test & Publish](https://github.com/jvalue/open-data-service-ms/workflows/Transformation%20Build%20&%20Test%20&%20Publish/badge.svg)
-![Storage Build & Test & Publish](https://github.com/jvalue/open-data-service-ms/workflows/Storage%20Build%20&%20Test%20&%20Publish/badge.svg)
+![Open Data Service (ODS)](https://github.com/jvalue/open-data-service/workflows/Open%20Data%20Service%20(ODS)/badge.svg)
 
 # Open Data Service (ODS)
 
 The Open Data Service (ODS) is an application which can collect data from multiple sources simulataneously, process that data and then offer an improved (or "cleaned") version to its clients.
 *We aim to establish the ODS as **the** go-to place for using Open Data!*
+
+## Contributing
+Contributions are welcome. Thank you if you want to contribute to the development of the ODS.
+There are several ways of contributing to the ODS:
+- by implementing new features
+- by fixing known bugs
+- by filing bug reports
+- by improving the documentation
+- by discussing use cases that are not covered yet
+
+You can check our [issue board](https://github.com/jvalue/open-data-service/issues) for open issues to work on or to create new issues with a feature request, bug report, etc.
+Before we can merge your contribution you need to accept your Contributor License Agreement (CLA), integrated into the Pull Request process.
+
+## Development
+Please provide your contribution in the form of a pull request. We will then check your pull request as soon as possible and give you feedback if necessary.
+Please make sure that commits related to an issue (e.g. closing an issue) contains the issue number in the commit message.
 
 ## Project Structure
 

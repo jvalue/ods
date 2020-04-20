@@ -6,10 +6,18 @@
     "mock:receiver": "node src/mock.receiver.js",
     "pretest": "npm run mock:receiver &",
     "test": "jest",
-    "posttest": "killall node"
+    "posttest": "killall node",
+    "lint": "./node_modules/.bin/eslint src --ext .js --fix"
   },
   "devDependencies": {
-    "jest": "^25.2.4",
+    "eslint": "^6.0.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-jest": "^23.8.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "jest": "^25.3.0",
     "supertest": "^4.0.2"
   },
   "jest": {
@@ -19,6 +27,6 @@
     "koa": "^2.11.0",
     "koa-bodyparser": "^4.3.0",
     "koa-router": "^8.0.8",
-    "wait-on": "^4.0.1"
+    "wait-on": "^4.0.2"
   }
 }
