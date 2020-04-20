@@ -28,7 +28,8 @@
     "express-session": "^1.16.2",
     "firebase-admin": "^8.8.0",
     "keycloak-connect": "^7.0.0",
-    "vm2": "^3.8.3"
+    "vm2": "^3.8.3",
+    "swagger-jsdoc": "^4.0.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.6",
@@ -37,6 +38,7 @@
     "@types/jest": "^24.9.1",
     "@types/keycloak-connect": "^4.5.2",
     "@types/supertest": "^2.0.8",
+    "@types/swagger-jsdoc": "^3.0.2",
     "@typescript-eslint/eslint-plugin": "^2.26.0",
     "@typescript-eslint/parser": "^2.26.0",
     "concurrently": "^4.1.2",
