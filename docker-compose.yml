@@ -197,7 +197,7 @@ services:
   swagger:
     image: swaggerapi/swagger-ui
     environment:
-      API_URLS: "[{ url: '/api/storage', name: 'storage' }, { url: '/api/core/v2/api-docs', name: 'core' }, { url: '/api/adapter/v2/api-docs', name: 'adapter' }, { url: '/api/scheduler/api-docs', name: 'scheduler' }]"
+      API_URLS: "[{ url: '/api/storage', name: 'storage' }, { url: '/api/core/v2/api-docs', name: 'core' }, { url: '/api/adapter/v2/api-docs', name: 'adapter' }, { url: '/api/scheduler/api-docs', name: 'scheduler' }, { url: '/api/transformation/api-docs', name: 'transformation' }]"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-swagger.rule=PathPrefix(`/api/docs`)"
