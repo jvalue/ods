@@ -14,8 +14,13 @@ const options: swaggerGen.Options = {
   // Note: relative to package.json
   // Note: since we transpile and then start, reference the dist directory + transpiled js files
   apis: [
-    'dist/index.js', // REST API
-    'dist/transformationEndpoint.js', // REST API
+    'dist/index.js',                            // REST API
+    'dist/transformationEndpoint.js',           // REST API
+    'dist/interfaces/notificationRequest.js',   // model classes
+    'dist/interfaces/transformationRequest.js', // model classes
+    'dist/interfaces/jobResult.js',             // model classes
+    'dist/interfaces/jobError.js',              // model classes
+    'dist/interfaces/stats.js',                 // model classes
   ],
 };
 

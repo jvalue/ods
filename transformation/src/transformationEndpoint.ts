@@ -78,7 +78,7 @@ export class TransformationEndpoint {
      *       - in: body
      *         name: webhookConfig
      *         schema:
-     *           $ref: '#/definitions/Webhook'
+     *           $ref: '#/definitions/WebhookConfig'
      *     responses:
      *       200:
      *         description: If the notification was sent successfully.
@@ -98,7 +98,7 @@ export class TransformationEndpoint {
      *       - in: body
      *         name: slackConfig
      *         schema:
-     *           $ref: '#/definitions/Slack'
+     *           $ref: '#/definitions/SlackConfig'
      *     responses:
      *       200:
      *         description: If the notification was sent successfully.
@@ -119,7 +119,7 @@ export class TransformationEndpoint {
      *       - in: body
      *         name: firebaseConfig
      *         schema:
-     *           $ref: '#/definitions/Firebase'
+     *           $ref: '#/definitions/FirebaseConfig'
      *     responses:
      *       200:
      *         description: If the notification was sent successfully.
