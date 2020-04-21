@@ -18,11 +18,114 @@ export class TransformationEndpoint {
     this.keycloak = keycloak
     this.transformationService = transformationService
 
+    /**
+     * @swagger
+     * /:
+     *   get:
+     *     description: Simple Healthcheck
+     *     responses:
+     *       200:
+     *         description: "I am alive!"
+     *         schema:
+     *           type: string
+     */
     app.get('/', this.getHealthCheck)
+
+
+    /**
+     * @swagger
+     * /version:
+     *   get:
+     *     description: Current API version
+     *     responses:
+     *       200:
+     *         description: Returns the current API version (semantic versioning).
+     *         schema:
+     *           type: string
+     */
     app.get('/version', this.getVersion)
+
+    /**
+     * @swagger
+     * /job:
+     *   post:
+     *     description: Execute a transformation job
+     *     consumes:
+     *       - application/json
+     *     parameters:
+     *       - in: body
+     *         name: transformationConfig
+     *         schema:
+     *           $ref: '#/definitions/TransformationRequest'
+     *     responses:
+     *       200:
+     *         description: The transformed data.
+     *         schema:
+     *           $ref: '#/definitions/JobResult'
+     *       400:
+     *         description: if data or dataLocation not given or if transformation function is malformed or runtime errors
+     */
     app.post('/job', this.determineAuth(), this.postJob)
+
+    /**
+     * @swagger
+     * /notification/webhook:
+     *   post:
+     *     description: Execute a notification job with a webhook
+     *     consumes:
+     *       - application/json
+     *     parameters:
+     *       - in: body
+     *         name: webhookConfig
+     *         schema:
+     *           $ref: '#/definitions/Webhook'
+     *     responses:
+     *       200:
+     *         description: If the notification was sent successfully.
+     *       400:
+     *         description: if webhook configuration was malformed
+     */
     app.post('/notification/webhook', this.determineAuth(), this.postWebhook)
+
+    /**
+     * @swagger
+     * /notification/slack:
+     *   post:
+     *     description: Execute a notification job with posting to slack
+     *     consumes:
+     *       - application/json
+     *     parameters:
+     *       - in: body
+     *         name: slackConfig
+     *         schema:
+     *           $ref: '#/definitions/Slack'
+     *     responses:
+     *       200:
+     *         description: If the notification was sent successfully.
+     *       400:
+     *         description: if slack configuration was malformed
+     */
     app.post('/notification/slack', this.determineAuth(), this.postSlack)
+
+
+    /**
+     * @swagger
+     * /notification/fcm:
+     *   post:
+     *     description: Execute a notification job with Firebase Cloud Messaging (e.g push to mobile devices)
+     *     consumes:
+     *       - application/json
+     *     parameters:
+     *       - in: body
+     *         name: firebaseConfig
+     *         schema:
+     *           $ref: '#/definitions/Firebase'
+     *     responses:
+     *       200:
+     *         description: If the notification was sent successfully.
+     *       400:
+     *         description: if firebase configuration was malformed
+     */
     app.post('/notification/fcm', this.determineAuth(), this.postFirebase)
   }
 
