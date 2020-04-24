@@ -1,6 +1,6 @@
-#########################################################
+#-------------------------------------------------------#
 # First stage: image to build and test Java application #
-#########################################################
+#-------------------------------------------------------#
 FROM adoptopenjdk/openjdk13-openj9:alpine-slim as builder
 
 WORKDIR /builder
@@ -13,9 +13,9 @@ COPY gradlew /builder/gradlew
 RUN ./gradlew assemble
 RUN ./gradlew test
 
-#########################################################
+#-------------------------------------------------------#
 # Second stage: image to run Java application           #
-#########################################################
+#-------------------------------------------------------#
 FROM adoptopenjdk/openjdk13-openj9:alpine-slim
 
 RUN mkdir /app
