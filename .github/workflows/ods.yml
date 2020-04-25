@@ -7,7 +7,7 @@ jobs:
   # ----------------- ADAPTER SERVICE --------------------
 
   adapter-build:
-    name: Adapter Build & Test & Publish
+    name: Adapter Build & Test
     runs-on: ubuntu-latest
 
     steps:
@@ -40,7 +40,7 @@ jobs:
   # ----------------- CORE SERVICE --------------------
 
   core-build:
-    name: CORE Build & Test & Publish
+    name: CORE Build & Test
     runs-on: ubuntu-latest
 
     steps:
@@ -73,7 +73,7 @@ jobs:
   # ----------------- SCHEDULER SERVICE --------------------
 
   scheduler-build:
-    name: Scheduler Build & Test & Publish
+    name: Scheduler Build & Test
     runs-on: ubuntu-latest
 
     steps:
@@ -106,7 +106,7 @@ jobs:
   # ----------------- STORAGE SERVICE --------------------
 
   storage-build:
-    name: Storage Build & Test & Publish
+    name: Storage Build & Test
     runs-on: ubuntu-latest
 
     steps:
@@ -151,7 +151,7 @@ jobs:
   # ----------------- TRANSFORMATION SERVICE --------------------
 
   transformation-build:
-    name: Transformation Build & Test & Publish
+    name: Transformation Build & Test
     runs-on: ubuntu-latest
 
     steps:
@@ -184,7 +184,7 @@ jobs:
   # ----------------- UI SERVICE --------------------
 
   ui-build:
-    name: UI Build & Test & Publish
+    name: UI Build & Test
     runs-on: ubuntu-latest
 
     steps:
@@ -257,7 +257,7 @@ jobs:
   # ----------------- Registry Upload --------------------
 
   adapter_upload:
-    name: Upload Adapter to Docker Registry
+    name: Adapter Publish
     runs-on: ubuntu-latest
 
     needs: [systemtest]
@@ -291,7 +291,7 @@ jobs:
           docker push $IMAGE_ID:latest
 
   core_upload:
-    name: Upload Core to Docker Registry
+    name: Core Publish
     runs-on: ubuntu-latest
 
     needs: [systemtest]
@@ -324,7 +324,7 @@ jobs:
           docker push $IMAGE_ID:latest
 
   scheduler_upload:
-    name: Upload Scheduler to Docker Registry
+    name: Scheduler Publish
     runs-on: ubuntu-latest
 
     needs: [systemtest]
@@ -357,7 +357,7 @@ jobs:
           docker push $IMAGE_ID:latest
 
   storage_upload:
-    name: Upload Storage to Docker Registry
+    name: Storage Publish
     runs-on: ubuntu-latest
 
     needs: [systemtest]
@@ -403,7 +403,7 @@ jobs:
           docker push $IMAGE_ID_LIQUIBASE:latest
 
   transformation_upload:
-    name: Upload Transformation to Docker Registry
+    name: Transformation Publish
     runs-on: ubuntu-latest
 
     needs: [systemtest]
@@ -436,7 +436,7 @@ jobs:
           docker push $IMAGE_ID:latest
 
   ui_upload:
-    name: Upload Adapter to Docker Registry
+    name: UI Publish
     runs-on: ubuntu-latest
 
     needs: [systemtest]
