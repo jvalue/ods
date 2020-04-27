@@ -1,8 +1,13 @@
 FROM node:lts-alpine
 
-COPY ./src ./src
+# copy package*.json files first to make best use of docker layer caching
 COPY ./package*.json ./
+
+# run npm clean slate install
 RUN npm ci
+
+# copy rest of the files
+COPY ./src ./src
 
 EXPOSE 8080
 
