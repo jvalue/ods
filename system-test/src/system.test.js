@@ -86,7 +86,7 @@ describe('System-Test', () => {
     console.log(`[Test 1] Successfully created pipeline ${pipelineId} for datasource ${datasourceId}`)
 
     // Wait for webhook notification
-    const webhookResponse = await checkWebhook('test1', 1000)
+    const webhookResponse = await checkWebhook('test1', 2000)
     console.log(`[Test 1] Webhook response body: ${JSON.stringify(webhookResponse.body)}`)
     expect(webhookResponse.body.location).toEqual(STORAGE_DOCKER + '/' + pipelineId)
     expect(webhookResponse.body.timestamp).toBeDefined()
