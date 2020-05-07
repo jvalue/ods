@@ -1,11 +1,17 @@
 ![Open Data Service (ODS)](https://github.com/jvalue/open-data-service/workflows/Open%20Data%20Service%20(ODS)/badge.svg)
+[![on gitter](https://badges.gitter.im/jvalue-ods/community.svg)](https://gitter.im/jvalue-ods/community)
 
 # Open Data Service (ODS)
 
 The Open Data Service (ODS) is an application which can collect data from multiple sources simulataneously, process that data and then offer an improved (or "cleaned") version to its clients.
 *We aim to establish the ODS as **the** go-to place for using Open Data!*
 
+## Getting Help
+
+You can chat with us via our [gitter channel](https://gitter.im/jvalue-ods/community). Issues can be reported via [GitHub](https://github.com/jvalue/open-data-service/issues).
+
 ## Contributing
+
 Contributions are welcome. Thank you if you want to contribute to the development of the ODS.
 There are several ways of contributing to the ODS:
 - by implementing new features
