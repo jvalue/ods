@@ -31,26 +31,61 @@ TBD
 |---|---|---|---|---|
 | *base_url*/ | GET | - | text | Get health status |
 | *base_url*/version | GET | - | text | Get service version |
-| *base_url*/job | POST | transformationRequest | jobResult | Trigger execution |
+| *base_url*/webhook | POST | webhookRequest | - | Trigger webhook |
+| *base_url*/slack | POST | slackRequest | - | Trigger slack notification |
+| *base_url*/fcm | POST | firebaseRequest | - | Trigger firebase notification |
 
 
-### TransformationRequest
+### WebhookRequest
 ```
 {
-  "data": object | undefined
-  "dataLocation": object | undefined
-  "func": string [VALID JS CODE]
+  "pipelineName": string,
+  "pipelineId": string,
+  "data": object,
+  "dataLocation": string,
+  "condition": string,
+  "type": "WEBHOOK"
+  "url": string
 }
 ```
 
-### JobResult 
+### SlackRequest
 ```
 {
-  "data"?: object,
-  "error"?: object,
-  "stats": stats
+  "pipelineName": string,
+  "pipelineId": string,
+  "data": object,
+  "dataLocation": string,
+  "condition": string,
+  "notificationType": "SLACK",
+  "workspaceId": string,
+  "channelId": string,
+  "secret": string
 }
 ```
+
+### FirebaseRequest
+```
+{
+  "pipelineName": string,
+  "pipelineId": string,
+  "data": object,
+  "dataLocation": string,
+  "condition": string,
+  "notificationType": "FCM",
+  "projectId": string,
+  "clientEmail": string,
+  "privateKey": string,
+  "topic": string
+}
+```
+
+
+### Slack notification walkthrough
+* Create a slack app for your slack channel and enable activations as discribed [here](https://api.slack.com/messaging/webhooks).
+* Determine your apps' incoming webhook url at the slack [dashboard](https://api.slack.com/apps).
+* POST a slackRequest under the endpoint ```/notification/slack```. The workspaceId, channelId and secret fields can be taken from the parts of the incoming webhook url (separated by '/', in the given order).
+* Go to your configured channel and be stunned by the magic. 
 
 ## License
 
