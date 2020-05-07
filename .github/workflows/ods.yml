@@ -19,11 +19,11 @@ jobs:
 
       - name: Integration-test
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml build adapter-it
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d adapter
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from adapter-it adapter-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml build adapter-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d adapter
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from adapter-it adapter-it
           docker-compose logs
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml down
 
       - name: Save Docker image as artifact
         run: |
@@ -52,11 +52,11 @@ jobs:
 
       - name: Integration-test
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml build core-it
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d core
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from core-it core-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml build core-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d core
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from core-it core-it
           docker-compose logs
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml down
 
       - name: Save Docker image as artifact
         run: |
@@ -85,11 +85,11 @@ jobs:
 
       - name: Integration-test
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml build scheduler-it
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d scheduler
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from scheduler-it scheduler-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml build scheduler-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d scheduler
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from scheduler-it scheduler-it
           docker-compose logs
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml down
 
       - name: Save Docker image as artifact
         run: |
@@ -119,13 +119,13 @@ jobs:
 
       - name: Integration-test
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml build storage-it
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d storage-db
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up storage-db-liquibase
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d storage
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from storage-it storage-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml build storage-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d storage-db
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up storage-db-liquibase
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d storage
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from storage-it storage-it
           docker-compose logs
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml down
 
       - name: Save Docker image as artifact
         run: |
@@ -163,11 +163,11 @@ jobs:
 
       - name: Integration-test
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml build transformation-it
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d transformation
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from transformation-it transformation-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml build transformation-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d transformation
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from transformation-it transformation-it
           docker-compose logs
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml down
 
       - name: Save Docker image as artifact
         run: |

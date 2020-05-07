@@ -1,5 +1,6 @@
 # Overwrite service configurations of global docker-compose.yml
-# for the CI ENVIRONMENT, including MOCKS and INTEGRATION TESTS
+# for INTEGRATION TESTING, including MOCKS and INTEGRATION TEST SERVICES.
+# can be used locally or in the CI ENVIRONMENT.
 
 version: '3.7'
 
