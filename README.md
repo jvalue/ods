@@ -1,5 +1,5 @@
 ![Open Data Service (ODS)](https://github.com/jvalue/open-data-service/workflows/Open%20Data%20Service%20(ODS)/badge.svg)
-[![on gitter](https://badges.gitter.im/jvalue-ods/community.svg)](https://gitter.im/jvalue-ods/community)
+[![on gitter](https://badges.gitter.im/jvalue-ods/community.svg)](https://gitter.im/jvalue-ods/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 # Open Data Service (ODS)
 
