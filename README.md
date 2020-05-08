@@ -6,9 +6,9 @@
 The Open Data Service (ODS) is an application which can collect data from multiple sources simulataneously, process that data and then offer an improved (or "cleaned") version to its clients.
 *We aim to establish the ODS as **the** go-to place for using Open Data!*
 
-## Getting Help
+## Contact us
 
-You can chat with us via our [gitter channel](https://gitter.im/jvalue-ods/community). Issues can be reported via [GitHub](https://github.com/jvalue/open-data-service/issues).
+If you have any questions or would like to contact us, you can easily reach us via [gitter channel](https://gitter.im/jvalue-ods/community). Issues can be reported via [GitHub](https://github.com/jvalue/open-data-service/issues).
 
 ## Contributing
 
