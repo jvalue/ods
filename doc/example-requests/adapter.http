@@ -9,6 +9,7 @@ GET {{baseURL}}/formats  HTTP/1.1
 Content-Type: application/json
 
 ### Perform Data Import JSON
+## DEPRECATED
 POST {{baseURL}}/dataImport  HTTP/1.1
 Content-Type: application/json
 
@@ -27,6 +28,7 @@ Content-Type: application/json
 }
 
 ### Perform Data Import CSV
+## DEPRECATED
 POST {{baseURL}}/dataImport  HTTP/1.1
 Content-Type: application/json;charset=UTF-8
 
@@ -61,7 +63,7 @@ Content-Type: application/json
 ### Get all datasources
 GET {{baseURL}}/datasources  HTTP/1.1
 
-### Create a datasources
+### Create a datasource
 POST {{baseURL}}/datasources  HTTP/1.1
 Content-Type: application/json
 
@@ -80,9 +82,10 @@ Content-Type: application/json
   "trigger": {
     "firstExecution": "2018-10-07T01:32:00.123Z",
     "periodic": true,
-    "interval": 1000
+    "interval": 60000
   },
   "metadata": {
+    "displayName": "pegelOnline",
     "author": "icke",
     "license": "none"
   }
