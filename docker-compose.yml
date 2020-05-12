@@ -1,7 +1,7 @@
 # Service configurations for all microservices
 # has to be specified by environment files
 
-version: '2.0'
+version: '3.7'
 
 
 volumes:
