@@ -16,7 +16,11 @@ const MOCK_TRANSFORMATION_PORT = process.env.MOCK_TRANSFORMATION_PORT || 8083
 const MOCK_TRANSFORMATION_HOST = process.env.MOCK_TRANSFORMATION_HOST || 'localhost'
 const MOCK_TRANSFORMATION_URL = 'http://' + MOCK_TRANSFORMATION_HOST + ':' + MOCK_TRANSFORMATION_PORT
 
-const MOCK_STORAGE_PORT = process.env.MOCK_STORAGE_PORT || 8084
+const MOCK_NOTIFICATION_PORT = process.env.MOCK_NOTIFICATION_PORT || 8084
+const MOCK_NOTIFICATION_HOST = process.env.MOCK_NOTIFICATION_HOST || 'localhost'
+const MOCK_NOTIFICATION_URL = 'http://' + MOCK_NOTIFICATION_HOST + ':' + MOCK_NOTIFICATION_PORT
+
+const MOCK_STORAGE_PORT = process.env.MOCK_STORAGE_PORT || 8085
 const MOCK_STORAGE_HOST = process.env.MOCK_STORAGE_HOST || 'localhost'
 const MOCK_STORAGE_URL = 'http://' + MOCK_STORAGE_HOST + ':' + MOCK_STORAGE_PORT
 
@@ -54,7 +58,7 @@ describe('Scheduler', () => {
   })
 
   test('GET /jobs', async () => {
-    await sleep(2000) // wait until scheduler does sync
+    await sleep(4000) // wait until scheduler does sync
     const response = await request(URL).get('/jobs')
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('application/json')
@@ -74,7 +78,7 @@ describe('Scheduler', () => {
 
   test('Pipeline triggers correct notifications', async () => {
     await sleep(10000) // pipeline should have been executing until now!
-    const triggered = await request(MOCK_TRANSFORMATION_URL).get('/notification/webhook/nordstream')
+    const triggered = await request(MOCK_NOTIFICATION_URL).get('/webhook/nordstream')
     expect(triggered.status).toEqual(200)
     expect(triggered.body).toEqual(
       {
@@ -87,7 +91,7 @@ describe('Scheduler', () => {
         url: 'should-also-be-triggered'
       })
 
-    const alsoTriggered = await request(MOCK_TRANSFORMATION_URL).get('/notification/slack/nordstream')
+    const alsoTriggered = await request(MOCK_NOTIFICATION_URL).get('/slack/nordstream')
     expect(alsoTriggered.status).toEqual(200)
     expect(alsoTriggered.type).toEqual('application/json')
     expect(alsoTriggered.body).toEqual(
@@ -100,7 +104,7 @@ describe('Scheduler', () => {
         dataLocation: MOCK_STORAGE_URL + '/125',
         url: 'should-be-triggered'
       })
-    const alsoTriggeredToo = await request(MOCK_TRANSFORMATION_URL).get('/notification/fcm/nordstream')
+    const alsoTriggeredToo = await request(MOCK_NOTIFICATION_URL).get('/fcm/nordstream')
     expect(alsoTriggeredToo.status).toEqual(200)
     expect(alsoTriggeredToo.type).toEqual('application/json')
     expect(alsoTriggeredToo.body).toEqual(
