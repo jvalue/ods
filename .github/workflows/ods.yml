@@ -272,6 +272,10 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: transformation-artifact
+      - name: Download notification artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: notification-artifact
 
       - name: Run Systemtest
         run: |
@@ -280,8 +284,9 @@ jobs:
           docker load -i ./storage-artifact/storage_postgrest.tar
           docker load -i ./liquibase-artifact/storage_liquibase.tar
           docker load -i ./transformation-artifact/transformation.tar
+          docker load -i ./notification-artifact/notification.tar
           docker load -i ./adapter-artifact/adapter.tar
-          docker-compose -f docker-compose.yml up -d core adapter transformation storage scheduler
+          docker-compose -f docker-compose.yml up -d core adapter transformation notification storage scheduler
           docker-compose -f docker-compose.yml -f docker-compose.st.yml up --exit-code-from system-test system-test
           docker-compose logs
           docker-compose -f docker-compose.yml -f docker-compose.st.yml down
