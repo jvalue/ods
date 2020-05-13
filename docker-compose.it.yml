@@ -55,8 +55,6 @@ services:
   transformation:
     environment:
       AUTH_ENABLED: 'false'
-      MOCK_RECEIVER_HOST: transformation-it
-      MOCK_RECEIVER_PORT: 8081
 
   transformation-it:
     image: open-data-service/ods-main/transformation-it
@@ -64,24 +62,23 @@ services:
       context: ./transformation/integration-test/
     environment:
       TRANSFORMATION_API: http://transformation:8080
-      MOCK_RECEIVER_HOST: transformation-it
-      MOCK_RECEIVER_PORT: 8081
 
    # ----------------- NOTIFICATION SERVICE (PORTS #TODO) --------------------
-  transformation:
+  notification:
     environment:
       AUTH_ENABLED: 'false'
       MOCK_RECEIVER_HOST: notification-it
       MOCK_RECEIVER_PORT: 8081
 
-  transformation-it:
+  notification-it:
     image: open-data-service/ods-main/notification-it
     build:
       context: ./notification/integration-test/
     environment:
-      TRANSFORMATION_API: http://notification:8080
+      NOTIFICATION_API: http://notification:8080
       MOCK_RECEIVER_HOST: notification-it
       MOCK_RECEIVER_PORT: 8081
+
   # ----------------- CORE SERVICE (PORTS 9600 - 9599) --------------------
   core-it:
     image: open-data-service/ods-main/core-it
