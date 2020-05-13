@@ -6,8 +6,9 @@
     "mock:core": "node src/mock.core.js",
     "mock:adapter": "node src/mock.adapter.js",
     "mock:transformation": "node src/mock.transformation.js",
+    "mock:notification": "node src/mock.notification.js",
     "mock:storage": "node src/mock.storage.js",
-    "pretest": "(npm run mock:adapter &) && (npm run mock:core &) && (npm run mock:transformation &) && (npm run mock:storage &)",
+    "pretest": "(npm run mock:adapter &) && (npm run mock:core &) && (npm run mock:transformation &) && (npm run mock:notification &) && (npm run mock:storage &)",
     "test": "jest",
     "posttest": "killall node",
     "lint": "./node_modules/.bin/eslint src --ext .js --fix"

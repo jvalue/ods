@@ -42,9 +42,10 @@ describe('Scheduler', () => {
     console.log('Waiting for service with URL: ' + MOCK_CORE_URL)
     console.log('Waiting for service with URL: ' + MOCK_ADAPTER_URL)
     console.log('Waiting for service with URL: ' + MOCK_TRANSFORMATION_URL)
+    console.log('Waiting for service with URL: ' + MOCK_NOTIFICATION_URL)
     console.log('Waiting for service with URL: ' + MOCK_STORAGE_URL)
     await waitOn(
-      { resources: [MOCK_CORE_URL, MOCK_ADAPTER_URL, MOCK_TRANSFORMATION_URL, MOCK_STORAGE_URL], timeout: 50000 })
+      { resources: [MOCK_CORE_URL, MOCK_ADAPTER_URL, MOCK_TRANSFORMATION_URL, MOCK_NOTIFICATION_URL, MOCK_STORAGE_URL], timeout: 50000 })
     console.log('Waiting for service with URL: ' + pingUrl)
     await waitOn({ resources: [pingUrl], timeout: 50000 })
   }, 60000)

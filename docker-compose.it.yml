@@ -25,7 +25,8 @@ services:
       CONFIG_SERVICE_URL: http://scheduler-it:8081
       ADAPTER_SERVICE_URL: http://scheduler-it:8082
       TRANSFORMATION_SERVICE_URL: http://scheduler-it:8083
-      STORAGE_SERVICE_URL: http://scheduler-it:8084
+      NOTIFICATION_SERVICE_URL: http://scheduler-it:8084
+      STORAGE_SERVICE_URL: http://scheduler-it:8085
 
   scheduler-it:
     image: open-data-service/ods-main/scheduler-it
@@ -42,7 +43,7 @@ services:
       MOCK_NOTIFICATION_HOST: scheduler-it
       MOCK_NOTIFICATION_PORT: 8084
       MOCK_STORAGE_HOST: scheduler-it
-      MOCK_STORAGE_PORT: 8084
+      MOCK_STORAGE_PORT: 8085
 
 
   # ----------------- STORAGE SERVICE (PORTS 9400 - 9499) --------------------

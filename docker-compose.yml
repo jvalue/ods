@@ -218,7 +218,7 @@ services:
 # -------------------- RABBIT-MQ -------------------------------------------
   rabbitmq:
     image:  rabbitmq:latest
-    environment: 
+    environment:
       RABBITMQ_ERLANG_COOKIE: 'S0m3_R4bBi7_C0ok13'
       RABBITMQ_DEFAULT_USER: 'rabbit_adm'
       RABBITMQ_DEFAULT_PASS: 'R4bb!7_4DM_p4SS'
@@ -231,4 +231,3 @@ services:
     ports:
       - "15672:15672"
       - "5672:5672"
-      

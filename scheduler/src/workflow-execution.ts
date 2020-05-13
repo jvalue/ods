@@ -41,6 +41,7 @@ async function retryableExecution<T1, T2>(func: (arg: T1) => Promise<T2>, args: 
       return await func(args)
     } catch (e) {
       console.log(`${description} failed!`)
+      console.log(e.message)
       retryNumber++
     }
   }
