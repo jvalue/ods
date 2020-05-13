@@ -2,7 +2,7 @@ const Koa = require('koa')
 const Router = require('koa-router')
 const bodyParser = require('koa-bodyparser')
 
-const PORT = process.env.MOCK_STORAGE_PORT || 8084
+const PORT = process.env.MOCK_STORAGE_PORT || 8085
 
 const router = new Router()
 const app = new Koa()

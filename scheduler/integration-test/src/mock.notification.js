@@ -18,34 +18,34 @@ router.get('/', async ctx => {
   ctx.body = 'ok'
 })
 
-router.post('/notification/webhook', async ctx => {
+router.post('/webhook', async ctx => {
   webhooks.set(ctx.request.body.pipelineName, ctx.request.body)
   ctx.status = 200
 })
 
-router.post('/notification/slack', async ctx => {
+router.post('/slack', async ctx => {
   slacks.set(ctx.request.body.pipelineName, ctx.request.body)
   ctx.status = 200
 })
 
-router.post('/notification/fcm', async ctx => {
+router.post('/fcm', async ctx => {
   firebases.set(ctx.request.body.pipelineName, ctx.request.body)
   ctx.status = 200
 })
 
-router.get('/notification/webhook/:url', async ctx => {
+router.get('/webhook/:url', async ctx => {
   const url = ctx.params.url
   ctx.type = 'application/json'
   ctx.body = webhooks.get(url)
 })
 
-router.get('/notification/slack/:url', async ctx => {
+router.get('/slack/:url', async ctx => {
   const url = ctx.params.url
   ctx.type = 'application/json'
   ctx.body = slacks.get(url)
 })
 
-router.get('/notification/fcm/:url', async ctx => {
+router.get('/fcm/:url', async ctx => {
   const url = ctx.params.url
   ctx.type = 'application/json'
   ctx.body = firebases.get(url)
