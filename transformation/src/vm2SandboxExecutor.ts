@@ -42,26 +42,4 @@ export default class VM2SandboxExecutor implements SandboxExecutor {
       return { data: undefined, error: convertRuntimeError(err, FUNCTION_WRAP_PREFIX_LENGTH) }
     }
   }
-
-  evaluate (expression: string, data: object): boolean {
-    const wrapper =
-      'f=function(data){' +
-      'return ' +
-      expression +
-      '};f(' +
-      JSON.stringify(data) +
-      ');'
-
-    let result = false
-    try {
-      result = this.vm.run(wrapper)
-    } catch (err) {
-      // console.error('Malformed expression received: ' + expression, err)
-    }
-    if (typeof result !== 'boolean') {
-      return false
-    } else {
-      return result
-    }
-  }
 }

@@ -1,4 +1,4 @@
-import { VM, VMScript } from 'vm2'
+import { VM } from 'vm2'
 
 import SandboxExecutor from './interfaces/sandboxExecutor';
 
@@ -13,7 +13,6 @@ export default class VM2SandboxExecutor implements SandboxExecutor {
       timeout
     })
   }
-
 
   evaluate (expression: string, data: object): boolean {
     const wrapper =
