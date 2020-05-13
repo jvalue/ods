@@ -1,6 +1,7 @@
 import * as AdapterClient from './clients/adapter-client'
 import * as CoreClient from './clients/core-client'
 import * as TransformationClient from './clients/transformation-client'
+import * as NotificationClient from './clients/notification-client'
 import * as StorageClient from './clients/storage-client'
 
 import DatasourceConfig from './interfaces/datasource-config'
@@ -93,7 +94,7 @@ async function executeNotification (args: { notificationConfig: NotificationConf
   notificationConfig.dataLocation = args.dataLocation
   notificationConfig.pipelineId = pipelineConfig.id
   notificationConfig.pipelineName = pipelineConfig.metadata.displayName
-  await TransformationClient.executeNotification(notificationConfig)
+  await NotificationClient.executeNotification(notificationConfig)
   console.log(`Successfully delivered notification request to transformation-service for ${pipelineConfig.id}`)
 }
 
