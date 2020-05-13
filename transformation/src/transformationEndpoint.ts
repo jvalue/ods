@@ -7,7 +7,6 @@ import TransformationService from './interfaces/transformationService'
 import TransformationRequest from './interfaces/transformationRequest'
 import { Server } from 'http'
 import JobResult from './interfaces/jobResult'
-import { Firebase, NotificationRequest, Slack, Webhook } from './interfaces/notificationRequest'
 import axios from 'axios'
 
 export class TransformationEndpoint {
@@ -38,9 +37,6 @@ export class TransformationEndpoint {
     this.app.get('/', this.getHealthCheck)
     this.app.get('/version', this.getVersion)
     this.app.post('/job', this.determineAuth(), this.postJob)
-    this.app.post('/notification/webhook', this.determineAuth(), this.postWebhook)
-    this.app.post('/notification/slack', this.determineAuth(), this.postSlack)
-    this.app.post('/notification/fcm', this.determineAuth(), this.postFirebase)
   }
 
   listen (): Server {
@@ -92,44 +88,6 @@ export class TransformationEndpoint {
     res.end()
   }
 
-  postWebhook = async (req: Request, res: Response): Promise<void> => {
-    const webhookRequest = req.body as Webhook
-    if (!TransformationEndpoint.isValidWebhookRequest(webhookRequest)) {
-      res.status(400).send('Malformed webhook request.')
-    }
-    await this.processNotificationRequest(webhookRequest, res)
-  }
-
-  postSlack = async (req: Request, res: Response): Promise<void> => {
-    const slackRequest = req.body as Slack
-    if (!TransformationEndpoint.isValidSlackRequest(slackRequest)) {
-      res.status(400).send('Malformed webhook request.')
-    }
-    await this.processNotificationRequest(slackRequest, res)
-  }
-
-  postFirebase = async (req: Request, res: Response): Promise<void> => {
-    const firebaseRequest = req.body as Firebase
-    if (!TransformationEndpoint.isValidFirebaseRequest(firebaseRequest)) {
-      res.status(400).send('Malformed webhook request.')
-    }
-    await this.processNotificationRequest(firebaseRequest, res)
-  }
-
-  processNotificationRequest = async (notification: NotificationRequest, res: Response): Promise<void> => {
-    try {
-      await this.transformationService.handleNotification(notification)
-    } catch (e) {
-      if (e instanceof Error) {
-        console.log(`Notification handling failed. Nested cause is: ${e.name}: ${e.message}`)
-        res.status(500).send(`Notification handling failed. Nested cause is: ${e.name}: ${e.message}`)
-      } else {
-        res.status(500).send()
-      }
-    }
-    res.status(200).send()
-  }
-
   determineAuth = (): express.RequestHandler | [] => {
     if (this.keycloak !== undefined) {
       return this.keycloak.protect()
@@ -138,22 +96,5 @@ export class TransformationEndpoint {
     }
   }
 
-  private static isValidWebhookRequest (obj: Webhook): boolean {
-    return this.isValidNotificationRequest(obj) &&
-      obj.type === 'WEBHOOK'
-  }
 
-  private static isValidSlackRequest (obj: Slack): boolean {
-    return this.isValidNotificationRequest(obj) &&
-      obj.type === 'SLACK' && !!obj.channelId && !!obj.secret && !!obj.workspaceId
-  }
-
-  private static isValidFirebaseRequest (obj: Firebase): boolean {
-    return this.isValidNotificationRequest(obj) &&
-      obj.type === 'FCM' && !!obj.clientEmail && !!obj.privateKey && !!obj.projectId && !!obj.topic
-  }
-
-  private static isValidNotificationRequest (obj: NotificationRequest): boolean {
-    return !!obj.data && !!obj.pipelineName && !!obj.pipelineId && !!obj.condition && !!obj.dataLocation
-  }
 }
