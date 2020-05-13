@@ -1,6 +1,5 @@
 import axios from 'axios'
 
-
 import ExecutionResult from './interfaces/executionResult'
 import JobResult from './interfaces/jobResult'
 import Stats from './interfaces/stats'

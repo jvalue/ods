@@ -90,7 +90,7 @@ return test(data);`, {})
       expect(error.stacktrace[1]).toBe('    at main (main:5:8)')
     })
 
-    it ('should timeout on a while(true) loop', () => {
+    it('should timeout on a while(true) loop', () => {
       const { data, error } = e.execute('while(true) {}\nreturn data;', {})
       expect(data).toEqual(undefined)
       if (error === undefined) {
@@ -102,12 +102,12 @@ return test(data);`, {})
       expect(error.position).toBe(0)
     })
 
-    it ('should not be possible to require things', () => {
+    it('should not be possible to require things', () => {
       const { data, error } = e.execute(`
         const fs = require('fs');
         fs.stat('/tmp/something', () => {});
         return data;`,
-        { a: 1 })
+      { a: 1 })
       expect(data).toEqual(undefined)
       if (error === undefined) {
         fail()
@@ -117,10 +117,10 @@ return test(data);`, {})
       expect(error.message).toBe('ReferenceError: require is not defined')
     })
 
-    it ('no access to process', () => {
+    it('no access to process', () => {
       const { data, error } = e.execute(`
         process.exit(0);`,
-        { a: 1 })
+      { a: 1 })
       expect(data).toEqual(undefined)
       if (error === undefined) {
         fail()
@@ -130,9 +130,9 @@ return test(data);`, {})
       expect(error.message).toBe('ReferenceError: process is not defined')
     })
 
-    it ('no breakout using console', () => {
-      const result = e.execute(`console.constructor.constructor('return process')(); return data;`,{ a: 1 })
-      const { data, error } = result;
+    it('no breakout using console', () => {
+      const result = e.execute('console.constructor.constructor(\'return process\')(); return data;', { a: 1 })
+      const { data, error } = result
       expect(data).toEqual(undefined)
       if (error === undefined) {
         fail()
