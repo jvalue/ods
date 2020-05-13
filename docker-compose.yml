@@ -22,6 +22,7 @@ services:
         CORE_SERVICE_URL: /api/core
         STORAGE_SERVICE_URL: /api/storage
         TRANSFORMATION_SERVICE_URL: /api/transformation
+        NOTIFICATION_SERVICE_URL: /api/notification
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-ui.rule=PathPrefix(`/`)"
@@ -88,6 +89,7 @@ services:
       CONFIG_SERVICE_URL: http://core:8080
       ADAPTER_SERVICE_URL: http://adapter:8080
       TRANSFORMATION_SERVICE_URL: http://transformation:8080
+      NOTIFICATION_SERVICE_URL: http://notification:8080
       STORAGE_SERVICE_URL: http://storage:3000
       INITIAL_CONNECTION_RETRIES: 20
       INITIAL_CONNECTION_RETRY_BACKOFF: 5000
@@ -161,6 +163,21 @@ services:
       - "traefik.http.services.transformation.loadbalancer.server.port=8080"
 
 
+  # ----------------- NOTIFICATION SERVICE (/notification) --------------------
+  notification:
+    image: ${DOCKER_REGISTRY}/notification
+    build:
+      context: ./notification/
+    environment:
+      AUTH_ENABLED: 'false' #TODO: turn to true as soon as it works!
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.to-notification.rule=PathPrefix(`/api/notification`)"
+      - "traefik.http.routers.to-notification.middlewares=notification-stripprefix@docker"
+      - "traefik.http.middlewares.notification-stripprefix.stripprefix.prefixes=/api/notification"
+      - "traefik.http.services.notification.loadbalancer.server.port=8080"
+
+
   # ----------------- CORE SERVICE (/core) --------------------
   core:
     image: ${DOCKER_REGISTRY}/core
@@ -197,3 +214,21 @@ services:
       - "9001:8080"   # The Web UI (enabled by --api)
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
+
+# -------------------- RABBIT-MQ -------------------------------------------
+  rabbitmq:
+    image:  rabbitmq:latest
+    environment: 
+      RABBITMQ_ERLANG_COOKIE: 'S0m3_R4bBi7_C0ok13'
+      RABBITMQ_DEFAULT_USER: 'rabbit_adm'
+      RABBITMQ_DEFAULT_PASS: 'R4bb!7_4DM_p4SS'
+    labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.to-amqp.rule=PathPrefix(`/api/amqp`)"
+        - "traefik.http.routers.to-amqp.middlewares=amqp-stripprefix@docker"
+        - "traefik.http.middlewares.amqp-stripprefix.stripprefix.prefixes=/api/amqp"
+        - "traefik.http.services.amqp.loadbalancer.server.port=8080"
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+      
