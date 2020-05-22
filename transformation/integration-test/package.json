@@ -4,7 +4,6 @@
   "description": "Transformation Service Integration-Tests",
   "scripts": {
     "test": "jest",
-    "posttest": "killall node",
     "lint": "./node_modules/.bin/eslint src --ext .js --fix"
   },
   "devDependencies": {
