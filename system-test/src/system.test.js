@@ -481,7 +481,7 @@ function generateDataSourceConfig (sourceLocation, periodic, interval = 5000) {
       parameters: {}
     },
     trigger: {
-      firstExecution: new Date(Date.now() + 2000),
+      firstExecution: new Date(Date.now() + 3000),
       periodic,
       interval
     },
