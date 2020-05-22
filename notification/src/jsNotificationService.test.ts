@@ -77,7 +77,13 @@ describe('JSTransformationService', () => {
         url: 'callback'
       }
 
-      await notificationService.handleNotification(notificationRequest)
+
+      try {
+        await notificationService.handleNotification(notificationRequest)
+        fail()
+      } catch (err) {
+        expect(err.message).toEqual("Malformed expression received: asdfa;\n Error message: ReferenceError: asdfa is not defined")
+      }
 
       expect(post).not.toHaveBeenCalled()
     })
