@@ -5,7 +5,7 @@ const waitOn = require('wait-on')
 const URL = process.env.TRANSFORMATION_API || 'http://localhost:8080'
 
 describe('Transformation Service', () => {
-  console.log('Trnasformation-Service URL= ' + URL)
+  console.log('Transformation-Service URL= ' + URL)
 
   beforeAll(async () => {
     const pingUrl = URL + '/'
