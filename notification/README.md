@@ -2,7 +2,7 @@
 
 ## Getting started
 
-Make sure they keyclone container is running (see `../auth`).
+Make sure they Keycloak container is running (see `../auth`).
 
 ## Build
 
