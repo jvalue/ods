@@ -3,7 +3,6 @@ package org.jvalue.ods.adapterservice.datasource.model;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.springframework.format.datetime.DateFormatter;
 
 import java.io.File;
