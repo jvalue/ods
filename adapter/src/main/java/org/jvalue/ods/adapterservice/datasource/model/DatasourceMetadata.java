@@ -87,7 +87,6 @@ public class DatasourceMetadata {
         DatasourceMetadata that = (DatasourceMetadata) o;
         return Objects.equals(author, that.author) &&
                 Objects.equals(license, that.license) &&
-                Objects.equals(creationTimestamp, that.creationTimestamp) &&
                 Objects.equals(displayName, that.displayName) &&
                 Objects.equals(description, that.description);
     }
