@@ -27,10 +27,10 @@ export default class VM2SandboxExecutor implements SandboxExecutor {
     try {
       result = this.vm.run(wrapper)
     } catch (err) {
-      // console.error('Malformed expression received: ' + expression, err)
+      throw new Error(`Malformed expression received: ${expression}\n Error message: ${err}`)
     }
     if (typeof result !== 'boolean') {
-      return false
+      throw new Error(`Malformed expression received: ${expression}\n Error message: Expected result to be a boolean expression!`)
     } else {
       return result
     }
