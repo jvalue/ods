@@ -28,13 +28,16 @@ describe('VM2SandboxExecutor', () => {
       expect(result).toBe(false)
     })
 
-    it('should evaluate nonboolean expression', () => {
+    it('should error on nonboolean expression', () => {
       const object = { value1: 5 }
       const expression = '1 + 1'
 
-      const result = e.evaluate(expression, object)
-
-      expect(result).toBe(false)
+      try {
+        e.evaluate(expression, object)
+        fail()
+      } catch (err) {
+        expect(err.message).toEqual("Malformed expression received: 1 + 1\n Error message: Expected result to be a boolean expression!")
+      }
     })
 
     it('should evaluate complex expression', () => {
