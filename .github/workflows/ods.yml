@@ -489,7 +489,7 @@ jobs:
 
       - name: Load Docker Image from artifact
         run: |
-          docker load -i ./notification-artifact/notifcation.tar
+          docker load -i ./notification-artifact/notification.tar
 
       - name: Notifcation Push to registry
         run: |
