@@ -485,11 +485,11 @@ jobs:
       - name: Download notifcation artifact
         uses: actions/download-artifact@v1
         with:
-          name: notifcation-artifact
+          name: notification-artifact
 
       - name: Load Docker Image from artifact
         run: |
-          docker load -i ./notifcation-artifact/notifcation.tar
+          docker load -i ./notification-artifact/notifcation.tar
 
       - name: Notifcation Push to registry
         run: |
