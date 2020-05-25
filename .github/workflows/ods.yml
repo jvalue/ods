@@ -495,7 +495,7 @@ jobs:
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
 
-          IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/notifcation
+          IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/notification
 
           NOTIFICATION_VERSION=$(grep "version" ./notification/package.json | awk '{print $2}' | sed 's/[,"]//g')
 
