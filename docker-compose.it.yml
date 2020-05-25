@@ -25,7 +25,8 @@ services:
       CONFIG_SERVICE_URL: http://scheduler-it:8081
       ADAPTER_SERVICE_URL: http://scheduler-it:8082
       TRANSFORMATION_SERVICE_URL: http://scheduler-it:8083
-      STORAGE_SERVICE_URL: http://scheduler-it:8084
+      NOTIFICATION_SERVICE_URL: http://scheduler-it:8084
+      STORAGE_SERVICE_URL: http://scheduler-it:8085
 
   scheduler-it:
     image: open-data-service/ods-main/scheduler-it
@@ -39,8 +40,10 @@ services:
       MOCK_ADAPTER_PORT: 8082
       MOCK_TRANSFORMATION_HOST: scheduler-it
       MOCK_TRANSFORMATION_PORT: 8083
+      MOCK_NOTIFICATION_HOST: scheduler-it
+      MOCK_NOTIFICATION_PORT: 8084
       MOCK_STORAGE_HOST: scheduler-it
-      MOCK_STORAGE_PORT: 8084
+      MOCK_STORAGE_PORT: 8085
 
 
   # ----------------- STORAGE SERVICE (PORTS 9400 - 9499) --------------------
@@ -55,8 +58,6 @@ services:
   transformation:
     environment:
       AUTH_ENABLED: 'false'
-      MOCK_RECEIVER_HOST: transformation-it
-      MOCK_RECEIVER_PORT: 8081
 
   transformation-it:
     image: open-data-service/ods-main/transformation-it
@@ -64,7 +65,21 @@ services:
       context: ./transformation/integration-test/
     environment:
       TRANSFORMATION_API: http://transformation:8080
-      MOCK_RECEIVER_HOST: transformation-it
+
+   # ----------------- NOTIFICATION SERVICE (PORTS #TODO) --------------------
+  notification:
+    environment:
+      AUTH_ENABLED: 'false'
+      MOCK_RECEIVER_HOST: notification-it
+      MOCK_RECEIVER_PORT: 8081
+
+  notification-it:
+    image: open-data-service/ods-main/notification-it
+    build:
+      context: ./notification/integration-test/
+    environment:
+      NOTIFICATION_API: http://notification:8080
+      MOCK_RECEIVER_HOST: notification-it
       MOCK_RECEIVER_PORT: 8081
 
   # ----------------- CORE SERVICE (PORTS 9600 - 9599) --------------------
