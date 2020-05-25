@@ -90,7 +90,7 @@ return test(data);`, {})
       expect(error.stacktrace[1]).toBe('    at main (main:5:8)')
     })
 
-    it ('should timeout on a while(true) loop', () => {
+    it('should timeout on a while(true) loop', () => {
       const { data, error } = e.execute('while(true) {}\nreturn data;', {})
       expect(data).toEqual(undefined)
       if (error === undefined) {
@@ -102,12 +102,12 @@ return test(data);`, {})
       expect(error.position).toBe(0)
     })
 
-    it ('should not be possible to require things', () => {
+    it('should not be possible to require things', () => {
       const { data, error } = e.execute(`
         const fs = require('fs');
         fs.stat('/tmp/something', () => {});
         return data;`,
-        { a: 1 })
+      { a: 1 })
       expect(data).toEqual(undefined)
       if (error === undefined) {
         fail()
@@ -117,10 +117,10 @@ return test(data);`, {})
       expect(error.message).toBe('ReferenceError: require is not defined')
     })
 
-    it ('no access to process', () => {
+    it('no access to process', () => {
       const { data, error } = e.execute(`
         process.exit(0);`,
-        { a: 1 })
+      { a: 1 })
       expect(data).toEqual(undefined)
       if (error === undefined) {
         fail()
@@ -130,9 +130,9 @@ return test(data);`, {})
       expect(error.message).toBe('ReferenceError: process is not defined')
     })
 
-    it ('no breakout using console', () => {
-      const result = e.execute(`console.constructor.constructor('return process')(); return data;`,{ a: 1 })
-      const { data, error } = result;
+    it('no breakout using console', () => {
+      const result = e.execute('console.constructor.constructor(\'return process\')(); return data;', { a: 1 })
+      const { data, error } = result
       expect(data).toEqual(undefined)
       if (error === undefined) {
         fail()
@@ -140,44 +140,6 @@ return test(data);`, {})
       }
       expect(error.name).toBe('ReferenceError')
       expect(error.message).toBe('ReferenceError: process is not defined')
-    })
-  })
-
-  describe('evaluate', () => {
-    it('should evaluate simple true expression', () => {
-      const object = { value1: 5 }
-      const expression = 'data.value1 === 5'
-
-      const result = e.evaluate(expression, object)
-
-      expect(result).toBe(true)
-    })
-
-    it('should evaluate simple false expression', () => {
-      const object = { value1: 5 }
-      const expression = 'data.value1 === 6'
-
-      const result = e.evaluate(expression, object)
-
-      expect(result).toBe(false)
-    })
-
-    it('should evaluate nonboolean expression', () => {
-      const object = { value1: 5 }
-      const expression = '1 + 1'
-
-      const result = e.evaluate(expression, object)
-
-      expect(result).toBe(false)
-    })
-
-    it('should evaluate complex expression', () => {
-      const object = { value1: 5, value2: 10, stringval: 'text' }
-      const expression = 'data.value1 + data.value2 === 15 && data.stringval === "text"'
-
-      const result = e.evaluate(expression, object)
-
-      expect(result).toBe(true)
     })
   })
 })

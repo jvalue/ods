@@ -3,6 +3,7 @@ import * as PipelineExecution from './workflow-execution'
 import * as AdapterClient from './clients/adapter-client'
 import * as StorageClient from './clients/storage-client'
 import * as TransformationClient from './clients/transformation-client'
+import * as NotificationClient from './clients/notification-client'
 import * as CoreClient from './clients/core-client'
 import PipelineConfig from './interfaces/pipeline-config'
 import NotificationConfig from './interfaces/notification-config'
@@ -13,13 +14,14 @@ import TransformationConfig from './interfaces/transformation-config'
 jest.mock('./clients/adapter-client')
 jest.mock('./clients/storage-client')
 jest.mock('./clients/transformation-client')
+jest.mock('./clients/notification-client')
 jest.mock('./clients/core-client')
 
 const mockGetPipelinesForDatasource = CoreClient.getCachedPipelinesByDatasourceId as jest.Mock
 const mockExecuteAdapter = AdapterClient.executeAdapter as jest.Mock
 const mockExecuteTransformation = TransformationClient.executeTransformation as jest.Mock
 const mockExecuteStorage = StorageClient.executeStorage as jest.Mock
-const mockExecuteNotification = TransformationClient.executeNotification as jest.Mock
+const mockExecuteNotification = NotificationClient.executeNotification as jest.Mock
 
 const adapterResponse: AdapterResponse = {
   id: 42,

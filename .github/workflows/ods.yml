@@ -180,6 +180,38 @@ jobs:
           name: transformation-artifact
           path: transformation.tar
 
+    # ----------------- NOTIFICATION SERVICE --------------------
+
+  notification-build:
+    name: Notification Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build and Test
+        run: |
+          docker-compose -f docker-compose.yml build notification
+
+      - name: Integration-test
+        run: |
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml build notification-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d notification
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from notification-it notification-it
+          docker-compose logs
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml down
+
+      - name: Save Docker image as artifact
+        run: |
+          IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/notification
+          docker save $IMAGE_ID > notification.tar
+
+      - name: Upload Docker image as artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: notification-artifact
+          path: notification.tar
+
 
   # ----------------- UI SERVICE --------------------
 
@@ -240,6 +272,10 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: transformation-artifact
+      - name: Download notification artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: notification-artifact
 
       - name: Run Systemtest
         run: |
@@ -248,8 +284,9 @@ jobs:
           docker load -i ./storage-artifact/storage_postgrest.tar
           docker load -i ./liquibase-artifact/storage_liquibase.tar
           docker load -i ./transformation-artifact/transformation.tar
+          docker load -i ./notification-artifact/notification.tar
           docker load -i ./adapter-artifact/adapter.tar
-          docker-compose -f docker-compose.yml up -d core adapter transformation storage scheduler
+          docker-compose -f docker-compose.yml up -d core adapter transformation notification storage scheduler
           docker-compose -f docker-compose.yml -f docker-compose.st.yml up --exit-code-from system-test system-test
           docker-compose logs
           docker-compose -f docker-compose.yml -f docker-compose.st.yml down
@@ -433,6 +470,39 @@ jobs:
           docker tag $IMAGE_ID $IMAGE_ID:latest
 
           docker push $IMAGE_ID:$TRANSFORMATION_VERSION
+          docker push $IMAGE_ID:latest
+
+  notifcation_upload:
+    name: Notifcation Publish
+    runs-on: ubuntu-latest
+
+    needs: [systemtest]
+
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download notifcation artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: notifcation-artifact
+
+      - name: Load Docker Image from artifact
+        run: |
+          docker load -i ./notifcation-artifact/notifcation.tar
+
+      - name: Notifcation Push to registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
+          IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/notifcation
+
+          NOTIFICATION_VERSION=$(grep "version" ./notification/package.json | awk '{print $2}' | sed 's/[,"]//g')
+
+          docker tag $IMAGE_ID $IMAGE_ID:$NOTIFICATION_VERSION
+          docker tag $IMAGE_ID $IMAGE_ID:latest
+
+          docker push $IMAGE_ID:$NOTIFICATION_VERSION
           docker push $IMAGE_ID:latest
 
   ui_upload:

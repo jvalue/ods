@@ -2,7 +2,7 @@ import axios from 'axios'
 
 import PipelineConfig from '../interfaces/pipeline-config'
 
-const STORAGE_SERVICE_URL = process.env.STORAGE_SERVICE_URL || 'http://localhost:8084'
+const STORAGE_SERVICE_URL = process.env.STORAGE_SERVICE_URL || 'http://localhost:8085'
 
 export async function executeStorage (pipelineConfig: PipelineConfig, data: object): Promise<string> {
   const dataLocation: string = getDataRequestUrl(pipelineConfig.id)
