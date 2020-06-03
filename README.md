@@ -26,11 +26,13 @@ In order to fetch and transform data from an external source, the ODS needs to b
 The configuration consists of two steps: 
 * A Data Source needs to be configured, i.e. URI, protocol, data format has to be specified as well as a trigger.
 * For each Data Source, one or more Pipelines can be configured to further process the data and possibly trigger a notification. 
+  
 This configuration can be done programmatically via the API or browser based with a gui.
 
 ## Using the API
 There is a collection of examples for entire configurations in our [example request collection](doc/example-requests/).
-Additionally there is is swagger API documentation available under `localhost:9400`. 
+
+Additionally, there is is swagger API documentation available under `localhost:9400`. 
 The swagger integration is currently in progress, so there is only documentation for the storage service available.
 
 ## Using the UI
