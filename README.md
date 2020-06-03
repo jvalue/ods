@@ -56,6 +56,7 @@ We use the microservice architectural style in this project. The microservices a
 | [Scheduler](scheduler/README.md) | orchestrates the executions of Pipelines |
 | [Adapter-Service](adapter/README.md) | fetches data from Sources and imports them into the system |
 | [Transformation-Service](transformation/README.md) | execution of data transformations |
+| [Notification-Service](notification/README.md) | execution of notifications |
 | [Storage-Service](storage/README.md) | stores data of Pipelines and offers an API for querying |
 | [Auth-Service](auth/README.md) | user authentication and authorization |
 | Reverse-Proxy | communication of UI with backend microservices independent from deployment environment |
