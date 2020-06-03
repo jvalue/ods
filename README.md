@@ -13,21 +13,19 @@ To execute the ODS locally, run `docker-compose up` in the project root director
 - [Open Data Service (ODS)](#open-data-service-ods)
 - [Quick Start](#quick-start)
 - [Table of Contents](#table-of-contents)
-  - [Contact us](#contact-us)
-  - [Contributing](#contributing)
-  - [Development](#development)
-  - [Project Structure](#project-structure)
-  - [Run](#run)
-  - [Getting Started](#getting-started)
-    - [Using API](#using-api)
-    - [Using the UI](#using-the-ui)
+- [Contact us](#contact-us)
+- [Contributing](#contributing)
+- [Development](#development)
+- [Project Structure](#project-structure)
+- [Using the API](#using-the-api)
+- [Using the UI](#using-the-ui)
 - [License](#license)
 
-## Contact us
+# Contact us
 
 If you have any questions or would like to contact us, you can easily reach us via [gitter channel](https://gitter.im/jvalue-ods/community). Issues can be reported via [GitHub](https://github.com/jvalue/open-data-service/issues).
 
-## Contributing
+# Contributing
 
 Contributions are welcome. Thank you if you want to contribute to the development of the ODS.
 There are several ways of contributing to the ODS:
@@ -40,11 +38,11 @@ There are several ways of contributing to the ODS:
 You can check our [issue board](https://github.com/jvalue/open-data-service/issues) for open issues to work on or to create new issues with a feature request, bug report, etc.
 Before we can merge your contribution you need to accept your Contributor License Agreement (CLA), integrated into the Pull Request process.
 
-## Development
+# Development
 Please provide your contribution in the form of a pull request. We will then check your pull request as soon as possible and give you feedback if necessary.
 Please make sure that commits related to an issue (e.g. closing an issue) contains the issue number in the commit message.
 
-## Project Structure
+# Project Structure
 
 We use the microservice architectural style in this project. The microservices are located in the sub-directories and communicate at runtime over network with each other. Each Microservice has its own defined interface that has to be used by other services, direct access to the database of other microservices is strictly prohibited. In production, each microservice can be multiplied in order to scale the system (except the scheduler at the moment).
 
@@ -52,7 +50,7 @@ We use the microservice architectural style in this project. The microservices a
 
 | Microservice | Description |
 |----|----|
-| Web-Client / UI | easy and seamless configuration of Sources, Pipelines |
+| [Web-Client / UI](ui/README.md) | easy and seamless configuration of Sources, Pipelines | 
 | Core-Service | stores and manages configurations for Pipelines |
 | Scheduler | orchestrates the executions of Pipelines |
 | Adapter-Service | fetches data from Sources and imports them into the system |
@@ -61,20 +59,13 @@ We use the microservice architectural style in this project. The microservices a
 | Auth-Service | user authentication and authorization |
 | Reverse-Proxy | communication of UI with backend microservices indenepdent from deployment environment |
 
+Further information about the microservices can be obtained via the respective README files
 
-## Run
-
-Use `docker-compose up` to run all microservices in production mode.
-
-Use `docker-compose -f docker-compose.yml -f docker-compose.ci.yml up <services>` for starting up specific services in development mode and intergation tests. See sub-directories for futher information.
-
-## Getting Started
-
-### Using API
+# Using the API
 
 You can finde example requests for the api under [doc/example-requests](./doc/example-requests).
 
-### Using the UI
+# Using the UI
 
 The easiest way to use the ODS is via the UI. If you started the ODS with docker-compose you can access the UI under `http://localhost:9000/`.  If you click on any of the pages you need to authenticate yourself to proceed to the pages. For that, you can use the already existing user `demo` with the password `demo`.
 
