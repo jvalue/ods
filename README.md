@@ -6,6 +6,23 @@
 The Open Data Service (ODS) is an application which can collect data from multiple sources simulataneously, process that data and then offer an improved (or "cleaned") version to its clients.
 *We aim to establish the ODS as **the** go-to place for using Open Data!*
 
+# Quick Start
+To execute the ODS locally, run `docker-compose up` in the project root directory. The ui will be accessible under `localhost:9000`.  
+
+# Table of Contents
+- [Open Data Service (ODS)](#open-data-service-ods)
+- [Quick Start](#quick-start)
+- [Table of Contents](#table-of-contents)
+  - [Contact us](#contact-us)
+  - [Contributing](#contributing)
+  - [Development](#development)
+  - [Project Structure](#project-structure)
+  - [Run](#run)
+  - [Getting Started](#getting-started)
+    - [Using API](#using-api)
+    - [Using the UI](#using-the-ui)
+- [License](#license)
+
 ## Contact us
 
 If you have any questions or would like to contact us, you can easily reach us via [gitter channel](https://gitter.im/jvalue-ods/community). Issues can be reported via [GitHub](https://github.com/jvalue/open-data-service/issues).
