@@ -15,7 +15,6 @@ To execute the ODS locally, run `docker-compose up` in the project root director
 - [Table of Contents](#table-of-contents)
 - [Contact us](#contact-us)
 - [Contributing](#contributing)
-- [Development](#development)
 - [Project Structure](#project-structure)
 - [Configure the ODS](#configure-the-ods)
 - [Using the API](#using-the-api)
@@ -39,7 +38,6 @@ There are several ways of contributing to the ODS:
 You can check our [issue board](https://github.com/jvalue/open-data-service/issues) for open issues to work on or to create new issues with a feature request, bug report, etc.
 Before we can merge your contribution you need to accept your Contributor License Agreement (CLA), integrated into the Pull Request process.
 
-# Development
 Please provide your contribution in the form of a pull request. We will then check your pull request as soon as possible and give you feedback if necessary.
 Please make sure that commits related to an issue (e.g. closing an issue) contains the issue number in the commit message.
 
