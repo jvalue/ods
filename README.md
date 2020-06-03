@@ -13,54 +13,13 @@ To execute the ODS locally, run `docker-compose up` in the project root director
 - [Open Data Service (ODS)](#open-data-service-ods)
 - [Quick Start](#quick-start)
 - [Table of Contents](#table-of-contents)
-- [Contact us](#contact-us)
-- [Contributing](#contributing)
-- [Project Structure](#project-structure)
 - [Configure the ODS](#configure-the-ods)
-- [Using the API](#using-the-api)
-- [Using the UI](#using-the-ui)
+  - [Using the API](#using-the-api)
+  - [Using the UI](#using-the-ui)
+- [Project Structure](#project-structure)
+- [Contributing](#contributing)
+- [Contact us](#contact-us)
 - [License](#license)
-
-# Contact us
-
-If you have any questions or would like to contact us, you can easily reach us via [gitter channel](https://gitter.im/jvalue-ods/community). Issues can be reported via [GitHub](https://github.com/jvalue/open-data-service/issues).
-
-# Contributing
-
-Contributions are welcome. Thank you if you want to contribute to the development of the ODS.
-There are several ways of contributing to the ODS:
-- by implementing new features
-- by fixing known bugs
-- by filing bug reports
-- by improving the documentation
-- by discussing use cases that are not covered yet
-
-You can check our [issue board](https://github.com/jvalue/open-data-service/issues) for open issues to work on or to create new issues with a feature request, bug report, etc.
-Before we can merge your contribution you need to accept your Contributor License Agreement (CLA), integrated into the Pull Request process.
-
-Please provide your contribution in the form of a pull request. We will then check your pull request as soon as possible and give you feedback if necessary.
-Please make sure that commits related to an issue (e.g. closing an issue) contains the issue number in the commit message.
-
-# Project Structure
-
-We use the microservice architectural style in this project. The microservices are located in the sub-directories and communicate at runtime over network with each other. Each Microservice has its own defined interface that has to be used by other services, direct access to the database of other microservices is strictly prohibited. In production, each microservice can be multiplied in order to scale the system (except the scheduler at the moment).
-
-![Microservice Architecture](https://github.com/jvalue/open-data-service/blob/master/doc/service_arch.png)
-
-| Microservice | Description |
-|----|----|
-| [Web-Client / UI](ui/README.md) | easy and seamless configuration of Sources, Pipelines | 
-| [Core-Service](core/README.md) | stores and manages configurations for Pipelines |
-| [Scheduler](scheduler/README.md) | orchestrates the executions of Pipelines |
-| [Adapter-Service](adapter/README.md) | fetches data from Sources and imports them into the system |
-| [Transformation-Service](transformation/README.md) | execution of data transformations |
-| [Notification-Service](notification/README.md) | execution of notifications |
-| [Storage-Service](storage/README.md) | stores data of Pipelines and offers an API for querying |
-| [Auth-Service](auth/README.md) | user authentication and authorization |
-| Reverse-Proxy | communication of UI with backend microservices independent from deployment environment |
-
-Further information about a specific microservice can be found in the respective README file. 
-Examples showing the API of each microservice are in the [example request](doc/example-requests) directory.
 
 # Configure the ODS 
 In order to fetch and transform data from an external source, the ODS needs to be configured.
@@ -69,12 +28,12 @@ The configuration consists of two steps:
 * For each Data Source, one or more Pipelines can be configured to further process the data and possibly trigger a notification. 
 This configuration can be done programmatically via the API or browser based with a gui.
 
-# Using the API
+## Using the API
 There is a collection of examples for entire configurations in our [example request collection](doc/example-requests/).
 Additionally there is is swagger API documentation available under `localhost:9400`. 
 The swagger integration is currently in progress, so there is only documentation for the storage service available.
 
-# Using the UI
+## Using the UI
 
 The easiest way to use the ODS is via the UI. If you started the ODS with docker-compose you can access the UI under `http://localhost:9000/`.  If you click on any of the pages you need to authenticate yourself to proceed to the pages. For that, you can use the already existing user `demo` with the password `demo`.
 
@@ -121,6 +80,49 @@ By clicking on the `Data` button inside the table you see the collected data by 
 
 In this storage view, you see all data sets for the related pipeline. On top of this list, a static link shows the URL to fetch the data with a REST client.
 Each data entry in the list can be expanded to see the fetched data and additional meta-data.
+
+
+
+# Project Structure
+
+We use the microservice architectural style in this project. The microservices are located in the sub-directories and communicate at runtime over network with each other. Each Microservice has its own defined interface that has to be used by other services, direct access to the database of other microservices is strictly prohibited. In production, each microservice can be multiplied in order to scale the system (except the scheduler at the moment).
+
+![Microservice Architecture](https://github.com/jvalue/open-data-service/blob/master/doc/service_arch.png)
+
+| Microservice | Description |
+|----|----|
+| [Web-Client / UI](ui/README.md) | easy and seamless configuration of Sources, Pipelines | 
+| [Core-Service](core/README.md) | stores and manages configurations for Pipelines |
+| [Scheduler](scheduler/README.md) | orchestrates the executions of Pipelines |
+| [Adapter-Service](adapter/README.md) | fetches data from Sources and imports them into the system |
+| [Transformation-Service](transformation/README.md) | execution of data transformations |
+| [Notification-Service](notification/README.md) | execution of notifications |
+| [Storage-Service](storage/README.md) | stores data of Pipelines and offers an API for querying |
+| [Auth-Service](auth/README.md) | user authentication and authorization |
+| Reverse-Proxy | communication of UI with backend microservices independent from deployment environment |
+
+Further information about a specific microservice can be found in the respective README file. 
+Examples showing the API of each microservice are in the [example request](doc/example-requests) directory.
+
+# Contributing
+
+Contributions are welcome. Thank you if you want to contribute to the development of the ODS.
+There are several ways of contributing to the ODS:
+- by implementing new features
+- by fixing known bugs
+- by filing bug reports
+- by improving the documentation
+- by discussing use cases that are not covered yet
+
+You can check our [issue board](https://github.com/jvalue/open-data-service/issues) for open issues to work on or to create new issues with a feature request, bug report, etc.
+Before we can merge your contribution you need to accept your Contributor License Agreement (CLA), integrated into the Pull Request process.
+
+Please provide your contribution in the form of a pull request. We will then check your pull request as soon as possible and give you feedback if necessary.
+Please make sure that commits related to an issue (e.g. closing an issue) contains the issue number in the commit message.
+
+# Contact us
+
+If you have any questions or would like to contact us, you can easily reach us via [gitter channel](https://gitter.im/jvalue-ods/community). Issues can be reported via [GitHub](https://github.com/jvalue/open-data-service/issues).
 
 # License
 
