@@ -17,6 +17,7 @@ To execute the ODS locally, run `docker-compose up` in the project root director
 - [Contributing](#contributing)
 - [Development](#development)
 - [Project Structure](#project-structure)
+- [Configure the ODS](#configure-the-ods)
 - [Using the API](#using-the-api)
 - [Using the UI](#using-the-ui)
 - [License](#license)
@@ -59,11 +60,20 @@ We use the microservice architectural style in this project. The microservices a
 | [Auth-Service](auth/README.md) | user authentication and authorization |
 | Reverse-Proxy | communication of UI with backend microservices independent from deployment environment |
 
-Further information about the microservices can be obtained via the respective README files
+Further information about a specific microservice can be found in the respective README file. 
+Examples showing the API of each microservice are in the [example request](doc/example-requests) directory.
+
+# Configure the ODS 
+In order to fetch and transform data from an external source, the ODS needs to be configured.
+The configuration consists of two steps: 
+* A Data Source needs to be configured, i.e. URI, protocol, data format has to be specified as well as a trigger.
+* For each Data Source, one or more Pipelines can be configured to further process the data and possibly trigger a notification. 
+This configuration can be done programmatically via the API or browser based with a gui.
 
 # Using the API
-
-You can finde example requests for the api under [doc/example-requests](./doc/example-requests).
+There is a collection of examples for entire configurations in our [example request collection](doc/example-requests/).
+Additionally there is is swagger API documentation available under `localhost:9400`. 
+The swagger integration is currently in progress, so there is only documentation for the storage service available.
 
 # Using the UI
 
