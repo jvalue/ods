@@ -41,40 +41,51 @@ The easiest way to use the ODS is via the UI. If you started the ODS with docker
 
 To demonstrate the ODS we will create a new pipeline to fetch water level data for German rivers and have a look at the collected data.
 
-First, go to the Pipelines page and click on `Create new Pipeline`.
-The configuration workflow for creating a new pipeline is divided into the following five steps.
+First, go to the Datasources page and click on `Create new Datasource`. 
+The configuration workflow for creating a new Datasource is divided into the following four steps.
 
-![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/01_overview.jpg)
+![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/ds01_overview.jpg)
 
-Step 1: Name the pipeline.
+Step 1: Name the datasource.
 
-![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/02_pipeline_name.jpg)
+![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/ds02_name.jpg)
 
 Step 2: Configure an adapter to crawl the data. You can use the prefilled example settings.
 
-![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/03_adapter_config.jpg)
+![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/ds03_adapter.jpg)
 
-Step 3: In this step, you can manipulate the raw data to fit your needs by writing JavaScript code.
-The `data` object represents the incoming raw data.
-In this example, the attribute `test` is added to the `data` object before returning it.
+Step 3: Describe additional meta-data for the data source.
 
-![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/04_transformation.jpg)
+![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/ds04_meta-data.jpg)
 
-Step 4: Describe additional meta-data.
-
-![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/05_meta-data.jpg)
-
-Step 5: Configure the interval of how often the data should be fetched.
+Step 4: Configure the interval of how often the data should be fetched.
 If `Periodic execution` is disabled the data will be fetched only once.
 With the two sliders, you can choose the interval duration.
 The first execution of the pipeline will be after the `Time of First Execution` plus the interval time.
 Please choose 1 minute, so that you don't have to wait too long for the first data to arrive.
 
-![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/06_trigger.jpg)
+![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/ds05_trigger.jpg)
 
-The configuration of the pipeline is now finished. In the overview, you see now the recently created pipeline.
+The configuration of the data source is now finished. In the overview, you see the recently created data source.
+Rembember the id on the left to the Datasource name, we will need it in the next step.
+![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/ds06_overview.jpg)
 
-![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/07_overview_with_data.jpg)
+
+To obtain the data fetched by this data source, you need to create a pipeline operating on the data source we just created.
+Go to the Pipelines page and click on `Create new Pipeline`. The creation process consists of three steps.
+![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/p01_overview.jpg)
+
+Step 1: Choose a name for the pipeline and fill in the datasource id of the datasource we just created.
+![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/p02_name.jpg)
+
+Step 2: In this step, you can manipulate the raw data to fit your needs by writing JavaScript code. The data object represents the incoming raw data. In this example, the attribute test is added to the data object before returning it.
+![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/p03_transformation.jpg)
+
+Step 3: Describe additional meta-data for the pipeline.
+![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/p04_meta-data.jpg)
+
+After clicking on the save button, you should see the recently created pipeline. 
+![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/p05_overview.jpg)
 
 By clicking on the `Data` button inside the table you see the collected data by the pipeline.
 
