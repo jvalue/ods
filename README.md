@@ -50,14 +50,14 @@ We use the microservice architectural style in this project. The microservices a
 
 | Microservice | Description |
 |----|----|
-| [Web-Client / UI](ui) | easy and seamless configuration of Sources, Pipelines | 
-| Core-Service | stores and manages configurations for Pipelines |
-| Scheduler | orchestrates the executions of Pipelines |
-| Adapter-Service | fetches data from Sources and imports them into the system |
-| Transformation-Service | execution of data transformations |
-| Storage-Service | stores data of Pipelines and offers an API for querying |
-| Auth-Service | user authentication and authorization |
-| Reverse-Proxy | communication of UI with backend microservices indenepdent from deployment environment |
+| [Web-Client / UI](ui/README.md) | easy and seamless configuration of Sources, Pipelines | 
+| [Core-Service](core/README.md) | stores and manages configurations for Pipelines |
+| [Scheduler](scheduler/README.md) | orchestrates the executions of Pipelines |
+| [Adapter-Service](adapter/README.md) | fetches data from Sources and imports them into the system |
+| [Transformation-Service](transformation/README.md) | execution of data transformations |
+| [Storage-Service](storage/README.md) | stores data of Pipelines and offers an API for querying |
+| [Auth-Service](auth/README.md) | user authentication and authorization |
+| Reverse-Proxy | communication of UI with backend microservices independent from deployment environment |
 
 Further information about the microservices can be obtained via the respective README files
 
