@@ -50,7 +50,7 @@ We use the microservice architectural style in this project. The microservices a
 
 | Microservice | Description |
 |----|----|
-| [Web-Client / UI](ui/README.md) | easy and seamless configuration of Sources, Pipelines | 
+| [Web-Client / UI](ui) | easy and seamless configuration of Sources, Pipelines | 
 | Core-Service | stores and manages configurations for Pipelines |
 | Scheduler | orchestrates the executions of Pipelines |
 | Adapter-Service | fetches data from Sources and imports them into the system |
