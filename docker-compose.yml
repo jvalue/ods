@@ -217,7 +217,7 @@ services:
 
 # -------------------- RABBIT-MQ -------------------------------------------
   rabbitmq:
-    image:  rabbitmq:latest
+    image:  rabbitmq:management
     environment:
       RABBITMQ_ERLANG_COOKIE: 'S0m3_R4bBi7_C0ok13'
       RABBITMQ_DEFAULT_USER: 'rabbit_adm'
