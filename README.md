@@ -139,7 +139,7 @@ If you have any questions or would like to contact us, you can easily reach us v
 
 # License
 
-Copyright 2019 Friedrich-Alexander Universität Erlangen-Nürnberg
+Copyright 2019-2020 Friedrich-Alexander Universität Erlangen-Nürnberg
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
