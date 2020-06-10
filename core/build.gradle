@@ -1,12 +1,11 @@
 plugins {
 	id 'org.springframework.boot' version '2.3.0.RELEASE'
+  id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 	id 'java'
 }
 
 def props = new Properties()
 file('src/main/resources/application.properties').withInputStream {props.load(it)}
-
-apply plugin: 'io.spring.dependency-management'
 
 group = 'org.jvalue.ods'
 version = props.getProperty("app.version")
