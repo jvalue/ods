@@ -10,7 +10,7 @@ apply plugin: 'io.spring.dependency-management'
 
 group = 'org.jvalue.ods'
 version = props.getProperty("app.version")
-sourceCompatibility = '13'
+sourceCompatibility = '14'
 
 repositories {
 	mavenCentral()
