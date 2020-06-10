@@ -16,7 +16,7 @@ RUN ./gradlew test
 #-------------------------------------------------------#
 # Second stage: image to run Java application           #
 #-------------------------------------------------------#
-FROM adoptopenjdk/openjdk13-openj9:alpine-slim
+FROM adoptopenjdk/openjdk14-openj9:alpine-slim
 
 RUN mkdir /app
 WORKDIR /app
