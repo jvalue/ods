@@ -3,10 +3,7 @@
   "version": "1.0.0",
   "description": "Transformation Service Integration-Tests",
   "scripts": {
-    "mock:receiver": "node src/mock.receiver.js",
-    "pretest": "npm run mock:receiver &",
     "test": "jest",
-    "posttest": "killall node",
     "lint": "./node_modules/.bin/eslint src --ext .js --fix"
   },
   "devDependencies": {
@@ -24,9 +21,6 @@
     "testEnvironment": "node"
   },
   "dependencies": {
-    "koa": "^2.11.0",
-    "koa-bodyparser": "^4.3.0",
-    "koa-router": "^8.0.8",
     "wait-on": "^4.0.2"
   }
 }

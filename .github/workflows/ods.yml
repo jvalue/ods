@@ -1,13 +1,13 @@
 name: Open Data Service (ODS)
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
 
   # ----------------- ADAPTER SERVICE --------------------
 
   adapter-build:
-    name: Adapter Build & Test & Publish
+    name: Adapter Build & Test
     runs-on: ubuntu-latest
 
     steps:
@@ -19,26 +19,11 @@ jobs:
 
       - name: Integration-test
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml build adapter-it
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d adapter
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from adapter-it adapter-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml build adapter-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d adapter
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from adapter-it adapter-it
           docker-compose logs
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
-
-      - name: Push to registry
-        if: github.ref == 'refs/heads/master'
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
-
-          IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/adapter
-
-          ADAPTER_VERSION=$(grep "version =" ./adapter/src/main/resources/application.properties | awk '{print $3}' | sed "s/[']//g")
-
-          docker tag $IMAGE_ID $IMAGE_ID:$ADAPTER_VERSION
-          docker tag $IMAGE_ID $IMAGE_ID:latest
-
-          docker push $IMAGE_ID:$ADAPTER_VERSION
-          docker push $IMAGE_ID:latest
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml down
 
       - name: Save Docker image as artifact
         run: |
@@ -55,7 +40,7 @@ jobs:
   # ----------------- CORE SERVICE --------------------
 
   core-build:
-    name: CORE Build & Test & Publish
+    name: CORE Build & Test
     runs-on: ubuntu-latest
 
     steps:
@@ -67,26 +52,11 @@ jobs:
 
       - name: Integration-test
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml build core-it
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d core
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from core-it core-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml build core-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d core
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from core-it core-it
           docker-compose logs
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
-
-      - name: Push to registry
-        if: github.ref == 'refs/heads/master'
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
-
-          CORE_VERSION=$(grep "version =" ./core/src/main/resources/application.properties | awk '{print $3}' | sed "s/[']//g")
-
-          IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/core
-
-          docker tag $IMAGE_ID $IMAGE_ID:$CORE_VERSION
-          docker tag $IMAGE_ID $IMAGE_ID:latest
-
-          docker push $IMAGE_ID:$CORE_VERSION
-          docker push $IMAGE_ID:latest
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml down
 
       - name: Save Docker image as artifact
         run: |
@@ -103,7 +73,7 @@ jobs:
   # ----------------- SCHEDULER SERVICE --------------------
 
   scheduler-build:
-    name: Scheduler Build & Test & Publish
+    name: Scheduler Build & Test
     runs-on: ubuntu-latest
 
     steps:
@@ -115,26 +85,11 @@ jobs:
 
       - name: Integration-test
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml build scheduler-it
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d scheduler
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from scheduler-it scheduler-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml build scheduler-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d scheduler
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from scheduler-it scheduler-it
           docker-compose logs
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
-
-      - name: Push to registry
-        if: github.ref == 'refs/heads/master'
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
-
-          IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/scheduler
-
-          SCHEDULER_VERSION=$(grep "version" scheduler/package.json | awk '{print $2}' | sed 's/[,"]//g')
-
-          docker tag $IMAGE_ID $IMAGE_ID:$SCHEDULER_VERSION
-          docker tag $IMAGE_ID $IMAGE_ID:latest
-
-          docker push $IMAGE_ID:$SCHEDULER_VERSION
-          docker push $IMAGE_ID:latest
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml down
 
       - name: Save Docker image as artifact
         run: |
@@ -151,7 +106,7 @@ jobs:
   # ----------------- STORAGE SERVICE --------------------
 
   storage-build:
-    name: Storage Build & Test & Publish
+    name: Storage Build & Test
     runs-on: ubuntu-latest
 
     steps:
@@ -164,35 +119,13 @@ jobs:
 
       - name: Integration-test
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml build storage-it
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d storage-db
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up storage-db-liquibase
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d storage
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from storage-it storage-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml build storage-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d storage-db
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up storage-db-liquibase
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d storage
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from storage-it storage-it
           docker-compose logs
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
-
-      - name: Push to registry
-        if: github.ref == 'refs/heads/master'
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
-
-          STORAGE_VERSION=$(grep "VERSION" ./storage/version.txt | awk '{print $3}' | sed 's/[,"]//g')
-
-          IMAGE_ID_STORAGE=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/storage
-          IMAGE_ID_LIQUIBASE=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/storage-db-liquibase
-
-          docker tag $IMAGE_ID_STORAGE $IMAGE_ID_STORAGE:$STORAGE_VERSION
-          docker tag $IMAGE_ID_STORAGE $IMAGE_ID_STORAGE:latest
-
-          docker tag $IMAGE_ID_LIQUIBASE $IMAGE_ID_LIQUIBASE:$STORAGE_VERSION
-          docker tag $IMAGE_ID_LIQUIBASE $IMAGE_ID_LIQUIBASE:latest
-
-          docker push $IMAGE_ID_STORAGE:$STORAGE_VERSION
-          docker push $IMAGE_ID_STORAGE:latest
-
-          docker push $IMAGE_ID_LIQUIBASE:$STORAGE_VERSION
-          docker push $IMAGE_ID_LIQUIBASE:latest
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml down
 
       - name: Save Docker image as artifact
         run: |
@@ -218,7 +151,7 @@ jobs:
   # ----------------- TRANSFORMATION SERVICE --------------------
 
   transformation-build:
-    name: Transformation Build & Test & Publish
+    name: Transformation Build & Test
     runs-on: ubuntu-latest
 
     steps:
@@ -230,26 +163,11 @@ jobs:
 
       - name: Integration-test
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml build transformation-it
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d transformation
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from transformation-it transformation-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml build transformation-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d transformation
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from transformation-it transformation-it
           docker-compose logs
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml down
-
-      - name: Push to registry
-        if: github.ref == 'refs/heads/master'
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
-
-          IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/transformation
-
-          TRANSFORMATION_VERSION=$(grep "version" ./transformation/package.json | awk '{print $2}' | sed 's/[,"]//g')
-
-          docker tag $IMAGE_ID $IMAGE_ID:$TRANSFORMATION_VERSION
-          docker tag $IMAGE_ID $IMAGE_ID:latest
-
-          docker push $IMAGE_ID:$TRANSFORMATION_VERSION
-          docker push $IMAGE_ID:latest
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml down
 
       - name: Save Docker image as artifact
         run: |
@@ -262,11 +180,43 @@ jobs:
           name: transformation-artifact
           path: transformation.tar
 
+    # ----------------- NOTIFICATION SERVICE --------------------
+
+  notification-build:
+    name: Notification Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build and Test
+        run: |
+          docker-compose -f docker-compose.yml build notification
+
+      - name: Integration-test
+        run: |
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml build notification-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d notification
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from notification-it notification-it
+          docker-compose logs
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml down
+
+      - name: Save Docker image as artifact
+        run: |
+          IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/notification
+          docker save $IMAGE_ID > notification.tar
+
+      - name: Upload Docker image as artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: notification-artifact
+          path: notification.tar
+
 
   # ----------------- UI SERVICE --------------------
 
   ui-build:
-    name: UI Build & Test & Publish
+    name: UI Build & Test
     runs-on: ubuntu-latest
 
     steps:
@@ -276,21 +226,16 @@ jobs:
         run: |
           docker-compose -f docker-compose.yml build ui
 
-      - name: Push to registry
-        if: github.ref == 'refs/heads/master'
+      - name: Save Docker image as artifact
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
-
           IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/ui
+          docker save $IMAGE_ID > ui.tar
 
-          UI_VERSION=$(grep "version" ./ui/package.json | awk '{print $2}' | sed 's/[,"]//g')
-
-          docker tag $IMAGE_ID $IMAGE_ID:$UI_VERSION
-          docker tag $IMAGE_ID $IMAGE_ID:latest
-
-          docker push $IMAGE_ID:$UI_VERSION
-          docker push $IMAGE_ID:latest
-
+      - name: Upload Docker image as artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: ui-artifact
+          path: ui.tar
 
   # ----------------- SYSTEMTEST --------------------
 
@@ -327,6 +272,10 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: transformation-artifact
+      - name: Download notification artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: notification-artifact
 
       - name: Run Systemtest
         run: |
@@ -335,8 +284,256 @@ jobs:
           docker load -i ./storage-artifact/storage_postgrest.tar
           docker load -i ./liquibase-artifact/storage_liquibase.tar
           docker load -i ./transformation-artifact/transformation.tar
+          docker load -i ./notification-artifact/notification.tar
           docker load -i ./adapter-artifact/adapter.tar
-          docker-compose -f docker-compose.yml up -d core adapter transformation storage scheduler
+          docker-compose -f docker-compose.yml up -d core adapter transformation notification storage scheduler
           docker-compose -f docker-compose.yml -f docker-compose.st.yml up --exit-code-from system-test system-test
           docker-compose logs
           docker-compose -f docker-compose.yml -f docker-compose.st.yml down
+
+  # ----------------- Registry Upload --------------------
+
+  adapter_upload:
+    name: Adapter Publish
+    runs-on: ubuntu-latest
+
+    needs: [systemtest]
+
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download adapter artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: adapter-artifact
+
+
+      - name: Load Docker Image from artifact
+        run: |
+          docker load -i ./adapter-artifact/adapter.tar
+
+      - name: Adapter Push to registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
+          IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/adapter
+
+          ADAPTER_VERSION=$(grep "version =" ./adapter/src/main/resources/application.properties | awk '{print $3}' | sed "s/[']//g")
+
+          docker tag $IMAGE_ID $IMAGE_ID:$ADAPTER_VERSION
+          docker tag $IMAGE_ID $IMAGE_ID:latest
+
+          docker push $IMAGE_ID:$ADAPTER_VERSION
+          docker push $IMAGE_ID:latest
+
+  core_upload:
+    name: Core Publish
+    runs-on: ubuntu-latest
+
+    needs: [systemtest]
+
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download core artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: core-artifact
+
+      - name: Load Docker Image from artifact
+        run: |
+          docker load -i ./core-artifact/core.tar
+
+      - name: Core Push to registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
+          CORE_VERSION=$(grep "version =" ./core/src/main/resources/application.properties | awk '{print $3}' | sed "s/[']//g")
+
+          IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/core
+
+          docker tag $IMAGE_ID $IMAGE_ID:$CORE_VERSION
+          docker tag $IMAGE_ID $IMAGE_ID:latest
+
+          docker push $IMAGE_ID:$CORE_VERSION
+          docker push $IMAGE_ID:latest
+
+  scheduler_upload:
+    name: Scheduler Publish
+    runs-on: ubuntu-latest
+
+    needs: [systemtest]
+
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download scheduler artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: scheduler-artifact
+
+      - name: Load Docker Image from artifact
+        run: |
+          docker load -i ./scheduler-artifact/scheduler.tar
+
+      - name: Scheduler Push to registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
+          IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/scheduler
+
+          SCHEDULER_VERSION=$(grep "version" scheduler/package.json | awk '{print $2}' | sed 's/[,"]//g')
+
+          docker tag $IMAGE_ID $IMAGE_ID:$SCHEDULER_VERSION
+          docker tag $IMAGE_ID $IMAGE_ID:latest
+
+          docker push $IMAGE_ID:$SCHEDULER_VERSION
+          docker push $IMAGE_ID:latest
+
+  storage_upload:
+    name: Storage Publish
+    runs-on: ubuntu-latest
+
+    needs: [systemtest]
+
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download storage artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: storage-artifact
+      - name: Download liquibase artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: liquibase-artifact
+
+      - name: Load Docker Images from artifacts
+        run: |
+
+          docker load -i ./storage-artifact/storage_postgrest.tar
+          docker load -i ./liquibase-artifact/storage_liquibase.tar
+
+      - name: Storage Push to registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
+          STORAGE_VERSION=$(grep "VERSION" ./storage/version.txt | awk '{print $3}' | sed 's/[,"]//g')
+
+          IMAGE_ID_STORAGE=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/storage
+          IMAGE_ID_LIQUIBASE=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/storage-db-liquibase
+
+          docker tag $IMAGE_ID_STORAGE $IMAGE_ID_STORAGE:$STORAGE_VERSION
+          docker tag $IMAGE_ID_STORAGE $IMAGE_ID_STORAGE:latest
+
+          docker tag $IMAGE_ID_LIQUIBASE $IMAGE_ID_LIQUIBASE:$STORAGE_VERSION
+          docker tag $IMAGE_ID_LIQUIBASE $IMAGE_ID_LIQUIBASE:latest
+
+          docker push $IMAGE_ID_STORAGE:$STORAGE_VERSION
+          docker push $IMAGE_ID_STORAGE:latest
+
+          docker push $IMAGE_ID_LIQUIBASE:$STORAGE_VERSION
+          docker push $IMAGE_ID_LIQUIBASE:latest
+
+  transformation_upload:
+    name: Transformation Publish
+    runs-on: ubuntu-latest
+
+    needs: [systemtest]
+
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download transformation artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: transformation-artifact
+
+      - name: Load Docker Image from artifact
+        run: |
+          docker load -i ./transformation-artifact/transformation.tar
+
+      - name: Transformation Push to registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
+          IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/transformation
+
+          TRANSFORMATION_VERSION=$(grep "version" ./transformation/package.json | awk '{print $2}' | sed 's/[,"]//g')
+
+          docker tag $IMAGE_ID $IMAGE_ID:$TRANSFORMATION_VERSION
+          docker tag $IMAGE_ID $IMAGE_ID:latest
+
+          docker push $IMAGE_ID:$TRANSFORMATION_VERSION
+          docker push $IMAGE_ID:latest
+
+  notifcation_upload:
+    name: Notifcation Publish
+    runs-on: ubuntu-latest
+
+    needs: [systemtest]
+
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download notifcation artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: notification-artifact
+
+      - name: Load Docker Image from artifact
+        run: |
+          docker load -i ./notification-artifact/notification.tar
+
+      - name: Notifcation Push to registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
+          IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/notification
+
+          NOTIFICATION_VERSION=$(grep "version" ./notification/package.json | awk '{print $2}' | sed 's/[,"]//g')
+
+          docker tag $IMAGE_ID $IMAGE_ID:$NOTIFICATION_VERSION
+          docker tag $IMAGE_ID $IMAGE_ID:latest
+
+          docker push $IMAGE_ID:$NOTIFICATION_VERSION
+          docker push $IMAGE_ID:latest
+
+  ui_upload:
+    name: UI Publish
+    runs-on: ubuntu-latest
+
+    needs: [systemtest]
+
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download ui artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: ui-artifact
+
+      - name: Load Docker Image from artifact
+        run: |
+          docker load -i ./ui-artifact/ui.tar
+
+      - name: UI Push to registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
+          IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/ui
+
+          UI_VERSION=$(grep "version" ./ui/package.json | awk '{print $2}' | sed 's/[,"]//g')
+
+          docker tag $IMAGE_ID $IMAGE_ID:$UI_VERSION
+          docker tag $IMAGE_ID $IMAGE_ID:latest
+
+          docker push $IMAGE_ID:$UI_VERSION
+          docker push $IMAGE_ID:latest

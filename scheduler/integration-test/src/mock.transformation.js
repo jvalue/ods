@@ -27,39 +27,6 @@ router.post('/job', async ctx => {
   ctx.body = { data: importedData }
 })
 
-router.post('/notification/webhook', async ctx => {
-  webhooks.set(ctx.request.body.pipelineName, ctx.request.body)
-  ctx.status = 200
-})
-
-router.post('/notification/slack', async ctx => {
-  slacks.set(ctx.request.body.pipelineName, ctx.request.body)
-  ctx.status = 200
-})
-
-router.post('/notification/fcm', async ctx => {
-  firebases.set(ctx.request.body.pipelineName, ctx.request.body)
-  ctx.status = 200
-})
-
-router.get('/notification/webhook/:url', async ctx => {
-  const url = ctx.params.url
-  ctx.type = 'application/json'
-  ctx.body = webhooks.get(url)
-})
-
-router.get('/notification/slack/:url', async ctx => {
-  const url = ctx.params.url
-  ctx.type = 'application/json'
-  ctx.body = slacks.get(url)
-})
-
-router.get('/notification/fcm/:url', async ctx => {
-  const url = ctx.params.url
-  ctx.type = 'application/json'
-  ctx.body = firebases.get(url)
-})
-
 app.use(router.routes())
 
 const server = app.listen(PORT, () => console.log('Starting mock transformation server on port ' + PORT))

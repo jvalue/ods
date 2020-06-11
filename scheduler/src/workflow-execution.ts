@@ -16,7 +16,7 @@ export async function execute (datasourceConfig: DatasourceConfig, maxRetries = 
       await retryableExecution(executeAdapter, datasourceConfig, `Executing adapter for datasource ${datasourceConfig.id}`)
 
   // pipeline
-  const followingPipelines = CoreClient.getCachedPipelinesByDatasourceId(datasourceConfig.id)
+  const followingPipelines = await CoreClient.getCachedPipelinesByDatasourceId(datasourceConfig.id)
   for (let pipelineConfig of followingPipelines) {
     const transformedData =
         await retryableExecution(executeTransformation, { pipelineConfig: pipelineConfig, dataLocation: adapterResponse.location }, `Executing transformatins for pipeline ${pipelineConfig.id}`)
@@ -41,6 +41,7 @@ async function retryableExecution<T1, T2>(func: (arg: T1) => Promise<T2>, args: 
       return await func(args)
     } catch (e) {
       console.log(`${description} failed!`)
+      console.log(e.message)
       retryNumber++
     }
   }

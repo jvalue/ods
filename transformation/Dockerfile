@@ -1,25 +1,34 @@
-# First stage: image to build and test node application
-FROM node:lts-alpine as builder
+#-------------------------------------------------------#
+# First stage: image to build and test node application #
+#-------------------------------------------------------#
+FROM node:lts-alpine as build-stage
 
 WORKDIR /build
-COPY ./src ./src
+
+# Copy package*.json files first in order to make best use of docker layer caching
 COPY ./package*.json ./
+
+# npm clean slate install to get reproducible builds and quicker installs
+RUN npm ci
+
+# copy rest of the files
+COPY ./src ./src
 COPY ./tsconfig.json ./
 COPY ./jest.config.js ./
 
-# Install dependencies and run build
-RUN npm ci
+# build and test
 RUN npm run transpile
 RUN npm run test
 
-# Second stage: image to run node application
+#---------------------------------------------#
+# Second stage: image to run node application #
+#---------------------------------------------#
 FROM node:lts-alpine
 
-RUN mkdir /app
 WORKDIR /app
 
-COPY --from=builder /build/dist/ ./dist/
-COPY --from=builder /build/package*.json ./
+COPY --from=build-stage /build/dist/ ./dist/
+COPY --from=build-stage /build/package*.json ./
 COPY ./keycloak.json ./
 
 RUN npm ci --only=production
