@@ -4,10 +4,13 @@ import session, { MemoryStore } from 'express-session'
 import cors from 'cors'
 import Keycloak from 'keycloak-connect'
 import NotificationService from './interfaces/notificationService'
- 
+import { getManager, createConnection, ConnectionOptions, Connection, getConnection } from "typeorm"
+import "reflect-metadata"
+
 import { Server } from 'http'
 
-import { Firebase, NotificationRequest, Slack, Webhook } from '@/interfaces/notificationRequest'
+import { SlackConfig, FirebaseConfigRequest, NotificationConfigRequest, SlackConfigRequest, WebHookConfigRequest, WebHookConfig, NotificationConfig, FirebaseConfig } from './interfaces/notificationConfig';
+import { StorageHandler } from './storageHandler';
 
 export class NotificationEndpoint {
   port: number
@@ -16,10 +19,13 @@ export class NotificationEndpoint {
   keycloak?: Keycloak
 
   NotificationService: NotificationService
+  StorageHandler: StorageHandler
 
-  constructor (NotificationService: NotificationService, port: number, auth: boolean) {
+
+  constructor(NotificationService: NotificationService, storageHandler: StorageHandler, port: number, auth: boolean) {
     this.port = port
     this.NotificationService = NotificationService
+    this.StorageHandler = storageHandler
 
     this.app = express()
 
@@ -36,14 +42,78 @@ export class NotificationEndpoint {
 
     this.app.get('/', this.getHealthCheck)
     this.app.get('/version', this.getVersion)
-    this.app.post('/webhook', this.determineAuth(), this.postWebhook)
-    this.app.post('/slack', this.determineAuth(), this.postSlack)
-    this.app.post('/fcm', this.determineAuth(), this.postFirebase)
+
+    // // Deletion of Configs
+    // this.app.delete('/slack', this.determineAuth(), this.handleSlackDelete)
+    // this.app.delete('/webhook', this.determineAuth(), this.handleWebHookDelete)
+    // this.app.delete('/fcm', this.determineAuth(), this.handleFCMDelete)
+
+    // Creation of Configs
+    this.app.post('/slack', this.determineAuth(), this.handleSlackRequest)
+    this.app.post('/webhook', this.determineAuth(), this.handleWebhookRequest)
+    this.app.post('/fcm', this.determineAuth(), this.handleFCMRequest)
+
+    // // Update of Configs
+    // this.app.post('/slack/:id', this.determineAuth(), this.updateSlackConfig)
+    // this.app.post('/webhook/:id', this.determineAuth(), this.updateWebhookConfig)
+    // this.app.post('/fcm/:id', this.determineAuth(), this.updateFCMConfig)
+
+    // Request Configs
+
+    this.app.get('/conf/:id', this.determineAuth(), this.getConfigs)
+        //this.app.post('/webhook', this.determineAuth(), this.postWebhook)
+    // this.app.post('/fcm', this.determineAuth(), this.postFirebase)
+    // this.app.post('/fcm', this.determineAuth(), this.postFirebase)
+    console.log("Init Connection to Database")
+    this.StorageHandler.initConnection(5,5)
+    
   }
 
+  
   listen (): Server {
     return this.app.listen(this.port, () => {
       console.log('listening on port ' + this.port)
+      
+      // const amqp = require("amqplib/callback_api");
+      // const rabbit_url = process.env.RABBIT_SERVICE_URL;
+      // const rabbit_usr = process.env.RABBIT_SERVICE_USR;
+      // const rabbit_password = process.env.RABBIT_SERVICE_PWD;
+
+      // const rabit_amqp_url = 'amqp://' + rabbit_usr + ':' + rabbit_password + '@' + rabbit_url;
+      // console.log("URL"+rabit_amqp_url)
+      // amqp.connect(rabit_amqp_url, function (error0: string, connection: object) {
+      //   if (error0) {
+      //     console.error("Error connecting to RabbitMQ: " + error0);
+      //     exit - 1;
+      //   }
+      //   console.log("Connected to RabbitMQ.");
+
+      //    connection.createChannel(function (error1, channel) {
+      //      if (error1) {
+      //        throw error1;
+      //      }
+
+      //      var queue = "test_queue";
+
+      //      channel.assertQueue(queue, {
+      //        durable: false,
+      //      });
+
+      //      console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", queue);
+
+      //      channel.consume(
+      //        queue,
+      //        function (msg:object) {
+      //          console.log(" [x] Received %s", msg.content.toString());
+      //        },
+      //        {
+      //          noAck: true,
+      //        }
+      //      );
+      //    });
+      // });
+
+
     })
   }
 
@@ -59,31 +129,178 @@ export class NotificationEndpoint {
     res.end()
   }
 
-  postWebhook = async (req: Request, res: Response): Promise<void> => {
-    const webhookRequest = req.body as Webhook
-    if (!NotificationEndpoint.isValidWebhookRequest(webhookRequest)) {
-      res.status(400).send('Malformed webhook request.')
+  /**===============================================================================
+   * Gets all Configs asto corresponding to corresponnding Pipeline-ID 
+   * (identified by param id) as json list
+   *================================================================================*/
+  getConfigs = (req: Request, res: Response): void => {
+    
+    const pipelineID = parseInt(req.params.id)
+    console.log(`Received request for configs with pipeline id ${pipelineID} from Host ${req.connection.remoteAddress}`)
+    
+    if (!pipelineID) {
+      console.error("Request for config: ID not set")
+      res.status(400).send('Pipeline ID is not set.')
+      return
     }
-    await this.processNotificationRequest(webhookRequest, res)
+    
+    const slackConfigs = this.StorageHandler.getSlackConfigs(pipelineID)
+    const webHookConfigs = this.StorageHandler.getWebHookConfigs(pipelineID)
+    const firebaseConfig = this.StorageHandler.getFirebaseConfigs(pipelineID)
+
+    // wait for the Configs to be received from DB
+    Promise.all([webHookConfigs, slackConfigs, firebaseConfig]).then(configs => {
+      
+      if (!configs || !configs[0] || !configs[1] || !configs[2]) {
+        res.status(500).send('Internal Server Error')
+        return
+      }
+
+      res.status(200).send(configs);  
+    })
+    // if (!slackConfigs) {
+    //   res.status(500).send('Internal Server Error')
+    // }
   }
 
-  postSlack = async (req: Request, res: Response): Promise<void> => {
-    const slackRequest = req.body as Slack
-    if (!NotificationEndpoint.isValidSlackRequest(slackRequest)) {
+  /**===========================================================================
+   * Persists a posted Webhook Config to the Database
+   *============================================================================*/
+  handleWebhookRequest = async (req: Request, res: Response): Promise<void> => {
+    console.log(`Received Webhook config from Host ${req.connection.remoteAddress}`)
+
+    var webHookConfig: WebHookConfig[]
+
+    // Init Repository for WebHook Config
+    console.debug("Init Repository")
+    const postRepository = getConnection().getRepository(WebHookConfig)
+
+    // create object from Body of the Request (=WebHookConfig)
+    console.debug("Init SlackConfig")
+    try {
+        webHookConfig = postRepository.create(req.body)
+    } catch (error) {
+      console.error(`Could not create WebHookConfig Object: ${error}`)
+      res.status(400).send('Malformed webhook request.')
+      return
+    }
+
+    // Check for validity of the request
+    if (!NotificationEndpoint.isValidWebhookRequest(webHookConfig)) {
+      console.warn('Malformed webhook request.')
       res.status(400).send('Malformed webhook request.')
     }
-    await this.processNotificationRequest(slackRequest, res)
+
+    // persist the Config
+    console.debug("Save WebHookConfig to Repository")
+    postRepository.save(webHookConfig);
+    console.log("Webhook config persisted")
+
+    // return saved post back
+    res.status(200).send('OK');
+    
   }
 
-  postFirebase = async (req: Request, res: Response): Promise<void> => {
-    const firebaseRequest = req.body as Firebase
-    if (!NotificationEndpoint.isValidFirebaseRequest(firebaseRequest)) {
-      res.status(400).send('Malformed webhook request.')
+  /**===========================================================================
+   * Persists a posted Slack Config to the Database
+   *============================================================================*/
+  handleSlackRequest = async (req: Request, res: Response): Promise<void> => {
+    console.log(`Received config from Host ${req.connection.remoteAddress}`)
+    
+    var slackConfig : SlackConfig[]
+
+    // Init Repository for Slack Config
+    console.debug("Init Repository")
+    const postRepository = getConnection().getRepository(SlackConfig)
+
+    try {
+      console.debug("Init SlackConfig")
+      // create object from Body of the Request (=SlackConfig)
+      slackConfig = postRepository.create(req.body)
+    } catch (error) {
+      console.error(`Could not create WebHookConfig Object: ${error}`)
+      res.status(400).send('Malformed slack config request.')
+      return
     }
-    await this.processNotificationRequest(firebaseRequest, res)
+
+    // Check for validity of the request
+    if (!NotificationEndpoint.isValidSlackRequest(slackConfig)) {
+      console.warn('Malformed slack request.')
+      res.status(400).send('Malformed slack request.')
+      return
+    }
+
+      // persist the Config
+      console.debug("Save SlackConfig to Repository")
+      postRepository.save(slackConfig);
+      console.log("Slack config persisted")
+  
+    // return saved post back
+    res.send(200);
   }
 
-  processNotificationRequest = async (notification: NotificationRequest, res: Response): Promise<void> => {
+  /**===========================================================================
+   * Persists a posted Slack Config to the Database
+   *============================================================================*/
+  handleFCMRequest = (req: Request, res: Response): void => {
+    console.log(`Received config from Host ${req.connection.remoteAddress}`)
+
+    var firebaseConfig : FirebaseConfig[]
+    
+    // Init Repository for Slack Config
+    console.debug("Init Repository")
+    const postRepository = getConnection().getRepository(FirebaseConfig)
+
+    // create object from Body of the Request (=SlackConfig)
+    console.debug("Init SlackConfig")
+    try {
+      firebaseConfig = postRepository.create(req.body)
+    } catch (error) {
+      console.error(`Could not create WebHookConfig Object: ${error}`)
+      res.status(400).send('Malformed firebase request.')
+      return
+    }
+
+    // Check for validity of the request
+    if (!NotificationEndpoint.isValidFirebaseRequest(firebaseConfig)) {
+      console.warn('Malformed FireBase request.')
+      res.status(400).send('Malformed FireBase request.')
+    }
+
+    // persist the Config
+    console.debug("Save FireBase config to Repository")
+    postRepository.save(firebaseConfig);
+    console.log("FireBase config persisted")
+
+    // return saved post back
+    res.send(200);
+  }
+
+  // postWebhook = async (req: Request, res: Response): Promise<void> => {
+  //   const webhookRequest = req.body as WebHookConfigRequest
+  //   if (!NotificationEndpoint.isValidWebhookRequest(webhookRequest)) {
+  //     res.status(400).send('Malformed webhook request.')
+  //   }
+  //   await this.processNotificationRequest(webhookRequest, res)
+  // }
+
+  // postSlack = async (req: Request, res: Response): Promise<void> => {
+  //   const slackRequest = req.body as SlackConfigRequest
+  //   if (!NotificationEndpoint.isValidSlackRequest(slackRequest)) {
+  //     res.status(400).send('Malformed webhook request.')
+  //   }
+  //   await this.processNotificationRequest(slackRequest, res)
+  // }
+
+  // postFirebase = async (req: Request, res: Response): Promise<void> => {
+  //   const firebaseRequest = req.body as FirebaseConfigRequest
+  //   if (!NotificationEndpoint.isValidFirebaseRequest(firebaseRequest)) {
+  //     res.status(400).send('Malformed webhook request.')
+  //   }
+  //   await this.processNotificationRequest(firebaseRequest, res)
+  // }
+
+  processNotificationRequest = async (notification: NotificationConfigRequest, res: Response): Promise<void> => {
     try {
       await this.NotificationService.handleNotification(notification)
     } catch (e) {
@@ -105,22 +322,34 @@ export class NotificationEndpoint {
     }
   }
 
-  private static isValidWebhookRequest (obj: Webhook): boolean {
-    return this.isValidNotificationRequest(obj) &&
-      obj.type === 'WEBHOOK'
+  private static isValidWebhookRequest(obj: WebHookConfig[]): boolean {
+    for (let conf of obj) {
+      if (!this.isValidNotificationRequest(conf) || !conf.url)
+        return false
+    }
+    return true
   }
 
-  private static isValidSlackRequest (obj: Slack): boolean {
-    return this.isValidNotificationRequest(obj) &&
-      obj.type === 'SLACK' && !!obj.channelId && !!obj.secret && !!obj.workspaceId
+  private static isValidSlackRequest(obj: SlackConfig[]): boolean {
+    for (let conf of obj) {
+      if (!this.isValidNotificationRequest(conf) || !conf.channelId || !conf.secret || !conf.workspaceId) {
+        return false
+      }
+    }
+    return true
   }
 
-  private static isValidFirebaseRequest (obj: Firebase): boolean {
-    return this.isValidNotificationRequest(obj) &&
-      obj.type === 'FCM' && !!obj.clientEmail && !!obj.privateKey && !!obj.projectId && !!obj.topic
+  private static isValidFirebaseRequest(obj: FirebaseConfig[]): boolean {
+    for (let conf of obj) {
+      if (!this.isValidNotificationRequest(conf) || !conf.clientEmail || !conf.privateKey || !conf.projectId || !conf.topic){
+        return false
+      }
+    }
+
+    return true
   }
 
-  private static isValidNotificationRequest (obj: NotificationRequest): boolean {
+  private static isValidNotificationRequest (obj: NotificationConfig): boolean {
     return !!obj.data && !!obj.pipelineName && !!obj.pipelineId && !!obj.condition && !!obj.dataLocation
   }
 }

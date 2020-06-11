@@ -3,7 +3,7 @@ import axios from 'axios'
 
 import VM2SandboxExecutor from './vm2SandboxExecutor'
 import SlackCallback from './interfaces/slackCallback'
-import { Webhook, Slack } from './interfaces/notificationRequest'
+import { WebHookConfigRequest, SlackConfigRequest } from './interfaces/notificationConfig'
 import NotificationService from './interfaces/notificationService';
 import JSNotificationService from './jsNotificationService';
 
@@ -32,7 +32,7 @@ describe('JSTransformationService', () => {
     it('should trigger notification when condition is met', async () => {
       post.mockReturnValue(Promise.resolve())
 
-      const notificationRequest: Webhook = {
+      const notificationRequest: WebHookConfigRequest = {
         pipelineName: 'nordstream',
         pipelineId: 1,
         dataLocation: 'data',
@@ -51,7 +51,7 @@ describe('JSTransformationService', () => {
     })
 
     test('Notification does not trigger when condition is not met', async () => {
-      const notificationRequest: Webhook = {
+      const notificationRequest: WebHookConfigRequest = {
         pipelineName: 'southstream',
         pipelineId: 2,
         dataLocation: 'data',
@@ -67,7 +67,7 @@ describe('JSTransformationService', () => {
     })
 
     test('Notification does not trigger when condition is malformed', async () => {
-      const notificationRequest: Webhook = {
+      const notificationRequest: WebHookConfigRequest = {
         pipelineName: 'weststream',
         pipelineId: 3,
         dataLocation: 'data',
@@ -83,7 +83,7 @@ describe('JSTransformationService', () => {
     })
 
     test('SLACK request', async () => {
-      const request: Slack = {
+      const request: SlackConfigRequest = {
         condition: 'data.value1 > 0',
         data,
         dataLocation: 'data',

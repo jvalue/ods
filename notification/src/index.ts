@@ -1,6 +1,9 @@
 import { NotificationEndpoint } from './notificationEndpoint';
 import VM2SandboxExecutor from './vm2SandboxExecutor'
 import JSNotificationService from './jsNotificationService'
+import { StorageHandler } from './storageHandler';
+import "reflect-metadata";
+import { Connection, createConnection } from 'typeorm';
 
 const port = 8080
 
@@ -12,6 +15,8 @@ if (authEnabled === false) {
 
 const sandboxExecutor = new VM2SandboxExecutor()
 const notificationService = new JSNotificationService(sandboxExecutor)
-const notificationEndpoint = new NotificationEndpoint(notificationService, port, authEnabled)
+const storageHandler = new StorageHandler()
+
+const notificationEndpoint = new NotificationEndpoint(notificationService, storageHandler, port, authEnabled)
 
 notificationEndpoint.listen()

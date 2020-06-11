@@ -42,6 +42,40 @@ export class TransformationEndpoint {
   listen (): Server {
     return this.app.listen(this.port, () => {
       console.log('listening on port ' + this.port)
+      //  const amqp = require("amqplib/callback_api");
+      //  const rabbit_url = process.env.RABBIT_SERVICE_URL;
+      //  const rabbit_usr = process.env.RABBIT_SERVICE_USR;
+      //  const rabbit_password = process.env.RABBIT_SERVICE_PWD;
+
+      //  const rabit_amqp_url = "amqp://" + rabbit_usr + ":" + rabbit_password + "@" + rabbit_url;
+      //  console.log("URL" + rabit_amqp_url);
+      // amqp.connect(rabit_amqp_url, function (error0: string, connection) {
+      //   if (error0) {
+      //     console.error("Error connecting to RabbitMQ: " + error0);
+      //     return -1;
+      //   } else {
+      //     console.log("Connected to RabbitMQ.")
+      //     connection.createChannel(function (error1, channel) {
+      //       if (error1) {
+      //         console.error("RabbitMQ: " + error0);
+      //         return -1
+      //       }
+
+      //       const queue = 'test_queue'
+      //       const msg = 'Hello World'
+
+      //       channel.assertQueue(queue, {
+      //         durable: false,
+      //       });
+
+
+      //       channel.sendToQueue(queue, Buffer.from(msg));
+      //       console.log(" [x] Sent %s", msg);
+
+      //      });
+      //   }
+      //  });
+      
     })
   }
 
