@@ -160,6 +160,10 @@ services:
       context: ./transformation/
     environment:
       AUTH_ENABLED: 'false' #TODO: turn to true as soon as it works!
+      PGUSER: 'notification_usr'
+      PGHOST: 'notification-db'
+      PGPASSWORD: 'admin'
+      PGPORT: 5432
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-transformation.rule=PathPrefix(`/api/transformation`)"
@@ -170,7 +174,7 @@ services:
   transformation-db:
     image: postgres
     environment:
-      - POSTGRES_USER=adapterservice
+      - POSTGRES_USER=transformation_usr
       - POSTGRES_PASSWORD=admin
 
   # ----------------- NOTIFICATION SERVICE (/notification) --------------------
