@@ -27,7 +27,8 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Emit, PropSync } from 'vue-property-decorator'
-import { SlackNotification } from './notificationConfig'
+
+import { SlackNotification } from '@/notification/notificationConfig'
 
 @Component({ })
 export default class SlackEdit extends Vue {

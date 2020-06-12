@@ -1,7 +1,7 @@
 <template>
   <v-form
     v-model="validForm"
-    >
+  >
     <v-switch
       v-model="csvConfig.firstRowAsHeader"
       label="Use first row as header"

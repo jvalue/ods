@@ -1,4 +1,4 @@
-import NotificationConfig from '@/pipeline/notifications/notificationConfig'
+import NotificationConfig from '@/notification/notificationConfig'
 
 export default interface Pipeline {
   id: number;

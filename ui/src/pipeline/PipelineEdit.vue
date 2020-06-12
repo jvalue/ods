@@ -76,7 +76,6 @@
               @validityChanged="validStep3 = $event"
             />
           </v-stepper-content>
-
         </v-stepper>
       </v-card-text>
       <v-card-actions>
@@ -128,9 +127,9 @@ const pipelineNamespace = { namespace: 'pipeline' }
   components: { StepperButtonGroup, PipelineMetadataConfig, PipelineTransformationConfig }
 })
 export default class PipelineEdit extends Vue {
-  @Action('loadPipelineById', pipelineNamespace) private loadPipelineByIdAction!: ( id: number ) => void
-  @Action('createPipeline', pipelineNamespace) private createPipelineAction!: ( p: Pipeline ) => void
-  @Action('updatePipeline', pipelineNamespace) private updatePipelineAction!: ( p: Pipeline ) => void
+  @Action('loadPipelineById', pipelineNamespace) private loadPipelineByIdAction!: (id: number) => void
+  @Action('createPipeline', pipelineNamespace) private createPipelineAction!: (p: Pipeline) => void
+  @Action('updatePipeline', pipelineNamespace) private updatePipelineAction!: (p: Pipeline) => void
   @State('selectedPipeline', pipelineNamespace) private selectedPipeline!: Pipeline
 
   private isEditMode = false
@@ -141,7 +140,7 @@ export default class PipelineEdit extends Vue {
   private validStep2 = true // starts with valid default values
   private validStep3 = true // starts with valid default values
 
-    private dialogPipeline: Pipeline = {
+  private dialogPipeline: Pipeline = {
     id: -1,
     datasourceId: -1,
     transformation: { func: "data.test = 'abc'; return data;" },

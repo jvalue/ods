@@ -1,11 +1,10 @@
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
 import Pipeline from './pipeline'
 import * as RestService from './pipelineRest'
-import NotificationConfig from '@/pipeline/notifications/notificationConfig'
+import NotificationConfig from '@/notification/notificationConfig'
 
 @Module({ namespaced: true })
 export default class PipelineModule extends VuexModule {
-
   private pipelines: Pipeline[] = []
   private selectedPipeline: Pipeline = {} as unknown as Pipeline
   private isLoadingPipelines = true
@@ -42,7 +41,6 @@ export default class PipelineModule extends VuexModule {
   public async loadPipelineByDatasourceId (datasourceId: number): Promise<Pipeline> {
     return await RestService.getPipelineByDatasourceId(datasourceId)
   }
-
 
   @Action({ commit: 'setPipelines', rawError: true })
   public async createPipeline (pipeline: Pipeline): Promise<Pipeline[]> {

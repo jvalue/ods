@@ -12,8 +12,9 @@
         >
           <v-icon
             dark
-            right>
-              mdi mdi-arrow-left
+            right
+          >
+            mdi mdi-arrow-left
           </v-icon>
         </v-btn>
         <v-btn
@@ -96,11 +97,12 @@
 import Component from 'vue-class-component'
 import Vue from 'vue'
 import { Action, State } from 'vuex-class'
-import Pipeline from '@/pipeline/pipeline'
-import NotificationConfig from '@/pipeline/notifications/notificationConfig'
-import NotificationEditDialog from '@/pipeline/notifications/notificationEditDialog'
-import NotificationEdit from '@/pipeline/notifications/NotificationEdit.vue'
 import { Ref } from 'vue-property-decorator'
+
+import Pipeline from '@/pipeline/pipeline'
+import NotificationConfig from '@/notification/notificationConfig'
+import NotificationEditDialog from '@/notification/notificationEditDialog'
+import NotificationEdit from '@/notification/NotificationEdit.vue'
 
 const namespace = { namespace: 'pipeline' }
 
@@ -160,7 +162,7 @@ export default class PipelineNotifications extends Vue {
     this.loadPipelineByIdAction(this.pipelineId)
   }
 
-  private onNavigateBack() {
+  private onNavigateBack () {
     this.$router.push({ name: 'pipeline-overview' })
   }
 

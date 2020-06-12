@@ -45,7 +45,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 
-import {Emit, Prop, PropSync, Watch} from 'vue-property-decorator'
+import { Emit, Prop, PropSync, Watch } from 'vue-property-decorator'
 
 import Datasource from '../../datasource'
 import CsvAdapterConfig from './CsvAdapterConfig.vue'
@@ -76,7 +76,7 @@ export default class AdapterConfig extends Vue {
   private formatChanged (val: string) {
     switch (val) {
       case 'CSV': {
-        if(!this.isEditMode) { // otherwise csv params don't need reassignment of default values
+        if (!this.isEditMode) { // otherwise csv params don't need reassignment of default values
           this.adapterConfig.format.parameters = {
             lineSeparator: '\n',
             columnSeparator: ';',
