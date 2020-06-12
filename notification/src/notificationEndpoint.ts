@@ -90,7 +90,7 @@ export class NotificationEndpoint {
    * Gets all Configs asto corresponding to corresponnding Pipeline-ID
    * (identified by param pipelineId) as json list
    *================================================================================*/
-  getConfigs = (req: Request, res: Response): void => {
+  getConfigs = async (req: Request, res: Response) => {
 
     const pipelineId = parseInt(req.params.pipelineId)
     console.log(`Received request for configs with pipeline id ${pipelineId} from Host ${req.connection.remoteAddress}`)
@@ -102,22 +102,28 @@ export class NotificationEndpoint {
     }
 
     // Get configs from database
-    let configs = this.StorageHandler.getConfigsForPipeline(pipelineId)
+    const configSummary = await this.StorageHandler.getConfigsForPipeline(pipelineId)
+    const configs: object[] = []
 
-    if (!configs) {
-      res.status(500).send('Internal Server Error')
-      return
-    }
-
-    // Get configSummary from promise
-    configs.then(configSummary =>{
-      if (!configSummary) {
-        res.status(500).send('Internal Server Error')
-        return
-      }
-
-      res.status(200).send(configSummary)
+    configSummary.firebase.forEach((firebaseConfig) => {
+      const config = Object.assign({}, firebaseConfig) as any
+      config.type = "FCM"
+      configs.push(config)
     })
+
+    configSummary.slack.forEach((slackConfig) => {
+      const config = Object.assign({}, slackConfig) as any
+      config.type = "SLACK"
+      configs.push(config)
+    })
+
+    configSummary.firebase.forEach((webhookConfig) => {
+      const config = Object.assign({}, webhookConfig) as any
+      config.type = "WEBHOOK"
+      configs.push(config)
+    })
+
+    res.status(200).send(configs)
   }
 
   /**===============================================================================

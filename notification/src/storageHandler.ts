@@ -3,25 +3,25 @@ import { Connection, ConnectionOptions, createConnection, getConnection } from '
 import { NotificationSummary} from './interfaces/notificationSummary';
 
 /**=============================================================================================================
- * This class handles Requests to the Nofification Database 
+ * This class handles Requests to the Nofification Database
  * in order to store and get Notification Configurations.
  *==============================================================================================================*/
 export class StorageHandler {
 
     constructor() {
-        
+
     }
     /**===========================================================================================
      * Initializes a Database Connection to the notification-db service (postgres)
      * by using the Environment variables:
-     *          - PGHOST:       IP/hostname of the storage service 
+     *          - PGHOST:       IP/hostname of the storage service
      *          - PGPORT:       PORT        of the storage service
      *          - PGPASSWORD:   PASSWORD to connect to the stprage db
      *          - PGUSER:       USER     to connect to the storage db
-     * 
+     *
      * @param retries:  Number of retries to connect to the database
      * @param backoff:  Time in seconds to backoff before next connection retry
-     * 
+     *
      * @returns     a Promise, containing either a Connection on success or null on failure
      *===========================================================================================*/
     public async initConnection(retries: number, backoff: number): Promise<Connection | null> {
@@ -47,7 +47,7 @@ export class StorageHandler {
         // try to establish connection
         for (let i = 0; i < retries; i++) {
             dbCon = await createConnection(options).catch(() => { return null })
-            
+
             if (!dbCon) {
                 console.warn(`DB Connection could not be initialized. Retrying in ${backoff} seconds`)
                 await this.backOff(backoff);
@@ -56,19 +56,19 @@ export class StorageHandler {
                 break;
             }
         }
-            
+
         if (established) {
             console.log('Connection established')
         } else {
             console.error('Connection could not be established.')
         }
-            
+
         return dbCon
     }
 
     /**====================================================================
      * Waits for a specific time period
-     * 
+     *
      * @param backOff   Period to wait in seconds
      *====================================================================*/
     private backOff(backOff: number): Promise<void> {
@@ -76,27 +76,17 @@ export class StorageHandler {
     }
 
     /**
-     * 
-     * @param pipelineID 
+     *
+     * @param pipelineId
      */
-    public async getConfigsForPipeline(pipelineID: number): Promise<NotificationSummary|null> {
-        console.log(`Getting ConfigSummary for Pipeline with id ${pipelineID}.`)
-
-        if (!pipelineID) {
-            console.error('Pipeline ID not set.')
-            return null;
-        }
+    public async getConfigsForPipeline(pipelineId: number): Promise<NotificationSummary> {
+        console.log(`Getting ConfigSummary for Pipeline with id ${pipelineId}.`)
 
         const notificationSummary = new NotificationSummary
 
-        const slackConfigs = await this.getSlackConfigs(pipelineID)
-        const webHookConfigs = await this.getWebHookConfigs(pipelineID)
-        const firebaseConfig = await this.getFirebaseConfigs(pipelineID)
-
-
-        if (!webHookConfigs || !slackConfigs || !firebaseConfig) {
-            return null
-        }
+        const slackConfigs = await this.getSlackConfigs(pipelineId)
+        const webHookConfigs = await this.getWebHookConfigs(pipelineId)
+        const firebaseConfig = await this.getFirebaseConfigs(pipelineId)
 
         notificationSummary.slack = slackConfigs
         notificationSummary.webhook = webHookConfigs
@@ -123,52 +113,41 @@ export class StorageHandler {
     }
     /**===========================================================================================
      * Gets all Slack Config from the database for a specific pipeline id
-     * 
-     * @param pipelineID    Pipeline ID to get the Slack Configs for
+     *
+     * @param pipelineId    Pipeline ID to get the Slack Configs for
      *============================================================================================*/
-    public async getSlackConfigs(pipelineID: number): Promise<SlackConfig[] | null> {
-        console.log(`Getting Slack Configs with pipelineId ${pipelineID} from Database`)
-        var slackConfigList
-        
-        // return null if id not set
-        if (!pipelineID) {
-            return null;
-        }
+    public async getSlackConfigs(pipelineId: number): Promise<SlackConfig[]> {
+        console.log(`Getting Slack Configs with pipelineId ${pipelineId} from Database`)
+        var slackConfigList: SlackConfig[] = []
 
-        // Get Configs from Database 
+        // Get Configs from Database
         try {
             const repository = getConnection().getRepository(SlackConfig)
-            slackConfigList = await repository.find({ pipelineId: pipelineID })
+            slackConfigList = await repository.find({ pipelineId: pipelineId })
         } catch (error) {
             console.log(error)
-            return null
+            Promise.reject(error)
         }
         console.log(`Sucessfully got ${slackConfigList.length} Slack config(s) from Database`)
-        return slackConfigList      
+        return slackConfigList
     }
 
     /**===========================================================================================
      * Gets all WebHook Configs from the database for a specific pipeline id
-     * 
-     * @param pipelineID    Pipeline ID to get the WebHook Configs for
+     *
+     * @param pipelineId    Pipeline ID to get the WebHook Configs for
      *============================================================================================*/
-    public async getWebHookConfigs(pipelineID: number): Promise<WebHookConfig[] | null> {
-        console.log(`Getting WebHook Configs with pipelineId ${pipelineID} from Database`)
+    public async getWebHookConfigs(pipelineId: number): Promise<WebHookConfig[]> {
+        console.log(`Getting WebHook Configs with pipelineId ${pipelineId} from Database`)
+        var webHookConfigs: WebHookConfig[] = []
 
-        var webHookConfigs: WebHookConfig[]
-
-        // return null if id not set
-        if (!pipelineID) {
-            return null;
-        }
-
-        // Get Configs from Database 
+        // Get Configs from Database
         try {
             const repository = getConnection().getRepository(WebHookConfig)
-            webHookConfigs = await repository.find({ pipelineId: pipelineID })
+            webHookConfigs = await repository.find({ pipelineId: pipelineId })
         } catch (error) {
             console.log(error)
-            return null
+            Promise.reject(error)
         }
         console.log(`Sucessfully got ${webHookConfigs.length} WebhookConfigs from Database`)
         return webHookConfigs
@@ -176,34 +155,29 @@ export class StorageHandler {
 
     /**===========================================================================================
      * Gets all Firebase Configs from the database for a specific pipeline id
-     * 
-     * @param pipelineID    Pipeline ID to get the Firebase Configs for
+     *
+     * @param pipelineId    Pipeline ID to get the Firebase Configs for
      *============================================================================================*/
-    public async getFirebaseConfigs(pipelineID: number): Promise<FirebaseConfig[] | null> {
-        console.log(`Getting Firebase Configs with pipelineId ${pipelineID} from Database`)
+    public async getFirebaseConfigs(pipelineId: number): Promise<FirebaseConfig[]> {
+        console.log(`Getting Firebase Configs with pipelineId ${pipelineId} from Database`)
 
-        var firebaseConfig: FirebaseConfig[]
+        var firebaseConfigs: FirebaseConfig[] = []
 
-        // return null if id not set
-        if (!pipelineID) {
-            return null;
-        }
-
-        // Get Configs from Database 
+        // Get Configs from Database
         try {
             const repository = getConnection().getRepository(FirebaseConfig)
-            firebaseConfig = await repository.find({ pipelineId: pipelineID })
+            firebaseConfigs = await repository.find({ pipelineId: pipelineId })
         } catch (error) {
             console.log(error)
-            return null
+            Promise.reject(error)
         }
-        console.log(`Sucessfully got ${firebaseConfig.length} Firebase configs from Database`)
-        return firebaseConfig
+        console.log(`Sucessfully got ${firebaseConfigs.length} Firebase configs from Database`)
+        return firebaseConfigs
     }
 
     /**===============================================================
      * TODO: Document
-     * 
+     *
      *===============================================================*/
     public saveWebhookConfig(webhookConfig: WebHookConfig): boolean{
 
@@ -214,7 +188,7 @@ export class StorageHandler {
         // create object from Body of the Request (=WebHookConfig)
         console.debug("Init Webhook config")
         webhookConfig = postRepository.create(webhookConfig)
-        
+
         // persist the Config
         console.debug("Save WebHookConfig to Repository")
         postRepository.save(webhookConfig);
@@ -235,7 +209,7 @@ export class StorageHandler {
         // create object from Body of the Request (=SlackConfig)
         console.debug("Init SlackConfig")
         slackConfig = postRepository.create(slackConfig)
-    
+
         // persist the Config
         console.debug("Save SlackConfig to Repository")
         postRepository.save(slackConfig);
@@ -265,5 +239,5 @@ export class StorageHandler {
 
         return true
     }
-    
+
 }
