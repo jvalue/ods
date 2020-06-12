@@ -49,14 +49,10 @@ export class NotificationEndpoint {
     this.app.delete('pipelines/:pipelineId/notifications', this.determineAuth(), this.handlePipelineDelete)
 
     // Creation of Configs
-    this.app.post('notificaitons/slack', this.determineAuth(), this.handleSlackRequest)
-    this.app.post('notifications/webhook', this.determineAuth(), this.handleWebhookRequest)
-    this.app.post('notifications/fcm', this.determineAuth(), this.handleFCMRequest)
+    this.app.post('notificaitons/', this.determineAuth(), this.handleNotificaitonCreate)
 
     // // Update of Configs
-    // this.app.post('/slack/:id', this.determineAuth(), this.updateSlackConfig)
-    // this.app.post('/webhook/:id', this.determineAuth(), this.updateWebhookConfig)
-    // this.app.post('/fcm/:id', this.determineAuth(), this.updateFCMConfig)
+    this.app.put('notificaitons/:id', this.determineAuth(), this.handleNotificaitonUpdate)
 
     // Request Configs
 
@@ -149,6 +145,35 @@ export class NotificationEndpoint {
     res.status(200).send(config)
   }
 
+  /**===========================================================================
+   * Handles a request to save a NotificationConfig
+   * This is done by checking the validity of the config and then save
+   * it to the database on success
+   *============================================================================*/
+  handleNotificaitonCreate  = async (req: Request, res: Response): Promise<void> => {
+    console.log(`Received notification config from Host ${req.connection.remoteAddress}`)
+
+    const notificationType = req.body?.type
+    if (!notificaitonConfig || !notificationType) {
+      res.status(400).send('Malformed notification request.')
+      return
+    }
+
+    switch(notificationType) {
+      case 'WEBHOOK':
+        this.handleWebhookRequest(req, res)
+        break
+      case 'FCM':
+        this.handleFCMRequest(req, res)
+        break
+      case 'SLACK':
+        this.handleSlackRequest(req, res)
+        break
+      default:
+        res.status(400).send(`Notification type ${notificationType} not suppoerted!`)
+        return
+    }
+  }
 
   /**===========================================================================
    * Handles a request to save a WebhookConfig

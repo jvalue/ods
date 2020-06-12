@@ -10,16 +10,6 @@
       <v-card-text>
         <v-container>
           <v-row
-            cols="20"
-            sm="6"
-            md="4"
-          >
-            <v-text-field
-              v-model="editedNotification.condition"
-              label="Condition"
-            />
-          </v-row>
-          <v-row
             cols="30"
             sm="6"
             md="4"
@@ -28,6 +18,16 @@
               v-model="editedNotification.type"
               :items="notificationTypes"
               label="Type"
+            />
+          </v-row>
+          <v-row
+            cols="20"
+            sm="6"
+            md="4"
+          >
+            <v-text-field
+              v-model="editedNotification.condition"
+              label="Condition"
             />
           </v-row>
           <v-row

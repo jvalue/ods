@@ -24,11 +24,7 @@ export async function getById (id: number): Promise<NotificationConfig> {
 }
 
 export async function create (notificationConfig: NotificationConfig): Promise<NotificationConfig> {
-  const notificationType = notificationConfig.type
-  const requestBody = Object.assign({}, notificationConfig) as any
-  requestBody.type = undefined
-
-  const response = await http.post(`/notifications/${notificationType}`, JSON.stringify(requestBody))
+  const response = await http.post(`/notifications`, JSON.stringify(notificationConfig))
   return JSON.parse(response.data)
 }
 
