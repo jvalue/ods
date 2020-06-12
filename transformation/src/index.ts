@@ -1,6 +1,7 @@
 import { TransformationEndpoint } from './transformationEndpoint'
 import VM2SandboxExecutor from './vm2SandboxExecutor'
 import JSTransformationService from './jsTransformationService'
+import { AmqpHandler } from './amqpHandler'
 
 const port = 8080
 
@@ -12,6 +13,9 @@ if (authEnabled === false) {
 
 const sandboxExecutor = new VM2SandboxExecutor()
 const transformationService = new JSTransformationService(sandboxExecutor)
-const transformationEndpoint = new TransformationEndpoint(transformationService, port, authEnabled)
+const amqp = new AmqpHandler()
+amqp.connect(5, 5)
+
+const transformationEndpoint = new TransformationEndpoint(transformationService, amqp, port, authEnabled)
 
 transformationEndpoint.listen()

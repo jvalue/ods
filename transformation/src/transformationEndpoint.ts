@@ -21,10 +21,12 @@ export class TransformationEndpoint {
   keycloak?: Keycloak
 
   transformationService: TransformationService
-  
-  constructor (transformationService: TransformationService, port: number, auth: boolean) {
+  amqp: AmqpHandler
+
+  constructor (transformationService: TransformationService, amqp: AmqpHandler, port: number, auth: boolean) {
     this.port = port
     this.transformationService = transformationService
+    this.amqp = amqp
 
     this.app = express()
 
@@ -47,7 +49,6 @@ export class TransformationEndpoint {
     //this.app.get('/:id', this)
 
     StorageHandler.initConnection(5, 5)
-    AmqpHandler.connect(5,5)
   }
 
   listen (): Server {
@@ -70,7 +71,7 @@ export class TransformationEndpoint {
 
   /**===========================================================================
     * Handles a request to save a TransformationConfig
-    * This is done by checking the validity of the config and then save 
+    * This is done by checking the validity of the config and then save
     * it to the database on success
     *============================================================================*/
   handleConfigRequest = async (req: Request, res: Response): Promise<void> => {
@@ -98,7 +99,7 @@ export class TransformationEndpoint {
   }
 
   /**===============================================================================
-     * Gets all Configs asto corresponding to corresponnding Pipeline-ID 
+     * Gets all Configs asto corresponding to corresponnding Pipeline-ID
      * (identified by param id) as json list
      *================================================================================*/
   getConfigs = (req: Request, res: Response): void => {
@@ -157,7 +158,7 @@ export class TransformationEndpoint {
     if (result.data) {
       res.writeHead(200)
       let transformationEvent = new TransformationEvent(1, 'PIPELINE_TEST', transformation.dataLocation, true)
-      AmqpHandler.notifyNotificationService(transformationEvent)
+      this.amqp.notifyNotificationService(transformationEvent)
     } else {
       res.writeHead(400)
     }
