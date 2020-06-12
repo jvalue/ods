@@ -1,9 +1,7 @@
-import { TransformationEvent } from "./interfaces/transformationEvent";
-import { StorageHandler } from "./storageHandler"
-import JSNotificationService from './jsNotificationService';
+import { TransformationEvent } from './interfaces/transformationEvent';
 
 export class AmqpHandler{
-    
+    static channel: any
 
     /**====================================================================================
      * Connects to Amqp Service and initializes a channel
@@ -53,7 +51,7 @@ export class AmqpHandler{
     }
 
     private static initChannel(connection: any) {
-            connection.createChannel(function (error1: Error, channel: any) {
+            this.channel = connection.createChannel(function (error1: Error, channel: any) {
                 if (error1) {
                     throw error1;
                 }
@@ -86,26 +84,26 @@ export class AmqpHandler{
             return false
         }
         
-        let handler = new StorageHandler()
-        
-        let configs = handler.getConfigsForPipeline(transformationEvent.pipelineID)
-
-        configs.then(config => {
-
-            if (!config) {
-                console.error('Could not get Config')
-                return true
-            }
-
-            for (const webhookConfig of config.webhook) {
-                let notificationService = new JSNotificationService(execute)
-                
-
-        
-            }
-        })            
-        
         return true
+    }
+
+    public static notifyNotificationService(transfromationEvent:TransformationEvent) {
+        const queue = 'test_queue'
+
+        const isValid = this.isValidTransformationEvent(transfromationEvent)
+
+        
+        if (!isValid) {
+            console.error('Message received is not an Transformation Event')
+            return false
+        }
+
+        this.channel.sendToQueue(queue, Buffer.from(JSON.stringify(transfromationEvent)));
+        console.log(" [x] Sent %s", transfromationEvent);
+
+        this.channel.assertQueue(queue, {
+              durable: false,
+        });
     }
 
 
@@ -121,5 +119,3 @@ export class AmqpHandler{
         return !!event.dataLocation && !!event.pipelineID && !!event.pipelineName && !!event.result
     }
 }
-
-    
