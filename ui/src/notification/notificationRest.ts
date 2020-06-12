@@ -11,6 +11,7 @@ const NOTIFICATION_SERVICE_URL = process.env.VUE_APP_NOTIFICATION_SERVICE_URL as
 const http = axios.create({
   baseURL: `${NOTIFICATION_SERVICE_URL}`,
   headers: { 'Content-Type': 'application/json' },
+  transformResponse: []
 })
 
 export async function getAllByPipelineId (pipelineId: number): Promise<NotificationConfig[]> {
