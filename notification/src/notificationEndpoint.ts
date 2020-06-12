@@ -154,7 +154,7 @@ export class NotificationEndpoint {
     console.log(`Received notification config from Host ${req.connection.remoteAddress}`)
 
     const notificationType = req.body?.type
-    if (!notificaitonConfig || !notificationType) {
+    if (!notificationType) {
       res.status(400).send('Malformed notification request.')
       return
     }
@@ -276,6 +276,20 @@ export class NotificationEndpoint {
   }
 
   handlePipelineDelete = (req: Request, res: Response): void => {
+  }
+
+    /**===========================================================================
+   * Handles a request to update a NotificationConfig
+   * This is done by checking the validity of the config and then save
+   * it to the database on success
+   *============================================================================*/
+  handleNotificaitonUpdate  = async (req: Request, res: Response): Promise<void> => {
+    console.log(`Received notification config from Host ${req.connection.remoteAddress}`)
+
+    const id = parseInt(req.params.id)
+    // delete with notification id
+    // save with id
+    // or implement an update method!
   }
 
 
