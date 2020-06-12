@@ -3,12 +3,13 @@ import axios from 'axios'
 import * as firebase from 'firebase-admin'
 import NotificationService from './interfaces/notificationService';
 
-import { FirebaseConfigRequest, NotificationConfigRequest, SlackConfigRequest, WebHookConfigRequest } from './interfaces/notificationConfig'
+import { FirebaseConfigRequest, NotificationConfigRequest, SlackConfigRequest, WebHookConfigRequest, NotificationConfig, WebHookConfig, SlackConfig, FirebaseConfig } from './interfaces/notificationConfig';
 
 import SlackCallback from './interfaces/slackCallback';
 import WebhookCallback from './interfaces/webhookCallback';
 import FcmCallback from './interfaces/fcmCallback';
 import SandboxExecutor from './interfaces/sandboxExecutor';
+
 
 const VERSION = '0.0.1'
 
@@ -26,8 +27,8 @@ export default class JSNotificationService implements NotificationService {
         return VERSION
       }
 
-    
-    async handleNotification (notification: NotificationConfigRequest): Promise<void> {
+  
+  async handleNotification(notification: NotificationConfig, type: string): Promise<void> {
         console.log(`NotificationRequest received for pipeline: ${notification.pipelineId}.`)
         const conditionHolds = this.executor.evaluate(notification.condition, notification.data)
         console.log('Condition is ' + conditionHolds)
@@ -38,15 +39,15 @@ export default class JSNotificationService implements NotificationService {
         const message = `Pipeline ${notification.pipelineName}(${notification.pipelineId}) ` +
         `has new data available. Fetch at ${notification.dataLocation}.`
 
-        switch (notification.type) {
+        switch (type) {
         case 'WEBHOOK':
-            await this.handleWebhook(notification as WebHookConfigRequest)
+            await this.handleWebhook(notification as WebHookConfig)
             break
         case 'FCM':
-            await this.handleFCM(notification as FirebaseConfigRequest, message)
+            await this.handleFCM(notification as FirebaseConfig, message)
             break
         case 'SLACK':
-            await this.handleSlack(notification as SlackConfigRequest, message)
+            await this.handleSlack(notification as SlackConfig, message)
             break
         default:
             throw new Error('Notification type not implemented.')
@@ -54,7 +55,7 @@ export default class JSNotificationService implements NotificationService {
     }
 
 
-  private async handleWebhook (webhook: WebHookConfigRequest): Promise<void> {
+  private async handleWebhook (webhook: WebHookConfig): Promise<void> {
     const callbackObject: WebhookCallback = {
       location: webhook.dataLocation,
       timestamp: new Date(Date.now())
@@ -63,7 +64,7 @@ export default class JSNotificationService implements NotificationService {
     await axios.post(webhook.url, callbackObject)
   }
 
-  private async handleSlack (slack: SlackConfigRequest, message: string): Promise<void> {
+  private async handleSlack (slack: SlackConfig, message: string): Promise<void> {
     let slackBaseUri = 'https://hooks.slack.com/services'
     if (process.env.MOCK_RECEIVER_HOST && process.env.MOCK_RECEIVER_PORT) {
       slackBaseUri = `http://${process.env.MOCK_RECEIVER_HOST}:${process.env.MOCK_RECEIVER_PORT}/slack`
@@ -76,7 +77,7 @@ export default class JSNotificationService implements NotificationService {
     await axios.post(url, callbackObject)
   }
 
-  private async handleFCM (firebaseRequest: FirebaseConfigRequest, message: string): Promise<void> {
+  private async handleFCM (firebaseRequest: FirebaseConfig, message: string): Promise<void> {
     let app: App
     try {
       app = firebase.app(firebaseRequest.clientEmail)

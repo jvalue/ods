@@ -14,13 +14,13 @@ export default class VM2SandboxExecutor implements SandboxExecutor {
     })
   }
 
-  evaluate (expression: string, data: object): boolean {
+  evaluate (expression: string, data: string): boolean {
     const wrapper =
       'f=function(data){' +
       'return ' +
       expression +
       '};f(' +
-      JSON.stringify(data) +
+        data +
       ');'
 
     let result = false

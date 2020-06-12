@@ -1,6 +1,7 @@
-import { NotificationConfigRequest } from './notificationConfig'
+import { NotificationConfig } from './notificationConfig'
+
 
 export default interface NotificationService {
   getVersion(): string;
-  handleNotification(notifiactionRequest: NotificationConfigRequest): Promise<void>;
+  handleNotification(notifcationConfig: NotificationConfig, type: string): Promise<void>;
 }

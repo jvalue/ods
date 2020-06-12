@@ -27,56 +27,6 @@ export interface FirebaseConfigRequest extends NotificationConfigRequest{
   topic: string;
 }
 
-// @Entity()
-// export class NotificationConfig {
-//   @PrimaryColumn()
-//   pipelineId!: number;
-
-//   @Column()
-//   pipelineName!: string;
-
-//   @Column()
-//   data!: string;
-
-//   @Column()
-//   dataLocation!: string;
-
-//   @Column()
-//   condition!: string;
-
-//   @Column()
-//   type!: string;
-// }
-
-// @Entity()
-// export class WebHookConfig {
-//   @PrimaryColumn()
-//   @OneToOne(type => NotificationConfig)
-//   @JoinColumn()
-//   baseConfig!: NotificationConfig
-
-//   @Column()
-//   url!: string;
-// }
-
-// @Entity()
-// export class SlackConfig {
-  
-//   @OneToOne(type => NotificationConfig , notificationConfig => notificationConfig.pipelineId)
-//   @JoinColumn()
-//   notificationConfig!: NotificationConfig
-
-//   @PrimaryColumn()
-//   workspaceId!: string;
-
-//   @Column()
-//   channelId!: string;
-
-//   @Column()
-//   secret!: string;
-// }
-
-
 export class NotificationConfig{
   @Column()
   pipelineId!: number;
@@ -100,21 +50,6 @@ export class SlackConfig extends NotificationConfig{
 
   @PrimaryGeneratedColumn()
   id!: number
-
-  // @Column()
-  // pipelineId!: number;
-
-  // @Column()
-  // pipelineName!: string;
-
-  // @Column()
-  // data!: string;
-
-  // @Column()
-  // dataLocation!: string;
-
-  // @Column()
-  // condition!: string;
 
   @Column()
   workspaceId!: string;

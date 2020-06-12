@@ -11,6 +11,7 @@ import { Server } from 'http'
 
 import { SlackConfig, NotificationConfigRequest, WebHookConfig, NotificationConfig, FirebaseConfig } from './interfaces/notificationConfig';
 import { StorageHandler } from './storageHandler';
+import { AmqpHandler } from './amqpHandler';
 
 export class NotificationEndpoint {
   port: number
@@ -66,8 +67,9 @@ export class NotificationEndpoint {
     // this.app.post('/fcm', this.determineAuth(), this.postFirebase)
     // this.app.post('/fcm', this.determineAuth(), this.postFirebase)
     console.log("Init Connection to Database")
-    this.StorageHandler.initConnection(5,5)
     
+    this.StorageHandler.initConnection(5, 5)
+    AmqpHandler.connect(5,5)
   }
 
   
@@ -104,21 +106,25 @@ export class NotificationEndpoint {
       return
     }
     
-    const slackConfigs = this.StorageHandler.getSlackConfigs(pipelineID)
-    const webHookConfigs = this.StorageHandler.getWebHookConfigs(pipelineID)
-    const firebaseConfig = this.StorageHandler.getFirebaseConfigs(pipelineID)
+    // Get configs from database
+    let configs = this.StorageHandler.getConfigsForPipeline(pipelineID)
 
-    // wait for the Configs to be received from DB
-    Promise.all([webHookConfigs, slackConfigs, firebaseConfig]).then(configs => {
-      
-      if (!configs || !configs[0] || !configs[1] || !configs[2]) {
+    if (!configs) {
+      res.status(500).send('Internal Server Error')
+      return
+    }
+
+    // Get configSummary from promise
+    configs.then(configSummary =>{
+      if (!configSummary) {
         res.status(500).send('Internal Server Error')
         return
       }
 
-      res.status(200).send(configs);  
+      res.status(200).send(configSummary)  
     })
   }
+
 
   /**===========================================================================
    * Handles a request to save a WebhookConfig
@@ -144,11 +150,9 @@ export class NotificationEndpoint {
       res.status(400).send('Internal Server Error.')
       return
     }
-    
-
+  
     // return saved post back
     res.status(200).send('OK');
-    
   }
 
   /**===========================================================================
@@ -157,35 +161,25 @@ export class NotificationEndpoint {
   handleSlackRequest = async (req: Request, res: Response): Promise<void> => {
     console.log(`Received config from Host ${req.connection.remoteAddress}`)
     
-    var slackConfig : SlackConfig
+    var slackConfig: SlackConfig = req.body as SlackConfig
 
-    // Init Repository for Slack Config
-    console.debug("Init Repository")
-    const postRepository = getConnection().getRepository(SlackConfig)
-
-    try {
-      console.debug("Init SlackConfig")
-      // create object from Body of the Request (=SlackConfig)
-      slackConfig = postRepository.create(req.body as SlackConfig)
-    } catch (error) {
-      console.error(`Could not create WebHookConfig Object: ${error}`)
-      res.status(400).send('Malformed slack config request.')
-      return
-    }
-
-    
-    // Check for validity of the request
+     // Check for validity of the request
     if (!NotificationEndpoint.isValidSlackRequest(slackConfig)) {
       console.warn('Malformed slack request.')
       res.status(400).send('Malformed slack request.')
       return
     }
 
-      // persist the Config
-      console.debug("Save SlackConfig to Repository")
-      postRepository.save(slackConfig);
-      console.log("Slack config persisted")
-  
+    // Persist Config
+    try {
+      this.StorageHandler.saveSlackConfig(slackConfig)
+    } catch(error) {
+      console.error(`Could not create WebHookConfig Object: ${error}`)
+      res.status(400).send('Malformed slack config request.')
+      return
+      
+    }
+
     // return saved post back
     res.send(200);
   }
@@ -196,21 +190,8 @@ export class NotificationEndpoint {
   handleFCMRequest = (req: Request, res: Response): void => {
     console.log(`Received config from Host ${req.connection.remoteAddress}`)
 
-    var firebaseConfig : FirebaseConfig
-    
-    // Init Repository for Slack Config
-    console.debug("Init Repository")
-    const postRepository = getConnection().getRepository(FirebaseConfig)
-
-    // create object from Body of the Request (=FirebaseConfig)
-    console.debug("Init FirebaseConfig")
-    try {
-      firebaseConfig = postRepository.create(req.body as FirebaseConfig)
-    } catch (error) {
-      console.error(`Could not create Firebase Object: ${error}`)
-      res.status(400).send('Malformed firebase request.')
-      return
-    }
+    var firebaseConfig : FirebaseConfig = req.body as FirebaseConfig
+  
 
     // Check for validity of the request
     if (!NotificationEndpoint.isValidFirebaseRequest(firebaseConfig)) {
@@ -218,10 +199,13 @@ export class NotificationEndpoint {
       res.status(400).send('Malformed FireBase request.')
     }
 
-    // persist the Config
-    console.debug("Save FireBase config to Repository")
-    postRepository.save(firebaseConfig);
-    console.log("FireBase config persisted")
+    try {
+      this.StorageHandler.saveFirebaseConfig(firebaseConfig)
+    } catch (error) {
+      console.error(`Could not create Firebase Object: ${error}`)
+      res.status(400).send('Malformed firebase request.')
+      return
+    }
 
     // return saved post back
     res.send(200);
@@ -240,19 +224,20 @@ export class NotificationEndpoint {
   handlePipelineDelete = (req: Request, res: Response): void => {
   }
 
-  processNotificationRequest = async (notification: NotificationConfigRequest, res: Response): Promise<void> => {
-    try {
-      await this.NotificationService.handleNotification(notification)
-    } catch (e) {
-      if (e instanceof Error) {
-        console.log(`Notification handling failed. Nested cause is: ${e.name}: ${e.message}`)
-        res.status(500).send(`Notification handling failed. Nested cause is: ${e.name}: ${e.message}`)
-      } else {
-        res.status(500).send()
-      }
-    }
-    res.status(200).send()
-  }
+
+  // processNotificationRequest = async (notification: NotificationConfigRequest, res: Response): Promise<void> => {
+  //   try {
+  //     await this.NotificationService.handleNotification(notification)
+  //   } catch (e) {
+  //     if (e instanceof Error) {
+  //       console.log(`Notification handling failed. Nested cause is: ${e.name}: ${e.message}`)
+  //       res.status(500).send(`Notification handling failed. Nested cause is: ${e.name}: ${e.message}`)
+  //     } else {
+  //       res.status(500).send()
+  //     }
+  //   }
+  //   res.status(200).send()
+  // }
 
   determineAuth = (): express.RequestHandler | [] => {
     if (this.keycloak !== undefined) {

@@ -8,6 +8,11 @@ import TransformationRequest from './interfaces/transformationRequest'
 import { Server } from 'http'
 import JobResult from './interfaces/jobResult'
 import axios from 'axios'
+import { StorageHandler } from './storageHandler';
+import { TransformationConfig } from './interfaces/TransormationConfig';
+import JSTransformationService from './jsTransformationService';
+import { AmqpHandler } from './amqpHandler';
+import { TransformationEvent } from './interfaces/transformationEvent';
 
 export class TransformationEndpoint {
   port: number
@@ -16,7 +21,7 @@ export class TransformationEndpoint {
   keycloak?: Keycloak
 
   transformationService: TransformationService
-
+  
   constructor (transformationService: TransformationService, port: number, auth: boolean) {
     this.port = port
     this.transformationService = transformationService
@@ -37,45 +42,17 @@ export class TransformationEndpoint {
     this.app.get('/', this.getHealthCheck)
     this.app.get('/version', this.getVersion)
     this.app.post('/job', this.determineAuth(), this.postJob)
+
+    this.app.post('/config', this.determineAuth(), this.handleConfigRequest)
+    //this.app.get('/:id', this)
+
+    StorageHandler.initConnection(5, 5)
+    AmqpHandler.connect(5,5)
   }
 
   listen (): Server {
     return this.app.listen(this.port, () => {
       console.log('listening on port ' + this.port)
-      //  const amqp = require("amqplib/callback_api");
-      //  const rabbit_url = process.env.RABBIT_SERVICE_URL;
-      //  const rabbit_usr = process.env.RABBIT_SERVICE_USR;
-      //  const rabbit_password = process.env.RABBIT_SERVICE_PWD;
-
-      //  const rabit_amqp_url = "amqp://" + rabbit_usr + ":" + rabbit_password + "@" + rabbit_url;
-      //  console.log("URL" + rabit_amqp_url);
-      // amqp.connect(rabit_amqp_url, function (error0: string, connection) {
-      //   if (error0) {
-      //     console.error("Error connecting to RabbitMQ: " + error0);
-      //     return -1;
-      //   } else {
-      //     console.log("Connected to RabbitMQ.")
-      //     connection.createChannel(function (error1, channel) {
-      //       if (error1) {
-      //         console.error("RabbitMQ: " + error0);
-      //         return -1
-      //       }
-
-      //       const queue = 'test_queue'
-      //       const msg = 'Hello World'
-
-      //       channel.assertQueue(queue, {
-      //         durable: false,
-      //       });
-
-
-      //       channel.sendToQueue(queue, Buffer.from(msg));
-      //       console.log(" [x] Sent %s", msg);
-
-      //      });
-      //   }
-      //  });
-      
     })
   }
 
@@ -90,6 +67,70 @@ export class TransformationEndpoint {
     res.send(this.transformationService.getVersion())
     res.end()
   }
+
+  /**===========================================================================
+    * Handles a request to save a TransformationConfig
+    * This is done by checking the validity of the config and then save 
+    * it to the database on success
+    *============================================================================*/
+  handleConfigRequest = async (req: Request, res: Response): Promise<void> => {
+    console.log(`Received Transformation config from Host ${req.connection.remoteAddress}`)
+
+    var transformationConfig = req.body as TransformationConfig
+
+    // Check for validity of the request
+    if (!(this.isValidTransformationConfig(transformationConfig))) {
+      console.warn('Malformed transformation request.')
+      res.status(400).send('Malformed transformation request.')
+    }
+
+    // Persist Config
+    try {
+      StorageHandler.saveTransformationConfig(transformationConfig)
+    } catch (error) {
+      console.error(`Could not create transformationConfig Object: ${error}`)
+      res.status(400).send('Internal Server Error.')
+      return
+    }
+
+    // return saved post back
+    res.status(200).send('OK');
+  }
+
+  /**===============================================================================
+     * Gets all Configs asto corresponding to corresponnding Pipeline-ID 
+     * (identified by param id) as json list
+     *================================================================================*/
+  getConfigs = (req: Request, res: Response): void => {
+
+    const pipelineID = parseInt(req.params.id)
+    console.log(`Received request for configs with pipeline id ${pipelineID} from Host ${req.connection.remoteAddress}`)
+
+    if (!pipelineID) {
+      console.error("Request for config: ID not set")
+      res.status(400).send('Pipeline ID is not set.')
+      return
+    }
+
+    // Get configs from database
+    let configs = StorageHandler.getTransformationConfigs(pipelineID)
+
+    if (!configs) {
+      res.status(500).send('Internal Server Error')
+      return
+    }
+
+    // Get configSummary from promise
+    configs.then(configSummary => {
+      if (!configSummary) {
+        res.status(500).send('Internal Server Error')
+        return
+      }
+
+      res.status(200).send(configSummary)
+    })
+  }
+
 
   postJob = async (req: Request, res: Response): Promise<void> => {
     const transformation: TransformationRequest = req.body
@@ -115,6 +156,8 @@ export class TransformationEndpoint {
     res.setHeader('Content-Type', 'application/json')
     if (result.data) {
       res.writeHead(200)
+      let transformationEvent = new TransformationEvent(1, 'PIPELINE_TEST', transformation.dataLocation, true)
+      AmqpHandler.notifyNotificationService(transformationEvent)
     } else {
       res.writeHead(400)
     }
@@ -128,5 +171,9 @@ export class TransformationEndpoint {
     } else {
       return []
     }
+  }
+
+  private isValidTransformationConfig(conf: TransformationConfig): boolean {
+    return !!conf && !!conf.dataLocation && !!conf.func && !!conf.pipelineId
   }
 }

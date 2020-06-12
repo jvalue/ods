@@ -160,10 +160,18 @@ services:
       context: ./transformation/
     environment:
       AUTH_ENABLED: 'false' #TODO: turn to true as soon as it works!
+
+      # Postgres connection vars
       PGUSER: 'notification_usr'
       PGHOST: 'notification-db'
       PGPASSWORD: 'admin'
       PGPORT: 5432
+
+      # Rabbitmq connection details
+      AMQP_SERVICE_HOST: 'rabbitmq'
+      #RABBITMQ_ERLANG_COOKIE: 'S0m3_R4bBi7_C0ok13'
+      AMQP_SERVICE_USER: 'rabbit_adm'
+      AMQP_SERVICE_PWD: 'R4bb!7_4DM_p4SS'
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-transformation.rule=PathPrefix(`/api/transformation`)"
@@ -184,12 +192,21 @@ services:
       context: ./notification/
     environment:
       AUTH_ENABLED: 'false' #TODO: turn to true as soon as it works!
+      
+      # Postgres connection vars
       PGUSER: 'notification_usr'
       PGHOST: 'notification-db'
       PGPASSWORD: 'admin'
-      PGPORT: 5432
+      PGPORT: 5432,
+
+      # Rabbitmq connection details
+      AMQP_SERVICE_HOST: 'rabbitmq'
+      #RABBITMQ_ERLANG_COOKIE: 'S0m3_R4bBi7_C0ok13'
+      AMQP_SERVICE_USER: 'rabbit_adm'
+      AMQP_SERVICE_PWD: 'R4bb!7_4DM_p4SS'
     depends_on: 
       - notification-db
+      - rabbitmq
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-notification.rule=PathPrefix(`/api/notification`)"

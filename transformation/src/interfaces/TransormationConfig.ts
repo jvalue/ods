@@ -4,14 +4,13 @@ import "reflect-metadata"
 @Entity()
 export class TransformationConfig {
 
-
     @PrimaryGeneratedColumn()
     id!: number
 
-    @Column // TODO: CHeck 1:1 Relation to pipeline ? --> Delete id, make this primary
+    @Column() // TODO: CHeck 1:1 Relation to pipeline ? --> Delete id, make this primary
     pipelineId!: number 
     
-    @Column
+    @Column()
     func!: string
 
     @Column()

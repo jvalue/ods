@@ -48,11 +48,9 @@
         "typescript": "^3.9.3"
     },
     "homepage": "https://github.com/jvalue/open-data-service",
-    "licenses": [
-        {
-            "type": "GNU Affero General Public License 3",
-            "url": "https://opensource.org/licenses/AGPL-3.0"
-        }
-    ],
+    "licenses": [{
+        "type": "GNU Affero General Public License 3",
+        "url": "https://opensource.org/licenses/AGPL-3.0"
+    }],
     "repository": "https://github.com/jvalue/open-data-service.git"
 }
