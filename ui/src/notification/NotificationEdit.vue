@@ -92,9 +92,10 @@ import SlackEdit from '@/notification/SlackEdit.vue'
 @Component({
   components: { SlackEdit, WebhookEdit, FirebaseEdit }
 })
-export default class PipelineNotifications extends Vue implements NotificationEditDialog {
+export default class NotificationEdit extends Vue implements NotificationEditDialog {
   private validForm = false;
-  @Emit('pipelineSaved')
+
+  @Emit('save')
   onPipelineSave () {
     return this.editedNotification
   }

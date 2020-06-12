@@ -115,11 +115,11 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Watch } from 'vue-property-decorator'
 import { Action, State } from 'vuex-class'
-import Pipeline from './pipeline'
 
-import StepperButtonGroup from '../components/StepperButtonGroup.vue'
-import PipelineMetadataConfig from './edit/PipelineMetadataConfig.vue'
-import PipelineTransformationConfig from './edit/PipelineTransformationConfig.vue'
+import Pipeline from '@/pipeline/pipeline'
+import StepperButtonGroup from '@/components/StepperButtonGroup.vue'
+import PipelineMetadataConfig from '@/pipeline/edit/PipelineMetadataConfig.vue'
+import PipelineTransformationConfig from '@/pipeline/edit/PipelineTransformationConfig.vue'
 
 const pipelineNamespace = { namespace: 'pipeline' }
 
@@ -149,8 +149,7 @@ export default class PipelineEdit extends Vue {
       license: '',
       description: '',
       displayName: ''
-    },
-    notifications: []
+    }
   }
 
   created () {
