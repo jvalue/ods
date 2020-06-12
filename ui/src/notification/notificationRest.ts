@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios'
 import NotificationConfig from '@/notification/notificationConfig'
 
-const NOTIFICATION_SERVICE_URL = process.env.VUE_APP_CORE_SERVICE_URL as string
+const NOTIFICATION_SERVICE_URL = process.env.VUE_APP_NOTIFICATION_SERVICE_URL as string
 
 /**
  * Axios instance with default headers and base url.
