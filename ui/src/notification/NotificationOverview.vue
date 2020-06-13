@@ -4,7 +4,7 @@
       <v-card-title>
         <notification-edit
           ref="notificationEdit"
-          @pipelineSaved="onSave"
+          @save="onSave"
         />
         <v-btn
           class="ma-2"
@@ -12,8 +12,9 @@
         >
           <v-icon
             dark
-            right>
-              mdi mdi-arrow-left
+            right
+          >
+            mdi mdi-arrow-left
           </v-icon>
         </v-btn>
         <v-btn
@@ -96,11 +97,13 @@
 import Component from 'vue-class-component'
 import Vue from 'vue'
 import { Action, State } from 'vuex-class'
-import Pipeline from '@/pipeline/pipeline'
-import NotificationConfig from '@/pipeline/notifications/notificationConfig'
-import NotificationEditDialog from '@/pipeline/notifications/notificationEditDialog'
-import NotificationEdit from '@/pipeline/notifications/NotificationEdit.vue'
 import { Ref } from 'vue-property-decorator'
+
+import Pipeline from '@/pipeline/pipeline'
+import NotificationConfig from '@/notification/notificationConfig'
+import NotificationEditDialog from '@/notification/notificationEditDialog'
+import NotificationEdit from '@/notification/NotificationEdit.vue'
+import * as RestClient from '@/notification/notificationRest'
 
 const namespace = { namespace: 'pipeline' }
 
@@ -110,65 +113,57 @@ const namespace = { namespace: 'pipeline' }
   }
 })
 export default class PipelineNotifications extends Vue {
-  @Action('loadPipelineById', namespace) private loadPipelineByIdAction!: (id: number) => void
 
-  @Action('addNotification', namespace)
-  private addNotificationAction!: (notification: NotificationConfig) => Promise<Pipeline>
+  @State('selectedPipeline', namespace) selectedPipeline!: Pipeline
 
-  @Action('removeNotification', namespace)
-  private removeNotificationAction!: (notification: NotificationConfig) => Promise<Pipeline>
-
-  @Action('updateNotification', namespace)
-  private updateNotificationAction!: (notification: NotificationConfig) => Promise<Pipeline>
-
-  @State('selectedPipeline', namespace) private selectedPipeline!: Pipeline
+  notifications: NotificationConfig[] = []
 
   @Ref('notificationEdit')
-  private notificationEdit!: NotificationEditDialog
+  notificationEdit!: NotificationEditDialog
 
-  private headers = [
+  headers = [
     { text: 'Id', value: 'notificationId' },
     { text: 'Type', value: 'type' },
     { text: 'Condition', value: 'condition' },
     { text: 'Actions', value: 'action' }
   ]
 
-  private isEdit = false
-  private pipelineId = -1
+  isEdit = false
+  pipelineId = -1
 
-  private created () {
+  async created () {
     console.log('Notification Overview created!')
     this.pipelineId = this.$route.params.pipelineId as unknown as number
-    this.loadPipelineByIdAction(this.pipelineId)
+    await this.onLoadNotifications()
   }
 
-  private onCreateNotification () {
+  onCreateNotification () {
     this.isEdit = false
     this.notificationEdit.openDialog()
   }
 
-  private onEditNotification (notification: NotificationConfig) {
+  onEditNotification (notification: NotificationConfig) {
     this.isEdit = true
     this.notificationEdit.openDialog(notification)
   }
 
-  private onDeleteNotification (notification: NotificationConfig) {
-    this.removeNotificationAction(notification)
+  async onDeleteNotification (notification: NotificationConfig) {
+    await RestClient.remove(notification.notificationId)
   }
 
-  private onLoadNotifications () {
-    this.loadPipelineByIdAction(this.pipelineId)
+  async onLoadNotifications () {
+    this.notifications = await RestClient.getAllByPipelineId(this.pipelineId)
   }
 
-  private onNavigateBack() {
+  onNavigateBack () {
     this.$router.push({ name: 'pipeline-overview' })
   }
 
   onSave (editedNotification: NotificationConfig) {
     if (this.isEdit) { // edit
-      this.updateNotificationAction(editedNotification)
+      RestClient.update(editedNotification.notificationId, editedNotification)
     } else { // create
-      this.addNotificationAction(editedNotification)
+      RestClient.create(editedNotification)
     }
   }
 }

@@ -5,6 +5,7 @@ import transformationRoutes from '@/transformation/router'
 import storageRoutes from '@/storage/router'
 import datasourceRoutes from '@/datasource/router'
 import pipelineRoutes from '@/pipeline/router'
+import notificationRoutes from '@/notification/router'
 import { isAuthenticated, keycloakLogin } from './keycloak'
 
 Vue.use(Router)
@@ -31,6 +32,7 @@ let routes = [
 routes = routes.concat(transformationRoutes)
 routes = routes.concat(pipelineRoutes)
 routes = routes.concat(datasourceRoutes)
+routes = routes.concat(notificationRoutes)
 routes = routes.concat(storageRoutes)
 
 const router = new Router({
