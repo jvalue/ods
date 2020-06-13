@@ -3,7 +3,7 @@ import { StorageHandler } from "./storageHandler"
 import JSNotificationService from './jsNotificationService';
 
 export class AmqpHandler{
-    
+
 
     /**====================================================================================
      * Connects to Amqp Service and initializes a channel
@@ -19,7 +19,7 @@ export class AmqpHandler{
         console.log("URL: " + rabit_amqp_url)
 
         var established: boolean = false
-        
+
 
         for (let i = 0; i < retries; i++) {
             await this.backOff(backoff)
@@ -35,17 +35,17 @@ export class AmqpHandler{
                 // create the channel
                 AmqpHandler.initChannel(connection)
             })
-            
+
 
             if (established) {
                 break
             }
         }
     }
-    
+
     /**====================================================================
          * Waits for a specific time period
-         * 
+         *
          * @param backOff   Period to wait in seconds
          *====================================================================*/
     private static backOff(backOff: number): Promise<void> {
@@ -73,8 +73,8 @@ export class AmqpHandler{
 
 
     /**
-     * Handles an event message 
-     * @param msg 
+     * Handles an event message
+     * @param msg
      */
     private static handleEvent(msg: any) :boolean {
         const transformationEvent = msg.content.toString() as TransformationEvent
@@ -85,9 +85,9 @@ export class AmqpHandler{
             console.error('Message received is not an Transformation Event')
             return false
         }
-        
+
         let handler = new StorageHandler()
-        
+
         let configs = handler.getConfigsForPipeline(transformationEvent.pipelineID)
 
         configs.then(config => {
@@ -98,13 +98,13 @@ export class AmqpHandler{
             }
 
             for (const webhookConfig of config.webhook) {
-                let notificationService = new JSNotificationService(execute)
-                
+                // let notificationService = new JSNotificationService(execute)
 
-        
+
+
             }
-        })            
-        
+        })
+
         return true
     }
 
@@ -112,9 +112,9 @@ export class AmqpHandler{
     /**
      * Checks if parameter event is a Transformation event,
      * by checking if all field variables exist and are set.
-     * 
-     * @param event Transformation event to be checked for validity 
-     * 
+     *
+     * @param event Transformation event to be checked for validity
+     *
      * @returns     true, if param event is a TransformationEvent, else false
      */
     private static isValidTransformationEvent(event: TransformationEvent) : boolean {
@@ -122,4 +122,4 @@ export class AmqpHandler{
     }
 }
 
-    
+

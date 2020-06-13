@@ -22,5 +22,5 @@ export default [
     name: 'datasource-edit',
     component: DatasourceEdit,
     meta: { title: 'Edit Datasource', requiresAuth: true, isEditMode: true }
-  },
+  }
 ]

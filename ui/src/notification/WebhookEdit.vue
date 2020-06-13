@@ -15,7 +15,8 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Emit, PropSync } from 'vue-property-decorator'
-import { WebhookNotification } from '@/pipeline/notifications/notificationConfig'
+
+import { WebhookNotification } from '@/notification/notificationConfig'
 
 @Component({ })
 export default class WebhookEdit extends Vue {

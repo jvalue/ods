@@ -10,16 +10,6 @@
       <v-card-text>
         <v-container>
           <v-row
-            cols="20"
-            sm="6"
-            md="4"
-          >
-            <v-text-field
-              v-model="editedNotification.condition"
-              label="Condition"
-            />
-          </v-row>
-          <v-row
             cols="30"
             sm="6"
             md="4"
@@ -31,6 +21,16 @@
             />
           </v-row>
           <v-row
+            cols="20"
+            sm="6"
+            md="4"
+          >
+            <v-text-field
+              v-model="editedNotification.condition"
+              label="Condition"
+            />
+          </v-row>
+          <v-row
             cols="10"
             sm="6"
             md="4"
@@ -38,20 +38,20 @@
             <webhook-edit
               v-if="editedNotification.type === 'WEBHOOK'"
               v-model="editedNotification"
-              @validityChanged="validForm = $event"
               style="flex: 1 1 auto"
+              @validityChanged="validForm = $event"
             />
             <firebase-edit
               v-if="editedNotification.type === 'FCM'"
               v-model="editedNotification"
-              @validityChanged="validForm = $event"
               style="flex: 1 1 auto"
+              @validityChanged="validForm = $event"
             />
             <slack-edit
               v-if="editedNotification.type === 'SLACK'"
               v-model="editedNotification"
-              @validityChanged="validForm = $event"
               style="flex: 1 1 auto"
+              @validityChanged="validForm = $event"
             />
           </v-row>
         </v-container>
@@ -81,19 +81,21 @@
 <script lang="ts">
 import Component from 'vue-class-component'
 import Vue from 'vue'
-import NotificationConfig, {WebhookNotification} from '@/pipeline/notifications/notificationConfig'
-import NotificationEditDialog from '@/pipeline/notifications/notificationEditDialog'
 import { Emit } from 'vue-property-decorator'
-import WebhookEdit from '@/pipeline/notifications/WebhookEdit.vue'
-import FirebaseEdit from '@/pipeline/notifications/FirebaseEdit.vue'
-import SlackEdit from '@/pipeline/notifications/SlackEdit.vue'
+
+import NotificationConfig, { WebhookNotification } from '@/notification/notificationConfig'
+import NotificationEditDialog from '@/notification/notificationEditDialog'
+import WebhookEdit from '@/notification/WebhookEdit.vue'
+import FirebaseEdit from '@/notification/FirebaseEdit.vue'
+import SlackEdit from '@/notification/SlackEdit.vue'
 
 @Component({
-  components: {SlackEdit, WebhookEdit, FirebaseEdit }
+  components: { SlackEdit, WebhookEdit, FirebaseEdit }
 })
-export default class PipelineNotifications extends Vue implements NotificationEditDialog {
+export default class NotificationEdit extends Vue implements NotificationEditDialog {
   private validForm = false;
-  @Emit('pipelineSaved')
+
+  @Emit('save')
   onPipelineSave () {
     return this.editedNotification
   }
@@ -105,7 +107,7 @@ export default class PipelineNotifications extends Vue implements NotificationEd
     notificationId: -1,
     condition: 'true',
     url: '',
-    type: "WEBHOOK"
+    type: 'WEBHOOK'
   }
 
   private editedNotification: NotificationConfig = Object.assign({}, this.defaultNotification)
