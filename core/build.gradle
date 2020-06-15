@@ -1,16 +1,15 @@
 plugins {
-	id 'org.springframework.boot' version '2.2.6.RELEASE'
+	id 'org.springframework.boot' version '2.3.0.RELEASE'
+  id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 	id 'java'
 }
 
 def props = new Properties()
 file('src/main/resources/application.properties').withInputStream {props.load(it)}
 
-apply plugin: 'io.spring.dependency-management'
-
 group = 'org.jvalue.ods'
 version = props.getProperty("app.version")
-sourceCompatibility = '13'
+sourceCompatibility = '14'
 
 repositories {
 	mavenCentral()
@@ -20,6 +19,7 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+  implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.postgresql:postgresql'

@@ -2,6 +2,7 @@ import { TransformationEvent } from './interfaces/transformationEvent';
 import {   ConsumeMessage } from "amqplib";
 import { Channel, connect, Connection} from "amqplib/callback_api"
 import VM2SandboxExecutor from './vm2SandboxExecutor';
+import { TransformationEventInterface } from '../../notification/src/interfaces/transformationEventInterface';
 
 export class AmqpHandler{
     static channel?: Channel           // notification channel
@@ -119,9 +120,9 @@ export class AmqpHandler{
 
         // Extract content from Event
         const messageContent = msg.content.toString() 
-        const transformationEvent = JSON.parse(messageContent) as TransformationEvent
+        const transformationEvent = JSON.parse(messageContent) as TransformationEventInterface
 
-        const isValid = transformationEvent.isValidTransformationEvent()
+        const isValid = this.isValidTransformationEvent(transformationEvent)
 
         if (!isValid) {
             console.error('Message received is not an Transformation Event')
@@ -177,6 +178,14 @@ export class AmqpHandler{
     }
 
 
-
+    /**
+     * Checks if this event is a valid Transformation event,
+     * by checking if all field variables exist and are set.
+     *
+     * @returns     true, if param event is a TransformationEvent, else false
+     */
+    public static isValidTransformationEvent(event: TransformationEventInterface): boolean {
+        return !!event.dataLocation && !!event.pipelineID && !!event.pipelineName && !!event.result
+    }
 
 }
