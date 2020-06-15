@@ -1,16 +1,15 @@
 plugins {
-	id 'org.springframework.boot' version '2.2.2.RELEASE'
+	id 'org.springframework.boot' version '2.3.0.RELEASE'
+  id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 	id 'java'
 }
 
 def props = new Properties()
 file("src/main/resources/application.properties").withInputStream { props.load(it)}
 
-apply plugin: 'io.spring.dependency-management'
-
 group = 'org.jvalue.ods'
 version = props.getProperty("app.version")
-sourceCompatibility = '13'
+sourceCompatibility = '14'
 
 task testProps {
 	doFirst {
@@ -25,6 +24,8 @@ repositories {
 }
 
 test {
+  useJUnitPlatform()
+
 	testLogging {
 		events "passed", "skipped", "failed"
 
@@ -40,6 +41,7 @@ test {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+  implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
   implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
@@ -47,5 +49,7 @@ dependencies {
 	implementation 'org.postgresql:postgresql'
 
 
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+  testImplementation('org.springframework.boot:spring-boot-starter-test') {
+    exclude group: 'org.junit.vintage:junit-vintage-engine'
+  }
 }
