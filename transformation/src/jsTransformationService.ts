@@ -54,4 +54,6 @@ export default class JSTransformationService implements TransformationService {
     const jobResult: JobResult = { ...result, stats }
     return jobResult
   }
+
+  
 }

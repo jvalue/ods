@@ -45,14 +45,14 @@ export class NotificationEndpoint {
     this.app.get('/version', this.getVersion)
 
     // // Deletion of Configs
-    this.app.delete('notifications/:id', this.determineAuth(), this.handleNotificationDelete)
-    this.app.delete('pipelines/:pipelineId/notifications', this.determineAuth(), this.handlePipelineDelete)
+    this.app.delete('/notifications/:id', this.determineAuth(), this.handleNotificationDelete)
+    this.app.delete('/pipelines/:pipelineId/notifications', this.determineAuth(), this.handlePipelineDelete)
 
     // Creation of Configs
-    this.app.post('notificaitons/', this.determineAuth(), this.handleNotificaitonCreate)
+    this.app.post('/notifications/', this.determineAuth(), this.handleNotificaitonCreate)
 
     // // Update of Configs
-    this.app.put('notificaitons/:id', this.determineAuth(), this.handleNotificaitonUpdate)
+    this.app.put('/notifications/:id', this.determineAuth(), this.handleNotificaitonUpdate)
 
     // Request Configs
 

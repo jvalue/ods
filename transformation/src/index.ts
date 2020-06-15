@@ -13,9 +13,7 @@ if (authEnabled === false) {
 
 const sandboxExecutor = new VM2SandboxExecutor()
 const transformationService = new JSTransformationService(sandboxExecutor)
-const amqp = new AmqpHandler()
-amqp.connect(5, 5)
 
-const transformationEndpoint = new TransformationEndpoint(transformationService, amqp, port, authEnabled)
+const transformationEndpoint = new TransformationEndpoint(transformationService, port, authEnabled)
 
 transformationEndpoint.listen()

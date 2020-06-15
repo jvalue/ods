@@ -112,8 +112,8 @@ services:
       DATABASE_HOST: storage-db
       DATABASE_PORT: 5432
       DATABASE_NAME: ods
-      DATABASE_USER: postgrest
-      DATABASE_PW: postgres-wrapper-pw
+      DATABASE_USER: ods_admin
+      DATABASE_PW: ods_pw
     depends_on:
       - storage-db
       - storage-db-liquibase # TODO: make sure the migration runs through before reading db structure

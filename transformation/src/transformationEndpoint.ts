@@ -10,7 +10,6 @@ import JobResult from './interfaces/jobResult'
 import axios from 'axios'
 import { StorageHandler } from './storageHandler';
 import { TransformationConfig } from './interfaces/TransormationConfig';
-import JSTransformationService from './jsTransformationService';
 import { AmqpHandler } from './amqpHandler';
 import { TransformationEvent } from './interfaces/transformationEvent';
 
@@ -21,12 +20,12 @@ export class TransformationEndpoint {
   keycloak?: Keycloak
 
   transformationService: TransformationService
-  amqp: AmqpHandler
+  
 
-  constructor (transformationService: TransformationService, amqp: AmqpHandler, port: number, auth: boolean) {
+  constructor (transformationService: TransformationService, port: number, auth: boolean) {
     this.port = port
     this.transformationService = transformationService
-    this.amqp = amqp
+    
 
     this.app = express()
 
@@ -46,9 +45,10 @@ export class TransformationEndpoint {
     this.app.post('/job', this.determineAuth(), this.postJob)
 
     this.app.post('/config', this.determineAuth(), this.handleConfigRequest)
-    //this.app.get('/:id', this)
+    this.app.get('/config/:id', this.getConfigs)
 
-    StorageHandler.initConnection(5, 5)
+    StorageHandler.initConnection(10, 5)
+    AmqpHandler.connect(10, 5)
   }
 
   listen (): Server {
@@ -134,6 +134,7 @@ export class TransformationEndpoint {
 
 
   postJob = async (req: Request, res: Response): Promise<void> => {
+    console.log(`Received request: ${req.body}`)
     const transformation: TransformationRequest = req.body
     if (!transformation.data && !transformation.dataLocation) {
       res.writeHead(400)
@@ -158,7 +159,7 @@ export class TransformationEndpoint {
     if (result.data) {
       res.writeHead(200)
       let transformationEvent = new TransformationEvent(1, 'PIPELINE_TEST', transformation.dataLocation, true)
-      this.amqp.notifyNotificationService(transformationEvent)
+      AmqpHandler.notifyNotificationService(transformationEvent)
     } else {
       res.writeHead(400)
     }

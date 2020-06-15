@@ -45,7 +45,7 @@ export async function createStructure (pipelineId: number): Promise<void> {
       }
     )
   } catch (e) {
-    if (e.response.status === 409 || e.response.data.code === '42P07') {
+    if (e.response && (e.response.status === 409 || e.response.data.code === '42P07')) {
       // the structure already exists
       console.log(`Storage structure for pipeline ${pipelineId} already exists.`)
     } else {
