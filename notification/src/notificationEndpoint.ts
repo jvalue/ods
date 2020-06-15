@@ -9,7 +9,7 @@ import "reflect-metadata"
 import { Server } from 'http'
 
 import { SlackConfig, NotificationConfigRequest, WebHookConfig, NotificationConfig, FirebaseConfig } from './interfaces/notificationConfig';
-import { StorageHandler } from './storageHandler';
+import { NotificationRepository } from './interfaces/notificationRepository'
 import { AmqpHandler } from './amqpHandler';
 
 export class NotificationEndpoint {
@@ -19,13 +19,13 @@ export class NotificationEndpoint {
   keycloak?: Keycloak
 
   NotificationService: NotificationService
-  StorageHandler: StorageHandler
+  storageHandler: NotificationRepository
 
 
-  constructor(NotificationService: NotificationService, storageHandler: StorageHandler, port: number, auth: boolean) {
+  constructor(NotificationService: NotificationService, storageHandler: NotificationRepository, port: number, auth: boolean) {
     this.port = port
     this.NotificationService = NotificationService
-    this.StorageHandler = storageHandler
+    this.storageHandler = storageHandler
 
     this.app = express()
 
@@ -62,7 +62,7 @@ export class NotificationEndpoint {
     // this.app.post('/fcm', this.determineAuth(), this.postFirebase)
     console.log("Init Connection to Database")
 
-    this.StorageHandler.initConnection(5, 5)
+    this.storageHandler.initConnection(5, 5)
     AmqpHandler.connect(5,5)
   }
 
@@ -101,7 +101,7 @@ export class NotificationEndpoint {
     }
 
     // Get configs from database
-    const configSummary = await this.StorageHandler.getConfigsForPipeline(pipelineId)
+    const configSummary = await this.storageHandler.getConfigsForPipeline(pipelineId)
     const configs: object[] = []
 
     configSummary.firebase.forEach((firebaseConfig) => {
@@ -198,7 +198,7 @@ export class NotificationEndpoint {
 
     // Persist Config
     try {
-      await this.StorageHandler.saveWebhookConfig(webHookConfig)
+      await this.storageHandler.saveWebhookConfig(webHookConfig)
     } catch(error) {
       console.error(`Could not create WebHookConfig Object: ${error}`)
       res.status(400).send('Internal Server Error.')
@@ -226,7 +226,7 @@ export class NotificationEndpoint {
 
     // Persist Config
     try {
-      await this.StorageHandler.saveSlackConfig(slackConfig)
+      await this.storageHandler.saveSlackConfig(slackConfig)
     } catch(error) {
       console.error(`Could not create WebHookConfig Object: ${error}`)
       res.status(400).send('Malformed slack config request.')
@@ -254,7 +254,7 @@ export class NotificationEndpoint {
     }
 
     try {
-      await this.StorageHandler.saveFirebaseConfig(firebaseConfig)
+      await this.storageHandler.saveFirebaseConfig(firebaseConfig)
     } catch (error) {
       console.error(`Could not create Firebase Object: ${error}`)
       res.status(400).send('Malformed firebase request.')
