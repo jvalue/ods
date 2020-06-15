@@ -84,6 +84,7 @@ export class AmqpHandler{
         const eventMessage = JSON.parse(msg.content.toString())
         const transformationEvent = eventMessage as TransformationEventInterface
 
+        
         const isValid = AmqpHandler.isValidTransformationEvent(transformationEvent)
 
         if (!isValid) {

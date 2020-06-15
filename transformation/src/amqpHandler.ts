@@ -2,7 +2,7 @@ import { TransformationEvent } from './interfaces/transformationEvent';
 import {   ConsumeMessage } from "amqplib";
 import { Channel, connect, Connection} from "amqplib/callback_api"
 import VM2SandboxExecutor from './vm2SandboxExecutor';
-import { TransformationEventInterface } from '../../notification/src/interfaces/transformationEventInterface';
+import { TransformationEventInterface } from './interfaces/transformationEventInterface'
 
 export class AmqpHandler{
     static channel?: Channel           // notification channel
