@@ -6,7 +6,7 @@ import VM2SandboxExecutor from "./vm2SandboxExecutor";
 
 
 export class AmqpHandler{
-
+    static notifQueueName = process.env.AMQP_NOTIFICATION_QUEUE!     // Queue name of the Job Queue
 
     /**
      * Connects to Amqp Service and initializes a channel
@@ -26,13 +26,12 @@ export class AmqpHandler{
 
         for (let i = 0; i < retries; i++) {
             await this.backOff(backoff)
-            connect(rabit_amqp_url, function (error0: any, connection: Connection) {
+            await connect(rabit_amqp_url, function (error0: any, connection: Connection) {
                 if (error0) {
                     console.error(`Error connecting to RabbitMQ: ${error0}.Retrying in ${backoff} seconds`);
                     return
                 }
                 established = true
-                console.log("Connected to RabbitMQ.");
 
                 // create the channel
                 AmqpHandler.initChannel(connection)
@@ -45,11 +44,11 @@ export class AmqpHandler{
         }
     }
 
-    /**====================================================================
-         * Waits for a specific time period
-         *
-         * @param backOff   Period to wait in seconds
-         *====================================================================*/
+    /**
+     * Waits for a specific time period.
+     *
+     * @param backOff   Period to wait in seconds
+     */
     private static backOff(backOff: number): Promise<void> {
         return new Promise(resolve => setTimeout(resolve, backOff * 1000));
     }
@@ -60,15 +59,13 @@ export class AmqpHandler{
                     throw error1;
                 }
 
-                var queue = "test_queue";
-
-                channel.assertQueue(queue, {
+                channel.assertQueue(AmqpHandler.notifQueueName, {
                     durable: false,
                 });
 
                 // Consume from Channel
-                console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", queue);
-                channel.consume(queue, AmqpHandler.handleEvent,{noAck: true}
+                console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", AmqpHandler.notifQueueName);
+                channel.consume(AmqpHandler.notifQueueName, AmqpHandler.handleEvent,{noAck: true}
                 );
             });
     }
@@ -107,22 +104,23 @@ export class AmqpHandler{
             }
 
             for (const webhookConfig of config.webhook) {
-                notificationService.handleNotification(webhookConfig,'WEBHOOK')
+                notificationService.handleNotification(webhookConfig, transformationEvent, 'WEBHOOK')
             }
 
             for (const slackConfig of config.slack) {
-                notificationService.handleNotification(slackConfig, 'SLACK')
+                notificationService.handleNotification(slackConfig, transformationEvent, 'SLACK')
             }
 
 
             for (const firebaseConfig of config.firebase) {
-                notificationService.handleNotification(firebaseConfig, 'FCM')
+                notificationService.handleNotification(firebaseConfig, transformationEvent, 'FCM')
             }
             
         })
 
         return true
     }
+
     /**
         * Checks if this event is a valid Transformation event,
         * by checking if all field variables exist and are set.
@@ -130,7 +128,7 @@ export class AmqpHandler{
         * @returns     true, if param event is a TransformationEvent, else false
         */
     public static  isValidTransformationEvent(event: TransformationEventInterface): boolean {
-        return !!event.dataLocation && !!event.pipelineID && !!event.pipelineName && !!event.result
+        return !!event.dataLocation && !!event.pipelineID && !!event.pipelineName && !!event.jobResult
     }
 }
 

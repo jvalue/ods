@@ -1,21 +1,23 @@
 import { TransformationEventInterface } from "./transformationEventInterface"
+import JobResult from "./jobResult"
+
 
 /**
  * Event send by the Transformation service upon transformation finish
  */
-export class TransformationEvent implements TransformationEventInterface{
+export class TransformationEvent implements TransformationEventInterface {
     pipelineID: number      // ID of the pipeline
     pipelineName: string    // Name of the pipeline
 
     dataLocation: string    // url (location) of the pipeline
 
-    result: boolean         // result of the transformation
+    jobResult: JobResult            // result of the transformation
 
-    constructor(pipelineID: number, pipelineName: string, dataLocation: string, result: boolean) {
+    constructor(pipelineID: number, pipelineName: string, jobResult: JobResult, dataLocation: string) {
         this.pipelineID = pipelineID
         this.pipelineName = pipelineName
         this.dataLocation = dataLocation
-        this.result = result
+        this.jobResult = jobResult
     }
 
     /**
@@ -25,6 +27,6 @@ export class TransformationEvent implements TransformationEventInterface{
      * @returns     true, if param event is a TransformationEvent, else false
      */
     public isValidTransformationEvent(): boolean {
-        return !!this.dataLocation && !!this.pipelineID && !!this.pipelineName && !!this.result
+        return !!this.jobResult && !!this.dataLocation && !!this.pipelineID && !!this.pipelineName
     }
 }

@@ -1,7 +1,8 @@
 import { NotificationConfig } from './notificationConfig'
+import { TransformationEventInterface } from './transformationEventInterface';
 
 
 export default interface NotificationService {
   getVersion(): string;
-  handleNotification(notifcationConfig: NotificationConfig, type: string): Promise<void>;
+  handleNotification(notifcationConfig: NotificationConfig, event: TransformationEventInterface, type: string): Promise<void>;
 }

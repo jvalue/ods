@@ -136,6 +136,7 @@ export class TransformationEndpoint {
   postJob = async (req: Request, res: Response): Promise<void> => {
     console.log(`Received request: ${req.body}`)
 
+    // TODO: Implement PipelineID + PipeLine name in Request
     let pipelineID = req.body.pipelineID
 
     const transformation: TransformationRequest = req.body
@@ -161,12 +162,14 @@ export class TransformationEndpoint {
     res.setHeader('Content-Type', 'application/json')
     if (result.data) {
       res.writeHead(200)
-      let transformationEvent = new TransformationEvent(pipelineID, 'PIPELINE_TEST', transformation.dataLocation, true)
-      AmqpHandler.notifyNotificationService(transformationEvent)
     } else {
       res.writeHead(400)
     }
     res.write(answer)
+    
+    let transformationEvent = new TransformationEvent(pipelineID, 'PIPELINE_TEST', result, transformation.dataLocation)
+    AmqpHandler.notifyNotificationService(transformationEvent)
+
     res.end()
   }
 

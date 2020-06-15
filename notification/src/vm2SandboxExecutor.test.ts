@@ -14,7 +14,7 @@ describe('VM2SandboxExecutor', () => {
       const object = { value1: 5 }
       const expression = 'data.value1 === 5'
 
-      const result = e.evaluate(expression, JSON.stringify(object))
+      const result = e.evaluate(expression, object)
 
       expect(result).toBe(true)
     })
@@ -23,7 +23,7 @@ describe('VM2SandboxExecutor', () => {
       const object = { value1: 5 }
       const expression = 'data.value1 === 6'
 
-      const result = e.evaluate(expression, JSON.stringify(object))
+      const result = e.evaluate(expression, object)
 
       expect(result).toBe(false)
     })
@@ -33,7 +33,7 @@ describe('VM2SandboxExecutor', () => {
       const expression = '1 + 1'
 
       try {
-        e.evaluate(expression, JSON.stringify(object))
+        e.evaluate(expression, object)
         fail()
       } catch (err) {
         expect(err.message).toEqual("Malformed expression received: 1 + 1\n Error message: Expected result to be a boolean expression!")
@@ -44,7 +44,7 @@ describe('VM2SandboxExecutor', () => {
       const object = { value1: 5, value2: 10, stringval: 'text' }
       const expression = 'data.value1 + data.value2 === 15 && data.stringval === "text"'
 
-      const result = e.evaluate(expression, JSON.stringify(object))
+      const result = e.evaluate(expression, object)
 
       expect(result).toBe(true)
     })

@@ -9,6 +9,7 @@ import SlackCallback from './interfaces/slackCallback';
 import WebhookCallback from './interfaces/webhookCallback';
 import FcmCallback from './interfaces/fcmCallback';
 import SandboxExecutor from './interfaces/sandboxExecutor';
+import { TransformationEventInterface } from './interfaces/transformationEventInterface';
 
 
 const VERSION = '0.0.1'
@@ -25,32 +26,78 @@ export default class JSNotificationService implements NotificationService {
       return VERSION
   }
 
-  async handleNotification(notification: NotificationConfig, type: string): Promise<void> {
-        console.log(`NotificationRequest received for pipeline: ${notification.pipelineId}.`)
-        const conditionHolds = this.executor.evaluate(notification.condition, notification.data)
-        console.log('Condition is ' + conditionHolds)
-        if (!conditionHolds) { // no need to trigger notification
-        return Promise.resolve()
-        }
+async handleNotification(notification: NotificationConfig, event: TransformationEventInterface, type: string): Promise<void> {
+  console.log(`NotificationRequest received for pipeline: ${notification.pipelineId}.`)
 
-        const message = `Pipeline ${notification.pipelineName}(${notification.pipelineId}) ` +
-        `has new data available. Fetch at ${notification.dataLocation}.`
+  
+  const conditionHolds = this.executor.evaluate(notification.condition, event.jobResult.data)
+  console.log('Condition is ' + conditionHolds)
+  if (!conditionHolds) { // no need to trigger notification
+    return Promise.resolve()
+  }
+  
+  const message = this.buildMessage(event)
 
-        switch (type) {
-        case 'WEBHOOK':
-            await this.handleWebhook(notification as WebHookConfig)
-            break
-        case 'FCM':
-            await this.handleFCM(notification as FirebaseConfig, message)
-            break
-        case 'SLACK':
-            await this.handleSlack(notification as SlackConfig, message)
-            break
-        default:
-            throw new Error('Notification type not implemented.')
-        }
+  switch (type) {
+  case 'WEBHOOK':
+      await this.handleWebhook(notification as WebHookConfig)
+      break
+  case 'FCM':
+      await this.handleFCM(notification as FirebaseConfig, message)
+      break
+  case 'SLACK':
+      await this.handleSlack(notification as SlackConfig, message)
+      break
+  default:
+      throw new Error('Notification type not implemented.')
+  }
+  }
+
+
+  /**
+   * Builds the notification message to be sent,
+   * by composing the contents of the transformation event to readable
+   * message
+   * 
+   * @param event event to extract transformation results from 
+   * @returns message to be sent as notification
+   */
+  private buildMessage(event: TransformationEventInterface) {
+    
+    var message: string
+    const jobError = event.jobResult.error    // Error of transformation (if exists)
+
+    /*====================================================
+    *  Build Message for failed transformation/pipline
+    *====================================================*/
+    if (jobError) {
+      message = `Pipeline ${event.pipelineName}(Pipeline ID:${event.pipelineID})Failed.
+
+        Details:
+          Line: ${jobError.lineNumber}
+          Message: ${jobError.message}
+          Stacktrace: ${ jobError.stacktrace}`
+    } else {
+    /*======================================================
+     *  Build Message for succesfull transformation/pipline
+     *=======================================================*/ 
+      // Build Stats (Time measures for transformation execution)
+      const jobStats = event.jobResult.stats
+      let start = new Date(jobStats.startTimestamp)
+      let end = new Date(jobStats.endTimestamp)
+
+
+      // Build Success Message
+      message = `Pipeline ${event.pipelineName}(Pipeline ID:${event.pipelineID}) ` +
+        `has new data available. Fetch at ${event.dataLocation}.
+
+      Transformation Details:
+            Start: ${start}
+            End:  ${end}
+            Duration: ${jobStats.durationInMilliSeconds} ms`
     }
-
+    return message
+  }
 
   private async handleWebhook (webhook: WebHookConfig): Promise<void> {
     const callbackObject: WebhookCallback = {

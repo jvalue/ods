@@ -28,6 +28,8 @@ export default class JSTransformationService implements TransformationService {
     return [time, result]
   }
 
+
+  
   executeJob (code: string, data: object): JobResult {
     const startTimestamp = Date.now()
 
