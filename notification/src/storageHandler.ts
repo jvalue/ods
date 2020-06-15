@@ -142,38 +142,33 @@ export class StorageHandler implements NotificationRepository {
      * TODO: Document
      *
      *===============================================================*/
-    public saveWebhookConfig(webhookConfig: WebHookConfig): boolean {
+    public saveWebhookConfig(webhookConfig: WebHookConfig): Promise<WebHookConfig> {
         const postRepository = getConnection().getRepository(WebHookConfig)
         webhookConfig = postRepository.create(webhookConfig)
 
-        // persist the Config
-        postRepository.save(webhookConfig);
-        return true
+        return postRepository.save(webhookConfig);
     }
 
     /**===============================================================
      * TODO: Document
      *
      *===============================================================*/
-    public saveSlackConfig(slackConfig: SlackConfig): boolean {
+    public saveSlackConfig(slackConfig: SlackConfig): Promise<SlackConfig>  {
         const postRepository = getConnection().getRepository(SlackConfig)
         slackConfig = postRepository.create(slackConfig)
 
-        // persist the Config
-        postRepository.save(slackConfig);
-        return true
+        return postRepository.save(slackConfig);
     }
 
     /**===============================================================
      * TODO: Document
      *
      *===============================================================*/
-    public saveFirebaseConfig(firebaseConfig: FirebaseConfig): boolean {
+    public saveFirebaseConfig(firebaseConfig: FirebaseConfig): Promise<FirebaseConfig>  {
         const postRepository = getConnection().getRepository(FirebaseConfig)
         firebaseConfig = postRepository.create(firebaseConfig)
 
-        postRepository.save(firebaseConfig);
-        return true
+        return postRepository.save(firebaseConfig);
     }
 
     /**====================================================================

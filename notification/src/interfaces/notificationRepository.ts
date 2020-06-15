@@ -7,7 +7,7 @@ export interface NotificationRepository {
   getSlackConfigs(pipelineId: number): Promise<SlackConfig[]>
   getWebHookConfigs(pipelineId: number): Promise<WebHookConfig[]>
   getFirebaseConfigs(pipelineId: number): Promise<FirebaseConfig[]>
-  saveWebhookConfig(webhookConfig: WebHookConfig): boolean
-  saveSlackConfig(slackConfig: SlackConfig): boolean
-  saveFirebaseConfig(firebaseConfig: FirebaseConfig): boolean
+  saveWebhookConfig(webhookConfig: WebHookConfig): Promise<WebHookConfig>
+  saveSlackConfig(slackConfig: SlackConfig): Promise<SlackConfig>
+  saveFirebaseConfig(firebaseConfig: FirebaseConfig): Promise<FirebaseConfig>
 }
