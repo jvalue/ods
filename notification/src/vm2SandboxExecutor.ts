@@ -2,9 +2,6 @@ import { VM } from 'vm2'
 
 import SandboxExecutor from './interfaces/sandboxExecutor';
 
-
-const FUNCTION_WRAP_PREFIX_LENGTH = 1
-
 export default class VM2SandboxExecutor implements SandboxExecutor {
   vm: VM;
 
