@@ -3,9 +3,6 @@ import VM2SandboxExecutor from './vm2SandboxExecutor'
 import JSNotificationService from './jsNotificationService'
 import { StorageHandler } from './storageHandler';
 import "reflect-metadata";
-import { Connection, createConnection } from 'typeorm';
-import { AmqpHandler } from './amqpHandler';
-
 const port = 8080
 
 // authEnabled defaults to false

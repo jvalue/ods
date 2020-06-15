@@ -15,19 +15,16 @@ const VERSION = '0.0.1'
 
 export default class JSNotificationService implements NotificationService {
 
+  executor: SandboxExecutor
 
-    executor: SandboxExecutor
+  constructor (executor: SandboxExecutor) {
+    this.executor = executor
+  }
 
-    constructor (executor: SandboxExecutor) {
-      this.executor = executor
-    }
+  getVersion (): string {
+      return VERSION
+  }
 
-
-    getVersion (): string {
-        return VERSION
-      }
-
-  
   async handleNotification(notification: NotificationConfig, type: string): Promise<void> {
         console.log(`NotificationRequest received for pipeline: ${notification.pipelineId}.`)
         const conditionHolds = this.executor.evaluate(notification.condition, notification.data)
@@ -106,6 +103,4 @@ export default class JSNotificationService implements NotificationService {
     const firebaseResponse = await firebase.messaging(app).send(firebaseMessage)
     console.log(`Firebase message sent to: ${firebaseResponse}`)
   }
-
-
 }
