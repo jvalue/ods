@@ -4,7 +4,6 @@ import session, { MemoryStore } from 'express-session'
 import cors from 'cors'
 import Keycloak from 'keycloak-connect'
 import NotificationService from './interfaces/notificationService'
-import { getConnection } from "typeorm"
 import "reflect-metadata"
 
 import { Server } from 'http'
@@ -192,14 +191,14 @@ export class NotificationEndpoint {
     var webHookConfig = req.body as WebHookConfig
 
     // Check for validity of the request
-    if (!NotificationEndpoint.isValidWebhookRequest( webHookConfig)) {
+    if (!NotificationEndpoint.isValidWebhookRequest(webHookConfig)) {
       console.warn('Malformed webhook request.')
       res.status(400).send('Malformed webhook request.')
     }
 
     // Persist Config
     try {
-      this.StorageHandler.saveWebhookConfig(webHookConfig)
+      await this.StorageHandler.saveWebhookConfig(webHookConfig)
     } catch(error) {
       console.error(`Could not create WebHookConfig Object: ${error}`)
       res.status(400).send('Internal Server Error.')
@@ -227,7 +226,7 @@ export class NotificationEndpoint {
 
     // Persist Config
     try {
-      this.StorageHandler.saveSlackConfig(slackConfig)
+      await this.StorageHandler.saveSlackConfig(slackConfig)
     } catch(error) {
       console.error(`Could not create WebHookConfig Object: ${error}`)
       res.status(400).send('Malformed slack config request.')
@@ -242,7 +241,7 @@ export class NotificationEndpoint {
   /**===========================================================================
    * Persists a posted Firebase Config to the Database
    *============================================================================*/
-  handleFCMRequest = (req: Request, res: Response): void => {
+  handleFCMRequest = async (req: Request, res: Response) => {
     console.log(`Received config from Host ${req.connection.remoteAddress}`)
 
     var firebaseConfig : FirebaseConfig = req.body as FirebaseConfig
@@ -255,7 +254,7 @@ export class NotificationEndpoint {
     }
 
     try {
-      this.StorageHandler.saveFirebaseConfig(firebaseConfig)
+      await this.StorageHandler.saveFirebaseConfig(firebaseConfig)
     } catch (error) {
       console.error(`Could not create Firebase Object: ${error}`)
       res.status(400).send('Malformed firebase request.')

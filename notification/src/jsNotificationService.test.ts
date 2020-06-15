@@ -2,7 +2,6 @@
 import axios from 'axios'
 
 import VM2SandboxExecutor from './vm2SandboxExecutor'
-import SlackCallback from './interfaces/slackCallback'
 import { WebHookConfigRequest, SlackConfigRequest, WebHookConfig } from './interfaces/notificationConfig';
 import NotificationService from './interfaces/notificationService';
 import JSNotificationService from './jsNotificationService';
