@@ -1,14 +1,14 @@
 import { Connection, ConnectionOptions, createConnection, getConnection } from 'typeorm';
-import { TransformationConfig } from '../interfaces/TransormationConfig';
+import { TransformationConfig } from '../models/TransormationConfig';
 
 
-/**=============================================================================================================
+/**
  * This class handles Requests to the Nofification Database 
  * in order to store and get Notification Configurations.
- *==============================================================================================================*/
+ */
 export class StorageHandler {
 
-    /**===========================================================================================
+    /**
      * Initializes a Database Connection to the notification-db service (postgres)
      * by using the Environment variables:
      *          - PGHOST:       IP/hostname of the storage service 
@@ -20,11 +20,13 @@ export class StorageHandler {
      * @param backoff:  Time in seconds to backoff before next connection retry
      * 
      * @returns     a Promise, containing either a Connection on success or null on failure
-     *===========================================================================================*/
-    public static async initConnection(retries: number, backoff: number): Promise<Connection | null> {
+     */
+    public async initConnection(retries: number, backoff: number): Promise<Connection | null> {
         var dbCon: null | Connection = null
         var established: boolean = false
-
+        /*=================================================================
+        * Get connection Options from Environment variables
+        *=================================================================*/
         const options: ConnectionOptions = {
             type: "postgres",
             host: process.env.PGHOST,
@@ -38,7 +40,9 @@ export class StorageHandler {
                 TransformationConfig
             ]
         }
-
+        /*=================================================================
+         * try to connect to the notification-db service (<retries> times)
+         *=================================================================*/
         for (let i = 0; i < retries; i++) {
             dbCon = await createConnection(options).catch(() => { return null })
 
@@ -50,7 +54,9 @@ export class StorageHandler {
                 break;
             }
         }
-
+        /*=================================================================
+        * Check for Connection Result
+        *=================================================================*/
         if (established) {
             console.log('Connection established')
         } else {
@@ -60,21 +66,21 @@ export class StorageHandler {
         return dbCon
     }
 
-    /**====================================================================
-     * Waits for a specific time period
-     * 
-     * @param backOff   Period to wait in seconds
-     *====================================================================*/
-    private static backOff(backOff: number): Promise<void> {
+    /**
+      * Waits for a specific time period (in seconds)
+      *
+      * @param backOff   Period to wait in seconds
+     */
+    private backOff(backOff: number): Promise<void> {
         return new Promise(resolve => setTimeout(resolve, backOff * 1000));
     }
 
-    /**===========================================================================================
+    /**
     * Gets all Transfromation Configs from the database for a specific pipeline id
     * 
     * @param pipelineID    Pipeline ID to get the Transfromation Configs for
-    *============================================================================================*/
-    public static async getTransformationConfigs(pipelineID: number): Promise<TransformationConfig[] | null> {
+    */
+    public async getTransformationConfigs(pipelineID: number): Promise<TransformationConfig[] | null> {
         console.log(`Getting Transformation Configs with pipelineId ${pipelineID} from Database`)
 
         var transformationConfigs: TransformationConfig[]
@@ -92,17 +98,19 @@ export class StorageHandler {
             console.log(error)
             return null
         }
+
         console.log(`Sucessfully got ${transformationConfigs.length} Transformation configs from Database`)
         return transformationConfigs
  
     }
 
-
-    /**===============================================================
-     * TODO: Document
-     * 
-     *===============================================================*/
-    public static saveTransformationConfig(transformationConfig: TransformationConfig): boolean {
+    /**
+     * Persists a transformation config (provided by argument) to the config database
+     *
+     * @param transformationConfig    transformation config to persist
+     * @returns Promise, containing the stored transformation config
+     */
+    public saveTransformationConfig(transformationConfig: TransformationConfig): boolean {
 
         // Init Repository for Transformation Config
         console.debug("Init Repository")

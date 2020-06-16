@@ -11,7 +11,6 @@ import { Server } from 'http'
 import { SlackConfig, WebHookConfig, NotificationConfig, FirebaseConfig, NotficationConfigRequest, CONFIG_TYPE } from './models/notificationConfig';
 import { NotificationRepository } from './interfaces/notificationRepository'
 import { AmqpHandler } from './handlers/amqpHandler';
-import JSNotificationService from './jsNotificationService';
 
 export class NotificationEndpoint {
   port: number
@@ -21,12 +20,14 @@ export class NotificationEndpoint {
 
   NotificationService: NotificationService
   storageHandler: NotificationRepository
+  amqpHandler: AmqpHandler
 
 
-  constructor(NotificationService: NotificationService, storageHandler: NotificationRepository, port: number, auth: boolean) {
+  constructor(NotificationService: NotificationService, storageHandler: NotificationRepository, amqpHandler: AmqpHandler, port: number, auth: boolean) {
     this.port = port
     this.NotificationService = NotificationService
     this.storageHandler = storageHandler
+    this.amqpHandler = amqpHandler
 
     this.app = express()
 
@@ -64,7 +65,7 @@ export class NotificationEndpoint {
     console.log("Init Connection to Database")
 
     this.storageHandler.initConnection(5, 5)
-    AmqpHandler.connect(5,5)
+    amqpHandler.connect(5,5)
   }
 
 

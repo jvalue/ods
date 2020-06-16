@@ -1,5 +1,4 @@
-import { Entity, PrimaryColumn, Column, OneToOne, JoinColumn, PrimaryGeneratedColumn } from 'typeorm';
-import "reflect-metadata"
+import { Entity,  Column,  PrimaryGeneratedColumn } from 'typeorm'
 
 export enum CONFIG_TYPE{
   WEBHOOK = "WEBHOOK",

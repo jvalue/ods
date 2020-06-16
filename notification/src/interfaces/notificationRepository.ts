@@ -1,5 +1,5 @@
 import { FirebaseConfig, SlackConfig, WebHookConfig } from "../models/notificationConfig";
-import { NotificationSummary } from "../models/notificationSummary";
+import { NotificationSummary } from "./notificationSummary";
 
 export interface NotificationRepository {
   initConnection(retries: number, backoff: number): Promise<void>

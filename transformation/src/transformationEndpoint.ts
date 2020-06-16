@@ -9,9 +9,10 @@ import { Server } from 'http'
 import JobResult from './interfaces/jobResult/jobResult'
 import axios from 'axios'
 import { StorageHandler } from './handlers/storageHandler';
-import { TransformationConfig } from './interfaces/TransormationConfig';
+import { TransformationConfig } from './models/TransormationConfig';
 import { AmqpHandler } from './handlers/amqpHandler';
-import { TransformationEvent } from './model/transformationEvent';
+import { TransformationEvent } from './interfaces/transformationEvent';
+
 
 export class TransformationEndpoint {
   port: number
@@ -20,12 +21,14 @@ export class TransformationEndpoint {
   keycloak?: Keycloak
 
   transformationService: TransformationService
-  
+  storageHandler: StorageHandler
+  amqpHandler: AmqpHandler
 
-  constructor (transformationService: TransformationService, port: number, auth: boolean) {
+  constructor(transformationService: TransformationService, storageHandler: StorageHandler, amqpHandler: AmqpHandler, port: number, auth: boolean) {
     this.port = port
     this.transformationService = transformationService
-    
+    this.storageHandler = storageHandler
+    this.amqpHandler = amqpHandler
 
     this.app = express()
 
@@ -47,8 +50,8 @@ export class TransformationEndpoint {
     this.app.post('/config', this.determineAuth(), this.handleConfigRequest)
     this.app.get('/config/:id', this.getConfigs)
 
-    StorageHandler.initConnection(10, 5)
-    AmqpHandler.connect(10, 5)
+    storageHandler.initConnection(10, 5)
+    amqpHandler.connect(10, 5)
   }
 
   listen (): Server {
@@ -87,7 +90,7 @@ export class TransformationEndpoint {
 
     // Persist Config
     try {
-      StorageHandler.saveTransformationConfig(transformationConfig)
+      this.storageHandler.saveTransformationConfig(transformationConfig)
     } catch (error) {
       console.error(`Could not create transformationConfig Object: ${error}`)
       res.status(400).send('Internal Server Error.')
@@ -114,7 +117,7 @@ export class TransformationEndpoint {
     }
 
     // Get configs from database
-    let configs = StorageHandler.getTransformationConfigs(pipelineID)
+    let configs = this.storageHandler.getTransformationConfigs(pipelineID)
 
     if (!configs) {
       res.status(500).send('Internal Server Error')
@@ -167,8 +170,15 @@ export class TransformationEndpoint {
     }
     res.write(answer)
     
-    let transformationEvent = new TransformationEvent(pipelineID, 'PIPELINE_TEST', result, transformation.dataLocation)
-    AmqpHandler.notifyNotificationService(transformationEvent)
+    // Initialize transformationEvent (to be sent to Notification Queue)
+    let transformationEvent : TransformationEvent= {
+      "pipelineId": pipelineID,
+      "pipelineName": 'TODO: Get Pipeline ID from endpoint caller/queue publisher',
+      "dataLocation": transformation.dataLocation,
+      "jobResult": result
+    }
+  
+    this.amqpHandler.notifyNotificationService(transformationEvent)
 
     res.end()
   }

@@ -9,7 +9,7 @@ import SlackCallback from './interfaces/notificationCallbacks/slackCallback';
 import WebhookCallback from './interfaces/notificationCallbacks/webhookCallback';
 import FcmCallback from './interfaces/notificationCallbacks/fcmCallback';
 import SandboxExecutor from './interfaces/sandboxExecutor';
-import { TransformationEventInterface } from './interfaces/transformationResults/transformationEventInterface';
+import { TransformationEvent } from './interfaces/transformationResults/transformationEvent';
 
 
 const VERSION = '0.0.1'
@@ -26,7 +26,7 @@ export default class JSNotificationService implements NotificationService {
       return VERSION
   }
 
-async handleNotification(notification: NotificationConfig, event: TransformationEventInterface, type: CONFIG_TYPE): Promise<void> {
+async handleNotification(notification: NotificationConfig, event: TransformationEvent, type: CONFIG_TYPE): Promise<void> {
   console.log(`NotificationRequest received for pipeline: ${notification.pipelineId}.`)
 
   const conditionHolds = this.executor.evaluate(notification.condition, event.jobResult.data)
@@ -61,16 +61,16 @@ async handleNotification(notification: NotificationConfig, event: Transformation
    * @param event event to extract transformation results from 
    * @returns message to be sent as notification
    */
-  private buildMessage(event: TransformationEventInterface) {
+  private buildMessage(event: TransformationEvent) :string{
     
-    var message: string
+    let message: string                       // message to return
     const jobError = event.jobResult.error    // Error of transformation (if exists)
 
     /*====================================================
     *  Build Message for failed transformation/pipline
     *====================================================*/
     if (jobError) {
-      message = `Pipeline ${event.pipelineName}(Pipeline ID:${event.pipelineID})Failed.
+      message = `Pipeline ${event.pipelineName}(Pipeline ID:${event.pipelineId})Failed.
 
         Details:
           Line: ${jobError.lineNumber}
@@ -82,12 +82,12 @@ async handleNotification(notification: NotificationConfig, event: Transformation
      *=======================================================*/ 
       // Build Stats (Time measures for transformation execution)
       const jobStats = event.jobResult.stats
-      let start = new Date(jobStats.startTimestamp)
-      let end = new Date(jobStats.endTimestamp)
+      const start = new Date(jobStats.startTimestamp)
+      const end = new Date(jobStats.endTimestamp)
 
 
       // Build Success Message
-      message = `Pipeline ${event.pipelineName}(Pipeline ID:${event.pipelineID}) ` +
+      message = `Pipeline ${event.pipelineName}(Pipeline ID:${event.pipelineId}) ` +
         `has new data available. Fetch at ${event.dataLocation}.
 
       Transformation Details:
@@ -95,6 +95,7 @@ async handleNotification(notification: NotificationConfig, event: Transformation
             End:  ${end}
             Duration: ${jobStats.durationInMilliSeconds} ms`
     }
+    
     return message
   }
 

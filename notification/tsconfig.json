@@ -15,7 +15,7 @@
     "paths": {
       "@/*": ["src/*"]
     },
-    "lib": ["es5"  , "dom"],
+    "lib": ["es5"  , "es6", "dom"],
     "outDir": "dist"
   },
   "include": [

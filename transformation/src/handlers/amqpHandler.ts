@@ -1,7 +1,6 @@
-import { TransformationEvent } from '../model/transformationEvent';
+import { TransformationEvent } from '../interfaces/transformationEvent';
 import {   ConsumeMessage } from "amqplib";
 import { Channel, connect, Connection} from "amqplib/callback_api"
-import { TransformationEventInterface } from '../interfaces/transformationEventInterface'
 import JobEvent from '../interfaces/jobResult/jobEvent';
 
 
@@ -12,7 +11,7 @@ import JobEvent from '../interfaces/jobResult/jobEvent';
  *      * Notification Channel:     
  *       ----------------------
  *       A channel to notify the notification service that a transformation is done.
- *       (see TransformationEventInterface for details of the Event)
+ *       (see TransformationEvent for details of the Event)
  * 
  *      * Job Channel:
  *       --------------
@@ -21,22 +20,22 @@ import JobEvent from '../interfaces/jobResult/jobEvent';
  *       (see JobEvent for details of the Event)
  */
 export class AmqpHandler{
-    static notificationChannel: Channel             // notification channel
-    static jobChannel: Channel                      // Channel containing transformation Jobs
+    notificationChannel!: Channel             // notification channel
+    jobChannel!: Channel                      // Channel containing transformation Jobs
 
-    static connection: Connection                   // Connection to the AMQP Service (Rabbit MQ)
+    connection!: Connection                   // Connection to the AMQP Service (Rabbit MQ)
 
-    static jobQueueName = process.env.AMQP_JOB_QUEUE!                // Queue name of the Job Queue
-    static notifQueueName = process.env.AMQP_NOTIFICATION_QUEUE!     // Queue name of the Job Queue
+    jobQueueName = process.env.AMQP_JOB_QUEUE!                // Queue name of the Job Queue
+    notifQueueName = process.env.AMQP_NOTIFICATION_QUEUE!     // Queue name of the Job Queue
 
-
+    
     /**
      * Connects to Amqp Service and initializes a channel
      * 
      * @param retries   Number of retries to connect to the notification-config db
      * @param backoff   Time to wait until the next retry
      */
-    public static async connect(retries: number, backoff: number) {
+    public async connect(retries: number, backoff: number) {
         const rabbit_url = process.env.AMQP_SERVICE_HOST;
         const rabbit_usr = process.env.AMQP_SERVICE_USER;
         const rabbit_password = process.env.AMQP_SERVICE_PWD;
@@ -44,7 +43,8 @@ export class AmqpHandler{
 
         console.log("URL: " + rabit_amqp_url)
 
-        var established: boolean = false
+        var established: boolean = false        // indicator if the connection has been established
+        const handler: AmqpHandler = this       // To call the functions in the callback
 
         for (let i = 0; i < retries; i++) {
             await this.backOff(backoff)
@@ -58,8 +58,8 @@ export class AmqpHandler{
                 established = true
                 
                 // create the channels
-                AmqpHandler.initNotificationChannel(connection)
-                AmqpHandler.initJobChannel(connection)
+                handler.initNotificationChannel(connection)
+                handler.initJobChannel(connection)
             })
 
             if (established) {
@@ -75,7 +75,7 @@ export class AmqpHandler{
      *
      * @param backOff   Period to wait in seconds
      */
-    private static backOff(backOff: number): Promise<void> {
+    private backOff(backOff: number): Promise<void> {
         return new Promise(resolve => setTimeout(resolve, backOff * 1000));
     }
     
@@ -87,17 +87,18 @@ export class AmqpHandler{
      * 
      * @returns     initialized channel
      */
-    private static initNotificationChannel(connection: Connection): void {
-        
+    private initNotificationChannel(connection: Connection): void {
+        const handler: AmqpHandler = this   // for ability to  call the functions in the callback
+
         connection.createChannel(function (err: any, channel: Channel) {
             if (err) {
                 console.log('Filed to create Channel: ' + err)
                 return
             }
 
-            AmqpHandler.notificationChannel = channel
+            handler.notificationChannel = channel
 
-            AmqpHandler.notificationChannel.assertQueue(AmqpHandler.notifQueueName, {
+            handler.notificationChannel.assertQueue(handler.notifQueueName, {
                 durable: false,
             });
 
@@ -116,7 +117,8 @@ export class AmqpHandler{
      * 
      * @param connection Connection to the AMQP Service (rabbitmq)
      */
-    private static initJobChannel(connection: Connection): void {
+    private initJobChannel(connection: Connection): void {
+        const handler: AmqpHandler = this   // for ability to access the members in the callback
 
         connection.createChannel(function (err: any, channel: Channel) {
             if (err) {
@@ -125,16 +127,16 @@ export class AmqpHandler{
             }
 
             // Assign this channel
-            AmqpHandler.jobChannel = channel
+            handler.jobChannel = channel
 
             // Make sure the Channel exists
-            AmqpHandler.jobChannel.assertQueue(AmqpHandler.jobQueueName, {
+            handler.jobChannel.assertQueue(handler.jobQueueName, {
                 durable: false,
             });
 
             // Consume from Channel
-            console.log(" [*] Waiting for Jobs in %s.", AmqpHandler.jobQueueName);
-            AmqpHandler.jobChannel.consume(AmqpHandler.jobQueueName, AmqpHandler.consumeJobEvent, { noAck: true });
+            console.log(" [*] Waiting for Jobs in %s.", handler.jobQueueName);
+            handler.jobChannel.consume(handler.jobQueueName, handler.consumeJobEvent, { noAck: true });
         })
     }
 
@@ -146,7 +148,7 @@ export class AmqpHandler{
      * @param msg
      * @returns true on successful handling of the event, else: false
      */
-    private static consumeJobEvent(msg: ConsumeMessage | null): boolean {
+    private consumeJobEvent(msg: ConsumeMessage | null): boolean {
         if (!msg) {
             console.warn('Could not receive Notification Event: Message is null')
             return false
@@ -176,15 +178,15 @@ export class AmqpHandler{
      * 
      * @returns true, if the Event has been successfully sent to the queue, else: false.
      */
-    public static notifyNotificationService(transfromationEvent: TransformationEvent) {
+    public notifyNotificationService(transfromationEvent: TransformationEvent) {
         console.log('Notifying notification service that Transformation is done.')
         console.debug(`Sending Transformation Event to queue: \n\
         Data Location:  ${transfromationEvent.dataLocation} \n\
-        Pipeline ID:    ${transfromationEvent.pipelineID}\n\
+        Pipeline ID:    ${transfromationEvent.pipelineId}\n\
         Pipeline Name:  ${transfromationEvent.pipelineName}\n\
         Result:         ${transfromationEvent.jobResult}`)
 
-        const isValid = transfromationEvent.isValidTransformationEvent()
+        const isValid = this.isValidTransformationEvent(transfromationEvent)
 
         if (!isValid) {
             console.error('Message to be sent is not an Transformation Event')
@@ -192,7 +194,7 @@ export class AmqpHandler{
         }
 
         // Make sure the Channel exists
-        AmqpHandler.notificationChannel.assertQueue(this.notifQueueName, {
+        this.notificationChannel.assertQueue(this.notifQueueName, {
             durable: false,
         });
 
@@ -212,7 +214,7 @@ export class AmqpHandler{
      * 
      * @param jobEvent Job to be executed (Transformation)
      */
-    public static handleJob(jobEvent: JobEvent) {
+    public handleJob(jobEvent: JobEvent) {
         // TODO: Implement the transformation Execution based on JobEvent
     }
 
@@ -224,8 +226,8 @@ export class AmqpHandler{
      * @param event TransformationEvent that has to be checked
      * @returns     true, if param event is a TransformationEvent, else false
      */
-    public static isValidTransformationEvent(event: TransformationEventInterface): boolean {
-        return !!event.dataLocation && !!event.pipelineID && !!event.pipelineName && !!event.jobResult
+    public isValidTransformationEvent(event: TransformationEvent): boolean {
+        return !!event.dataLocation && !!event.pipelineId && !!event.pipelineName && !!event.jobResult
     }
 
 
@@ -236,7 +238,9 @@ export class AmqpHandler{
      * @param event JobEvent, that has to be checked
      * @returns     true, if param event is a TransformationEvent, else false
      */
-    public static isValidJobEvent(event: JobEvent) {
+    public isValidJobEvent(event: JobEvent) {
         return !!event.pipelineID && !! event.func && !!event.data
     }
+
+
 }
