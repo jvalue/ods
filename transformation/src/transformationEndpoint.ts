@@ -6,12 +6,12 @@ import Keycloak from 'keycloak-connect'
 import TransformationService from './interfaces/transformationService'
 import TransformationRequest from './interfaces/transformationRequest'
 import { Server } from 'http'
-import JobResult from './interfaces/jobResult'
+import JobResult from './interfaces/jobResult/jobResult'
 import axios from 'axios'
-import { StorageHandler } from './storageHandler';
+import { StorageHandler } from './handlers/storageHandler';
 import { TransformationConfig } from './interfaces/TransormationConfig';
-import { AmqpHandler } from './amqpHandler';
-import { TransformationEvent } from './interfaces/transformationEvent';
+import { AmqpHandler } from './handlers/amqpHandler';
+import { TransformationEvent } from './model/transformationEvent';
 
 export class TransformationEndpoint {
   port: number

@@ -1,5 +1,5 @@
 import { Connection, ConnectionOptions, createConnection, getConnection } from 'typeorm';
-import { TransformationConfig } from './interfaces/TransormationConfig';
+import { TransformationConfig } from '../interfaces/TransormationConfig';
 
 
 /**=============================================================================================================

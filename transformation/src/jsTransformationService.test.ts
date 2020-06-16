@@ -4,7 +4,7 @@ import axios from 'axios'
 import TransformationService from './interfaces/transformationService'
 
 import JSTransformationService from './jsTransformationService'
-import VM2SandboxExecutor from './vm2SandboxExecutor'
+import VM2SandboxExecutor from './executors/vm2SandboxExecutor'
 import SandboxExecutor from './interfaces/sandboxExecutor'
 
 jest.mock('axios')

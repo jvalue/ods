@@ -1,31 +1,12 @@
 import { Entity, PrimaryColumn, Column, OneToOne, JoinColumn, PrimaryGeneratedColumn } from 'typeorm';
 import "reflect-metadata"
 
-export interface NotificationConfigRequest {
-  pipelineId: number;
-  pipelineName: string;
-  data: object;
-  dataLocation: string;
-  condition: string;
-  type: string;
+export enum CONFIG_TYPE{
+  WEBHOOK = "WEBHOOK",
+  SLACK = "SLACK",
+  FCM = "FCM"
 }
 
-export interface WebHookConfigRequest extends NotificationConfigRequest{
-  url: string;
-}
-
-export interface SlackConfigRequest extends NotificationConfigRequest {
-  workspaceId: string;
-  channelId: string;
-  secret: string;
-}
-
-export interface FirebaseConfigRequest extends NotificationConfigRequest{
-  projectId: string;
-  clientEmail: string;
-  privateKey: string;
-  topic: string;
-}
 
 export class NotificationConfig{
   @Column()
@@ -35,15 +16,15 @@ export class NotificationConfig{
   pipelineName!: string;
 
   @Column()
-  data!: string;
-
-  @Column()
   dataLocation!: string;
 
   @Column()
   condition!: string;
 }
 
+export class NotficationConfigRequest extends NotificationConfig{
+  type!: CONFIG_TYPE
+}
 
 @Entity()
 export class SlackConfig extends NotificationConfig{

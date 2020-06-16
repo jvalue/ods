@@ -3,13 +3,13 @@ import axios from 'axios'
 import * as firebase from 'firebase-admin'
 import NotificationService from './interfaces/notificationService';
 
-import { FirebaseConfigRequest, NotificationConfigRequest, SlackConfigRequest, WebHookConfigRequest, NotificationConfig, WebHookConfig, SlackConfig, FirebaseConfig } from './interfaces/notificationConfig';
+import { CONFIG_TYPE, NotificationConfig, WebHookConfig, SlackConfig, FirebaseConfig, NotficationConfigRequest } from './models/notificationConfig';
 
-import SlackCallback from './interfaces/slackCallback';
-import WebhookCallback from './interfaces/webhookCallback';
-import FcmCallback from './interfaces/fcmCallback';
+import SlackCallback from './interfaces/notificationCallbacks/slackCallback';
+import WebhookCallback from './interfaces/notificationCallbacks/webhookCallback';
+import FcmCallback from './interfaces/notificationCallbacks/fcmCallback';
 import SandboxExecutor from './interfaces/sandboxExecutor';
-import { TransformationEventInterface } from './interfaces/transformationEventInterface';
+import { TransformationEventInterface } from './interfaces/transformationResults/transformationEventInterface';
 
 
 const VERSION = '0.0.1'
@@ -26,10 +26,9 @@ export default class JSNotificationService implements NotificationService {
       return VERSION
   }
 
-async handleNotification(notification: NotificationConfig, event: TransformationEventInterface, type: string): Promise<void> {
+async handleNotification(notification: NotificationConfig, event: TransformationEventInterface, type: CONFIG_TYPE): Promise<void> {
   console.log(`NotificationRequest received for pipeline: ${notification.pipelineId}.`)
 
-  
   const conditionHolds = this.executor.evaluate(notification.condition, event.jobResult.data)
   console.log('Condition is ' + conditionHolds)
   if (!conditionHolds) { // no need to trigger notification
@@ -39,13 +38,13 @@ async handleNotification(notification: NotificationConfig, event: Transformation
   const message = this.buildMessage(event)
 
   switch (type) {
-  case 'WEBHOOK':
+  case CONFIG_TYPE.WEBHOOK:
       await this.handleWebhook(notification as WebHookConfig)
       break
-  case 'FCM':
+  case CONFIG_TYPE.FCM:
       await this.handleFCM(notification as FirebaseConfig, message)
       break
-  case 'SLACK':
+  case CONFIG_TYPE.SLACK:
       await this.handleSlack(notification as SlackConfig, message)
       break
   default:

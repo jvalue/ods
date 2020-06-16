@@ -3,14 +3,15 @@ import express, { Application, Request, Response } from 'express'
 import session, { MemoryStore } from 'express-session'
 import cors from 'cors'
 import Keycloak from 'keycloak-connect'
-import NotificationService from './interfaces/notificationService'
+import NotificationService from './interfaces/notificationService';
 import "reflect-metadata"
 
 import { Server } from 'http'
 
-import { SlackConfig, NotificationConfigRequest, WebHookConfig, NotificationConfig, FirebaseConfig } from './interfaces/notificationConfig';
+import { SlackConfig, WebHookConfig, NotificationConfig, FirebaseConfig, NotficationConfigRequest, CONFIG_TYPE } from './models/notificationConfig';
 import { NotificationRepository } from './interfaces/notificationRepository'
-import { AmqpHandler } from './amqpHandler';
+import { AmqpHandler } from './handlers/amqpHandler';
+import JSNotificationService from './jsNotificationService';
 
 export class NotificationEndpoint {
   port: number
@@ -85,10 +86,10 @@ export class NotificationEndpoint {
     res.end()
   }
 
-  /**===============================================================================
+  /**
    * Gets all Configs asto corresponding to corresponnding Pipeline-ID
    * (identified by param pipelineId) as json list
-   *================================================================================*/
+   */
   getConfigs = async (req: Request, res: Response) => {
 
     const pipelineId = parseInt(req.params.pipelineId)
@@ -125,9 +126,9 @@ export class NotificationEndpoint {
     res.status(200).send(configs)
   }
 
-  /**===============================================================================
+  /**
    * Gets the notification config corresponding to corresponnding id
-   *================================================================================*/
+   */
   getConfig = (req: Request, res: Response): void => {
 
     const id = parseInt(req.params.id)
@@ -150,48 +151,48 @@ export class NotificationEndpoint {
     res.status(200).send(config)
   }
 
-  /**===========================================================================
+  /**
    * Handles a request to save a NotificationConfig
    * This is done by checking the validity of the config and then save
    * it to the database on success
-   *============================================================================*/
+   */
   handleNotificaitonCreate  = async (req: Request, res: Response): Promise<void> => {
     console.log(`Received notification config from Host ${req.connection.remoteAddress}`)
 
-    const notificationType = req.body?.type
-    if (!notificationType) {
+    let configRequest = req.body as NotficationConfigRequest
+    if (!NotificationEndpoint.isValidNotificationConfigRequest(configRequest)) {
       res.status(400).send('Malformed notification request.')
       return
     }
 
-    switch(notificationType) {
-      case 'WEBHOOK':
+    switch(configRequest.type) {
+      case CONFIG_TYPE.WEBHOOK:
         this.handleWebhookRequest(req, res)
         break
-      case 'FCM':
+      case CONFIG_TYPE.FCM:
         this.handleFCMRequest(req, res)
         break
-      case 'SLACK':
+      case CONFIG_TYPE.SLACK:
         this.handleSlackRequest(req, res)
         break
       default:
-        res.status(400).send(`Notification type ${notificationType} not suppoerted!`)
+        res.status(400).send(`Notification type ${configRequest.type} not suppoerted!`)
         return
     }
   }
 
-  /**===========================================================================
+  /**
    * Handles a request to save a WebhookConfig
    * This is done by checking the validity of the config and then save
    * it to the database on success
-   *============================================================================*/
+   */
   handleWebhookRequest = async (req: Request, res: Response): Promise<void> => {
     console.log(`Received Webhook config from Host ${req.connection.remoteAddress}`)
 
     var webHookConfig = req.body as WebHookConfig
 
     // Check for validity of the request
-    if (!NotificationEndpoint.isValidWebhookRequest(webHookConfig)) {
+    if (!NotificationEndpoint.isValidWebhookConfig(webHookConfig)) {
       console.warn('Malformed webhook request.')
       res.status(400).send('Malformed webhook request.')
     }
@@ -209,16 +210,16 @@ export class NotificationEndpoint {
     res.status(200).send('OK');
   }
 
-  /**===========================================================================
+  /*
    * Persists a posted Slack Config to the Database
-   *============================================================================*/
+   */
   handleSlackRequest = async (req: Request, res: Response): Promise<void> => {
     console.log(`Received config from Host ${req.connection.remoteAddress}`)
 
     var slackConfig: SlackConfig = req.body as SlackConfig
 
      // Check for validity of the request
-    if (!NotificationEndpoint.isValidSlackRequest(slackConfig)) {
+    if (!NotificationEndpoint.isValidSlackConfig(slackConfig)) {
       console.warn('Malformed slack request.')
       res.status(400).send('Malformed slack request.')
       return
@@ -238,9 +239,9 @@ export class NotificationEndpoint {
     res.send(200);
   }
 
-  /**===========================================================================
-   * Persists a posted Firebase Config to the Database
-   *============================================================================*/
+  /**
+   * Persists a posted Firebase Config to the notifcation database service.
+   */
   handleFCMRequest = async (req: Request, res: Response) => {
     console.log(`Received config from Host ${req.connection.remoteAddress}`)
 
@@ -248,7 +249,7 @@ export class NotificationEndpoint {
 
 
     // Check for validity of the request
-    if (!NotificationEndpoint.isValidFirebaseRequest(firebaseConfig)) {
+    if (!NotificationEndpoint.isValidFirebaseConfig(firebaseConfig)) {
       console.warn('Malformed FireBase request.')
       res.status(400).send('Malformed FireBase request.')
     }
@@ -267,10 +268,22 @@ export class NotificationEndpoint {
 
   handleNotificationDelete = (req: Request, res: Response): void => {
     // call deleteSlack / deleteWebHook / deleteFCM based on notification type
+
+    const id = parseInt(req.params.id)
+    console.log(`Received config-deletion-request for pipline with id "${id}" from Host ${req.connection.remoteAddress}`)
+
+    if (!id) {
+      console.error("Request for pipeline config deletion: id not set")
+      res.status(400).send('Pipeline id is not set.')
+      return
+    }
+
+    
+
   }
 
   deleteSlack = (req: Request, res: Response): void => {
-
+    
   }
 
   deleteWebHook = (req: Request, res: Response): void => {
@@ -283,11 +296,11 @@ export class NotificationEndpoint {
   handlePipelineDelete = (req: Request, res: Response): void => {
   }
 
-    /**===========================================================================
+  /*
    * Handles a request to update a NotificationConfig
    * This is done by checking the validity of the config and then save
    * it to the database on success
-   *============================================================================*/
+   */
   handleNotificaitonUpdate  = async (req: Request, res: Response): Promise<void> => {
     console.log(`Received notification config from Host ${req.connection.remoteAddress}`)
 
@@ -298,20 +311,6 @@ export class NotificationEndpoint {
   }
 
 
-  // processNotificationRequest = async (notification: NotificationConfigRequest, res: Response): Promise<void> => {
-  //   try {
-  //     await this.NotificationService.handleNotification(notification)
-  //   } catch (e) {
-  //     if (e instanceof Error) {
-  //       console.log(`Notification handling failed. Nested cause is: ${e.name}: ${e.message}`)
-  //       res.status(500).send(`Notification handling failed. Nested cause is: ${e.name}: ${e.message}`)
-  //     } else {
-  //       res.status(500).send()
-  //     }
-  //   }
-  //   res.status(200).send()
-  // }
-
   determineAuth = (): express.RequestHandler | [] => {
     if (this.keycloak !== undefined) {
       return this.keycloak.protect()
@@ -320,20 +319,65 @@ export class NotificationEndpoint {
     }
   }
 
-  private static isValidWebhookRequest(conf: WebHookConfig): boolean {
-    return this.isValidNotificationRequest(conf) && !!conf.url
+  /**
+   * Evaluates the validity of the WebHookConfig (provided by argument),
+   * by checking for the field variables.
+   * 
+   * @param conf WebHookConfig to be validated
+   * 
+   * @returns true, if conf is a valid, false else
+   */
+  private static isValidWebhookConfig(conf: WebHookConfig): boolean {
+    return this.isValidNotificationConfig(conf) && !!conf.url
+  }
+
+  /**
+   * Evaluates the validity of the SlackConfig (provided by argument),
+   * by checking for the field variables.
+   *
+   * @param conf SlackConfig to be validated
+   *
+   * @returns true, if conf is a valid, false else
+   */
+  private static isValidSlackConfig(conf: SlackConfig): boolean {
+      return this.isValidNotificationConfig(conf) && !!conf.channelId && !!conf.secret && !!conf.workspaceId
   }
 
 
-  private static isValidSlackRequest(conf: SlackConfig): boolean {
-      return this.isValidNotificationRequest(conf) && !!conf.channelId && !!conf.secret && !!conf.workspaceId
+  /**
+   * Evaluates the validity of the FirebaseConfig (provided by argument),
+   * by checking for the field variables.
+   *
+   * @param conf FirebaseConfig to be validated
+   *
+   * @returns true, if conf is a valid, false else
+   */
+  private static isValidFirebaseConfig(conf: FirebaseConfig): boolean {
+      return this.isValidNotificationConfig(conf) && !!conf.clientEmail && !!conf.privateKey || !conf.projectId || !conf.topic
   }
 
-  private static isValidFirebaseRequest(conf: FirebaseConfig): boolean {
-      return this.isValidNotificationRequest(conf) && !!conf.clientEmail && !!conf.privateKey || !conf.projectId || !conf.topic
+
+  /**
+  * Evaluates the validity of the NotificationConfig (provided by argument),
+  * by checking for the field variables.
+  *
+  * @param conf NotificationConfig to be validated
+  *
+  * @returns true, if conf is a valid, false else
+  */
+  private static isValidNotificationConfig (obj: NotificationConfig): boolean {
+    return !!obj.pipelineName && !!obj.pipelineId && !!obj.condition
   }
 
-  private static isValidNotificationRequest (obj: NotificationConfig): boolean {
-    return !!obj.data && !!obj.pipelineName && !!obj.pipelineId && !!obj.condition && !!obj.dataLocation
+  /**
+  * Evaluates the validity of the NotificationConfigRequest (provided by argument),
+  * by checking for the field variables.
+  *
+  * @param conf NotificationConfigRequest to be validated
+  *
+  * @returns true, if conf is a valid, false else
+  */
+  private static isValidNotificationConfigRequest(obj: NotficationConfigRequest): boolean {
+    return !!obj.pipelineName && !!obj.pipelineId && !!obj.condition && !!obj.type
   }
 }

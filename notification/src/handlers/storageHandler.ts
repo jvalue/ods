@@ -1,7 +1,7 @@
-import { SlackConfig, WebHookConfig, FirebaseConfig } from './interfaces/notificationConfig';
+import { SlackConfig, WebHookConfig, FirebaseConfig } from '../models/notificationConfig';
 import { Connection, ConnectionOptions, createConnection, getConnection } from 'typeorm';
-import { NotificationSummary} from './interfaces/notificationSummary';
-import { NotificationRepository } from './interfaces/notificationRepository';
+import { NotificationSummary} from '../models/notificationSummary';
+import { NotificationRepository } from '../interfaces/notificationRepository';
 
 /**=============================================================================================================
  * This class handles Requests to the Nofification Database

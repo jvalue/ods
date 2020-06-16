@@ -1,8 +1,9 @@
 import { StorageHandler } from "./storageHandler"
 import { Channel, connect, Connection } from "amqplib/callback_api"
-import { TransformationEventInterface } from './interfaces/transformationEventInterface';
-import JSNotificationService from './jsNotificationService';
-import VM2SandboxExecutor from "./vm2SandboxExecutor";
+import { TransformationEventInterface } from '../interfaces/transformationResults/transformationEventInterface';
+import JSNotificationService from '../jsNotificationService';
+import VM2SandboxExecutor from "../vm2SandboxExecutor";
+import { CONFIG_TYPE } from "../models/notificationConfig";
 
 
 export class AmqpHandler{
@@ -104,16 +105,16 @@ export class AmqpHandler{
             }
 
             for (const webhookConfig of config.webhook) {
-                notificationService.handleNotification(webhookConfig, transformationEvent, 'WEBHOOK')
+                notificationService.handleNotification(webhookConfig, transformationEvent, CONFIG_TYPE.WEBHOOK)
             }
 
             for (const slackConfig of config.slack) {
-                notificationService.handleNotification(slackConfig, transformationEvent, 'SLACK')
+                notificationService.handleNotification(slackConfig, transformationEvent, CONFIG_TYPE.SLACK)
             }
 
 
             for (const firebaseConfig of config.firebase) {
-                notificationService.handleNotification(firebaseConfig, transformationEvent, 'FCM')
+                notificationService.handleNotification(firebaseConfig, transformationEvent, CONFIG_TYPE.FCM)
             }
             
         })

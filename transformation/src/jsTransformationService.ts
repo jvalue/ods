@@ -1,8 +1,8 @@
 import axios from 'axios'
 
-import ExecutionResult from './interfaces/executionResult'
-import JobResult from './interfaces/jobResult'
-import Stats from './interfaces/stats'
+import ExecutionResult from './interfaces/jobResult/executionResult'
+import JobResult from './interfaces/jobResult/jobResult'
+import Stats from './interfaces/jobResult/stats'
 
 import TransformationService from './interfaces/transformationService'
 import SandboxExecutor from './interfaces/sandboxExecutor'

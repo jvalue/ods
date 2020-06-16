@@ -1,4 +1,4 @@
-import JobError from './interfaces/jobError'
+import JobError from '../interfaces/jobResult/jobError'
 
 /**
  * Splits a line from a stacktrace into functionName, fileName, lineNumber and position.

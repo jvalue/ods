@@ -1,7 +1,7 @@
 import { NotificationEndpoint } from './notificationEndpoint';
 import VM2SandboxExecutor from './vm2SandboxExecutor'
 import JSNotificationService from './jsNotificationService'
-import { StorageHandler } from './storageHandler';
+import { StorageHandler } from './handlers/storageHandler';
 import "reflect-metadata";
 const port = 8080
 

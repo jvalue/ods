@@ -2,7 +2,7 @@
 import axios from 'axios'
 
 import VM2SandboxExecutor from './vm2SandboxExecutor'
-import { WebHookConfigRequest, SlackConfigRequest, WebHookConfig } from './interfaces/notificationConfig';
+import { WebHookConfig, NotficationConfigRequest, CONFIG_TYPE, NotificationConfig } from './models/notificationConfig';
 import NotificationService from './interfaces/notificationService';
 import JSNotificationService from './jsNotificationService';
 
@@ -36,7 +36,6 @@ describe('JSNotificationService', () => {
         pipelineName: 'nordstream',
         pipelineId: 1,
         dataLocation: 'data',
-        data: JSON.stringify(data),
         condition: 'data.value1 > 0',
         url: 'callback'
       }
@@ -50,11 +49,10 @@ describe('JSNotificationService', () => {
     })
 
     test('Notification does not trigger when condition is not met', async () => {
-      const notificationRequest: WebHookConfigRequest = {
+      const notificationRequest = {
         pipelineName: 'southstream',
         pipelineId: 2,
         dataLocation: 'data',
-        data: data,
         condition: 'data.value1 < 0',
         type: 'WEBHOOK',
         url: 'callback'
@@ -66,11 +64,10 @@ describe('JSNotificationService', () => {
     })
 
     test('Notification does not trigger when condition is malformed', async () => {
-      const notificationRequest: WebHookConfigRequest = {
+      const notificationRequest = {
         pipelineName: 'weststream',
         pipelineId: 3,
         dataLocation: 'data',
-        data: data,
         condition: 'asdfa;',
         type: 'WEBHOOK',
         url: 'callback'
@@ -88,9 +85,8 @@ describe('JSNotificationService', () => {
     })
 
     test('SLACK request', async () => {
-      const request: SlackConfigRequest = {
+      const request = {
         condition: 'data.value1 > 0',
-        data,
         dataLocation: 'data',
         pipelineId: 42,
         pipelineName: 'AnswerToEverything-Pipeline',

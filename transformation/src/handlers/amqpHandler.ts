@@ -1,8 +1,8 @@
-import { TransformationEvent } from './interfaces/transformationEvent';
+import { TransformationEvent } from '../model/transformationEvent';
 import {   ConsumeMessage } from "amqplib";
 import { Channel, connect, Connection} from "amqplib/callback_api"
-import { TransformationEventInterface } from './interfaces/transformationEventInterface'
-import JobEvent from './interfaces/jobEvent';
+import { TransformationEventInterface } from '../interfaces/transformationEventInterface'
+import JobEvent from '../interfaces/jobResult/jobEvent';
 
 
 /**

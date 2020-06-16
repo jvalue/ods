@@ -1,5 +1,5 @@
-import { TransformationEventInterface } from "./transformationEventInterface"
-import JobResult from "./jobResult"
+import { TransformationEventInterface } from "../interfaces/transformationResults/transformationEventInterface"
+import JobResult from "../interfaces/transformationResults/jobResult"
 
 
 /**
