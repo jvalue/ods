@@ -20,7 +20,7 @@ jobs:
       - name: Integration-test
         run: |
           docker-compose -f docker-compose.yml -f docker-compose.it.yml build adapter-it
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d adapter
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d adapter rabbitmq
           docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from adapter-it adapter-it
           docker-compose logs
           docker-compose -f docker-compose.yml -f docker-compose.it.yml down
