@@ -13,7 +13,7 @@
     "allowJs": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*", "tests/*"]
     },
     "lib": ["es5"],
     "outDir": "dist"

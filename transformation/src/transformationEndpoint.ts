@@ -12,6 +12,7 @@ import { StorageHandler } from './handlers/storageHandler';
 import { TransformationConfig } from './models/TransormationConfig';
 import { AmqpHandler } from './handlers/amqpHandler';
 import { TransformationEvent } from './interfaces/transformationEvent';
+import { DeleteResult, UpdateResult } from 'typeorm';
 
 
 export class TransformationEndpoint {
@@ -47,10 +48,14 @@ export class TransformationEndpoint {
     this.app.get('/version', this.getVersion)
     this.app.post('/job', this.determineAuth(), this.postJob)
 
-    this.app.post('/config', this.determineAuth(), this.handleConfigRequest)
-    this.app.get('/config/:id', this.getConfigs)
+    this.app.post('/config', this.determineAuth(), this.handleConfigCreation)
+    this.app.get('/config/:id', this.handleConfigRequest)
+    
+    this.app.delete('/:deletionType/:id', this.handleConfigDeletion)
+    this.app.delete('/pipeline/:id', this.handlePipelineDeletion) 
+    this.app.put('/config/:id', this.handleConfigUpdate)
 
-    storageHandler.initConnection(10, 5)
+    storageHandler.init(10, 5)
     amqpHandler.connect(10, 5)
   }
 
@@ -72,12 +77,15 @@ export class TransformationEndpoint {
     res.end()
   }
 
-  /**===========================================================================
+  /**
     * Handles a request to save a TransformationConfig
     * This is done by checking the validity of the config and then save
     * it to the database on success
-    *============================================================================*/
-  handleConfigRequest = async (req: Request, res: Response): Promise<void> => {
+    * 
+    * @param req Request, containing a Transformation config to persist
+    * @param res Response to send back to the requester
+    */
+  handleConfigCreation = async (req: Request, res: Response): Promise<void> => {
     console.log(`Received Transformation config from Host ${req.connection.remoteAddress}`)
 
     var transformationConfig = req.body as TransformationConfig
@@ -93,7 +101,7 @@ export class TransformationEndpoint {
       this.storageHandler.saveTransformationConfig(transformationConfig)
     } catch (error) {
       console.error(`Could not create transformationConfig Object: ${error}`)
-      res.status(400).send('Internal Server Error.')
+      res.status(500).send('Internal Server Error.')
       return
     }
 
@@ -101,11 +109,138 @@ export class TransformationEndpoint {
     res.status(200).send('OK');
   }
 
-  /**===============================================================================
+  /**
+  * Handles the deletion of a TransformationConfig
+  * This is done by checking the validity of the config and then delete
+  * it from the database on success
+  * 
+  * @param req Request, containing a Transformation config to delete
+  * @param res Response to send back to the requester
+  */
+  handleConfigDeletion = async (req: Request, res: Response): Promise<void> => {
+    console.log(`Received Transformation config from Host ${req.connection.remoteAddress}`)
+    let deleteResult :DeleteResult
+    const configId = parseInt(req.params.id)
+
+    if (!configId) {
+      res.status(400).send('Invalid Config Id provided.')
+      res.end()
+      return
+    }
+
+    // Delete Config
+    try {
+      deleteResult = await this.storageHandler.deleteTransformationConfig(configId)
+
+      if (deleteResult.affected != 1) {
+        const msg = `Could not delete Transformation Config: Config with id ${configId} not found.`
+        console.log(msg)
+        res.status(400).send(msg)
+      }
+
+    } catch (error) {
+      console.error(`Could not create transformationConfig Object: ${error}`)
+      res.status(500).send('Internal Server Error: Config could not deleted')
+      return
+    }
+
+    // return saved post back
+    res.status(200).send(`${deleteResult.affected} Configs deleted.`);
+    res.end()
+  }
+
+
+
+  /**
+ * Handles the deletion of all TransformationConfig with pipeline ID 1
+ * This is done by checking the validity of the config and then delete
+ * it from the database on success
+ * 
+ * @param req Request, containing a Transformation config to delete
+ * @param res Response to send back to the requester
+ */
+  handlePipelineDeletion = async (req: Request, res: Response): Promise<void> => {
+    console.log(`Received Transformation config from Host ${req.connection.remoteAddress}`)
+    let deleteResult: DeleteResult
+    const pipelineID = parseInt(req.params.id)
+
+    if (!pipelineID) {
+      res.status(400).send('Invalid pipeline Id provided.')
+      res.end()
+      return
+    }
+
+    // Delete Config
+    try {
+      deleteResult = await this.storageHandler.deleteConfigsForPipelineID(pipelineID)
+
+      if (deleteResult.affected != 1) {
+        const msg = `Could not delete Transformation Config: Config with id ${pipelineID} not found.`
+        console.log(msg)
+        res.status(400).send(msg)
+      }
+
+    } catch (error) {
+      console.error(`Could not create transformationConfig Object: ${error}`)
+      res.status(500).send('Internal Server Error: Config could not deleted')
+      return
+    }
+
+    // return saved post back
+    res.status(200).send(`${deleteResult.affected} Configs deleted.`);
+    res.end()
+  }
+
+  /**
+  * Handles the update of a TransformationConfig
+  * This is done by checking the validity of the config and then delete
+  * it from the database on success
+  * 
+  * @param req Request, containing a Transformation config to delete
+  * @param res Response to send back to the requester
+  */
+  handleConfigUpdate = async (req: Request, res: Response): Promise<void> => {
+    console.log(`Received Transformation config from Host ${req.connection.remoteAddress}`)
+
+    let updateResult: UpdateResult
+    const configId = parseInt(req.params.id)
+
+    // Check for configId Validity
+    if (!configId) {
+      res.status(400).send('Invalid Config Id provided.')
+      res.end()
+      return
+    }
+
+    var transformationConfig = req.body as TransformationConfig
+
+    // Check for validity of the request
+    if (!(this.isValidTransformationConfig(transformationConfig))) {
+      console.warn('Malformed transformation request.')
+      res.status(400).send('Malformed transformation request.')
+    }
+
+    // Delete Config
+    try {
+      updateResult = await this.storageHandler.updateTransoformationConfig(configId, transformationConfig)
+    } catch (error) {
+      console.error(`Could not create transformationConfig Object: ${error}`)
+      res.status(500).send('Internal Server Error: Config could not deleted')
+      return
+    }
+
+    // return saved post back
+    res.status(200).send(`${updateResult.affected} Configs were updated with ID ${configId}`);
+  }
+
+  /**
      * Gets all Configs asto corresponding to corresponnding Pipeline-ID
      * (identified by param id) as json list
-     *================================================================================*/
-  getConfigs = (req: Request, res: Response): void => {
+     * 
+     * @param req Request for configs with a specific pipeline id
+     * @param res Response that will contain the Config summary
+     */
+  handleConfigRequest = (req: Request, res: Response): void => {
 
     const pipelineID = parseInt(req.params.id)
     console.log(`Received request for configs with pipeline id ${pipelineID} from Host ${req.connection.remoteAddress}`)
@@ -190,6 +325,7 @@ export class TransformationEndpoint {
       return []
     }
   }
+
 
   private isValidTransformationConfig(conf: TransformationConfig): boolean {
     return !!conf && !!conf.dataLocation && !!conf.func && !!conf.pipelineId

@@ -1,12 +1,36 @@
-import { Connection, ConnectionOptions, createConnection, getConnection } from 'typeorm';
+import { Connection, ConnectionOptions, createConnection, getConnection, Repository, DeleteResult, UpdateResult } from 'typeorm';
 import { TransformationConfig } from '../models/TransormationConfig';
+import { TransformationRepository } from '../interfaces/transformationRepository';
 
 
 /**
  * This class handles Requests to the Nofification Database 
  * in order to store and get Notification Configurations.
  */
-export class StorageHandler {
+export class StorageHandler implements TransformationRepository{
+
+    private configRepository!: Repository<TransformationConfig>
+
+    /**
+     * Initializes the components of the notifciation storage handler.
+     * This is done by establishing a connection to the notication database 
+     * and initiliazing a repository for the notification config
+     * 
+     * @param retries:  Number of retries to connect to the database
+     * @param backoff:  Time in seconds to backoff before next connection retry
+     */
+    public init(retries: number, backoff: number): void {
+        console.log('Initializing storageHandler.')
+        const handler: StorageHandler = this
+
+        this.initConnection(retries, backoff).then(connection => {
+            if (connection) {
+                this.configRepository = connection.getRepository(TransformationConfig);    
+            }
+
+        }).catch(error => console.error('Could not initialize storageHandler.'))
+    }
+
 
     /**
      * Initializes a Database Connection to the notification-db service (postgres)
@@ -21,7 +45,7 @@ export class StorageHandler {
      * 
      * @returns     a Promise, containing either a Connection on success or null on failure
      */
-    public async initConnection(retries: number, backoff: number): Promise<Connection | null> {
+    private async initConnection(retries: number, backoff: number): Promise<Connection | null> {
         var dbCon: null | Connection = null
         var established: boolean = false
         /*=================================================================
@@ -92,8 +116,7 @@ export class StorageHandler {
 
         // Get Configs from Database 
         try {
-            const repository = getConnection().getRepository(TransformationConfig)
-            transformationConfigs = await repository.find({ pipelineId: pipelineID })
+            transformationConfigs = await this.configRepository.find({ pipelineId: pipelineID })
         } catch (error) {
             console.log(error)
             return null
@@ -101,7 +124,6 @@ export class StorageHandler {
 
         console.log(`Sucessfully got ${transformationConfigs.length} Transformation configs from Database`)
         return transformationConfigs
- 
     }
 
     /**
@@ -114,18 +136,67 @@ export class StorageHandler {
 
         // Init Repository for Transformation Config
         console.debug("Init Repository")
-        const postRepository = getConnection().getRepository(TransformationConfig)
 
         // create object from Body of the Request (=TransformationConfig)
         console.debug("Init Transformation config")
-        transformationConfig = postRepository.create(transformationConfig)
+        transformationConfig = this.configRepository.create(transformationConfig)
 
         // persist the Config
         console.debug("Save TransformationConfig to Repository")
-        postRepository.save(transformationConfig);
+        this.configRepository.save(transformationConfig);
         console.log("Webhook config persisted")
 
         return true
     }
+
+    /**
+     * Deletes a Transformation config for given id
+     *
+     * @param id id for the config to be deleted
+     * @returns result of the deletion execution
+     */
+    public deleteTransformationConfig(id: number): Promise<DeleteResult> {
+        return this.configRepository.delete(id)
+    }
+
+    /**
+     * Updates a Transformation config for given id
+     *
+     * @param id id for the config to be updated
+     * @param transformationConfig Transformation config to be written to database
+     * @returns Promise containing the result of the update operation
+     */
+    public updateTransoformationConfig(id: number, transformationConfig: TransformationConfig): Promise<UpdateResult> {
+        return this.configRepository.update(id, transformationConfig)
+    }
+
+    /**
+     * Deletes all configs in the database referring to given pipeline id.
+     * Currently only one config exists for given Pipeline ID.
+     * 
+     * @param pipelineId Id of the pipeline to delete the configs for
+     * @returns Promise, containing the results of the deletion execution
+     */
+    public deleteConfigsForPipelineID(pipelineId: number): Promise<DeleteResult> {
+        console.log(`Deleting all configs for pipeline id "${pipelineId}"`)
+
+        let condition = { "pipelineId": pipelineId }
+
+        return this.configRepository.delete(condition)
+    }
+
+    /**
+     * Updates config for given pipelineId with the Transformation config, provided by argument config
+     * Currently only one config exists for given Pipeline ID.
+     *
+     * @param pipelineId pipeline id, the config is updated for
+     * @param config config that gets written in the database
+     * @returns Promise, containing the results of the update execution
+     */
+    public updateConfigForPipelineID(pipelineId: number, config: TransformationConfig): Promise<UpdateResult> {
+        const condition = {"pipelineId": pipelineId}
+        return this.configRepository.update(condition,config)
+    }
+
 
 }

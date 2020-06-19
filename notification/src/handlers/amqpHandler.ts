@@ -83,10 +83,11 @@ export class AmqpHandler{
         });
     }
 
-
     /**
      * Handles an event message
      * @param msg
+     * 
+     * @returns true on success, else false
      */
     private handleEvent(msg: any): boolean {
 

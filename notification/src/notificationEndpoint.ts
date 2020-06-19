@@ -11,6 +11,7 @@ import { Server } from 'http'
 import { SlackConfig, WebHookConfig, NotificationConfig, FirebaseConfig, NotficationConfigRequest, CONFIG_TYPE } from './models/notificationConfig';
 import { NotificationRepository } from './interfaces/notificationRepository'
 import { AmqpHandler } from './handlers/amqpHandler';
+import { DeleteResult } from 'typeorm';
 
 export class NotificationEndpoint {
   port: number
@@ -45,26 +46,28 @@ export class NotificationEndpoint {
     this.app.get('/', this.getHealthCheck)
     this.app.get('/version', this.getVersion)
 
-    // // Deletion of Configs
-    this.app.delete('/notifications/:id', this.determineAuth(), this.handleNotificationDelete)
-    this.app.delete('/pipelines/:pipelineId/notifications', this.determineAuth(), this.handlePipelineDelete)
-
+    //TODO: to be done LATER !! UI currently works with this interface
     // Creation of Configs
-    this.app.post('/notifications/', this.determineAuth(), this.handleNotificaitonCreate)
+    // this.app.post('/config/slack/', this.determineAuth(), this.deleteSlack)
+    // this.app.post('/config/webhook/', this.determineAuth(), this.deleteWebHook)
+    // this.app.post('/config/fcm/', this.determineAuth(), this.deleteFCM)
 
-    // // Update of Configs
-    this.app.put('/notifications/:id', this.determineAuth(), this.handleNotificaitonUpdate)
+    this.app.post('/config/', this.determineAuth(), this.handleNotificaitonCreate)
+
+    // Update of Configs
+    this.app.put('/config/:configtype/:id', this.determineAuth(), this.handleNotificationUpdate)
+
+    // Deletion of Configs
+    this.app.delete('/config/pipeline/:pipelineId/', this.determineAuth(), this.handlePipelineDelete)
+
+    this.app.delete('/config/slack/:id', this.determineAuth(), this.deleteSlack)
+    this.app.delete('/config/webhook/:id', this.determineAuth(), this.deleteWebHook)
+    this.app.delete('/config/fcm/:id', this.determineAuth(), this.deleteFCM)
 
     // Request Configs
+    this.app.get('/config/pipeline/:pipelineId/', this.determineAuth(), this.getConfigs)
 
-    this.app.get('/pipelines/:pipelineId/notifications', this.determineAuth(), this.getConfigs)
-    this.app.get('/notifications/:id', this.determineAuth(), this.getConfig)
-        //this.app.post('/webhook', this.determineAuth(), this.postWebhook)
-    // this.app.post('/fcm', this.determineAuth(), this.postFirebase)
-    // this.app.post('/fcm', this.determineAuth(), this.postFirebase)
-    console.log("Init Connection to Database")
-
-    this.storageHandler.initConnection(5, 5)
+    this.storageHandler.init(5, 5)
     amqpHandler.connect(5,5)
   }
 
@@ -108,19 +111,19 @@ export class NotificationEndpoint {
 
     configSummary.firebase.forEach((firebaseConfig) => {
       const config = Object.assign({}, firebaseConfig) as any
-      config.type = "FCM"
+      config.type = CONFIG_TYPE.FCM
       configs.push(config)
     })
 
     configSummary.slack.forEach((slackConfig) => {
       const config = Object.assign({}, slackConfig) as any
-      config.type = "SLACK"
+      config.type = CONFIG_TYPE.SLACK
       configs.push(config)
     })
 
-    configSummary.firebase.forEach((webhookConfig) => {
+    configSummary.webhook.forEach((webhookConfig) => {
       const config = Object.assign({}, webhookConfig) as any
-      config.type = "WEBHOOK"
+      config.type = CONFIG_TYPE.WEBHOOK
       configs.push(config)
     })
 
@@ -190,7 +193,7 @@ export class NotificationEndpoint {
   handleWebhookRequest = async (req: Request, res: Response): Promise<void> => {
     console.log(`Received Webhook config from Host ${req.connection.remoteAddress}`)
 
-    var webHookConfig = req.body as WebHookConfig
+    let webHookConfig = req.body as WebHookConfig
 
     // Check for validity of the request
     if (!NotificationEndpoint.isValidWebhookConfig(webHookConfig)) {
@@ -211,13 +214,17 @@ export class NotificationEndpoint {
     res.status(200).send('OK');
   }
 
-  /*
+
+  /**
    * Persists a posted Slack Config to the Database
+   * 
+   * @param req Request for config creation
+   * @param res Response for config creation
    */
   handleSlackRequest = async (req: Request, res: Response): Promise<void> => {
     console.log(`Received config from Host ${req.connection.remoteAddress}`)
 
-    var slackConfig: SlackConfig = req.body as SlackConfig
+    let slackConfig: SlackConfig = req.body as SlackConfig
 
      // Check for validity of the request
     if (!NotificationEndpoint.isValidSlackConfig(slackConfig)) {
@@ -246,7 +253,7 @@ export class NotificationEndpoint {
   handleFCMRequest = async (req: Request, res: Response) => {
     console.log(`Received config from Host ${req.connection.remoteAddress}`)
 
-    var firebaseConfig : FirebaseConfig = req.body as FirebaseConfig
+    let firebaseConfig : FirebaseConfig = req.body as FirebaseConfig
 
 
     // Check for validity of the request
@@ -267,34 +274,156 @@ export class NotificationEndpoint {
     res.send(200);
   }
 
-  handleNotificationDelete = (req: Request, res: Response): void => {
-    // call deleteSlack / deleteWebHook / deleteFCM based on notification type
+  handlePipelineDelete = (req: Request, res: Response): void => {
+    
+    const pipelineId = parseInt(req.params.pipelineId)
+    console.log(`Received config-deletion-request for pipline with id "${pipelineId}" from Host ${req.connection.remoteAddress}`)
 
-    const id = parseInt(req.params.id)
-    console.log(`Received config-deletion-request for pipline with id "${id}" from Host ${req.connection.remoteAddress}`)
-
-    if (!id) {
+    if (!pipelineId) {
       console.error("Request for pipeline config deletion: id not set")
       res.status(400).send('Pipeline id is not set.')
+      res.end()
       return
     }
 
-    
 
+    // Delete All Configs with given pipelineId
+    try {
+      this.storageHandler.deleteConfigsForPipelineID(pipelineId)
+    } catch (error) {
+      console.error(`Could not delete configs with pipelineID ${pipelineId}: ${error}`)
+      res.status(400).send('Internal Server Error.')
+      res.end()
+      return
+    }
+
+    // return saved post back
+    res.status(200).send('Configs have been deleted.');
+    res.end()
   }
 
-  deleteSlack = (req: Request, res: Response): void => {
-    
+  /**
+   * Handles slack config  deletion requests.
+   * 
+   * @param req Deletion Request containing parameter id (id to be deleted)
+   * @param res Response to the Deletion request
+   */
+  deleteSlack = async (req: Request, res: Response): Promise<void> => {
+    const configId = parseInt(req.params.id)
+    let deleteResult : DeleteResult
+
+    console.log(`Received deletion request for slack config with id ${configId} from Host ${req.connection.remoteAddress}`)
+
+    if (!configId) {
+      console.error("Request for config: ID not set")
+      res.status(400).send('Pipeline ID is not set.')
+      res.end()
+      return
+    }
+
+    // Delete Config
+    try {
+      deleteResult = await this.storageHandler.deleteSlackConfig(configId)
+
+      // No Deletion done
+      if (deleteResult.affected != 1) {
+        const msg = `Could not delete Slack Config: Config with id ${configId} not found.`
+        console.log(msg)
+        res.status(400).send(msg)
+      }
+
+    } catch (error) {
+      console.error(`Could not delete slack config  with id ${configId}: ${error}`)
+      res.status(400).send('Internal Server Error.')
+      res.end()
+      return
+    }
+
+    // return saved post back
+    res.status(200).send('DELETED');
+    res.end()
   }
 
-  deleteWebHook = (req: Request, res: Response): void => {
 
+  /**
+    * Handles Firebase config deletion requests.
+    * 
+    * @param req Deletion Request containing parameter id (id to be deleted)
+    * @param res Response to the Deletion request
+    */
+  deleteFCM = async (req: Request, res: Response): Promise<void> => {
+    const configId = parseInt(req.params.id)
+    let deleteResult: DeleteResult
+
+    console.log(`Received deletion request for firebase configs with id ${configId} from Host ${req.connection.remoteAddress}`)
+
+    if (!configId) {
+      console.error("Request for config: ID not set")
+      res.status(400).send('Pipeline ID is not set.')
+      res.end()
+      return
+    }
+
+    // Delete Config
+    try {
+      deleteResult = await this.storageHandler.deleteFirebaseConfig(configId)
+
+      // No Deletion done
+      if (deleteResult.affected != 1) {
+        console.log(`Could not delete Firebase Config with id ${configId}`)
+      }
+
+    } catch (error) {
+      console.error(`Could not delete firebase config  with id ${configId}: ${error}`)
+      res.status(400).send('Internal Server Error.')
+      res.end()
+      return
+    }
+
+    // return saved post back
+    res.status(200).send('DELETED');
+    res.end()
   }
 
-  deleteFCM = (req: Request, res: Response): void => {
-  }
 
-  handlePipelineDelete = (req: Request, res: Response): void => {
+  /**
+   * Handles Webhook deletion requests.
+   * 
+   * @param req Deletion Request containing parameter id (id to be deleted)
+   * @param res Response to the Deletion request
+   */
+  deleteWebHook = async (req: Request, res: Response): Promise<void> => {
+    const configId = parseInt(req.params.id)
+    let deleteResult: DeleteResult
+
+    console.log(`Received deletion request for webhook configs with id ${configId} from Host ${req.connection.remoteAddress}`)
+
+    if (!configId) {
+      console.error("Request for config: ID not set")
+      res.status(400).send('Pipeline ID is not set.')
+      res.end()
+      return
+    }
+
+    // Delete Config
+    try {
+      deleteResult = await this.storageHandler.deleteSlackConfig(configId)
+
+      // No Deletion done
+      if (deleteResult.affected != 1) {
+        console.log(`Could not delete webhook Config with id ${configId}`)
+      }
+
+    } catch (error) {
+      console.error(`Could not delete WebHook Config with id ${configId}: ${error}`)
+      res.status(400).send('Internal Server Error.')
+      res.end()
+      return
+    }
+
+    // return saved post back
+    res.status(200).send('DELETED');
+    res.end()
   }
 
   /*
@@ -302,13 +431,41 @@ export class NotificationEndpoint {
    * This is done by checking the validity of the config and then save
    * it to the database on success
    */
-  handleNotificaitonUpdate  = async (req: Request, res: Response): Promise<void> => {
-    console.log(`Received notification config from Host ${req.connection.remoteAddress}`)
+  handleNotificationUpdate  = async (req: Request, res: Response): Promise<void> => {
+    console.log(`Received notification config update request from Host ${req.connection.remoteAddress}`)
+    const configType = req.params.configtype
 
     const id = parseInt(req.params.id)
+    const configRequest = req.body as NotficationConfigRequest
+
+    if (!NotificationEndpoint.isValidNotificationConfig(configRequest)) {
+      console.error("Received malformed NoticationUpdate request")
+      res.status(400).send('Malformed Notification config.')
+      res.end()
+      return
+    }
+
+    switch (configType) {
+      case 'webhook':
+           this.storageHandler.updateWebhookConfig(id, req.body as WebHookConfig)
+        break
+      case 'fcm':
+        const config = req.body as FirebaseConfig
+        this.storageHandler.updateFirebaseConfig(id, req.body as FirebaseConfig)
+        break
+      case 'slack':
+        this.storageHandler.updateSlackConfig(id, req.body as SlackConfig)
+        break
+      default:
+        res.status(400).send(`Notification type ${configRequest.type} not suppoerted!`)
+        return
+    }
+
     // delete with notification id
     // save with id
     // or implement an update method!
+
+    res.end()
   }
 
 

@@ -219,9 +219,7 @@ services:
       - "traefik.http.services.notification.loadbalancer.server.port=8080"
 
   notification-db:
-    image: notification-db
-    build:
-      context:  ./notification/notification-db
+    image: postgres
     environment:
       POSTGRES_USER: 'notification_usr'
       POSTGRES_PASSWORD: 'admin'

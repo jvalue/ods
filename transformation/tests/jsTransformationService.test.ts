@@ -1,11 +1,10 @@
 /* eslint-env jest */
 import axios from 'axios'
 
-import TransformationService from './interfaces/transformationService'
+import TransformationService from '../src/interfaces/transformationService'
 
-import JSTransformationService from './jsTransformationService'
-import VM2SandboxExecutor from './executors/vm2SandboxExecutor'
-import SandboxExecutor from './interfaces/sandboxExecutor'
+import JSTransformationService from '../src/jsTransformationService'
+import SandboxExecutor from '../src/interfaces/sandboxExecutor'
 
 jest.mock('axios')
 
