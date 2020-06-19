@@ -8,6 +8,7 @@ import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
 import org.jvalue.ods.adapterservice.config.RabbitConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.io.IOException;
@@ -37,7 +38,7 @@ public class Adapter {
             logger.debug("Fetched: {}", raw);
             JsonNode result = interpreter.interpret(raw, config.formatConfig.parameters);
             DataBlob blob = blobRepository.save(new DataBlob(result.toString()));
-            rabbitTemplate.convertAndSend(RabbitConfiguration.DATA_IMPORT_QUEUE);
+            rabbitTemplate.convertAndSend(RabbitConfiguration.DATA_IMPORT_QUEUE, blob.getMetaData().getLocation());
             return blob.getMetaData();
         } catch (IOException e) {
             throw new IllegalArgumentException("Not able to parse data as format: " + config.formatConfig.format, e);
