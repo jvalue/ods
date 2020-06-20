@@ -16,6 +16,8 @@ services:
       ADAPTER_API: http://adapter:8080
       MOCK_SERVER_HOST: adapter-it
       MOCK_SERVER_PORT: 8081
+    depends_on:
+      - rabbitmq
 
   # ----------------- SCHEDULER SERVICE (PORTS 9300 - 9399) --------------------
   scheduler:
