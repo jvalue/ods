@@ -10,6 +10,7 @@ services:
     image: open-data-service/ods-main/system-test
     depends_on:
       - mock-server
+      - rabbitmq
     build:
       context: ./system-test/
 
