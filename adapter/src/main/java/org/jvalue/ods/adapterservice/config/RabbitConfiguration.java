@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitConfiguration {
-    public static final String DATA_IMPORT_QUEUE = "dataImportQueue";
+    public static final String DATA_IMPORT_QUEUE = "data_import";
 
     @Bean
     public Queue dataImportQueue() {
