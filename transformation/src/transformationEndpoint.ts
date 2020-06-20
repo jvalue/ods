@@ -88,8 +88,8 @@ export class TransformationEndpoint {
   handleConfigCreation = async (req: Request, res: Response): Promise<void> => {
     console.log(`Received Transformation config from Host ${req.connection.remoteAddress}`)
 
-    var transformationConfig = req.body as TransformationConfig
-
+    const transformationConfig = req.body as TransformationConfig
+    let savedConfig : TransformationConfig
     // Check for validity of the request
     if (!(this.isValidTransformationConfig(transformationConfig))) {
       console.warn('Malformed transformation request.')
@@ -98,7 +98,7 @@ export class TransformationEndpoint {
 
     // Persist Config
     try {
-      this.storageHandler.saveTransformationConfig(transformationConfig)
+      savedConfig = await this.storageHandler.saveTransformationConfig(transformationConfig)
     } catch (error) {
       console.error(`Could not create transformationConfig Object: ${error}`)
       res.status(500).send('Internal Server Error.')
@@ -106,7 +106,7 @@ export class TransformationEndpoint {
     }
 
     // return saved post back
-    res.status(200).send('OK');
+    res.status(200).send(savedConfig);
   }
 
   /**
@@ -212,7 +212,7 @@ export class TransformationEndpoint {
       return
     }
 
-    var transformationConfig = req.body as TransformationConfig
+    const transformationConfig = req.body as TransformationConfig
 
     // Check for validity of the request
     if (!(this.isValidTransformationConfig(transformationConfig))) {
@@ -234,7 +234,7 @@ export class TransformationEndpoint {
   }
 
   /**
-     * Gets all Configs asto corresponding to corresponnding Pipeline-ID
+     * Gets all Configs to corresponding to corresponnding Pipeline-ID
      * (identified by param id) as json list
      * 
      * @param req Request for configs with a specific pipeline id
@@ -252,7 +252,7 @@ export class TransformationEndpoint {
     }
 
     // Get configs from database
-    let configs = this.storageHandler.getTransformationConfigs(pipelineID)
+    const configs = this.storageHandler.getTransformationConfigs(pipelineID)
 
     if (!configs) {
       res.status(500).send('Internal Server Error')
@@ -275,7 +275,7 @@ export class TransformationEndpoint {
     console.log(`Received request: ${req.body}`)
 
     // TODO: Implement PipelineID + PipeLine name in Request
-    let pipelineID = req.body.pipelineID
+    const pipelineID = req.body.pipelineID
 
     const transformation: TransformationRequest = req.body
     if (!transformation.data && !transformation.dataLocation) {
@@ -306,7 +306,7 @@ export class TransformationEndpoint {
     res.write(answer)
     
     // Initialize transformationEvent (to be sent to Notification Queue)
-    let transformationEvent : TransformationEvent= {
+    const transformationEvent : TransformationEvent= {
       "pipelineId": pipelineID,
       "pipelineName": 'TODO: Get Pipeline ID from endpoint caller/queue publisher',
       "dataLocation": transformation.dataLocation,

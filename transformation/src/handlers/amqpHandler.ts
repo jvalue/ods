@@ -45,27 +45,33 @@ export class AmqpHandler{
 
         var established: boolean = false        // indicator if the connection has been established
         const handler: AmqpHandler = this       // To call the functions in the callback
+        let errMsg: string = ''             // Error Message to be shown after final retry
 
         for (let i = 0; i < retries; i++) {
             await this.backOff(backoff)
-            connect(rabit_amqp_url, function (error0: any, connection: Connection) {
-
+            await connect(rabit_amqp_url, async function (error0: any, connection: Connection) {
                 if (error0) {
-                    console.error(`Error connecting to RabbitMQ: ${error0}.Retrying in ${backoff} seconds`);
+                    errMsg = `Error connecting to RabbitMQ: ${error0}.Retrying in ${backoff} seconds`
+                    console.info(`Connecting to Amqp handler (${i}/${retries}`);
                     return
                 }
 
                 established = true
                 
                 // create the channels
-                handler.initNotificationChannel(connection)
-                handler.initJobChannel(connection)
+                await handler.initNotificationChannel(connection)
+                await handler.initJobChannel(connection)
             })
 
             if (established) {
-                console.log("Connected to RabbitMQ.");
                 break
             }
+        }
+
+        if (!established) {
+            console.error(`Could not establish connection to Amqp Handler: ${errMsg}`)
+        } else {
+            console.info('Connected to amqpHandler')
         }
     }
 

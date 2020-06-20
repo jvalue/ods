@@ -10,6 +10,7 @@ import { TransformationRepository } from '../interfaces/transformationRepository
 export class StorageHandler implements TransformationRepository{
 
     private configRepository!: Repository<TransformationConfig>
+    private dbConnection!: Connection | null
 
     /**
      * Initializes the components of the notifciation storage handler.
@@ -19,22 +20,28 @@ export class StorageHandler implements TransformationRepository{
      * @param retries:  Number of retries to connect to the database
      * @param backoff:  Time in seconds to backoff before next connection retry
      */
-    public init(retries: number, backoff: number): void {
+    public async init(retries: number, backoff: number): Promise<void> {
         console.log('Initializing storageHandler.')
         const handler: StorageHandler = this
 
-        this.initConnection(retries, backoff).then(connection => {
-            if (connection) {
-                this.configRepository = connection.getRepository(TransformationConfig);    
-            }
+        this.dbConnection = await this.initConnection(retries, backoff)
+        
+        if (!this.dbConnection) {
+            console.error('Could not initialize storageHandler.')
+            return Promise.reject()
+        }
+        this.configRepository = this.dbConnection.getRepository(TransformationConfig); 
 
-        }).catch(error => console.error('Could not initialize storageHandler.'))
+        if (!this.checkClassInvariant()) {
+            Promise.reject()
+        }
+        return Promise.resolve()
     }
 
 
     /**
      * Initializes a Database Connection to the notification-db service (postgres)
-     * by using the Environment variables:
+     * by using the Environment constiables:
      *          - PGHOST:       IP/hostname of the storage service 
      *          - PGPORT:       PORT        of the storage service
      *          - PGPASSWORD:   PASSWORD to connect to the stprage db
@@ -46,10 +53,11 @@ export class StorageHandler implements TransformationRepository{
      * @returns     a Promise, containing either a Connection on success or null on failure
      */
     private async initConnection(retries: number, backoff: number): Promise<Connection | null> {
-        var dbCon: null | Connection = null
-        var established: boolean = false
+        console.debug('Trying to establish connection to config database')
+        let dbCon: null | Connection = null
+        let established: boolean = false
         /*=================================================================
-        * Get connection Options from Environment variables
+        * Get connection Options from Environment constiables
         *=================================================================*/
         const options: ConnectionOptions = {
             type: "postgres",
@@ -105,9 +113,12 @@ export class StorageHandler implements TransformationRepository{
     * @param pipelineID    Pipeline ID to get the Transfromation Configs for
     */
     public async getTransformationConfigs(pipelineID: number): Promise<TransformationConfig[] | null> {
-        console.log(`Getting Transformation Configs with pipelineId ${pipelineID} from Database`)
-
-        var transformationConfigs: TransformationConfig[]
+        console.debug(`Getting Transformation Configs with pipelineId ${pipelineID} from Database`)
+        
+        if (!this.checkClassInvariant()) {
+            Promise.reject()
+        }
+        let transformationConfigs: TransformationConfig[]
 
         // return null if id not set
         if (!pipelineID) {
@@ -122,7 +133,7 @@ export class StorageHandler implements TransformationRepository{
             return null
         }
 
-        console.log(`Sucessfully got ${transformationConfigs.length} Transformation configs from Database`)
+        console.debug(`Sucessfully got ${transformationConfigs.length} Transformation configs from Database`)
         return transformationConfigs
     }
 
@@ -132,21 +143,20 @@ export class StorageHandler implements TransformationRepository{
      * @param transformationConfig    transformation config to persist
      * @returns Promise, containing the stored transformation config
      */
-    public saveTransformationConfig(transformationConfig: TransformationConfig): boolean {
+    public saveTransformationConfig(transformationConfig: TransformationConfig): Promise<TransformationConfig>{
+        console.debug(`Saving tranformation config.`)
 
-        // Init Repository for Transformation Config
-        console.debug("Init Repository")
-
+        if (!this.checkClassInvariant()) {
+            Promise.reject()
+        }
+        
         // create object from Body of the Request (=TransformationConfig)
-        console.debug("Init Transformation config")
         transformationConfig = this.configRepository.create(transformationConfig)
-
         // persist the Config
-        console.debug("Save TransformationConfig to Repository")
-        this.configRepository.save(transformationConfig);
-        console.log("Webhook config persisted")
+        let saveResult = this.configRepository.save(transformationConfig);
 
-        return true
+        console.debug("Webhook config persisted")
+        return saveResult
     }
 
     /**
@@ -156,7 +166,38 @@ export class StorageHandler implements TransformationRepository{
      * @returns result of the deletion execution
      */
     public deleteTransformationConfig(id: number): Promise<DeleteResult> {
-        return this.configRepository.delete(id)
+        console.debug(`Deleting conifg with id ${id}.`)
+
+        if (!this.checkClassInvariant()) {
+            Promise.reject()
+        }
+
+        let deletePromise = this.configRepository.delete(id)
+
+        console.debug(`Successfully deleted config with id ${id}`)
+        return deletePromise
+    }
+
+ 
+    /**
+     * Deletes all configs in the database referring to given pipeline id.
+     * Currently only one config exists for given Pipeline ID.
+     * 
+     * @param pipelineId Id of the pipeline to delete the configs for
+     * @returns Promise, containing the results of the deletion execution
+     */
+    public deleteConfigsForPipelineID(pipelineId: number): Promise<DeleteResult> {
+        console.debug(`Deleting all configs for pipeline id "${pipelineId}"`)
+
+        if (!this.checkClassInvariant()) {
+            Promise.reject()
+        }
+
+        let condition = { "pipelineId": pipelineId }
+
+        this.checkClassInvariant
+
+        return this.configRepository.delete(condition)
     }
 
     /**
@@ -167,23 +208,16 @@ export class StorageHandler implements TransformationRepository{
      * @returns Promise containing the result of the update operation
      */
     public updateTransoformationConfig(id: number, transformationConfig: TransformationConfig): Promise<UpdateResult> {
-        return this.configRepository.update(id, transformationConfig)
+        console.debug(`Updating config with id ${id}.`)
+        if(!this.checkClassInvariant()){     Promise.reject()}
+
+        let updatePromise = this.configRepository.update(id, transformationConfig)
+
+        console.debug(`Successfully updated config with id ${id}`)
+
+        return updatePromise
     }
 
-    /**
-     * Deletes all configs in the database referring to given pipeline id.
-     * Currently only one config exists for given Pipeline ID.
-     * 
-     * @param pipelineId Id of the pipeline to delete the configs for
-     * @returns Promise, containing the results of the deletion execution
-     */
-    public deleteConfigsForPipelineID(pipelineId: number): Promise<DeleteResult> {
-        console.log(`Deleting all configs for pipeline id "${pipelineId}"`)
-
-        let condition = { "pipelineId": pipelineId }
-
-        return this.configRepository.delete(condition)
-    }
 
     /**
      * Updates config for given pipelineId with the Transformation config, provided by argument config
@@ -198,5 +232,32 @@ export class StorageHandler implements TransformationRepository{
         return this.configRepository.update(condition,config)
     }
 
+    /**
+     * This function ensures that all objects are initialized 
+     * for further interaction with the config database 
+     * 
+     * @returns true if invariant correct, else false
+     */
+    private checkClassInvariant(): boolean {
+        let result: boolean = true
+        let msg: string[] = []
+
+
+        if (!this.dbConnection) {
+            msg.push('Config Database connection')
+            result = false
+        }
+
+        if (!this.configRepository) {
+            msg.push('Transformation config repository')
+            result = false
+        }
+
+        if (!result) {
+           console.error(`Error the following member variables are not set: ${msg}`)
+        }
+
+        return result
+    }
 
 }

@@ -13,6 +13,9 @@ export class StorageHandler implements NotificationRepository {
     webhookRepository!: Repository<WebHookConfig>
     firebaseRepository!: Repository<FirebaseConfig>
 
+    private dbConnection!: Connection | null
+
+
     private connectionOptions: ConnectionOptions = {
       type: "postgres",
       host: process.env.PGHOST,
@@ -31,28 +34,37 @@ export class StorageHandler implements NotificationRepository {
 
 
     /**
-     * Initializes the components of the notifciation storage handler.
-     * This is done by establishing a connection to the notication database 
-     * and initiliazing a repository for the notification config
-     * 
-     * @param retries:  Number of retries to connect to the database
-     * @param backoff:  Time in seconds to backoff before next connection retry
-     */
-    public init(retries: number, backoff: number): void {
-        console.log('Initializing storageHandler.')
-        const handler :StorageHandler = this
-        
-        this.initConnection(retries, backoff).then(connection => {
-            this.slackRepository = getConnection().getRepository(SlackConfig);
-            this.webhookRepository = getConnection().getRepository(WebHookConfig);
-            this.firebaseRepository = getConnection().getRepository(FirebaseConfig);
+ * Initializes the components of the notifciation storage handler.
+ * This is done by establishing a connection to the notication database 
+ * and initiliazing a repository for the notification config
+ * 
+ * @param retries:  Number of retries to connect to the database
+ * @param backoff:  Time in seconds to backoff before next connection retry
+ */
+    public async init(retries: number, backoff: number): Promise<void> {
+        console.debug('Initializing storageHandler.')
+        const handler: StorageHandler = this
 
-        }).catch(error => console.error('Could not initialize storageHandler.'))
+        this.dbConnection = await this.initConnection(retries, backoff)
+
+        if (!this.dbConnection) {
+            console.error('Could not initialize storageHandler.')
+            return Promise.reject()
+        }
+
+        this.slackRepository = this.dbConnection.getRepository(SlackConfig);
+        this.webhookRepository = this.dbConnection.getRepository(WebHookConfig);
+        this.firebaseRepository = this.dbConnection.getRepository(FirebaseConfig);
+
+        if (!this.checkClassInvariant()) {
+            return Promise.reject()
+        }
+        return Promise.resolve()
     }
 
     /**
      * Initializes a Database Connection to the notification-db service (postgres)
-     * by using the Environment variables:
+     * by using the Environment letiables:
      *          - PGHOST:       IP/hostname of the storage service
      *          - PGPORT:       PORT        of the storage service
      *          - PGPASSWORD:   PASSWORD to connect to the stprage db
@@ -64,8 +76,8 @@ export class StorageHandler implements NotificationRepository {
      * @returns     a Promise, containing either a Connection on success or null on failure
      */
     private async initConnection(retries: number, backoff: number): Promise<Connection|null> {
-        var dbCon: null | Connection = null
-        var connected: boolean = false
+        let dbCon: null | Connection = null
+        let connected: boolean = false
 
         // try to establish connection
         for (let i = 0; i < retries; i++) {
@@ -102,7 +114,10 @@ export class StorageHandler implements NotificationRepository {
      * @returns Promise, containing NotificationSummary (config that contains all configs)
      */
     public async getConfigsForPipeline(pipelineId: number): Promise<NotificationSummary> {
-        console.log(`Getting ConfigSummary for Pipeline with id ${pipelineId}.`)
+        console.debug(`Getting ConfigSummary for Pipeline with id ${pipelineId}.`)
+        if (!this.checkClassInvariant()) {
+            return Promise.reject()
+        }
 
         // Get the configs for given pipeline id
         const slackConfigs = await this.getSlackConfigs(pipelineId)
@@ -115,7 +130,8 @@ export class StorageHandler implements NotificationRepository {
             "webhook": webHookConfigs,
             "firebase": firebaseConfig
         }
-        
+
+        console.debug(`Successfully got the all configs for pipeline with id ${pipelineId}`)
         return notificationSummary
     }
 
@@ -125,17 +141,26 @@ export class StorageHandler implements NotificationRepository {
      * 
      * @param pipelineId Id of the pipeline to delete the configs for
      */
-    public deleteConfigsForPipelineID(pipelineId: number): void {
-        console.log(`Deleting all configs for pipeline id "${pipelineId}"`)  
-        
+    public deleteConfigsForPipelineID(pipelineId: number): Promise<void> {
+        console.debug(`Deleting all configs for pipeline id "${pipelineId}"`)  
+        if (!this.checkClassInvariant()) {
+            return Promise.reject()
+        }
+
         let condition = { "pipelineId": pipelineId }
 
-        getConnection().transaction(async transactionalEntityManager => {
+        if (!this.dbConnection) {
+            console.error(`Could not delete configs for pipeline id "${pipelineId}": Connection has not been established to config atabase`)
+            return Promise.reject()
+        }
+
+        let transaction =this.dbConnection.transaction(async transactionalEntityManager => {
             await transactionalEntityManager.delete(SlackConfig, condition)    
             await transactionalEntityManager.delete(WebHookConfig, condition)    
             await transactionalEntityManager.delete(FirebaseConfig, condition)    
-        })
-    
+        }).catch(error => { console.error(`Could not delete Conifgs with pipelineId ${pipelineId}`)})
+        
+        return Promise.resolve()
     }
 
     /**
@@ -145,15 +170,24 @@ export class StorageHandler implements NotificationRepository {
      * @returns Promise, containing a list of slack configs with given pipeline id
      */
     public async getSlackConfigs(pipelineId: number): Promise<SlackConfig[]> {
-        console.log(`Getting Slack Configs with pipelineId ${pipelineId} from Database`)
-        var slackConfigList: SlackConfig[] = []
+        console.debug(`Getting Slack Configs with pipelineId ${pipelineId} from Database`)
+        if (!this.checkClassInvariant()) {
+            return Promise.reject()
+        }
+        let slackConfigList: SlackConfig[] = []
+
+        if (!this.slackRepository) {
+            console.error('Could not get slack configs  for pipeline id "${pipelineId}": Slack repository not initialized.')
+            return Promise.reject()
+        }
 
         try {
             slackConfigList = await this.slackRepository.find({ pipelineId: pipelineId })
         } catch (error) {
             Promise.reject(error)
         }
-        console.log(`Sucessfully got ${slackConfigList.length} Slack config(s) from Database`)
+
+        console.debug(`Sucessfully got ${slackConfigList.length} Slack config(s) from Database`)
         return slackConfigList
     }
 
@@ -164,15 +198,20 @@ export class StorageHandler implements NotificationRepository {
      * @returns Promise, containing a list of slack configs with given pipeline id
      */
     public async getWebHookConfigs(pipelineId: number): Promise<WebHookConfig[]> {
-        console.log(`Getting WebHook Configs with pipelineId ${pipelineId} from Database`)
-        var webHookConfigs: WebHookConfig[] = []
+        console.debug(`Getting WebHook Configs with pipelineId ${pipelineId} from Database`)
+
+        if (!this.checkClassInvariant()) {
+            return Promise.reject()
+        }
+        let webHookConfigs: WebHookConfig[] = []
 
         try {
             webHookConfigs = await this.webhookRepository.find({ pipelineId: pipelineId })
         } catch (error) {
             Promise.reject(error)
         }
-        console.log(`Sucessfully got ${webHookConfigs.length} WebhookConfigs from Database`)
+
+        console.debug(`Sucessfully got ${webHookConfigs.length} WebhookConfigs from Database`)
         return webHookConfigs
     }
 
@@ -183,15 +222,19 @@ export class StorageHandler implements NotificationRepository {
      * @returns Promise, containing a list of Firebaseconfigs with given pipeline id
      */
     public async getFirebaseConfigs(pipelineId: number): Promise<FirebaseConfig[]> {
-        console.log(`Getting Firebase Configs with pipelineId ${pipelineId} from Database`)
-        var firebaseConfigs: FirebaseConfig[] = []
+        console.debug(`Getting Firebase Configs with pipelineId ${pipelineId} from Database`)
+        if (!this.checkClassInvariant()) {
+            return Promise.reject()
+        }
+        let firebaseConfigs: FirebaseConfig[] = []
 
         try {
             firebaseConfigs = await this.firebaseRepository.find({ pipelineId: pipelineId })
         } catch (error) {
             Promise.reject(error)
         }
-        console.log(`Sucessfully got ${firebaseConfigs.length} Firebase configs from Database`)
+
+        console.debug(`Sucessfully got ${firebaseConfigs.length} Firebase configs from Database`)
         return firebaseConfigs
     }
 
@@ -202,9 +245,17 @@ export class StorageHandler implements NotificationRepository {
      * @returns Promise, containing the stored webhook config
      */
     public saveWebhookConfig(webhookConfig: WebHookConfig): Promise<WebHookConfig> {
-        webhookConfig = this.webhookRepository.create(webhookConfig)
-        
-        return this.webhookRepository.save(webhookConfig);
+        console.debug('Saving Webhook config to database')
+        if (!this.checkClassInvariant()) {
+            return Promise.reject()
+        }
+
+        const config = this.webhookRepository.create(webhookConfig)
+
+        let webhookPromise = this.webhookRepository.save(config)
+
+        console.debug('Succesfully persisted webhook config.')
+        return webhookPromise;
     }
 
     /**
@@ -214,9 +265,16 @@ export class StorageHandler implements NotificationRepository {
      * @returns Promise, containing the stored slack config
      */
     public saveSlackConfig(slackConfig: SlackConfig): Promise<SlackConfig>  {
-        slackConfig = this.slackRepository.create(slackConfig)
+        console.debug('Saving Slack config to database.')
+        if (!this.checkClassInvariant()) {
+            return Promise.reject()
+        }
+        const config = this.slackRepository.create(slackConfig)
 
-        return this.slackRepository.save(slackConfig);
+        let slackPromise = this.slackRepository.save(config)
+
+        console.debug('Successfully persisted slack config')
+        return slackPromise;
     }
 
     /**
@@ -226,9 +284,17 @@ export class StorageHandler implements NotificationRepository {
      * @returns Promise, containing the stored firebase config
      */
     public saveFirebaseConfig(firebaseConfig: FirebaseConfig): Promise<FirebaseConfig>  {
-        firebaseConfig = this.firebaseRepository.create(firebaseConfig)
+        console.debug('Saving firebase conifg to database')
 
-        return this.firebaseRepository.save(firebaseConfig);
+        if (!this.checkClassInvariant()) {
+            return Promise.reject()
+        }
+
+        const config = this.firebaseRepository.create(firebaseConfig)
+        let firebasePromise = this.firebaseRepository.save(config)
+
+        console.debug('Successfully persisted firebase config')
+        return firebasePromise;
     }
     
     /**
@@ -238,8 +304,17 @@ export class StorageHandler implements NotificationRepository {
      * @param slackConfig slack config to be written to database
      * @returns Promise containing the result of the update operation
      */
-    public updateSlackConfig(id : number, slackConfig: SlackConfig): Promise<UpdateResult>{
-        return this.slackRepository.update(id, slackConfig)  
+    public updateSlackConfig(id: number, slackConfig: SlackConfig): Promise<UpdateResult>{
+        console.debug('Updating slack config to database')
+
+        if (!this.checkClassInvariant()) {
+            return Promise.reject()
+        }
+
+        let updatePromise = this.slackRepository.update(id, slackConfig)
+
+        console.debug('Succesfully updated slack config')
+        return updatePromise
     }
 
     /**
@@ -250,7 +325,16 @@ export class StorageHandler implements NotificationRepository {
      * @returns Promise containing the result of the update operation
      */
     public updateWebhookConfig(id: number, webhookConfig: WebHookConfig): Promise<UpdateResult> {
-        return this.webhookRepository.update(id,webhookConfig)
+        console.debug('Updating webhook config to database')
+
+        if (!this.checkClassInvariant()) {
+            return Promise.reject()
+        }
+
+        let updatePromise = this.webhookRepository.update(id, webhookConfig)
+
+        console.debug('Succesfully updated webhook config')
+        return updatePromise
     }
 
     /**
@@ -261,7 +345,16 @@ export class StorageHandler implements NotificationRepository {
      * @returns Promise containing the result of the update operation
      */
     public updateFirebaseConfig(id: number, firebaseConfig: FirebaseConfig): Promise<UpdateResult>{
-        return this.firebaseRepository.update(id, firebaseConfig)
+        console.debug('Updating firebase config to database')
+
+        if (!this.checkClassInvariant()) {
+            return Promise.reject()
+        }
+
+        let updatePromise = this.firebaseRepository.update(id, firebaseConfig)
+
+        console.debug('Succesfully updated firebase config')
+        return updatePromise
     }
 
 
@@ -272,7 +365,16 @@ export class StorageHandler implements NotificationRepository {
       * @returns result of the deletion execution
       */
     public deleteSlackConfig(id: number): Promise<DeleteResult> {
-        return this.slackRepository.delete(id)
+        console.debug(`Deleting slack config with id ${id}`)
+
+        if (!this.checkClassInvariant()) {
+            return Promise.reject()
+        }
+
+        let deletePromise = this.slackRepository.delete(id)
+
+        console.debug(`Successfully deleted slack config with id ${id}`)
+        return deletePromise
     }
 
     /**
@@ -282,7 +384,17 @@ export class StorageHandler implements NotificationRepository {
      * @returns result of the deletion execution
      */
     public deleteWebhookConfig(id: number): Promise<DeleteResult> {
-        return this.webhookRepository.delete(id)
+        console.debug(`Deleting webhook config with id ${id}`)
+
+        if (!this.checkClassInvariant()) {
+            return Promise.reject()
+        }
+
+        let deletePromise = this.webhookRepository.delete(id)
+
+        console.debug(`Successfully deleted webhook config with id ${id}`)
+        return deletePromise
+        
     }
 
     /**
@@ -292,8 +404,53 @@ export class StorageHandler implements NotificationRepository {
      * @returns result of the deletion execution
      */
     public deleteFirebaseConfig(id: number): Promise<DeleteResult> {
-        return this.firebaseRepository.delete(id)
+        console.debug(`Deleting firebase config with id ${id}`)
+
+        if (!this.checkClassInvariant()) {
+            return Promise.reject()
+        }
+
+        let deletePromise = this.firebaseRepository.delete(id)
+
+        console.debug(`Successfully deleted firebase config with id ${id}`)
+        return deletePromise
     }
 
+    /**
+     * This function ensures that all objects are initialized 
+     * for further interaction with the config database 
+     * 
+     * @returns true, if invariant correct, else false
+     */
+    private checkClassInvariant(): boolean {
+        let result: boolean = true
+        let msg: string[] = []
 
+        
+        if (!this.dbConnection) {
+            msg.push('Config Database connection')
+            result = false
+        }
+
+        if (!this.slackRepository) {
+            msg.push('Slack config repository')
+            result = false
+        }
+
+        if (!this.webhookRepository) {
+            msg.push('Webhook config repository')
+            result = false
+        }
+
+        if (!this.firebaseRepository) {
+            msg.push('Firebase config repository.')
+            result = false      
+        }
+
+        if (!result) {
+            console.error(`Error the following member variables are not set: ${msg}`)
+        }
+
+       return result
+    }
 }

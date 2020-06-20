@@ -8,7 +8,7 @@ export interface TransformationRepository {
   deleteConfigsForPipelineID(pipelineId: number): Promise<DeleteResult>
   getTransformationConfigs(pipelineID: number): Promise<TransformationConfig[] | null>
 
-  saveTransformationConfig(transformationConfig: TransformationConfig): boolean
+  saveTransformationConfig(transformationConfig: TransformationConfig): Promise<TransformationConfig>
   deleteTransformationConfig(id: number): Promise<DeleteResult>
   updateTransoformationConfig(id: number, transformationConfig: TransformationConfig): Promise<UpdateResult>
   

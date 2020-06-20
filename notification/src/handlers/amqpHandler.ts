@@ -34,24 +34,31 @@ export class AmqpHandler{
 
         var established: boolean = false    // amqp service connection result
         const handler: AmqpHandler = this   // for ability to access methods and members in callback
+        let errMsg: string = ''             // Error Message to be shown after final retry
         
         for (let i = 0; i < retries; i++) {
             await this.backOff(backoff)
-            await connect(rabit_amqp_url, function (error0: any, connection: Connection) {
+            await connect(rabit_amqp_url, async function (error0: any, connection: Connection) {
                 if (error0) {
-                    console.error(`Error connecting to RabbitMQ: ${error0}.Retrying in ${backoff} seconds`);
+                    errMsg = `Error connecting to RabbitMQ: ${error0}.Retrying in ${backoff} seconds`
+                    console.info(`Connecting to Amqp handler (${i}/${retries}`);
                     return
                 }
                 established = true
 
                 // create the channel
-                handler.initChannel(connection)
+                await handler.initChannel(connection)
             })
 
             if (established) {
-                console.log("Connected to RabbitMQ.");
                 break
             }
+        }
+
+        if (!established) {
+            console.error(`Could not establish connection to Amqp Handler: ${errMsg}`)
+        } else {
+            console.info('Connected to amqpHandler')
         }
     }
 
@@ -104,11 +111,11 @@ export class AmqpHandler{
             return false
         }
 
-        let handler = new StorageHandler()
+        const handler = new StorageHandler()
 
-        let configs = handler.getConfigsForPipeline(transformationEvent.pipelineId)
-        let executor = new VM2SandboxExecutor()
-        let notificationService = new JSNotificationService(executor)
+        const configs = handler.getConfigsForPipeline(transformationEvent.pipelineId)
+        const executor = new VM2SandboxExecutor()
+        const notificationService = new JSNotificationService(executor)
 
 
         configs.then(config => {

@@ -21,7 +21,6 @@
         "keycloak-connect": "^7.0.0",
         "pg": "^8.2.1",
         "reflect-metadata": "^0.1.13",
-        "sinon": "^9.0.2",
         "typeorm": "^0.2.25",
         "vm2": "^3.9.2"
     },
@@ -49,11 +48,9 @@
         "typescript": "^3.9.5"
     },
     "homepage": "https://github.com/jvalue/open-data-service",
-    "licenses": [
-        {
-            "type": "GNU Affero General Public License 3",
-            "url": "https://opensource.org/licenses/AGPL-3.0"
-        }
-    ],
+    "licenses": [{
+        "type": "GNU Affero General Public License 3",
+        "url": "https://opensource.org/licenses/AGPL-3.0"
+    }],
     "repository": "https://github.com/jvalue/open-data-service.git"
 }
