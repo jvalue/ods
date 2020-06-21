@@ -50,11 +50,11 @@ export class TransformationEndpoint {
 
     this.app.post('/config', this.determineAuth(), this.handleConfigCreation)
     this.app.get('/config/:id', this.handleConfigRequest)
-    
-    this.app.delete('/:deletionType/:id', this.handleConfigDeletion)
-    this.app.delete('/pipeline/:id', this.handlePipelineDeletion) 
+    this.app.delete('/config/:id', this.handleConfigDeletion)
     this.app.put('/config/:id', this.handleConfigUpdate)
 
+    this.app.delete('/pipeline/:id', this.handlePipelineDeletion) 
+    
     storageHandler.init(10, 5)
     amqpHandler.connect(10, 5)
   }

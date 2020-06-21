@@ -2,8 +2,8 @@ import axios, { AxiosResponse } from 'axios'
 import Pipeline from './pipeline'
 
 const CORE_SERVICE_URL = process.env.VUE_APP_CORE_SERVICE_URL as string
-const NOTIFICATION_SERVICE_URL = process.env.VUE_APP_TRANSFORMATION_SERVICE_URL as string
-const TRANSFORMATION_SERVICE_URL = process.env.VUE_APP_NOTIFICATION_SERVICE_URL as string
+const NOTIFICATION_SERVICE_URL = process.env.VUE_APP_NOTIFICATION_SERVICE_URL as string
+const TRANSFORMATION_SERVICE_URL = process.env.VUE_APP_TRANSFORMATION_SERVICE_URL as string
 /**
  * Axios instances with default headers and base url.
  * The option transformResponse is set to an empty array

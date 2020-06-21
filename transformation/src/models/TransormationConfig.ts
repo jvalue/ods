@@ -1,4 +1,27 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, PrimaryColumn } from 'typeorm';
+
+// @Entity()
+// export class Pipeline{
+//     @PrimaryColumn()
+//     id!: number;
+
+//     @Column()
+//     datasourceId!: number;
+    
+//     @Column()
+//     metadata!: PipelineMetaData;
+
+//     @Column()
+//     transformation!: TransformationConfig;
+// }
+
+// @Entity()
+// export class PipelineMetaData{
+//     displayName!: string;
+//     description!: string;
+//     author!: string;
+//     license!: string;
+// }
 
 @Entity()
 export class TransformationConfig {
