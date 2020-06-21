@@ -2,8 +2,8 @@ import axios, { AxiosResponse } from 'axios'
 import Pipeline from './pipeline'
 
 const CORE_SERVICE_URL = process.env.VUE_APP_CORE_SERVICE_URL as string
-const NOTIFICATION_SERVICE_URL = process.env.VUE_APP_CORE_SERVICE_URL as string
-const TRANSFORMATION_SERVICE_URL = process.env.VUE_APP_CORE_SERVICE_URL as string
+const NOTIFICATION_SERVICE_URL = process.env.VUE_APP_TRANSFORMATION_SERVICE_URL as string
+const TRANSFORMATION_SERVICE_URL = process.env.VUE_APP_NOTIFICATION_SERVICE_URL as string
 /**
  * Axios instances with default headers and base url.
  * The option transformResponse is set to an empty array
@@ -16,7 +16,7 @@ const http_core = axios.create({
 })
 
 const http_notification = axios.create({
-  baseURL: `${NOTIFICATION_SERVICE_URL}/config/pipelines`,
+  baseURL: `${NOTIFICATION_SERVICE_URL}/config/pipeline`,
   headers: { 'Content-Type': 'application/json' },
   transformResponse: []
 })
@@ -54,7 +54,7 @@ export async function updatePipeline (pipeline: Pipeline): Promise<AxiosResponse
 export async function deletePipeline(id: number): Promise<AxiosResponse> {
   let response : AxiosResponse
   response = await http_notification.delete(`/${id}`)
-  
+
   if (response.status == 200) {
     response = await http_transformation.delete(`/${id}`)
   }
