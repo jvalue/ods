@@ -15,24 +15,26 @@ const http = axios.create({
 })
 
 export async function getAllByPipelineId (pipelineId: number): Promise<NotificationConfig[]> {
-  const response = await http.get(`/pipelines/${pipelineId}/notifications`)
+  const response = await http.get(`/config/pipeline/${pipelineId}`)
   return JSON.parse(response.data)
 }
 
-export async function getById (id: number): Promise<NotificationConfig> {
-  const response = await http.get(`/notifications/${id}`)
+export async function getById (id: number, notificationType: string): Promise<NotificationConfig> {
+  const response = await http.get(`/config/${notificationType}/${id}`)
   return JSON.parse(response.data)
 }
 
-export async function create (notificationConfig: NotificationConfig): Promise<NotificationConfig> {
-  const response = await http.post(`/notifications`, JSON.stringify(notificationConfig))
+export async function create(notificationType: string, notificationConfig: NotificationConfig): Promise<NotificationConfig> {
+  delete notificationConfig['id'] // remove notificaitonId
+  const response = await http.post(`/config/${notificationType}`, JSON.stringify(notificationConfig))
   return JSON.parse(response.data)
 }
 
-export async function update (id: number, notificationConfig: NotificationConfig): Promise<void> {
-  return http.put(`/notifications/${id}`, JSON.stringify(notificationConfig))
+export async function update(id: number, notificationType: string, notificationConfig: NotificationConfig): Promise<void> {
+  delete notificationConfig['id'] // remove notificaitonId
+  return http.put(`/config/${notificationType}/${id}`, JSON.stringify(notificationConfig))
 }
 
-export async function remove (id: number): Promise<void> {
-  return http.delete(`/notifications/${id}`)
+export async function remove(id: number, notificationType: string): Promise<void> {
+  return http.delete(`/config/${notificationType}/${id}`)
 }

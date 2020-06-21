@@ -42,21 +42,24 @@
 
       <v-data-table
         :headers="headers"
-        :items="selectedPipeline.notifications"
+        :items="notifications"
         class="elevation-1"
       >
         <v-progress-linear
           slot="progress"
           indeterminate
         />
-        <template v-slot:item.notificationId="{ item }">
-          {{ item.notificationId }}
+        <template v-slot:item.id="{ item }">
+          {{ item.id }}
         </template>
         <template v-slot:item.type="{ item }">
           {{ item.type }}
         </template>
         <template v-slot:item.condition="{ item }">
           {{ item.condition }}
+        </template>
+         <template v-slot:item.id="{ item }">
+          {{ item.id }}
         </template>
         <template v-slot:item.action="{ item }">
           <v-btn
@@ -122,7 +125,7 @@ export default class PipelineNotifications extends Vue {
   notificationEdit!: NotificationEditDialog
 
   headers = [
-    { text: 'Id', value: 'notificationId' },
+    { text: 'Id', value: 'id' },
     { text: 'Type', value: 'type' },
     { text: 'Condition', value: 'condition' },
     { text: 'Actions', value: 'action' }
@@ -142,13 +145,17 @@ export default class PipelineNotifications extends Vue {
     this.notificationEdit.openDialog()
   }
 
-  onEditNotification (notification: NotificationConfig) {
+  async onEditNotification (notification: NotificationConfig) {
     this.isEdit = true
     this.notificationEdit.openDialog(notification)
   }
 
   async onDeleteNotification (notification: NotificationConfig) {
-    await RestClient.remove(notification.notificationId)
+    const notificationId = notification.id
+    const notficationType = notification.type
+
+    await RestClient.remove(notificationId, notficationType)
+    await this.onLoadNotifications()
   }
 
   async onLoadNotifications () {
@@ -157,14 +164,20 @@ export default class PipelineNotifications extends Vue {
 
   onNavigateBack () {
     this.$router.push({ name: 'pipeline-overview' })
-  }
+  }   
 
-  onSave (editedNotification: NotificationConfig) {
+  async onSave (editedNotification: NotificationConfig) {
+    const type = editedNotification.type
+
+    editedNotification.pipelineId = this.pipelineId
+
     if (this.isEdit) { // edit
-      RestClient.update(editedNotification.notificationId, editedNotification)
+      await RestClient.update(editedNotification.id, type, editedNotification)
     } else { // create
-      RestClient.create(editedNotification)
+      await RestClient.create(type, editedNotification)
     }
+    //this.$router.go(0) // reload page (this.onLoadNotificaiton not working?)
+    await this.onLoadNotifications()
   }
 }
 </script>

@@ -39,7 +39,7 @@ async handleNotification(notification: NotificationConfig, event: Transformation
 
   switch (type) {
   case CONFIG_TYPE.WEBHOOK:
-      await this.handleWebhook(notification as WebHookConfig)
+      await this.handleWebhook(notification as WebHookConfig, message)
       break
   case CONFIG_TYPE.FCM:
       await this.handleFCM(notification as FirebaseConfig, message)
@@ -61,25 +61,15 @@ async handleNotification(notification: NotificationConfig, event: Transformation
    * @param event event to extract transformation results from 
    * @returns message to be sent as notification
    */
-  private buildMessage(event: TransformationEvent) :string{
-    
+  buildMessage(event: TransformationEvent): string {
+
     let message: string                       // message to return
     const jobError = event.jobResult.error    // Error of transformation (if exists)
 
-    /*====================================================
-    *  Build Message for failed transformation/pipline
-    *====================================================*/
-    if (jobError) {
-      message = `Pipeline ${event.pipelineName}(Pipeline ID:${event.pipelineId})Failed.
-
-        Details:
-          Line: ${jobError.lineNumber}
-          Message: ${jobError.message}
-          Stacktrace: ${ jobError.stacktrace}`
-    } else {
     /*======================================================
-     *  Build Message for succesfull transformation/pipline
-     *=======================================================*/ 
+    *  Build Message for succesfull transformation/pipline
+    *=======================================================*/
+    if (jobError === undefined) {
       // Build Stats (Time measures for transformation execution)
       const jobStats = event.jobResult.stats
       const start = new Date(jobStats.startTimestamp)
@@ -90,18 +80,29 @@ async handleNotification(notification: NotificationConfig, event: Transformation
       message = `Pipeline ${event.pipelineName}(Pipeline ID:${event.pipelineId}) ` +
         `has new data available. Fetch at ${event.dataLocation}.
 
-      Transformation Details:
-            Start: ${start}
-            End:  ${end}
-            Duration: ${jobStats.durationInMilliSeconds} ms`
+        Transformation Details:
+              Start: ${start}
+              End:  ${end}
+              Duration: ${jobStats.durationInMilliSeconds} ms`
+
+    } else {
+      /*====================================================
+      *  Build Message for failed transformation/pipline
+      *====================================================*/
+      message = `Pipeline ${event.pipelineName}(Pipeline ID:${event.pipelineId})Failed.
+
+          Details:
+            Line: ${jobError.lineNumber}
+            Message: ${jobError.message}
+            Stacktrace: ${ jobError.stacktrace}`
     }
-    
+
     return message
   }
 
-  private async handleWebhook (webhook: WebHookConfig): Promise<void> {
+  private async handleWebhook (webhook: WebHookConfig, message: string): Promise<void> {
     const callbackObject: WebhookCallback = {
-      location: webhook.dataLocation,
+      location: message,
       timestamp: new Date(Date.now())
     }
     console.log(`Posting webhook to ${webhook.url}, callback object: ${JSON.stringify(callbackObject)}.`)

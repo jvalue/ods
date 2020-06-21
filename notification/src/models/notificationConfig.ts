@@ -1,21 +1,15 @@
 import { Entity,  Column,  PrimaryGeneratedColumn } from 'typeorm'
 
 export enum CONFIG_TYPE{
-  WEBHOOK = "WEBHOOK",
-  SLACK = "SLACK",
-  FCM = "FCM"
+  WEBHOOK = "webhook",
+  SLACK = "slack",
+  FCM = "fcm"
 }
 
 
 export class NotificationConfig{
   @Column()
   pipelineId!: number;
-
-  @Column()
-  pipelineName!: string;
-
-  @Column()
-  dataLocation!: string;
 
   @Column()
   condition!: string;

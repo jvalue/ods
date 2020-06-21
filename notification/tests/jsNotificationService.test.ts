@@ -18,6 +18,8 @@ describe('JSNotificationService', () => {
       value1: 5
     }
 
+    
+
     const post = axios.post as jest.Mock
 
     let notificationService: NotificationService
@@ -75,31 +77,71 @@ describe('JSNotificationService', () => {
         }
       }
 
-
     })
 
     afterEach(() => {
       jest.clearAllMocks()
     })
 
+    function buildMessage(event: TransformationEvent): string {
+
+      let message: string                       // message to return
+      const jobError = event.jobResult.error    // Error of transformation (if exists)
+
+      /*======================================================
+      *  Build Message for succesfull transformation/pipline
+      *=======================================================*/
+      if (jobError === undefined) {
+        // Build Stats (Time measures for transformation execution)
+        const jobStats = event.jobResult.stats
+        const start = new Date(jobStats.startTimestamp)
+        const end = new Date(jobStats.endTimestamp)
+
+
+        // Build Success Message
+        message = `Pipeline ${event.pipelineName}(Pipeline ID:${event.pipelineId}) ` +
+          `has new data available. Fetch at ${event.dataLocation}.
+
+        Transformation Details:
+              Start: ${start}
+              End:  ${end}
+              Duration: ${jobStats.durationInMilliSeconds} ms`
+      
+      } else {
+      /*====================================================
+      *  Build Message for failed transformation/pipline
+      *====================================================*/
+        message = `Pipeline ${event.pipelineName}(Pipeline ID:${event.pipelineId})Failed.
+
+          Details:
+            Line: ${jobError.lineNumber}
+            Message: ${jobError.message}
+            Stacktrace: ${ jobError.stacktrace}`
+      }
+
+      return message
+    }
+
+
+
     it('should trigger notification when transformation failed and condition is "data == undefined', async () => {
       post.mockReturnValue(Promise.resolve())
 
       const notificationConfig: WebHookConfig = {
         id: 1,
-        pipelineName: 'nordstream',
         pipelineId: 1,
-        dataLocation: 'data',
         condition: 'data === undefined',
         url: 'callback'
       }
 
       await notificationService.handleNotification(notificationConfig, failEvent, CONFIG_TYPE.WEBHOOK)
 
+      const expectedMessage = buildMessage(failEvent)
+
       expect(post).toHaveBeenCalledTimes(1)
       //check arguments for axios post
       expect(post.mock.calls[0][0]).toEqual(notificationConfig.url)
-      expect(post.mock.calls[0][1].location).toEqual(notificationConfig.dataLocation)
+      expect(post.mock.calls[0][1].location).toEqual(expectedMessage)
     })
 
     it('should trigger notification when transformation failed and condition is "!data', async () => {
@@ -107,19 +149,19 @@ describe('JSNotificationService', () => {
 
       const notificationConfig: WebHookConfig = {
         id: 1,
-        pipelineName: 'nordstream',
         pipelineId: 1,
-        dataLocation: 'data',
         condition: '!data',
         url: 'callback'
       }
 
       await notificationService.handleNotification(notificationConfig, failEvent, CONFIG_TYPE.WEBHOOK)
 
+      const expectedMessage = buildMessage(failEvent)
+
       expect(post).toHaveBeenCalledTimes(1)
       //check arguments for axios post
       expect(post.mock.calls[0][0]).toEqual(notificationConfig.url)
-      expect(post.mock.calls[0][1].location).toEqual(notificationConfig.dataLocation)
+      expect(post.mock.calls[0][1].location).toEqual(expectedMessage)
     })
 
     /**
@@ -130,19 +172,19 @@ describe('JSNotificationService', () => {
 
       const notificationConfig: WebHookConfig = {
         id: 1,
-        pipelineName: 'nordstream',
         pipelineId: 1,
-        dataLocation: 'data',
         condition: 'data.value1 > 0',
         url: 'callback'
       }
 
       await notificationService.handleNotification(notificationConfig, successEvent,CONFIG_TYPE.WEBHOOK)
 
+      const expectedMessage = buildMessage(successEvent)
+
       expect(post).toHaveBeenCalledTimes(1)
       //check arguments for axios post
       expect(post.mock.calls[0][0]).toEqual(notificationConfig.url)
-      expect(post.mock.calls[0][1].location).toEqual(notificationConfig.dataLocation)
+      expect(post.mock.calls[0][1].location).toEqual(expectedMessage)
     })
 
     /**
@@ -151,9 +193,7 @@ describe('JSNotificationService', () => {
     test('Notification does not trigger when condition is malformed', async () => {
       const notificationRequest: WebHookConfig = {
         id: 1,
-        pipelineName: 'weststream',
         pipelineId: 3,
-        dataLocation: 'data',
         condition: 'asdfa;',
         url: 'callback'
       }
@@ -176,9 +216,7 @@ describe('JSNotificationService', () => {
       const request: SlackConfig = {
         id:1,
         condition: 'data.value1 > 0',
-        dataLocation: 'data',
         pipelineId: 42,
-        pipelineName: 'AnswerToEverything-Pipeline',
         workspaceId: '012',
         channelId: '123',
         secret: '42'
@@ -186,24 +224,7 @@ describe('JSNotificationService', () => {
       
       await notificationService.handleNotification(request, successEvent, CONFIG_TYPE.SLACK)
 
-      /*======================================================
-      *  Build Message for succesfull transformation/pipline
-      *=======================================================*/
-      // Build Stats (Time measures for transformation execution)
-      const jobStats = successEvent.jobResult.stats
-      const start = new Date(jobStats.startTimestamp)
-      const end = new Date(jobStats.endTimestamp)
-
-
-      // Build Success Message
-      const message = `Pipeline ${successEvent.pipelineName}(Pipeline ID:${successEvent.pipelineId}) ` +
-        `has new data available. Fetch at ${successEvent.dataLocation}.
-
-      Transformation Details:
-            Start: ${start}
-            End:  ${end}
-            Duration: ${jobStats.durationInMilliSeconds} ms`
-
+      const message = buildMessage(successEvent)
 
       const expectedObject: SlackCallback = {
         text: message

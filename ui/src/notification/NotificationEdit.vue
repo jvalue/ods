@@ -36,19 +36,19 @@
             md="4"
           >
             <webhook-edit
-              v-if="editedNotification.type === 'WEBHOOK'"
+              v-if="editedNotification.type === 'webhook'"
               v-model="editedNotification"
               style="flex: 1 1 auto"
               @validityChanged="validForm = $event"
             />
             <firebase-edit
-              v-if="editedNotification.type === 'FCM'"
+              v-if="editedNotification.type === 'firebase'"
               v-model="editedNotification"
               style="flex: 1 1 auto"
               @validityChanged="validForm = $event"
             />
             <slack-edit
-              v-if="editedNotification.type === 'SLACK'"
+              v-if="editedNotification.type === 'slack'"
               v-model="editedNotification"
               style="flex: 1 1 auto"
               @validityChanged="validForm = $event"
@@ -83,11 +83,12 @@ import Component from 'vue-class-component'
 import Vue from 'vue'
 import { Emit } from 'vue-property-decorator'
 
-import NotificationConfig, { WebhookNotification } from '@/notification/notificationConfig'
-import NotificationEditDialog from '@/notification/notificationEditDialog'
+import NotificationConfig, {WebhookNotification, CONFIG_TYPE } from './notificationConfig'
+import NotificationEditDialog from '@/notification/notificationEditDialog.vue'
 import WebhookEdit from '@/notification/WebhookEdit.vue'
 import FirebaseEdit from '@/notification/FirebaseEdit.vue'
 import SlackEdit from '@/notification/SlackEdit.vue'
+import notificationRoutes from './router';
 
 @Component({
   components: { SlackEdit, WebhookEdit, FirebaseEdit }
@@ -100,19 +101,24 @@ export default class NotificationEdit extends Vue implements NotificationEditDia
     return this.editedNotification
   }
 
-  private notificationTypes = ['WEBHOOK', 'FCM', 'SLACK']
+  private pipelineId = -1
   private dialogOpen = false
-
+  private notificationTypes = Object.values(CONFIG_TYPE)  // Convert CONFIG_TYPES to list
+  //private notificationTypes = CONFIG_TYPE
+  //private notificationTypes = ['webhook', 'fcm', 'slack']
+  
   private defaultNotification: WebhookNotification = {
-    notificationId: -1,
+    id: -1,
+    pipelineId: this.pipelineId,
     condition: 'true',
     url: '',
-    type: 'WEBHOOK'
+    type: CONFIG_TYPE.WEBHOOK
   }
 
   private editedNotification: NotificationConfig = Object.assign({}, this.defaultNotification)
 
-  openDialog (notificationConfig?: NotificationConfig) {
+  openDialog (id: number, notificationConfig?: NotificationConfig) {
+    
     if (notificationConfig) { // edit
       this.editedNotification = Object.assign({}, notificationConfig)
     } else { // create
@@ -124,6 +130,7 @@ export default class NotificationEdit extends Vue implements NotificationEditDia
   closeDialog () {
     this.editedNotification = Object.assign({}, this.defaultNotification)
     this.dialogOpen = false
+    this.editedNotification.pipelineId = this.pipelineId
   }
 
   onSave () {
