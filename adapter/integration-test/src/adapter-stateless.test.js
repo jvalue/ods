@@ -5,6 +5,7 @@ const URL = process.env.ADAPTER_API || 'http://localhost:9000/api/adapter'
 const MOCK_SERVER_PORT = process.env.MOCK_SERVER_PORT || 8081
 const MOCK_SERVER_HOST = process.env.MOCK_SERVER_HOST || 'localhost'
 const MOCK_SERVER_URL = 'http://' + MOCK_SERVER_HOST + ':' + MOCK_SERVER_PORT
+const RABBIT_URL = `http://${process.env.RABBIT_HOST}:15672`
 
 describe('Adapter Stateless', () => {
   console.log('Adapter-Service URL= ' + URL)
@@ -12,8 +13,9 @@ describe('Adapter Stateless', () => {
   beforeAll(async () => {
     try {
       console.log('Waiting for service with URL: ' + MOCK_SERVER_URL)
-      await waitOn({ resources: [MOCK_SERVER_URL], timeout: 50000 })
+      await waitOn({ resources: [MOCK_SERVER_URL, RABBIT_URL], timeout: 50000 })
       console.log('[online] Service with URL:  ' + MOCK_SERVER_URL)
+      console.log('[online] Service with URL:  ' + RABBIT_URL)
     } catch (err) {
       process.exit(1)
     }
