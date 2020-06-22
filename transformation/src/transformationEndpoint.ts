@@ -9,7 +9,7 @@ import { Server } from 'http'
 import JobResult from './interfaces/jobResult/jobResult'
 import axios from 'axios'
 import { StorageHandler } from './handlers/storageHandler';
-import { TransformationConfig } from './models/TransormationConfig';
+import { TransformationConfig } from './models/TransformationConfig';
 import { AmqpHandler } from './handlers/amqpHandler';
 import { TransformationEvent } from './interfaces/transformationEvent';
 import { DeleteResult, UpdateResult } from 'typeorm';
@@ -48,12 +48,13 @@ export class TransformationEndpoint {
     this.app.get('/version', this.getVersion)
     this.app.post('/job', this.determineAuth(), this.postJob)
 
+    // Config CRUD Operations
     this.app.post('/config', this.determineAuth(), this.handleConfigCreation)
     this.app.get('/config/:id', this.handleConfigRequest)
     this.app.delete('/config/:id', this.handleConfigDeletion)
     this.app.put('/config/:id', this.handleConfigUpdate)
 
-    this.app.delete('/pipeline/:id', this.handlePipelineDeletion) 
+    //this.app.delete('/pipeline/:id', this.handlePipelineDeletion) // 1:1 relation between Pipeline and  Transformation 
     
     storageHandler.init(10, 5)
     amqpHandler.connect(10, 5)
@@ -234,40 +235,44 @@ export class TransformationEndpoint {
   }
 
   /**
-     * Gets all Configs to corresponding to corresponnding Pipeline-ID
+     * Gets Config to corresponding to corresponnding Pipeline-ID
      * (identified by param id) as json list
      * 
-     * @param req Request for configs with a specific pipeline id
+     * If no pipeline-ID specified it will return all configs.
+     * 
+     * @param req Request for config with a specific pipeline id. (All configs returned when not specified)
      * @param res Response that will contain the Config summary
      */
-  handleConfigRequest = (req: Request, res: Response): void => {
+  handleConfigRequest = async (req: Request, res: Response): Promise<void> => {
 
     const pipelineID = parseInt(req.params.id)
-    console.log(`Received request for configs with pipeline id ${pipelineID} from Host ${req.connection.remoteAddress}`)
-
+    
+    /*===================================================
+     * Request for all Configs
+     *==================================================*/
     if (!pipelineID) {
-      console.error("Request for config: ID not set")
-      res.status(400).send('Pipeline ID is not set.')
-      return
+      console.log(`Received request for all configs from Host ${req.connection.remoteAddress}`)
+      const allConfigs = await this.storageHandler.getAllConfigs()
+      res.status(200).send(allConfigs)
+      res.end()
+      return Promise.resolve()
     }
 
+    /*===================================================
+    * Request for Configs for pipeline ID
+    *==================================================*/
+    console.log(`Received request for configs with pipeline id ${pipelineID} from Host ${req.connection.remoteAddress}`)
     // Get configs from database
-    const configs = this.storageHandler.getTransformationConfigs(pipelineID)
+    const configs = await this.storageHandler.getTransformationConfigs(pipelineID)
+      .catch(error => console.log(`Could not get config with pipeline id ${pipelineID}`))
 
     if (!configs) {
       res.status(500).send('Internal Server Error')
-      return
+      return Promise.reject()
     }
 
-    // Get configSummary from promise
-    configs.then(configSummary => {
-      if (!configSummary) {
-        res.status(500).send('Internal Server Error')
-        return
-      }
-
-      res.status(200).send(configSummary)
-    })
+    res.status(200).send(configs)
+    return Promise.resolve()
   }
 
 
@@ -328,6 +333,7 @@ export class TransformationEndpoint {
 
 
   private isValidTransformationConfig(conf: TransformationConfig): boolean {
-    return !!conf && !!conf.dataLocation && !!conf.func && !!conf.pipelineId
+    return true
+    //return !!conf && !!conf.datasourceId && !!conf.func && !!conf.pipelineId
   }
 }

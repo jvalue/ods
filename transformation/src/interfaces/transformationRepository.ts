@@ -1,4 +1,4 @@
-import { TransformationConfig } from "../models/TransormationConfig";
+import { TransformationConfig } from "../models/TransformationConfig";
 import { Connection, DeleteResult, UpdateResult } from 'typeorm';
 
 export interface TransformationRepository {

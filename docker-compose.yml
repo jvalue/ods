@@ -162,8 +162,8 @@ services:
       AUTH_ENABLED: 'false' #TODO: turn to true as soon as it works!
 
       # Postgres connection vars
-      PGUSER: 'notification_usr'
-      PGHOST: 'notification-db'
+      PGUSER: 'transformation_usr'
+      PGHOST: 'transformation-db'
       PGPASSWORD: 'admin'
       PGPORT: 5432
 

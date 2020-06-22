@@ -1,7 +1,6 @@
 <template>
   <v-form
-    v-model="validForm"
-  >
+    v-model="validForm">
     <v-text-field
       v-model="firebaseNotification.projectId"
       label="Id of your firebase project"

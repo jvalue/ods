@@ -27,13 +27,15 @@ const http_transformation = axios.create({
   transformResponse: []
 })
 
-export async function getAllPipelines (): Promise<Pipeline[]> {
-  const response = await http_core.get('/')
+export async function getAllPipelines(): Promise<Pipeline[]> {
+  //const response = await http_core.get('/')
+  const response = await http_transformation.get('/config/')
   return JSON.parse(response.data)
 }
 
 export async function getPipelineById (id: number): Promise<Pipeline> {
-  const response = await http_core.get(`/${id}`)
+  //const response = await http_core.get(`/${id}`)
+  const response = await http_transformation.get(`/${id}`)
   return JSON.parse(response.data)
 }
 
@@ -43,12 +45,15 @@ export async function getPipelineByDatasourceId (datasourceId: number): Promise<
 }
 
 export async function createPipeline (pipeline: Pipeline): Promise<Pipeline> {
-  const response = await http_core.post('/', JSON.stringify(pipeline))
+  //const response = await http_core.post('/', JSON.stringify(pipeline))
+  const response = await http_transformation.post('/' , pipeline)
   return JSON.parse(response.data)
 }
 
 export async function updatePipeline (pipeline: Pipeline): Promise<AxiosResponse> {
-  return http_core.put(`/${pipeline.id}`, JSON.stringify(pipeline))
+  
+  //return http_core.put(`/${pipeline.id}`, JSON.stringify(pipeline))
+  return http_transformation.put(`/${pipeline.id}`, JSON.stringify(pipeline))
 }
 
 export async function deletePipeline(id: number): Promise<AxiosResponse> {
@@ -59,6 +64,6 @@ export async function deletePipeline(id: number): Promise<AxiosResponse> {
     response = await http_transformation.delete(`/${id}`)
   }
 
-  response = await http_core.delete(`/${id}`)
+  //response = await http_core.delete(`/${id}`)
   return response
 }

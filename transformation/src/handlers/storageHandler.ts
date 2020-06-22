@@ -1,6 +1,8 @@
 import { Connection, ConnectionOptions, createConnection, getConnection, Repository, DeleteResult, UpdateResult } from 'typeorm';
-import { TransformationConfig } from '../models/TransormationConfig';
+import { TransformationConfig } from '../models/TransformationConfig';
 import { TransformationRepository } from '../interfaces/transformationRepository';
+import { PipelineMetaData } from '../models/PipelineMetaData';
+import TransformationData from '../models/TransformationData';
 
 
 /**
@@ -56,6 +58,7 @@ export class StorageHandler implements TransformationRepository{
         console.debug('Trying to establish connection to config database')
         let dbCon: null | Connection = null
         let established: boolean = false
+        let errMsg : string = ''
         /*=================================================================
         * Get connection Options from Environment constiables
         *=================================================================*/
@@ -69,17 +72,22 @@ export class StorageHandler implements TransformationRepository{
             synchronize: true,
             // logging: true,
             entities: [
-                TransformationConfig
+                TransformationConfig,
+                PipelineMetaData,
+                TransformationData
             ]
         }
         /*=================================================================
          * try to connect to the notification-db service (<retries> times)
          *=================================================================*/
-        for (let i = 0; i < retries; i++) {
-            dbCon = await createConnection(options).catch(() => { return null })
+        for (let i = 1; i <= retries; i++) {
+            console.log(`Trying to establish Database Connection (${i}/${retries})`)
+            dbCon = await createConnection(options).catch((err: Error) => {
+                errMsg = err.message
+                return null
+            })
 
             if (!dbCon) {
-                console.warn(`DB Connection could not be initialized. Retrying in ${backoff} seconds`)
                 await this.backOff(backoff);
             } else {
                 established = true
@@ -90,9 +98,9 @@ export class StorageHandler implements TransformationRepository{
         * Check for Connection Result
         *=================================================================*/
         if (established) {
-            console.log('Connection established')
+            console.info('Connected to database.')
         } else {
-            console.error('Connection could not be established.')
+            console.error(`Connection could not be established: ${errMsg}`)
         }
 
         return dbCon
@@ -113,21 +121,52 @@ export class StorageHandler implements TransformationRepository{
     * @param pipelineID    Pipeline ID to get the Transfromation Configs for
     */
     public async getTransformationConfigs(pipelineID: number): Promise<TransformationConfig[] | null> {
-        console.debug(`Getting Transformation Configs with pipelineId ${pipelineID} from Database`)
+        console.debug(`Getting Transformation Configs with id ${pipelineID} from Database`)
         
         if (!this.checkClassInvariant()) {
             Promise.reject()
         }
+        
         let transformationConfigs: TransformationConfig[]
 
+        
         // return null if id not set
         if (!pipelineID) {
             return null;
         }
 
+        
         // Get Configs from Database 
         try {
-            transformationConfigs = await this.configRepository.find({ pipelineId: pipelineID })
+            transformationConfigs = await this.configRepository.find({ id: pipelineID })
+        } catch (error) {
+            console.log(error)
+            return null
+        }
+
+        console.debug(`Sucessfully got ${transformationConfigs.length} Transformation configs from Database`)
+        return transformationConfigs
+    }
+
+
+    /**
+    * Gets all Transfromation Configs from the database 
+    * 
+    * @returns Promise, containing a list of all transormation configs
+    */
+    public async getAllConfigs(): Promise<TransformationConfig[] | null> {
+        console.debug(`Getting all Transformation Configs from Database`)
+
+        if (!this.checkClassInvariant()) {
+            Promise.reject()
+        }
+
+        let transformationConfigs: TransformationConfig[]
+
+
+        // Get Configs from Database 
+        try {
+            transformationConfigs = await this.configRepository.find()
         } catch (error) {
             console.log(error)
             return null
@@ -143,7 +182,7 @@ export class StorageHandler implements TransformationRepository{
      * @param transformationConfig    transformation config to persist
      * @returns Promise, containing the stored transformation config
      */
-    public saveTransformationConfig(transformationConfig: TransformationConfig): Promise<TransformationConfig>{
+    public async saveTransformationConfig(transformationConfig: TransformationConfig): Promise<TransformationConfig>{
         console.debug(`Saving tranformation config.`)
 
         if (!this.checkClassInvariant()) {
@@ -153,9 +192,9 @@ export class StorageHandler implements TransformationRepository{
         // create object from Body of the Request (=TransformationConfig)
         transformationConfig = this.configRepository.create(transformationConfig)
         // persist the Config
-        let saveResult = this.configRepository.save(transformationConfig);
+        const saveResult = this.configRepository.save(transformationConfig);
 
-        console.debug("Webhook config persisted")
+        console.debug("Pipeline Config persisted")
         return saveResult
     }
 
@@ -183,17 +222,17 @@ export class StorageHandler implements TransformationRepository{
      * Deletes all configs in the database referring to given pipeline id.
      * Currently only one config exists for given Pipeline ID.
      * 
-     * @param pipelineId Id of the pipeline to delete the configs for
+     * @param id Id of the pipeline to delete the configs for
      * @returns Promise, containing the results of the deletion execution
      */
-    public deleteConfigsForPipelineID(pipelineId: number): Promise<DeleteResult> {
-        console.debug(`Deleting all configs for pipeline id "${pipelineId}"`)
+    public deleteConfigsForPipelineID(id: number): Promise<DeleteResult> {
+        console.debug(`Deleting all configs for pipeline id "${id}"`)
 
         if (!this.checkClassInvariant()) {
             Promise.reject()
         }
 
-        let condition = { "pipelineId": pipelineId }
+        let condition = { "id": id }
 
         this.checkClassInvariant
 
@@ -220,15 +259,15 @@ export class StorageHandler implements TransformationRepository{
 
 
     /**
-     * Updates config for given pipelineId with the Transformation config, provided by argument config
+     * Updates config for given id with the Transformation config, provided by argument config
      * Currently only one config exists for given Pipeline ID.
      *
-     * @param pipelineId pipeline id, the config is updated for
+     * @param id pipeline id, the config is updated for
      * @param config config that gets written in the database
      * @returns Promise, containing the results of the update execution
      */
-    public updateConfigForPipelineID(pipelineId: number, config: TransformationConfig): Promise<UpdateResult> {
-        const condition = {"pipelineId": pipelineId}
+    public updateConfigForPipelineID(id: number, config: TransformationConfig): Promise<UpdateResult> {
+        const condition = {"id": id}
         return this.configRepository.update(condition,config)
     }
 

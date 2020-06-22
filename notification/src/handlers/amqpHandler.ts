@@ -36,12 +36,12 @@ export class AmqpHandler{
         const handler: AmqpHandler = this   // for ability to access methods and members in callback
         let errMsg: string = ''             // Error Message to be shown after final retry
         
-        for (let i = 0; i < retries; i++) {
+        for (let i = 1; i <= retries; i++) {
             await this.backOff(backoff)
             await connect(rabit_amqp_url, async function (error0: any, connection: Connection) {
                 if (error0) {
                     errMsg = `Error connecting to RabbitMQ: ${error0}.Retrying in ${backoff} seconds`
-                    console.info(`Connecting to Amqp handler (${i}/${retries}`);
+                    console.info(`Connecting to Amqp handler (${i}/${retries})`);
                     return
                 }
                 established = true

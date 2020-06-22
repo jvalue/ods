@@ -80,10 +80,10 @@ export class StorageHandler implements NotificationRepository {
         let connected: boolean = false
 
         // try to establish connection
-        for (let i = 0; i < retries; i++) {
+        for (let i = 1; i <= retries; i++) {
             dbCon = await createConnection(this.connectionOptions).catch(() => { return null })
             if (!dbCon) {
-                console.info(`DB Connection could not be initialized. Retrying in ${backoff} seconds`)
+                console.info(`Initiliazing database connection (${i}/${retries})`)
                 await this.backOff(backoff);
             } else {
                 connected = true
@@ -95,6 +95,7 @@ export class StorageHandler implements NotificationRepository {
             return Promise.reject("Connection to databse could not be established.")
         }
 
+        console.info('Connected to notification config database sucessfully.')
         return Promise.resolve(dbCon)
     }
 

@@ -3,6 +3,7 @@ import VM2SandboxExecutor from './executors/vm2SandboxExecutor'
 import JSTransformationService from './jsTransformationService'
 import { AmqpHandler } from './handlers/amqpHandler'
 import { StorageHandler } from './handlers/storageHandler';
+import "reflect-metadata"
 
 const port = 8080
 

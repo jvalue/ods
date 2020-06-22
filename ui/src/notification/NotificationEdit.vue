@@ -42,7 +42,7 @@
               @validityChanged="validForm = $event"
             />
             <firebase-edit
-              v-if="editedNotification.type === 'firebase'"
+              v-if="editedNotification.type === 'fcm'"
               v-model="editedNotification"
               style="flex: 1 1 auto"
               @validityChanged="validForm = $event"
@@ -103,9 +103,9 @@ export default class NotificationEdit extends Vue implements NotificationEditDia
 
   private pipelineId = -1
   private dialogOpen = false
-  private notificationTypes = Object.values(CONFIG_TYPE)  // Convert CONFIG_TYPES to list
+  // private notificationTypes = Object.values(CONFIG_TYPE)  // Convert CONFIG_TYPES to list
   //private notificationTypes = CONFIG_TYPE
-  //private notificationTypes = ['webhook', 'fcm', 'slack']
+  private notificationTypes = ['webhook', 'fcm', 'slack']
   
   private defaultNotification: WebhookNotification = {
     id: -1,
