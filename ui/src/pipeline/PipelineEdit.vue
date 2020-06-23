@@ -120,7 +120,7 @@ import Pipeline from './pipeline'
 
 import StepperButtonGroup from '../components/StepperButtonGroup.vue'
 import PipelineMetadataConfig from './edit/PipelineMetadataConfig.vue'
-import PipelineTransformationConfig from './edit/PipelineTransformationConfig.vue'
+import PipelineTransformationConfig from './edit/transformation/PipelineTransformationConfig.vue'
 
 const pipelineNamespace = { namespace: 'pipeline' }
 
@@ -138,13 +138,13 @@ export default class PipelineEdit extends Vue {
   private dialogStep = 1
 
   private validStep1 = false
-  private validStep2 = true // starts with valid default values
+  private validStep2 = false // need to execute
   private validStep3 = true // starts with valid default values
 
-    private dialogPipeline: Pipeline = {
+  private dialogPipeline: Pipeline = {
     id: -1,
     datasourceId: -1,
-    transformation: { func: "data.test = 'abc'; return data;" },
+    transformation: { func: "data.test = 'abc';\nreturn data;" },
     metadata: {
       author: '',
       license: '',
