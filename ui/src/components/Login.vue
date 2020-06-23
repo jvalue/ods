@@ -89,7 +89,6 @@ export default class Login extends Vue {
   private initKeycloak!: () => void;
 
   private mounted () {
-    console.log('mounted')
     this.initKeycloak()
   }
 
