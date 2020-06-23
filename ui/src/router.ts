@@ -39,8 +39,10 @@ const router = new Router({
   routes
 })
 
+const AUTH_DISABLED: boolean = process.env.VUE_APP_AUTH_DISABLED === 'true'
+
 router.beforeEach((to, from, next) => {
-  if (to.meta.requiresAuth && !isAuthenticated()) {
+  if (!AUTH_DISABLED && to.meta.requiresAuth && !isAuthenticated()) {
     keycloakLogin()
   }
   next()
