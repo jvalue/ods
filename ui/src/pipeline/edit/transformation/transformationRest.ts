@@ -1,8 +1,7 @@
 import { AxiosResponse } from 'axios'
 import { createAxios } from '@/keycloak'
 
-import JobResult from './interfaces/jobResult'
-import TransformationRequest from './interfaces/transformationRequest'
+import { TransformationRequest, JobResult } from './transformation'
 
 const TRANSFORMATION_SERVICE_URL = process.env.VUE_APP_TRANSFORMATION_SERVICE_URL as string
 

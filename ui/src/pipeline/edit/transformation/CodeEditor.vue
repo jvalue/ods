@@ -17,8 +17,8 @@ import { Watch } from 'vue-property-decorator'
 import MonacoEditor, { MonacoEditorConstructor } from 'vue-monaco'
 import * as monaco from 'monaco-editor'
 
-import JobResult from './interfaces/jobResult'
-import JobError from './interfaces/jobError'
+import { TransformationConfig } from '../../pipeline'
+import { JobResult, JobError } from './transformation'
 
 const Props = Vue.extend({
   props: {
@@ -52,6 +52,7 @@ export default class CodeEditor extends Props {
   }
 
   set code (code: string) {
+    console.log('emit new code')
     this.$emit('input', code)
   }
 
@@ -71,7 +72,6 @@ export default class CodeEditor extends Props {
    * @returns {monaco.Range} the range to be highlighted
    */
   private buildRange (error: JobError): monaco.Range {
-    console.log(error)
     const lines: string[] = this.code.split('\n')
 
     let lineNumber: number
