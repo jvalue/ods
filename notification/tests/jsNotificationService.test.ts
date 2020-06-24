@@ -14,11 +14,6 @@ describe('JSNotificationService', () => {
 
 
   describe('notification system', () => {
-    const data = {
-      value1: 5
-    }
-
-    
 
     const post = axios.post as jest.Mock
 
@@ -27,6 +22,9 @@ describe('JSNotificationService', () => {
     let successEvent: TransformationEvent   // Event received after successful transformation
     let failEvent: TransformationEvent      // Event received after failed transformation
 
+    /**
+     * Execution before each test.
+     */
     beforeEach(() => {
       notificationService = new JSNotificationService(new VM2SandboxExecutor()) // TODO: replace with mock
       console.log = jest.fn()
@@ -79,10 +77,17 @@ describe('JSNotificationService', () => {
 
     })
 
+    /**
+     * Execution after each test
+     */
     afterEach(() => {
       jest.clearAllMocks()
     })
 
+    /**
+     * Build the message to fetched by axios mock
+     * @param event transoformationEvent, received upon successfull transformation
+     */
     function buildMessage(event: TransformationEvent): string {
 
       let message: string                       // message to return

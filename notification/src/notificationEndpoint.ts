@@ -45,12 +45,7 @@ export class NotificationEndpoint {
 
     this.app.get('/', this.getHealthCheck)
     this.app.get('/version', this.getVersion)
-    //TODO: to be done LATER !! UI currently works with this interface
-    // Creation of Configs
-    // this.app.post('/config/slack/', this.determineAuth(), this.deleteSlack)
-    // this.app.post('/config/webhook/', this.determineAuth(), this.deleteWebHook)
-    // this.app.post('/config/fcm/', this.determineAuth(), this.deleteFCM)
-
+ 
     // Create Configs
     this.app.post('/config/:configType', this.determineAuth(), this.handleConfigCreation)
 
@@ -90,7 +85,7 @@ export class NotificationEndpoint {
    * Gets all Configs asto corresponding to corresponnding Pipeline-ID
    * (identified by param pipelineId) as json list
    */
-  handleConfigRequest = async (req: Request, res: Response) => {
+  handleConfigSummaryRequest = async (req: Request, res: Response) => {
 
     const pipelineId = parseInt(req.params.pipelineId)
     console.log(`Received request for configs with pipeline id ${pipelineId} from Host ${req.connection.remoteAddress}`)
@@ -126,30 +121,6 @@ export class NotificationEndpoint {
     res.status(200).send(configs)
   }
 
-  /**
-   * Gets the notification config corresponding to corresponnding id
-   */
-  getConfig = (req: Request, res: Response): void => {
-
-    const id = parseInt(req.params.id)
-    console.log(`Received request for config ${id} from Host ${req.connection.remoteAddress}`)
-
-    if (!id) {
-      console.error("Request for config: id not set")
-      res.status(400).send('Notification config id is not set.')
-      return
-    }
-
-    // Get config from database
-    let config = {} // TODO: get from db
-
-    if (!config) {
-      res.status(400).send(`Notification config with id ${id} does not exist!`)
-      return
-    }
-
-    res.status(200).send(config)
-  }
 
   /**
    * Handles a request to save a NotificationConfig
@@ -284,6 +255,18 @@ export class NotificationEndpoint {
   }
 
 
+  /**
+   * Handles a requeset for config deletion.
+   * Depending on the paramter :configType in the URL it either deletes a config 
+   * of a specific config type (such as slack) or deletes all configs 
+   * for a specific pipeline
+   * 
+   * @param req request containing the paramter :configType and the :id of the config
+   *            or respectively the pipeline id for the configs to be deleted
+   * 
+   * @param res HTTP-Response that is sent back to the requester
+   * 
+   */
   handleConfigDeletion = (req: Request, res: Response): void => {
 
     const configType = req.params.configType
@@ -316,6 +299,47 @@ export class NotificationEndpoint {
         return
     }
 
+
+  }
+
+  /**
+   * Handles a request for configs and returns the configs corresponding to the parameter :configType
+   * as a HTTP- Response
+   * 
+   * @param req Request for a Config.
+   * @param res Response containing  specific configs, such as slack or  all configs for a pipeline 
+   */
+  handleConfigRequest = (req: Request, res: Response): void => {
+
+    const configType = req.params.configType
+
+    if (!configType) {
+      console.warn(`Cannot request config(s): Not valid config type provided`)
+      res.status(400).send(`Cannot request config(s): Not valid config type provided`)
+      res.end()
+      return
+    }
+
+    switch (configType) {
+      case CONFIG_TYPE.WEBHOOK:
+        this.handleWebhookRequest(req, res)
+        break
+
+      case CONFIG_TYPE.FCM:
+        this.handleFCMRequest(req, res)
+        break
+
+      case CONFIG_TYPE.SLACK:
+        this.handleSlackRequest(req, res)
+        break
+
+      case 'pipeline':
+        this.handleConfigSummaryRequest(req, res)
+
+      default:
+        res.status(400).send(`Notification type ${configType} not suppoerted!`)
+        return
+    }
 
   }
 

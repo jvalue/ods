@@ -12,19 +12,19 @@ export default interface NotificationConfig {
 }
 
 export interface WebhookNotification extends NotificationConfig {
-  type: CONFIG_TYPE.WEBHOOK;
+  type: 'webhook';
   url: string;
 }
 
 export interface SlackNotification extends NotificationConfig {
-  type: CONFIG_TYPE.SLACK;
+  type: "slack";
   workspaceId: string;
   channelId: string;
   secret: string;
 }
 
 export interface FirebaseNotification extends NotificationConfig {
-  type: CONFIG_TYPE;
+  type: "fcm";
   projectId: string;
   clientEmail: string;
   privateKey: string;

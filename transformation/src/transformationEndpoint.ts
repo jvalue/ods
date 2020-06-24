@@ -50,6 +50,7 @@ export class TransformationEndpoint {
 
     // Config CRUD Operations
     this.app.post('/config', this.determineAuth(), this.handleConfigCreation)
+    this.app.get('/config/:id', this.handleConfigSummaryRequest)
     this.app.get('/config/:id', this.handleConfigRequest)
     this.app.delete('/config/:id', this.handleConfigDeletion)
     this.app.put('/config/:id', this.handleConfigUpdate)
@@ -150,48 +151,6 @@ export class TransformationEndpoint {
     res.end()
   }
 
-
-
-  /**
- * Handles the deletion of all TransformationConfig with pipeline ID 1
- * This is done by checking the validity of the config and then delete
- * it from the database on success
- * 
- * @param req Request, containing a Transformation config to delete
- * @param res Response to send back to the requester
- */
-  handlePipelineDeletion = async (req: Request, res: Response): Promise<void> => {
-    console.log(`Received Transformation config from Host ${req.connection.remoteAddress}`)
-    let deleteResult: DeleteResult
-    const pipelineID = parseInt(req.params.id)
-
-    if (!pipelineID) {
-      res.status(400).send('Invalid pipeline Id provided.')
-      res.end()
-      return
-    }
-
-    // Delete Config
-    try {
-      deleteResult = await this.storageHandler.deleteConfigsForPipelineID(pipelineID)
-
-      if (deleteResult.affected != 1) {
-        const msg = `Could not delete Transformation Config: Config with id ${pipelineID} not found.`
-        console.log(msg)
-        res.status(400).send(msg)
-      }
-
-    } catch (error) {
-      console.error(`Could not create transformationConfig Object: ${error}`)
-      res.status(500).send('Internal Server Error: Config could not deleted')
-      return
-    }
-
-    // return saved post back
-    res.status(200).send(`${deleteResult.affected} Configs deleted.`);
-    res.end()
-  }
-
   /**
   * Handles the update of a TransformationConfig
   * This is done by checking the validity of the config and then delete
@@ -226,7 +185,7 @@ export class TransformationEndpoint {
       updateResult = await this.storageHandler.updateTransoformationConfig(configId, transformationConfig)
     } catch (error) {
       console.error(`Could not create transformationConfig Object: ${error}`)
-      res.status(500).send('Internal Server Error: Config could not deleted')
+      res.status(500).send('Internal Server Error: Config could not updated')
       return
     }
 
@@ -235,47 +194,75 @@ export class TransformationEndpoint {
   }
 
   /**
+   * Gets all configs from database as list 
+   * (optionally with special conditioning, provided by query parameter)
+   *
+   * @param req Request for config, optionally with query parameter for filtering
+   * @param res Response that will contain the Config summary as list of json
+   */
+  handleConfigSummaryRequest = async (req: Request, res: Response): Promise<void> => {
+    const queryParams = req.query
+    console.log(`Received request for all configs with query params "${JSON.stringify(queryParams)}"  from Host ${req.connection.remoteAddress}`)
+    
+    const allConfigs = await this.storageHandler.getAllConfigs(queryParams)
+    res.status(200).send(allConfigs)
+    res.end()
+
+    return Promise.resolve()
+  }
+
+  /**
      * Gets Config to corresponding to corresponnding Pipeline-ID
-     * (identified by param id) as json list
+     * (identified by param id) and query parameter as json
      * 
-     * If no pipeline-ID specified it will return all configs.
-     * 
-     * @param req Request for config with a specific pipeline id. (All configs returned when not specified)
-     * @param res Response that will contain the Config summary
+     * @param req Request for config with a specific pipeline id.
+     * @param res Response that will contain the Config for given pipeline id
      */
   handleConfigRequest = async (req: Request, res: Response): Promise<void> => {
-
-    const pipelineID = parseInt(req.params.id)
     
-    /*===================================================
-     * Request for all Configs
-     *==================================================*/
+    const pipelineID = parseInt(req.params.id)
+    const queryParams = req.query
+
+    // pipeline id is not set or not a number
     if (!pipelineID) {
-      console.log(`Received request for all configs from Host ${req.connection.remoteAddress}`)
-      const allConfigs = await this.storageHandler.getAllConfigs()
-      res.status(200).send(allConfigs)
+      res.status(500).send('Internal Server Error')
       res.end()
-      return Promise.resolve()
+      return Promise.reject()
     }
 
-    /*===================================================
-    * Request for Configs for pipeline ID
-    *==================================================*/
-    console.log(`Received request for configs with pipeline id ${pipelineID} from Host ${req.connection.remoteAddress}`)
-    // Get configs from database
-    const configs = await this.storageHandler.getTransformationConfigs(pipelineID)
-      .catch(error => console.log(`Could not get config with pipeline id ${pipelineID}`))
+    console.log(`Received request for configs with pipeline id ${pipelineID} and query params "${JSON.stringify(queryParams)}" from Host ${req.connection.remoteAddress}`)
 
-    if (!configs) {
+    // Get configs from database
+    const configs = await this.storageHandler.getTransformationConfig(pipelineID, queryParams)
+      .catch(error  => console.log(`Could not get config with pipeline id ${pipelineID}: ${error}`))
+
+    if (configs === null) {
       res.status(500).send('Internal Server Error')
+      res.end()
       return Promise.reject()
+    }
+
+    // No configs found for specified id
+    if (configs === undefined) {
+      res.status(404).send(`No Config for pipeline Id ${pipelineID} found.`)
+      res.end()
+      return Promise.resolve()
     }
 
     res.status(200).send(configs)
     return Promise.resolve()
   }
 
-
+  /**
+   * Handles request for adhoc trasnformations.
+   * 
+   * The data and the transfromation function will be passed as a request and
+   * will result in a response containing the results of the transformation and
+   * the metrics (such as execution duration) for transformation execution.
+   * 
+   * @param req HTTP-request, containing the transf. function and data to be transformed
+   * @param res HTTP-response, containing the transformation resulsts
+   */
   postJob = async (req: Request, res: Response): Promise<void> => {
     console.log(`Received request: ${req.body}`)
 
@@ -334,6 +321,6 @@ export class TransformationEndpoint {
 
   private isValidTransformationConfig(conf: TransformationConfig): boolean {
     return true
-    //return !!conf && !!conf.datasourceId && !!conf.func && !!conf.pipelineId
+    //TODO: return !!conf && !!conf.datasourceId && !!conf.func && !!conf.pipelineId
   }
 }

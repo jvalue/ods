@@ -7,8 +7,8 @@ export class TransformationConfig {
     @PrimaryGeneratedColumn()
     id!: number 
     
-    @Column({ nullable: true })
-    func!: string
+    // @Column({ nullable: true })
+    // func!: string
 
     @Column()
     datasourceId!: number;

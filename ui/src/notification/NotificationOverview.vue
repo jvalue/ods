@@ -176,7 +176,7 @@ export default class PipelineNotifications extends Vue {
     } else { // create
       await RestClient.create(type, editedNotification)
     }
-    //this.$router.go(0) // reload page (this.onLoadNotificaiton not working?)
+ 
     await this.onLoadNotifications()
   }
 }

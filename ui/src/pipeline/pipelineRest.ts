@@ -29,7 +29,7 @@ const http_transformation = axios.create({
 
 export async function getAllPipelines(): Promise<Pipeline[]> {
   //const response = await http_core.get('/')
-  const response = await http_transformation.get('/config/')
+  const response = await http_transformation.get('/')
   return JSON.parse(response.data)
 }
 
@@ -51,7 +51,6 @@ export async function createPipeline (pipeline: Pipeline): Promise<Pipeline> {
 }
 
 export async function updatePipeline (pipeline: Pipeline): Promise<AxiosResponse> {
-  
   //return http_core.put(`/${pipeline.id}`, JSON.stringify(pipeline))
   return http_transformation.put(`/${pipeline.id}`, JSON.stringify(pipeline))
 }
