@@ -10,6 +10,8 @@ services:
     image: open-data-service/ods-main/system-test
     depends_on:
       - mock-server
+      - rabbitmq
+      - edge
     build:
       context: ./system-test/
 
@@ -21,6 +23,7 @@ services:
       ADAPTER_API: http://adapter:8080
       MOCK_SERVER_API: http://mock-server:8080
       NOTIFICATION_API: http://notification:8080
+      RABBIT_HOST: rabbitmq
 
   mock-server:
     build:

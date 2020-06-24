@@ -5,8 +5,11 @@ import org.jvalue.ods.adapterservice.adapter.importer.Importer;
 import org.jvalue.ods.adapterservice.adapter.interpreter.Interpreter;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
+import org.jvalue.ods.adapterservice.config.RabbitConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -20,10 +23,13 @@ public class Adapter {
 
     private DataBlobRepository blobRepository;
 
-    public Adapter(Importer importer, Interpreter interpreter, DataBlobRepository dataRepository) {
+    private final RabbitTemplate rabbitTemplate;
+
+    public Adapter(Importer importer, Interpreter interpreter, DataBlobRepository dataRepository, RabbitTemplate rabbitTemplate) {
         this.importer = importer;
         this.interpreter = interpreter;
         this.blobRepository = dataRepository;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     public DataBlob.MetaData executeJob(AdapterConfig config){
@@ -32,6 +38,7 @@ public class Adapter {
             logger.debug("Fetched: {}", raw);
             JsonNode result = interpreter.interpret(raw, config.formatConfig.parameters);
             DataBlob blob = blobRepository.save(new DataBlob(result.toString()));
+            rabbitTemplate.convertAndSend(RabbitConfiguration.DATA_IMPORT_QUEUE, blob.getMetaData().getLocation());
             return blob.getMetaData();
         } catch (IOException e) {
             throw new IllegalArgumentException("Not able to parse data as format: " + config.formatConfig.format, e);
