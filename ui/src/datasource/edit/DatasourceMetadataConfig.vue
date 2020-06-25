@@ -36,16 +36,16 @@ export default class DatasourceMetadataConfig extends Vue {
   private metadataConfig!: DatasourceMetaData;
 
   @Emit('value')
-  emitValue () {
+  emitValue (): DatasourceMetaData {
     return this.metadataConfig
   }
 
   @Emit('validityChanged')
-  emitValid () {
+  emitValid (): boolean {
     return this.validForm
   }
 
-  formChanged () {
+  formChanged (): void {
     this.emitValue()
     this.emitValid()
   }

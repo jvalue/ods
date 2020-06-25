@@ -36,16 +36,16 @@ export default class PipelineMetadataConfig extends Vue {
   private metadataConfig!: PipelineMetaData;
 
   @Emit('value')
-  emitValue () {
+  emitValue (): PipelineMetaData {
     return this.metadataConfig
   }
 
   @Emit('validityChanged')
-  emitValid () {
+  emitValid (): boolean {
     return this.validForm
   }
 
-  formChanged () {
+  formChanged (): void {
     this.emitValue()
     this.emitValid()
   }

@@ -45,7 +45,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 
-import {Emit, Prop, PropSync, Watch} from 'vue-property-decorator'
+import { Emit, Prop, PropSync, Watch } from 'vue-property-decorator'
 
 import Datasource from '../../datasource'
 import CsvAdapterConfig from './CsvAdapterConfig.vue'
@@ -68,15 +68,15 @@ export default class AdapterConfig extends Vue {
   private adapterConfig!: Datasource;
 
   @Emit('value')
-  emitValue () {
+  emitValue (): Datasource {
     return this.adapterConfig
   }
 
   @Watch('adapterConfig.format.type')
-  private formatChanged (val: string) {
+  private formatChanged (val: string): void {
     switch (val) {
       case 'CSV': {
-        if(!this.isEditMode) { // otherwise csv params don't need reassignment of default values
+        if (!this.isEditMode) { // otherwise csv params don't need reassignment of default values
           this.adapterConfig.format.parameters = {
             lineSeparator: '\n',
             columnSeparator: ';',
@@ -94,16 +94,16 @@ export default class AdapterConfig extends Vue {
   }
 
   @Emit('validityChanged')
-  emitValid () {
+  emitValid (): boolean {
     return this.validForm && this.validFormatParameters
   }
 
-  formChanged () {
+  formChanged (): void {
     this.emitValue()
     this.emitValid()
   }
 
-  private required (val: string) {
+  private required (val: string): true | string {
     return !!val || 'required.'
   }
 }

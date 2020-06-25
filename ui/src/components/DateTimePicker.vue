@@ -88,16 +88,12 @@ export default class DateTimePicker extends Vue {
 
   private pickTimeModal = false;
 
-  constructor () {
-    super()
-  }
-
-  created () {
+  created (): void {
     this.reset()
   }
 
   @Watch('value')
-  onPropertyChanged (value: Date, oldValue: Date) {
+  onPropertyChanged (value: Date): void {
     if (value == null) {
       return
     }
@@ -112,12 +108,12 @@ export default class DateTimePicker extends Vue {
     }
   }
 
-  private reset () {
+  private reset (): void {
     this.resetValues()
     this.resetDialogs()
   }
 
-  private resetValues () {
+  private resetValues (): void {
     const dateString = this.value.toISOString()
     this.dateTimeString = this.formatDateTimePresentation(this.value)
     this.date = this.sliceDateFromString(dateString)
@@ -126,16 +122,17 @@ export default class DateTimePicker extends Vue {
 
   private formatDateTimePresentation (date: Date): string {
     const dateString = date.toISOString()
-    return `${this.sliceDateFromString(dateString)} ${this.sliceTimeFromString(dateString)} UTC` // timezone: UTC (because offset is cut)
+    // timezone: UTC (because offset is cut)
+    return `${this.sliceDateFromString(dateString)} ${this.sliceTimeFromString(dateString)} UTC`
   }
 
-  private resetDialogs () {
+  private resetDialogs (): void {
     this.pickDateTimeModal = false
     this.pickDateModal = true
     this.pickTimeModal = false
   }
 
-  private onSave () {
+  private onSave (): void {
     const selectedDate = new Date(
       this.sliceYearFromDateString(this.date),
       this.sliceMonthFromDateString(this.date) - 1,

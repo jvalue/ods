@@ -23,7 +23,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 
-import { Emit, Prop, PropSync } from 'vue-property-decorator'
+import { Emit, Prop } from 'vue-property-decorator'
 
 @Component({ })
 export default class StepperButtonGroup extends Vue {
@@ -40,12 +40,12 @@ export default class StepperButtonGroup extends Vue {
   private readonly previousVisible!: boolean;
 
   @Emit('stepChanged')
-  private nextStep () {
+  private nextStep (): number {
     return this.step + 1
   }
 
   @Emit('stepChanged')
-  private previousStep () {
+  private previousStep (): number {
     return this.step - 1
   }
 }

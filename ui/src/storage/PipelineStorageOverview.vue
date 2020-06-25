@@ -150,7 +150,7 @@ export default class PipelineStorageOverview extends Vue {
     return url
   }
 
-  private created () {
+  private created (): void {
     this.pipelineId = this.$route.params.storageId
     this.fetchData(this.pipelineId)
   }
