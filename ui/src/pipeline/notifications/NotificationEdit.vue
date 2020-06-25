@@ -38,20 +38,20 @@
             <webhook-edit
               v-if="editedNotification.type === 'WEBHOOK'"
               v-model="editedNotification"
-              @validityChanged="validForm = $event"
               style="flex: 1 1 auto"
+              @validityChanged="validForm = $event"
             />
             <firebase-edit
               v-if="editedNotification.type === 'FCM'"
               v-model="editedNotification"
-              @validityChanged="validForm = $event"
               style="flex: 1 1 auto"
+              @validityChanged="validForm = $event"
             />
             <slack-edit
               v-if="editedNotification.type === 'SLACK'"
               v-model="editedNotification"
-              @validityChanged="validForm = $event"
               style="flex: 1 1 auto"
+              @validityChanged="validForm = $event"
             />
           </v-row>
         </v-container>
@@ -81,7 +81,7 @@
 <script lang="ts">
 import Component from 'vue-class-component'
 import Vue from 'vue'
-import NotificationConfig, {WebhookNotification} from '@/pipeline/notifications/notificationConfig'
+import NotificationConfig, { WebhookNotification } from '@/pipeline/notifications/notificationConfig'
 import NotificationEditDialog from '@/pipeline/notifications/notificationEditDialog'
 import { Emit } from 'vue-property-decorator'
 import WebhookEdit from '@/pipeline/notifications/WebhookEdit.vue'
@@ -89,12 +89,12 @@ import FirebaseEdit from '@/pipeline/notifications/FirebaseEdit.vue'
 import SlackEdit from '@/pipeline/notifications/SlackEdit.vue'
 
 @Component({
-  components: {SlackEdit, WebhookEdit, FirebaseEdit }
+  components: { SlackEdit, WebhookEdit, FirebaseEdit }
 })
 export default class PipelineNotifications extends Vue implements NotificationEditDialog {
   private validForm = false;
   @Emit('pipelineSaved')
-  onPipelineSave () {
+  onPipelineSave (): NotificationConfig {
     return this.editedNotification
   }
 
@@ -105,12 +105,12 @@ export default class PipelineNotifications extends Vue implements NotificationEd
     notificationId: -1,
     condition: 'true',
     url: '',
-    type: "WEBHOOK"
+    type: 'WEBHOOK'
   }
 
   private editedNotification: NotificationConfig = Object.assign({}, this.defaultNotification)
 
-  openDialog (notificationConfig?: NotificationConfig) {
+  openDialog (notificationConfig?: NotificationConfig): void {
     if (notificationConfig) { // edit
       this.editedNotification = Object.assign({}, notificationConfig)
     } else { // create
@@ -119,12 +119,12 @@ export default class PipelineNotifications extends Vue implements NotificationEd
     this.dialogOpen = true
   }
 
-  closeDialog () {
+  closeDialog (): void {
     this.editedNotification = Object.assign({}, this.defaultNotification)
     this.dialogOpen = false
   }
 
-  onSave () {
+  onSave (): void {
     this.onPipelineSave()
     this.closeDialog()
   }

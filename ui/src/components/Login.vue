@@ -88,20 +88,20 @@ export default class Login extends Vue {
   @Action('initKeycloak', namespace)
   private initKeycloak!: () => void;
 
-  private mounted () {
+  private mounted (): void {
     this.initKeycloak()
   }
 
-  private onLogin () {
+  private onLogin (): void {
     this.login()
   }
 
-  private onLogout () {
+  private onLogout (): void {
     this.logout()
     this.menu = false
   }
 
-  private onEditProfile () {
+  private onEditProfile (): void {
     this.editProfile()
   }
 }

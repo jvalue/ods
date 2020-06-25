@@ -66,7 +66,7 @@ export default class App extends Vue {
     { title: 'About', route: '/about' }
   ];
 
-  private created () {
+  private created (): void {
     this.routerTitle = Router.currentRoute.meta.title || ''
 
     Router.afterEach((to) => {
