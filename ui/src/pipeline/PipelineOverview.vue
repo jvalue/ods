@@ -147,31 +147,31 @@ export default class PipelineOverview extends Vue {
 
   private search = '';
 
-  private mounted () {
+  private mounted (): void {
     this.loadPipelinesAction()
   }
 
-  private onShowPipelineData (pipeline: Pipeline) {
+  private onShowPipelineData (pipeline: Pipeline): void {
     this.$router.push({ name: 'pipeline-storage-overview', params: { storageId: `${pipeline.id}` } })
   }
 
-  private onCreatePipeline () {
+  private onCreatePipeline (): void {
     this.$router.push({ name: 'pipeline-new' })
   }
 
-  private onEditPipeline (pipeline: Pipeline) {
+  private onEditPipeline (pipeline: Pipeline): void {
     this.$router.push({ name: 'pipeline-edit', params: { pipelineId: `${pipeline.id}` } })
   }
 
-  private onDeletePipeline (pipeline: Pipeline) {
+  private onDeletePipeline (pipeline: Pipeline): void {
     this.deletePipelineAction(pipeline.id)
   }
 
-  private onNotifications (pipeline: Pipeline) {
+  private onNotifications (pipeline: Pipeline): void {
     this.$router.push({ name: 'notification-overview', params: { pipelineId: `${pipeline.id}` } })
   }
 
-  private filterOnlyDisplayName (value: any, search: string, item: Pipeline): boolean {
+  private filterOnlyDisplayName (value: object, search: string, item: Pipeline): boolean {
     return value != null &&
           search != null &&
           typeof value === 'string' &&

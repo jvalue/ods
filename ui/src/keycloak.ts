@@ -51,16 +51,16 @@ export function keycloakInit (
         })
     }
 
-    keycloakAuth.onAuthSuccess = () => {
-      console.log('onAuthSuccess', arguments)
+    keycloakAuth.onAuthSuccess = (...args) => {
+      console.log('onAuthSuccess', args)
       loadKeycloakUserProfile()
     }
-    keycloakAuth.onAuthError = () => console.log('onAuthError', arguments)
-    keycloakAuth.onAuthLogout = () => console.log('onAuthLogout', arguments)
-    keycloakAuth.onAuthRefreshSuccess = () =>
-      console.log('onAuthRefreshSuccess', arguments)
-    keycloakAuth.onAuthRefreshError = () => {
-      console.log('onAuthRefreshError', arguments)
+    keycloakAuth.onAuthError = (...args) => console.log('onAuthError', args)
+    keycloakAuth.onAuthLogout = (...args) => console.log('onAuthLogout', args)
+    keycloakAuth.onAuthRefreshSuccess = (...args) =>
+      console.log('onAuthRefreshSuccess', args)
+    keycloakAuth.onAuthRefreshError = (...args) => {
+      console.log('onAuthRefreshError', args)
       init()
     }
     init()

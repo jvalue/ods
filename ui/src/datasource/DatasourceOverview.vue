@@ -123,23 +123,23 @@ export default class DatsourceOverview extends Vue {
 
   private search = '';
 
-  private mounted () {
+  private mounted (): void {
     this.loadDatasourcesAction()
   }
 
-  private onCreate () {
+  private onCreate (): void {
     this.$router.push({ name: 'datasource-new' })
   }
 
-  private onEdit (datasource: Datasource) {
+  private onEdit (datasource: Datasource): void {
     this.$router.push({ name: 'datasource-edit', params: { datasourceId: `${datasource.id}` } })
   }
 
-  private onDelete (datasource: Datasource) {
+  private onDelete (datasource: Datasource): void {
     this.deleteDatasourceAction(datasource.id)
   }
 
-  private filterOnlyDisplayName (value: any, search: string, item: Datasource): boolean {
+  private filterOnlyDisplayName (value: object, search: string, item: Datasource): boolean {
     return value != null &&
           search != null &&
           typeof value === 'string' &&

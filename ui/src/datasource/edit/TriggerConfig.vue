@@ -12,7 +12,9 @@
       @change="formChanged"
     />
 
-    <span class="subheading font-weight-light mr-1">Interval: {{ dialogIntervalHours }}h {{ dialogIntervalMinutes }}m</span>
+    <span class="subheading font-weight-light mr-1">
+      Interval: {{ dialogIntervalHours }}h {{ dialogIntervalMinutes }}m
+    </span>
     <v-subheader>Hours</v-subheader>
     <v-slider
       v-model="dialogIntervalHours"
@@ -99,8 +101,15 @@ export default class TriggerConfig extends Vue {
   private dialogIntervalHours = 1
   private dialogIntervalMinutes = 0
 
-  private hoursTickLabels = ['0h', '', '', '', '', '', '6h', '', '', '', '', '', '12h', '', '', '', '', '', '18h', '', '', '', '', '', '24h']
-  private minutesTickLabels = () => {
+  private hoursTickLabels = [
+    '0h', '', '', '', '', '',
+    '6h', '', '', '', '', '',
+    '12h', '', '', '', '', '',
+    '18h', '', '', '', '', '',
+    '24h'
+  ]
+
+  private minutesTickLabels (): string[] {
     const ticks = new Array(61)
     ticks[0] = '0m'
     ticks[15] = '15m'
@@ -114,34 +123,34 @@ export default class TriggerConfig extends Vue {
   private triggerConfig!: Trigger;
 
   @Watch('triggerConfig')
-  private triggerConfigChanged () {
+  private triggerConfigChanged (): void {
     this.loadDialogIntervalForSlider()
   }
 
   @Emit('value')
-  emitValue () {
+  emitValue (): Trigger {
     return this.triggerConfig
   }
 
   @Emit('validityChanged')
-  emitValid () {
+  emitValid (): boolean {
     return this.validForm
   }
 
-  formChanged () {
+  formChanged (): void {
     this.setTriggerInterval()
 
     this.emitValue()
     this.emitValid()
   }
 
-  private setTriggerInterval () {
+  private setTriggerInterval (): void {
     const hoursInMS = this.dialogIntervalHours * ONE_HOUR_IN_MS
     const minutesInMS = this.dialogIntervalMinutes * ONE_MINUTE_IN_MS
     this.triggerConfig.interval = hoursInMS + minutesInMS
   }
 
-  private loadDialogIntervalForSlider () {
+  private loadDialogIntervalForSlider (): void {
     if (this.triggerConfig.interval <= 1) {
       this.dialogIntervalHours = 0
       this.dialogIntervalMinutes = 0

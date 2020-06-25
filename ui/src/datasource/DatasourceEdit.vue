@@ -49,8 +49,8 @@
           </v-stepper-step>
           <v-stepper-content step="2">
             <adapter-config
-              v-bind:isEditMode = "isEditMode"
               v-model="dialogDatasource"
+              :is-edit-mode="isEditMode"
               @validityChanged="validStep2 = $event"
             />
             <stepper-button-group
@@ -149,9 +149,9 @@ const datasourceNamespace = { namespace: 'datasource' }
   components: { AdapterConfig, StepperButtonGroup, DatasourceMetadataConfig, TriggerConfig }
 })
 export default class DatasourceEdit extends Vue {
-  @Action('loadDatasourceById', datasourceNamespace) private loadDatasourceByIdAction!: ( id: number ) => void
-  @Action('createDatasource', datasourceNamespace) private createDatasourceAction!: ( d: Datasource ) => void
-  @Action('updateDatasource', datasourceNamespace) private updateDatsourceAction!: ( d: Datasource ) => void
+  @Action('loadDatasourceById', datasourceNamespace) private loadDatasourceByIdAction!: (id: number) => void
+  @Action('createDatasource', datasourceNamespace) private createDatasourceAction!: (d: Datasource) => void
+  @Action('updateDatasource', datasourceNamespace) private updateDatsourceAction!: (d: Datasource) => void
   @State('selectedDatasource', datasourceNamespace) private selectedDatasource!: Datasource
 
   private isEditMode = false
@@ -187,10 +187,10 @@ export default class DatasourceEdit extends Vue {
       periodic: true,
       firstExecution: new Date(Date.now() + 600000),
       interval: 60000
-    },
+    }
   }
 
-  created () {
+  created (): void {
     this.isEditMode = this.$route.meta.isEditMode
 
     if (this.isEditMode) {
@@ -200,18 +200,18 @@ export default class DatasourceEdit extends Vue {
   }
 
   @Watch('selectedDatasource')
-  onSelectedDatasourceChange (value: Datasource, oldValue: Datasource) {
-    if (value != oldValue) {
+  onSelectedDatasourceChange (value: Datasource, oldValue: Datasource): void {
+    if (value !== oldValue) {
       this.dialogDatasource = value
     }
   }
 
-  private onSave () {
+  private onSave (): void {
     this.createDatasourceAction(this.dialogDatasource)
     this.routeToOverview()
   }
 
-  private onUpdate () {
+  private onUpdate (): void {
     this.updateDatsourceAction(this.dialogDatasource)
     this.routeToOverview()
   }
@@ -224,11 +224,11 @@ export default class DatasourceEdit extends Vue {
     this.$router.push({ name: 'datasource-overview' })
   }
 
-  private required (val: string) {
+  private required (val: string): true | string {
     return !!val || 'required.'
   }
 
-  private evaluateAllForms () {
+  private evaluateAllForms (): boolean {
     return this.validStep1 &&
         this.validStep2 &&
         this.validStep3 &&
