@@ -125,22 +125,19 @@ export class StorageHandler implements TransformationRepository{
     */
     public async getTransformationConfig(pipelineId: number, query: object): Promise<TransformationConfig | null | undefined> {
         console.debug(`Getting Transformation Configs with id ${pipelineId} and query parameters "${JSON.stringify(query)} from Database`)
-        let transformationConfig: TransformationConfig | undefined
-        let condition: FindConditions<TransformationConfig> // Condition to get configs for
-
-        condition = { id: pipelineId }
-        Object.assign(condition, query)
+        const condition: FindConditions<TransformationConfig> = Object.assign({ id: pipelineId, query })
 
         if (!this.checkClassInvariant()) {
-            Promise.reject()
+          Promise.reject()
         }
 
         // return null if id not set
         if (!pipelineId) {
-            return null;
+          return null;
         }
 
         // Get Configs from Database
+        let transformationConfig: TransformationConfig | undefined
         try {
             transformationConfig = await this.configRepository.findOne(condition)
         } catch (error) {
@@ -176,9 +173,9 @@ export class StorageHandler implements TransformationRepository{
             Promise.reject()
         }
 
-        let transformationConfigs: TransformationConfig[]
 
         // Get Configs from Database
+        let transformationConfigs: TransformationConfig[]
         try {
             if (queryParams && Object.keys(queryParams).length > 0) {
                 transformationConfigs = await this.configRepository.find(queryParams)
@@ -237,8 +234,7 @@ export class StorageHandler implements TransformationRepository{
             Promise.reject()
         }
 
-        let deletePromise = this.configRepository.delete(id)
-
+        const deletePromise = this.configRepository.delete(id)
         console.debug(`Successfully deleted config with id ${id}`)
         return deletePromise
     }
@@ -251,14 +247,14 @@ export class StorageHandler implements TransformationRepository{
      * @param transformationConfig Transformation config to be written to database
      * @returns Promise containing the result of the update operation
      */
-    public updateTransoformationConfig(id: number, transformationConfig: TransformationConfig): Promise<UpdateResult> {
+    public updateTransformationConfig(id: number, transformationConfig: TransformationConfig): Promise<UpdateResult> {
         console.debug(`Updating config with id ${id}.`)
-        if(!this.checkClassInvariant()){     Promise.reject()}
+        if(!this.checkClassInvariant()){
+            Promise.reject()
+        }
 
-        let updatePromise = this.configRepository.update(id, transformationConfig)
-
+        const updatePromise = this.configRepository.update(id, transformationConfig)
         console.debug(`Successfully updated config with id ${id}`)
-
         return updatePromise
     }
 
@@ -273,7 +269,7 @@ export class StorageHandler implements TransformationRepository{
      */
     public updateConfigForPipelineID(id: number, config: TransformationConfig): Promise<UpdateResult> {
         const condition = {"id": id}
-        return this.configRepository.update(condition,config)
+        return this.configRepository.update(condition, config)
     }
 
     /**
