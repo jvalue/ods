@@ -81,6 +81,8 @@
 <script lang="ts">
 import Component from 'vue-class-component'
 import Vue from 'vue'
+import NotificationConfig, { WebhookNotification } from '@/pipeline/notifications/notificationConfig'
+import NotificationEditDialog from '@/pipeline/notifications/notificationEditDialog'
 import { Emit } from 'vue-property-decorator'
 
 import NotificationConfig, {WebhookNotification, CONFIG_TYPE } from './notificationConfig'
@@ -97,12 +99,13 @@ export default class NotificationEdit extends Vue implements NotificationEditDia
   private validForm = false;
 
   @Emit('save')
-  onPipelineSave () {
+  onPipelineSave (): NotificationConfig {
     return this.editedNotification
   }
 
   //private pipelineId = -1
   private dialogOpen = false
+
   // private notificationTypes = Object.values(CONFIG_TYPE)  // Convert CONFIG_TYPES to list
   //private notificationTypes = CONFIG_TYPE
   private notificationTypes = ['webhook', 'fcm', 'slack']
@@ -112,12 +115,16 @@ export default class NotificationEdit extends Vue implements NotificationEditDia
     pipelineId: -1,
     condition: 'true',
     url: '',
+<<<<<<< .mine
     type: CONFIG_TYPE.WEBHOOK
+=======
+    type: 'WEBHOOK'
+>>>>>>> .theirs
   }
 
   private editedNotification: NotificationConfig = Object.assign({}, this.defaultNotification)
 
-  openDialog (notificationConfig?: NotificationConfig) {
+  openDialog (notificationConfig?: NotificationConfig): void {
     
     if (notificationConfig) { // edit
       this.editedNotification = Object.assign({}, notificationConfig)
@@ -127,13 +134,13 @@ export default class NotificationEdit extends Vue implements NotificationEditDia
     this.dialogOpen = true
   }
 
-  closeDialog () {
+  closeDialog (): void {
     this.editedNotification = Object.assign({}, this.defaultNotification)
     this.dialogOpen = false
     //this.editedNotification.pipelineId = this.pipelineId
   }
 
-  onSave () {
+  onSave (): void {
     this.onPipelineSave()
     this.closeDialog()
   }

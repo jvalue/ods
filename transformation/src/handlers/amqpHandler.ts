@@ -139,7 +139,7 @@ export class AmqpHandler{
             });
 
             // Consume from Channel
-            console.log(" [*] Waiting for Jobs in %s.", handler.jobQueueName);
+            console.log(" [*] Waiting for Jobs in %s. queue", handler.jobQueueName);
             handler.jobChannel.consume(handler.jobQueueName, handler.consumeJobEvent, { noAck: true });
         })
     }

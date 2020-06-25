@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from '@/views/Home.vue'
-import transformationRoutes from '@/transformation/router'
 import storageRoutes from '@/storage/router'
 import datasourceRoutes from '@/datasource/router'
 import pipelineRoutes from '@/pipeline/router'
@@ -29,7 +28,6 @@ let routes = [
   }
 ]
 
-routes = routes.concat(transformationRoutes)
 routes = routes.concat(pipelineRoutes)
 routes = routes.concat(datasourceRoutes)
 routes = routes.concat(notificationRoutes)
@@ -41,8 +39,10 @@ const router = new Router({
   routes
 })
 
+const AUTH_DISABLED: boolean = process.env.VUE_APP_AUTH_DISABLED === 'true'
+
 router.beforeEach((to, from, next) => {
-  if (to.meta.requiresAuth && !isAuthenticated()) {
+  if (!AUTH_DISABLED && to.meta.requiresAuth && !isAuthenticated()) {
     keycloakLogin()
   }
   next()

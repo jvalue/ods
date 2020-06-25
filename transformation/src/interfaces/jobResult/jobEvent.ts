@@ -11,7 +11,7 @@
 export default interface JobEvent {
     pipelineID: number      // pipeline ID of the request
 
-    func: string;           // function to apply to the data (-> transformation)
-
     data: object;           // data to be transformed
+
+    dataLocation: string    // data location
 }

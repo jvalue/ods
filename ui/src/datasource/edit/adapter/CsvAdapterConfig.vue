@@ -55,22 +55,22 @@ export default class CsvAdapterConfig extends Vue {
   private csvConfig!: CsvConfig;
 
   @Emit('value')
-  emitValue () {
+  emitValue (): CsvConfig {
     return this.csvConfig
   }
 
   @Emit('validityChanged')
-  emitValid () {
+  emitValid (): boolean {
     return this.validForm
   }
 
   @Emit('change')
-  formChanged () {
+  formChanged (): void {
     this.emitValue()
     this.emitValid()
   }
 
-  private required (val: string) {
+  private required (val: string): true | string {
     return !!val || 'required.'
   }
 }

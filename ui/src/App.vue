@@ -63,11 +63,10 @@ export default class App extends Vue {
     { title: 'Dashboard', route: '/' },
     { title: 'Datasources', route: '/datasources' },
     { title: 'Pipelines', route: '/pipelines' },
-    { title: 'Transformation', route: '/transformation' },
     { title: 'About', route: '/about' }
   ];
 
-  private created () {
+  private created (): void {
     this.routerTitle = Router.currentRoute.meta.title || ''
 
     Router.afterEach((to) => {

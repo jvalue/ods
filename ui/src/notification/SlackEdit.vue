@@ -38,21 +38,21 @@ export default class SlackEdit extends Vue {
   private slackNotification!: SlackNotification
 
   @Emit('value')
-  emitValue () {
+  emitValue (): SlackNotification {
     return this.slackNotification
   }
 
   @Emit('validityChanged')
-  emitValid () {
+  emitValid (): boolean {
     return this.validForm
   }
 
-  formChanged () {
+  formChanged (): void {
     this.emitValue()
     this.emitValid()
   }
 
-  private required (val: string) {
+  private required (val: string): true | string {
     return !!val || 'required.'
   }
 }

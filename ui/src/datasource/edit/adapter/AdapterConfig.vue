@@ -68,12 +68,12 @@ export default class AdapterConfig extends Vue {
   private adapterConfig!: Datasource;
 
   @Emit('value')
-  emitValue () {
+  emitValue (): Datasource {
     return this.adapterConfig
   }
 
   @Watch('adapterConfig.format.type')
-  private formatChanged (val: string) {
+  private formatChanged (val: string): void {
     switch (val) {
       case 'CSV': {
         if (!this.isEditMode) { // otherwise csv params don't need reassignment of default values
@@ -94,16 +94,16 @@ export default class AdapterConfig extends Vue {
   }
 
   @Emit('validityChanged')
-  emitValid () {
+  emitValid (): boolean {
     return this.validForm && this.validFormatParameters
   }
 
-  formChanged () {
+  formChanged (): void {
     this.emitValue()
     this.emitValid()
   }
 
-  private required (val: string) {
+  private required (val: string): true | string {
     return !!val || 'required.'
   }
 }

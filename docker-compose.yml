@@ -176,7 +176,7 @@ services:
       AMQP_SERVICE_USER: 'rabbit_adm'
       AMQP_SERVICE_PWD: 'R4bb!7_4DM_p4SS'
 
-      AMQP_JOB_QUEUE: 'JOB_QUEUE'
+      AMQP_JOB_QUEUE: 'data_import'
       AMQP_NOTIFICATION_QUEUE: 'NOTIF_QUEUE'
 
     labels:

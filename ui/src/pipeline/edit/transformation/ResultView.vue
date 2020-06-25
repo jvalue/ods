@@ -24,7 +24,7 @@
           end: {{ result.stats.endTimestamp | timestamp }}<br>
           job duration: {{ result.stats.durationInMilliSeconds | duration }}
         </p>
-      </v-card-text>
+      </v-card-text>/;0
     </div>
     <div v-if="!result">
       <v-card-text style="text-align:left">
@@ -35,22 +35,17 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import Vue from 'vue'
 import Component from 'vue-class-component'
 
-import { duration, timestamp } from '../filters'
-import JobResult from './interfaces/jobResult'
-
-const Props = Vue.extend({
-  props: {
-    result: Object as PropType<JobResult | null>
-  }
-})
+import { duration, timestamp } from '@/filters'
+import { JobResult } from './transformation'
+import { Prop } from 'vue-property-decorator'
 
 @Component({
   filters: { duration, timestamp }
 })
-export default class TextAreaDataProvider extends Props {
-
+export default class ResultView extends Vue {
+  @Prop() readonly result!: JobResult
 }
 </script>

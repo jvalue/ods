@@ -10,30 +10,25 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import Vue from 'vue'
 import Component from 'vue-class-component'
-import { Watch } from 'vue-property-decorator'
+import { Watch, Prop } from 'vue-property-decorator'
 
 import MonacoEditor, { MonacoEditorConstructor } from 'vue-monaco'
 import * as monaco from 'monaco-editor'
 
-import JobResult from './interfaces/jobResult'
-import JobError from './interfaces/jobError'
-
-const Props = Vue.extend({
-  props: {
-    value: String,
-    data: [Object, Array],
-    result: Object as PropType<JobResult | null>
-  }
-})
+import { JobResult, JobError } from './transformation'
 
 @Component({
   components: {
     MonacoEditor
   }
 })
-export default class CodeEditor extends Props {
+export default class CodeEditor extends Vue {
+  @Prop() readonly value!: string
+  @Prop() readonly data!: object
+  @Prop() readonly result!: JobResult | null
+
   public $refs!: Vue['$refs'] & {
     editor: MonacoEditorConstructor;
   }
@@ -71,7 +66,6 @@ export default class CodeEditor extends Props {
    * @returns {monaco.Range} the range to be highlighted
    */
   private buildRange (error: JobError): monaco.Range {
-    console.log(error)
     const lines: string[] = this.code.split('\n')
 
     let lineNumber: number
