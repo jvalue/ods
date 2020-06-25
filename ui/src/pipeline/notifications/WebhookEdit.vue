@@ -15,7 +15,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Emit, PropSync } from 'vue-property-decorator'
-import { WebhookNotification } from '@/pipeline/notifications/notificationConfig'
+import { WebhookNotification } from './notificationConfig'
 
 @Component({ })
 export default class WebhookEdit extends Vue {
@@ -25,28 +25,31 @@ export default class WebhookEdit extends Vue {
   private webhookNotification!: WebhookNotification
 
   @Emit('value')
-  emitValue () {
+  emitValue (): WebhookNotification {
     return this.webhookNotification
   }
 
   @Emit('validityChanged')
-  emitValid () {
+  emitValid (): boolean {
     return this.validForm
   }
 
-  formChanged () {
+  formChanged (): void {
     this.emitValue()
     this.emitValid()
   }
 
-  private validURL (url: string) {
+  private validURL (url: string): true | string {
     const urlRegex = new RegExp('^(https?:\\/\\/)?' + // protocol
         '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
         '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
         '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
         '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
         '(\\#[-a-z\\d_]*)?$', 'i') // fragment locator
-    return !!url && url.match(urlRegex) || 'URL invalid'
+    if (!!url && !!url.match(urlRegex)) {
+      return true
+    }
+    return 'URL invalid'
   }
 }
 </script>

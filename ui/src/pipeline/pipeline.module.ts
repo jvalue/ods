@@ -5,7 +5,6 @@ import NotificationConfig from '@/pipeline/notifications/notificationConfig'
 
 @Module({ namespaced: true })
 export default class PipelineModule extends VuexModule {
-
   private pipelines: Pipeline[] = []
   private selectedPipeline: Pipeline = {} as unknown as Pipeline
   private isLoadingPipelines = true
@@ -42,7 +41,6 @@ export default class PipelineModule extends VuexModule {
   public async loadPipelineByDatasourceId (datasourceId: number): Promise<Pipeline> {
     return await RestService.getPipelineByDatasourceId(datasourceId)
   }
-
 
   @Action({ commit: 'setPipelines', rawError: true })
   public async createPipeline (pipeline: Pipeline): Promise<Pipeline[]> {
