@@ -52,7 +52,6 @@ export default class CodeEditor extends Props {
   }
 
   set code (code: string) {
-    console.log('emit new code')
     this.$emit('input', code)
   }
 
