@@ -1,8 +1,11 @@
 /* eslint-disable prefer-promise-reject-errors */
 // eslint-disable-next-line no-unused-vars
 import Keycloak, { KeycloakError, KeycloakInitOptions, KeycloakInstance } from 'keycloak-js'
+import axios, { AxiosInstance } from 'axios'
 
 // =================================================================================================
+
+const AUTH_DISABLED: boolean = process.env.VUE_APP_AUTH_DISABLED === 'true'
 
 let keycloak: KeycloakInstance | undefined
 
@@ -127,7 +130,7 @@ export function editKeycloakUserProfile (): Promise<boolean> {
   })
 }
 
-export function useBearer (): Promise<string> {
+function useBearer (): Promise<string> {
   return new Promise<string>((resolve, reject) => {
     if (keycloak && keycloak.token) {
       const keycloakAuth = keycloak
@@ -141,6 +144,32 @@ export function useBearer (): Promise<string> {
         })
     } else {
       reject('Not logged in')
+    }
+  })
+}
+
+export async function createAxios (serviceBaseUrl: string): Promise<AxiosInstance> {
+  const baseHeaders = {
+    'Content-Type': 'application/json'
+  }
+
+  if (AUTH_DISABLED) {
+    return axios.create({
+      baseURL: serviceBaseUrl,
+      headers: baseHeaders
+    })
+  }
+
+  const token = await useBearer().catch(error => {
+    console.error('Unable to get keycloak token. Error: ' + error)
+    return Promise.reject(error)
+  })
+
+  return axios.create({
+    baseURL: serviceBaseUrl,
+    headers: {
+      ...baseHeaders,
+      Authorization: 'Bearer ' + token
     }
   })
 }

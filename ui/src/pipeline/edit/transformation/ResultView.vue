@@ -38,8 +38,8 @@
 import Vue, { PropType } from 'vue'
 import Component from 'vue-class-component'
 
-import { duration, timestamp } from '../filters'
-import JobResult from './interfaces/jobResult'
+import { duration, timestamp } from '@/filters'
+import { JobResult } from './transformation'
 
 const Props = Vue.extend({
   props: {
@@ -50,7 +50,7 @@ const Props = Vue.extend({
 @Component({
   filters: { duration, timestamp }
 })
-export default class TextAreaDataProvider extends Props {
+export default class ResultView extends Props {
 
 }
 </script>

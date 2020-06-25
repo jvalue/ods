@@ -1,8 +1,7 @@
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
 
 import * as TransformationRest from './transformationRest'
-import JobResult from './interfaces/jobResult'
-import TransformationRequest from './interfaces/transformationRequest'
+import { TransformationRequest, JobResult } from './transformation'
 
 @Module({ namespaced: true })
 export default class TransformationModule extends VuexModule {
