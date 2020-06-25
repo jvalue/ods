@@ -2,6 +2,9 @@ package org.jvalue.ods.adapterservice.datasource.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
+import org.jvalue.ods.adapterservice.adapter.model.FormatConfig;
+import org.jvalue.ods.adapterservice.adapter.model.ProtocolConfig;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -77,6 +80,13 @@ public class Datasource {
         ", trigger=" + trigger +
         '}';
     }
+
+    public AdapterConfig toAdapterConfig() {
+      return new AdapterConfig(
+        new ProtocolConfig(this.getProtocol().getType(), this.getProtocol().getParameters()),
+        new FormatConfig(this.getFormat().getType(), this.getFormat().getParameters())
+      );
+  }
 
     @Override
     public boolean equals(Object o) {
