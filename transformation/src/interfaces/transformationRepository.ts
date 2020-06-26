@@ -10,6 +10,6 @@ export interface TransformationRepository {
 
   saveTransformationConfig(transformationConfig: TransformationConfig): Promise<TransformationConfig>
   deleteTransformationConfig(id: number): Promise<DeleteResult>
-  updateTransoformationConfig(id: number, transformationConfig: TransformationConfig): Promise<UpdateResult>
-  
+  updateTransformationConfig(id: number, transformationConfig: TransformationConfig): Promise<UpdateResult>
+
 }

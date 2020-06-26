@@ -115,11 +115,11 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Watch } from 'vue-property-decorator'
 import { Action, State } from 'vuex-class'
-import Pipeline from './pipeline'
 
-import StepperButtonGroup from '../components/StepperButtonGroup.vue'
-import PipelineMetadataConfig from './edit/PipelineMetadataConfig.vue'
-import PipelineTransformationConfig from './edit/transformation/PipelineTransformationConfig.vue'
+import Pipeline from '@/pipeline/pipeline'
+import StepperButtonGroup from '@/components/StepperButtonGroup.vue'
+import PipelineMetadataConfig from '@/pipeline/edit/PipelineMetadataConfig.vue'
+import PipelineTransformationConfig from '@/pipeline/edit/transformation/PipelineTransformationConfig.vue'
 
 const pipelineNamespace = { namespace: 'pipeline' }
 
@@ -150,10 +150,9 @@ export default class PipelineEdit extends Vue {
       description: '',
       displayName: ''
     }
-    //notifications: []
   }
 
-  created (): void {
+  created () {
     this.isEditMode = this.$route.meta.isEditMode
 
     if (this.isEditMode) {
@@ -163,18 +162,18 @@ export default class PipelineEdit extends Vue {
   }
 
   @Watch('selectedPipeline')
-  onSelectedPipelineChange (value: Pipeline, oldValue: Pipeline): void {
-    if (value !== oldValue) {
+  onSelectedPipelineChange (value: Pipeline, oldValue: Pipeline) {
+    if (value != oldValue) {
       this.dialogPipeline = value
     }
   }
 
-  private onSave (): void {
+  private onSave () {
     this.createPipelineAction(this.dialogPipeline)
     this.routeToOverview()
   }
 
-  private onUpdate (): void {
+  private onUpdate () {
     this.updatePipelineAction(this.dialogPipeline)
     this.routeToOverview()
   }
@@ -187,11 +186,11 @@ export default class PipelineEdit extends Vue {
     this.$router.push({ name: 'pipeline-overview' })
   }
 
-  private required (val: string): true | string {
+  private required (val: string) {
     return !!val || 'required.'
   }
 
-  private evaluateAllForms (): boolean {
+  private evaluateAllForms () {
     return this.validStep1 &&
         this.validStep2 &&
         this.validStep3

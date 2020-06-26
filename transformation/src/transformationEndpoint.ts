@@ -55,8 +55,8 @@ export class TransformationEndpoint {
     this.app.delete('/config/:id', this.handleConfigDeletion)
     this.app.put('/config/:id', this.handleConfigUpdate)
 
-    //this.app.delete('/pipeline/:id', this.handlePipelineDeletion) // 1:1 relation between Pipeline and  Transformation 
-    
+    //this.app.delete('/pipeline/:id', this.handlePipelineDeletion) // 1:1 relation between Pipeline and  Transformation
+
     storageHandler.init(10, 5)
     amqpHandler.connect(10, 5)
   }
@@ -83,7 +83,7 @@ export class TransformationEndpoint {
     * Handles a request to save a TransformationConfig
     * This is done by checking the validity of the config and then save
     * it to the database on success
-    * 
+    *
     * @param req Request, containing a Transformation config to persist
     * @param res Response to send back to the requester
     */
@@ -115,7 +115,7 @@ export class TransformationEndpoint {
   * Handles the deletion of a TransformationConfig
   * This is done by checking the validity of the config and then delete
   * it from the database on success
-  * 
+  *
   * @param req Request, containing a Transformation config to delete
   * @param res Response to send back to the requester
   */
@@ -155,7 +155,7 @@ export class TransformationEndpoint {
   * Handles the update of a TransformationConfig
   * This is done by checking the validity of the config and then delete
   * it from the database on success
-  * 
+  *
   * @param req Request, containing a Transformation config to delete
   * @param res Response to send back to the requester
   */
@@ -182,7 +182,7 @@ export class TransformationEndpoint {
 
     // Delete Config
     try {
-      updateResult = await this.storageHandler.updateTransoformationConfig(configId, transformationConfig)
+      updateResult = await this.storageHandler.updateTransformationConfig(configId, transformationConfig)
     } catch (error) {
       console.error(`Could not create transformationConfig Object: ${error}`)
       res.status(500).send('Internal Server Error: Config could not updated')
@@ -194,7 +194,7 @@ export class TransformationEndpoint {
   }
 
   /**
-   * Gets all configs from database as list 
+   * Gets all configs from database as list
    * (optionally with special conditioning, provided by query parameter)
    *
    * @param req Request for config, optionally with query parameter for filtering
@@ -203,7 +203,7 @@ export class TransformationEndpoint {
   handleConfigSummaryRequest = async (req: Request, res: Response): Promise<void> => {
     const queryParams = req.query
     console.log(`Received request for all configs with query params "${JSON.stringify(queryParams)}"  from Host ${req.connection.remoteAddress}`)
-    
+
     const allConfigs = await this.storageHandler.getAllConfigs(queryParams)
     res.status(200).send(allConfigs)
     res.end()
@@ -214,12 +214,12 @@ export class TransformationEndpoint {
   /**
      * Gets Config to corresponding to corresponnding Pipeline-ID
      * (identified by param id) and query parameter as json
-     * 
+     *
      * @param req Request for config with a specific pipeline id.
      * @param res Response that will contain the Config for given pipeline id
      */
   handleConfigRequest = async (req: Request, res: Response): Promise<void> => {
-    
+
     const pipelineID = parseInt(req.params.id)
     const queryParams = req.query
 
@@ -255,11 +255,11 @@ export class TransformationEndpoint {
 
   /**
    * Handles request for adhoc trasnformations.
-   * 
+   *
    * The data and the transfromation function will be passed as a request and
    * will result in a response containing the results of the transformation and
    * the metrics (such as execution duration) for transformation execution.
-   * 
+   *
    * @param req HTTP-request, containing the transf. function and data to be transformed
    * @param res HTTP-response, containing the transformation resulsts
    */
@@ -296,7 +296,7 @@ export class TransformationEndpoint {
       res.writeHead(400)
     }
     res.write(answer)
-    
+
     // Initialize transformationEvent (to be sent to Notification Queue)
     const transformationEvent : TransformationEvent= {
       "pipelineId": pipelineID,
@@ -304,7 +304,7 @@ export class TransformationEndpoint {
       "dataLocation": transformation.dataLocation,
       "jobResult": result
     }
-  
+
     this.amqpHandler.notifyNotificationService(transformationEvent)
 
     res.end()
