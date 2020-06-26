@@ -56,7 +56,7 @@ export class NotificationEndpoint {
     this.app.delete('/config/:configType/:id/', this.determineAuth(), this.handleConfigDeletion)
 
     // Request Configs
-    this.app.get('/config/pipeline/:pipelineId/', this.determineAuth(), this.handleConfigRequest)
+    this.app.get('/config/:configType/:id/', this.determineAuth(), this.handleConfigRequest)
 
     this.storageHandler.init(5, 5)
     amqpHandler.connect(5,5)
@@ -83,11 +83,11 @@ export class NotificationEndpoint {
 
   /**
    * Gets all Configs asto corresponding to corresponnding Pipeline-ID
-   * (identified by param pipelineId) as json list
+   * (identified by param id) as json list
    */
   handleConfigSummaryRequest = async (req: Request, res: Response) => {
 
-    const pipelineId = parseInt(req.params.pipelineId)
+    const pipelineId = parseInt(req.params.id)
     console.log(`Received request for configs with pipeline id ${pipelineId} from Host ${req.connection.remoteAddress}`)
 
     if (!pipelineId) {
@@ -121,6 +121,89 @@ export class NotificationEndpoint {
     res.status(200).send(configs)
   }
 
+  /**
+    * Gets all Slack Configs corresponding to corresponnding config id
+    * (identified by param id) as json list
+    */
+  handleSlackRequest = async (req: Request, res: Response) => {
+
+    const id = parseInt(req.params.id)
+    console.log(`Received request for slack config with id ${id} from Host ${req.connection.remoteAddress}`)
+
+    if (!id) {
+      console.error("Request for config: ID not set")
+      res.status(400).send('Slack ID is not set.')
+      return
+    }
+
+    // Get configs from database
+    const configs = await this.storageHandler.getSlackConfigs(id)
+    
+    if (!configs) {
+      console.error(`Could not get slack config with id "${id}" from database`)
+      res.status(500).send('Internal Server error.')
+      res.end()
+      return
+    }
+
+    res.status(200).send(configs)
+  }
+
+  /**
+   * Gets all Webhook Configs corresponding to corresponnding config id
+   * (identified by param id) as json list
+   */
+  handleWebhookRequest = async (req: Request, res: Response) => {
+
+    const id = parseInt(req.params.id)
+    console.log(`Received request for webhook config with id ${id} from Host ${req.connection.remoteAddress}`)
+
+    if (!id) {
+      console.error("Request for config: ID not set")
+      res.status(400).send('Webhook ID is not set.')
+      return
+    }
+
+    // Get configs from database
+    const configs = await this.storageHandler.getWebHookConfigs(id)
+
+    if (!configs) {
+      console.error(`Could not get webhook config with id "${id}" from database`)
+      res.status(500).send('Internal Server error.')
+      res.end()
+      return
+    }
+
+    res.status(200).send(configs)
+  }
+
+  /**
+   * Gets all Firebase Configs corresponding to corresponnding config id
+   * (identified by param id) as json list
+   */
+  handleFCMRequest = async (req: Request, res: Response) => {
+
+    const id = parseInt(req.params.id)
+    console.log(`Received request for firebase config with id ${id} from Host ${req.connection.remoteAddress}`)
+
+    if (!id) {
+      console.error("Request for config: ID not set")
+      res.status(400).send('Firebase ID is not set.')
+      return
+    }
+
+    // Get configs from database
+    const configs = await this.storageHandler.getFirebaseConfigs(id)
+
+    if (!configs) {
+      console.error(`Could not get firebase config with id "${id}" from database`)
+      res.status(500).send('Internal Server error.')
+      res.end()
+      return
+    }
+
+    res.status(200).send(configs)
+  }
 
   /**
    * Handles a request to save a NotificationConfig
@@ -148,13 +231,13 @@ export class NotificationEndpoint {
 
     switch(notificationType) {
       case CONFIG_TYPE.WEBHOOK:
-        this.handleWebhookRequest(req, res)
+        this.handleWebhookCreation(req, res)
         break
       case CONFIG_TYPE.FCM:
-        this.handleFCMRequest(req, res)
+        this.handleFCMCreation(req, res)
         break
       case CONFIG_TYPE.SLACK:
-        this.handleSlackRequest(req, res)
+        this.handleSlackCreation(req, res)
         break
       default:
         res.status(400).send(`Notification type ${notificationType} not suppoerted!`)
@@ -167,7 +250,7 @@ export class NotificationEndpoint {
    * This is done by checking the validity of the config and then save
    * it to the database on success
    */
-  handleWebhookRequest = async (req: Request, res: Response): Promise<void> => {
+  handleWebhookCreation = async (req: Request, res: Response): Promise<void> => {
     console.log(`Received Webhook config from Host ${req.connection.remoteAddress}`)
 
     const webHookConfig = req.body as WebHookConfig
@@ -199,7 +282,7 @@ export class NotificationEndpoint {
    * @param req Request for config creation
    * @param res Response for config creation
    */
-  handleSlackRequest = async (req: Request, res: Response): Promise<void> => {
+  handleSlackCreation = async (req: Request, res: Response): Promise<void> => {
     console.log(`Received config from Host ${req.connection.remoteAddress}`)
 
     const slackConfig: SlackConfig = req.body as SlackConfig
@@ -229,7 +312,7 @@ export class NotificationEndpoint {
   /**
    * Persists a posted Firebase Config to the notifcation database service.
    */
-  handleFCMRequest = async (req: Request, res: Response) => {
+  handleFCMCreation = async (req: Request, res: Response) => {
     console.log(`Received config from Host ${req.connection.remoteAddress}`)
 
     const firebaseConfig : FirebaseConfig = req.body as FirebaseConfig
@@ -335,6 +418,7 @@ export class NotificationEndpoint {
 
       case 'pipeline':
         this.handleConfigSummaryRequest(req, res)
+        break
 
       default:
         res.status(400).send(`Notification type ${configType} not suppoerted!`)

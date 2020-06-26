@@ -81,12 +81,10 @@
 <script lang="ts">
 import Component from 'vue-class-component'
 import Vue from 'vue'
-import NotificationConfig, { WebhookNotification } from '@/pipeline/notifications/notificationConfig'
-import NotificationEditDialog from '@/pipeline/notifications/notificationEditDialog'
+import NotificationConfig, { WebhookNotification, CONFIG_TYPE } from '@/notification/notificationConfig'
+import NotificationEditDialog from '@/notification/notificationEditDialog.vue'
 import { Emit } from 'vue-property-decorator'
 
-import NotificationConfig, {WebhookNotification, CONFIG_TYPE } from './notificationConfig'
-import NotificationEditDialog from '@/notification/notificationEditDialog.vue'
 import WebhookEdit from '@/notification/WebhookEdit.vue'
 import FirebaseEdit from '@/notification/FirebaseEdit.vue'
 import SlackEdit from '@/notification/SlackEdit.vue'
@@ -115,11 +113,7 @@ export default class NotificationEdit extends Vue implements NotificationEditDia
     pipelineId: -1,
     condition: 'true',
     url: '',
-<<<<<<< .mine
     type: CONFIG_TYPE.WEBHOOK
-=======
-    type: 'WEBHOOK'
->>>>>>> .theirs
   }
 
   private editedNotification: NotificationConfig = Object.assign({}, this.defaultNotification)

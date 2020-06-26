@@ -4,12 +4,12 @@
  * 
  * It contains
  * 
- * @field pipelineID       pipeline ID of the request
+ * @field pipelineId       pipeline ID of the request
  * @field func             function to apply to the data (-> transformation) 
  * @field data             data to be transformed
  */
 export default interface JobEvent {
-    pipelineID: number      // pipeline ID of the request
+    pipelineId: number      // pipeline ID of the request
 
     data: object;           // data to be transformed
 

@@ -19,22 +19,35 @@ export async function getAllByPipelineId (pipelineId: number): Promise<Notificat
   return JSON.parse(response.data)
 }
 
-export async function getById (id: number, notificationType: string): Promise<NotificationConfig> {
+export async function getById(id: number, notificationType: string): Promise<NotificationConfig> {
   const response = await http.get(`/config/${notificationType}/${id}`)
   return JSON.parse(response.data)
 }
 
-export async function create(notificationType: string, notificationConfig: NotificationConfig): Promise<NotificationConfig> {
-  delete notificationConfig['id'] // remove notificaitonId
+export async function create(notificationConfig: NotificationConfig): Promise<NotificationConfig> {
+  const notificationType = notificationConfig.type
+  // remove notificaitonId and type
+  delete notificationConfig['id'] 
+  delete notificationConfig['type']
+
   const response = await http.post(`/config/${notificationType}`, JSON.stringify(notificationConfig))
   return JSON.parse(response.data)
 }
 
-export async function update(id: number, notificationType: string, notificationConfig: NotificationConfig): Promise<void> {
-  delete notificationConfig['id'] // remove notificaitonId
+export async function update(notificationConfig: NotificationConfig): Promise<void> {
+  const notificationType = notificationConfig.type
+  const id = notificationConfig.id
+  
+  // remove notificaitonId and type
+  delete notificationConfig['id'] 
+  delete notificationConfig['type']
+
   return http.put(`/config/${notificationType}/${id}`, JSON.stringify(notificationConfig))
 }
 
-export async function remove(id: number, notificationType: string): Promise<void> {
+export async function remove(notificationConfig: NotificationConfig): Promise<void> {
+  const notificationType = notificationConfig.type
+  const id = notificationConfig.id
+
   return http.delete(`/config/${notificationType}/${id}`)
 }

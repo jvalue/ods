@@ -50,7 +50,7 @@ export class TransformationEndpoint {
 
     // Config CRUD Operations
     this.app.post('/config', this.determineAuth(), this.handleConfigCreation)
-    this.app.get('/config/:id', this.handleConfigSummaryRequest)
+    this.app.get('/config/', this.handleConfigSummaryRequest)
     this.app.get('/config/:id', this.handleConfigRequest)
     this.app.delete('/config/:id', this.handleConfigDeletion)
     this.app.put('/config/:id', this.handleConfigUpdate)

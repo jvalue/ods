@@ -25,6 +25,55 @@ router.get('/', async ctx => {
 router.get("/config/pipeline/:pipelineId", async(ctx) => {
     const pipelineId = ctx.params.pipelineId;
     const configMap = pipelineMap.get(pipelineId)
+
+    ctx.status = 200
+    ctx.type = 'application/json'
+
+    if (!configMap) {
+        ctx.body = []
+    }
+
+    ctx.body = configMap
+})
+
+/*==================================================================
+ *  Mock for Config persistence
+ *=================================================================*/
+router.post('/config/:configType', async ctx => {
+    const configType = ctx.params.configType
+    let notificationConfigs = new Map() // Map of notification Configs for CRUD Operations (key: config type, value: list of configs)
+
+    const config = ctx.request.body
+    const pipelineId = config.pipelienId
+
+    if (!config || !pipelineId) {
+        ctx.status = 400
+        ctx.type = 'application/json'
+        ctx.body = 'Malformed config request.'
+        return
+    }
+
+    notificationConfigs.set(configType, config)
+    pipelineMap.set(pipelineId, notificationConfigs)
+
+    ctx.status = 200
+    ctx.type = 'application/json'
+    ctx.body(config)
+})
+
+/*==================================================================
+ *  Mock for Config Deltion Requests (for specific pipeline)
+ *=================================================================*/
+router.delete("/config/pipeline/:pipelineId", async(ctx) => {
+    const pipelineId = ctx.params.pipelineId;
+    const configMap = pipelineMap.get(pipelineId)
+
+    pipelineMap.delete(pipelineId)
+
+    ctx.status = 200
+    ctx.type = 'application/json'
+
+
 })
 
 /*==================================================================

@@ -149,8 +149,8 @@ export default class PipelineEdit extends Vue {
       license: '',
       description: '',
       displayName: ''
-    },
-    notifications: []
+    }
+    //notifications: []
   }
 
   created (): void {

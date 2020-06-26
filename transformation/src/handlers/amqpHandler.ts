@@ -243,7 +243,7 @@ export class AmqpHandler{
      * @returns     true, if param event is a TransformationEvent, else false
      */
     public isValidJobEvent(event: JobEvent) {
-        return !!event.pipelineID && !! event.func && !!event.data
+        return !!event.pipelineId && !! event.dataLocation && !!event.data
     }
 
 

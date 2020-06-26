@@ -6,7 +6,6 @@ export interface TransformationRepository {
   init(retries: number, backoff: number):void
 
   updateConfigForPipelineID(pipelineId: number, config: TransformationConfig): Promise<UpdateResult>
-  deleteConfigsForPipelineID(pipelineId: number): Promise<DeleteResult>
   getTransformationConfig(pipelineID: number, query: Query): Promise<TransformationConfig | null |undefined>
 
   saveTransformationConfig(transformationConfig: TransformationConfig): Promise<TransformationConfig>
