@@ -24,8 +24,9 @@ export default class NotificationModule extends VuexModule {
   }
 
   @Action({ commit: 'setNotifications', rawError: true })
-  public async addNotification (notification: NotificationConfig): Promise<NotificationConfig> {
-    return await RestService.create(notification)
+  public async addNotification(notification: NotificationConfig): Promise<NotificationConfig[]> {
+    await RestService.create(notification)
+    return RestService.getAllByPipelineId(notification.pipelineId)
   }
 
   @Action({ commit: 'setNotifications', rawError: true })

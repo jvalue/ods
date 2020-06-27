@@ -118,9 +118,6 @@ const notificationNameSpace = {namespace: 'notification'}
   }
 })
 export default class PipelineNotifications extends Vue {
-  // @Action('loadPipelineById', pipelineNameSpace) 
-  // private loadPipelineByIdAction!: (id: number) => void
-
   @Action('loadConfigsbyPipelineId', notificationNameSpace) 
   private loadConfigbyPipelineIdAction!: (id: number) => void
 
@@ -134,7 +131,7 @@ export default class PipelineNotifications extends Vue {
   private updateNotificationAction!: (notification: NotificationConfig) => Promise<NotificationConfig[]>
 
   //@State('selectedPipeline', pipelineNameSpace) private selectedPipeline!: Pipeline
-  @State('notifications', notificationNameSpace) private notifications: NotificationConfig[] = []
+  @State('notifications', notificationNameSpace) private notifications!: NotificationConfig[]
   @State('isLoadingNotifications', notificationNameSpace) private isLoadingNotifications!: boolean;
 
   @Ref('notificationEdit')
@@ -153,8 +150,6 @@ export default class PipelineNotifications extends Vue {
   private async created () {
     console.log('Notification Overview created!')
     this.pipelineId = this.$route.params.pipelineId as unknown as number
-    //await this.onLoadNotifications()
-    //this.loadPipelineByIdAction(this.pipelineId)
     this.loadConfigbyPipelineIdAction(this.pipelineId)
   }
 
@@ -170,13 +165,9 @@ export default class PipelineNotifications extends Vue {
 
   private async onDeleteNotification (notification: NotificationConfig) {
      this.removeNotificationAction(notification)
-    //await RestClient.remove(notification)
-    //await this.onLoadNotifications()
   }
 
   private async onLoadNotifications () {
-    //this.loadPipelineByIdAction(this.pipelineId)
-    //this.notifications = await RestClient.getAllByPipelineId(this.pipelineId)
     await this.loadConfigbyPipelineIdAction(this.pipelineId)
   }
 
@@ -189,13 +180,9 @@ export default class PipelineNotifications extends Vue {
     
     if (this.isEdit) { // edit
       this.updateNotificationAction(editedNotification)
-      //await RestClient.update(editedNotification)
     } else { // create
       this.addNotificationAction(editedNotification)
-      //await RestClient.create(editedNotification)
     }
- 
-    await this.onLoadNotifications()
   }
 }
 </script>

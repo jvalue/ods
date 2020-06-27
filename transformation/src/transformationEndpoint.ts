@@ -306,16 +306,6 @@ export class TransformationEndpoint {
       res.writeHead(400)
     }
     res.write(answer)
-
-    // Initialize transformationEvent (to be sent to Notification Queue)
-    const transformationEvent : TransformationEvent= {
-      "pipelineId": pipelineID,
-      "pipelineName": 'TODO: Get Pipeline ID from endpoint caller/queue publisher',
-      "dataLocation": transformation.dataLocation,
-      "jobResult": result
-    }
-
-    this.amqpHandler.notifyNotificationService(transformationEvent)
     res.end()
   }
 
