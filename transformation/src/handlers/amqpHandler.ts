@@ -2,6 +2,12 @@ import { TransformationEvent } from '../interfaces/transformationEvent';
 import {   ConsumeMessage } from "amqplib";
 import { Channel, connect, Connection} from "amqplib/callback_api"
 import JobEvent from '../interfaces/jobResult/jobEvent';
+import TransformationService from '../interfaces/transformationService';
+import JSTransformationService from '../jsTransformationService';
+import { StorageHandler } from './storageHandler';
+import { PipelineConfig } from '../models/PipelineConfig';
+import axios from 'axios';
+import JobResult from '@/interfaces/jobResult/jobResult';
 
 
 /**
@@ -19,7 +25,7 @@ import JobEvent from '../interfaces/jobResult/jobEvent';
  *       All Jobs for the transformation service will be consumed here.
  *       (see JobEvent for details of the Event)
  */
-export class AmqpHandler{
+export class AmqpHandler {
     notificationChannel!: Channel             // notification channel
     jobChannel!: Channel                      // Channel containing transformation Jobs
 
@@ -28,6 +34,17 @@ export class AmqpHandler{
     jobQueueName = process.env.AMQP_JOB_QUEUE!                // Queue name of the Job Queue
     notifQueueName = process.env.AMQP_NOTIFICATION_QUEUE!     // Queue name of the Job Queue
 
+    transformationService: JSTransformationService
+    storageHandler: StorageHandler
+    /**
+     * Default constructor
+     * 
+     * @param transformationService transformation service that executes transformations
+     */
+    constructor(storageHandler: StorageHandler, transformationService: JSTransformationService) {
+        this.storageHandler = storageHandler
+        this.transformationService = transformationService
+    }
 
     /**
      * Connects to Amqp Service and initializes a channel
@@ -197,21 +214,80 @@ export class AmqpHandler{
         console.log(" [x] Sent %s", transfromationEvent);
 
         this.notificationChannel!.assertQueue(this.notifQueueName, {
-              durable: false,
+            durable: false,
         });
     }
 
 
     /**
-     * Handles the Execution of a Job.
+     * Handles the Execution of a transformation job.
      *
      * All information of the job is provided within the JobEvent (argument)
      *
      * @param jobEvent Job to be executed (Transformation)
      */
-    public handleJob(jobEvent: JobEvent) {
-        // TODO: Implement the transformation Execution based on JobEvent
+    private async handleJob(jobEvent: JobEvent) {
+        if (!this.isValidJobEvent(jobEvent)) {
+            console.error("Cannot handle Job: given JobEvent is not valid")
+            return
+        }
+        const pipelineConfigs = await this.storageHandler.getAllConfigs({ datasourceId: jobEvent.dataLocation })
+
+        if (!pipelineConfigs) {
+            console.log(`No PipelineConfigs found for adapter data with datasource id ${jobEvent.dataLocation}`)
+            return
+        }
+
+        let adapterData: Object     // Data to transform (origin: adapter service)
+
+
+        // Fat Event
+        if (jobEvent.data) {
+            adapterData = jobEvent.data
+            // Thin Event
+        } else if (jobEvent.dataLocation) {
+            adapterData = await axios.get(jobEvent.dataLocation)
+
+            // No Data set (--> Ignore Transformation)
+        } else {
+            console.error(`Data cannot be transformed: No Data on queue and no reference to data given by event.`)
+            return
+        }
+
+        // Iterate over all Pipeline Configs, referring to the datasourceId
+        for (let config of pipelineConfigs) {
+
+            // Execute transformation
+            const transformationCode = config.transformation.func
+            let jobResult = this.transformationService.executeJob(transformationCode, adapterData)
+
+            // Send Event to Notificaiton Service
+            let transformationEvent = this.generateTransformationEvent(config, jobResult)
+            this.notifyNotificationService(transformationEvent)
+            console.log('Fetching successful.')
+        }
     }
+
+    /**
+     * Generates a transformation event that is sent to the notification service 
+     * after transformation execution.
+     * 
+     * @param config pipelineConfig, containing information about pipeline
+     * @param jobeResult result of the transformation execution
+     */
+    private generateTransformationEvent(config: PipelineConfig, jobeResult: JobResult): TransformationEvent {
+        // Initialize transformationEvent (to be sent to Notification Queue)
+        const transformationEvent: TransformationEvent = {
+            "pipelineId": config.id,
+            "pipelineName": config.metadata.displayName,
+            "dataLocation": ''+config.datasourceId,
+            "jobResult": jobeResult
+        }
+
+        return transformationEvent
+    }
+
+
 
 
     /**
@@ -221,7 +297,7 @@ export class AmqpHandler{
      * @param event TransformationEvent that has to be checked
      * @returns     true, if param event is a TransformationEvent, else false
      */
-    public isValidTransformationEvent(event: TransformationEvent): boolean {
+    private isValidTransformationEvent(event: TransformationEvent): boolean {
         return !!event.dataLocation && !!event.pipelineId && !!event.pipelineName && !!event.jobResult
     }
 
@@ -233,9 +309,8 @@ export class AmqpHandler{
      * @param event JobEvent, that has to be checked
      * @returns     true, if param event is a TransformationEvent, else false
      */
-    public isValidJobEvent(event: JobEvent): boolean {
-        return !!event.pipelineID && !! event.func && !!event.data
+    private isValidJobEvent(event: JobEvent): boolean {
+        return !!event.data && !! !!event.dataLocation && !! !!event.pipelineId
     }
-
 
 }

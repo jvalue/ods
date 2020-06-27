@@ -13,7 +13,7 @@ import AdapterResponse from '@/interfaces/adapter-response'
 export async function execute (datasourceConfig: DatasourceConfig, maxRetries = 3): Promise<void> {
   // adapter
   const adapterResponse: AdapterResponse =
-      await retryableExecution(executeAdapter, datasourceConfig, `Executing adapter for datasource ${datasourceConfig.id}`)
+    await retryableExecution(executeAdapter, datasourceConfig, `Executing adapter for datasource ${datasourceConfig.id}`)
 
   // pipeline
   const followingPipelines = await CoreClient.getCachedPipelinesByDatasourceId(datasourceConfig.id)

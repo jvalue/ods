@@ -9,10 +9,12 @@ import { Server } from 'http'
 import JobResult from './interfaces/jobResult/jobResult'
 import axios from 'axios'
 import { StorageHandler } from './handlers/storageHandler';
-import { TransformationConfig } from './models/TransformationConfig';
+import { PipelineConfig } from './models/PipelineConfig';
 import { AmqpHandler } from './handlers/amqpHandler';
 import { TransformationEvent } from './interfaces/transformationEvent';
-import { DeleteResult, UpdateResult } from 'typeorm';
+import { DeleteResult } from 'typeorm';
+import { PipelineMetaData } from './models/PipelineMetaData';
+import TransformationConfig from './models/TransformationConfig';
 
 
 export class TransformationEndpoint {
@@ -55,8 +57,6 @@ export class TransformationEndpoint {
     this.app.delete('/config/:id', this.handleConfigDeletion)
     this.app.put('/config/:id', this.handleConfigUpdate)
 
-    //this.app.delete('/pipeline/:id', this.handlePipelineDeletion) // 1:1 relation between Pipeline and  Transformation
-
     storageHandler.init(10, 5)
     amqpHandler.connect(10, 5)
   }
@@ -80,27 +80,27 @@ export class TransformationEndpoint {
   }
 
   /**
-    * Handles a request to save a TransformationConfig
+    * Handles a request to save a PipelineConfig
     * This is done by checking the validity of the config and then save
     * it to the database on success
     *
-    * @param req Request, containing a Transformation config to persist
+    * @param req Request, containing a Pipeline config to persist
     * @param res Response to send back to the requester
     */
   handleConfigCreation = async (req: Request, res: Response): Promise<void> => {
-    console.log(`Received Transformation config from Host ${req.connection.remoteAddress}`)
+    console.log(`Received Pipeline config from Host ${req.connection.remoteAddress}`)
 
-    const transformationConfig = req.body as TransformationConfig
-    let savedConfig : TransformationConfig
+    const transformationConfig = req.body as PipelineConfig
+    let savedConfig : PipelineConfig
     // Check for validity of the request
-    if (!(this.isValidTransformationConfig(transformationConfig))) {
+    if (!(this.isValidPipelineConfig(transformationConfig))) {
       console.warn('Malformed transformation request.')
       res.status(400).send('Malformed transformation request.')
     }
 
     // Persist Config
     try {
-      savedConfig = await this.storageHandler.saveTransformationConfig(transformationConfig)
+      savedConfig = await this.storageHandler.savePipelineConfig(transformationConfig)
     } catch (error) {
       console.error(`Could not create transformationConfig Object: ${error}`)
       res.status(500).send('Internal Server Error.')
@@ -112,15 +112,15 @@ export class TransformationEndpoint {
   }
 
   /**
-  * Handles the deletion of a TransformationConfig
+  * Handles the deletion of a PipelineConfig
   * This is done by checking the validity of the config and then delete
   * it from the database on success
   *
-  * @param req Request, containing a Transformation config to delete
+  * @param req Request, containing a Pipeline config to delete
   * @param res Response to send back to the requester
   */
   handleConfigDeletion = async (req: Request, res: Response): Promise<void> => {
-    console.log(`Received Transformation config from Host ${req.connection.remoteAddress}`)
+    console.log(`Received Pipeline config from Host ${req.connection.remoteAddress}`)
     let deleteResult :DeleteResult
     const configId = parseInt(req.params.id)
 
@@ -132,10 +132,10 @@ export class TransformationEndpoint {
 
     // Delete Config
     try {
-      deleteResult = await this.storageHandler.deleteTransformationConfig(configId)
+      deleteResult = await this.storageHandler.deletePipelineConfig(configId)
 
       if (deleteResult.affected != 1) {
-        const msg = `Could not delete Transformation Config: Config with id ${configId} not found.`
+        const msg = `Could not delete Pipeline Config: Config with id ${configId} not found.`
         console.log(msg)
         res.status(400).send(msg)
       }
@@ -152,17 +152,18 @@ export class TransformationEndpoint {
   }
 
   /**
-  * Handles the update of a TransformationConfig
+  * Handles the update of a PipelineConfig
   * This is done by checking the validity of the config and then delete
   * it from the database on success
   *
-  * @param req Request, containing a Transformation config to delete
+  * @param req Request, containing a Pipeline config to delete
   * @param res Response to send back to the requester
   */
   handleConfigUpdate = async (req: Request, res: Response): Promise<void> => {
-    console.log(`Received Transformation config from Host ${req.connection.remoteAddress}`)
-
-    let updateResult: UpdateResult
+    console.log(`Received update reuqest for transformation config with id ${parseInt(req.params.id)} from Host ${req.connection.remoteAddress}`)
+    console.debug(`Updating with config ${JSON.stringify(req.body)}`)
+    
+    let updatedConfig: PipelineConfig
     const configId = parseInt(req.params.id)
 
     // Check for configId Validity
@@ -172,25 +173,34 @@ export class TransformationEndpoint {
       return
     }
 
-    const transformationConfig = req.body as TransformationConfig
+    const transformationConfig = req.body as PipelineConfig
+    console.log('TRANSFORMATION_CONFIG: ' +JSON.stringify(transformationConfig))
 
     // Check for validity of the request
-    if (!(this.isValidTransformationConfig(transformationConfig))) {
+    if (!(this.isValidPipelineConfig(transformationConfig))) {
       console.warn('Malformed transformation request.')
       res.status(400).send('Malformed transformation request.')
     }
 
-    // Delete Config
+    
     try {
-      updateResult = await this.storageHandler.updateTransformationConfig(configId, transformationConfig)
+      // Update Config
+      updatedConfig = await this.storageHandler.updatePipelineConfig(configId, transformationConfig)
+      
+      // Config to be updated does not exist
+      if (!updatedConfig) {
+        res.status(400).send(`Cannot update config: Config with id "${configId}" does not exist`)
+      }
+
     } catch (error) {
-      console.error(`Could not create transformationConfig Object: ${error}`)
       res.status(500).send('Internal Server Error: Config could not updated')
+      res.end()
       return
     }
 
     // return saved post back
-    res.status(200).send(`${updateResult.affected} Configs were updated with ID ${configId}`);
+    res.status(200).send(JSON.stringify(updatedConfig));
+    res.end()
   }
 
   /**
@@ -233,7 +243,7 @@ export class TransformationEndpoint {
     console.log(`Received request for configs with pipeline id ${pipelineID} and query params "${JSON.stringify(queryParams)}" from Host ${req.connection.remoteAddress}`)
 
     // Get configs from database
-    const configs = await this.storageHandler.getTransformationConfig(pipelineID, queryParams)
+    const configs = await this.storageHandler.getPipelineConfig(pipelineID, queryParams)
       .catch(error  => console.log(`Could not get config with pipeline id ${pipelineID}: ${error}`))
 
     if (configs === null) {
@@ -306,7 +316,6 @@ export class TransformationEndpoint {
     }
 
     this.amqpHandler.notifyNotificationService(transformationEvent)
-
     res.end()
   }
 
@@ -318,9 +327,36 @@ export class TransformationEndpoint {
     }
   }
 
+  /**
+   * Evaluates the validity of the Pipelineconfig, provided by argument conf.
+   * This is done by  checking if the mandatory fields of the config are set.
+   * 
+   * @param conf PipelineConfig to be validated
+   */
+  private isValidPipelineConfig(conf: PipelineConfig): boolean {
+    return !!conf && !!conf.datasourceId && !!conf.metadata && !!conf.transformation &&
+      this.isValidMetaDataConfig(conf.metadata) &&
+      this.isValidTransformationConfig(conf.transformation)
+  }
 
-  private isValidTransformationConfig(conf: TransformationConfig): boolean {
-    return true
-    //TODO: return !!conf && !!conf.datasourceId && !!conf.func && !!conf.pipelineId
+  /**
+   * Evaluates the validity of the PipelineMetaDataConfig, provided by argument conf.
+   * This is done by  checking if the mandatory fields of the config are set.
+   *
+   * @param conf PipelineMetaDataConfig to be validated
+   */
+  private isValidMetaDataConfig(conf: PipelineMetaData): boolean {
+      return !!conf && !!conf.author && !!conf.description && !!conf.displayName && !!conf.license
+  }
+
+
+  /**
+   * Evaluates the validity of the TransformationConfig, provided by argument config.
+   * This is done by  checking if the mandatory fields of the config are set.
+   *
+   * @param conf TransformationConfig to be validated
+   */
+  private isValidTransformationConfig(conf: TransformationConfig): boolean{
+      return !!conf && !!conf.func 
   }
 }

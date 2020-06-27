@@ -102,12 +102,7 @@ services:
       - "traefik.http.routers.to-scheduler.rule=PathPrefix(`/api/scheduler`)"
       - "traefik.http.routers.to-scheduler.middlewares=scheduler-stripprefix@docker"
       - "traefik.http.middlewares.scheduler-stripprefix.stripprefix.prefixes=/api/scheduler"
-
-  scheduler-db:
-    image: postgres
-    environment:
-      - POSTGRES_USER=adapterservice
-      - POSTGRES_PASSWORD=admin
+      
   # ----------------- STORAGE SERVICE (/storage) --------------------
   storage: # Wraps postgres database with API
     image: ${DOCKER_REGISTRY}/storage
