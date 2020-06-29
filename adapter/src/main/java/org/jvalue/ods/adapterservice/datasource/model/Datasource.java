@@ -8,6 +8,8 @@ import org.jvalue.ods.adapterservice.adapter.model.ProtocolConfig;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 @Entity
@@ -87,6 +89,20 @@ public class Datasource {
         new FormatConfig(this.getFormat().getType(), this.getFormat().getParameters())
       );
   }
+
+    public Datasource fillQueryParameters(DatasourceParameters datasourceParameters) {
+      if (datasourceParameters == null || datasourceParameters.parameters == null) {
+        return this;
+      }
+      String url = (String) this.getProtocol().getParameters().get("location");
+      for (Map.Entry<String, String> parameter : datasourceParameters.parameters.entrySet()) {
+        url = url.replace("{" + parameter.getKey() + "}", parameter.getValue());
+      }
+      HashMap<String, Object> parameters = new HashMap<>(this.getProtocol().getParameters());
+      parameters.put("location", url);
+      DatasourceProtocol protocolConfig = new DatasourceProtocol(this.getProtocol().getType(), parameters);
+      return new Datasource(protocolConfig, this.format, this.metadata, this.trigger);
+    }
 
     @Override
     public boolean equals(Object o) {
