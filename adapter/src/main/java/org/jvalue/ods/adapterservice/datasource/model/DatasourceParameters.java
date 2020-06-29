@@ -1,16 +1,18 @@
 package org.jvalue.ods.adapterservice.datasource.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import org.springframework.lang.Nullable;
 
 import java.util.Map;
 import java.util.Objects;
 
 public class DatasourceParameters {
 
-  public final Map<String, Object> parameters;
+  @Nullable
+  public final Map<String, String> parameters;
 
   @JsonCreator
-  public DatasourceParameters(Map<String, Object> parameters) {
+  public DatasourceParameters(Map<String, String> parameters) {
     this.parameters = parameters;
   }
 
