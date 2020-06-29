@@ -18,6 +18,7 @@ jest.mock('./clients/notification-client')
 jest.mock('./clients/core-client')
 
 const mockGetPipelinesForDatasource = CoreClient.getCachedPipelinesByDatasourceId as jest.Mock
+const mockGetPipelineConfigs = TransformationClient.getPipelineConfigs as jest.Mock
 const mockExecuteAdapter = AdapterClient.executeAdapter as jest.Mock
 const mockExecuteTransformation = TransformationClient.executeTransformation as jest.Mock
 const mockExecuteStorage = StorageClient.executeStorage as jest.Mock
@@ -46,6 +47,7 @@ test('Should execute pipeline once', async () => {
   const pipelineConfig = generatePipelineConfig(transformation, [])
 
   mockGetPipelinesForDatasource.mockReturnValue([pipelineConfig]) // register pipeline to follow datasource import
+  mockGetPipelineConfigs.mockReturnValue([pipelineConfig])
 
   mockExecuteAdapter.mockResolvedValue(adapterResponse)
   mockExecuteTransformation.mockResolvedValue({ data: transformedData })
@@ -54,7 +56,8 @@ test('Should execute pipeline once', async () => {
 
   expect(mockExecuteAdapter).toHaveBeenCalledWith(datasourceConfig)
 
-  expect(mockGetPipelinesForDatasource).toHaveBeenCalledWith(datasourceConfig.id)
+  //expect(mockGetPipelinesForDatasource).toHaveBeenCalledWith(datasourceConfig.id)
+  expect(mockGetPipelineConfigs).toHaveBeenCalledWith(datasourceConfig.id)
 
   expect(mockExecuteTransformation).toHaveBeenCalledWith(transformation)
   expect(mockExecuteTransformation).toHaveBeenCalledTimes(1)
@@ -68,6 +71,7 @@ test('Should execute pipeline periodic', async () => {
   const pipelineConfig = generatePipelineConfig(transformation, [])
 
   mockGetPipelinesForDatasource.mockReturnValue([pipelineConfig]) // register pipeline to follow datasource import
+  mockGetPipelineConfigs.mockReturnValue([pipelineConfig])
 
   mockExecuteAdapter.mockResolvedValue(adapterResponse)
   mockExecuteTransformation.mockResolvedValue({ data: transformedData })
@@ -116,6 +120,8 @@ test('Should trigger notifications', async () => {
   const pipelineConfig = generatePipelineConfig(transformation, [notification1, notification2, notification3])
 
   mockGetPipelinesForDatasource.mockReturnValue([pipelineConfig]) // register pipeline to follow datasource import
+  mockGetPipelineConfigs.mockReturnValue([pipelineConfig])
+  
   mockExecuteAdapter.mockResolvedValue(adapterResponse)
 
   await PipelineExecution.execute(datasourceConfig)

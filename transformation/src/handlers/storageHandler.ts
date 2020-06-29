@@ -77,7 +77,7 @@ export class StorageHandler implements PipelineRepository{
             password: process.env.PGPASSWORD,
             database: process.env.PGUSER,
             synchronize: true,
-            logging: true,
+            //logging: true,
             entities: [
                 PipelineConfig,
                 PipelineMetaData,
@@ -176,12 +176,11 @@ export class StorageHandler implements PipelineRepository{
     * @returns Promise, containing a list of all transormation configs
     */
     public async getAllConfigs(queryParams: object): Promise<PipelineConfig[] | null> {
-        console.debug(`Getting all Pipeline Configs from Database`)
+        console.debug(`Getting all Pipeline Configs from Database with query parameters ${JSON.stringify(queryParams)}`)
 
         if (!this.checkClassInvariant()) {
             Promise.reject()
         }
-
 
         // Get Configs from Database
         let pipelineConfigs: PipelineConfig[]

@@ -16,10 +16,18 @@ export async function execute (datasourceConfig: DatasourceConfig, maxRetries = 
     await retryableExecution(executeAdapter, datasourceConfig, `Executing adapter for datasource ${datasourceConfig.id}`)
 
   // pipeline
-  const followingPipelines = await CoreClient.getCachedPipelinesByDatasourceId(datasourceConfig.id)
+  const followingPipelinesOld = await CoreClient.getCachedPipelinesByDatasourceId(datasourceConfig.id)
+  const followingPipelines = await TransformationClient.getPipelineConfigs(datasourceConfig.id) // temporary
+  console.log(`Received ${followingPipelines.length} pipeline configs from transformation service.`)
+
   for (let pipelineConfig of followingPipelines) {
+    const transformationRequest = {
+      pipelineConfig: pipelineConfig,
+      dataLocation: adapterResponse.location
+    }
+
     const transformedData =
-        await retryableExecution(executeTransformation, { pipelineConfig: pipelineConfig, dataLocation: adapterResponse.location }, `Executing transformatins for pipeline ${pipelineConfig.id}`)
+        await retryableExecution(executeTransformation, transformationRequest, `Executing transformatins for pipeline ${pipelineConfig.id}`)
 
     const dataLocation =
         await retryableExecution(executeStorage, { pipelineConfig: pipelineConfig, data: transformedData }, `Storing data for pipeline ${pipelineConfig.id}`)
@@ -56,7 +64,8 @@ async function executeAdapter (dataousrceConfig: DatasourceConfig): Promise<Adap
   return importedData
 }
 
-async function executeTransformation (args: { pipelineConfig: PipelineConfig, dataLocation: string }): Promise<object> {
+async function executeTransformation(args: { pipelineConfig: PipelineConfig, dataLocation: string }): Promise<object> {
+  console.log('Sending tranformation job to transformationservice')
   const pipelineConfig = args.pipelineConfig
   const dataLocation = args.dataLocation
 

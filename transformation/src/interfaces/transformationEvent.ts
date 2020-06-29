@@ -1,4 +1,4 @@
-import JobResult from './jobResult/jobResult';
+import JobResult from './job/jobResult';
 
 /**
  * Event send by the Transformation service upon transformation finish

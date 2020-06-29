@@ -9,7 +9,7 @@
  * @field data             data to be transformed
  */
 export default interface JobEvent {
-    pipelineId: number      // pipeline ID of the request
+    datasourceId: number     // referenced data source id
 
     data: object;           // data to be transformed
 

@@ -6,12 +6,11 @@ import Keycloak from 'keycloak-connect'
 import TransformationService from './interfaces/transformationService'
 import TransformationRequest from './interfaces/transformationRequest'
 import { Server } from 'http'
-import JobResult from './interfaces/jobResult/jobResult'
+import JobResult from './interfaces/job/jobResult'
 import axios from 'axios'
 import { StorageHandler } from './handlers/storageHandler';
 import { PipelineConfig } from './models/PipelineConfig';
 import { AmqpHandler } from './handlers/amqpHandler';
-import { TransformationEvent } from './interfaces/transformationEvent';
 import { DeleteResult } from 'typeorm';
 import { PipelineMetaData } from './models/PipelineMetaData';
 import TransformationConfig from './models/TransformationConfig';
@@ -96,6 +95,8 @@ export class TransformationEndpoint {
     if (!(this.isValidPipelineConfig(transformationConfig))) {
       console.warn('Malformed transformation request.')
       res.status(400).send('Malformed transformation request.')
+      res.end()
+      return
     }
 
     // Persist Config
@@ -274,10 +275,7 @@ export class TransformationEndpoint {
    * @param res HTTP-response, containing the transformation resulsts
    */
   postJob = async (req: Request, res: Response): Promise<void> => {
-    console.log(`Received request: ${req.body}`)
-
-    // TODO: Implement PipelineID + PipeLine name in Request
-    const pipelineID = req.body.pipelineID
+    console.log(`Received Job request: ${req.body}`)
 
     const transformation: TransformationRequest = req.body
     if (!transformation.data && !transformation.dataLocation) {
@@ -294,6 +292,7 @@ export class TransformationEndpoint {
       console.log('Fetching successful.')
       transformation.data = importResponse.data
     }
+
     if (!transformation.func) {
       transformation.func = 'return data;' // Undefined transformation functions are interpreted as identity function
     }

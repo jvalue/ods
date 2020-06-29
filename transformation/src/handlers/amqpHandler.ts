@@ -1,13 +1,13 @@
 import { TransformationEvent } from '../interfaces/transformationEvent';
 import {   ConsumeMessage } from "amqplib";
 import { Channel, connect, Connection} from "amqplib/callback_api"
-import JobEvent from '../interfaces/jobResult/jobEvent';
+import JobEvent from '../interfaces/job/jobEvent';
 import TransformationService from '../interfaces/transformationService';
 import JSTransformationService from '../jsTransformationService';
 import { StorageHandler } from './storageHandler';
 import { PipelineConfig } from '../models/PipelineConfig';
 import axios from 'axios';
-import JobResult from '@/interfaces/jobResult/jobResult';
+import JobResult from '@/interfaces/job/jobResult';
 
 
 /**
@@ -34,6 +34,8 @@ export class AmqpHandler {
     jobQueueName = process.env.AMQP_JOB_QUEUE!                // Queue name of the Job Queue
     notifQueueName = process.env.AMQP_NOTIFICATION_QUEUE!     // Queue name of the Job Queue
 
+    adapterEndpoint = process.env.ADAPTER_SERVICE_URL   // Adapter service url to get data from
+
     transformationService: JSTransformationService
     storageHandler: StorageHandler
     /**
@@ -59,12 +61,11 @@ export class AmqpHandler {
         const rabit_amqp_url = 'amqp://' + rabbit_usr + ':' + rabbit_password + '@' + rabbit_url;
 
         var established: boolean = false        // indicator if the connection has been established
-        const handler: AmqpHandler = this       // To call the functions in the callback
         let errMsg: string = ''             // Error Message to be shown after final retry
 
         for (let i = 1; i <= retries; i++) {
             await this.backOff(backoff)
-            await connect(rabit_amqp_url, async function (error0: any, connection: Connection) {
+            await connect(rabit_amqp_url, async (error0: any, connection: Connection) => {
                 if (error0) {
                     errMsg = `Error connecting to RabbitMQ: ${error0}.Retrying in ${backoff} seconds`
                     console.info(`Connecting to Amqp handler (${i}/${retries})`);
@@ -74,8 +75,8 @@ export class AmqpHandler {
                 established = true
 
                 // create the channels
-                await handler.initNotificationChannel(connection)
-                await handler.initJobChannel(connection)
+                await this.initNotificationChannel(connection)
+                await this.initJobChannel(connection)
             })
 
             if (established) {
@@ -109,6 +110,7 @@ export class AmqpHandler {
      * @returns     initialized channel
      */
     private initNotificationChannel(connection: Connection): void {
+        console.log(`Connecting to channel "${this.notifQueueName}" to publish events for notificaiton service`)
         connection.createChannel((err: any, channel: Channel) => {
             if (err) {
                 console.log('Filed to create Channel: ' + err)
@@ -121,10 +123,8 @@ export class AmqpHandler {
                 durable: false,
             });
 
-            // // Consume from Channel
-            // console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", AmqpHandler.notifQueueName);
-            //AmqpHandler.channel.consume(AmqpHandler.queueName, AmqpHandler.consumeEvents, { noAck: true });
         })
+        console.log(`Successfully connected to channel "${this.notifQueueName}".`)
     }
 
 
@@ -137,6 +137,7 @@ export class AmqpHandler {
      * @param connection Connection to the AMQP Service (rabbitmq)
      */
     private initJobChannel(connection: Connection): void {
+        console.log(`Connecting to channel "${this.jobQueueName}" to publish events for notificaiton service`)
         connection.createChannel((err: any, channel: Channel) => {
             if (err) {
                 console.log('Filed to create Channel: ' + err)
@@ -152,9 +153,13 @@ export class AmqpHandler {
             });
 
             // Consume from Channel
-            console.log(" [*] Waiting for Jobs in %s.", this.jobQueueName);
-            this.jobChannel.consume(this.jobQueueName, this.consumeJobEvent, { noAck: true });
+            this.jobChannel.consume(
+                this.jobQueueName,
+                (msg: ConsumeMessage | null) => this.consumeJobEvent(msg),
+                { noAck: true }
+            );
         })
+        console.log(`Connecting to channel "${this.jobQueueName}" to publish events for notificaiton service`)
     }
 
 
@@ -162,10 +167,11 @@ export class AmqpHandler {
      * Handles notification Event. This event contains the
      * condtion to be evaluated.
      *
-     * @param msg
+     * @param msg Message received from the queue
      * @returns true on successful handling of the event, else: false
      */
     private consumeJobEvent(msg: ConsumeMessage | null): boolean {
+        console.log(`Received Message from data queue: ${msg?.content.toString()}`)
         if (!msg) {
             console.warn('Could not receive Notification Event: Message is null')
             return false
@@ -175,7 +181,7 @@ export class AmqpHandler {
         const messageContent = msg.content.toString()
         const jobEvent = JSON.parse(messageContent) as JobEvent
 
-        if (!this.isValidJobEvent(jobEvent)) {
+        if (!AmqpHandler.isValidJobEvent(jobEvent)) {
             console.error('Message received is not an Transformation Event')
             return false
         }
@@ -194,11 +200,11 @@ export class AmqpHandler {
      */
     public notifyNotificationService(transfromationEvent: TransformationEvent) {
         console.log('Notifying notification service that Transformation is done.')
-        console.debug(`Sending Transformation Event to queue: \n\
-        Data Location:  ${transfromationEvent.dataLocation} \n\
-        Pipeline ID:    ${transfromationEvent.pipelineId}\n\
-        Pipeline Name:  ${transfromationEvent.pipelineName}\n\
-        Result:         ${transfromationEvent.jobResult}`)
+        // console.debug(`Sending Transformation Event to queue: \n\
+        // Data Location:  ${transfromationEvent.dataLocation} \n\
+        // Pipeline ID:    ${transfromationEvent.pipelineId}\n\
+        // Pipeline Name:  ${transfromationEvent.pipelineName}\n\
+        // Result:         ${transfromationEvent.jobResult}`)
 
         if (!this.isValidTransformationEvent(transfromationEvent)) {
             console.error('Message to be sent is not an Transformation Event')
@@ -211,7 +217,8 @@ export class AmqpHandler {
         });
 
         this.notificationChannel!.sendToQueue(this.notifQueueName, Buffer.from(JSON.stringify(transfromationEvent)));
-        console.log(" [x] Sent %s", transfromationEvent);
+        //console.log(" [x] Sent %s", transfromationEvent);
+        console.log('Successfully sent transformation Event to notification queue.')
 
         this.notificationChannel!.assertQueue(this.notifQueueName, {
             durable: false,
@@ -226,15 +233,15 @@ export class AmqpHandler {
      *
      * @param jobEvent Job to be executed (Transformation)
      */
-    private async handleJob(jobEvent: JobEvent) {
-        if (!this.isValidJobEvent(jobEvent)) {
+    public async handleJob(jobEvent: JobEvent) {
+        if (!AmqpHandler.isValidJobEvent(jobEvent)) {
             console.error("Cannot handle Job: given JobEvent is not valid")
             return
         }
-        const pipelineConfigs = await this.storageHandler.getAllConfigs({ datasourceId: jobEvent.dataLocation })
+        const pipelineConfigs = await this.storageHandler.getAllConfigs({ datasourceId: jobEvent.datasourceId })
 
-        if (!pipelineConfigs) {
-            console.log(`No PipelineConfigs found for adapter data with datasource id ${jobEvent.dataLocation}`)
+        if (!pipelineConfigs || pipelineConfigs.length == 0) {
+            console.log(`No PipelineConfigs found for adapter data with datasource id ${jobEvent.datasourceId}`)
             return
         }
 
@@ -244,11 +251,20 @@ export class AmqpHandler {
         // Fat Event
         if (jobEvent.data) {
             adapterData = jobEvent.data
-            // Thin Event
-        } else if (jobEvent.dataLocation) {
-            adapterData = await axios.get(jobEvent.dataLocation)
 
-            // No Data set (--> Ignore Transformation)
+        // Thin Event
+        } else if (jobEvent.dataLocation) {
+            console.log(`Getting data from Adapter service: ${jobEvent.dataLocation}`)
+
+            const http = axios.create({
+                baseURL: this.adapterEndpoint,
+                headers: { 'Content-Type': 'application/json' }
+            })
+
+            const response = await http.get(jobEvent.dataLocation)
+            adapterData = response.data
+            
+        // No Data set (--> Ignore Transformation)
         } else {
             console.error(`Data cannot be transformed: No Data on queue and no reference to data given by event.`)
             return
@@ -309,8 +325,9 @@ export class AmqpHandler {
      * @param event JobEvent, that has to be checked
      * @returns     true, if param event is a TransformationEvent, else false
      */
-    private isValidJobEvent(event: JobEvent): boolean {
-        return !!event.data && !! !!event.dataLocation && !! !!event.pipelineId
+    public static isValidJobEvent(event: JobEvent): boolean {
+        // return !!event && !!event.data && !!event.dataLocation // Uncomment for FAT EVENT
+        return !!event && !!event.dataLocation
     }
 
 }

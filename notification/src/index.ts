@@ -15,7 +15,7 @@ if (authEnabled === false) {
 const sandboxExecutor = new VM2SandboxExecutor()
 const notificationService = new JSNotificationService(sandboxExecutor)
 const storageHandler = new StorageHandler()
-const amqpHandler = new AmqpHandler()
+const amqpHandler = new AmqpHandler(storageHandler, sandboxExecutor)
 
 const notificationEndpoint = new NotificationEndpoint(notificationService, storageHandler, amqpHandler, port, authEnabled)
 

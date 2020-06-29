@@ -160,6 +160,8 @@ services:
     environment:
       AUTH_ENABLED: 'false' #TODO: turn to true as soon as it works!
 
+      ADAPTER_SERVICE_URL: http://adapter:8080
+
       # Postgres connection vars
       PGUSER: 'transformation_usr'
       PGHOST: 'transformation-db'

@@ -1,5 +1,5 @@
 import { StorageHandler } from "./storageHandler"
-import { Channel, connect, Connection } from "amqplib/callback_api"
+import { connect, Connection, ConsumeMessage } from "amqplib/callback_api"
 import { TransformationEvent } from '../interfaces/transformationResults/transformationEvent';
 import JSNotificationService from '../jsNotificationService';
 import VM2SandboxExecutor from "../vm2SandboxExecutor";
@@ -18,6 +18,19 @@ import { CONFIG_TYPE } from "../models/notificationConfig";
 export class AmqpHandler{
     notifQueueName = process.env.AMQP_NOTIFICATION_QUEUE!     // Queue name of the Job Queue
 
+    storageHandler : StorageHandler
+    executor : VM2SandboxExecutor
+
+    /**
+     * Default constructor.
+     * 
+     * @param storageHandler    StorageHandler to get corresponding notification configs
+     * @param executor          Sandboxexecutor to run condition evaluations
+     */
+    constructor(storageHandler : StorageHandler, executor : VM2SandboxExecutor) {
+        this.storageHandler = storageHandler
+        this.executor = executor
+    }
     /**
      * Connects to Amqp Service and initializes a channel
      * 
@@ -72,6 +85,7 @@ export class AmqpHandler{
     }
 
     private initChannel(connection: any) {
+        console.log(`Initializing Transformation Channel "${this.notifQueueName}"`)
         const handler: AmqpHandler = this   // for ability to access methods and members in callback
 
         connection.createChannel(function (error1: Error, channel: any) {
@@ -84,19 +98,26 @@ export class AmqpHandler{
             });
 
             // Consume from Channel
-            console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", handler.notifQueueName);
-            channel.consume(handler.notifQueueName, handler.handleEvent,{noAck: true}
+            channel.consume(
+                handler.notifQueueName,
+                (msg: ConsumeMessage | null) => handler.handleEvent(msg),
+                { noAck: true }
             );
         });
+        console.info(`Successfully initialized Transformation Channel "${this.notifQueueName}"`)
     }
 
     /**
      * Handles an event message
-     * @param msg
+     * @param msg Message receveived from the message queue
      * 
      * @returns true on success, else false
      */
-    private handleEvent(msg: any): boolean {
+    private handleEvent(msg: ConsumeMessage | null): boolean {
+        if (!msg) {
+            console.warn('Could not receive Notification Event: Message is not set')
+            return false
+        }
 
         const eventMessage = JSON.parse(msg.content.toString())
         const transformationEvent = eventMessage as TransformationEvent
@@ -111,11 +132,9 @@ export class AmqpHandler{
             return false
         }
 
-        const handler = new StorageHandler()
 
-        const configs = handler.getConfigsForPipeline(transformationEvent.pipelineId)
-        const executor = new VM2SandboxExecutor()
-        const notificationService = new JSNotificationService(executor)
+        const configs = this.storageHandler.getConfigsForPipeline(transformationEvent.pipelineId)
+        const notificationService = new JSNotificationService(this.executor)
 
 
         configs.then(config => {

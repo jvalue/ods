@@ -1,4 +1,4 @@
-import JobResult from './jobResult/jobResult'
+import JobResult from './job/jobResult'
 
 export default interface TransformationService {
   getVersion(): string;
