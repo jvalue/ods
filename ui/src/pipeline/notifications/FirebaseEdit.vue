@@ -26,7 +26,6 @@
       :rules="[ required ]"
       @keyup="formChanged"
     />
-
   </v-form>
 </template>
 
@@ -37,30 +36,29 @@ import { Emit, PropSync } from 'vue-property-decorator'
 import { FirebaseNotification } from './notificationConfig'
 
 @Component({ })
-export default class FirebaseEdit extends Vue{
+export default class FirebaseEdit extends Vue {
   private validForm = false
 
   @PropSync('value')
   private firebaseNotification!: FirebaseNotification
 
   @Emit('value')
-  emitValue () {
+  emitValue (): FirebaseNotification {
     return this.firebaseNotification
   }
 
   @Emit('validityChanged')
-  emitValid () {
+  emitValid (): boolean {
     return this.validForm
   }
 
-  formChanged () {
+  formChanged (): void {
     this.emitValue()
     this.emitValid()
   }
 
-  private required (val: string) {
+  private required (val: string): true | string {
     return !!val || 'required.'
   }
-
 }
 </script>

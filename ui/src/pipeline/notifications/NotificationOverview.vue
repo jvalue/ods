@@ -12,8 +12,9 @@
         >
           <v-icon
             dark
-            right>
-              mdi mdi-arrow-left
+            right
+          >
+            mdi mdi-arrow-left
           </v-icon>
         </v-btn>
         <v-btn
@@ -136,35 +137,35 @@ export default class PipelineNotifications extends Vue {
   private isEdit = false
   private pipelineId = -1
 
-  private created () {
+  private created (): void {
     console.log('Notification Overview created!')
     this.pipelineId = this.$route.params.pipelineId as unknown as number
     this.loadPipelineByIdAction(this.pipelineId)
   }
 
-  private onCreateNotification () {
+  private onCreateNotification (): void {
     this.isEdit = false
     this.notificationEdit.openDialog()
   }
 
-  private onEditNotification (notification: NotificationConfig) {
+  private onEditNotification (notification: NotificationConfig): void {
     this.isEdit = true
     this.notificationEdit.openDialog(notification)
   }
 
-  private onDeleteNotification (notification: NotificationConfig) {
+  private onDeleteNotification (notification: NotificationConfig): void {
     this.removeNotificationAction(notification)
   }
 
-  private onLoadNotifications () {
+  private onLoadNotifications (): void {
     this.loadPipelineByIdAction(this.pipelineId)
   }
 
-  private onNavigateBack() {
+  private onNavigateBack (): void {
     this.$router.push({ name: 'pipeline-overview' })
   }
 
-  onSave (editedNotification: NotificationConfig) {
+  private onSave (editedNotification: NotificationConfig): void {
     if (this.isEdit) { // edit
       this.updateNotificationAction(editedNotification)
     } else { // create
