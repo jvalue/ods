@@ -1,5 +1,6 @@
 package org.jvalue.ods.adapterservice.datasource.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
@@ -59,6 +60,18 @@ public class DatasourceTest {
     assertEquals("JSON", result.get("format").get("type").textValue());
     assertEquals("http://www.the-inder.net",
         result.get("protocol").get("parameters").get("location").textValue());
+  }
+
+  @Test
+  public void testFillQueryParameters() throws ParseException {
+    Datasource datasource = generateDatasource("HTTP", "JSON", "http://www.the-inder.net/{userId}/{dataId}");
+    Map<String, String> parameters = new HashMap<>();
+    parameters.put("userId", "1");
+    parameters.put("dataId", "123");
+    parameters.put("notAKey", "notAValue");
+    DatasourceParameters datasourceParameters = new DatasourceParameters(parameters);
+    Datasource newDatasource = datasource.fillQueryParameters(datasourceParameters);
+    assertEquals("http://www.the-inder.net/1/123", newDatasource.getProtocol().getParameters().get("location"));
   }
 
   private Datasource generateDatasource(String protocol, String format, String location) throws ParseException {
