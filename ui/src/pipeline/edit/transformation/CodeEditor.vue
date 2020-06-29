@@ -10,30 +10,25 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import Vue from 'vue'
 import Component from 'vue-class-component'
-import { Watch } from 'vue-property-decorator'
+import { Watch, Prop } from 'vue-property-decorator'
 
 import MonacoEditor, { MonacoEditorConstructor } from 'vue-monaco'
 import * as monaco from 'monaco-editor'
 
-import { TransformationConfig } from '../../pipeline'
 import { JobResult, JobError } from './transformation'
-
-const Props = Vue.extend({
-  props: {
-    value: String,
-    data: [Object, Array],
-    result: Object as PropType<JobResult | null>
-  }
-})
 
 @Component({
   components: {
     MonacoEditor
   }
 })
-export default class CodeEditor extends Props {
+export default class CodeEditor extends Vue {
+  @Prop() readonly value!: string
+  @Prop() readonly data!: object
+  @Prop() readonly result!: JobResult | null
+
   public $refs!: Vue['$refs'] & {
     editor: MonacoEditorConstructor;
   }

@@ -76,7 +76,6 @@
               @validityChanged="validStep3 = $event"
             />
           </v-stepper-content>
-
         </v-stepper>
       </v-card-text>
       <v-card-actions>
@@ -128,9 +127,9 @@ const pipelineNamespace = { namespace: 'pipeline' }
   components: { StepperButtonGroup, PipelineMetadataConfig, PipelineTransformationConfig }
 })
 export default class PipelineEdit extends Vue {
-  @Action('loadPipelineById', pipelineNamespace) private loadPipelineByIdAction!: ( id: number ) => void
-  @Action('createPipeline', pipelineNamespace) private createPipelineAction!: ( p: Pipeline ) => void
-  @Action('updatePipeline', pipelineNamespace) private updatePipelineAction!: ( p: Pipeline ) => void
+  @Action('loadPipelineById', pipelineNamespace) private loadPipelineByIdAction!: (id: number) => void
+  @Action('createPipeline', pipelineNamespace) private createPipelineAction!: (p: Pipeline) => void
+  @Action('updatePipeline', pipelineNamespace) private updatePipelineAction!: (p: Pipeline) => void
   @State('selectedPipeline', pipelineNamespace) private selectedPipeline!: Pipeline
 
   private isEditMode = false
@@ -154,7 +153,7 @@ export default class PipelineEdit extends Vue {
     notifications: []
   }
 
-  created () {
+  created (): void {
     this.isEditMode = this.$route.meta.isEditMode
 
     if (this.isEditMode) {
@@ -164,18 +163,18 @@ export default class PipelineEdit extends Vue {
   }
 
   @Watch('selectedPipeline')
-  onSelectedPipelineChange (value: Pipeline, oldValue: Pipeline) {
-    if (value != oldValue) {
+  onSelectedPipelineChange (value: Pipeline, oldValue: Pipeline): void {
+    if (value !== oldValue) {
       this.dialogPipeline = value
     }
   }
 
-  private onSave () {
+  private onSave (): void {
     this.createPipelineAction(this.dialogPipeline)
     this.routeToOverview()
   }
 
-  private onUpdate () {
+  private onUpdate (): void {
     this.updatePipelineAction(this.dialogPipeline)
     this.routeToOverview()
   }
@@ -188,11 +187,11 @@ export default class PipelineEdit extends Vue {
     this.$router.push({ name: 'pipeline-overview' })
   }
 
-  private required (val: string) {
+  private required (val: string): true | string {
     return !!val || 'required.'
   }
 
-  private evaluateAllForms () {
+  private evaluateAllForms (): boolean {
     return this.validStep1 &&
         this.validStep2 &&
         this.validStep3

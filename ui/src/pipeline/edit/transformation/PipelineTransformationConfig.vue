@@ -34,10 +34,10 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import Vue from 'vue'
 import Component from 'vue-class-component'
 
-import { Emit, PropSync, Watch } from 'vue-property-decorator'
+import { Emit, Watch, Prop } from 'vue-property-decorator'
 import { Action, State } from 'vuex-class'
 
 import { TransformationConfig } from '../../pipeline'
@@ -49,12 +49,6 @@ import ResultView from './ResultView.vue'
 
 const namespace = { namespace: 'transformation' }
 
-const Props = Vue.extend({
-  props: {
-    value: Object as PropType<TransformationConfig>
-  }
-})
-
 @Component({
   components: {
     MonacoDataProvider,
@@ -62,7 +56,9 @@ const Props = Vue.extend({
     ResultView
   }
 })
-export default class PipelineTransformationConfig extends Props {
+export default class PipelineTransformationConfig extends Vue {
+  @Prop() value!: TransformationConfig
+
   private data: object = { a: 1, b: 2, c: 3 }
   private timeoutHandle: number | null = null
   private validForm = false // function needs to be tested in order to be valid
@@ -106,8 +102,8 @@ export default class PipelineTransformationConfig extends Props {
   /** emit new validity after a new transformation result comes in */
   @Watch('transformationResult')
   onTransformationResultChanged (): void {
-    this.validForm = this.transformationResult?.error === undefined;
-    this.emitValid();
+    this.validForm = this.transformationResult?.error === undefined
+    this.emitValid()
   }
 
   /** wait 1.5s until automatically starting a test run, remove old schedule if necessary */
@@ -123,12 +119,12 @@ export default class PipelineTransformationConfig extends Props {
   }
 
   @Emit('input')
-  emitValue () {
+  emitValue (): TransformationConfig {
     return this.value
   }
 
   @Emit('validityChanged')
-  emitValid () {
+  emitValid (): boolean {
     return this.validForm
   }
 }
