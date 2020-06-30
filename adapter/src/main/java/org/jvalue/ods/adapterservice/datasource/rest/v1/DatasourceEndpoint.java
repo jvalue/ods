@@ -1,7 +1,5 @@
 package org.jvalue.ods.adapterservice.datasource.rest.v1;
 
-import org.jvalue.ods.adapterservice.adapter.Adapter;
-import org.jvalue.ods.adapterservice.adapter.AdapterFactory;
 import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
 import org.jvalue.ods.adapterservice.datasource.DatasourceManager;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
@@ -22,12 +20,10 @@ import java.net.URI;
 public class DatasourceEndpoint {
 
     private final DatasourceManager datasourceManager;
-    private final AdapterFactory adapterFactory;
 
     @Autowired
-    public DatasourceEndpoint(DatasourceManager datasourceManager, AdapterFactory adapterFactory) {
+    public DatasourceEndpoint(DatasourceManager datasourceManager) {
         this.datasourceManager = datasourceManager;
-      this.adapterFactory = adapterFactory;
     }
 
     @GetMapping
