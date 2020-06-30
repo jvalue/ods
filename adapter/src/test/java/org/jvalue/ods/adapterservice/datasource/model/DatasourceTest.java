@@ -76,6 +76,23 @@ public class DatasourceTest {
     assertEquals("http://www.the-inder.net/1/123", datasourceProtocol.getParameters().get("location"));
   }
 
+  @Test
+  public void testToAdapterConfig() throws ParseException {
+    Datasource datasource = generateDatasource("HTTP", "JSON", "http://www.the-inder.net/{userId}/{dataId}");
+    Map<String, String> parameters = new HashMap<>();
+    parameters.put("userId", "1");
+    parameters.put("dataId", "123");
+    parameters.put("notAKey", "notAValue");
+    RuntimeParameters runtimeParameters = new RuntimeParameters(parameters);
+    AdapterConfig adapterConfig = datasource.toAdapterConfig(runtimeParameters);
+    System.out.println(adapterConfig);
+    AdapterConfig testAgainst = new AdapterConfig(
+      new ProtocolConfig("HTTP", Map.of("location", "http://www.the-inder.net/1/123")),
+      new FormatConfig("JSON", Map.of())
+      );
+    assertEquals(testAgainst, adapterConfig);
+  }
+
   private Datasource generateDatasource(String protocol, String format, String location) throws ParseException {
     DatasourceProtocol protocolConfig = new DatasourceProtocol(protocol, Map.of("location", location));
     DatasourceFormat formatConfig = new DatasourceFormat(format, Map.of());
