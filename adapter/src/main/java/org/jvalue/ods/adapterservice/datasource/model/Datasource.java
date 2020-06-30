@@ -83,16 +83,17 @@ public class Datasource {
         '}';
     }
 
-    public AdapterConfig toAdapterConfig() {
+    public AdapterConfig toAdapterConfig(RuntimeParameters runtimeParameters) {
+      DatasourceProtocol datasourceProtocol = fillQueryParameters(runtimeParameters);
       return new AdapterConfig(
-        new ProtocolConfig(this.getProtocol().getType(), this.getProtocol().getParameters()),
+        new ProtocolConfig(this.getProtocol().getType(), datasourceProtocol.getParameters()),
         new FormatConfig(this.getFormat().getType(), this.getFormat().getParameters())
       );
   }
 
-    public Datasource fillQueryParameters(RuntimeParameters runtimeParameters) {
-      if (runtimeParameters == null || runtimeParameters.parameters == null) {
-        return this;
+    protected DatasourceProtocol fillQueryParameters(RuntimeParameters runtimeParameters) {
+      if (runtimeParameters == null || runtimeParameters.parameters == null || !this.getProtocol().getType().equals("HTTP")) {
+        return this.getProtocol();
       }
       String url = (String) this.getProtocol().getParameters().get("location");
       for (Map.Entry<String, String> parameter : runtimeParameters.parameters.entrySet()) {
@@ -100,8 +101,7 @@ public class Datasource {
       }
       HashMap<String, Object> parameters = new HashMap<>(this.getProtocol().getParameters());
       parameters.put("location", url);
-      DatasourceProtocol protocolConfig = new DatasourceProtocol(this.getProtocol().getType(), parameters);
-      return new Datasource(protocolConfig, this.format, this.metadata, this.trigger);
+      return new DatasourceProtocol(this.getProtocol().getType(), parameters);
     }
 
     @Override
