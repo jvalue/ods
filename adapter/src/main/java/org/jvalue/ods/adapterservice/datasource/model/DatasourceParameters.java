@@ -17,6 +17,13 @@ public class DatasourceParameters {
   }
 
   @Override
+  public String toString() {
+    return "DatasourceParameters{" +
+      "parameters=" + parameters +
+      '}';
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof DatasourceParameters)) return false;
