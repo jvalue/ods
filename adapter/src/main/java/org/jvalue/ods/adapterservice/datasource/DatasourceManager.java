@@ -7,7 +7,7 @@ import org.jvalue.ods.adapterservice.datasource.event.DatasourceEvent;
 import org.jvalue.ods.adapterservice.datasource.event.EventType;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
 import org.jvalue.ods.adapterservice.datasource.model.DatasourceMetadata;
-import org.jvalue.ods.adapterservice.datasource.model.DatasourceParameters;
+import org.jvalue.ods.adapterservice.datasource.model.RuntimeParameters;
 import org.jvalue.ods.adapterservice.datasource.repository.DatasourceRepository;
 import org.jvalue.ods.adapterservice.datasource.repository.DatasourceEventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,15 +81,15 @@ public class DatasourceManager {
     );
   }
 
- public Datasource getParametrizedDatasource(Long id, DatasourceParameters datasourceParameters) {
+ public Datasource getParametrizedDatasource(Long id, RuntimeParameters runtimeParameters) {
    Datasource datasource = getDatasource(id)
      .orElseThrow(() -> new IllegalArgumentException("No datasource found with id " + id));
-   datasource.fillQueryParameters(datasourceParameters);
+   datasource.fillQueryParameters(runtimeParameters);
    return datasource;
  }
 
- public DataBlob.MetaData trigger(Long id, DatasourceParameters datasourceParameters) {
-    Datasource datasource = getParametrizedDatasource(id, datasourceParameters);
+ public DataBlob.MetaData trigger(Long id, RuntimeParameters runtimeParameters) {
+    Datasource datasource = getParametrizedDatasource(id, runtimeParameters);
    try {
      Adapter adapter = adapterFactory.getAdapter(datasource.toAdapterConfig());
      return adapter.executeJob(datasource.toAdapterConfig());

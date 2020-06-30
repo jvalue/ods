@@ -6,13 +6,13 @@ import org.springframework.lang.Nullable;
 import java.util.Map;
 import java.util.Objects;
 
-public class DatasourceParameters {
+public class RuntimeParameters {
 
   @Nullable
   public final Map<String, String> parameters;
 
   @JsonCreator
-  public DatasourceParameters(Map<String, String> parameters) {
+  public RuntimeParameters(Map<String, String> parameters) {
     this.parameters = parameters;
   }
 
@@ -26,8 +26,8 @@ public class DatasourceParameters {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof DatasourceParameters)) return false;
-    DatasourceParameters that = (DatasourceParameters) o;
+    if (!(o instanceof RuntimeParameters)) return false;
+    RuntimeParameters that = (RuntimeParameters) o;
     return Objects.equals(parameters, that.parameters);
   }
 

@@ -90,12 +90,12 @@ public class Datasource {
       );
   }
 
-    public Datasource fillQueryParameters(DatasourceParameters datasourceParameters) {
-      if (datasourceParameters == null || datasourceParameters.parameters == null) {
+    public Datasource fillQueryParameters(RuntimeParameters runtimeParameters) {
+      if (runtimeParameters == null || runtimeParameters.parameters == null) {
         return this;
       }
       String url = (String) this.getProtocol().getParameters().get("location");
-      for (Map.Entry<String, String> parameter : datasourceParameters.parameters.entrySet()) {
+      for (Map.Entry<String, String> parameter : runtimeParameters.parameters.entrySet()) {
         url = url.replace("{" + parameter.getKey() + "}", parameter.getValue());
       }
       HashMap<String, Object> parameters = new HashMap<>(this.getProtocol().getParameters());
