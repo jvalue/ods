@@ -3,6 +3,9 @@ package org.jvalue.ods.adapterservice.datasource.model;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
+import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
+import org.jvalue.ods.adapterservice.adapter.model.FormatConfig;
+import org.jvalue.ods.adapterservice.adapter.model.ProtocolConfig;
 import org.springframework.format.datetime.DateFormatter;
 
 import java.io.File;
@@ -69,8 +72,8 @@ public class DatasourceTest {
     parameters.put("dataId", "123");
     parameters.put("notAKey", "notAValue");
     RuntimeParameters runtimeParameters = new RuntimeParameters(parameters);
-    Datasource newDatasource = datasource.fillQueryParameters(runtimeParameters);
-    assertEquals("http://www.the-inder.net/1/123", newDatasource.getProtocol().getParameters().get("location"));
+    DatasourceProtocol datasourceProtocol = datasource.fillQueryParameters(runtimeParameters);
+    assertEquals("http://www.the-inder.net/1/123", datasourceProtocol.getParameters().get("location"));
   }
 
   private Datasource generateDatasource(String protocol, String format, String location) throws ParseException {

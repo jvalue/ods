@@ -2,6 +2,7 @@ package org.jvalue.ods.adapterservice.datasource;
 
 import org.jvalue.ods.adapterservice.adapter.Adapter;
 import org.jvalue.ods.adapterservice.adapter.AdapterFactory;
+import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
 import org.jvalue.ods.adapterservice.datasource.event.DatasourceEvent;
 import org.jvalue.ods.adapterservice.datasource.event.EventType;
@@ -81,18 +82,17 @@ public class DatasourceManager {
     );
   }
 
- public Datasource getParametrizedDatasource(Long id, RuntimeParameters runtimeParameters) {
+ private AdapterConfig getParametrizedDatasource(Long id, RuntimeParameters runtimeParameters) {
    Datasource datasource = getDatasource(id)
      .orElseThrow(() -> new IllegalArgumentException("No datasource found with id " + id));
-   datasource.fillQueryParameters(runtimeParameters);
-   return datasource;
+   return datasource.toAdapterConfig(runtimeParameters);
  }
 
  public DataBlob.MetaData trigger(Long id, RuntimeParameters runtimeParameters) {
-    Datasource datasource = getParametrizedDatasource(id, runtimeParameters);
+    AdapterConfig adapterConfig = getParametrizedDatasource(id, runtimeParameters);
    try {
-     Adapter adapter = adapterFactory.getAdapter(datasource.toAdapterConfig());
-     return adapter.executeJob(datasource.toAdapterConfig());
+     Adapter adapter = adapterFactory.getAdapter(adapterConfig);
+     return adapter.executeJob(adapterConfig);
    } catch (Exception e) {
      if(e instanceof IllegalArgumentException) {
        System.err.println("Data Import request failed. Malformed Request: " + e.getMessage());
