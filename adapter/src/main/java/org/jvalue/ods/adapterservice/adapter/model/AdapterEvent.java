@@ -5,7 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.Serializable;
 
 /**
- * This Event will be sent to the transformation service after data import execution.
+ * This Event will be published to the "import queue"  after data import execution.
+ * 
  */
 public class AdapterEvent implements Serializable {
     private String data;

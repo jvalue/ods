@@ -152,6 +152,37 @@ services:
     environment:
       API_URL: http://localhost:9400/
 
+  # Storage with message queue for CUD-Operations
+  storage-mq:
+    image: ${DOCKER_REGISTRY}/storage-mq
+    build:
+      context: ./storage-mq/
+    depends_on:
+      - storage-db
+    environment:
+      AUTH_ENABLED: 'false' #TODO: turn to true as soon as it works!
+
+      # Postgres connection vars
+      DATABASE_HOST: storage-db
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ods
+      DATABASE_USER: ods_admin
+      DATABASE_PW: ods_pw
+
+      # Rabbitmq connection details
+      AMQP_SERVICE_HOST: 'rabbitmq'
+      AMQP_SERVICE_USER: 'rabbit_adm'
+      AMQP_SERVICE_PWD: 'R4bb!7_4DM_p4SS'
+
+      # Queue Names
+      AMQP_ODSDATA_QUEUE: 'ODS_DATA_QUEUE'
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.to-storage-mq.rule=PathPrefix(`/api/storage-mq`)"
+      - "traefik.http.routers.to-storage-mq.middlewares=storage-mq-stripprefix@docker"
+      - "traefik.http.middlewares.storage-mq-stripprefix.stripprefix.prefixes=/api/storage-mq"
+      - "traefik.http.services.storage-mq.loadbalancer.server.port=8080"
   # ----------------- TRANSFORMATION SERVICE (/transformation) --------------------
   transformation:
     image: ${DOCKER_REGISTRY}/transformation
@@ -175,6 +206,7 @@ services:
 
       AMQP_JOB_QUEUE: 'data_import'
       AMQP_NOTIFICATION_QUEUE: 'NOTIF_QUEUE'
+      AMQP_ODSDATA_QUEUE: 'ODS_DATA_QUEUE'
 
     labels:
       - "traefik.enable=true"

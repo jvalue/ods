@@ -3,6 +3,6 @@
     "bearer-only": true,
     "auth-server-url": "http://localhost:8080/auth",
     "ssl-required": "external",
-    "resource": "notification-service",
+    "resource": "storage-mq-service",
     "confidential-port": 0
 }

@@ -1,55 +1,99 @@
 
-import { Connection, ConnectionOptions, createConnection, getConnection, Repository, UpdateResult, DeleteResult } from 'typeorm';
+import { Connection, ConnectionOptions, createConnection, getConnection, Repository, UpdateResult, DeleteResult, EntitySchema, getRepository } from 'typeorm';
 import { DataRepository } from '../interfaces/dataRepository';
 import ODSData from '../models/odsData';
+
 
 /**
  * This class handles Requests to the Nofification Database
  * in order to store and get Notification Configurations.
  */
 export class StorageHandler implements DataRepository {
-
-    private dataRepository!: Repository<ODSData>
-
     private dbConnection!: Connection | null
 
+    private repositoryMap: Map<any, Repository<ODSData> > = new Map()
 
     private connectionOptions: ConnectionOptions = {
-      type: "postgres",
-      host: process.env.PGHOST,
-      port: +process.env.PGPORT!,
-      username: process.env.PGUSER,
-      password: process.env.PGPASSWORD,
-      database: process.env.PGUSER,
-      synchronize: true,
-      // logging: true,
-      entities: [
-          ODSData
-      ]
+        type: "postgres",
+        host: process.env.DATABASE_HOST!,
+        port: +process.env.DATABASE_PORT!,
+        username: process.env.DATABASE_USER!,
+        password: process.env.DATABASE_PW!,
+        database: process.env.DATABASE_NAME!,
+        synchronize: true,
+        // logging: true,
+        entities: []
     }
 
 
     /**
+     * Gets the reposity for the table with table name provided by argument tableName
+     * A database connection for given Table (provided by table name) will be established.
+     * 
+     * This ensures that the tableschema has been created before handling operations.
+     * One repository/connection is held per database table in Map repositoryMap 
+     * and existing repositories will be reused.
+     * 
+     * The default connection pool by pg/typeorm will handle connections, so many connections
+     * will have no effect on performance.
+     * 
+     * @param tableName tableName to establish the connection for 
+     * @returns         connection for given database table
+     */
+    private async getRepository(tableName: string): Promise< Repository<ODSData> >{
+
+        const entityType = ODSData.createTableEntity(tableName)
+
+        if (!this.repositoryMap.has(entityType)) {
+            // Set connection options
+            const tableName = (entityType as any).tableName;
+
+            this.connectionOptions.entities?.push(entityType)   
+            this.connectionOptions.name?.replace(this.connectionOptions.name, tableName)   // workaround due to read only  
+            
+            // Create Connection
+            const connection = await this.initConnection(10, 3)
+                .catch(error => {
+                    console.error(`Connection could not be established.`)
+                    return Promise.reject()
+                })
+            
+            if (!connection) {
+                return Promise.reject()
+            }
+            
+            // Create Repository
+            const repository = connection.getRepository(entityType)
+
+            if (!repository) {
+                console.error()
+                return Promise.reject()
+            }
+
+            this.repositoryMap.set(entityType, repository);
+        }
+        return this.repositoryMap.get(entityType) as Repository<ODSData>;
+    }
+
+    /**
      * Initializes the components of the storage handler.
-     * This is done by establishing a connection to the notication database 
-     * and initiliazing a repository for the notification config
+     * This is done by testing a connection to the storage database 
      * 
      * @param retries:  Number of retries to connect to the database
      * @param backoff:  Time in seconds to backoff before next connection retry
      */
     public async init(retries: number, backoff: number): Promise<void> {
         console.debug('Initializing storageHandler.')
-        const handler: StorageHandler = this
 
+        // Test the connection
         this.dbConnection = await this.initConnection(retries, backoff)
 
         if (!this.dbConnection) {
             console.error('Could not initialize storageHandler.')
             return Promise.reject()
         }
-
-        this.dataRepository = this.dbConnection.getRepository(ODSData);
-       
+    
+        this.dbConnection.close()
 
         if (!this.checkClassInvariant()) {
             return Promise.reject()
@@ -116,13 +160,9 @@ export class StorageHandler implements DataRepository {
         }
         let data: ODSData| undefined
 
-        if (!this.dataRepository) {
-            console.error('Could not get slack configs  for pipeline id "${pipelineId}": Slack repository not initialized.')
-            return Promise.reject()
-        }
-
         try {
-            data = await this.dataRepository.findOne(id)
+            const repository = await this.getRepository(`${id}`)
+            data = await repository.findOne(id)
         } catch (error) {
             Promise.reject(error)
         }
@@ -145,9 +185,10 @@ export class StorageHandler implements DataRepository {
         }
 
         // create object from Body of the Request (=PipelineConfig)
-        data = this.dataRepository.create(data)
+        const repository = await this.getRepository(`${data.pipelineId}`)
+        data = repository.create(data)
         // persist the Config
-        const saveResult = this.dataRepository.save(data);
+        const saveResult = await repository.save(data);
 
         console.debug("Data sucessfully persisted.")
         return saveResult
@@ -159,14 +200,15 @@ export class StorageHandler implements DataRepository {
      * @param id id for the config to be deleted
      * @returns result of the deletion execution
      */
-    public deleteData(id: number): Promise<DeleteResult> {
+    public async deleteData(id: number): Promise<DeleteResult> {
         console.debug(`Deleting data with id ${id}.`)
 
         if (!this.checkClassInvariant()) {
             Promise.reject()
         }
-
-        const deletePromise = this.dataRepository.delete(id)
+        const repository = await this.getRepository(`${id}`)
+    
+        const deletePromise = await repository.delete(id)
         console.debug(`Successfully deleted config with id ${id}`)
         return deletePromise
     }
@@ -183,15 +225,17 @@ export class StorageHandler implements DataRepository {
     public async updateData(id: number, data: ODSData): Promise<ODSData> {
         console.debug(`Updating config with id ${id}.`)
         let updatedData!: Promise<ODSData>
-        data.id = id // Set id of the pipelineConfig
+        data.pipelineId = `${id}` // Set id of the pipelineConfig
 
         if (!this.checkClassInvariant()) {
             return Promise.reject()
         }
 
+        const repository = await this.getRepository(`${id}`)
+
         // Check if config to update exsits (--> else: reject Promise)
         try {
-            const configToUpdate = await this.dataRepository.findOne(id)
+            const configToUpdate = await repository.findOne(id)
 
             if (!configToUpdate) {
                 return updatedData
@@ -205,7 +249,8 @@ export class StorageHandler implements DataRepository {
 
         // Update Config (only possible to save in order to update all relations)
         try {
-            updatedData = this.dataRepository.save(data)
+           
+            updatedData = repository.save(data)
         } catch (error) {
             console.error(`Error saving config: ${error}`)
             return Promise.reject('Internal Server Error: Could not update config.')
@@ -214,6 +259,32 @@ export class StorageHandler implements DataRepository {
         console.debug(`Successfully updated config with id ${id}`)
         return updatedData
     }
+
+    /**
+     * This funcion will create a pieline data table in the database
+     * by executing the database function createStructureForDataSource.
+     * 
+     * The result of this function is the creation of a table named after the pipeline id
+     * 
+     * @param pipelineId Pipeline Id for wich a table will be created in the database
+     * @returns true on successfull table creation, else: false
+     */
+    private async createPipelineDataTable(pipelineId: number): Promise<boolean> {
+        if (!this.checkClassInvariant()) {
+            return false
+        }
+
+        await getConnection().createEntityManager().
+            query(`SELECT storage.createStructureForDataSource(${pipelineId});`).
+            catch((err: Error) => {
+                console.error(`Could not create pipeline table: ${err}`)
+                return false
+            })
+        
+        return true
+    }
+
+
     /**
      * This function ensures that all objects are initialized 
      * for further interaction with the config database 
@@ -224,14 +295,8 @@ export class StorageHandler implements DataRepository {
         let result: boolean = true
         let msg: string[] = []
 
-        
         if (!this.dbConnection) {
             msg.push('Config Database connection')
-            result = false
-        }
-
-        if (!this.dataRepository) {
-            msg.push('Data repository')
             result = false
         }
 

@@ -3,7 +3,6 @@ import { PipelineConfig } from '../models/PipelineConfig';
 import { PipelineRepository } from '../interfaces/pipelineRepository';
 import { PipelineMetaData } from '../models/PipelineMetaData';
 import TransformationConfig from '../models/TransformationConfig';
-import { config } from 'process';
 
 
 

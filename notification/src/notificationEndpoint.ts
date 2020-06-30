@@ -58,8 +58,8 @@ export class NotificationEndpoint {
     // Request Configs
     this.app.get('/config/:configType/:id/', this.determineAuth(), this.handleConfigRequest)
 
-    this.storageHandler.init(5, 5)
-    amqpHandler.connect(5,5)
+    this.storageHandler.init(30, 5)
+    amqpHandler.connect(30,5)
   }
 
 

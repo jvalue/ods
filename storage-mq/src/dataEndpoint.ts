@@ -2,19 +2,21 @@ import bodyParser from 'body-parser'
 import express, { Application, Request, Response } from 'express'
 import session, { MemoryStore } from 'express-session'
 import cors from 'cors'
-import Keycloak from 'keycloak-connect'
+
 import "reflect-metadata"
 
 import { Server } from 'http'
 
 import { DataRepository } from './interfaces/dataRepository'
 import { AmqpHandler } from './handlers/amqpHandler';
+import Keycloak from 'keycloak-connect'
+
 
 export class DataEndPoint {
   port: number
   app: Application
   store?: MemoryStore
-  keycloak?: Keycloak
+  keycloak?: any  // type KeyCloak not working
 
   
   version = '0.0.1'
@@ -45,10 +47,10 @@ export class DataEndPoint {
     this.app.get('/version', this.getVersion)
 
     // Request Configs
-    this.app.get('/config/:configType/:id/', this.determineAuth(), this.handleDataRequest)
+    this.app.get('/:id', this.determineAuth(), this.handleDataRequest)
 
-    this.storageHandler.init(5, 5)
-    amqpHandler.connect(5,5)
+    this.storageHandler.init(30, 5)
+    amqpHandler.connect(30,5)
   }
 
 
@@ -87,19 +89,19 @@ export class DataEndPoint {
    */
   handleDataRequest = async (req: Request, res: Response): Promise<void> => {
 
-    const dataId = parseInt(req.params.id)
+    const pipelineId = parseInt(req.params.id)
 
-    if (!dataId || dataId < 1) {
+    if (!pipelineId || pipelineId < 1) {
       console.warn(`Cannot request data: No valid id provided`)
       res.status(400).send(`Cannot request data: No valid id provided`)
       res.end()
       return
     }
 
-    const configs = await this.storageHandler.getData(dataId)
+    const configs = await this.storageHandler.getData(pipelineId)
 
     if (!configs) {
-      console.error(`Could not get slack config with id "${dataId}" from database`)
+      console.error(`Could not get slack config with id "${pipelineId}" from database`)
       res.status(500).send('Internal Server error.')
       res.end()
       return

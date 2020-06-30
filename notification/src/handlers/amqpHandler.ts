@@ -18,6 +18,7 @@ import { CONFIG_TYPE } from "../models/notificationConfig";
 export class AmqpHandler{
     notifQueueName = process.env.AMQP_NOTIFICATION_QUEUE!     // Queue name of the Job Queue
 
+    notificationService: JSNotificationService
     storageHandler : StorageHandler
     executor : VM2SandboxExecutor
 
@@ -27,7 +28,8 @@ export class AmqpHandler{
      * @param storageHandler    StorageHandler to get corresponding notification configs
      * @param executor          Sandboxexecutor to run condition evaluations
      */
-    constructor(storageHandler : StorageHandler, executor : VM2SandboxExecutor) {
+    constructor(notificationHandler: JSNotificationService, storageHandler: StorageHandler, executor: VM2SandboxExecutor) {
+        this.notificationService = notificationHandler
         this.storageHandler = storageHandler
         this.executor = executor
     }
@@ -134,7 +136,6 @@ export class AmqpHandler{
 
 
         const configs = this.storageHandler.getConfigsForPipeline(transformationEvent.pipelineId)
-        const notificationService = new JSNotificationService(this.executor)
 
 
         configs.then(config => {
@@ -145,16 +146,16 @@ export class AmqpHandler{
             }
 
             for (const webhookConfig of config.webhook) {
-                notificationService.handleNotification(webhookConfig, transformationEvent, CONFIG_TYPE.WEBHOOK)
+                this.notificationService.handleNotification(webhookConfig, transformationEvent, CONFIG_TYPE.WEBHOOK)
             }
 
             for (const slackConfig of config.slack) {
-                notificationService.handleNotification(slackConfig, transformationEvent, CONFIG_TYPE.SLACK)
+                this.notificationService.handleNotification(slackConfig, transformationEvent, CONFIG_TYPE.SLACK)
             }
 
 
             for (const firebaseConfig of config.firebase) {
-                notificationService.handleNotification(firebaseConfig, transformationEvent, CONFIG_TYPE.FCM)
+                this.notificationService.handleNotification(firebaseConfig, transformationEvent, CONFIG_TYPE.FCM)
             }
             
         })

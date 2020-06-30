@@ -324,7 +324,7 @@ export class TransformationEndpoint {
    */
   private isValidPipelineConfig(conf: PipelineConfig): boolean {
     return !!conf && !!conf.datasourceId && !!conf.metadata && !!conf.transformation &&
-      this.isValidMetaDataConfig(conf.metadata) &&
+      //this.isValidMetaDataConfig(conf.metadata) &&
       this.isValidTransformationConfig(conf.transformation)
   }
 

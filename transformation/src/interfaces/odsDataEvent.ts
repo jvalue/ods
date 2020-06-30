@@ -1,12 +1,12 @@
-import ODSData from '../models/odsData';
+import ODSData from "./odsData";
 
-export enum EVENT_TYPE {
+
+export enum EVENT_TYPE{
     CREATE = 'CREATE',
     REQUEST = 'REQUEST',
     UPDATE = 'UPDATE',
     DELETE = 'DELETE',
 }
-
 
 export interface DataEvent{
     id: number;

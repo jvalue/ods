@@ -6,14 +6,14 @@ import { DataEvent, EVENT_TYPE } from '../interfaces/dataEvent';
  * This class handles the communication with the AMQP service (rabbitmq)
  * It interacts with this channels:
  *
- *      * Notification Channel:
+ *      * ODS Data Channel:
  *       ----------------------
- *       A channel to notify the notification service that a transformation is done.
- *       (see TransformationEvent for details of the Event).
+ *       A channel where CREATE, UPDATE, DELETE Operations of transformed data will be placed for 
+ *       corresponding execution on the database
  *      
  */
 export class AmqpHandler{
-    notifQueueName = process.env.AMQP_NOTIFICATION_QUEUE!     // Queue name of the Job Queue
+    odsDataQueueName = process.env.AMQP_ODSDATA_QUEUE!     // Queue name of "ODS DATA" queue
 
     storageHandler : StorageHandler
 
@@ -79,7 +79,7 @@ export class AmqpHandler{
     }
 
     private initChannel(connection: any) {
-        console.log(`Initializing Transformation Channel "${this.notifQueueName}"`)
+        console.log(`Initializing Transformation Channel "${this.odsDataQueueName}"`)
         const handler: AmqpHandler = this   // for ability to access methods and members in callback
 
         connection.createChannel(function (error1: Error, channel: any) {
@@ -87,18 +87,18 @@ export class AmqpHandler{
                 throw error1;
             }
 
-            channel.assertQueue(handler.notifQueueName, {
+            channel.assertQueue(handler.odsDataQueueName, {
                 durable: false,
             });
 
             // Consume from Channel
             channel.consume(
-                handler.notifQueueName,
+                handler.odsDataQueueName,
                 (msg: ConsumeMessage | null) => handler.handleEvent(msg),
                 { noAck: true }
             );
         });
-        console.info(`Successfully initialized Transformation Channel "${this.notifQueueName}"`)
+        console.info(`Successfully initialized Transformation Channel "${this.odsDataQueueName}"`)
     }
 
     /**

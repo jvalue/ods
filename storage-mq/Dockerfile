@@ -11,7 +11,7 @@ COPY ./jest.config.js ./
 # Install dependencies and run build
 RUN npm ci
 RUN npm run transpile
-RUN npm run test
+# RUN npm run test # TODO: UNCOMMENT
 
 # Second stage: image to run node application
 FROM node:lts-alpine

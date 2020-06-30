@@ -7,8 +7,8 @@ export interface TransformationEvent {
     pipelineId: number      // ID of the pipeline
     pipelineName: string    // Name of the pipeline
 
-    dataLocation: string    // url (location) of the pipeline
+    dataLocation: string    // url (location) of the data
 
-    jobResult: JobResult         // result of the transformation
+    jobResult: JobResult    // result of the transformation
 
 }

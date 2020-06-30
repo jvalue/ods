@@ -2,12 +2,14 @@ import { TransformationEvent } from '../interfaces/transformationEvent';
 import {   ConsumeMessage } from "amqplib";
 import { Channel, connect, Connection} from "amqplib/callback_api"
 import JobEvent from '../interfaces/job/jobEvent';
-import TransformationService from '../interfaces/transformationService';
 import JSTransformationService from '../jsTransformationService';
 import { StorageHandler } from './storageHandler';
 import { PipelineConfig } from '../models/PipelineConfig';
 import axios from 'axios';
 import JobResult from '@/interfaces/job/jobResult';
+import ODSData from '../interfaces/odsData';
+import { EVENT_TYPE, DataEvent } from '../interfaces/odsDataEvent';
+
 
 
 /**
@@ -28,11 +30,13 @@ import JobResult from '@/interfaces/job/jobResult';
 export class AmqpHandler {
     notificationChannel!: Channel             // notification channel
     jobChannel!: Channel                      // Channel containing transformation Jobs
+    odsDataChannel!: Channel                  // Channel to publish transformed data to the storage service (CQRS)
 
     connection!: Connection                   // Connection to the AMQP Service (Rabbit MQ)
 
     jobQueueName = process.env.AMQP_JOB_QUEUE!                // Queue name of the Job Queue
-    notifQueueName = process.env.AMQP_NOTIFICATION_QUEUE!     // Queue name of the Job Queue
+    notifQueueName = process.env.AMQP_NOTIFICATION_QUEUE!     // Queue name of the Notification Queue
+    odsDataQueueName = process.env.AMQP_ODSDATA_QUEUE!        // Queu name of the Ods Data Queue (Queue where transformed data is puslished)
 
     adapterEndpoint = process.env.ADAPTER_SERVICE_URL   // Adapter service url to get data from
 
@@ -77,6 +81,7 @@ export class AmqpHandler {
                 // create the channels
                 await this.initNotificationChannel(connection)
                 await this.initJobChannel(connection)
+                await this.initODSDataChannel(connection)
             })
 
             if (established) {
@@ -127,6 +132,33 @@ export class AmqpHandler {
         console.log(`Successfully connected to channel "${this.notifQueueName}".`)
     }
 
+
+    /**
+   * Initializes a Queue/Channel for publishing transformed data for the storage service.
+   *
+   * Events (see odsDataEvents.ts).
+   *
+   * @param connection Connection to the AMQP Service (rabbitmq)
+   */
+    private initODSDataChannel(connection: Connection): void {
+        console.log(`Connecting to channel "${this.odsDataChannel}" to publish events for storage service`)
+        connection.createChannel((err: any, channel: Channel) => {
+            if (err) {
+                console.log('Filed to create Channel: ' + err)
+                return
+            }
+
+            // Assign this channel
+            this.odsDataChannel = channel
+
+            // Make sure the Channel exists
+            this.jobChannel.assertQueue(this.jobQueueName, {
+                durable: false,
+            });
+
+        })
+        console.log(`Connecting to channel "${this.jobQueueName}" to publish events for notificaiton service`)
+    }
 
     /**
      * Initializes a Queue/Channel for the consumption of Job-Queries.
@@ -247,7 +279,9 @@ export class AmqpHandler {
 
         let adapterData: Object     // Data to transform (origin: adapter service)
 
-
+        /*========================================================================
+         * Get Adapter Data
+         *=======================================================================*/
         // Fat Event
         if (jobEvent.data) {
             adapterData = jobEvent.data
@@ -269,7 +303,11 @@ export class AmqpHandler {
             console.error(`Data cannot be transformed: No Data on queue and no reference to data given by event.`)
             return
         }
-
+        /*==========================================================================
+         * Get Pipeline Data for corresponding datasource id,
+         * execute the transformation and publish results to the odsData queue
+         * (queue for data storage)
+         *========================================================================*/
         // Iterate over all Pipeline Configs, referring to the datasourceId
         for (let config of pipelineConfigs) {
 
@@ -280,8 +318,45 @@ export class AmqpHandler {
             // Send Event to Notificaiton Service
             let transformationEvent = this.generateTransformationEvent(config, jobResult)
             this.notifyNotificationService(transformationEvent)
+
+            this.publishTransformedData(config,jobResult)
             console.log('Fetching successful.')
         }
+    }
+
+
+    private publishTransformedData(pipelineConfig: PipelineConfig, jobResult: JobResult): boolean {
+        console.log(`Publishing transformed data to the storage queue.`)
+
+        // No transformed data --> nothing todo
+        if (!jobResult.data) {
+            return false
+        }
+
+        const odsDataEvent = this.generateODSDataEvent(EVENT_TYPE.CREATE, pipelineConfig, jobResult)
+        this.odsDataChannel.sendToQueue(this.odsDataQueueName, Buffer.from(JSON.stringify(odsDataEvent)));
+
+        console.log(`Sucessfully published transformed data to the storage queue.`)
+        return true
+    }
+
+    private generateODSDataEvent(type: EVENT_TYPE, pipelineConfig:PipelineConfig, jobResult: JobResult): DataEvent {
+        
+        const odsData = {
+            data: jobResult.data,
+            timestamp: new Date(jobResult.stats.startTimestamp),
+            origin: ''+pipelineConfig.datasourceId, // TODO: Get Data Origin from adapter
+            license: pipelineConfig.metadata.license, // TODO: Check if this is the right license
+            pipelineId: ''+pipelineConfig.id
+        }
+
+        const event = {
+            id: -1,
+            type: type,
+            data: odsData as ODSData
+        } 
+
+        return event as DataEvent
     }
 
     /**
@@ -302,9 +377,6 @@ export class AmqpHandler {
 
         return transformationEvent
     }
-
-
-
 
     /**
      * Checks if this event is a valid Transformation event,

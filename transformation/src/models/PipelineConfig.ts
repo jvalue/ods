@@ -6,9 +6,6 @@ import TransformationConfig from './TransformationConfig';
 export class PipelineConfig {
     @PrimaryGeneratedColumn()
     id!: number 
-    
-    // @Column({ nullable: true })
-    // func!: string
 
     @Column()
     datasourceId!: number;
