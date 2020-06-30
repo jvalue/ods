@@ -69,8 +69,8 @@ public class DatasourceTest {
     parameters.put("userId", "1");
     parameters.put("dataId", "123");
     parameters.put("notAKey", "notAValue");
-    DatasourceParameters datasourceParameters = new DatasourceParameters(parameters);
-    Datasource newDatasource = datasource.fillQueryParameters(datasourceParameters);
+    RuntimeParameters runtimeParameters = new RuntimeParameters(parameters);
+    Datasource newDatasource = datasource.fillQueryParameters(runtimeParameters);
     assertEquals("http://www.the-inder.net/1/123", newDatasource.getProtocol().getParameters().get("location"));
   }
 

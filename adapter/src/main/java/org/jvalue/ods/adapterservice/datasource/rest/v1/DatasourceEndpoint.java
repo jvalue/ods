@@ -3,7 +3,7 @@ package org.jvalue.ods.adapterservice.datasource.rest.v1;
 import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
 import org.jvalue.ods.adapterservice.datasource.DatasourceManager;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
-import org.jvalue.ods.adapterservice.datasource.model.DatasourceParameters;
+import org.jvalue.ods.adapterservice.datasource.model.RuntimeParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -77,9 +77,9 @@ public class DatasourceEndpoint {
 
     @PostMapping("/{id}/trigger")
     public DataBlob.MetaData getData(@PathVariable() Long id,
-                                     @Valid @RequestBody DatasourceParameters datasourceParameters) {
+                                     @Valid @RequestBody RuntimeParameters runtimeParameters) {
       try {
-        return datasourceManager.trigger(id, datasourceParameters);
+        return datasourceManager.trigger(id, runtimeParameters);
       } catch (IllegalArgumentException e) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No valid Datasource for id "+ id);
       }
