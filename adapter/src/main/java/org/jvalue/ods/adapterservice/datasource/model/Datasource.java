@@ -2,9 +2,14 @@ package org.jvalue.ods.adapterservice.datasource.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
+import org.jvalue.ods.adapterservice.adapter.model.FormatConfig;
+import org.jvalue.ods.adapterservice.adapter.model.ProtocolConfig;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 @Entity
@@ -76,6 +81,27 @@ public class Datasource {
         ", metadata=" + metadata +
         ", trigger=" + trigger +
         '}';
+    }
+
+    public AdapterConfig toAdapterConfig(RuntimeParameters runtimeParameters) {
+      DatasourceProtocol datasourceProtocol = fillQueryParameters(runtimeParameters);
+      return new AdapterConfig(
+        new ProtocolConfig(this.getProtocol().getType(), datasourceProtocol.getParameters()),
+        new FormatConfig(this.getFormat().getType(), this.getFormat().getParameters())
+      );
+  }
+
+    protected DatasourceProtocol fillQueryParameters(RuntimeParameters runtimeParameters) {
+      if (runtimeParameters == null || runtimeParameters.parameters == null || !this.getProtocol().getType().equals("HTTP")) {
+        return this.getProtocol();
+      }
+      String url = (String) this.getProtocol().getParameters().get("location");
+      for (Map.Entry<String, String> parameter : runtimeParameters.parameters.entrySet()) {
+        url = url.replace("{" + parameter.getKey() + "}", parameter.getValue());
+      }
+      HashMap<String, Object> parameters = new HashMap<>(this.getProtocol().getParameters());
+      parameters.put("location", url);
+      return new DatasourceProtocol(this.getProtocol().getType(), parameters);
     }
 
     @Override
