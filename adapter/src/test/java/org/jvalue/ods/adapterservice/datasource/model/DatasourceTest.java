@@ -3,6 +3,9 @@ package org.jvalue.ods.adapterservice.datasource.model;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
+import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
+import org.jvalue.ods.adapterservice.adapter.model.FormatConfig;
+import org.jvalue.ods.adapterservice.adapter.model.ProtocolConfig;
 import org.springframework.format.datetime.DateFormatter;
 
 import java.io.File;
@@ -59,6 +62,34 @@ public class DatasourceTest {
     assertEquals("JSON", result.get("format").get("type").textValue());
     assertEquals("http://www.the-inder.net",
         result.get("protocol").get("parameters").get("location").textValue());
+  }
+
+  @Test
+  public void testFillQueryParameters() throws ParseException {
+    Datasource datasource = generateDatasource("HTTP", "JSON", "http://www.the-inder.net/{userId}/{dataId}");
+    Map<String, String> parameters = new HashMap<>();
+    parameters.put("userId", "1");
+    parameters.put("dataId", "123");
+    parameters.put("notAKey", "notAValue");
+    RuntimeParameters runtimeParameters = new RuntimeParameters(parameters);
+    DatasourceProtocol datasourceProtocol = datasource.fillQueryParameters(runtimeParameters);
+    assertEquals("http://www.the-inder.net/1/123", datasourceProtocol.getParameters().get("location"));
+  }
+
+  @Test
+  public void testToAdapterConfig() throws ParseException {
+    Datasource datasource = generateDatasource("HTTP", "JSON", "http://www.the-inder.net/{userId}/{dataId}");
+    Map<String, String> parameters = new HashMap<>();
+    parameters.put("userId", "1");
+    parameters.put("dataId", "123");
+    parameters.put("notAKey", "notAValue");
+    RuntimeParameters runtimeParameters = new RuntimeParameters(parameters);
+    AdapterConfig adapterConfig = datasource.toAdapterConfig(runtimeParameters);
+    AdapterConfig testAgainst = new AdapterConfig(
+      new ProtocolConfig("HTTP", Map.of("location", "http://www.the-inder.net/1/123")),
+      new FormatConfig("JSON", Map.of())
+      );
+    assertEquals(testAgainst, adapterConfig);
   }
 
   private Datasource generateDatasource(String protocol, String format, String location) throws ParseException {
