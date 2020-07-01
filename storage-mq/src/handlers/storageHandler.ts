@@ -1,7 +1,8 @@
 
-import { Connection, ConnectionOptions, createConnection, getConnection, Repository, UpdateResult, DeleteResult, EntitySchema, getRepository } from 'typeorm';
+import { Connection, ConnectionOptions, createConnection, getConnection, Repository, DeleteResult, EntitySchema } from 'typeorm';
 import { DataRepository } from '../interfaces/dataRepository';
 import ODSData from '../models/odsData';
+import { createTableEntity } from '../models/odsData';
 
 
 /**
@@ -10,21 +11,41 @@ import ODSData from '../models/odsData';
  */
 export class StorageHandler implements DataRepository {
     private dbConnection!: Connection | null
+    private repositoryMap!: Map<string, Repository<ODSData>>
+    private connectionMap: Map<string, Connection> = new Map()
 
-    private repositoryMap: Map<any, Repository<ODSData> > = new Map()
+    /**
+     * Generates connction options for typeorm postgres database connection.
+     * 
+     * @param tableName unique Name of the database connection for reeusability
+     * @param entityTypes typeORM Entity Class to pass to the connectionOptions
+     *                    (a table will be created for this Class)
+     */
+    private generateConnectionOptions(tableName: string, entityTypes?:any[]) {
+        console.debug(`Generating connection options for connection with name "${tableName}"`)
+        let entities = []
 
-    private connectionOptions: ConnectionOptions = {
-        type: "postgres",
-        host: process.env.DATABASE_HOST!,
-        port: +process.env.DATABASE_PORT!,
-        username: process.env.DATABASE_USER!,
-        password: process.env.DATABASE_PW!,
-        database: process.env.DATABASE_NAME!,
-        synchronize: true,
-        // logging: true,
-        entities: []
+        const name = `table:${tableName}`;
+
+        if (entityTypes) {
+            entities = entityTypes
+        }
+
+        let connectionOptions: ConnectionOptions = {
+            type: "postgres",
+            host: process.env.DATABASE_HOST!,
+            port: +process.env.DATABASE_PORT!,
+            username: process.env.DATABASE_USER!,
+            password: process.env.DATABASE_PW!,
+            database: process.env.DATABASE_NAME!,
+            synchronize: true,
+            // logging: true,
+            entities: entities,
+            name: name
+        }
+        console.debug(`Succesfully generated connection options for connection with name "${connectionOptions.name}"`)
+        return connectionOptions
     }
-
 
     /**
      * Gets the reposity for the table with table name provided by argument tableName
@@ -41,24 +62,24 @@ export class StorageHandler implements DataRepository {
      * @returns         connection for given database table
      */
     private async getRepository(tableName: string): Promise< Repository<ODSData> >{
-
-        const entityType = ODSData.createTableEntity(tableName)
-
-        if (!this.repositoryMap.has(entityType)) {
+        console.debug(`Getting repository for table "${tableName}"`)
+        const entityType = createTableEntity(tableName)
+        const key = (entityType as any).tableName;
+        
+        if (!this.repositoryMap.has(key)) {
+            console.debug(`Generating new repository for table "${tableName}"`)
             // Set connection options
-            const tableName = (entityType as any).tableName;
-
-            this.connectionOptions.entities?.push(entityType)   
-            this.connectionOptions.name?.replace(this.connectionOptions.name, tableName)   // workaround due to read only  
+            let connectionOptions = this.generateConnectionOptions(tableName, [entityType])
             
             // Create Connection
-            const connection = await this.initConnection(10, 3)
+            const connection = await this.initConnection(connectionOptions, 10, 3)
                 .catch(error => {
                     console.error(`Connection could not be established.`)
                     return Promise.reject()
                 })
             
             if (!connection) {
+                console.error(`Repository could not be created: Connection could not established`)
                 return Promise.reject()
             }
             
@@ -70,9 +91,11 @@ export class StorageHandler implements DataRepository {
                 return Promise.reject()
             }
 
-            this.repositoryMap.set(entityType, repository);
+            this.repositoryMap.set(key, repository);
         }
-        return this.repositoryMap.get(entityType) as Repository<ODSData>;
+
+        console.debug(`Successfully got repository for table "${tableName}"`)
+        return this.repositoryMap.get(key) as Repository<ODSData>;
     }
 
     /**
@@ -86,14 +109,16 @@ export class StorageHandler implements DataRepository {
         console.debug('Initializing storageHandler.')
 
         // Test the connection
-        this.dbConnection = await this.initConnection(retries, backoff)
+        let conOptions = this.generateConnectionOptions('test')
+        this.dbConnection = await this.initConnection(conOptions,retries, backoff)
 
+        this.repositoryMap = new Map()
         if (!this.dbConnection) {
             console.error('Could not initialize storageHandler.')
             return Promise.reject()
         }
     
-        this.dbConnection.close()
+        // this.dbConnection.close()
 
         if (!this.checkClassInvariant()) {
             return Promise.reject()
@@ -102,27 +127,26 @@ export class StorageHandler implements DataRepository {
     }
 
     /**
-     * Initializes a Database Connection to the notification-db service (postgres)
-     * by using the Environment letiables:
-     *          - PGHOST:       IP/hostname of the storage service
-     *          - PGPORT:       PORT        of the storage service
-     *          - PGPASSWORD:   PASSWORD to connect to the stprage db
-     *          - PGUSER:       USER     to connect to the storage db
+     * Initializes a database connection to the storage-db service.
      *
+     * @param connectionOptions Connection options for the database connection (see typeOrm)
      * @param retries:  Number of retries to connect to the database
      * @param backoff:  Time in seconds to backoff before next connection retry
      *
      * @returns     a Promise, containing either a Connection on success or null on failure
      */
-    private async initConnection(retries: number, backoff: number): Promise<Connection|null> {
+    private async initConnection(connectionOptions: ConnectionOptions, retries: number, backoff: number): Promise<Connection | null> {
         let dbCon: null | Connection = null
         let connected: boolean = false
+    
 
         // try to establish connection
         for (let i = 1; i <= retries; i++) {
-            dbCon = await createConnection(this.connectionOptions).catch(() => { return null })
+            console.info(`Initiliazing database connection (${i}/${retries})`)
+
+            dbCon = await createConnection(connectionOptions).catch(() => { return null })
+
             if (!dbCon) {
-                console.info(`Initiliazing database connection (${i}/${retries})`)
                 await this.backOff(backoff);
             } else {
                 connected = true
@@ -130,11 +154,12 @@ export class StorageHandler implements DataRepository {
             }
         }
 
-        if (!connected) {
+        if (!connected || !dbCon) {
             return Promise.reject("Connection to databse could not be established.")
         }
 
-        console.info('Connected to notification config database sucessfully.')
+        dbCon.close()
+        console.info('Sucessfully established connection to storage-db database.')
         return Promise.resolve(dbCon)
     }
 
@@ -184,9 +209,15 @@ export class StorageHandler implements DataRepository {
             Promise.reject()
         }
 
+        const tableName = `${data.pipelineId}`
         // create object from Body of the Request (=PipelineConfig)
         const repository = await this.getRepository(`${data.pipelineId}`)
-        data = repository.create(data)
+
+        if (!repository) {
+            console.error(`Cannot save data: Repository is not set.`)
+        }
+
+        data = repository.create()
         // persist the Config
         const saveResult = await repository.save(data);
 
@@ -266,16 +297,16 @@ export class StorageHandler implements DataRepository {
      * 
      * The result of this function is the creation of a table named after the pipeline id
      * 
-     * @param pipelineId Pipeline Id for wich a table will be created in the database
+     * @param tableName Pipeline Id for wich a table will be created in the database
      * @returns true on successfull table creation, else: false
      */
-    private async createPipelineDataTable(pipelineId: number): Promise<boolean> {
+    private async createPipelineDataTable(tableName: string): Promise<boolean> {
         if (!this.checkClassInvariant()) {
             return false
         }
 
         await getConnection().createEntityManager().
-            query(`SELECT storage.createStructureForDataSource(${pipelineId});`).
+            query(`SELECT storage.createStructureForDataSource(${tableName});`).
             catch((err: Error) => {
                 console.error(`Could not create pipeline table: ${err}`)
                 return false

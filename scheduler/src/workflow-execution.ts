@@ -16,26 +16,26 @@ export async function execute (datasourceConfig: DatasourceConfig, maxRetries = 
     await retryableExecution(executeAdapter, datasourceConfig, `Executing adapter for datasource ${datasourceConfig.id}`)
 
   // pipeline
-  const followingPipelinesOld = await CoreClient.getCachedPipelinesByDatasourceId(datasourceConfig.id)
-  const followingPipelines = await TransformationClient.getPipelineConfigs(datasourceConfig.id) // temporary
-  console.log(`Received ${followingPipelines.length} pipeline configs from transformation service.`)
+  // const followingPipelinesOld = await CoreClient.getCachedPipelinesByDatasourceId(datasourceConfig.id)
+  // const followingPipelines = await TransformationClient.getPipelineConfigs(datasourceConfig.id) // temporary
+  // console.log(`Received ${followingPipelines.length} pipeline configs from transformation service.`)
 
-  for (let pipelineConfig of followingPipelines) {
-    const transformationRequest = {
-      pipelineConfig: pipelineConfig,
-      dataLocation: adapterResponse.location
-    }
+  // for (let pipelineConfig of followingPipelines) {
+  //   const transformationRequest = {
+  //     pipelineConfig: pipelineConfig,
+  //     dataLocation: adapterResponse.location
+  //   }
 
-    const transformedData =
-        await retryableExecution(executeTransformation, transformationRequest, `Executing transformatins for pipeline ${pipelineConfig.id}`)
+  //   const transformedData =
+  //       await retryableExecution(executeTransformation, transformationRequest, `Executing transformatins for pipeline ${pipelineConfig.id}`)
 
-    const dataLocation =
-        await retryableExecution(executeStorage, { pipelineConfig: pipelineConfig, data: transformedData }, `Storing data for pipeline ${pipelineConfig.id}`)
+  //   const dataLocation =
+  //       await retryableExecution(executeStorage, { pipelineConfig: pipelineConfig, data: transformedData }, `Storing data for pipeline ${pipelineConfig.id}`)
 
-    pipelineConfig.notifications.map(async notificationConfig => {
-      await retryableExecution(executeNotification, { notificationConfig: notificationConfig, pipelineConfig: pipelineConfig, data: transformedData, dataLocation: dataLocation }, `Notifying clients for pipeline ${pipelineConfig.id}`)
-    })
-  }
+  //   pipelineConfig.notifications.map(async notificationConfig => {
+  //     await retryableExecution(executeNotification, { notificationConfig: notificationConfig, pipelineConfig: pipelineConfig, data: transformedData, dataLocation: dataLocation }, `Notifying clients for pipeline ${pipelineConfig.id}`)
+  //   })
+  // }
 }
 
 async function retryableExecution<T1, T2>(func: (arg: T1) => Promise<T2>, args: T1, description: string, maxRetries = 3) : Promise<T2> {
