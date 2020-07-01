@@ -94,6 +94,7 @@ When started via docker-compose *base_url* is `http://localhost:9000/api/adapter
 | *base_url*/datasources/events/${id}  | GET  | -  | DatasourceEvent with {{id}}
 | *base_url*/datasources/events?datasourceId={datasourceId}&after={eventId}  | GET  | -  | Array of DatasourceEvents after {{eventId}}; {{datasourceId}} optional, limits to specific datasource |
 | *base_url*/datasources/events/latest  | GET  | -  | The latest DatasourceEvent |
+| *base_url*/datasources/${id}/trigger  | POST  | Parameters  | Adapter ImportResponse |
 
 When started via docker-compose *base_url* is `http://localhost:9000/api/adapter`
 
@@ -164,5 +165,12 @@ When started via docker-compose *base_url* is `http://localhost:9000/api/adapter
   "eventId": number,
   "eventType": "DATASOURCE UPDATE" | "DATASOURCE_CREATE" | "DATASOURCE_DELETE",
   "datasourceId": number
+}
+```
+
+### Parameters
+```
+{
+  "parameters": <<Map of type <String, String> for open parameter to replace with the value>>
 }
 ```

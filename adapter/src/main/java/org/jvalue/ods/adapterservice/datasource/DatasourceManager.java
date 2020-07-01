@@ -1,9 +1,14 @@
 package org.jvalue.ods.adapterservice.datasource;
 
+import org.jvalue.ods.adapterservice.adapter.Adapter;
+import org.jvalue.ods.adapterservice.adapter.AdapterFactory;
+import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
+import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
 import org.jvalue.ods.adapterservice.datasource.event.DatasourceEvent;
 import org.jvalue.ods.adapterservice.datasource.event.EventType;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
 import org.jvalue.ods.adapterservice.datasource.model.DatasourceMetadata;
+import org.jvalue.ods.adapterservice.datasource.model.RuntimeParameters;
 import org.jvalue.ods.adapterservice.datasource.repository.DatasourceRepository;
 import org.jvalue.ods.adapterservice.datasource.repository.DatasourceEventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +23,14 @@ public class DatasourceManager {
 
   private final DatasourceRepository datasourceRepository;
   private final DatasourceEventRepository eventRepository;
+  private final AdapterFactory adapterFactory;
 
 
   @Autowired
-  public DatasourceManager(DatasourceRepository datasourceRepository, DatasourceEventRepository eventRepository) {
+  public DatasourceManager(DatasourceRepository datasourceRepository, DatasourceEventRepository eventRepository, AdapterFactory adapterFactory) {
     this.datasourceRepository = datasourceRepository;
     this.eventRepository = eventRepository;
+    this.adapterFactory = adapterFactory;
   }
 
 
@@ -74,6 +81,28 @@ public class DatasourceManager {
       pl -> eventRepository.save(new DatasourceEvent(EventType.DATASOURCE_DELETE, pl.getId()))
     );
   }
+
+ private AdapterConfig getParametrizedDatasource(Long id, RuntimeParameters runtimeParameters) {
+   Datasource datasource = getDatasource(id)
+     .orElseThrow(() -> new IllegalArgumentException("No datasource found with id " + id));
+   return datasource.toAdapterConfig(runtimeParameters);
+ }
+
+ public DataBlob.MetaData trigger(Long id, RuntimeParameters runtimeParameters) {
+    AdapterConfig adapterConfig = getParametrizedDatasource(id, runtimeParameters);
+   try {
+     Adapter adapter = adapterFactory.getAdapter(adapterConfig);
+     return adapter.executeJob(adapterConfig);
+   } catch (Exception e) {
+     if(e instanceof IllegalArgumentException) {
+       System.err.println("Data Import request failed. Malformed Request: " + e.getMessage());
+       throw e;
+     } else {
+       System.err.println("Exception in the Adapter: " + e.getMessage());
+       throw e;
+     }
+   }
+ }
 
   /**
    * Create an updated DatasourceConfig using the full representation of an update. This method ensures that id and creation time remain stable.
