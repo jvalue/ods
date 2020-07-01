@@ -1,6 +1,6 @@
 import { StorageHandler } from "./storageHandler"
 import { connect, Connection, ConsumeMessage } from "amqplib/callback_api"
-import { DataEvent, EVENT_TYPE } from '../interfaces/dataEvent';
+import { DataEvent, EVENT_TYPE, DDL_QUERY_TYPE, DataDDLEvent, DataDMLEvent, DML_QUERY_TYPE } from '../interfaces/dataEvent';
 
 /**
  * This class handles the communication with the AMQP service (rabbitmq)
@@ -125,22 +125,59 @@ export class AmqpHandler{
             return false
         }
 
-        switch (dataEvent.type) {
-            case EVENT_TYPE.CREATE:
-                this.storageHandler.saveData(dataEvent.data)
-                break
-            
-            case EVENT_TYPE.UPDATE:
-                this.storageHandler.updateData(dataEvent.id, dataEvent.data)
-                break
-            
-            case EVENT_TYPE.DELETE:
-                this.storageHandler.deleteData(dataEvent.id)
-                break
-            default:
-                console.warn(`Data Event Type "${dataEvent.type}" not supported.`)
-                break
+        
 
+        switch (dataEvent.eventType) {
+            /*===========================================================
+             * Data DDL Event
+             *=========================================================*/
+            case EVENT_TYPE.DATA_DDL:
+
+                const ddlEvent = dataEvent as DataDDLEvent
+
+                switch (ddlEvent.ddlType) {
+
+                    case DDL_QUERY_TYPE.CREATE_TABLE:
+                        this.storageHandler.createDataTable(ddlEvent.tableName)
+                        break
+                    
+                    case DDL_QUERY_TYPE.DROP_TABLE:
+                        this.storageHandler.dropTable(ddlEvent.tableName)
+                        break
+                    
+                    default:
+                        console.warn(`Data Event Type ${dataEvent.eventType} not supported`)
+                        break
+                }
+
+                break;
+            
+            /*===========================================================
+            * Data DML Event
+            *=========================================================*/
+            case EVENT_TYPE.DATA_DML:
+        
+                const dmlEvent = dataEvent as DataDMLEvent
+                const tableName = '' + dmlEvent.data.pipelineId
+
+                switch (dmlEvent.dmlType) {
+                    case DML_QUERY_TYPE.CREATE:
+                        this.storageHandler.saveData(tableName, dmlEvent.data)
+                        break
+                    
+                    case DML_QUERY_TYPE.UPDATE:
+                        this.storageHandler.updateData(tableName, dmlEvent.data, { id: dmlEvent.data.id })
+                        break
+                    
+                    case DML_QUERY_TYPE.DELETE:
+                        this.storageHandler.deleteData(tableName, { id: dmlEvent.data.id })
+                        break
+                    
+                    default:
+                        console.warn(`Data Event Type "${dmlEvent.data.pipelineId}" not supported.`)
+                        break
+
+                }
         }
     
         return true
@@ -153,7 +190,7 @@ export class AmqpHandler{
         * @returns     true, if param event is a TransformationEvent, else false
         */
     public  isValidDataEvent(event: DataEvent): boolean {
-        return !!event && !!event.type && !!event.data
+        return !!event && !!event.type
     }
 }
 

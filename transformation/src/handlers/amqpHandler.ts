@@ -8,7 +8,7 @@ import { PipelineConfig } from '../models/PipelineConfig';
 import axios from 'axios';
 import JobResult from '@/interfaces/job/jobResult';
 import ODSData from '../interfaces/odsData';
-import { EVENT_TYPE, DataEvent } from '../interfaces/odsDataEvent';
+import { DML_QUERY_TYPE, DataDMLEvent, DataDDLEvent, DDL_QUERY_TYPE, EVENT_TYPE } from '../interfaces/odsDataEvent';
 
 
 
@@ -135,7 +135,6 @@ export class AmqpHandler {
 
     /**
    * Initializes a Queue/Channel for publishing transformed data for the storage service.
-   *
    * Events (see odsDataEvents.ts).
    *
    * @param connection Connection to the AMQP Service (rabbitmq)
@@ -162,7 +161,6 @@ export class AmqpHandler {
 
     /**
      * Initializes a Queue/Channel for the consumption of Job-Queries.
-     *
      * Events (=Jobs) will be consumed and handled with a transformation using
      * the Events contents.
      *
@@ -260,7 +258,6 @@ export class AmqpHandler {
 
     /**
      * Handles the Execution of a transformation job.
-     *
      * All information of the job is provided within the JobEvent (argument)
      *
      * @param jobEvent Job to be executed (Transformation)
@@ -333,15 +330,56 @@ export class AmqpHandler {
             return false
         }
 
-        const odsDataEvent = this.generateODSDataEvent(EVENT_TYPE.CREATE, pipelineConfig, jobResult)
+        const odsDataEvent = this.generateDMLEvent(DML_QUERY_TYPE.CREATE, pipelineConfig, jobResult)
         this.odsDataChannel.sendToQueue(this.odsDataQueueName, Buffer.from(JSON.stringify(odsDataEvent)));
 
         console.log(`Sucessfully published transformed data to the storage queue.`)
         return true
     }
 
-    private generateODSDataEvent(type: EVENT_TYPE, pipelineConfig:PipelineConfig, jobResult: JobResult): DataEvent {
+    /**
+     * This function creates a database table on storage-mq service for storing data for a specific pipeline,
+     * by sending a "Create table" event to storage queue
+     * 
+     * This will be called when a pipeline is created (and therefore a pipeline)
+     * 
+     * @param tableName name of the table to be created
+     * @returns true on success, false on failure
+     */
+    public publishTableCreationEvent(tableName: string): boolean {
+        console.log(`Publishing "Create table" event to the storage queue.`)
+
+        const ddlEvent = {
+            eventType: EVENT_TYPE.DATA_DDL,
+            ddlType: DDL_QUERY_TYPE.CREATE_TABLE,
+            tableName: tableName
+        } 
         
+        try {
+            this.odsDataChannel.sendToQueue(this.odsDataQueueName, Buffer.from(JSON.stringify(ddlEvent)))
+        } catch (err) {
+            console.log(`Could not publish "Create table" Event to storage queue.`)
+            return false
+        }
+        console.log(`Publishing "Create table" event to the storage queue.`)
+        return true
+    }
+
+    /**
+     * Generates an event for data modeling (e.g. INSERT, UPDATE, DELETE) on storage-mq service
+     * 
+     * @param type Event Type (see enum EVENT_TYPE)
+     * @param pipelineConfig pipelineConfig to extract information from  for the data to persisted on the storage-mq service
+     * @param jobResult transformation result to extract  information from for the data to persisted on the storage-mq service
+     * 
+     * @returns Event to be published to the storage queue
+     */
+    private generateDMLEvent(type: DML_QUERY_TYPE, pipelineConfig:PipelineConfig, jobResult: JobResult): DataDMLEvent {
+        // add an id to data (mandatory for ODSData cast)
+        if (jobResult.data) {
+            Object.assign(jobResult.data, {id: -1})
+        }
+
         const odsData = {
             data: jobResult.data,
             timestamp: new Date(jobResult.stats.startTimestamp),
@@ -351,12 +389,12 @@ export class AmqpHandler {
         }
 
         const event = {
-            id: -1,
-            type: type,
+            eventType: EVENT_TYPE.DATA_DML,
+            dmlType: type,
             data: odsData as ODSData
         } 
 
-        return event as DataEvent
+        return event as DataDMLEvent
     }
 
     /**
@@ -377,6 +415,8 @@ export class AmqpHandler {
 
         return transformationEvent
     }
+
+
 
     /**
      * Checks if this event is a valid Transformation event,

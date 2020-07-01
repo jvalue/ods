@@ -98,7 +98,9 @@ export class DataEndPoint {
       return
     }
 
-    const configs = await this.storageHandler.getData(pipelineId)
+    const tableName = '' + pipelineId
+    
+    const configs = await this.storageHandler.getData(tableName)
 
     if (!configs) {
       console.error(`Could not get slack config with id "${pipelineId}" from database`)

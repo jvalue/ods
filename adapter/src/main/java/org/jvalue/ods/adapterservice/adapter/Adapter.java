@@ -40,7 +40,7 @@ public class Adapter {
             DataBlob blob = blobRepository.save(new DataBlob(result.toString()));
 
             // AdapterEvent adapterEvent = new AdapterEvent(blob.getData(), null); // FAT Event
-            AdapterEvent adapterEvent = new AdapterEvent(config.id, null, blob.getMetaData().getLocation());
+            AdapterEvent adapterEvent = new AdapterEvent(config.getDataSourceId(), null, blob.getMetaData().getLocation());
             rabbitTemplate.convertAndSend(RabbitConfiguration.DATA_IMPORT_QUEUE, adapterEvent.toJSON());
             return blob.getMetaData();
         } catch (IOException e) {

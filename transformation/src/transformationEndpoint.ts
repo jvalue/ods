@@ -89,19 +89,25 @@ export class TransformationEndpoint {
   handleConfigCreation = async (req: Request, res: Response): Promise<void> => {
     console.log(`Received Pipeline config from Host ${req.connection.remoteAddress}`)
 
-    const transformationConfig = req.body as PipelineConfig
+    const pipelineConfig = req.body as PipelineConfig
     let savedConfig : PipelineConfig
     // Check for validity of the request
-    if (!(this.isValidPipelineConfig(transformationConfig))) {
+    if (!(this.isValidPipelineConfig(pipelineConfig))) {
       console.warn('Malformed transformation request.')
       res.status(400).send('Malformed transformation request.')
       res.end()
       return
     }
 
-    // Persist Config
+    
     try {
-      savedConfig = await this.storageHandler.savePipelineConfig(transformationConfig)
+      // Persist Config
+      savedConfig = await this.storageHandler.savePipelineConfig(pipelineConfig)
+
+      // Create table with name = pipeline id on storage-service
+      const tablename = `${pipelineConfig.id}`
+      this.amqpHandler.publishTableCreationEvent(tablename)
+      
     } catch (error) {
       console.error(`Could not create transformationConfig Object: ${error}`)
       res.status(500).send('Internal Server Error.')

@@ -1,12 +1,15 @@
 import {DeleteResult} from 'typeorm';
-import ODSData from '../models/odsData';
+import ODSData from './odsData';
 
 export interface DataRepository {
   init(retries: number, backoff: number): Promise<void>
   
-  getData(id: number): Promise<ODSData | undefined>
-  saveData(data: ODSData): Promise<ODSData>
-  deleteData(id: number): Promise<DeleteResult>
-  updateData(id: number, data: ODSData): Promise<ODSData>
+  getData(tableName: string, conditions?: object): Promise<ODSData[] | undefined>
+  saveData(tableName: string, data: ODSData): Promise<boolean>
+  deleteData(tableName: string, conditions?: object): Promise<boolean>
+  updateData(tableName: string, data: ODSData, conditions?: object): Promise<boolean>
+
+  createDataTable(tableName: string): Promise<boolean>
+  dropTable(tableName: string): Promise<boolean>
 
 }
