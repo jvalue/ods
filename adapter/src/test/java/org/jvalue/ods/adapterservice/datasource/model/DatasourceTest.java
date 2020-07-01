@@ -85,7 +85,6 @@ public class DatasourceTest {
     parameters.put("notAKey", "notAValue");
     RuntimeParameters runtimeParameters = new RuntimeParameters(parameters);
     AdapterConfig adapterConfig = datasource.toAdapterConfig(runtimeParameters);
-    System.out.println(adapterConfig);
     AdapterConfig testAgainst = new AdapterConfig(
       new ProtocolConfig("HTTP", Map.of("location", "http://www.the-inder.net/1/123")),
       new FormatConfig("JSON", Map.of())
