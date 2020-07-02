@@ -55,11 +55,11 @@ async function initJobs (): Promise<void> {
       process.exit()
     })
 
-    // await updateDatsources()
-  datasourcePollingJob = schedule.scheduleJob(
-    'DatasourceEventPollingJob',
-    CHRONJOB_EVERY_2_SECONDS,
-    updateDatsources)
+    await updateDatsources()
+  // datasourcePollingJob = schedule.scheduleJob(
+  //   'DatasourceEventPollingJob',
+  //   CHRONJOB_EVERY_2_SECONDS,
+  //   updateDatsources)
 }
 
 

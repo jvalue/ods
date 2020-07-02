@@ -47,7 +47,9 @@ public class DatasourceManager {
 
     // Send to scheduler queue
     DatasourceEvent event = new DatasourceEvent(EventType.DATASOURCE_CREATE, savedConfig.getId());
-    rabbitTemplate.convertAndSend(RabbitConfiguration.DATA_IMPORT_QUEUE, event.toJSON());
+    if(rabbitTemplate != null) {
+      rabbitTemplate.convertAndSend(RabbitConfiguration.DATA_CONFIG_QUEUE, event.toJSON());
+    }
 
     return savedConfig;
   }
