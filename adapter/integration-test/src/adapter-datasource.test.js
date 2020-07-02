@@ -188,18 +188,32 @@ describe('Adapter Configuration', () => {
 })
 
 test('POST datasources/{id}/trigger', async () => {
-  const datasourceResponse = await request(URL)
+  const dynamicDatasourceResponse = await request(URL)
     .post('/datasources')
     .send(dynamicDatasourceConfig)
-  const datasourceId = datasourceResponse.body.id
+  const dynDatasourceId = dynamicDatasourceResponse.body.id
 
-  const dataMetaData = await request(URL)
-    .post('/datasources/' + datasourceId + '/trigger')
+  const dynamicDataMetaData = await request(URL)
+    .post('/datasources/' + dynDatasourceId + '/trigger')
     .send(runtimeParameters)
 
-  const id = dataMetaData.body.id
-  const data = await request(URL)
-    .get('/data/' + id)
+  const dynId = dynamicDataMetaData.body.id
+  const dynData = await request(URL)
+    .get('/data/' + dynId)
+    .send()
+
+  const normalDatasourceResponse = await request(URL)
+    .post('/datasources')
+    .send(notDynamicDatasourceConfig)
+  const normalDatasourceId = normalDatasourceResponse.body.id
+
+  const normalDataMetaData = await request(URL)
+    .post('/datasources/' + normalDatasourceId + '/trigger')
+    .send(null)
+
+  const normalId = normalDataMetaData.body.id
+  const normalData = await request(URL)
+    .get('/data/' + normalId)
     .send()
 
   const delResponse = await request(URL)
@@ -207,11 +221,16 @@ test('POST datasources/{id}/trigger', async () => {
     .send()
 
   expect(delResponse.status).toEqual(204)
-  expect(dataMetaData.status).toEqual(200)
-  expect(dataMetaData.body.id).toBeGreaterThanOrEqual(0)
-  expect(dataMetaData.body.location).toEqual('/data/' + id)
-  expect(data.status).toEqual(200)
-  expect(data.body.id).toBe(runtimeParameters.parameters.id)
+  expect(dynamicDataMetaData.status).toEqual(200)
+  expect(dynamicDataMetaData.body.id).toBeGreaterThanOrEqual(0)
+  expect(dynamicDataMetaData.body.location).toEqual('/data/' + dynId)
+  expect(dynData.status).toEqual(200)
+  expect(dynData.body.id).toBe(runtimeParameters.parameters.id)
+  expect(normalDataMetaData.status).toEqual(200)
+  expect(normalDataMetaData.body.id).toBeGreaterThanOrEqual(0)
+  expect(normalDataMetaData.body.location).toEqual('/data/' + normalId)
+  expect(normalData.status).toEqual(200)
+  expect(normalData.body.id).toBe('1')
 })
 
 const datasourceConfig = {
@@ -245,6 +264,32 @@ const dynamicDatasourceConfig = {
     type: 'HTTP',
     parameters: {
       location: MOCK_SERVER_URL + '/json/{id}',
+      encoding: 'UTF-8'
+    }
+  },
+  format: {
+    type: 'JSON',
+    parameters: {}
+  },
+  trigger: {
+    firstExecution: '1905-12-01T02:30:00.123Z',
+    periodic: false,
+    interval: 50000
+  },
+  metadata: {
+    author: 'icke',
+    license: 'none',
+    displayName: 'test datasource 2',
+    description: 'integration testing dynamic datasources'
+  }
+}
+
+const notDynamicDatasourceConfig = {
+  id: -1,
+  protocol: {
+    type: 'HTTP',
+    parameters: {
+      location: MOCK_SERVER_URL + '/json/1',
       encoding: 'UTF-8'
     }
   },
