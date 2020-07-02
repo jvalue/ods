@@ -2,6 +2,9 @@ const request = require('supertest')
 const waitOn = require('wait-on')
 
 const URL = process.env.ADAPTER_API || 'http://localhost:9000/api/adapter'
+const MOCK_SERVER_PORT = process.env.MOCK_SERVER_PORT || 8081
+const MOCK_SERVER_HOST = process.env.MOCK_SERVER_HOST || 'localhost'
+const MOCK_SERVER_URL = 'http://' + MOCK_SERVER_HOST + ':' + MOCK_SERVER_PORT
 
 describe('Adapter Configuration', () => {
   console.log('Adapter-Service URL= ' + URL)
@@ -184,6 +187,33 @@ describe('Adapter Configuration', () => {
   })
 })
 
+test('POST datasources/{id}/trigger', async () => {
+  const datasourceResponse = await request(URL)
+    .post('/datasources')
+    .send(dynamicDatasourceConfig)
+  const datasourceId = datasourceResponse.body.id
+
+  const dataMetaData = await request(URL)
+    .post('/datasources/' + datasourceId + '/trigger')
+    .send(runtimeParameters)
+
+  const id = dataMetaData.body.id
+  const data = await request(URL)
+    .get('/data/' + id)
+    .send()
+
+  const delResponse = await request(URL)
+    .delete('/datasources/')
+    .send()
+
+  expect(delResponse.status).toEqual(204)
+  expect(dataMetaData.status).toEqual(200)
+  expect(dataMetaData.body.id).toBeGreaterThanOrEqual(0)
+  expect(dataMetaData.body.location).toEqual('/data/' + id)
+  expect(data.status).toEqual(200)
+  expect(data.body.id).toBe(runtimeParameters.parameters.id)
+})
+
 const datasourceConfig = {
   id: 12345,
   protocol: {
@@ -206,5 +236,37 @@ const datasourceConfig = {
     license: 'none',
     displayName: 'test datasource 1',
     description: 'integraiton testing datasources'
+  }
+}
+
+const dynamicDatasourceConfig = {
+  id: 54321,
+  protocol: {
+    type: 'HTTP',
+    parameters: {
+      location: MOCK_SERVER_URL + '/json/{id}',
+      encoding: 'UTF-8'
+    }
+  },
+  format: {
+    type: 'JSON',
+    parameters: {}
+  },
+  trigger: {
+    firstExecution: '1905-12-01T02:30:00.123Z',
+    periodic: false,
+    interval: 50000
+  },
+  metadata: {
+    author: 'icke',
+    license: 'none',
+    displayName: 'test datasource 2',
+    description: 'integration testing dynamic datasources'
+  }
+}
+
+const runtimeParameters = {
+  parameters: {
+    id: '2'
   }
 }
