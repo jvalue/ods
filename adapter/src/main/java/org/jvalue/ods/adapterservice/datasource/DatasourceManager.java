@@ -4,6 +4,7 @@ import org.jvalue.ods.adapterservice.adapter.Adapter;
 import org.jvalue.ods.adapterservice.adapter.AdapterFactory;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
+import org.jvalue.ods.adapterservice.config.RabbitConfiguration;
 import org.jvalue.ods.adapterservice.datasource.event.DatasourceEvent;
 import org.jvalue.ods.adapterservice.datasource.event.EventType;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
@@ -11,6 +12,7 @@ import org.jvalue.ods.adapterservice.datasource.model.DatasourceMetadata;
 import org.jvalue.ods.adapterservice.datasource.model.RuntimeParameters;
 import org.jvalue.ods.adapterservice.datasource.repository.DatasourceRepository;
 import org.jvalue.ods.adapterservice.datasource.repository.DatasourceEventRepository;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,12 +27,14 @@ public class DatasourceManager {
   private final DatasourceEventRepository eventRepository;
   private final AdapterFactory adapterFactory;
 
+  private final RabbitTemplate rabbitTemplate;
 
   @Autowired
-  public DatasourceManager(DatasourceRepository datasourceRepository, DatasourceEventRepository eventRepository, AdapterFactory adapterFactory) {
+  public DatasourceManager(DatasourceRepository datasourceRepository, DatasourceEventRepository eventRepository, AdapterFactory adapterFactory, RabbitTemplate rabbitTemplate) {
     this.datasourceRepository = datasourceRepository;
     this.eventRepository = eventRepository;
     this.adapterFactory = adapterFactory;
+    this.rabbitTemplate = rabbitTemplate;
   }
 
 
@@ -40,6 +44,10 @@ public class DatasourceManager {
 
     Datasource savedConfig = datasourceRepository.save(config);
     eventRepository.save(new DatasourceEvent(EventType.DATASOURCE_CREATE, savedConfig.getId()));
+
+    // Send to scheduler queue
+    DatasourceEvent event = new DatasourceEvent(EventType.DATASOURCE_CREATE, savedConfig.getId());
+    rabbitTemplate.convertAndSend(RabbitConfiguration.DATA_IMPORT_QUEUE, event.toJSON());
 
     return savedConfig;
   }

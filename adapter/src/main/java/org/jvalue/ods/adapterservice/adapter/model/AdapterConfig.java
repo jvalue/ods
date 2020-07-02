@@ -8,7 +8,7 @@ import java.util.Objects;
 
 public class AdapterConfig {
 
-    private long dataSourceId;
+    private long id;
 
     @NotNull
     public final ProtocolConfig protocolConfig;
@@ -38,11 +38,11 @@ public class AdapterConfig {
         return Objects.hash(protocolConfig, formatConfig);
     }
 
-    public long getDataSourceId() {
-      return dataSourceId;
+    public long getID() {
+      return id;
     }
 
-    public void setDataSourceId(long id) {
-      this.dataSourceId = id;
+    public void setID(long id) {
+      this.id = id;
   }
 }

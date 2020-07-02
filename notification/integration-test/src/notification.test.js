@@ -28,7 +28,75 @@ describe('Scheduler', () => {
     })
 
 
+    test('GET /config/pipeline/1 requests empty config database', async() => {
+        const receiverResponse = await request(MOCK_RECEIVER_URL)
+            .get('/config/pipeline/1')
+
+        expect(receiverResponse.status).toEqual(200)
+
+        // expect empty list
+        expect(receiverResponse.body).toEqual([])
+    })
+
+    test('GET /config/slack/1 request slack config that does not exist', async() => {
+        const receiverResponse = await request(URL)
+            .get('/config/slack/1')
+
+        expect(receiverResponse.status).toEqual(500)
+
+        // expect empty list
+        expect(receiverResponse.body).toEqual('Internal Server error.')
+    })
+
+
     test('POST /config/webhook persists webhook config', async() => {
+        const webhookConfig = {
+            pipelineId: 1,
+            condition!: 'true',
+            url: MOCK_RECEIVER_URL + '/webhook1'
+        }
+
+        const notificationResponse = await request(URL)
+            .post('/config/webhook')
+            .send(webhookConfig)
+
+        expect(notificationResponse.status).toEqual(200)
+
+        // compare response with initial webhook config
+        expect(notificationResponse.body.pipelineId).toEqual(pipelineId)
+        expect(notificationResponse.body.condition).toEqual(condition)
+        expect(notificationResponse.body.url).toEqual(url)
+    })
+
+    test('POST and DELETE and GET /config/webhook persists and deletes webhook config --> should return nothing', async() => {
+        const webhookConfig = {
+            pipelineId: 1,
+            condition!: 'true',
+            url: MOCK_RECEIVER_URL + '/webhook1'
+        }
+
+        const notificationResponse = await request(URL)
+            .post('/config/webhook')
+            .send(webhookConfig)
+
+        expect(notificationResponse.status).toEqual(200)
+        await sleep(3000) // wait for processing
+
+        const id = notificationResponse.body.id // ID of persisted config in Database
+
+        const receiverResponse = await request(URL)
+            .delete('/webhook1')
+
+        expect(receiverResponse.status).toEqual(200)
+
+        // compare response with initial webhook config
+        expect(receiverResponse.body.pipelineId).toEqual(pipelineId)
+        expect(receiverResponse.body.condition).toEqual(condition)
+        expect(receiverResponse.body.url).toEqual(url)
+    })
+
+
+    test('POST /config/slack persists webhook config', async() => {
         const webhookConfig = {
             pipelineId: 1,
             condition!: 'true',
@@ -51,7 +119,6 @@ describe('Scheduler', () => {
         expect(receiverResponse.body.pipelineId).toEqual(pipelineId)
         expect(receiverResponse.body.condition).toEqual(condition)
         expect(receiverResponse.body.url).toEqual(url)
-
     })
 
     test('POST /webhook triggers webhook', async() => {

@@ -1,28 +1,14 @@
 /* eslint-env jest */
 import * as PipelineExecution from './workflow-execution'
 import * as AdapterClient from './clients/adapter-client'
-import * as StorageClient from './clients/storage-client'
-import * as TransformationClient from './clients/transformation-client'
-import * as NotificationClient from './clients/notification-client'
-import * as CoreClient from './clients/core-client'
-import PipelineConfig from './interfaces/pipeline-config'
-import NotificationConfig from './interfaces/notification-config'
 import AdapterResponse from '@/interfaces/adapter-response'
 import DatasourceConfig from './interfaces/datasource-config'
-import TransformationConfig from './interfaces/transformation-config'
 
 jest.mock('./clients/adapter-client')
-jest.mock('./clients/storage-client')
-jest.mock('./clients/transformation-client')
-jest.mock('./clients/notification-client')
-jest.mock('./clients/core-client')
 
-const mockGetPipelinesForDatasource = CoreClient.getCachedPipelinesByDatasourceId as jest.Mock
-const mockGetPipelineConfigs = TransformationClient.getPipelineConfigs as jest.Mock
+
 const mockExecuteAdapter = AdapterClient.executeAdapter as jest.Mock
-const mockExecuteTransformation = TransformationClient.executeTransformation as jest.Mock
-const mockExecuteStorage = StorageClient.executeStorage as jest.Mock
-const mockExecuteNotification = NotificationClient.executeNotification as jest.Mock
+
 
 const adapterResponse: AdapterResponse = {
   id: 42,
@@ -41,56 +27,46 @@ afterEach(() => {
   jest.clearAllMocks()
 })
 
-test('Should execute pipeline once', async () => {
-  const datasourceConfig = generateDatasourceConfig(false)
-  const transformation = { dataLocation: '/data/42' }
-  const pipelineConfig = generatePipelineConfig(transformation, [])
+// test('Should execute pipeline once', async () => {
+//   const datasourceConfig = generateDatasourceConfig(false)
 
-  mockGetPipelinesForDatasource.mockReturnValue([pipelineConfig]) // register pipeline to follow datasource import
-  mockGetPipelineConfigs.mockReturnValue([pipelineConfig])
+//   mockExecuteAdapter.mockResolvedValue(adapterResponse)
 
-  mockExecuteAdapter.mockResolvedValue(adapterResponse)
-  mockExecuteTransformation.mockResolvedValue({ data: transformedData })
 
-  await PipelineExecution.execute(datasourceConfig)
+//   await PipelineExecution.execute(datasourceConfig)
 
-  expect(mockExecuteAdapter).toHaveBeenCalledWith(datasourceConfig)
+//   expect(mockExecuteAdapter).toHaveBeenCalledWith(datasourceConfig)
 
-  //expect(mockGetPipelinesForDatasource).toHaveBeenCalledWith(datasourceConfig.id)
-  // expect(mockGetPipelineConfigs).toHaveBeenCalledWith(datasourceConfig.id)
+//   //expect(mockGetPipelinesForDatasource).toHaveBeenCalledWith(datasourceConfig.id)
+//   // expect(mockGetPipelineConfigs).toHaveBeenCalledWith(datasourceConfig.id)
 
-  // expect(mockExecuteTransformation).toHaveBeenCalledWith(transformation)
-  // expect(mockExecuteTransformation).toHaveBeenCalledTimes(1)
+//   // expect(mockExecuteTransformation).toHaveBeenCalledWith(transformation)
+//   // expect(mockExecuteTransformation).toHaveBeenCalledTimes(1)
 
-  // expect(mockExecuteStorage).toHaveBeenCalledWith(pipelineConfig, transformedData)
-})
+//   // expect(mockExecuteStorage).toHaveBeenCalledWith(pipelineConfig, transformedData)
+// })
 
-test('Should execute pipeline periodic', async () => {
-  const datasourceConfig = generateDatasourceConfig(true)
-  const transformation = { dataLocation: 'data/42' }
-  const pipelineConfig = generatePipelineConfig(transformation, [])
+// test('Should execute pipeline periodic', async () => {
+//   const datasourceConfig = generateDatasourceConfig(true)
+//   const transformation = { dataLocation: 'data/42' }
+ 
+//   mockExecuteAdapter.mockResolvedValue(adapterResponse)
 
-  mockGetPipelinesForDatasource.mockReturnValue([pipelineConfig]) // register pipeline to follow datasource import
-  mockGetPipelineConfigs.mockReturnValue([pipelineConfig])
+//   await PipelineExecution.execute(datasourceConfig)
 
-  mockExecuteAdapter.mockResolvedValue(adapterResponse)
-  mockExecuteTransformation.mockResolvedValue({ data: transformedData })
+//   expect(mockExecuteAdapter).toHaveBeenCalledWith(datasourceConfig)
 
-  await PipelineExecution.execute(datasourceConfig)
+//   // expect(mockGetPipelinesForDatasource).toHaveBeenCalledWith(datasourceConfig.id)
 
-  expect(mockExecuteAdapter).toHaveBeenCalledWith(datasourceConfig)
-
-  // expect(mockGetPipelinesForDatasource).toHaveBeenCalledWith(datasourceConfig.id)
-
-  // expect(mockExecuteTransformation).toHaveBeenCalledWith(transformation)
-  // expect(mockExecuteStorage).toHaveBeenCalledWith(pipelineConfig, transformedData)
-})
+//   // expect(mockExecuteTransformation).toHaveBeenCalledWith(transformation)
+//   // expect(mockExecuteStorage).toHaveBeenCalledWith(pipelineConfig, transformedData)
+// })
 
 test('Should not execute undefined transformation', async () => {
-  const datasourceConfig = generateDatasourceConfig(false)
-  const pipelineConfig = generatePipelineConfig(undefined, []) // transformation undefined
+  // const datasourceConfig = generateDatasourceConfig(false)
+  
 
-  mockExecuteAdapter.mockResolvedValue(adapterResponse)
+  // mockExecuteAdapter.mockResolvedValue(adapterResponse)
 
   // await PipelineExecution.execute(datasourceConfig)
 
@@ -152,20 +128,5 @@ function generateDatasourceConfig (periodic = true): DatasourceConfig {
       creationTimestamp: new Date(Date.now() + 5000),
       license: 'license 123'
     },
-  }
-}
-
-function generatePipelineConfig (
-  transformation: TransformationConfig | undefined, notifications: NotificationConfig[]): PipelineConfig {
-  return {
-    id: 555,
-    datasourceId: 123,
-    transformation: transformation,
-    metadata: {
-      displayName: 'pipeline 555',
-      creationTimestamp: new Date(Date.now() + 5000),
-      license: 'license 555'
-    },
-    notifications: notifications
   }
 }

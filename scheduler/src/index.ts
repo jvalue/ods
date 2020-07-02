@@ -4,7 +4,7 @@ import schedule from 'node-schedule'
 
 import * as Scheduling from './scheduling'
 import { ADAPTER_SERVICE_URL } from './clients/adapter-client'
-import * as CoreClient from './clients/core-client'
+import { AmqpHandler } from './clients/amqpHandler'
 
 const app = express()
 const port = 8080
@@ -44,6 +44,8 @@ async function updateDatsources (): Promise<void> {
   }
 }
 
+
+
 async function initJobs (): Promise<void> {
   console.log('Starting sync with Adapter Service on URL ' + ADAPTER_SERVICE_URL)
   await Scheduling.initializeJobs(INITIAL_CONNECTION_RETRIES, INITIAL_CONNECTION_RETRY_BACKOFF)
@@ -53,35 +55,14 @@ async function initJobs (): Promise<void> {
       process.exit()
     })
 
+    // await updateDatsources()
   datasourcePollingJob = schedule.scheduleJob(
     'DatasourceEventPollingJob',
     CHRONJOB_EVERY_2_SECONDS,
     updateDatsources)
 }
 
-async function initPipelineConfigSync (retries = 30, retryBackoff = 3000): Promise<void> {
-  try {
-    console.log('Starting sync with Core Service')
-    await CoreClient.initSync()
-  } catch (e) {
-    if (retries === 0) {
-      return Promise.reject(new Error('Failed to initialize pipelineConfig sync.'))
-    }
-    if (e.code === 'ECONNREFUSED' || e.code === 'ENOTFOUND') {
-      console.error(`Failed to sync with Core Service on initialization (${retries}) . Retrying after ${retryBackoff}ms... `)
-    } else {
-      console.error(e)
-      console.error(`Retrying (${retries})...`)
-    }
-    await new Promise(resolve => setTimeout(resolve, retryBackoff)) // sleep
-    return await initPipelineConfigSync(retries - 1, retryBackoff)
-  }
 
-  pipelinePollingJob = schedule.scheduleJob(
-    'PipelineConfigSyncJob',
-    CHRONJOB_EVERY_2_SECONDS,
-    CoreClient.sync)
-}
 
 // log all promise rejections that happen (mostly because they happen in async and don't log the point where it happened)
 process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
@@ -89,7 +70,6 @@ process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
 });
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
-initPipelineConfigSync()
 initJobs()
 
 process.on('SIGTERM', async () => {

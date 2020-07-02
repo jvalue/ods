@@ -190,7 +190,7 @@ export class AmqpHandler{
         * @returns     true, if param event is a TransformationEvent, else false
         */
     public  isValidDataEvent(event: DataEvent): boolean {
-        return !!event && !!event.type
+        return !!event && !!event.eventType
     }
 }
 

@@ -70,7 +70,7 @@ export async function updateDatasources (): Promise<void> {
   }
 }
 
-async function applyChanges (event: DatasourceEvent): Promise<void> {
+export async function applyChanges (event: DatasourceEvent): Promise<void> {
   console.log(event)
   switch (event.eventType) {
     case EventType.DATASOURCE_DELETE: {

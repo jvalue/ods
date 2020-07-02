@@ -31,7 +31,6 @@ export enum DDL_QUERY_TYPE {
  * Data Event sent to the storage-mq
  */
 export interface DataEvent {
-    type: any;
     eventType: EVENT_TYPE
 }
 

@@ -105,9 +105,9 @@ export class TransformationEndpoint {
       savedConfig = await this.storageHandler.savePipelineConfig(pipelineConfig)
 
       // Create table with name = pipeline id on storage-service
-      const tablename = `${pipelineConfig.id}`
+      const tablename = `${savedConfig.id}`
       this.amqpHandler.publishTableCreationEvent(tablename)
-      
+
     } catch (error) {
       console.error(`Could not create transformationConfig Object: ${error}`)
       res.status(500).send('Internal Server Error.')

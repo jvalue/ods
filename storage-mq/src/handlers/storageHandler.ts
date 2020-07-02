@@ -296,11 +296,10 @@ export class StorageHandler implements DataRepository {
         
         try {
             client = await this.connectionPool.connect()  // Get a client from connection pool
-            await client.query(`SELECT storage.createStructureForDataSource(${tableName});`)
+            await client.query(`Set search_path to storage; SELECT storage.createStructureForDataSource('${tableName}');`)
  
             // double check table existence
-            await client.query(`SELECT * FROM ${tableName}`)
-               
+            await client.query(`SELECT * FROM "${tableName}"`)
 
         } catch (err) {
             console.error(`Could not create ODSData table: ${err}`)
@@ -330,18 +329,16 @@ export class StorageHandler implements DataRepository {
 
         if (!this.checkClassInvariant()) {
             return false
-
         }
 
         let client!: PoolClient // Client from Pool to execute the queries
 
         try {
             client = await this.connectionPool.connect()  // Get a client from connection pool
-            await client.query(`SELECT storage.createStructureForDataSource(${tableName});`)
+            await client.query(`Set search_path to storage;SELECT storage.deleteStructureForDataSource(${tableName});`)
 
             // double check table existence
-            await client.query(`SELECT * FROM ${tableName}`)
-
+            await client.query(`SELECT * FROM "${tableName}"`)
 
         } catch (err) {
             console.error(`Could not create ODSData table: ${err}`)
@@ -368,11 +365,10 @@ export class StorageHandler implements DataRepository {
      * @returns string, containing a value clause
      */
     private generateInsertStatement(tableName:string, odsData: ODSData): string {
-
         const valueClause = `("data", "license", "origin", "pipelineId", "timestamp") VALUES 
-                (${odsData.data}, ${odsData.license}, ${odsData.origin}, ${odsData.pipelineId},${odsData.timestamp})`
+                (${JSON.stringify(odsData.data)}, ${odsData.license}, ${odsData.origin}, ${odsData.pipelineId},${odsData.timestamp})`
 
-        return `INSERT INTO TABLE ${tableName} ${valueClause} ` 
+        return `INSERT INTO "${tableName}" ${valueClause} ` 
     }
 
 
@@ -388,7 +384,7 @@ export class StorageHandler implements DataRepository {
 
         const whereClause = this.generateWhereClause(conditions)
 
-        return `UPDATE TABLE ${tableName} ${setClause} ${whereClause}`
+        return `UPDATE TABLE "${tableName}" ${setClause} ${whereClause}`
     }
 
 

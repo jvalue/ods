@@ -8,7 +8,7 @@ import { PipelineConfig } from '../models/PipelineConfig';
 import axios from 'axios';
 import JobResult from '@/interfaces/job/jobResult';
 import ODSData from '../interfaces/odsData';
-import { DML_QUERY_TYPE, DataDMLEvent, DataDDLEvent, DDL_QUERY_TYPE, EVENT_TYPE } from '../interfaces/odsDataEvent';
+import { DML_QUERY_TYPE, DataDMLEvent, DDL_QUERY_TYPE, EVENT_TYPE } from '../interfaces/odsDataEvent';
 
 
 

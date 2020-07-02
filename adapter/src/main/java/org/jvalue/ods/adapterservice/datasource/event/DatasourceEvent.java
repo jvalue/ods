@@ -2,6 +2,8 @@ package org.jvalue.ods.adapterservice.datasource.event;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -61,4 +63,19 @@ public class DatasourceEvent {
     public int hashCode() {
         return Objects.hash(eventId, eventType, datasourceId);
     }
+
+  /**
+   * Converts this class object into a serialized JSON String
+   * @return this class object as JSON String
+   */
+  public String toJSON(){
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      return mapper.writeValueAsString(this);
+
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
 }
