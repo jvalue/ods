@@ -192,33 +192,19 @@ describe('Adapter Configuration', () => {
   })
 })
 
-test('POST datasources/{id}/trigger', async () => {
-  const dynamicDatasourceResponse = await request(URL)
+test('POST datasources/{id}/trigger dynamic', async () => {
+  const datasourceResponse = await request(URL)
     .post('/datasources')
     .send(dynamicDatasourceConfig)
-  const dynDatasourceId = dynamicDatasourceResponse.body.id
+  const datasourceId = datasourceResponse.body.id
 
-  const dynamicDataMetaData = await request(URL)
-    .post(`/datasources/${dynDatasourceId}/trigger`)
+  const dataMetaData = await request(URL)
+    .post(`/datasources/${datasourceId}/trigger`)
     .send(runtimeParameters)
 
-  const dynId = dynamicDataMetaData.body.id
-  const dynData = await request(URL)
-    .get(`/data/${dynId}`)
-    .send()
-
-  const normalDatasourceResponse = await request(URL)
-    .post('/datasources')
-    .send(notDynamicDatasourceConfig)
-  const normalDatasourceId = normalDatasourceResponse.body.id
-
-  const normalDataMetaData = await request(URL)
-    .post(`/datasources/${normalDatasourceId}/trigger`)
-    .send(null)
-
-  const normalId = normalDataMetaData.body.id
-  const normalData = await request(URL)
-    .get(`/data/${normalId}`)
+  const id = dataMetaData.body.id
+  const data = await request(URL)
+    .get(`/data/${id}`)
     .send()
 
   const delResponse = await request(URL)
@@ -226,14 +212,37 @@ test('POST datasources/{id}/trigger', async () => {
     .send()
 
   expect(delResponse.status).toEqual(204)
-  expect(dynamicDataMetaData.status).toEqual(200)
-  expect(dynamicDataMetaData.body.id).toBeGreaterThanOrEqual(0)
-  expect(dynamicDataMetaData.body.location).toEqual(`/data/${dynId}`)
-  expect(dynData.status).toEqual(200)
-  expect(dynData.body.id).toBe(runtimeParameters.parameters.id)
-  expect(normalDataMetaData.status).toEqual(200)
-  expect(normalDataMetaData.body.id).toBeGreaterThanOrEqual(0)
-  expect(normalDataMetaData.body.location).toEqual(`/data/${normalId}`)
+  expect(datasourceResponse.status).toEqual(201)
+  expect(dataMetaData.status).toEqual(200)
+  expect(dataMetaData.body.id).toBeGreaterThanOrEqual(0)
+  expect(dataMetaData.body.location).toEqual(`/data/${id}`)
+  expect(data.status).toEqual(200)
+  expect(data.body.id).toBe(runtimeParameters.parameters.id)
+})
+
+test('POST datasources/{id}/trigger static', async () => {
+  const datasourceResponse = await request(URL)
+    .post('/datasources')
+    .send(staticDatasourceConfig)
+  const datasourceId = datasourceResponse.body.id
+
+  const dataMetaData = await request(URL)
+    .post(`/datasources/${datasourceId}/trigger`)
+    .send(null)
+
+  const id = dataMetaData.body.id
+  const normalData = await request(URL)
+    .get(`/data/${id}`)
+    .send()
+
+  const delResponse = await request(URL)
+    .delete('/datasources/')
+    .send()
+
+  expect(delResponse.status).toEqual(204)
+  expect(dataMetaData.status).toEqual(200)
+  expect(dataMetaData.body.id).toBeGreaterThanOrEqual(0)
+  expect(dataMetaData.body.location).toEqual(`/data/${id}`)
   expect(normalData.status).toEqual(200)
   expect(normalData.body.id).toBe('1')
 })
@@ -289,7 +298,7 @@ const dynamicDatasourceConfig = {
   }
 }
 
-const notDynamicDatasourceConfig = {
+const staticDatasourceConfig = {
   id: -1,
   protocol: {
     type: 'HTTP',
