@@ -76,7 +76,7 @@ public class DatasourceEndpoint {
     }
 
     @PostMapping("/{id}/trigger")
-    public DataBlob.MetaData getData(@PathVariable() Long id,
+    public DataBlob.MetaData getData(@PathVariable Long id,
                                      @Valid @RequestBody RuntimeParameters runtimeParameters) {
       try {
         return datasourceManager.trigger(id, runtimeParameters);
