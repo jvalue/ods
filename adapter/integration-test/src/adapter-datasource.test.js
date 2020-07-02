@@ -194,12 +194,12 @@ test('POST datasources/{id}/trigger', async () => {
   const dynDatasourceId = dynamicDatasourceResponse.body.id
 
   const dynamicDataMetaData = await request(URL)
-    .post('/datasources/' + dynDatasourceId + '/trigger')
+    .post(`/datasources/${dynDatasourceId}/trigger`)
     .send(runtimeParameters)
 
   const dynId = dynamicDataMetaData.body.id
   const dynData = await request(URL)
-    .get('/data/' + dynId)
+    .get(`/data/${dynId}`)
     .send()
 
   const normalDatasourceResponse = await request(URL)
@@ -208,12 +208,12 @@ test('POST datasources/{id}/trigger', async () => {
   const normalDatasourceId = normalDatasourceResponse.body.id
 
   const normalDataMetaData = await request(URL)
-    .post('/datasources/' + normalDatasourceId + '/trigger')
+    .post(`/datasources/${normalDatasourceId}/trigger`)
     .send(null)
 
   const normalId = normalDataMetaData.body.id
   const normalData = await request(URL)
-    .get('/data/' + normalId)
+    .get(`/data/${normalId}`)
     .send()
 
   const delResponse = await request(URL)
@@ -223,12 +223,12 @@ test('POST datasources/{id}/trigger', async () => {
   expect(delResponse.status).toEqual(204)
   expect(dynamicDataMetaData.status).toEqual(200)
   expect(dynamicDataMetaData.body.id).toBeGreaterThanOrEqual(0)
-  expect(dynamicDataMetaData.body.location).toEqual('/data/' + dynId)
+  expect(dynamicDataMetaData.body.location).toEqual(`/data/${dynId}`)
   expect(dynData.status).toEqual(200)
   expect(dynData.body.id).toBe(runtimeParameters.parameters.id)
   expect(normalDataMetaData.status).toEqual(200)
   expect(normalDataMetaData.body.id).toBeGreaterThanOrEqual(0)
-  expect(normalDataMetaData.body.location).toEqual('/data/' + normalId)
+  expect(normalDataMetaData.body.location).toEqual(`/data/${normalId}`)
   expect(normalData.status).toEqual(200)
   expect(normalData.body.id).toBe('1')
 })
