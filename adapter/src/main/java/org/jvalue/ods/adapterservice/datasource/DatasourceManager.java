@@ -6,7 +6,7 @@ import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
 import org.jvalue.ods.adapterservice.config.RabbitConfiguration;
 import org.jvalue.ods.adapterservice.datasource.event.DatasourceEvent;
-import org.jvalue.ods.adapterservice.datasource.event.DatesourceImportedEvent;
+import org.jvalue.ods.adapterservice.datasource.event.DatasourceImportedEvent;
 import org.jvalue.ods.adapterservice.datasource.event.EventType;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
 import org.jvalue.ods.adapterservice.datasource.model.DatasourceMetadata;
@@ -98,7 +98,7 @@ public class DatasourceManager {
    try {
       Adapter adapter = adapterFactory.getAdapter(adapterConfig);
       DataBlob.MetaData executionResult = adapter.executeJob(adapterConfig);
-      this.rabbitTemplate.convertAndSend(RabbitConfiguration.DATA_IMPORT_QUEUE, new DatesourceImportedEvent(id, executionResult.getLocation()));
+      this.rabbitTemplate.convertAndSend(RabbitConfiguration.DATA_IMPORT_QUEUE, new DatasourceImportedEvent(id, executionResult.getLocation()));
       return executionResult;
    } catch (Exception e) {
      if(e instanceof IllegalArgumentException) {
