@@ -24,6 +24,7 @@ services:
       MOCK_SERVER_API: http://mock-server:8080
       NOTIFICATION_API: http://notification:8080
       RABBIT_HOST: rabbitmq
+      RABBIT_API: http://rabbitmq:15672
 
   mock-server:
     build:
