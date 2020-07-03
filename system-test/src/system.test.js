@@ -7,7 +7,7 @@ const SCHEDULER_URL = process.env.SCHEDULER_API || 'http://localhost:9000/api/sc
 const ADAPTER_URL = process.env.ADAPTER_API || 'http://localhost:9000/api/adapter'
 const TRANSFORMATION_URL = process.env.TRANSFORMATION_API || 'http://localhost:9000/api/transformation'
 const MOCK_SERVER_URL = process.env.MOCK_SERVER_API || 'http://localhost:9000/api/system-tests/mock-server'
-const RABBIT_URL = `http://${process.env.RABBIT_HOST}:15672`
+const RABBIT_URL = process.env.RABBIT_API || 'http://localhost:9000/api/rabbitmq'
 
 const STORAGE_DOCKER = process.env.STORAGE_API || 'http://storage:3000' // needed to run tests outside of docker environment
 const MOCK_SERVER_DOCKER = process.env.MOCK_SERVER_API || 'http://mock-server:8080'
