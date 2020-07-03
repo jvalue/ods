@@ -14,6 +14,11 @@ router.get('/json', async ctx => {
   ctx.body = { whateverwillbe: 'willbe', quesera: 'sera' }
 })
 
+router.get('/json/:id', async ctx => {
+  console.log('Get /json/' + ctx.params.id)
+  ctx.body = { id: ctx.params.id }
+})
+
 router.get('/xml', async ctx => {
   console.log('GET /xml')
 
