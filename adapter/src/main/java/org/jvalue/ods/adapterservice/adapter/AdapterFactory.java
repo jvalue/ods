@@ -7,7 +7,6 @@ import org.jvalue.ods.adapterservice.adapter.interpreter.Interpreter;
 import org.jvalue.ods.adapterservice.adapter.interpreter.JsonInterpreter;
 import org.jvalue.ods.adapterservice.adapter.interpreter.XmlInterpreter;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -22,7 +21,6 @@ import static java.util.Map.entry;
 public class AdapterFactory {
 
     private final DataBlobRepository dataRepository;
-    private final RabbitTemplate rabbitTemplate;
 
     private static final Map<String, Importer> importers = Map.ofEntries(
             entry("HTTP", new HttpImporter(new RestTemplate()))
@@ -34,9 +32,8 @@ public class AdapterFactory {
    );
 
     @Autowired
-    public AdapterFactory(DataBlobRepository dataRepository, RabbitTemplate rabbitTemplate) {
+    public AdapterFactory(DataBlobRepository dataRepository) {
         this.dataRepository = dataRepository;
-        this.rabbitTemplate = rabbitTemplate;
     }
 
 
@@ -50,7 +47,7 @@ public class AdapterFactory {
             throw new IllegalArgumentException("Interpreter for format " + config.formatConfig.format + " does not exist");
         }
 
-        return new Adapter(importer, interpreter, dataRepository, rabbitTemplate);
+        return new Adapter(importer, interpreter, dataRepository);
     }
 
     public Collection<Importer> getAllImporters() {
