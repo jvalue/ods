@@ -17,6 +17,7 @@ To execute the ODS locally, run `docker-compose up` in the project root director
   - [Using the API](#using-the-api)
   - [Using the UI](#using-the-ui)
 - [Project Structure](#project-structure)
+- [Deployment](#deployment)
 - [Contributing](#contributing)
 - [Contact us](#contact-us)
 - [License](#license)
@@ -116,6 +117,13 @@ We use the microservice architectural style in this project. The microservices a
 
 Further information about a specific microservice can be found in the respective README file. 
 Examples showing the API of each microservice are in the [example request](doc/example-requests) directory.
+
+# Deployment
+Docker images of the microservices the ods consists of are deployed via our continous deployment pipeline. 
+
+An online live instance is planned and will soon be available.
+
+A detailled explanation of available deployment mechanisms is accessible in our [deployment section](deployment/README.md).
 
 # Contributing
 
