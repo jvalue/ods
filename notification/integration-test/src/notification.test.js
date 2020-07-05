@@ -287,7 +287,7 @@ describe("Testing Notification dispatch on Event arrival from queue", () => {
     console.log(
         "Notification-Service URL= " + URL
     );
-    let amqpConnection;
+
     jest.setTimeout(30000);
 
     beforeAll(async() => {
@@ -336,15 +336,12 @@ describe("Testing Notification dispatch on Event arrival from queue", () => {
         expect(receiverResponse.body.message).toEqual(buildMessage(transformationEvent));
 
         // Clean up (post delete to notification config interface)
-        const deleteResponse = await request(
-            URL
-        ).delete(`/config/webhook/${persistedConfig.id}`);
-
+        const deleteResponse = await request(URL).delete(`/config/webhook/${persistedConfig.id}`);
         expect(deleteResponse.status).toEqual(200);
 
         await amqpConnection.close();
     });
-    /*
+
     test('Config with condition "data === null " and send valid transformation event with empty data to the queue --> triggers sending notification to webhook)', async() => {
         // Persist Config
         let notificationConfig = getValidWebhookConfig();
@@ -356,24 +353,26 @@ describe("Testing Notification dispatch on Event arrival from queue", () => {
 
         const persistedConfig = configResponse.body;
 
+        // send Transformation Event to the Queue
         let transformationEvent = getValidTransformationEvent();
-        transformationEvent.jobResult.data = null
-            // send Transformation Event to the Queue
-        expect(amqpConnection).not.toBeNull()
+        transformationEvent.jobResult.data = null;
 
+        let amqpConnection = await amqp.initConnection(20, 5);
+        expect(amqpConnection).not.toBeNull()
         await amqp.publishEvent(transformationEvent);
+
         await sleep(3000); // wait for processing
 
-        const receiverResponse = await request(MOCK_RECEIVER_URL).get(
-            "/webhook1"
-        );
+        // Check if notification has been send
+        const receiverResponse = await request(MOCK_RECEIVER_URL).get("/webhook1");
 
         expect(receiverResponse.status).toEqual(200);
         expect(receiverResponse.body.message).toEqual(buildMessage(transformationEvent));
 
-        // Clean up (post delete to notification config interface)
+        // Clean up (post delete to notification config interface and close amqp connection)
         const deleteResponse = await request(URL).delete(`/config/webhook/${persistedConfig.id}`);
         expect(deleteResponse.status).toEqual(200);
+        await amqpConnection.close();
     });
 
     test("Event does not trigger webhook when condition of corresponding persisted config is false", async() => {
@@ -392,10 +391,11 @@ describe("Testing Notification dispatch on Event arrival from queue", () => {
         // send Transformation Event to the Queue
         let transformationEvent = getValidTransformationEvent();
 
-        expect(amqpConnection).not.toBeNull();
+        let amqpConnection = await amqp.initConnection(20, 5);
+        expect(amqpConnection).not.toBeNull()
         await amqp.publishEvent(transformationEvent);
 
-        await sleep(3000);
+        await sleep(3000); // wait for processing
 
         const receiverResponse = await request(MOCK_RECEIVER_URL).get("/webhook2");
         expect(receiverResponse.status).toEqual(404);
@@ -418,30 +418,27 @@ describe("Testing Notification dispatch on Event arrival from queue", () => {
         // send Transformation Event to the Queue
         let transformationEvent = getValidTransformationEvent();
 
-        expect(amqpConnection).not.toBeNull();
+        let amqpConnection = await amqp.initConnection(20, 5);
+        expect(amqpConnection).not.toBeNull()
         await amqp.publishEvent(transformationEvent);
 
-        await sleep(3000);
+        await sleep(3000); // wait for processing
 
-        const receiverResponse = await request(
-            MOCK_RECEIVER_URL
-        ).get(
-            `/slack/${slackConfig.channelId}/${slackConfig.workspaceId}/${slackConfig.secret}`
-        );
+        const receiverResponse = await request(MOCK_RECEIVER_URL)
+            .get(`/slack/${slackConfig.channelId}/${slackConfig.workspaceId}/${slackConfig.secret}`);
 
         let notificationMessage = buildMessage(
             transformationEvent
         );
         expect(receiverResponse.status).toEqual(200);
-        expect(receiverResponse.body.text).toEqual(
-            notificationMessage
-        );
+        expect(receiverResponse.body.text).toEqual(notificationMessage);
 
         // Clean up (post delete to notification config interface)
         const deleteResponse = await request(URL).delete(`/config/webhook/${persistedConfig.id}`);
         expect(deleteResponse.status).toEqual(200);
+        await amqpConnection.close();
     });
-    */
+
 });
 
 function sleep(ms) {
