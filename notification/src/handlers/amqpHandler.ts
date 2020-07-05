@@ -1,5 +1,5 @@
 import { StorageHandler } from "./storageHandler"
-import { connect, Connection, ConsumeMessage } from "amqplib/callback_api"
+import { connect, Connection, ConsumeMessage, Channel } from "amqplib/callback_api"
 import { TransformationEvent } from '../interfaces/transformationResults/transformationEvent';
 import JSNotificationService from '../jsNotificationService';
 import VM2SandboxExecutor from "../vm2SandboxExecutor";
@@ -90,13 +90,13 @@ export class AmqpHandler{
         console.log(`Initializing Transformation Channel "${this.notifQueueName}"`)
         const handler: AmqpHandler = this   // for ability to access methods and members in callback
 
-        connection.createChannel(function (error1: Error, channel: any) {
+        connection.createChannel(function (error1: Error, channel: Channel) {
             if (error1) {
                 throw error1;
             }
 
             channel.assertQueue(handler.notifQueueName, {
-                durable: false,
+                durable: true,
             });
 
             // Consume from Channel

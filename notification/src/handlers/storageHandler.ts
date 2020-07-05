@@ -1,5 +1,5 @@
 import { SlackConfig, WebHookConfig, FirebaseConfig } from '../models/notificationConfig';
-import { Connection, ConnectionOptions, createConnection, getConnection, Repository, UpdateResult, DeleteResult } from 'typeorm';
+import { Connection, ConnectionOptions, createConnection, getConnection, Repository, UpdateResult, DeleteResult, FindConditions } from 'typeorm';
 import { NotificationSummary} from '../interfaces/notificationSummary';
 import { NotificationRepository } from '../interfaces/notificationRepository';
 
@@ -111,6 +111,7 @@ export class StorageHandler implements NotificationRepository {
     /**
      * This function returns all available Configs in the Database for given pipeline id.
      * 
+     * @throws Error on Database operation error
      * @param pipelineId    Id of the pipeline to search configs for
      * @returns Promise, containing NotificationSummary (config that contains all configs)
      */
@@ -120,10 +121,12 @@ export class StorageHandler implements NotificationRepository {
             return Promise.reject()
         }
 
+        const quereyParams = { "pipelineId": pipelineId }
+        
         // Get the configs for given pipeline id
-        const slackConfigs = await this.getSlackConfigs(pipelineId)
-        const webHookConfigs = await this.getWebHookConfigs(pipelineId)
-        const firebaseConfig = await this.getFirebaseConfigs(pipelineId)
+        const slackConfigs = await this.getSlackConfigs(quereyParams)
+        const webHookConfigs = await this.getWebHookConfigs(quereyParams)
+        const firebaseConfig = await this.getFirebaseConfigs(quereyParams)
 
         // build the summary
         const notificationSummary = {
@@ -141,9 +144,12 @@ export class StorageHandler implements NotificationRepository {
      * If one of the deletions fails all changes will be rolled back. 
      * 
      * @param pipelineId Id of the pipeline to delete the configs for
+     * @returns true on success, else error
      */
-    public deleteConfigsForPipelineID(pipelineId: number): Promise<void> {
+    public async deleteConfigsForPipelineID(pipelineId: number): Promise<void> {
         console.debug(`Deleting all configs for pipeline id "${pipelineId}"`)  
+        let result = true
+
         if (!this.checkClassInvariant()) {
             return Promise.reject()
         }
@@ -155,26 +161,39 @@ export class StorageHandler implements NotificationRepository {
             return Promise.reject()
         }
 
-        let transaction =this.dbConnection.transaction(async transactionalEntityManager => {
-            await transactionalEntityManager.delete(SlackConfig, condition)    
-            await transactionalEntityManager.delete(WebHookConfig, condition)    
-            await transactionalEntityManager.delete(FirebaseConfig, condition)    
-        }).catch(error => { console.error(`Could not delete Conifgs with pipelineId ${pipelineId}`)})
+        // execute transactionally for consistency accross config tables
+        this.dbConnection.transaction(async (transactionalEntityManager) => {
+            const slackResult = await transactionalEntityManager.delete(SlackConfig, condition)    
+            const webhookResult = await transactionalEntityManager.delete(WebHookConfig, condition)    
+            const fcmResult = await transactionalEntityManager.delete(FirebaseConfig, condition)
+            
+            console.log(`Deleted 
+                ${slackResult.affected} Slack configs
+                ${webhookResult.affected} Webhook configs
+                ${fcmResult.affected} Firebase configs
+            with pipeline id "${pipelineId}`)
+            
+        }).catch(error => {
+            throw `Could not delete Conifgs with pipelineId ${pipelineId}: ${error}`
+        })
         
         return Promise.resolve()
     }
 
     /**
-     * Gets all Slack Config from the database for a specific pipeline id
+     * Gets all Slack Config from the database.
+     * Additional Query Parameters may be passed (e.g. { pipelineId: 1, channelId: 'someID'} )
      *
-     * @param pipelineId    Pipeline ID to get the Slack Configs for
+     * @throws Error on Database operation error
+     * @param queryParams      object, containing additional condtitions for the database query
      * @returns Promise, containing a list of slack configs with given pipeline id
      */
-    public async getSlackConfigs(pipelineId: number): Promise<SlackConfig[]> {
-        console.debug(`Getting Slack Configs with pipelineId ${pipelineId} from Database`)
+    public async getSlackConfigs(queryParams: object): Promise<SlackConfig[]> {
+        console.debug(`Getting Slack Configs with conditions ${JSON.stringify(queryParams)} from Database`)
         if (!this.checkClassInvariant()) {
             return Promise.reject()
         }
+        let condition: FindConditions<SlackConfig> = Object.assign(queryParams)
         let slackConfigList: SlackConfig[] = []
 
         if (!this.slackRepository) {
@@ -182,12 +201,9 @@ export class StorageHandler implements NotificationRepository {
             return Promise.reject()
         }
 
-        try {
-            slackConfigList = await this.slackRepository.find({ pipelineId: pipelineId })
-        } catch (error) {
-            Promise.reject(error)
-        }
-
+ 
+        slackConfigList = await this.slackRepository.find(condition)
+      
         console.debug(`Sucessfully got ${slackConfigList.length} Slack config(s) from Database`)
         return slackConfigList
     }
@@ -195,19 +211,22 @@ export class StorageHandler implements NotificationRepository {
     /**
      * Gets all WebHook Configs from the database for a specific pipeline id
      *
-     * @param pipelineId    Pipeline ID to get the WebHook Configs for
+     * @throws Error on Database operation error
+     * @param queryParams      object, containing additional condtitions for the database query
      * @returns Promise, containing a list of slack configs with given pipeline id
      */
-    public async getWebHookConfigs(pipelineId: number): Promise<WebHookConfig[]> {
-        console.debug(`Getting WebHook Configs with pipelineId ${pipelineId} from Database`)
+    public async getWebHookConfigs(queryParams: object): Promise<WebHookConfig[]> {
+        console.debug(`Getting WebHook Configs with query parameters ${JSON.stringify(queryParams)} from Database`)
 
         if (!this.checkClassInvariant()) {
             return Promise.reject()
         }
         let webHookConfigs: WebHookConfig[] = []
 
+        let condition: FindConditions<WebHookConfig> = Object.assign(queryParams)
+
         try {
-            webHookConfigs = await this.webhookRepository.find({ pipelineId: pipelineId })
+            webHookConfigs = await this.webhookRepository.find(condition)
         } catch (error) {
             Promise.reject(error)
         }
@@ -219,18 +238,21 @@ export class StorageHandler implements NotificationRepository {
     /**
      * Gets all Firebase Configs from the database for a specific pipeline id
      *
-     * @param pipelineId    Pipeline ID to get the Firebase Configs for
+     * @throws Error on Database operation error
+     * @param queryParams      object, containing additional condtitions for the database query
      * @returns Promise, containing a list of Firebaseconfigs with given pipeline id
      */
-    public async getFirebaseConfigs(pipelineId: number): Promise<FirebaseConfig[]> {
-        console.debug(`Getting Firebase Configs with pipelineId ${pipelineId} from Database`)
+    public async getFirebaseConfigs(queryParams: object): Promise<FirebaseConfig[]> {
+        console.debug(`Getting Firebase Configs with pipelineId ${JSON.stringify(queryParams)} from Database`)
         if (!this.checkClassInvariant()) {
             return Promise.reject()
         }
         let firebaseConfigs: FirebaseConfig[] = []
 
+        let condition: FindConditions<WebHookConfig> = Object.assign(queryParams)
+
         try {
-            firebaseConfigs = await this.firebaseRepository.find({ pipelineId: pipelineId })
+            firebaseConfigs = await this.firebaseRepository.find(condition)
         } catch (error) {
             Promise.reject(error)
         }
@@ -242,6 +264,7 @@ export class StorageHandler implements NotificationRepository {
     /**
      * Persists a webhook config (provided by argument) to the config database
      *
+     * @throws Error on Database operation error
      * @param webhookConfig    webhook config to persist
      * @returns Promise, containing the stored webhook config
      */
@@ -262,6 +285,7 @@ export class StorageHandler implements NotificationRepository {
     /**
      * Persists a fireslackbase config (provided by argument) to the config database
      *
+     * @throws Error on Database operation error
      * @param slackConfig    slack config to persist
      * @returns Promise, containing the stored slack config
      */
@@ -281,6 +305,7 @@ export class StorageHandler implements NotificationRepository {
     /**
      * Persists a firebase config (provided by argument) to the config database
      * 
+     * @throws Error on Database operation error
      * @param firebaseConfig    firebase config to persist
      * @returns Promise, containing the stored firebase config
      */
@@ -301,6 +326,7 @@ export class StorageHandler implements NotificationRepository {
     /**
      * Updates a Slack config for given id
      * 
+     * @throws on Database operation error
      * @param id id for the config to be updated
      * @param slackConfig slack config to be written to database
      * @returns Promise containing the result of the update operation
@@ -321,6 +347,7 @@ export class StorageHandler implements NotificationRepository {
     /**
      * Updates a Webhook config for given id
      *
+     * @throws Error on Database operation error
      * @param id id for the config to be updated
      * @param webhookConfig webhook config to be written to database
      * @returns Promise containing the result of the update operation
@@ -341,6 +368,7 @@ export class StorageHandler implements NotificationRepository {
     /**
      * Updates a Firebase config for given id
      *
+     * @throws Error on Database operation error
      * @param id id for the config to be updated
      * @param firebaseConfig firebase config to be written to database
      * @returns Promise containing the result of the update operation
@@ -362,6 +390,7 @@ export class StorageHandler implements NotificationRepository {
     /**
       * Deletes a Slack config for given id
       * 
+      * @throws Error on Database operation error
       * @param id id for the config to be deleted
       * @returns result of the deletion execution
       */
@@ -381,6 +410,7 @@ export class StorageHandler implements NotificationRepository {
     /**
      * Deletes a Webhook config for given id
      *
+     * @throws Error on Database operation error
      * @param id id for the config to be deleted
      * @returns result of the deletion execution
      */
@@ -401,6 +431,7 @@ export class StorageHandler implements NotificationRepository {
     /**
      * Deletes a Firebase config for given id
      *
+     * @throws Error on Database operation error
      * @param id id for the config to be deleted
      * @returns result of the deletion execution
      */

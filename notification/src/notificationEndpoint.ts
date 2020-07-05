@@ -46,6 +46,9 @@ export class NotificationEndpoint {
     this.app.get('/', this.getHealthCheck)
     this.app.get('/version', this.getVersion)
  
+    // All Configs
+    this.app.get('/config/pipeline/:id', this.determineAuth(), this.handleConfigSummaryRequest)
+
     // Create Configs
     this.app.post('/config/:configType', this.determineAuth(), this.handleConfigCreation)
 
@@ -56,7 +59,7 @@ export class NotificationEndpoint {
     this.app.delete('/config/:configType/:id/', this.determineAuth(), this.handleConfigDeletion)
 
     // Request Configs
-    this.app.get('/config/:configType/:id/', this.determineAuth(), this.handleConfigRequest)
+    this.app.get('/config/:configType', this.determineAuth(), this.handleConfigRequest)
 
     this.storageHandler.init(30, 5)
     amqpHandler.connect(30,5)
@@ -126,21 +129,14 @@ export class NotificationEndpoint {
     * (identified by param id) as json list
     */
   handleSlackRequest = async (req: Request, res: Response) => {
-
-    const id = parseInt(req.params.id)
-    console.log(`Received request for slack config with id ${id} from Host ${req.connection.remoteAddress}`)
-
-    if (!id) {
-      console.error("Request for config: ID not set")
-      res.status(400).send('Slack ID is not set.')
-      return
-    }
+    const queryParams = req.query
+    console.log(`Received request for slack config with queryParams ${JSON.stringify(queryParams)} from Host ${req.connection.remoteAddress}`)
 
     // Get configs from database
-    const configs = await this.storageHandler.getSlackConfigs(id)
+    const configs = await this.storageHandler.getSlackConfigs(queryParams)
     
     if (!configs) {
-      console.error(`Could not get slack config with id "${id}" from database`)
+      console.error(`Could not get slack config with query parameters "${JSON.stringify(queryParams)}" from database`)
       res.status(500).send('Internal Server error.')
       res.end()
       return
@@ -154,21 +150,14 @@ export class NotificationEndpoint {
    * (identified by param id) as json list
    */
   handleWebhookRequest = async (req: Request, res: Response) => {
-
-    const id = parseInt(req.params.id)
-    console.log(`Received request for webhook config with id ${id} from Host ${req.connection.remoteAddress}`)
-
-    if (!id) {
-      console.error("Request for config: ID not set")
-      res.status(400).send('Webhook ID is not set.')
-      return
-    }
+    const queryParams = req.query
+    console.log(`Received request for webhook config with query parameters ${JSON.stringify(queryParams)} from Host ${req.connection.remoteAddress}`)
 
     // Get configs from database
-    const configs = await this.storageHandler.getWebHookConfigs(id)
+    const configs = await this.storageHandler.getWebHookConfigs(queryParams)
 
     if (!configs) {
-      console.error(`Could not get webhook config with id "${id}" from database`)
+      console.error(`Could not get webhook config with query parameters ${JSON.stringify(queryParams)} from database`)
       res.status(500).send('Internal Server error.')
       res.end()
       return
@@ -182,21 +171,14 @@ export class NotificationEndpoint {
    * (identified by param id) as json list
    */
   handleFCMRequest = async (req: Request, res: Response) => {
-
-    const id = parseInt(req.params.id)
-    console.log(`Received request for firebase config with id ${id} from Host ${req.connection.remoteAddress}`)
-
-    if (!id) {
-      console.error("Request for config: ID not set")
-      res.status(400).send('Firebase ID is not set.')
-      return
-    }
+    const queryParams = req.query
+    console.log(`Received request for firebase config with query parameters ${JSON.stringify(queryParams)} from Host ${req.connection.remoteAddress}`)
 
     // Get configs from database
-    const configs = await this.storageHandler.getFirebaseConfigs(id)
+    const configs = await this.storageHandler.getFirebaseConfigs(queryParams)
 
     if (!configs) {
-      console.error(`Could not get firebase config with id "${id}" from database`)
+      console.error(`Could not get firebase config with query parameters ${JSON.stringify(queryParams)} from database`)
       res.status(500).send('Internal Server error.')
       res.end()
       return
@@ -376,12 +358,11 @@ export class NotificationEndpoint {
       
       case 'pipeline':
         this.handlePipelineDelete(req, res)
-        
+        break
       default:
         res.status(400).send(`Notification type ${configType} not suppoerted!`)
         return
     }
-
 
   }
 
@@ -414,10 +395,6 @@ export class NotificationEndpoint {
 
       case CONFIG_TYPE.SLACK:
         this.handleSlackRequest(req, res)
-        break
-
-      case 'pipeline':
-        this.handleConfigSummaryRequest(req, res)
         break
 
       default:
@@ -555,12 +532,12 @@ export class NotificationEndpoint {
       console.error("Request for config: ID not set")
       res.status(400).send('Pipeline ID is not set.')
       res.end()
-      return
+      return Promise.resolve()
     }
 
     // Delete Config
     try {
-      deleteResult = await this.storageHandler.deleteSlackConfig(configId)
+      deleteResult = await this.storageHandler.deleteWebhookConfig(configId)
 
       // No Deletion done
       if (deleteResult.affected != 1) {
@@ -571,7 +548,7 @@ export class NotificationEndpoint {
       console.error(`Could not delete WebHook Config with id ${configId}: ${error}`)
       res.status(400).send('Internal Server Error.')
       res.end()
-      return
+      return Promise.resolve()
     }
 
     // return saved post back
@@ -585,7 +562,8 @@ export class NotificationEndpoint {
    * it to the database on success
    */
   handleConfigUpdate  = async (req: Request, res: Response): Promise<void> => {
-    console.log(`Received notification config update request from Host ${req.connection.remoteAddress}`)
+    console.log(`Received ${req.params.configType} config update for id "${req.params.id}" request from Host ${req.connection.remoteAddress}`)
+    console.debug(`Received config: ${JSON.stringify(req.body)}`)
     const configType = req.params.configType
     const id = parseInt(req.params.id)
     const config = req.body as NotificationConfig
@@ -594,39 +572,47 @@ export class NotificationEndpoint {
       console.warn(`No valid id for Notification Update Request provided`)
       res.send(400).send(`No valid id for Notification Update Request provided`)
       res.end()
-      return
+      return Promise.resolve()
     }
 
     if (!configType) {
       console.warn(`No valid notification Type for Notification Update Request provided`)
       res.send(400).send(`No valid id for Notification Update Request provided`)
       res.end()
-      return
+      return Promise.resolve()
     }
 
     if (!NotificationEndpoint.isValidNotificationConfig(config)) {
-      console.error("Received malformed NoticationUpdate request")
+      console.warn(`Received malformed NoticationUpdate request: ${JSON.stringify(req.body)}`)
       res.status(400).send('Malformed Notification config.')
+      res.end()
+      return Promise.resolve()
+    }
+
+    try {
+      switch (configType) {
+        case 'webhook':
+          this.storageHandler.updateWebhookConfig(id, req.body as WebHookConfig)
+          break
+        case 'fcm':
+          const config = req.body as FirebaseConfig
+          this.storageHandler.updateFirebaseConfig(id, req.body as FirebaseConfig)
+          break
+        case 'slack':
+          this.storageHandler.updateSlackConfig(id, req.body as SlackConfig)
+          break
+        default:
+          res.status(400).send(`Notification type ${configType} not suppoerted!`)
+          return
+      }
+    } catch (err) {
+      console.error(`Could not update ${configType} config: ${err}`)
+      res.status(500).send(`Internal Server Error.`)
       res.end()
       return
     }
 
-    switch (configType) {
-      case 'webhook':
-           this.storageHandler.updateWebhookConfig(id, req.body as WebHookConfig)
-        break
-      case 'fcm':
-        const config = req.body as FirebaseConfig
-        this.storageHandler.updateFirebaseConfig(id, req.body as FirebaseConfig)
-        break
-      case 'slack':
-        this.storageHandler.updateSlackConfig(id, req.body as SlackConfig)
-        break
-      default:
-        res.status(400).send(`Notification type ${configType} not suppoerted!`)
-        return
-    }
-
+    res.status(200).send('Sucessfully updated.')
     res.end()
   }
 
