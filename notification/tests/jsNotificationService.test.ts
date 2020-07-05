@@ -2,7 +2,7 @@
 import axios from 'axios'
 
 import VM2SandboxExecutor from '../src/vm2SandboxExecutor'
-import { WebHookConfig, NotficationConfigRequest, CONFIG_TYPE, NotificationConfig, SlackConfig } from '../src/models/notificationConfig';
+import { WebHookConfig,  CONFIG_TYPE, SlackConfig } from '../src/models/notificationConfig';
 import NotificationService from '../src/interfaces/notificationService';
 import JSNotificationService from '../src/jsNotificationService';
 import { TransformationEvent } from '../src/interfaces/transformationResults/transformationEvent';
@@ -85,49 +85,48 @@ describe('JSNotificationService', () => {
     })
 
     /**
-     * Build the message to fetched by axios mock
-     * @param event transoformationEvent, received upon successfull transformation
+     * Builds the notification message to be sent,
+     * by composing the contents of the transformation event to readable
+     * message
+     * 
+     * @param event event to extract transformation results from 
+     * @returns message to be sent as notification
      */
     function buildMessage(event: TransformationEvent): string {
 
-      let message: string                       // message to return
-      const jobError = event.jobResult.error    // Error of transformation (if exists)
+      let message // message to return
+      const jobError = event.jobResult.error // Error of transformation (if exists)
 
       /*======================================================
-      *  Build Message for succesfull transformation/pipline
-      *=======================================================*/
+       *  Build Message for succesfull transformation/pipline
+       *=======================================================*/
       if (jobError === undefined) {
         // Build Stats (Time measures for transformation execution)
         const jobStats = event.jobResult.stats
         const start = new Date(jobStats.startTimestamp)
         const end = new Date(jobStats.endTimestamp)
 
-
         // Build Success Message
-        message = `Pipeline ${event.pipelineName}(Pipeline ID:${event.pipelineId}) ` +
-          `has new data available. Fetch at ${event.dataLocation}.
+        message = `Pipeline ${event.pipelineName}(Pipeline ID:${event.pipelineId})\n` +
+          `has new data available. Fetch at ${event.dataLocation}.\n\n` +
+          `Transformation Details:\n` +
+          `\tStart: ${start}\n` +
+          `\tEnd:  ${end}\n` +
+          `\tDuration: ${jobStats.durationInMilliSeconds} ms`
 
-        Transformation Details:
-              Start: ${start}
-              End:  ${end}
-              Duration: ${jobStats.durationInMilliSeconds} ms`
-      
       } else {
-      /*====================================================
-      *  Build Message for failed transformation/pipline
-      *====================================================*/
-        message = `Pipeline ${event.pipelineName}(Pipeline ID:${event.pipelineId})Failed.
-
-          Details:
-            Line: ${jobError.lineNumber}
-            Message: ${jobError.message}
-            Stacktrace: ${ jobError.stacktrace}`
+        /*====================================================
+         *  Build Message for failed transformation/pipline
+         *====================================================*/
+        message = `Pipeline ${event.pipelineName}(Pipeline ID:${event.pipelineId})Failed.\n\n` +
+          `Details:\n` +
+          `\tLine: ${jobError.lineNumber}\n` +
+          `\tMessage: ${jobError.message}\n` +
+          `\tStacktrace: ${jobError.stacktrace}`
       }
 
       return message
     }
-
-
 
     it('should trigger notification when transformation failed and condition is "data == undefined', async () => {
       post.mockReturnValue(Promise.resolve())
@@ -146,7 +145,7 @@ describe('JSNotificationService', () => {
       expect(post).toHaveBeenCalledTimes(1)
       //check arguments for axios post
       expect(post.mock.calls[0][0]).toEqual(notificationConfig.url)
-      expect(post.mock.calls[0][1].location).toEqual(expectedMessage)
+      expect(post.mock.calls[0][1].message).toEqual(expectedMessage)
     })
 
     it('should trigger notification when transformation failed and condition is "!data', async () => {
@@ -166,7 +165,7 @@ describe('JSNotificationService', () => {
       expect(post).toHaveBeenCalledTimes(1)
       //check arguments for axios post
       expect(post.mock.calls[0][0]).toEqual(notificationConfig.url)
-      expect(post.mock.calls[0][1].location).toEqual(expectedMessage)
+      expect(post.mock.calls[0][1].message).toEqual(expectedMessage)
     })
 
     /**
@@ -189,7 +188,7 @@ describe('JSNotificationService', () => {
       expect(post).toHaveBeenCalledTimes(1)
       //check arguments for axios post
       expect(post.mock.calls[0][0]).toEqual(notificationConfig.url)
-      expect(post.mock.calls[0][1].location).toEqual(expectedMessage)
+      expect(post.mock.calls[0][1].message).toEqual(expectedMessage)
     })
 
     /**
