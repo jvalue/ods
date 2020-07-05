@@ -5,11 +5,11 @@ import { Connection, DeleteResult, UpdateResult } from 'typeorm';
 export interface NotificationRepository {
   init(retries: number, backoff: number):void
   getConfigsForPipeline(pipelineId: number): Promise<NotificationSummary>
-  deleteConfigsForPipelineID(pipelineId: number): void
+  deleteConfigsForPipelineID(pipelineId: number): Promise<void>
 
-  getSlackConfigs(pipelineId: number): Promise<SlackConfig[]>
-  getWebHookConfigs(pipelineId: number): Promise<WebHookConfig[]>
-  getFirebaseConfigs(pipelineId: number): Promise<FirebaseConfig[]>
+  getSlackConfigs(queryParams: object): Promise<SlackConfig[]>
+  getWebHookConfigs(queryParams: object): Promise<WebHookConfig[]>
+  getFirebaseConfigs(queryParams: object): Promise<FirebaseConfig[]>
 
   saveWebhookConfig(webhookConfig: WebHookConfig): Promise<WebHookConfig>
   saveSlackConfig(slackConfig: SlackConfig): Promise<SlackConfig>
