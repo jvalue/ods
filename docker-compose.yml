@@ -10,6 +10,23 @@ volumes:
 
 services:
 
+  # -------------------- RABBIT-MQ -------------------------------------------
+  rabbitmq:
+    image:  rabbitmq:management
+    environment:
+      RABBITMQ_ERLANG_COOKIE: 'S0m3_R4bBi7_C0ok13'
+      RABBITMQ_DEFAULT_USER: ${RABBIT_USR}
+      RABBITMQ_DEFAULT_PASS: ${RABBIT_PWD}
+    labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.to-amqp.rule=PathPrefix(`/api/amqp`)"
+        - "traefik.http.routers.to-amqp.middlewares=amqp-stripprefix@docker"
+        - "traefik.http.middlewares.amqp-stripprefix.stripprefix.prefixes=/api/amqp"
+        - "traefik.http.services.amqp.loadbalancer.server.port=8080"
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+
   # ----------------- UI SERVICE (/ui) --------------------
   ui:
     image: ${DOCKER_REGISTRY}/ui
@@ -68,14 +85,14 @@ services:
     environment:
       DB_URL: jdbc:postgresql://adapter-db:5432/adapterservice
 
-      
+      # AMQP_CONFIG
+      RABBIT_HOST: ${RABBIT_HOST}
+      RABBIT_USR: ${RABBIT_USR}
+      RABBIT_PWD: ${RABBIT_PWD}
+      RABBIT_PORT: ${RABBIT_PORT}
 
-      RABBIT_HOST: rabbitmq
-      RABBIT_USR: rabbit_adm
-      RABBIT_PWD: R4bb!7_4DM_p4SS
-      RABBIT_PORT: 5672
-
-      AMQP_ADAPTER_CONFIG_CHANNEL: 'ADAPTER_CONFIG'
+      AMQP_ADAPTER_CONFIG_CHANNEL: ${AMQP_ADAPTER_CONFIG_CHANNEL}
+      AMQP_ADAPTER_DATA_CHANNEL: ${AMQP_ADAPTER_DATA_CHANNEL}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-adapter.rule=PathPrefix(`/api/adapter`)"
@@ -98,13 +115,13 @@ services:
       ADAPTER_SERVICE_URL: http://adapter:8080
 
       # Rabbitmq connection details
-      AMQP_SERVICE_HOST: 'rabbitmq'
-      AMQP_SERVICE_USER: 'rabbit_adm'
-      AMQP_SERVICE_PWD: 'R4bb!7_4DM_p4SS'
+      AMQP_SERVICE_HOST: ${RABBIT_HOST}
+      AMQP_SERVICE_USER: ${RABBIT_USR}
+      AMQP_SERVICE_PWD: ${RABBIT_PWD}
 
       # AMQP - Queues
-      AMQP_ADAPTER_CONFIG_CHANNEL: 'ADAPTER_CONFIG'
-      AMQP_ADAPTER_TRIGGER_CHANNEL: 'ADAPTER_TRIGGER'
+      AMQP_ADAPTER_CONFIG_CHANNEL: ${AMQP_ADAPTER_CONFIG_CHANNEL}
+      AMQP_ADAPTER_TRIGGER_CHANNEL: ${AMQP_ADAPTER_TRIGGER_CHANNEL}
 
       INITIAL_CONNECTION_RETRIES: 20
       INITIAL_CONNECTION_RETRY_BACKOFF: 5000
@@ -147,6 +164,8 @@ services:
 
   storage-db-ui: # management UI for Postgres
     image: adminer
+    ports:
+      - "10000:8080"
 
   storage-db-liquibase: # perform database migration on start up
     image: ${DOCKER_REGISTRY}/storage-db-liquibase
@@ -181,12 +200,12 @@ services:
       DATABASE_PW: postgres-wrapper-pw
 
       # Rabbitmq connection details
-      AMQP_SERVICE_HOST: 'rabbitmq'
-      AMQP_SERVICE_USER: 'rabbit_adm'
-      AMQP_SERVICE_PWD: 'R4bb!7_4DM_p4SS'
+      AMQP_SERVICE_HOST: ${RABBIT_HOST}
+      AMQP_SERVICE_USER: ${RABBIT_USR}
+      AMQP_SERVICE_PWD: ${RABBIT_PWD}
 
       # Queue Names
-      AMQP_ODSDATA_QUEUE: 'ODS_DATA_QUEUE'
+      AMQP_ODSDATA_QUEUE: ${AMQP_ODSDATA_QUEUE}
 
     labels:
       - "traefik.enable=true"
@@ -211,13 +230,14 @@ services:
       PGPORT: 5432
 
       # Rabbitmq connection details
-      AMQP_SERVICE_HOST: 'rabbitmq'
-      AMQP_SERVICE_USER: 'rabbit_adm'
-      AMQP_SERVICE_PWD: 'R4bb!7_4DM_p4SS'
+      AMQP_SERVICE_HOST: ${RABBIT_HOST}
+      AMQP_SERVICE_USER: ${RABBIT_USR}
+      AMQP_SERVICE_PWD: ${RABBIT_PWD}
 
-      AMQP_JOB_QUEUE: 'data_import'
-      AMQP_NOTIFICATION_QUEUE: 'NOTIF_QUEUE'
-      AMQP_ODSDATA_QUEUE: 'ODS_DATA_QUEUE'
+      # Queues
+      AMQP_JOB_QUEUE: ${AMQP_ADAPTER_DATA_CHANNEL}
+      AMQP_NOTIFICATION_QUEUE: ${AMQP_NOTIFICATION_QUEUE}
+      AMQP_ODSDATA_QUEUE: ${AMQP_ODSDATA_QUEUE}
 
     labels:
       - "traefik.enable=true"
@@ -251,7 +271,7 @@ services:
       AMQP_SERVICE_USER: 'rabbit_adm'
       AMQP_SERVICE_PWD: 'R4bb!7_4DM_p4SS'
 
-      AMQP_NOTIFICATION_QUEUE: 'NOTIF_QUEUE'
+      AMQP_NOTIFICATION_QUEUE: ${AMQP_NOTIFICATION_QUEUE}
     depends_on: 
       - notification-db
       - rabbitmq
@@ -303,20 +323,3 @@ services:
       - "9001:8080"   # The Web UI (enabled by --api)
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
-
-# -------------------- RABBIT-MQ -------------------------------------------
-  rabbitmq:
-    image:  rabbitmq:management
-    environment:
-      RABBITMQ_ERLANG_COOKIE: 'S0m3_R4bBi7_C0ok13'
-      RABBITMQ_DEFAULT_USER: 'rabbit_adm'
-      RABBITMQ_DEFAULT_PASS: 'R4bb!7_4DM_p4SS'
-    labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.to-amqp.rule=PathPrefix(`/api/amqp`)"
-        - "traefik.http.routers.to-amqp.middlewares=amqp-stripprefix@docker"
-        - "traefik.http.middlewares.amqp-stripprefix.stripprefix.prefixes=/api/amqp"
-        - "traefik.http.services.amqp.loadbalancer.server.port=8080"
-    ports:
-      - "15672:15672"
-      - "5672:5672"
