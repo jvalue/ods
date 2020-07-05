@@ -1,32 +1,38 @@
 {
-  "name": "transformation-it",
-  "version": "1.0.0",
-  "description": "Transformation Service Integration-Tests",
-  "scripts": {
-    "mock:receiver": "node src/mock.receiver.js",
-    "pretest": "npm run mock:receiver &",
-    "test": "jest",
-    "posttest": "killall node",
-    "lint": "./node_modules/.bin/eslint src --ext .js --fix"
-  },
-  "devDependencies": {
-    "eslint": "^6.0.0",
-    "eslint-config-standard": "^14.1.1",
-    "eslint-plugin-import": "^2.21.2",
-    "eslint-plugin-jest": "^23.13.2",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1",
-    "jest": "^25.5.0",
-    "supertest": "^4.0.2"
-  },
-  "jest": {
-    "testEnvironment": "node"
-  },
-  "dependencies": {
-    "koa": "^2.12.0",
-    "koa-bodyparser": "^4.3.0",
-    "koa-router": "^8.0.8",
-    "wait-on": "^4.0.2"
-  }
+    "name": "transformation-it",
+    "version": "1.0.0",
+    "description": "Transformation Service Integration-Tests",
+    "scripts": {
+        "mock:receiver": "node mock.receiver.js",
+        "test:transpiled": "npm run transpile && npm run test",
+        "test:local": "npm run transpile && npm run test /dist",
+        "pretest": "npm run mock:receiver &",
+        "transpile": "tsc",
+        "test": "jest --runInBand --detectOpenHandles --forceExit",
+        "posttest": "killall node",
+        "lint": "./node_modules/.bin/eslint src --ext .js --fix"
+    },
+    "dependencies": {
+        "amqplib": "^0.5.6",
+        "koa": "^2.12.0",
+        "koa-bodyparser": "^4.3.0",
+        "koa-router": "^8.0.8",
+        "wait-on": "^4.0.2"
+    },
+    "devDependencies": {
+        "@types/amqplib": "^0.5.13",
+        "eslint": "^6.0.0",
+        "eslint-config-standard": "^14.1.1",
+        "eslint-plugin-import": "^2.21.2",
+        "eslint-plugin-jest": "^23.13.2",
+        "eslint-plugin-node": "^11.1.0",
+        "eslint-plugin-promise": "^4.2.1",
+        "eslint-plugin-standard": "^4.0.1",
+        "jest": "^25.5.4",
+        "supertest": "^4.0.2",
+        "typescript": "^3.9.6"
+    },
+    "jest": {
+        "testEnvironment": "node"
+    }
 }

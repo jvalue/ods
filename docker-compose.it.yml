@@ -62,6 +62,9 @@ services:
   transformation:
     environment:
       AUTH_ENABLED: 'false'
+    depends_on:
+    - rabbitmq
+    - transformation-db
 
   transformation-it:
     image: open-data-service/ods-main/transformation-it
@@ -70,12 +73,25 @@ services:
     environment:
       TRANSFORMATION_API: http://transformation:8080
 
+      # AMQP Settings
+      AMQP_SERVICE_HOST: ${RABBIT_HOST}
+      AMQP_SERVICE_USER: ${RABBIT_USR}
+      AMQP_SERVICE_PWD: ${RABBIT_PWD}
+
+      # AMQP Queues
+      AMQP_JOB_QUEUE: ${AMQP_ADAPTER_DATA_CHANNEL}
+      AMQP_NOTIFICATION_QUEUE: 'MOCK_NOTIFICATION_QUEUE'
+      AMQP_ODSDATA_QUEUE: 'MOCK_ODSDATA_QUEUE'
+
    # ----------------- NOTIFICATION SERVICE (PORTS #TODO) --------------------
   notification:
     environment:
       AUTH_ENABLED: 'false'
       MOCK_RECEIVER_HOST: notification-it
       MOCK_RECEIVER_PORT: 8081
+    depends_on:
+    - rabbitmq
+    - notification-db
 
   notification-it:
     image: open-data-service/ods-main/notification-it
@@ -86,6 +102,18 @@ services:
       MOCK_RECEIVER_HOST: notification-it
       MOCK_RECEIVER_PORT: 8081
 
+      # AMQP Settings
+      AMQP_SERVICE_HOST: ${RABBIT_HOST}
+      AMQP_SERVICE_USER: ${RABBIT_USR}
+      AMQP_SERVICE_PWD: ${RABBIT_PWD}
+      AMQP_NOTIFICATION_QUEUE: ${AMQP_NOTIFICATION_QUEUE}
+      
+    depends_on:
+    - notification
+    - rabbitmq
+    
+
+
   # ----------------- CORE SERVICE (PORTS 9600 - 9599) --------------------
   core-it:
     image: open-data-service/ods-main/core-it
@@ -93,3 +121,7 @@ services:
       context: ./core/integration-test
     environment:
       CORE_API: http://core:8080
+
+    
+    
+      
