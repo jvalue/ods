@@ -1,9 +1,9 @@
 import * as express from 'express'
 
-import NotificationService from '@/notification-execution/notificationService'
+import NotificationService from '../../notification-execution/notificationService'
 import { Firebase, NotificationRequest, Slack, Webhook } from './notificationRequest'
-import { CONFIG_TYPE } from '@/notification-config/notificationConfig'
-import { TransformationEvent } from '@/notification-execution/condition-evaluation/transformationEvent'
+import { CONFIG_TYPE } from '../../notification-config/notificationConfig'
+import { TransformationEvent } from '../../notification-execution/condition-evaluation/transformationEvent'
 
 export class NotificationExecutionEndpoint {
 
