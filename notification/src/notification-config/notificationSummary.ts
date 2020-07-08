@@ -1,10 +1,10 @@
-import { WebHookConfig, SlackConfig, FirebaseConfig } from '../models/notificationConfig';
+import { WebHookConfig, SlackConfig, FirebaseConfig } from './notificationConfig';
 
 
 /**
  * NotificationSummary will be returned upon a request for
  * configs for a specfic Pipeline id
- * 
+ *
  * @field webhook   All WebHookConfigs for a specific pipeline id
  * @field slack     All SlackConfigs for a specific pipeline id
  * @field firebase  All FirebaseConfigs for a specific pipeline id

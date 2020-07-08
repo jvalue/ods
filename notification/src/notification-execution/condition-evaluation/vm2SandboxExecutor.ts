@@ -1,6 +1,6 @@
 import { VM } from 'vm2'
 
-import SandboxExecutor from './interfaces/sandboxExecutor';
+import SandboxExecutor from './sandboxExecutor';
 
 export default class VM2SandboxExecutor implements SandboxExecutor {
   vm: VM;

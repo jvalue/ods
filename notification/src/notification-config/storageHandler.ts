@@ -1,7 +1,7 @@
-import { SlackConfig, WebHookConfig, FirebaseConfig } from '../models/notificationConfig';
+import { SlackConfig, WebHookConfig, FirebaseConfig } from './notificationConfig';
 import { Connection, ConnectionOptions, createConnection, getConnection, Repository, UpdateResult, DeleteResult } from 'typeorm';
-import { NotificationSummary} from '../interfaces/notificationSummary';
-import { NotificationRepository } from '../interfaces/notificationRepository';
+import { NotificationSummary} from './notificationSummary';
+import { NotificationRepository } from './notificationRepository';
 
 /**
  * This class handles Requests to the Nofification Database
@@ -35,9 +35,9 @@ export class StorageHandler implements NotificationRepository {
 
     /**
  * Initializes the components of the notifciation storage handler.
- * This is done by establishing a connection to the notication database 
+ * This is done by establishing a connection to the notication database
  * and initiliazing a repository for the notification config
- * 
+ *
  * @param retries:  Number of retries to connect to the database
  * @param backoff:  Time in seconds to backoff before next connection retry
  */
@@ -110,7 +110,7 @@ export class StorageHandler implements NotificationRepository {
 
     /**
      * This function returns all available Configs in the Database for given pipeline id.
-     * 
+     *
      * @param pipelineId    Id of the pipeline to search configs for
      * @returns Promise, containing NotificationSummary (config that contains all configs)
      */
@@ -138,12 +138,12 @@ export class StorageHandler implements NotificationRepository {
 
     /**
      * Deletes all configs in the database referring to given pipeline id.
-     * If one of the deletions fails all changes will be rolled back. 
-     * 
+     * If one of the deletions fails all changes will be rolled back.
+     *
      * @param pipelineId Id of the pipeline to delete the configs for
      */
     public deleteConfigsForPipelineID(pipelineId: number): Promise<void> {
-        console.debug(`Deleting all configs for pipeline id "${pipelineId}"`)  
+        console.debug(`Deleting all configs for pipeline id "${pipelineId}"`)
         if (!this.checkClassInvariant()) {
             return Promise.reject()
         }
@@ -156,11 +156,11 @@ export class StorageHandler implements NotificationRepository {
         }
 
         let transaction =this.dbConnection.transaction(async transactionalEntityManager => {
-            await transactionalEntityManager.delete(SlackConfig, condition)    
-            await transactionalEntityManager.delete(WebHookConfig, condition)    
-            await transactionalEntityManager.delete(FirebaseConfig, condition)    
+            await transactionalEntityManager.delete(SlackConfig, condition)
+            await transactionalEntityManager.delete(WebHookConfig, condition)
+            await transactionalEntityManager.delete(FirebaseConfig, condition)
         }).catch(error => { console.error(`Could not delete Conifgs with pipelineId ${pipelineId}`)})
-        
+
         return Promise.resolve()
     }
 
@@ -280,7 +280,7 @@ export class StorageHandler implements NotificationRepository {
 
     /**
      * Persists a firebase config (provided by argument) to the config database
-     * 
+     *
      * @param firebaseConfig    firebase config to persist
      * @returns Promise, containing the stored firebase config
      */
@@ -297,10 +297,10 @@ export class StorageHandler implements NotificationRepository {
         console.debug('Successfully persisted firebase config')
         return firebasePromise;
     }
-    
+
     /**
      * Updates a Slack config for given id
-     * 
+     *
      * @param id id for the config to be updated
      * @param slackConfig slack config to be written to database
      * @returns Promise containing the result of the update operation
@@ -361,7 +361,7 @@ export class StorageHandler implements NotificationRepository {
 
     /**
       * Deletes a Slack config for given id
-      * 
+      *
       * @param id id for the config to be deleted
       * @returns result of the deletion execution
       */
@@ -395,7 +395,7 @@ export class StorageHandler implements NotificationRepository {
 
         console.debug(`Successfully deleted webhook config with id ${id}`)
         return deletePromise
-        
+
     }
 
     /**
@@ -418,16 +418,16 @@ export class StorageHandler implements NotificationRepository {
     }
 
     /**
-     * This function ensures that all objects are initialized 
-     * for further interaction with the config database 
-     * 
+     * This function ensures that all objects are initialized
+     * for further interaction with the config database
+     *
      * @returns true, if invariant correct, else false
      */
     private checkClassInvariant(): boolean {
         let result: boolean = true
         let msg: string[] = []
 
-        
+
         if (!this.dbConnection) {
             msg.push('Config Database connection')
             result = false
@@ -445,7 +445,7 @@ export class StorageHandler implements NotificationRepository {
 
         if (!this.firebaseRepository) {
             msg.push('Firebase config repository.')
-            result = false      
+            result = false
         }
 
         if (!result) {

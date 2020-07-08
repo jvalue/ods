@@ -1,15 +1,15 @@
 import App = firebase.app.App;
 import axios from 'axios'
 import * as firebase from 'firebase-admin'
-import NotificationService from './interfaces/notificationService';
+import NotificationService from './notificationService';
 
-import { CONFIG_TYPE, NotificationConfig, WebHookConfig, SlackConfig, FirebaseConfig, NotficationConfigRequest } from './models/notificationConfig';
+import { CONFIG_TYPE, NotificationConfig, WebHookConfig, SlackConfig, FirebaseConfig, NotficationConfigRequest } from '../notification-config/notificationConfig';
 
-import SlackCallback from './interfaces/notificationCallbacks/slackCallback';
-import WebhookCallback from './interfaces/notificationCallbacks/webhookCallback';
-import FcmCallback from './interfaces/notificationCallbacks/fcmCallback';
-import SandboxExecutor from './interfaces/sandboxExecutor';
-import { TransformationEvent } from './interfaces/transformationResults/transformationEvent';
+import SlackCallback from './notificationCallbacks/slackCallback';
+import WebhookCallback from './notificationCallbacks/webhookCallback';
+import FcmCallback from './notificationCallbacks/fcmCallback';
+import SandboxExecutor from './condition-evaluation/sandboxExecutor';
+import { TransformationEvent } from './condition-evaluation/transformationEvent';
 
 
 const VERSION = '0.0.1'
@@ -34,7 +34,7 @@ async handleNotification(notification: NotificationConfig, event: Transformation
   if (!conditionHolds) { // no need to trigger notification
     return Promise.resolve()
   }
-  
+
   const message = this.buildMessage(event)
 
   switch (type) {
@@ -57,8 +57,8 @@ async handleNotification(notification: NotificationConfig, event: Transformation
    * Builds the notification message to be sent,
    * by composing the contents of the transformation event to readable
    * message
-   * 
-   * @param event event to extract transformation results from 
+   *
+   * @param event event to extract transformation results from
    * @returns message to be sent as notification
    */
   buildMessage(event: TransformationEvent): string {

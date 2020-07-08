@@ -1,9 +1,9 @@
-import { StorageHandler } from "./storageHandler"
+import { StorageHandler } from "../../notification-config/storageHandler"
 import { connect, Connection, ConsumeMessage } from "amqplib/callback_api"
-import { TransformationEvent } from '../interfaces/transformationResults/transformationEvent';
-import JSNotificationService from '../jsNotificationService';
-import VM2SandboxExecutor from "../vm2SandboxExecutor";
-import { CONFIG_TYPE } from "../models/notificationConfig";
+import { TransformationEvent } from '../../notification-execution/condition-evaluation/transformationEvent';
+import JSNotificationService from '../../notification-execution/jsNotificationService';
+import VM2SandboxExecutor from "../../notification-execution/condition-evaluation/vm2SandboxExecutor";
+import { CONFIG_TYPE } from "../../notification-config/notificationConfig";
 
 /**
  * This class handles the communication with the AMQP service (rabbitmq)
@@ -13,7 +13,7 @@ import { CONFIG_TYPE } from "../models/notificationConfig";
  *       ----------------------
  *       A channel to notify the notification service that a transformation is done.
  *       (see TransformationEvent for details of the Event).
- *      
+ *
  */
 export class AmqpHandler{
     notifQueueName = process.env.AMQP_NOTIFICATION_QUEUE!     // Queue name of the Job Queue
@@ -24,7 +24,7 @@ export class AmqpHandler{
 
     /**
      * Default constructor.
-     * 
+     *
      * @param storageHandler    StorageHandler to get corresponding notification configs
      * @param executor          Sandboxexecutor to run condition evaluations
      */
@@ -35,7 +35,7 @@ export class AmqpHandler{
     }
     /**
      * Connects to Amqp Service and initializes a channel
-     * 
+     *
      * @param retries   Number of retries to connect to the notification-config db
      * @param backoff   Time to wait until the next retry
      */
@@ -50,7 +50,7 @@ export class AmqpHandler{
         var established: boolean = false    // amqp service connection result
         const handler: AmqpHandler = this   // for ability to access methods and members in callback
         let errMsg: string = ''             // Error Message to be shown after final retry
-        
+
         for (let i = 1; i <= retries; i++) {
             await this.backOff(backoff)
             await connect(rabit_amqp_url, async function (error0: any, connection: Connection) {
@@ -112,7 +112,7 @@ export class AmqpHandler{
     /**
      * Handles an event message
      * @param msg Message receveived from the message queue
-     * 
+     *
      * @returns true on success, else false
      */
     private handleEvent(msg: ConsumeMessage | null): boolean {
@@ -124,9 +124,9 @@ export class AmqpHandler{
         const eventMessage = JSON.parse(msg.content.toString())
         const transformationEvent = eventMessage as TransformationEvent
 
-        console.log(`Received Event from Channel: Pipeline id: "${transformationEvent.pipelineId}", 
+        console.log(`Received Event from Channel: Pipeline id: "${transformationEvent.pipelineId}",
         Pipeline Name: "${transformationEvent.pipelineName}`)
-        
+
         const isValid = this.isValidTransformationEvent(transformationEvent)
 
         if (!isValid) {
@@ -157,7 +157,7 @@ export class AmqpHandler{
             for (const firebaseConfig of config.firebase) {
                 this.notificationService.handleNotification(firebaseConfig, transformationEvent, CONFIG_TYPE.FCM)
             }
-            
+
         })
 
         return true

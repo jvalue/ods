@@ -1,4 +1,4 @@
-import { FirebaseConfig, SlackConfig, WebHookConfig } from "../models/notificationConfig";
+import { FirebaseConfig, SlackConfig, WebHookConfig } from "./notificationConfig";
 import { NotificationSummary } from "./notificationSummary";
 import { Connection, DeleteResult, UpdateResult } from 'typeorm';
 

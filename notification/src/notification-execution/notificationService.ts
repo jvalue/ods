@@ -1,5 +1,5 @@
-import { NotificationConfig, CONFIG_TYPE } from '../models/notificationConfig'
-import { TransformationEvent } from './transformationResults/transformationEvent';
+import { NotificationConfig, CONFIG_TYPE } from '../notification-config/notificationConfig'
+import { TransformationEvent } from './condition-evaluation/transformationEvent';
 
 
 export default interface NotificationService {

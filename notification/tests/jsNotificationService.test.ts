@@ -1,12 +1,12 @@
 /* eslint-env jest */
 import axios from 'axios'
 
-import VM2SandboxExecutor from '../src/vm2SandboxExecutor'
-import { WebHookConfig, NotficationConfigRequest, CONFIG_TYPE, NotificationConfig, SlackConfig } from '../src/models/notificationConfig';
-import NotificationService from '../src/interfaces/notificationService';
-import JSNotificationService from '../src/jsNotificationService';
-import { TransformationEvent } from '../src/interfaces/transformationResults/transformationEvent';
-import SlackCallback from '@/interfaces/notificationCallbacks/slackCallback';
+import VM2SandboxExecutor from '../src/notification-execution/condition-evaluation/vm2SandboxExecutor'
+import { WebHookConfig, NotficationConfigRequest, CONFIG_TYPE, NotificationConfig, SlackConfig } from '../src/notification-config/notificationConfig';
+import NotificationService from '../src/notification-execution/notificationService';
+import JSNotificationService from '../src/notification-execution/jsNotificationService';
+import { TransformationEvent } from '../src/notification-execution/condition-evaluation/transformationEvent';
+import SlackCallback from '@/notification-execution/notificationCallbacks/slackCallback';
 
 jest.mock('axios')
 
@@ -18,7 +18,7 @@ describe('JSNotificationService', () => {
     const post = axios.post as jest.Mock
 
     let notificationService: NotificationService
-    
+
     let successEvent: TransformationEvent   // Event received after successful transformation
     let failEvent: TransformationEvent      // Event received after failed transformation
 
@@ -29,7 +29,7 @@ describe('JSNotificationService', () => {
       notificationService = new JSNotificationService(new VM2SandboxExecutor()) // TODO: replace with mock
       console.log = jest.fn()
       /*=======================================================
-       * An Event sent by the Transformation Service 
+       * An Event sent by the Transformation Service
        * on succesful transformation/pipeline
        * =====================================================*/
       successEvent = {
@@ -48,7 +48,7 @@ describe('JSNotificationService', () => {
           }
         }
       }
-      
+
       /*================================================
        *Build Event for failed transformation
        *===============================================*/
@@ -111,7 +111,7 @@ describe('JSNotificationService', () => {
               Start: ${start}
               End:  ${end}
               Duration: ${jobStats.durationInMilliSeconds} ms`
-      
+
       } else {
       /*====================================================
       *  Build Message for failed transformation/pipline
@@ -170,7 +170,7 @@ describe('JSNotificationService', () => {
     })
 
     /**
-     * Test for transform data and 
+     * Test for transform data and
      */
     it('should trigger notification when condition is met', async () => {
       post.mockReturnValue(Promise.resolve())
@@ -226,7 +226,7 @@ describe('JSNotificationService', () => {
         channelId: '123',
         secret: '42'
       }
-      
+
       await notificationService.handleNotification(request, successEvent, CONFIG_TYPE.SLACK)
 
       const message = buildMessage(successEvent)
@@ -236,7 +236,7 @@ describe('JSNotificationService', () => {
       }
       expect(post).toHaveBeenCalledTimes(1)
       const expectedUrl = `https://hooks.slack.com/services/${request.workspaceId}/${request.channelId}/${request.secret}`
-      
+
       expect(post.mock.calls[0][0]).toEqual(expectedUrl)
       expect(post.mock.calls[0][1]).toEqual(expectedObject)
     })

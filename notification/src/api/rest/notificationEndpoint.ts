@@ -3,14 +3,14 @@ import express, { Application, Request, Response } from 'express'
 import session, { MemoryStore } from 'express-session'
 import cors from 'cors'
 import Keycloak from 'keycloak-connect'
-import NotificationService from './interfaces/notificationService';
+import NotificationService from '@/notification-execution/notificationService';
 import "reflect-metadata"
 
 import { Server } from 'http'
 
-import { SlackConfig, WebHookConfig, NotificationConfig, FirebaseConfig, NotficationConfigRequest, CONFIG_TYPE } from './models/notificationConfig';
-import { NotificationRepository } from './interfaces/notificationRepository'
-import { AmqpHandler } from './handlers/amqpHandler';
+import { SlackConfig, WebHookConfig, NotificationConfig, FirebaseConfig, NotficationConfigRequest, CONFIG_TYPE } from '../../notification-config/notificationConfig';
+import { NotificationRepository } from '../../notification-config/notificationRepository'
+import { AmqpHandler } from '../amqp/amqpHandler';
 import { DeleteResult } from 'typeorm';
 
 export class NotificationEndpoint {
@@ -45,7 +45,7 @@ export class NotificationEndpoint {
 
     this.app.get('/', this.getHealthCheck)
     this.app.get('/version', this.getVersion)
- 
+
     // Create Configs
     this.app.post('/config/:configType', this.determineAuth(), this.handleConfigCreation)
 
@@ -138,7 +138,7 @@ export class NotificationEndpoint {
 
     // Get configs from database
     const configs = await this.storageHandler.getSlackConfigs(id)
-    
+
     if (!configs) {
       console.error(`Could not get slack config with id "${id}" from database`)
       res.status(500).send('Internal Server error.')
@@ -255,7 +255,7 @@ export class NotificationEndpoint {
 
     const webHookConfig = req.body as WebHookConfig
     let savedConfig: WebHookConfig
-    
+
     // Check for validity of the request
     if (!NotificationEndpoint.isValidWebhookConfig(webHookConfig)) {
       console.warn('Malformed webhook request.')
@@ -278,7 +278,7 @@ export class NotificationEndpoint {
 
   /**
    * Persists a posted Slack Config to the Database
-   * 
+   *
    * @param req Request for config creation
    * @param res Response for config creation
    */
@@ -287,7 +287,7 @@ export class NotificationEndpoint {
 
     const slackConfig: SlackConfig = req.body as SlackConfig
     let savedConfig: SlackConfig
-    
+
      // Check for validity of the request
     if (!NotificationEndpoint.isValidSlackConfig(slackConfig)) {
       console.warn('Malformed slack request.')
@@ -317,7 +317,7 @@ export class NotificationEndpoint {
 
     const firebaseConfig : FirebaseConfig = req.body as FirebaseConfig
     let savedConfig: FirebaseConfig
-    
+
 
     // Check for validity of the request
     if (!NotificationEndpoint.isValidFirebaseConfig(firebaseConfig)) {
@@ -340,15 +340,15 @@ export class NotificationEndpoint {
 
   /**
    * Handles a requeset for config deletion.
-   * Depending on the paramter :configType in the URL it either deletes a config 
-   * of a specific config type (such as slack) or deletes all configs 
+   * Depending on the paramter :configType in the URL it either deletes a config
+   * of a specific config type (such as slack) or deletes all configs
    * for a specific pipeline
-   * 
+   *
    * @param req request containing the paramter :configType and the :id of the config
    *            or respectively the pipeline id for the configs to be deleted
-   * 
+   *
    * @param res HTTP-Response that is sent back to the requester
-   * 
+   *
    */
   handleConfigDeletion = (req: Request, res: Response): void => {
 
@@ -365,18 +365,18 @@ export class NotificationEndpoint {
       case CONFIG_TYPE.WEBHOOK:
         this.deleteWebHook(req,res)
         break
-      
+
       case CONFIG_TYPE.FCM:
         this.deleteFCM(req,res)
         break
-      
+
       case CONFIG_TYPE.SLACK:
         this.deleteSlack(req,res)
         break
-      
+
       case 'pipeline':
         this.handlePipelineDelete(req, res)
-        
+
       default:
         res.status(400).send(`Notification type ${configType} not suppoerted!`)
         return
@@ -388,9 +388,9 @@ export class NotificationEndpoint {
   /**
    * Handles a request for configs and returns the configs corresponding to the parameter :configType
    * as a HTTP- Response
-   * 
+   *
    * @param req Request for a Config.
-   * @param res Response containing  specific configs, such as slack or  all configs for a pipeline 
+   * @param res Response containing  specific configs, such as slack or  all configs for a pipeline
    */
   handleConfigRequest = (req: Request, res: Response): void => {
 
@@ -428,7 +428,7 @@ export class NotificationEndpoint {
   }
 
   handlePipelineDelete = (req: Request, res: Response): void => {
-    
+
     const pipelineId = parseInt(req.params.id)
 
     if (!pipelineId) {
@@ -457,7 +457,7 @@ export class NotificationEndpoint {
 
   /**
    * Handles slack config  deletion requests.
-   * 
+   *
    * @param req Deletion Request containing parameter id (id to be deleted)
    * @param res Response to the Deletion request
    */
@@ -500,7 +500,7 @@ export class NotificationEndpoint {
 
   /**
     * Handles Firebase config deletion requests.
-    * 
+    *
     * @param req Deletion Request containing parameter id (id to be deleted)
     * @param res Response to the Deletion request
     */
@@ -541,7 +541,7 @@ export class NotificationEndpoint {
 
   /**
    * Handles Webhook deletion requests.
-   * 
+   *
    * @param req Deletion Request containing parameter id (id to be deleted)
    * @param res Response to the Deletion request
    */
@@ -642,9 +642,9 @@ export class NotificationEndpoint {
   /**
    * Evaluates the validity of the WebHookConfig (provided by argument),
    * by checking for the field variables.
-   * 
+   *
    * @param conf WebHookConfig to be validated
-   * 
+   *
    * @returns true, if conf is a valid, false else
    */
   private static isValidWebhookConfig(conf: WebHookConfig): boolean {

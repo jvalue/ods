@@ -1,6 +1,6 @@
 /* eslint-env jest */
-import SandboxExecutor from '../src/interfaces/sandboxExecutor'
-import VM2SandboxExecutor from '../src/vm2SandboxExecutor'
+import SandboxExecutor from '../src/notification-execution/condition-evaluation/sandboxExecutor'
+import VM2SandboxExecutor from '../src/notification-execution/condition-evaluation/vm2SandboxExecutor'
 import express from 'express';
 
 describe('VM2SandboxExecutor', () => {

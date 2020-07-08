@@ -1,9 +1,9 @@
-import { NotificationEndpoint } from './notificationEndpoint';
-import VM2SandboxExecutor from './vm2SandboxExecutor'
-import JSNotificationService from './jsNotificationService'
-import { StorageHandler } from './handlers/storageHandler';
+import { NotificationEndpoint } from './api/rest/notificationEndpoint';
+import VM2SandboxExecutor from './notification-execution/condition-evaluation/vm2SandboxExecutor'
+import JSNotificationService from './notification-execution/jsNotificationService'
+import { StorageHandler } from './notification-config/storageHandler';
 import "reflect-metadata";
-import { AmqpHandler } from './handlers/amqpHandler';
+import { AmqpHandler } from './api/amqp/amqpHandler';
 const port = 8080
 
 // authEnabled defaults to false
