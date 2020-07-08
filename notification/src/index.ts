@@ -1,4 +1,4 @@
-import { NotificationEndpoint } from './api/rest/notificationEndpoint';
+import { NotificationEndpoint } from './api/rest/notificationConfigEndpoint';
 import VM2SandboxExecutor from './notification-execution/condition-evaluation/vm2SandboxExecutor'
 import JSNotificationService from './notification-execution/jsNotificationService'
 import { StorageHandler } from './notification-config/storageHandler';
