@@ -12,25 +12,12 @@ export class NotificationExecutionEndpoint {
   constructor (NotificationService: NotificationService, app: express.Application) {
     this.notificationService = NotificationService
 
-    app.get('/', this.getHealthCheck)
-    app.get('/version', this.getVersion)
     app.post('/webhook', this.postWebhook)
     app.post('/slack', this.postSlack)
     app.post('/fcm', this.postFirebase)
   }
 
-
   // The following methods need arrow syntax because of javascript 'this' shenanigans
-
-  getHealthCheck = (req: express.Request, res: express.Response): void => {
-    res.send('I am alive!')
-  }
-
-  getVersion = (req: express.Request, res: express.Response): void => {
-    res.header('Content-Type', 'text/plain')
-    res.send(this.notificationService.getVersion())
-    res.end()
-  }
 
   postWebhook = async (req: express.Request, res: express.Response): Promise<void> => {
     const webhookRequest = req.body as Webhook

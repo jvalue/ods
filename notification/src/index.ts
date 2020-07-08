@@ -23,9 +23,6 @@ const notificationService = new JSNotificationService(sandboxExecutor)
 const storageHandler = new StorageHandler()
 const amqpHandler = new AmqpHandler(notificationService, storageHandler, sandboxExecutor)
 
-storageHandler.init(30, 5)
-amqpHandler.connect(30,5)
-
 const app = express()
 
 app.use(cors())
@@ -35,6 +32,20 @@ app.use(bodyParser.urlencoded({ extended: false }))
 const notificationConfigEndpoint = new NotificationConfigEndpoint(notificationService, storageHandler, amqpHandler, app)
 const notificationExecutionEndpoint = new NotificationExecutionEndpoint(notificationService, app)
 
-app.listen(port, () => {
+app.listen(port, async () => {
+
+  await storageHandler.init(30, 5)
+  await amqpHandler.connect(30,5)
+
   console.log('listening on port ' + port)
+
+  app.get("/", (req: express.Request, res: express.Response): void => {
+    res.send('I am alive!')
+  })
+
+  app.get("/version", (req: express.Request, res: express.Response): void => {
+    res.header('Content-Type', 'text/plain')
+    res.send(notificationService.getVersion())
+    res.end()
+  })
 })

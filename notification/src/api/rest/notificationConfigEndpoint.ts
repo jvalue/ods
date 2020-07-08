@@ -18,9 +18,6 @@ export class NotificationConfigEndpoint {
     this.storageHandler = storageHandler
     this.amqpHandler = amqpHandler
 
-    app.get('/', this.getHealthCheck)
-    app.get('/version', this.getVersion)
-
     // Create Configs
     app.post('/config/:configType', this.handleConfigCreation)
 
@@ -35,16 +32,6 @@ export class NotificationConfigEndpoint {
   }
 
   // The following methods need arrow syntax because of javascript 'this' shenanigans
-
-  getHealthCheck = (req: express.Request, res: express.Response): void => {
-    res.send('I am alive!')
-  }
-
-  getVersion = (req: express.Request, res: express.Response): void => {
-    res.header('Content-Type', 'text/plain')
-    res.send(this.NotificationService.getVersion())
-    res.end()
-  }
 
   /**
    * Gets all Configs asto corresponding to corresponnding Pipeline-ID
