@@ -1,11 +1,8 @@
-import NotificationConfig from '@/pipeline/notifications/notificationConfig'
-
 export default interface Pipeline {
   id: number;
   datasourceId: number;
   metadata: PipelineMetaData;
   transformation: TransformationConfig;
-  notifications: NotificationConfig[];
 }
 
 export interface PipelineMetaData {

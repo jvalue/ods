@@ -2,42 +2,68 @@ import axios, { AxiosResponse } from 'axios'
 import Pipeline from './pipeline'
 
 const CORE_SERVICE_URL = process.env.VUE_APP_CORE_SERVICE_URL as string
-
+const NOTIFICATION_SERVICE_URL = process.env.VUE_APP_NOTIFICATION_SERVICE_URL as string
+const TRANSFORMATION_SERVICE_URL = process.env.VUE_APP_TRANSFORMATION_SERVICE_URL as string
 /**
- * Axios instance with default headers and base url.
+ * Axios instances with default headers and base url.
  * The option transformResponse is set to an empty array
  * because of explicit JSON.parser call with custom reviver.
  */
-const http = axios.create({
+const http_core = axios.create({
   baseURL: `${CORE_SERVICE_URL}/pipelines`,
   headers: { 'Content-Type': 'application/json' },
   transformResponse: []
 })
 
-export async function getAllPipelines (): Promise<Pipeline[]> {
-  const response = await http.get('/')
+const http_notification = axios.create({
+  baseURL: `${NOTIFICATION_SERVICE_URL}/config/pipeline`,
+  headers: { 'Content-Type': 'application/json' },
+  transformResponse: []
+})
+
+const http_transformation = axios.create({
+  baseURL: `${TRANSFORMATION_SERVICE_URL}/config`,
+  headers: { 'Content-Type': 'application/json' },
+  transformResponse: []
+})
+
+export async function getAllPipelines(): Promise<Pipeline[]> {
+  //const response = await http_core.get('/')
+  const response = await http_transformation.get('/')
   return JSON.parse(response.data)
 }
 
 export async function getPipelineById (id: number): Promise<Pipeline> {
-  const response = await http.get(`/${id}`)
+  //const response = await http_core.get(`/${id}`)
+  const response = await http_transformation.get(`/${id}`)
   return JSON.parse(response.data)
 }
 
 export async function getPipelineByDatasourceId (datasourceId: number): Promise<Pipeline> {
-  const response = await http.get(`?datasourceId=${datasourceId}`)
+  const response = await http_core.get(`?datasourceId=${datasourceId}`)
   return JSON.parse(response.data)
 }
 
 export async function createPipeline (pipeline: Pipeline): Promise<Pipeline> {
-  const response = await http.post('/', JSON.stringify(pipeline))
+  //const response = await http_core.post('/', JSON.stringify(pipeline))
+  delete pipeline.id
+  const response = await http_transformation.post('/' , pipeline)
   return JSON.parse(response.data)
 }
 
 export async function updatePipeline (pipeline: Pipeline): Promise<AxiosResponse> {
-  return http.put(`/${pipeline.id}`, JSON.stringify(pipeline))
+  //return http_core.put(`/${pipeline.id}`, JSON.stringify(pipeline))
+  return http_transformation.put(`/${pipeline.id}`, JSON.stringify(pipeline))
 }
 
-export async function deletePipeline (id: number): Promise<AxiosResponse> {
-  return http.delete(`/${id}`)
+export async function deletePipeline(id: number): Promise<AxiosResponse> {
+  let response : AxiosResponse
+  response = await http_notification.delete(`/${id}`)
+
+  if (response.status == 200) {
+    response = await http_transformation.delete(`/${id}`)
+  }
+
+  //response = await http_core.delete(`/${id}`)
+  return response
 }
