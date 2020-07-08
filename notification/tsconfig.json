@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
     "target": "es5",
     "module": "commonjs",
     "strict": true,
@@ -11,9 +13,9 @@
     "allowJs": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*", "tests/*"]
     },
-    "lib": ["es5" , "dom"],
+    "lib": ["es5"  , "es6", "dom"],
     "outDir": "dist"
   },
   "include": [

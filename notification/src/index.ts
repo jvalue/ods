@@ -1,7 +1,9 @@
 import { NotificationEndpoint } from './notificationEndpoint';
 import VM2SandboxExecutor from './vm2SandboxExecutor'
 import JSNotificationService from './jsNotificationService'
-
+import { StorageHandler } from './handlers/storageHandler';
+import "reflect-metadata";
+import { AmqpHandler } from './handlers/amqpHandler';
 const port = 8080
 
 // authEnabled defaults to false
@@ -12,6 +14,9 @@ if (authEnabled === false) {
 
 const sandboxExecutor = new VM2SandboxExecutor()
 const notificationService = new JSNotificationService(sandboxExecutor)
-const notificationEndpoint = new NotificationEndpoint(notificationService, port, authEnabled)
+const storageHandler = new StorageHandler()
+const amqpHandler = new AmqpHandler(notificationService, storageHandler, sandboxExecutor)
+
+const notificationEndpoint = new NotificationEndpoint(notificationService, storageHandler, amqpHandler, port, authEnabled)
 
 notificationEndpoint.listen()
