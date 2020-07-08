@@ -1,81 +1,46 @@
-import bodyParser from 'body-parser'
-import express, { Application, Request, Response } from 'express'
-import session, { MemoryStore } from 'express-session'
-import cors from 'cors'
-import Keycloak from 'keycloak-connect'
+
 import NotificationService from '@/notification-execution/notificationService';
-import "reflect-metadata"
-
-import { Server } from 'http'
-
 import { SlackConfig, WebHookConfig, NotificationConfig, FirebaseConfig, NotficationConfigRequest, CONFIG_TYPE } from '../../notification-config/notificationConfig';
 import { NotificationRepository } from '../../notification-config/notificationRepository'
 import { AmqpHandler } from '../amqp/amqpHandler';
 import { DeleteResult } from 'typeorm';
+import * as express from 'express';
 
-export class NotificationEndpoint {
-  port: number
-  app: Application
-  store?: MemoryStore
-  keycloak?: Keycloak
+export class NotificationConfigEndpoint {
 
   NotificationService: NotificationService
   storageHandler: NotificationRepository
   amqpHandler: AmqpHandler
 
 
-  constructor(NotificationService: NotificationService, storageHandler: NotificationRepository, amqpHandler: AmqpHandler, port: number, auth: boolean) {
-    this.port = port
+  constructor(NotificationService: NotificationService, storageHandler: NotificationRepository, amqpHandler: AmqpHandler, app: express.Application) {
     this.NotificationService = NotificationService
     this.storageHandler = storageHandler
     this.amqpHandler = amqpHandler
 
-    this.app = express()
-
-    this.app.use(cors())
-    this.app.use(bodyParser.json({ limit: '50mb' }))
-    this.app.use(bodyParser.urlencoded({ extended: false }))
-
-    this.store = undefined
-    if (auth) {
-      this.store = new session.MemoryStore()
-      this.keycloak = new Keycloak({ store: this.store })
-      this.app.use(this.keycloak.middleware())
-    }
-
-    this.app.get('/', this.getHealthCheck)
-    this.app.get('/version', this.getVersion)
+    app.get('/', this.getHealthCheck)
+    app.get('/version', this.getVersion)
 
     // Create Configs
-    this.app.post('/config/:configType', this.determineAuth(), this.handleConfigCreation)
+    app.post('/config/:configType', this.handleConfigCreation)
 
     // Update of Configs
-    this.app.put('/config/:configType/:id', this.determineAuth(), this.handleConfigUpdate)
+    app.put('/config/:configType/:id', this.handleConfigUpdate)
 
     // Deletion of Configs
-    this.app.delete('/config/:configType/:id/', this.determineAuth(), this.handleConfigDeletion)
+    app.delete('/config/:configType/:id/', this.handleConfigDeletion)
 
     // Request Configs
-    this.app.get('/config/:configType/:id/', this.determineAuth(), this.handleConfigRequest)
-
-    this.storageHandler.init(30, 5)
-    amqpHandler.connect(30,5)
-  }
-
-
-  listen (): Server {
-    return this.app.listen(this.port, () => {
-      console.log('listening on port ' + this.port)
-    })
+    app.get('/config/:configType/:id/', this.handleConfigRequest)
   }
 
   // The following methods need arrow syntax because of javascript 'this' shenanigans
 
-  getHealthCheck = (req: Request, res: Response): void => {
+  getHealthCheck = (req: express.Request, res: express.Response): void => {
     res.send('I am alive!')
   }
 
-  getVersion = (req: Request, res: Response): void => {
+  getVersion = (req: express.Request, res: express.Response): void => {
     res.header('Content-Type', 'text/plain')
     res.send(this.NotificationService.getVersion())
     res.end()
@@ -85,7 +50,7 @@ export class NotificationEndpoint {
    * Gets all Configs asto corresponding to corresponnding Pipeline-ID
    * (identified by param id) as json list
    */
-  handleConfigSummaryRequest = async (req: Request, res: Response) => {
+  handleConfigSummaryRequest = async (req: express.Request, res: express.Response) => {
 
     const pipelineId = parseInt(req.params.id)
     console.log(`Received request for configs with pipeline id ${pipelineId} from Host ${req.connection.remoteAddress}`)
@@ -125,7 +90,7 @@ export class NotificationEndpoint {
     * Gets all Slack Configs corresponding to corresponnding config id
     * (identified by param id) as json list
     */
-  handleSlackRequest = async (req: Request, res: Response) => {
+  handleSlackRequest = async (req: express.Request, res: express.Response) => {
 
     const id = parseInt(req.params.id)
     console.log(`Received request for slack config with id ${id} from Host ${req.connection.remoteAddress}`)
@@ -153,7 +118,7 @@ export class NotificationEndpoint {
    * Gets all Webhook Configs corresponding to corresponnding config id
    * (identified by param id) as json list
    */
-  handleWebhookRequest = async (req: Request, res: Response) => {
+  handleWebhookRequest = async (req: express.Request, res: express.Response) => {
 
     const id = parseInt(req.params.id)
     console.log(`Received request for webhook config with id ${id} from Host ${req.connection.remoteAddress}`)
@@ -181,7 +146,7 @@ export class NotificationEndpoint {
    * Gets all Firebase Configs corresponding to corresponnding config id
    * (identified by param id) as json list
    */
-  handleFCMRequest = async (req: Request, res: Response) => {
+  handleFCMRequest = async (req: express.Request, res: express.Response) => {
 
     const id = parseInt(req.params.id)
     console.log(`Received request for firebase config with id ${id} from Host ${req.connection.remoteAddress}`)
@@ -210,7 +175,7 @@ export class NotificationEndpoint {
    * This is done by checking the validity of the config and then save
    * it to the database on success
    */
-  handleConfigCreation  = async (req: Request, res: Response): Promise<void> => {
+  handleConfigCreation  = async (req: express.Request, res: express.Response): Promise<void> => {
     console.log(`Received notification config from Host ${req.connection.remoteAddress}`)
 
     const notificationType = req.params.configType
@@ -224,7 +189,7 @@ export class NotificationEndpoint {
 
     const configRequest = req.body as NotificationConfig
 
-    if (!NotificationEndpoint.isValidNotificationConfig(configRequest)) {
+    if (!NotificationConfigEndpoint.isValidNotificationConfig(configRequest)) {
       res.status(400).send('Malformed notification request.')
       return
     }
@@ -250,14 +215,14 @@ export class NotificationEndpoint {
    * This is done by checking the validity of the config and then save
    * it to the database on success
    */
-  handleWebhookCreation = async (req: Request, res: Response): Promise<void> => {
+  handleWebhookCreation = async (req: express.Request, res: express.Response): Promise<void> => {
     console.log(`Received Webhook config from Host ${req.connection.remoteAddress}`)
 
     const webHookConfig = req.body as WebHookConfig
     let savedConfig: WebHookConfig
 
     // Check for validity of the request
-    if (!NotificationEndpoint.isValidWebhookConfig(webHookConfig)) {
+    if (!NotificationConfigEndpoint.isValidWebhookConfig(webHookConfig)) {
       console.warn('Malformed webhook request.')
       res.status(400).send('Malformed webhook request.')
     }
@@ -282,14 +247,14 @@ export class NotificationEndpoint {
    * @param req Request for config creation
    * @param res Response for config creation
    */
-  handleSlackCreation = async (req: Request, res: Response): Promise<void> => {
+  handleSlackCreation = async (req: express.Request, res: express.Response): Promise<void> => {
     console.log(`Received config from Host ${req.connection.remoteAddress}`)
 
     const slackConfig: SlackConfig = req.body as SlackConfig
     let savedConfig: SlackConfig
 
      // Check for validity of the request
-    if (!NotificationEndpoint.isValidSlackConfig(slackConfig)) {
+    if (!NotificationConfigEndpoint.isValidSlackConfig(slackConfig)) {
       console.warn('Malformed slack request.')
       res.status(400).send('Malformed slack request.')
       return
@@ -312,7 +277,7 @@ export class NotificationEndpoint {
   /**
    * Persists a posted Firebase Config to the notifcation database service.
    */
-  handleFCMCreation = async (req: Request, res: Response) => {
+  handleFCMCreation = async (req: express.Request, res: express.Response) => {
     console.log(`Received config from Host ${req.connection.remoteAddress}`)
 
     const firebaseConfig : FirebaseConfig = req.body as FirebaseConfig
@@ -320,7 +285,7 @@ export class NotificationEndpoint {
 
 
     // Check for validity of the request
-    if (!NotificationEndpoint.isValidFirebaseConfig(firebaseConfig)) {
+    if (!NotificationConfigEndpoint.isValidFirebaseConfig(firebaseConfig)) {
       console.warn('Malformed FireBase request.')
       res.status(400).send('Malformed FireBase request.')
     }
@@ -350,7 +315,7 @@ export class NotificationEndpoint {
    * @param res HTTP-Response that is sent back to the requester
    *
    */
-  handleConfigDeletion = (req: Request, res: Response): void => {
+  handleConfigDeletion = (req: express.Request, res: express.Response): void => {
 
     const configType = req.params.configType
 
@@ -392,7 +357,7 @@ export class NotificationEndpoint {
    * @param req Request for a Config.
    * @param res Response containing  specific configs, such as slack or  all configs for a pipeline
    */
-  handleConfigRequest = (req: Request, res: Response): void => {
+  handleConfigRequest = (req: express.Request, res: express.Response): void => {
 
     const configType = req.params.configType
 
@@ -427,7 +392,7 @@ export class NotificationEndpoint {
 
   }
 
-  handlePipelineDelete = (req: Request, res: Response): void => {
+  handlePipelineDelete = (req: express.Request, res: express.Response): void => {
 
     const pipelineId = parseInt(req.params.id)
 
@@ -461,7 +426,7 @@ export class NotificationEndpoint {
    * @param req Deletion Request containing parameter id (id to be deleted)
    * @param res Response to the Deletion request
    */
-  deleteSlack = async (req: Request, res: Response): Promise<void> => {
+  deleteSlack = async (req: express.Request, res: express.Response): Promise<void> => {
     const configId = parseInt(req.params.id)
     let deleteResult : DeleteResult
 
@@ -504,7 +469,7 @@ export class NotificationEndpoint {
     * @param req Deletion Request containing parameter id (id to be deleted)
     * @param res Response to the Deletion request
     */
-  deleteFCM = async (req: Request, res: Response): Promise<void> => {
+  deleteFCM = async (req: express.Request, res: express.Response): Promise<void> => {
     const configId = parseInt(req.params.id)
     let deleteResult: DeleteResult
 
@@ -545,7 +510,7 @@ export class NotificationEndpoint {
    * @param req Deletion Request containing parameter id (id to be deleted)
    * @param res Response to the Deletion request
    */
-  deleteWebHook = async (req: Request, res: Response): Promise<void> => {
+  deleteWebHook = async (req: express.Request, res: express.Response): Promise<void> => {
     const configId = parseInt(req.params.id)
     let deleteResult: DeleteResult
 
@@ -584,7 +549,7 @@ export class NotificationEndpoint {
    * This is done by checking the validity of the config and then save
    * it to the database on success
    */
-  handleConfigUpdate  = async (req: Request, res: Response): Promise<void> => {
+  handleConfigUpdate  = async (req: express.Request, res: express.Response): Promise<void> => {
     console.log(`Received notification config update request from Host ${req.connection.remoteAddress}`)
     const configType = req.params.configType
     const id = parseInt(req.params.id)
@@ -604,7 +569,7 @@ export class NotificationEndpoint {
       return
     }
 
-    if (!NotificationEndpoint.isValidNotificationConfig(config)) {
+    if (!NotificationConfigEndpoint.isValidNotificationConfig(config)) {
       console.error("Received malformed NoticationUpdate request")
       res.status(400).send('Malformed Notification config.')
       res.end()
@@ -628,15 +593,6 @@ export class NotificationEndpoint {
     }
 
     res.end()
-  }
-
-
-  determineAuth = (): express.RequestHandler | [] => {
-    if (this.keycloak !== undefined) {
-      return this.keycloak.protect()
-    } else {
-      return []
-    }
   }
 
   /**

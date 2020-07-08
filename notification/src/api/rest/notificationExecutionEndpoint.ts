@@ -1,92 +1,63 @@
-import bodyParser from 'body-parser'
-import express, { Application, Request, Response } from 'express'
-import session, { MemoryStore } from 'express-session'
-import cors from 'cors'
-import Keycloak from 'keycloak-connect'
+import * as express from 'express'
+
 import NotificationService from '@/notification-execution/notificationService'
-
-import { Server } from 'http'
-
 import { Firebase, NotificationRequest, Slack, Webhook } from './notificationRequest'
-import { NotificationConfig, CONFIG_TYPE } from '@/notification-config/notificationConfig'
+import { CONFIG_TYPE } from '@/notification-config/notificationConfig'
 import { TransformationEvent } from '@/notification-execution/condition-evaluation/transformationEvent'
 
-export class NotificationEndpoint {
-  port: number
-  app: Application
-  store?: MemoryStore
-  keycloak?: Keycloak
+export class NotificationExecutionEndpoint {
 
-  NotificationService: NotificationService
+  notificationService: NotificationService
 
-  constructor (NotificationService: NotificationService, port: number, auth: boolean) {
-    this.port = port
-    this.NotificationService = NotificationService
+  constructor (NotificationService: NotificationService, app: express.Application) {
+    this.notificationService = NotificationService
 
-    this.app = express()
-
-    this.app.use(cors())
-    this.app.use(bodyParser.json({ limit: '50mb' }))
-    this.app.use(bodyParser.urlencoded({ extended: false }))
-
-    this.store = undefined
-    if (auth) {
-      this.store = new session.MemoryStore()
-      this.keycloak = new Keycloak({ store: this.store })
-      this.app.use(this.keycloak.middleware())
-    }
-
-    this.app.get('/', this.getHealthCheck)
-    this.app.get('/version', this.getVersion)
-    this.app.post('/webhook', this.determineAuth(), this.postWebhook)
-    this.app.post('/slack', this.determineAuth(), this.postSlack)
-    this.app.post('/fcm', this.determineAuth(), this.postFirebase)
+    app.get('/', this.getHealthCheck)
+    app.get('/version', this.getVersion)
+    app.post('/webhook', this.postWebhook)
+    app.post('/slack', this.postSlack)
+    app.post('/fcm', this.postFirebase)
   }
 
-  listen (): Server {
-    return this.app.listen(this.port, () => {
-      console.log('listening on port ' + this.port)
-    })
-  }
 
   // The following methods need arrow syntax because of javascript 'this' shenanigans
 
-  getHealthCheck = (req: Request, res: Response): void => {
+  getHealthCheck = (req: express.Request, res: express.Response): void => {
     res.send('I am alive!')
   }
 
-  getVersion = (req: Request, res: Response): void => {
+  getVersion = (req: express.Request, res: express.Response): void => {
     res.header('Content-Type', 'text/plain')
-    res.send(this.NotificationService.getVersion())
+    res.send(this.notificationService.getVersion())
     res.end()
   }
 
-  postWebhook = async (req: Request, res: Response): Promise<void> => {
+  postWebhook = async (req: express.Request, res: express.Response): Promise<void> => {
     const webhookRequest = req.body as Webhook
-    if (!NotificationEndpoint.isValidWebhookRequest(webhookRequest)) {
-      res.status(400).send('Malformed webhook request.')
+    if (!NotificationExecutionEndpoint.isValidWebhookRequest(webhookRequest)) {
+      res.status(400).send('Malformed webhook express.Request.')
     }
     await this.processNotificationRequest(webhookRequest, CONFIG_TYPE.WEBHOOK, res)
-    await this.NotificationService.handleNotification
+    await this.notificationService.handleNotification
   }
 
-  postSlack = async (req: Request, res: Response): Promise<void> => {
+  postSlack = async (req: express.Request, res: express.Response): Promise<void> => {
     const slackRequest = req.body as Slack
-    if (!NotificationEndpoint.isValidSlackRequest(slackRequest)) {
-      res.status(400).send('Malformed webhook request.')
+    if (!NotificationExecutionEndpoint.isValidSlackRequest(slackRequest)) {
+      res.status(400).send('Malformed webhook express.Request.')
     }
     await this.processNotificationRequest(slackRequest, CONFIG_TYPE.SLACK, res)
   }
 
-  postFirebase = async (req: Request, res: Response): Promise<void> => {
+  postFirebase = async (req: express.Request, res: express.Response): Promise<void> => {
     const firebaseRequest = req.body as Firebase
-    if (!NotificationEndpoint.isValidFirebaseRequest(firebaseRequest)) {
-      res.status(400).send('Malformed webhook request.')
+    if (!NotificationExecutionEndpoint.isValidFirebaseRequest(firebaseRequest)) {
+      res.status(400).send('Malformed webhook express.Request.')
     }
     await this.processNotificationRequest(firebaseRequest, CONFIG_TYPE.FCM, res)
   }
 
-  processNotificationRequest = async (notification: NotificationRequest, configType: CONFIG_TYPE, res: Response): Promise<void> => {
+  processNotificationRequest = async (notification: NotificationRequest, configType: CONFIG_TYPE, res: express.Response): Promise<void> => {
     try {
       const event: TransformationEvent = { // TODO: refactor this out after migration to events!
         dataLocation: notification.dataLocation,
@@ -100,7 +71,7 @@ export class NotificationEndpoint {
         pipelineId: notification.pipelineId,
         pipelineName: notification.pipelineName
       }
-      await this.NotificationService.handleNotification(notification, event, configType)
+      await this.notificationService.handleNotification(notification, event, configType)
     } catch (e) {
       if (e instanceof Error) {
         console.log(`Notification handling failed. Nested cause is: ${e.name}: ${e.message}`)
@@ -110,14 +81,6 @@ export class NotificationEndpoint {
       }
     }
     res.status(200).send()
-  }
-
-  determineAuth = (): express.RequestHandler | [] => {
-    if (this.keycloak !== undefined) {
-      return this.keycloak.protect()
-    } else {
-      return []
-    }
   }
 
   private static isValidWebhookRequest (obj: Webhook): boolean {

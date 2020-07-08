@@ -1,9 +1,15 @@
-import { NotificationEndpoint } from './api/rest/notificationConfigEndpoint';
+import express from 'express'
+import cors from 'cors'
+import bodyParser from 'body-parser'
+
 import VM2SandboxExecutor from './notification-execution/condition-evaluation/vm2SandboxExecutor'
+import "reflect-metadata";
+import { NotificationConfigEndpoint } from './api/rest/notificationConfigEndpoint';
+import { NotificationExecutionEndpoint } from './api/rest/notificationExecutionEndpoint';
 import JSNotificationService from './notification-execution/jsNotificationService'
 import { StorageHandler } from './notification-config/storageHandler';
-import "reflect-metadata";
 import { AmqpHandler } from './api/amqp/amqpHandler';
+
 const port = 8080
 
 // authEnabled defaults to false
@@ -17,6 +23,18 @@ const notificationService = new JSNotificationService(sandboxExecutor)
 const storageHandler = new StorageHandler()
 const amqpHandler = new AmqpHandler(notificationService, storageHandler, sandboxExecutor)
 
-const notificationEndpoint = new NotificationEndpoint(notificationService, storageHandler, amqpHandler, port, authEnabled)
+storageHandler.init(30, 5)
+amqpHandler.connect(30,5)
 
-notificationEndpoint.listen()
+const app = express()
+
+app.use(cors())
+app.use(bodyParser.json({ limit: '50mb' }))
+app.use(bodyParser.urlencoded({ extended: false }))
+
+const notificationConfigEndpoint = new NotificationConfigEndpoint(notificationService, storageHandler, amqpHandler, app)
+const notificationExecutionEndpoint = new NotificationExecutionEndpoint(notificationService, app)
+
+app.listen(port, () => {
+  console.log('listening on port ' + port)
+})
