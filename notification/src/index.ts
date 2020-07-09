@@ -10,6 +10,7 @@ import { NotificationConfigEndpoint } from './api/rest/notificationConfigEndpoin
 import { NotificationExecutionEndpoint } from './api/rest/notificationExecutionEndpoint';
 import { StorageHandler } from './notification-config/storageHandler';
 import { AmqpHandler } from './api/amqp/amqpHandler';
+import { TriggerEventHandler } from './api/triggerEventHandler';
 
 const port = 8080
 
@@ -20,9 +21,10 @@ if (authEnabled === false) {
 }
 
 const sandboxExecutor = new VM2SandboxExecutor()
-const notificationService = new NotificationExecutor(sandboxExecutor)
+const notificationExecutor = new NotificationExecutor(sandboxExecutor)
 const storageHandler = new StorageHandler()
-const amqpHandler = new AmqpHandler(notificationService, storageHandler, sandboxExecutor)
+const triggerEventHandler = new TriggerEventHandler(storageHandler, notificationExecutor)
+const amqpHandler = new AmqpHandler(triggerEventHandler)
 
 const app = express()
 
@@ -31,7 +33,7 @@ app.use(bodyParser.json({ limit: '50mb' }))
 app.use(bodyParser.urlencoded({ extended: false }))
 
 const notificationConfigEndpoint = new NotificationConfigEndpoint(storageHandler, app)
-const notificationExecutionEndpoint = new NotificationExecutionEndpoint(notificationService, app)
+const notificationExecutionEndpoint = new NotificationExecutionEndpoint(triggerEventHandler, app)
 
 app.listen(port, async () => {
 
@@ -46,7 +48,7 @@ app.listen(port, async () => {
 
   app.get("/version", (req: express.Request, res: express.Response): void => {
     res.header('Content-Type', 'text/plain')
-    res.send(notificationService.getVersion())
+    res.send(notificationExecutor.getVersion())
     res.end()
   })
 })

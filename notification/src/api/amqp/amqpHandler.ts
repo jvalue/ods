@@ -1,10 +1,6 @@
-import { StorageHandler } from "../../notification-config/storageHandler"
 import { connect, Connection, ConsumeMessage, Channel } from "amqplib/callback_api"
+import { TriggerEventHandler } from "../triggerEventHandler";
 import { TransformationEvent } from '../transformationEvent';
-import JSNotificationService from '../../notification-execution/notificationExecutor';
-import VM2SandboxExecutor from "../../notification-execution/condition-evaluation/vm2SandboxExecutor";
-import { CONFIG_TYPE } from "../../notification-config/notificationConfig";
-import { NotificationMessageFactory } from "../notificationMessageFactory";
 
 /**
  * This class handles the communication with the AMQP service (rabbitmq)
@@ -19,9 +15,7 @@ import { NotificationMessageFactory } from "../notificationMessageFactory";
 export class AmqpHandler{
     notifQueueName = process.env.AMQP_NOTIFICATION_QUEUE!     // Queue name of the Job Queue
 
-    notificationService: JSNotificationService
-    storageHandler : StorageHandler
-    executor : VM2SandboxExecutor
+    triggerEventHandler: TriggerEventHandler
 
     /**
      * Default constructor.
@@ -29,11 +23,10 @@ export class AmqpHandler{
      * @param storageHandler    StorageHandler to get corresponding notification configs
      * @param executor          Sandboxexecutor to run condition evaluations
      */
-    constructor(notificationHandler: JSNotificationService, storageHandler: StorageHandler, executor: VM2SandboxExecutor) {
-        this.notificationService = notificationHandler
-        this.storageHandler = storageHandler
-        this.executor = executor
+    constructor(triggerEventHandler: TriggerEventHandler) {
+        this.triggerEventHandler = triggerEventHandler
     }
+
     /**
      * Connects to Amqp Service and initializes a channel
      *
@@ -109,66 +102,18 @@ export class AmqpHandler{
         console.info(`Successfully initialized Transformation Channel "${this.notifQueueName}"`)
     }
 
-    /**
-     * Handles an event message
-     * @param msg Message receveived from the message queue
-     *
-     * @returns true on success, else false
-     */
-    private async handleEvent(msg: ConsumeMessage | null): Promise<boolean> {
-        if (!msg) {
-            console.warn('Could not receive Notification Event: Message is not set')
-            return false
-        }
+    private async handleEvent(msg: ConsumeMessage | null): Promise<void> {
+      if (!msg) {
+        return Promise.reject('Could not receive Notification Event: Message is not set')
+      }
 
-        const eventMessage = JSON.parse(msg.content.toString())
-        const transformationEvent = eventMessage as TransformationEvent
+      const eventMessage = JSON.parse(msg.content.toString())
+      const transformationEvent = eventMessage as TransformationEvent
 
-        console.log(`Received Event from Channel: Pipeline id: "${transformationEvent.pipelineId}",
-        Pipeline Name: "${transformationEvent.pipelineName}`)
+      console.log(`Received Event from Channel: Pipeline id: "${transformationEvent.pipelineId}",
+      Pipeline Name: "${transformationEvent.pipelineName}`)
 
-        const isValid = AmqpHandler.isValidTransformationEvent(transformationEvent)
-
-        if (!isValid) {
-            console.error('Message received is not an Transformation Event')
-            return false
-        }
-
-
-        const message = NotificationMessageFactory.buildMessage(transformationEvent)
-        const data = transformationEvent.jobResult.data
-        const configs = await this.storageHandler.getConfigsForPipeline(transformationEvent.pipelineId)
-
-        if (!configs) {
-            console.error('Could not get config')
-            return true
-        }
-        for (const webhookConfig of configs.webhook) {
-            this.notificationService.handleNotification(webhookConfig, CONFIG_TYPE.WEBHOOK, message, data)
-        }
-
-        for (const slackConfig of configs.slack) {
-            this.notificationService.handleNotification(slackConfig, CONFIG_TYPE.SLACK, message, data)
-        }
-
-
-        for (const firebaseConfig of configs.firebase) {
-            this.notificationService.handleNotification(firebaseConfig, CONFIG_TYPE.FCM, message, data)
-        }
-
-        return true
-    }
-
-
-
-    /**
-        * Checks if this event is a valid Transformation event,
-        * by checking if all field variables exist and are set.
-        *
-        * @returns     true, if param event is a TransformationEvent, else false
-        */
-    public static isValidTransformationEvent(event: TransformationEvent): boolean {
-        return !!event.dataLocation && !!event.pipelineId && !!event.pipelineName && !!event.jobResult
+      return this.triggerEventHandler.handleEvent(transformationEvent)
     }
 }
 
