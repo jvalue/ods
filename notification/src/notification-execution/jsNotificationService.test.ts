@@ -1,11 +1,11 @@
 /* eslint-env jest */
 import axios from 'axios'
 
-import VM2SandboxExecutor from '../src/notification-execution/condition-evaluation/vm2SandboxExecutor'
-import { WebHookConfig, NotficationConfigRequest, CONFIG_TYPE, NotificationConfig, SlackConfig } from '../src/notification-config/notificationConfig';
-import NotificationService from '../src/notification-execution/notificationService';
-import JSNotificationService from '../src/notification-execution/jsNotificationService';
-import { TransformationEvent } from '../src/notification-execution/condition-evaluation/transformationEvent';
+import VM2SandboxExecutor from './condition-evaluation/vm2SandboxExecutor'
+import { WebHookConfig, NotficationConfigRequest, CONFIG_TYPE, NotificationConfig, SlackConfig } from '../notification-config/notificationConfig';
+import NotificationService from './notificationService';
+import JSNotificationService from './jsNotificationService';
+import { TransformationEvent } from './condition-evaluation/transformationEvent';
 import SlackCallback from '@/notification-execution/notificationCallbacks/slackCallback';
 
 jest.mock('axios')

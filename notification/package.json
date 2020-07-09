@@ -2,10 +2,10 @@
     "name": "open-data-service-notification",
     "version": "1.0.0",
     "description": "TBD",
-    "main": "dist/src/index.js",
+    "main": "dist/index.js",
     "scripts": {
         "start": "npm run transpile && npm run start:transpiled",
-        "start:transpiled": "node dist/src/index.js",
+        "start:transpiled": "node dist/index.js",
         "transpile": "tsc",
         "lint": "./node_modules/.bin/eslint src --ext .ts,.js --fix",
         "test": "jest"

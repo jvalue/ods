@@ -3,7 +3,6 @@ FROM node:lts-alpine as builder
 
 WORKDIR /build
 COPY ./src ./src
-COPY ./tests ./tests
 COPY ./package*.json ./
 COPY ./tsconfig.json ./
 COPY ./jest.config.js ./
