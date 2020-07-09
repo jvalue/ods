@@ -69,10 +69,10 @@ router.post('/adapter/:id', async ctx => {
 
 app.use(router.routes())
 
-const server = app.listen(PORT, () => console.log(`Starting mock notification receiver on port ${PORT}`))
+const server = app.listen(PORT, () => console.log(`Starting mock adapter receiver on port ${PORT}`))
 
 process.on('SIGTERM', async() => {
-    console.info('Mock-Notification-Receiver: SIGTERM signal received.')
+    console.info('Mock-Adapter-Receiver: SIGTERM signal received.')
     await server.close()
 })
 

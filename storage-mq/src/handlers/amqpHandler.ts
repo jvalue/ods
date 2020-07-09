@@ -88,7 +88,7 @@ export class AmqpHandler{
             }
 
             channel.assertQueue(handler.odsDataQueueName, {
-                durable: false,
+                durable: true,
             });
 
             // Consume from Channel
