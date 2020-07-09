@@ -1,9 +1,10 @@
 import { StorageHandler } from "../../notification-config/storageHandler"
 import { connect, Connection, ConsumeMessage } from "amqplib/callback_api"
-import { TransformationEvent } from '../../notification-execution/condition-evaluation/transformationEvent';
-import JSNotificationService from '../../notification-execution/jsNotificationService';
+import { TransformationEvent } from '../transformationEvent';
+import JSNotificationService from '../../notification-execution/notificationExecutor';
 import VM2SandboxExecutor from "../../notification-execution/condition-evaluation/vm2SandboxExecutor";
 import { CONFIG_TYPE } from "../../notification-config/notificationConfig";
+import { NotificationMessageFactory } from "../notificationMessageFactory";
 
 /**
  * This class handles the communication with the AMQP service (rabbitmq)
@@ -135,6 +136,8 @@ export class AmqpHandler{
         }
 
 
+        const message = NotificationMessageFactory.buildMessage(transformationEvent)
+        const data = transformationEvent.jobResult.data
         const configs = this.storageHandler.getConfigsForPipeline(transformationEvent.pipelineId)
 
 
@@ -144,24 +147,25 @@ export class AmqpHandler{
                 console.error('Could not get Config')
                 return true
             }
-
             for (const webhookConfig of config.webhook) {
-                this.notificationService.handleNotification(webhookConfig, transformationEvent, CONFIG_TYPE.WEBHOOK)
+                this.notificationService.handleNotification(webhookConfig, CONFIG_TYPE.WEBHOOK, message, data)
             }
 
             for (const slackConfig of config.slack) {
-                this.notificationService.handleNotification(slackConfig, transformationEvent, CONFIG_TYPE.SLACK)
+                this.notificationService.handleNotification(slackConfig, CONFIG_TYPE.SLACK, message, data)
             }
 
 
             for (const firebaseConfig of config.firebase) {
-                this.notificationService.handleNotification(firebaseConfig, transformationEvent, CONFIG_TYPE.FCM)
+                this.notificationService.handleNotification(firebaseConfig, CONFIG_TYPE.FCM, message, data)
             }
 
         })
 
         return true
     }
+
+
 
     /**
         * Checks if this event is a valid Transformation event,

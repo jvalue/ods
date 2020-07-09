@@ -2,11 +2,12 @@ import express from 'express'
 import cors from 'cors'
 import bodyParser from 'body-parser'
 
+import "reflect-metadata"; // once required for orm
+
+import NotificationExecutor from './notification-execution/notificationExecutor'
 import VM2SandboxExecutor from './notification-execution/condition-evaluation/vm2SandboxExecutor'
-import "reflect-metadata";
 import { NotificationConfigEndpoint } from './api/rest/notificationConfigEndpoint';
 import { NotificationExecutionEndpoint } from './api/rest/notificationExecutionEndpoint';
-import JSNotificationService from './notification-execution/jsNotificationService'
 import { StorageHandler } from './notification-config/storageHandler';
 import { AmqpHandler } from './api/amqp/amqpHandler';
 
@@ -19,7 +20,7 @@ if (authEnabled === false) {
 }
 
 const sandboxExecutor = new VM2SandboxExecutor()
-const notificationService = new JSNotificationService(sandboxExecutor)
+const notificationService = new NotificationExecutor(sandboxExecutor)
 const storageHandler = new StorageHandler()
 const amqpHandler = new AmqpHandler(notificationService, storageHandler, sandboxExecutor)
 

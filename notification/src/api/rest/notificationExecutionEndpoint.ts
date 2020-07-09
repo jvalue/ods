@@ -1,15 +1,16 @@
 import * as express from 'express'
 
-import NotificationService from '../../notification-execution/notificationService'
+import NotificationExecutor from '../../notification-execution/notificationExecutor'
 import { Firebase, NotificationRequest, Slack, Webhook } from './notificationRequest'
 import { CONFIG_TYPE } from '../../notification-config/notificationConfig'
-import { TransformationEvent } from '../../notification-execution/condition-evaluation/transformationEvent'
+import { TransformationEvent } from '../transformationEvent'
+import { NotificationMessageFactory } from '../notificationMessageFactory'
 
 export class NotificationExecutionEndpoint {
 
-  notificationService: NotificationService
+  notificationService: NotificationExecutor
 
-  constructor (NotificationService: NotificationService, app: express.Application) {
+  constructor (NotificationService: NotificationExecutor, app: express.Application) {
     this.notificationService = NotificationService
 
     app.post('/webhook', this.postWebhook)
@@ -53,12 +54,13 @@ export class NotificationExecutionEndpoint {
             durationInMilliSeconds: -1,
             startTimestamp: -1,
             endTimestamp: -1,
-          }
+          },
+          data: notification.data
         },
         pipelineId: notification.pipelineId,
         pipelineName: notification.pipelineName
       }
-      await this.notificationService.handleNotification(notification, event, configType)
+      await this.notificationService.handleNotification(notification, configType, NotificationMessageFactory.buildMessage(event), notification.data)
     } catch (e) {
       if (e instanceof Error) {
         console.log(`Notification handling failed. Nested cause is: ${e.name}: ${e.message}`)

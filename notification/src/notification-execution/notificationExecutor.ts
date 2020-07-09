@@ -1,20 +1,19 @@
 import App = firebase.app.App;
 import axios from 'axios'
 import * as firebase from 'firebase-admin'
-import NotificationService from './notificationService';
 
-import { CONFIG_TYPE, NotificationConfig, WebHookConfig, SlackConfig, FirebaseConfig, NotficationConfigRequest } from '../notification-config/notificationConfig';
+import { CONFIG_TYPE, NotificationConfig, WebHookConfig, SlackConfig, FirebaseConfig } from '../notification-config/notificationConfig';
 
 import SlackCallback from './notificationCallbacks/slackCallback';
 import WebhookCallback from './notificationCallbacks/webhookCallback';
 import FcmCallback from './notificationCallbacks/fcmCallback';
+
 import SandboxExecutor from './condition-evaluation/sandboxExecutor';
-import { TransformationEvent } from './condition-evaluation/transformationEvent';
 
 
 const VERSION = '0.0.1'
 
-export default class JSNotificationService implements NotificationService {
+export default class NotificationExecutor {
 
   executor: SandboxExecutor
 
@@ -26,78 +25,28 @@ export default class JSNotificationService implements NotificationService {
       return VERSION
   }
 
-async handleNotification(notification: NotificationConfig, event: TransformationEvent, type: CONFIG_TYPE): Promise<void> {
+async handleNotification(notification: NotificationConfig, type: CONFIG_TYPE, message: string, data?: object): Promise<void> {
   console.log(`NotificationRequest received for pipeline: ${notification.pipelineId}.`)
 
-  const conditionHolds = this.executor.evaluate(notification.condition, event.jobResult.data)
+  const conditionHolds = this.executor.evaluate(notification.condition, data)
   console.log('Condition is ' + conditionHolds)
   if (!conditionHolds) { // no need to trigger notification
     return Promise.resolve()
   }
 
-  const message = this.buildMessage(event)
-
   switch (type) {
-  case CONFIG_TYPE.WEBHOOK:
-      await this.handleWebhook(notification as WebHookConfig, message)
-      break
-  case CONFIG_TYPE.FCM:
-      await this.handleFCM(notification as FirebaseConfig, message)
-      break
-  case CONFIG_TYPE.SLACK:
-      await this.handleSlack(notification as SlackConfig, message)
-      break
-  default:
-      throw new Error('Notification type not implemented.')
-  }
-  }
-
-
-  /**
-   * Builds the notification message to be sent,
-   * by composing the contents of the transformation event to readable
-   * message
-   *
-   * @param event event to extract transformation results from
-   * @returns message to be sent as notification
-   */
-  buildMessage(event: TransformationEvent): string {
-
-    let message: string                       // message to return
-    const jobError = event.jobResult.error    // Error of transformation (if exists)
-
-    /*======================================================
-    *  Build Message for succesfull transformation/pipline
-    *=======================================================*/
-    if (jobError === undefined) {
-      // Build Stats (Time measures for transformation execution)
-      const jobStats = event.jobResult.stats
-      const start = new Date(jobStats.startTimestamp)
-      const end = new Date(jobStats.endTimestamp)
-
-
-      // Build Success Message
-      message = `Pipeline ${event.pipelineName}(Pipeline ID:${event.pipelineId}) ` +
-        `has new data available. Fetch at ${event.dataLocation}.
-
-        Transformation Details:
-              Start: ${start}
-              End:  ${end}
-              Duration: ${jobStats.durationInMilliSeconds} ms`
-
-    } else {
-      /*====================================================
-      *  Build Message for failed transformation/pipline
-      *====================================================*/
-      message = `Pipeline ${event.pipelineName}(Pipeline ID:${event.pipelineId})Failed.
-
-          Details:
-            Line: ${jobError.lineNumber}
-            Message: ${jobError.message}
-            Stacktrace: ${ jobError.stacktrace}`
+    case CONFIG_TYPE.WEBHOOK:
+        await this.handleWebhook(notification as WebHookConfig, message)
+        break
+    case CONFIG_TYPE.FCM:
+        await this.handleFCM(notification as FirebaseConfig, message)
+        break
+    case CONFIG_TYPE.SLACK:
+        await this.handleSlack(notification as SlackConfig, message)
+        break
+    default:
+        throw new Error('Notification type not implemented.')
     }
-
-    return message
   }
 
   private async handleWebhook (webhook: WebHookConfig, message: string): Promise<void> {
