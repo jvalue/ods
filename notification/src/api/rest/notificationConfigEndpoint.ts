@@ -1,22 +1,16 @@
 
-import NotificationService from '@/notification-execution/notificationService';
+import * as express from 'express';
+import { DeleteResult } from 'typeorm';
+
 import { SlackConfig, WebHookConfig, NotificationConfig, FirebaseConfig, NotficationConfigRequest, CONFIG_TYPE } from '../../notification-config/notificationConfig';
 import { NotificationRepository } from '../../notification-config/notificationRepository'
-import { AmqpHandler } from '../amqp/amqpHandler';
-import { DeleteResult } from 'typeorm';
-import * as express from 'express';
 
 export class NotificationConfigEndpoint {
 
-  NotificationService: NotificationService
   storageHandler: NotificationRepository
-  amqpHandler: AmqpHandler
 
-
-  constructor(NotificationService: NotificationService, storageHandler: NotificationRepository, amqpHandler: AmqpHandler, app: express.Application) {
-    this.NotificationService = NotificationService
+  constructor(storageHandler: NotificationRepository, app: express.Application) {
     this.storageHandler = storageHandler
-    this.amqpHandler = amqpHandler
 
     // Create Configs
     app.post('/config/:configType', this.handleConfigCreation)

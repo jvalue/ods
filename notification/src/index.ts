@@ -29,7 +29,7 @@ app.use(cors())
 app.use(bodyParser.json({ limit: '50mb' }))
 app.use(bodyParser.urlencoded({ extended: false }))
 
-const notificationConfigEndpoint = new NotificationConfigEndpoint(notificationService, storageHandler, amqpHandler, app)
+const notificationConfigEndpoint = new NotificationConfigEndpoint(storageHandler, app)
 const notificationExecutionEndpoint = new NotificationExecutionEndpoint(notificationService, app)
 
 app.listen(port, async () => {
