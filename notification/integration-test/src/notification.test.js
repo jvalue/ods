@@ -303,8 +303,6 @@ describe("Testing Notification dispatch on Event arrival from queue", () => {
         console.log("AMQP-Publisher-Mock successfully connected to AMQP-Server");
     }, 60000);
 
-    console.log = jest.fn(); // disable logging
-
     // afterAll(async() => {
     //     if (amqpConnection) {
     //         amqpConnection.close();
@@ -326,7 +324,7 @@ describe("Testing Notification dispatch on Event arrival from queue", () => {
 
         let amqpConnection = await amqp.initConnection(20, 5);
         expect(amqpConnection).not.toBeNull();
-        await amqp.publishEvent(transformationEvent);
+        amqp.publishEvent(transformationEvent);
 
         await sleep(3000); // wait for processing
 
@@ -441,6 +439,10 @@ describe("Testing Notification dispatch on Event arrival from queue", () => {
 
 });
 
+/**
+ * Sleep function
+ * @param ms time to sleep in ms
+ */
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }

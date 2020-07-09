@@ -53,7 +53,12 @@ export class AmqpHandler{
         
         for (let i = 1; i <= retries; i++) {
             await this.backOff(backoff)
-            await connect(rabit_amqp_url, async function (error0: any, connection: Connection) {
+
+            if (established) {
+                break
+            }
+
+            connect(rabit_amqp_url, async function (error0: any, connection: Connection) {
                 if (error0) {
                     errMsg = `Error connecting to RabbitMQ: ${error0}.Retrying in ${backoff} seconds`
                     console.info(`Connecting to Amqp handler (${i}/${retries})`);
@@ -62,12 +67,8 @@ export class AmqpHandler{
                 established = true
 
                 // create the channel
-                await handler.initChannel(connection)
+                handler.initChannel(connection)
             })
-
-            if (established) {
-                break
-            }
         }
 
         if (!established) {

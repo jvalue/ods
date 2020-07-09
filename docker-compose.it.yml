@@ -62,6 +62,11 @@ services:
   transformation:
     environment:
       AUTH_ENABLED: 'false'
+      AMQP_JOB_QUEUE: ${AMQP_ADAPTER_DATA_CHANNEL}
+      AMQP_NOTIFICATION_QUEUE: 'MOCK_NOTIFICATION_QUEUE'
+      AMQP_ODSDATA_QUEUE: 'MOCK_ODSDATA_QUEUE'
+      ADAPTER_SERVICE_URL: http://transformation-it:8081
+      
     depends_on:
     - rabbitmq
     - transformation-db
