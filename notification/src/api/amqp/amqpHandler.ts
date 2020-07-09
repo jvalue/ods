@@ -103,7 +103,7 @@ export class AmqpHandler{
             // Consume from Channel
             channel.consume(
                 handler.notifQueueName,
-                (msg: ConsumeMessage | null) => handler.handleEvent(msg),
+                async (msg: ConsumeMessage | null) => await handler.handleEvent(msg),
                 { noAck: true }
             );
         });
@@ -116,7 +116,7 @@ export class AmqpHandler{
      *
      * @returns true on success, else false
      */
-    private handleEvent(msg: ConsumeMessage | null): boolean {
+    private async handleEvent(msg: ConsumeMessage | null): Promise<boolean> {
         if (!msg) {
             console.warn('Could not receive Notification Event: Message is not set')
             return false
@@ -128,7 +128,7 @@ export class AmqpHandler{
         console.log(`Received Event from Channel: Pipeline id: "${transformationEvent.pipelineId}",
         Pipeline Name: "${transformationEvent.pipelineName}`)
 
-        const isValid = this.isValidTransformationEvent(transformationEvent)
+        const isValid = AmqpHandler.isValidTransformationEvent(transformationEvent)
 
         if (!isValid) {
             console.error('Message received is not an Transformation Event')
@@ -138,29 +138,24 @@ export class AmqpHandler{
 
         const message = NotificationMessageFactory.buildMessage(transformationEvent)
         const data = transformationEvent.jobResult.data
-        const configs = this.storageHandler.getConfigsForPipeline(transformationEvent.pipelineId)
+        const configs = await this.storageHandler.getConfigsForPipeline(transformationEvent.pipelineId)
+
+        if (!configs) {
+            console.error('Could not get config')
+            return true
+        }
+        for (const webhookConfig of configs.webhook) {
+            this.notificationService.handleNotification(webhookConfig, CONFIG_TYPE.WEBHOOK, message, data)
+        }
+
+        for (const slackConfig of configs.slack) {
+            this.notificationService.handleNotification(slackConfig, CONFIG_TYPE.SLACK, message, data)
+        }
 
 
-        configs.then(config => {
-
-            if (!config) {
-                console.error('Could not get Config')
-                return true
-            }
-            for (const webhookConfig of config.webhook) {
-                this.notificationService.handleNotification(webhookConfig, CONFIG_TYPE.WEBHOOK, message, data)
-            }
-
-            for (const slackConfig of config.slack) {
-                this.notificationService.handleNotification(slackConfig, CONFIG_TYPE.SLACK, message, data)
-            }
-
-
-            for (const firebaseConfig of config.firebase) {
-                this.notificationService.handleNotification(firebaseConfig, CONFIG_TYPE.FCM, message, data)
-            }
-
-        })
+        for (const firebaseConfig of configs.firebase) {
+            this.notificationService.handleNotification(firebaseConfig, CONFIG_TYPE.FCM, message, data)
+        }
 
         return true
     }
@@ -173,7 +168,7 @@ export class AmqpHandler{
         *
         * @returns     true, if param event is a TransformationEvent, else false
         */
-    public  isValidTransformationEvent(event: TransformationEvent): boolean {
+    public static isValidTransformationEvent(event: TransformationEvent): boolean {
         return !!event.dataLocation && !!event.pipelineId && !!event.pipelineName && !!event.jobResult
     }
 }
