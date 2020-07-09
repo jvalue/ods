@@ -27,9 +27,10 @@ describe('Notification', () => {
     })
 
 
-    test('GET /config/pipeline/ requests notification configs for non-existing pipeline', async() => {
+    test('GET /config/pipeline/982323 requests notification configs for non-existing pipeline', async() => {
         const receiverResponse = await request(MOCK_RECEIVER_URL)
-            .get('/config/pipeline/984029823')
+            .get('/config/pipeline/982323')
+            .send()
 
         expect(receiverResponse.status).toEqual(200)
 
@@ -41,9 +42,10 @@ describe('Notification', () => {
         })
     })
 
-    test('GET /config/slack/4879238749823749 request slack config that does not exist', async() => {
+    test('GET /config/slack/487749 request slack config that does not exist', async() => {
         const receiverResponse = await request(URL)
-            .get('/config/slack/4879823749')
+            .get('/config/slack/487749')
+            .send()
 
         expect(receiverResponse.status).toEqual(404)
 
