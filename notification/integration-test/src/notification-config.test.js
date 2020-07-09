@@ -8,8 +8,8 @@ const MOCK_RECEIVER_PORT = process.env.MOCK_RECEIVER_PORT || 8081
 const MOCK_RECEIVER_HOST = process.env.MOCK_RECEIVER_HOST || 'localhost'
 const MOCK_RECEIVER_URL = 'http://' + MOCK_RECEIVER_HOST + ':' + MOCK_RECEIVER_PORT
 
-describe('Scheduler', () => {
-    console.log('Scheduler-Service URL= ' + URL)
+describe('Notification', () => {
+    console.log('Notification-Service URL= ' + URL)
 
     beforeAll(async() => {
         const pingUrl = URL + '/'

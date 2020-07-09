@@ -8,8 +8,8 @@ const MOCK_RECEIVER_PORT = process.env.MOCK_RECEIVER_PORT || 8081
 const MOCK_RECEIVER_HOST = process.env.MOCK_RECEIVER_HOST || 'localhost'
 const MOCK_RECEIVER_URL = 'http://' + MOCK_RECEIVER_HOST + ':' + MOCK_RECEIVER_PORT
 
-describe('Scheduler', () => {
-    console.log('Scheduler-Service URL= ' + URL)
+describe('Notification', () => {
+    console.log('Notification-Service URL= ' + URL)
 
     beforeAll(async() => {
         const pingUrl = URL + '/'
@@ -18,54 +18,93 @@ describe('Scheduler', () => {
         await waitOn({ resources: [pingUrl, MOCK_RECEIVER_URL], timeout: 50000 })
     }, 60000)
 
-    test('POST /webhook triggers webhook', async() => {
-        const dataLocation = 'storage/1234'
-        const notificationJob = {
-            pipelineName: 'webhookpipeline',
-            pipelineId: 1,
-            dataLocation: dataLocation,
+    test('Trigger webhook', async() => {
+      // SETUP: store notification config
+      const webhookConfig = {
+          pipelineId: 1,
+          condition: 'data.value1 > 0',
+          url: MOCK_RECEIVER_URL + '/webhook1'
+      }
+      const notificationResponse = await request(URL)
+          .post('/config/webhook')
+          .send(webhookConfig)
+      expect(notificationResponse.status).toEqual(200)
+      const id = notificationResponse.body.id
+
+      // SETUP: trigger event
+      const dataLocation = 'storage/1234'
+      const triggerEvent = {
+          pipelineId: 1,
+          pipelineName: "Integration-Test Pipeline 1",
+          dataLocation: dataLocation,
+          jobResult: {
             data: {
-                value1: 1
+              value1: 1
             },
-            condition: 'data.value1 > 0',
-            type: 'WEBHOOK',
-            url: MOCK_RECEIVER_URL + '/webhook1'
-        }
+            stats: {
+              durationInMilliSeconds: 500,
+              startTimestamp: 12345,
+              endTimestamp: 12345
+            }
+          }
+      }
 
-        const notificationResponse = await request(URL)
-            .post('/webhook')
-            .send(notificationJob)
+      // ACT
+      const notificationTriggerResponse = await request(URL)
+            .post('/trigger')
+            .send(triggerEvent)
 
-        expect(notificationResponse.status).toEqual(200)
-        await sleep(3000) // wait for processing
+      expect(notificationTriggerResponse.status).toEqual(200)
+      await sleep(3000) // wait for processing
 
-        const receiverResponse = await request(MOCK_RECEIVER_URL)
-            .get('/webhook1')
+      // ASSERT
+      const receiverResponse = await request(MOCK_RECEIVER_URL)
+          .get('/webhook1')
 
-        expect(receiverResponse.status).toEqual(200)
-        expect(receiverResponse.body.location).toEqual(dataLocation)
+      expect(receiverResponse.status).toEqual(200)
+      expect(receiverResponse.body.location).toEqual(dataLocation)
     })
 
-    test('POST /webhook does not trigger webhook when condition is false', async() => {
-        const notificationJob = {
-            pipelineName: 'do not trigger',
+    test('Ttrigger not notifying webhook when condition is false', async() => {
+        // SETUP: store notification config
+        const webhookConfig = {
             pipelineId: 2,
-            dataLocation: 'storage/1234',
-            data: {
-                value1: 1
-            },
             condition: 'data.value1 < 0',
-            url: MOCK_RECEIVER_URL + '/webhook2',
-            type: 'WEBHOOK'
+            url: MOCK_RECEIVER_URL + '/webhook2'
+        }
+        const notificationResponse = await request(URL)
+            .post('/config/webhook')
+            .send(webhookConfig)
+        expect(notificationResponse.status).toEqual(200)
+        const id = notificationResponse.body.id
+
+        // SETUP: trigger event
+        const dataLocation = 'storage/1234'
+        const triggerEvent = {
+            pipelineId: 2,
+            pipelineName: "Integration-Test Pipeline 2 (not triggering)",
+            dataLocation: dataLocation,
+            jobResult: {
+              data: {
+                value1: 1
+              },
+              stats: {
+                durationInMilliSeconds: 500,
+                startTimestamp: 12345,
+                endTimestamp: 12345
+              }
+            }
         }
 
-        const notificationResponse = await request(URL)
-            .post('/webhook')
-            .send(notificationJob)
+        // ACT
+        const notificationTriggerResponse = await request(URL)
+        .post('/trigger')
+        .send(triggerEvent)
 
-        expect(notificationResponse.status).toEqual(200)
-        await sleep(3000)
+        expect(notificationTriggerResponse.status).toEqual(200)
+        await sleep(3000) // wait for processing
 
+        // ASSERT
         const receiverResponse = await request(MOCK_RECEIVER_URL)
             .get('/webhook2')
 
@@ -73,34 +112,53 @@ describe('Scheduler', () => {
     })
 
     test('POST /slack triggers slack notification', async() => {
-        const dataLocation = 'storage/234'
-        const slackJob = {
-            pipelineName: 'peterchens pipeline',
-            pipelineId: 666,
-            dataLocation,
+      // SETUP: store notification config
+      const slack = {
+        pipelineId: 3,
+        condition: 'typeof data.niceString === "string"',
+        channelId: '12',
+        workspaceId: '34',
+        secret: '56'
+      }
+      const notificationResponse = await request(URL)
+      .post('/config/slack')
+      .send(webhookConfig)
+      expect(notificationResponse.status).toEqual(200)
+      const id = notificationResponse.body.id
+
+      // SETUP: trigger event
+      const dataLocation = 'storage/234'
+      const triggerEvent = {
+          pipelineId: 3,
+          pipelineName: "Integration-Test Pipeline 3 (Slack)",
+          dataLocation: dataLocation,
+          jobResult: {
             data: {
-                niceString: 'nice'
+              niceString: 'nice'
             },
-            condition: 'typeof data.niceString === "string"',
-            type: 'SLACK',
-            channelId: '12',
-            workspaceId: '34',
-            secret: '56'
-        }
+            stats: {
+              durationInMilliSeconds: 500,
+              startTimestamp: 12345,
+              endTimestamp: 12345
+            }
+          }
+      }
 
-        const notificationResponse = await request(URL)
-            .post('/slack')
-            .send(slackJob)
-        expect(notificationResponse.status).toEqual(200)
+      // ACT
+      const notificationTriggerResponse = await request(URL)
+      .post('/trigger')
+      .send(triggerEvent)
 
-        await sleep(3000)
+      expect(notificationTriggerResponse.status).toEqual(200)
+      await sleep(3000) // wait for processing
 
-        const receiverResponse = await request(MOCK_RECEIVER_URL)
-            .get('/slack/12/34/56')
+      // ASSERT
+      const receiverResponse = await request(MOCK_RECEIVER_URL)
+          .get('/slack/12/34/56')
 
-        expect(receiverResponse.status).toEqual(200)
-        expect(receiverResponse.body.text)
-            .toEqual(`Pipeline ${slackJob.pipelineName}(${slackJob.pipelineId}) has new data available. Fetch at ${dataLocation}.`)
+      expect(receiverResponse.status).toEqual(200)
+      expect(receiverResponse.body.text)
+          .toEqual(`Pipeline ${slackJob.pipelineName}(${slackJob.pipelineId}) has new data available. Fetch at ${dataLocation}.`)
     })
 
     function sleep(ms) {

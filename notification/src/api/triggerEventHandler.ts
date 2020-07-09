@@ -1,8 +1,8 @@
 import { TransformationEvent } from "./transformationEvent"
 import { NotificationMessageFactory } from "./notificationMessageFactory"
-import { NotificationRepository } from "@/notification-config/notificationRepository"
-import NotificationExecutor from "@/notification-execution/notificationExecutor"
-import { CONFIG_TYPE } from "@/notification-config/notificationConfig"
+import { NotificationRepository } from "../notification-config/notificationRepository"
+import NotificationExecutor from "../notification-execution/notificationExecutor"
+import { CONFIG_TYPE } from "../notification-config/notificationConfig"
 
 export class TriggerEventHandler {
 
