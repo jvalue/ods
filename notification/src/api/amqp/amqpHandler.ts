@@ -1,5 +1,5 @@
 import { StorageHandler } from "../../notification-config/storageHandler"
-import { connect, Connection, ConsumeMessage } from "amqplib/callback_api"
+import { connect, Connection, ConsumeMessage, Channel } from "amqplib/callback_api"
 import { TransformationEvent } from '../transformationEvent';
 import JSNotificationService from '../../notification-execution/notificationExecutor';
 import VM2SandboxExecutor from "../../notification-execution/condition-evaluation/vm2SandboxExecutor";
@@ -87,23 +87,22 @@ export class AmqpHandler{
         return new Promise(resolve => setTimeout(resolve, backOff * 1000));
     }
 
-    private initChannel(connection: any) {
+    private initChannel(connection: Connection) {
         console.log(`Initializing Transformation Channel "${this.notifQueueName}"`)
-        const handler: AmqpHandler = this   // for ability to access methods and members in callback
 
-        connection.createChannel(function (error1: Error, channel: any) {
+        connection.createChannel((error1: Error, channel: Channel) => {
             if (error1) {
                 throw error1;
             }
 
-            channel.assertQueue(handler.notifQueueName, {
+            channel.assertQueue(this.notifQueueName, {
                 durable: false,
             });
 
             // Consume from Channel
             channel.consume(
-                handler.notifQueueName,
-                async (msg: ConsumeMessage | null) => await handler.handleEvent(msg),
+                this.notifQueueName,
+                async (msg: ConsumeMessage | null) => await this.handleEvent(msg),
                 { noAck: true }
             );
         });
