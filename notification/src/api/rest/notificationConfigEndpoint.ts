@@ -421,24 +421,7 @@ export class NotificationConfigEndpoint {
     }
 
     // Delete Config
-    try {
-      deleteResult = await this.storageHandler.deleteSlackConfig(configId)
-
-      // No Deletion done
-      if (deleteResult.affected != 1) {
-        const msg = `Could not delete Slack Config: Config with id ${configId} not found.`
-        console.log(msg)
-        res.status(400).send(msg)
-      }
-
-    } catch (error) {
-      console.error(`Could not delete slack config  with id ${configId}: ${error}`)
-      res.status(400).send('Internal Server Error.')
-      res.end()
-      return
-    }
-
-    // return saved post back
+    await this.storageHandler.deleteSlackConfig(configId)
     res.status(200).send('DELETED');
     res.end()
   }
@@ -464,22 +447,7 @@ export class NotificationConfigEndpoint {
     }
 
     // Delete Config
-    try {
-      deleteResult = await this.storageHandler.deleteFirebaseConfig(configId)
-
-      // No Deletion done
-      if (deleteResult.affected != 1) {
-        console.log(`Could not delete Firebase Config with id ${configId}`)
-      }
-
-    } catch (error) {
-      console.error(`Could not delete firebase config  with id ${configId}: ${error}`)
-      res.status(400).send('Internal Server Error.')
-      res.end()
-      return
-    }
-
-    // return saved post back
+    await this.storageHandler.deleteFirebaseConfig(configId)
     res.status(200).send('DELETED');
     res.end()
   }
@@ -505,22 +473,7 @@ export class NotificationConfigEndpoint {
     }
 
     // Delete Config
-    try {
-      deleteResult = await this.storageHandler.deleteSlackConfig(configId)
-
-      // No Deletion done
-      if (deleteResult.affected != 1) {
-        console.log(`Could not delete webhook Config with id ${configId}`)
-      }
-
-    } catch (error) {
-      console.error(`Could not delete WebHook Config with id ${configId}: ${error}`)
-      res.status(400).send('Internal Server Error.')
-      res.end()
-      return
-    }
-
-    // return saved post back
+    await this.storageHandler.deleteWebhookConfig(configId)
     res.status(200).send('DELETED');
     res.end()
   }

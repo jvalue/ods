@@ -1,6 +1,5 @@
-import { FirebaseConfig, SlackConfig, WebHookConfig } from "./notificationConfig";
 import { NotificationSummary } from "./notificationSummary";
-import { Connection, DeleteResult, UpdateResult } from 'typeorm';
+import { FirebaseConfig, SlackConfig, WebHookConfig } from "./notificationConfig";
 
 export interface NotificationRepository {
   init(retries: number, backoff: number):void
@@ -15,11 +14,11 @@ export interface NotificationRepository {
   saveSlackConfig(slackConfig: SlackConfig): Promise<SlackConfig>
   saveFirebaseConfig(firebaseConfig: FirebaseConfig): Promise<FirebaseConfig>
 
-  updateSlackConfig(id: number, slackConfig: SlackConfig): Promise<UpdateResult>
-  updateWebhookConfig(id: number, webhookConfig: WebHookConfig): Promise<UpdateResult>
-  updateFirebaseConfig(id: number, firebaseConfig: FirebaseConfig): Promise<UpdateResult>
+  updateSlackConfig(id: number, slackConfig: SlackConfig): Promise<SlackConfig>
+  updateWebhookConfig(id: number, webhookConfig: WebHookConfig): Promise<WebHookConfig>
+  updateFirebaseConfig(id: number, firebaseConfig: FirebaseConfig): Promise<FirebaseConfig>
 
-  deleteSlackConfig(id: number): Promise<DeleteResult>
-  deleteWebhookConfig(id: number): Promise<DeleteResult>
-  deleteFirebaseConfig(id: number): Promise<DeleteResult>
+  deleteSlackConfig(id: number): Promise<void>
+  deleteWebhookConfig(id: number): Promise<void>
+  deleteFirebaseConfig(id: number): Promise<void>
 }
