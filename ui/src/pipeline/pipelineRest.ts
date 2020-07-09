@@ -35,7 +35,8 @@ export async function getAllPipelines(): Promise<Pipeline[]> {
 
 export async function getPipelineById (id: number): Promise<Pipeline> {
   //const response = await http_core.get(`/${id}`)
-  const response = await http_transformation.get(`/${id}`)
+  const params = { id: id}
+  const response = await http_transformation.get(`/${id}`, { params })
   return JSON.parse(response.data)
 }
 

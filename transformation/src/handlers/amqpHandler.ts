@@ -1,14 +1,14 @@
 import { TransformationEvent } from '../interfaces/transformationEvent';
 import {   ConsumeMessage } from "amqplib";
 import { Channel, connect, Connection} from "amqplib/callback_api"
-import JobEvent from '../interfaces/job/jobEvent';
+import AdapterDataEvent from '../interfaces/events/adapterDataEvent';
 import JSTransformationService from '../jsTransformationService';
 import { StorageHandler } from './storageHandler';
 import { PipelineConfig } from '../models/PipelineConfig';
 import axios from 'axios';
 import JobResult from '@/interfaces/job/jobResult';
-import ODSData from '../interfaces/odsData';
-import { DML_QUERY_TYPE, DataDMLEvent, DDL_QUERY_TYPE, EVENT_TYPE } from '../interfaces/odsDataEvent';
+import ODSData from '../interfaces/events/odsData';
+import { DML_QUERY_TYPE, DataDMLEvent, DDL_QUERY_TYPE, EVENT_TYPE } from '../interfaces/events/odsDataEvent';
 
 
 
@@ -29,12 +29,12 @@ import { DML_QUERY_TYPE, DataDMLEvent, DDL_QUERY_TYPE, EVENT_TYPE } from '../int
  */
 export class AmqpHandler {
     notificationChannel!: Channel             // notification channel
-    jobChannel!: Channel                      // Channel containing transformation Jobs
+    adapterDataChannel!: Channel                      // Channel containing transformation Jobs
     odsDataChannel!: Channel                  // Channel to publish transformed data to the storage service (CQRS)
 
     connection!: Connection                   // Connection to the AMQP Service (Rabbit MQ)
 
-    jobQueueName = process.env.AMQP_JOB_QUEUE!                // Queue name of the Job Queue
+    adapterDataQueueName = process.env.AMQP_JOB_QUEUE!         // Queue name of the Job Queue
     notifQueueName = process.env.AMQP_NOTIFICATION_QUEUE!     // Queue name of the Notification Queue
     odsDataQueueName = process.env.AMQP_ODSDATA_QUEUE!        // Queu name of the Ods Data Queue (Queue where transformed data is puslished)
 
@@ -68,8 +68,8 @@ export class AmqpHandler {
         let errMsg: string = ''             // Error Message to be shown after final retry
 
         for (let i = 1; i <= retries; i++) {
-            await this.backOff(backoff)
-            await connect(rabit_amqp_url, async (error0: any, connection: Connection) => {
+        
+            connect(rabit_amqp_url, async (error0: any, connection: Connection) => {
                 if (error0) {
                     errMsg = `Error connecting to RabbitMQ: ${error0}.Retrying in ${backoff} seconds`
                     console.info(`Connecting to Amqp handler (${i}/${retries})`);
@@ -79,10 +79,12 @@ export class AmqpHandler {
                 established = true
 
                 // create the channels
-                await this.initNotificationChannel(connection)
-                await this.initJobChannel(connection)
-                await this.initODSDataChannel(connection)
+                this.initNotificationChannel(connection)
+                this.initAdapterDataChannel(connection)
+                this.initODSDataChannel(connection)
             })
+
+            await this.backOff(backoff)
 
             if (established) {
                 break
@@ -125,11 +127,11 @@ export class AmqpHandler {
             this.notificationChannel = channel
 
             this.notificationChannel.assertQueue(this.notifQueueName, {
-                durable: false,
+                durable: true,
             });
 
         })
-        console.log(`Successfully connected to channel "${this.notifQueueName}".`)
+        console.log(`Successfully connected to Queue "${this.notifQueueName}".`)
     }
 
 
@@ -140,7 +142,7 @@ export class AmqpHandler {
    * @param connection Connection to the AMQP Service (rabbitmq)
    */
     private initODSDataChannel(connection: Connection): void {
-        console.log(`Connecting to channel "${this.odsDataChannel}" to publish events for storage service`)
+        console.log(`Connecting to channel "${this.odsDataQueueName}" to publish events for storage service`)
         connection.createChannel((err: any, channel: Channel) => {
             if (err) {
                 console.log('Filed to create Channel: ' + err)
@@ -151,12 +153,10 @@ export class AmqpHandler {
             this.odsDataChannel = channel
 
             // Make sure the Channel exists
-            this.jobChannel.assertQueue(this.jobQueueName, {
-                durable: false,
-            });
+            this.odsDataChannel.assertQueue(this.odsDataQueueName, {durable: true});
 
         })
-        console.log(`Connecting to channel "${this.jobQueueName}" to publish events for notificaiton service`)
+        console.log(`Succesfully connected to Queue "${this.odsDataQueueName}"`)
     }
 
     /**
@@ -166,8 +166,8 @@ export class AmqpHandler {
      *
      * @param connection Connection to the AMQP Service (rabbitmq)
      */
-    private initJobChannel(connection: Connection): void {
-        console.log(`Connecting to channel "${this.jobQueueName}" to publish events for notificaiton service`)
+    private initAdapterDataChannel(connection: Connection): void {
+        console.log(`Connecting to channel "${this.adapterDataQueueName}" to consume events from adapter service`)
         connection.createChannel((err: any, channel: Channel) => {
             if (err) {
                 console.log('Filed to create Channel: ' + err)
@@ -175,21 +175,21 @@ export class AmqpHandler {
             }
 
             // Assign this channel
-            this.jobChannel = channel
+            this.adapterDataChannel = channel
 
             // Make sure the Channel exists
-            this.jobChannel.assertQueue(this.jobQueueName, {
-                durable: false,
+            this.adapterDataChannel.assertQueue(this.adapterDataQueueName, {
+                durable: true,
             });
 
             // Consume from Channel
-            this.jobChannel.consume(
-                this.jobQueueName,
+            this.adapterDataChannel.consume(
+                this.adapterDataQueueName,
                 (msg: ConsumeMessage | null) => this.consumeJobEvent(msg),
                 { noAck: true }
             );
         })
-        console.log(`Connecting to channel "${this.jobQueueName}" to publish events for notificaiton service`)
+        console.log(`Succesfully connected to Queue "${this.adapterDataQueueName}"`)
     }
 
 
@@ -209,10 +209,10 @@ export class AmqpHandler {
 
         // Extract content from Event
         const messageContent = msg.content.toString()
-        const jobEvent = JSON.parse(messageContent) as JobEvent
+        const jobEvent = JSON.parse(messageContent) as AdapterDataEvent
 
         if (!AmqpHandler.isValidJobEvent(jobEvent)) {
-            console.error('Message received is not an Transformation Event')
+            console.error('Message received is not a valid AdapterData Event')
             return false
         }
 
@@ -230,11 +230,6 @@ export class AmqpHandler {
      */
     public notifyNotificationService(transfromationEvent: TransformationEvent) {
         console.log('Notifying notification service that Transformation is done.')
-        // console.debug(`Sending Transformation Event to queue: \n\
-        // Data Location:  ${transfromationEvent.dataLocation} \n\
-        // Pipeline ID:    ${transfromationEvent.pipelineId}\n\
-        // Pipeline Name:  ${transfromationEvent.pipelineName}\n\
-        // Result:         ${transfromationEvent.jobResult}`)
 
         if (!this.isValidTransformationEvent(transfromationEvent)) {
             console.error('Message to be sent is not an Transformation Event')
@@ -243,7 +238,7 @@ export class AmqpHandler {
 
         // Make sure the Channel exists
         this.notificationChannel.assertQueue(this.notifQueueName, {
-            durable: false,
+            durable: true,
         });
 
         this.notificationChannel!.sendToQueue(this.notifQueueName, Buffer.from(JSON.stringify(transfromationEvent)));
@@ -251,7 +246,7 @@ export class AmqpHandler {
         console.log('Successfully sent transformation Event to notification queue.')
 
         this.notificationChannel!.assertQueue(this.notifQueueName, {
-            durable: false,
+            durable: true,
         });
     }
 
@@ -262,12 +257,12 @@ export class AmqpHandler {
      *
      * @param jobEvent Job to be executed (Transformation)
      */
-    public async handleJob(jobEvent: JobEvent) {
+    public async handleJob(jobEvent: AdapterDataEvent) {
         if (!AmqpHandler.isValidJobEvent(jobEvent)) {
             console.error("Cannot handle Job: given JobEvent is not valid")
             return
         }
-        const pipelineConfigs = await this.storageHandler.getAllConfigs({ datasourceId: jobEvent.datasourceId })
+        const pipelineConfigs = await this.storageHandler.getPipelineConfigs({ datasourceId: jobEvent.datasourceId })
 
         if (!pipelineConfigs || pipelineConfigs.length == 0) {
             console.log(`No PipelineConfigs found for adapter data with datasource id ${jobEvent.datasourceId}`)
@@ -311,7 +306,6 @@ export class AmqpHandler {
             // Execute transformation
             const transformationCode = config.transformation.func
             let jobResult = this.transformationService.executeJob(transformationCode, adapterData)
-
             // Send Event to Notificaiton Service
             let transformationEvent = this.generateTransformationEvent(config, jobResult)
             this.notifyNotificationService(transformationEvent)
@@ -333,7 +327,7 @@ export class AmqpHandler {
         const odsDataEvent = this.generateDMLEvent(DML_QUERY_TYPE.CREATE, pipelineConfig, jobResult)
         this.odsDataChannel.sendToQueue(this.odsDataQueueName, Buffer.from(JSON.stringify(odsDataEvent)));
 
-        console.log(`Sucessfully published transformed data to the storage queue.`)
+        console.debug(`Sucessfully published transformed data to the storage queue.`)
         return true
     }
 
@@ -347,16 +341,49 @@ export class AmqpHandler {
      * @returns true on success, false on failure
      */
     public publishTableCreationEvent(tableName: string): boolean {
-        console.log(`Publishing "Create table" event to the storage queue.`)
 
         const ddlEvent = {
             eventType: EVENT_TYPE.DATA_DDL,
             ddlType: DDL_QUERY_TYPE.CREATE_TABLE,
             tableName: tableName
-        } 
-        
+        }
+
+        const eventAsString = JSON.stringify(ddlEvent)
+        console.log(`Publishing "Create table" ${eventAsString} event to the storage queue ${this.odsDataQueueName}.`)
+
         try {
-            this.odsDataChannel.sendToQueue(this.odsDataQueueName, Buffer.from(JSON.stringify(ddlEvent)))
+            this.odsDataChannel.sendToQueue(this.odsDataQueueName, Buffer.from(eventAsString))
+        } catch (err) {
+            console.log(`Could not publish "Create table" Event to storage queue.`)
+            return false
+        }
+        console.log(`Publishing "Create table" event to the storage queue.`)
+        return true
+    }
+
+
+    /**
+     * This function drops a database table on storage-mq service for storing data for a specific pipeline,
+     * by sending a "Create table" event to storage queue
+     * 
+     * This will be called when a pipeline is deleted (and therefore a pipeline)
+     * 
+     * @param tableName name of the table to be deleted
+     * @returns true on success, false on failure
+     */
+    public publishTableDeletionEvent(tableName: string): boolean {
+
+        const ddlEvent = {
+            eventType: EVENT_TYPE.DATA_DDL,
+            ddlType: DDL_QUERY_TYPE.DROP_TABLE,
+            tableName: tableName
+        }
+
+        const eventAsString = JSON.stringify(ddlEvent)
+        console.log(`Publishing "Delete table" ${eventAsString} event to the storage queue ${this.odsDataQueueName}.`)
+
+        try {
+            this.odsDataChannel.sendToQueue(this.odsDataQueueName, Buffer.from(eventAsString))
         } catch (err) {
             console.log(`Could not publish "Create table" Event to storage queue.`)
             return false
@@ -416,8 +443,7 @@ export class AmqpHandler {
         return transformationEvent
     }
 
-
-
+    
     /**
      * Checks if this event is a valid Transformation event,
      * by checking if all field variables exist and are set.
@@ -437,9 +463,9 @@ export class AmqpHandler {
      * @param event JobEvent, that has to be checked
      * @returns     true, if param event is a TransformationEvent, else false
      */
-    public static isValidJobEvent(event: JobEvent): boolean {
+    public static isValidJobEvent(event: AdapterDataEvent): boolean {
         // return !!event && !!event.data && !!event.dataLocation // Uncomment for FAT EVENT
-        return !!event && !!event.dataLocation
+        return !!event && (!!event.dataLocation || !!event.data)
     }
 
 }

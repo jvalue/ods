@@ -10,5 +10,4 @@ export interface TransformationEvent {
     dataLocation: string    // url (location) of the data
 
     jobResult: JobResult    // result of the transformation
-
 }

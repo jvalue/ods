@@ -1,7 +1,7 @@
 
 import { DataRepository } from '../interfaces/dataRepository';
 import ODSData from '../interfaces/odsData';
-import { Pool, Client, PoolClient } from 'pg';
+import { Pool,  PoolClient, PoolConfig, QueryResult } from 'pg';
 
 
 
@@ -54,7 +54,7 @@ export class StorageHandler implements DataRepository {
         let connectionErr: boolean = false
     
         // Pool Config
-        const config = {
+        const config : PoolConfig= {
             host: process.env.DATABASE_HOST!,
             port: +process.env.DATABASE_PORT!,
             user: process.env.DATABASE_USER!,
@@ -62,7 +62,7 @@ export class StorageHandler implements DataRepository {
             database: process.env.DATABASE_NAME!,
             max: 20,
             idleTimeoutMillis: 30000,
-            connectionTimeoutMillis: 2000,
+            connectionTimeoutMillis: 2000    
         }
 
         // try to establish connection
@@ -139,16 +139,13 @@ export class StorageHandler implements DataRepository {
         return odsDataRows
     }
 
-
-
-
     /**
      * Persists dataset (provided by argument) to the config database
      *
-     * @param data  ods data to persist
+     * @param odsData  ods data to persist
      * @returns Promise, containing the ods data 
      */
-    public async saveData(tableName: string, data: ODSData): Promise<boolean> {
+    public async saveData(tableName: string, odsData: ODSData): Promise<boolean> {
         console.debug(`Saving ods data.`)
 
         let persisted = true // indicator to show whether the data was persisted 
@@ -159,15 +156,29 @@ export class StorageHandler implements DataRepository {
         }
 
         // remove id from data
-        delete data.id
+        delete odsData.id
+
+        // Generate Query-String
+        const data = JSON.stringify(odsData.data).replace("'", "''") // Escape single quotes
+        const insertStatement = `SET search_path to storage; INSERT INTO "${tableName}" ("data", "license", "origin", "pipelineId", "timestamp") VALUES ('$1', '$2', '$3', $4, '$5')`
+
+        // Generate bind variables
+        let values = [data, odsData.license, odsData.origin, parseInt(odsData.pipelineId), odsData.timestamp]
 
         try {
             // Get a client from connection pool
             client = await this.connectionPool.connect()  
 
-            const insertStatement = this.generateInsertStatement(tableName, data)
             // persist the Config
-            await client.query(insertStatement)
+            await client.query(
+                insertStatement,
+                values,
+                (err: Error, result: QueryResult<any>) => {
+                    const errMsg = `Could save ODSData: ${err}`
+                    console.error(errMsg)
+                    persisted = false
+                }
+            )
 
         } catch (err) {
             const errMsg = `Could save ODSData: ${err}`
@@ -234,13 +245,13 @@ export class StorageHandler implements DataRepository {
      * with data (provided by argument data)
      *
      * @param tableName     name of the table where to updated the data
-     * @param data          data to be written to database
+     * @param odsData          data to be written to database
      * @param conditions    conditons to indentify the entries to be updated, e.g. {id: 1}
      * 
      * @returns Promise containing the updated data on success 
      *          or Promise containing undefined data, if data to be updated does not exist
      */
-    public async updateData(tableName:string, data: ODSData, conditions?: object): Promise<boolean> {
+    public async updateData(tableName:string, odsData: ODSData, conditions?: object): Promise<boolean> {
         console.debug(`Updating dataset(s) in table ${tableName} with conditions ${JSON.stringify(conditions)}.`)
         let updated = true // indicator to show whether the data was persisted 
         
@@ -250,14 +261,36 @@ export class StorageHandler implements DataRepository {
             Promise.reject()
         }
 
-        const updateStatement = this.generateUpdateStatement(tableName, data, conditions)
+        const whereClause =this.generateWhereClause(conditions)
+
+        // Generate Query-String
+        const data = JSON.stringify(odsData.data).replace("'", "''") // Escape single quotes
+        const insertStatement = `UPDATE"${tableName}" SET 
+            data = '$1',
+            license = '$2',
+            origin = '$3',
+            pipelineId = $4,
+            timestamp = '$5'
+        ${whereClause}` 
+
+        // Generate bind variables
+        let values = [data, odsData.license, odsData.origin, parseInt(odsData.pipelineId), odsData.timestamp]
+
 
         try {
             // Get a client from connection pool
             client = await this.connectionPool.connect()
 
-            // Update the Config
-            await client.query(updateStatement)
+            // update the Config
+            await client.query(
+                insertStatement,
+                values,
+                (err: Error, result: QueryResult<any>) => {
+                    const errMsg = `Could save ODSData: ${err}`
+                    console.error(errMsg)
+                    updated = false
+                }
+            )
 
         } catch (err) {
             const errMsg = `Could save ODSData: ${err}`
@@ -364,9 +397,10 @@ export class StorageHandler implements DataRepository {
      * @param odsData odsData to generate VALUE-Clause for
      * @returns string, containing a value clause
      */
-    private generateInsertStatement(tableName:string, odsData: ODSData): string {
+    private generateInsertStatement(tableName: string, odsData: ODSData): string {
+        const data = JSON.stringify(odsData.data).replace("'", "''") // Escape single quotes
         const valueClause = `("data", "license", "origin", "pipelineId", "timestamp") VALUES 
-                (${JSON.stringify(odsData.data)}, ${odsData.license}, ${odsData.origin}, ${odsData.pipelineId},${odsData.timestamp})`
+                ('${data}', '${odsData.license}', '${odsData.origin}', ${odsData.pipelineId}, '${odsData.timestamp}')`
 
         return `INSERT INTO "${tableName}" ${valueClause} ` 
     }
@@ -379,8 +413,10 @@ export class StorageHandler implements DataRepository {
      * @returns SET Clause for an Update-SQL-Statement
      */
     private generateUpdateStatement(tableName: string, odsData: ODSData, conditions?: object): string {
-        const setClause = `SET data = ${odsData.data}, license = ${odsData.license}, origin = ${odsData.origin},
-                pipelineId = ${odsData.pipelineId}, timestamp = ${odsData.timestamp}`
+        const data = JSON.stringify(odsData.data).replace("'", "''") // Escape single quotes
+
+        const setClause = `SET data = '${data}', license = '${odsData.license}', origin = '${odsData.origin}',
+                pipelineId = ${odsData.pipelineId}, timestamp = '${odsData.timestamp}'`
 
         const whereClause = this.generateWhereClause(conditions)
 

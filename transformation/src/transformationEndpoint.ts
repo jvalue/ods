@@ -51,8 +51,7 @@ export class TransformationEndpoint {
 
     // Config CRUD Operations
     this.app.post('/config', this.determineAuth(), this.handleConfigCreation)
-    this.app.get('/config/', this.handleConfigSummaryRequest)
-    this.app.get('/config/:id', this.handleConfigRequest)
+    this.app.get('/config/', this.handleConfigRequest)
     this.app.delete('/config/:id', this.handleConfigDeletion)
     this.app.put('/config/:id', this.handleConfigUpdate)
 
@@ -141,11 +140,16 @@ export class TransformationEndpoint {
     try {
       deleteResult = await this.storageHandler.deletePipelineConfig(configId)
 
-      if (deleteResult.affected != 1) {
+      if (!deleteResult || deleteResult.affected != 1) {
         const msg = `Could not delete Pipeline Config: Config with id ${configId} not found.`
         console.log(msg)
         res.status(400).send(msg)
+        res.end()
+        return
       }
+
+      const tablename = ''+configId
+      this.amqpHandler.publishTableDeletionEvent(tablename)
 
     } catch (error) {
       console.error(`Could not create transformationConfig Object: ${error}`)
@@ -180,23 +184,25 @@ export class TransformationEndpoint {
       return
     }
 
-    const transformationConfig = req.body as PipelineConfig
-    console.log('TRANSFORMATION_CONFIG: ' +JSON.stringify(transformationConfig))
+    const pipelineConfig = req.body as PipelineConfig
 
     // Check for validity of the request
-    if (!(this.isValidPipelineConfig(transformationConfig))) {
+    if (!this.isValidPipelineConfig(pipelineConfig)) {
       console.warn('Malformed transformation request.')
       res.status(400).send('Malformed transformation request.')
+      res.end()
+      return
     }
 
-    
     try {
       // Update Config
-      updatedConfig = await this.storageHandler.updatePipelineConfig(configId, transformationConfig)
+      updatedConfig = await this.storageHandler.updatePipelineConfig(configId, pipelineConfig)
       
       // Config to be updated does not exist
       if (!updatedConfig) {
         res.status(400).send(`Cannot update config: Config with id "${configId}" does not exist`)
+        res.end()
+        return 
       }
 
     } catch (error) {
@@ -206,26 +212,8 @@ export class TransformationEndpoint {
     }
 
     // return saved post back
-    res.status(200).send(JSON.stringify(updatedConfig));
+    res.status(200).send(updatedConfig);
     res.end()
-  }
-
-  /**
-   * Gets all configs from database as list
-   * (optionally with special conditioning, provided by query parameter)
-   *
-   * @param req Request for config, optionally with query parameter for filtering
-   * @param res Response that will contain the Config summary as list of json
-   */
-  handleConfigSummaryRequest = async (req: Request, res: Response): Promise<void> => {
-    const queryParams = req.query
-    console.log(`Received request for all configs with query params "${JSON.stringify(queryParams)}"  from Host ${req.connection.remoteAddress}`)
-
-    const allConfigs = await this.storageHandler.getAllConfigs(queryParams)
-    res.status(200).send(allConfigs)
-    res.end()
-
-    return Promise.resolve()
   }
 
   /**
@@ -237,31 +225,22 @@ export class TransformationEndpoint {
      */
   handleConfigRequest = async (req: Request, res: Response): Promise<void> => {
 
-    const pipelineID = parseInt(req.params.id)
     const queryParams = req.query
-
-    // pipeline id is not set or not a number
-    if (!pipelineID) {
-      res.status(500).send('Internal Server Error')
-      res.end()
-      return Promise.reject()
-    }
-
-    console.log(`Received request for configs with pipeline id ${pipelineID} and query params "${JSON.stringify(queryParams)}" from Host ${req.connection.remoteAddress}`)
+    console.log(`Received request for configs with  query params "${JSON.stringify(queryParams)}" from Host ${req.connection.remoteAddress}`)
 
     // Get configs from database
-    const configs = await this.storageHandler.getPipelineConfig(pipelineID, queryParams)
-      .catch(error  => console.log(`Could not get config with pipeline id ${pipelineID}: ${error}`))
+    const configs = await this.storageHandler.getPipelineConfigs( queryParams)
+      .catch(error => {
+        console.log(`Could not get config with with  query params "${JSON.stringify(queryParams)}": ${error}`)
+        res.status(500).send('Internal Server Error')
+        res.end()
+        return Promise.reject()
+      })
 
-    if (configs === null) {
-      res.status(500).send('Internal Server Error')
-      res.end()
-      return Promise.reject()
-    }
 
     // No configs found for specified id
-    if (configs === undefined) {
-      res.status(404).send(`No Config for pipeline Id ${pipelineID} found.`)
+    if (configs === null) {
+      res.status(404).send(`No Config with  query params "${JSON.stringify(queryParams)}" found.`)
       res.end()
       return Promise.resolve()
     }
@@ -281,7 +260,7 @@ export class TransformationEndpoint {
    * @param res HTTP-response, containing the transformation resulsts
    */
   postJob = async (req: Request, res: Response): Promise<void> => {
-    console.log(`Received Job request: ${req.body}`)
+    console.log(`Received Job request: ${JSON.stringify(req.body)}`)
 
     const transformation: TransformationRequest = req.body
     if (!transformation.data && !transformation.dataLocation) {
@@ -330,8 +309,10 @@ export class TransformationEndpoint {
    */
   private isValidPipelineConfig(conf: PipelineConfig): boolean {
     return !!conf && !!conf.datasourceId && !!conf.metadata && !!conf.transformation &&
-      //this.isValidMetaDataConfig(conf.metadata) &&
+      this.isValidMetaDataConfig(conf.metadata) &&
       this.isValidTransformationConfig(conf.transformation)
+      
+      
   }
 
   /**

@@ -8,7 +8,7 @@
  * @field func             function to apply to the data (-> transformation) 
  * @field data             data to be transformed
  */
-export default interface JobEvent {
+export default interface AdapterDataEvent {
     datasourceId: number     // referenced data source id
 
     data: object;           // data to be transformed
