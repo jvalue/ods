@@ -155,10 +155,10 @@ export class StorageHandler implements NotificationRepository {
         const firebaseConfig = await this.getFirebaseConfigs(pipelineId)
 
         // build the summary
-        const notificationSummary = {
-            "slack": slackConfigs,
-            "webhook": webHookConfigs,
-            "firebase": firebaseConfig
+        const notificationSummary: NotificationSummary = {
+            slack: slackConfigs,
+            webhook: webHookConfigs,
+            firebase: firebaseConfig
         }
 
         console.debug(`Successfully got the all configs for pipeline with id ${pipelineId}`)

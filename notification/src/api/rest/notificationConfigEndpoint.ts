@@ -19,10 +19,13 @@ export class NotificationConfigEndpoint {
     app.put('/config/:configType/:id', this.handleConfigUpdate)
 
     // Deletion of Configs
-    app.delete('/config/:configType/:id/', this.handleConfigDeletion)
+    app.delete('/config/:configType/:id', this.handleConfigDeletion)
 
     // Request Configs
-    app.get('/config/:configType/:id/', this.handleConfigRequest)
+    app.get('/config/:configType/:id', this.handleConfigRequest)
+
+    // Summary for pipeline
+    app.get('/config/pipeline/:id', this.handleConfigSummaryRequest)
   }
 
   // The following methods need arrow syntax because of javascript 'this' shenanigans

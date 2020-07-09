@@ -9,7 +9,7 @@ import { WebHookConfig, SlackConfig, FirebaseConfig } from './notificationConfig
  * @field slack     All SlackConfigs for a specific pipeline id
  * @field firebase  All FirebaseConfigs for a specific pipeline id
  */
-export interface NotificationSummary{
+export interface NotificationSummary {
 
     webhook: WebHookConfig[]
 
