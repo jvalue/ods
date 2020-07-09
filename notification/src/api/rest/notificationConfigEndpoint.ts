@@ -86,11 +86,10 @@ export class NotificationConfigEndpoint {
     }
 
     // Get configs from database
-    const configs = await this.storageHandler.getSlackConfigs(id)
+    const configs = await this.storageHandler.getSlackConfig(id)
 
     if (!configs) {
-      console.error(`Could not get slack config with id "${id}" from database`)
-      res.status(500).send('Internal Server error.')
+      res.status(404).send('Could not find slack config with id ${id}')
       res.end()
       return
     }
@@ -113,12 +112,11 @@ export class NotificationConfigEndpoint {
       return
     }
 
-    // Get configs from database
-    const configs = await this.storageHandler.getWebHookConfigs(id)
+    // Get config from database
+    const configs = await this.storageHandler.getWebhookConfig(id)
 
     if (!configs) {
-      console.error(`Could not get webhook config with id "${id}" from database`)
-      res.status(500).send('Internal Server error.')
+      res.status(404).send('Could not find webhook config with id ${id}')
       res.end()
       return
     }
@@ -142,7 +140,7 @@ export class NotificationConfigEndpoint {
     }
 
     // Get configs from database
-    const configs = await this.storageHandler.getFirebaseConfigs(id)
+    const configs = await this.storageHandler.getFirebaseConfig(id)
 
     if (!configs) {
       console.error(`Could not get firebase config with id "${id}" from database`)

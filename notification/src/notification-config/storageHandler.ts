@@ -109,7 +109,7 @@ export class StorageHandler implements NotificationRepository {
         return new Promise(resolve => setTimeout(resolve, backOff * 1000));
     }
 
-    private async getSlackConfig(id: number): Promise<SlackConfig> {
+    public async getSlackConfig(id: number): Promise<SlackConfig> {
       const config = await this.slackRepository.findOne(id)
       if(!config) {
         return Promise.reject(`Could not find slack conig with id ${id}`)
@@ -118,7 +118,7 @@ export class StorageHandler implements NotificationRepository {
       return Promise.resolve(config)
     }
 
-    private async getWebhookConfig(id: number): Promise<WebHookConfig> {
+    public async getWebhookConfig(id: number): Promise<WebHookConfig> {
       const config = await this.webhookRepository.findOne(id)
       if(!config) {
         return Promise.reject(`Could not find webhook conig with id ${id}`)
@@ -127,7 +127,7 @@ export class StorageHandler implements NotificationRepository {
       return Promise.resolve(config)
     }
 
-    private async getFirebaseConfig(id: number): Promise<FirebaseConfig> {
+    public async getFirebaseConfig(id: number): Promise<FirebaseConfig> {
       const config = await this.firebaseRepository.findOne(id)
       if(!config) {
         return Promise.reject(`Could not find firebase conig with id ${id}`)
