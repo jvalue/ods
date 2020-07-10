@@ -17,12 +17,6 @@ export class AmqpHandler{
 
     triggerEventHandler: TriggerEventHandler
 
-    /**
-     * Default constructor.
-     *
-     * @param storageHandler    StorageHandler to get corresponding notification configs
-     * @param executor          Sandboxexecutor to run condition evaluations
-     */
     constructor(triggerEventHandler: TriggerEventHandler) {
         this.triggerEventHandler = triggerEventHandler
     }
@@ -41,7 +35,7 @@ export class AmqpHandler{
 
         console.log("URL: " + rabit_amqp_url)
 
-        var established: boolean = false    // amqp service connection result
+        let established: boolean = false    // amqp service connection result
         const handler: AmqpHandler = this   // for ability to access methods and members in callback
         let errMsg: string = ''             // Error Message to be shown after final retry
 
@@ -65,7 +59,7 @@ export class AmqpHandler{
         }
 
         if (!established) {
-            console.error(`Could not establish connection to Amqp Handler: ${errMsg}`)
+            console.error(`Could not establish connection to Amqp handler: ${errMsg}`)
         } else {
             console.info('Connected to amqpHandler')
         }
@@ -81,7 +75,7 @@ export class AmqpHandler{
     }
 
     private initChannel(connection: Connection) {
-        console.log(`Initializing Transformation Channel "${this.notifQueueName}"`)
+        console.log(`Initializing transformation channel "${this.notifQueueName}"`)
 
         connection.createChannel((error1: Error, channel: Channel) => {
             if (error1) {
@@ -99,19 +93,19 @@ export class AmqpHandler{
                 { noAck: true }
             );
         });
-        console.info(`Successfully initialized Transformation Channel "${this.notifQueueName}"`)
+        console.info(`Successfully initialized transformation channel "${this.notifQueueName}"`)
     }
 
     private async handleEvent(msg: ConsumeMessage | null): Promise<void> {
       if (!msg) {
-        return Promise.reject('Could not receive Notification Event: Message is not set')
+        return Promise.reject('Could not receive notification event: Message is not set')
       }
 
       const eventMessage = JSON.parse(msg.content.toString())
       const transformationEvent = eventMessage as TransformationEvent
 
-      console.log(`Received Event from Channel: Pipeline id: "${transformationEvent.pipelineId}",
-      Pipeline Name: "${transformationEvent.pipelineName}`)
+      console.log(`Received event from channel: Pipeline id: "${transformationEvent.pipelineId}",
+      pipeline name: "${transformationEvent.pipelineName}`)
 
       return this.triggerEventHandler.handleEvent(transformationEvent)
     }

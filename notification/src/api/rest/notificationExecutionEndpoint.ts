@@ -13,8 +13,6 @@ export class NotificationExecutionEndpoint {
     app.post('/trigger', this.triggerNotification)
   }
 
-  // The following methods need arrow syntax because of javascript 'this' shenanigans
-
   triggerNotification = async (req: express.Request, res: express.Response): Promise<void> => {
     const triggerEvent = req.body as TransformationEvent
     if (!this.triggerEventHandler.isValidTransformationEvent(triggerEvent)) {

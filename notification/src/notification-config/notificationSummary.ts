@@ -1,9 +1,9 @@
-import { WebHookConfig, SlackConfig, FirebaseConfig } from './notificationConfig';
+import { WebhookConfig, SlackConfig, FirebaseConfig } from './notificationConfig';
 
 
 /**
  * NotificationSummary will be returned upon a request for
- * configs for a specfic Pipeline id
+ * configs for a specific pipeline id
  *
  * @field webhook   All WebHookConfigs for a specific pipeline id
  * @field slack     All SlackConfigs for a specific pipeline id
@@ -11,7 +11,7 @@ import { WebHookConfig, SlackConfig, FirebaseConfig } from './notificationConfig
  */
 export interface NotificationSummary {
 
-    webhook: WebHookConfig[]
+    webhook: WebhookConfig[]
 
     slack: SlackConfig[]
 

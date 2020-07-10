@@ -2,7 +2,7 @@ import App = firebase.app.App;
 import axios from 'axios'
 import * as firebase from 'firebase-admin'
 
-import { CONFIG_TYPE, NotificationConfig, WebHookConfig, SlackConfig, FirebaseConfig } from '../notification-config/notificationConfig';
+import { CONFIG_TYPE, NotificationConfig, WebhookConfig, SlackConfig, FirebaseConfig } from '../notification-config/notificationConfig';
 
 import SlackCallback from './notificationCallbacks/slackCallback';
 import WebhookCallback from './notificationCallbacks/webhookCallback';
@@ -36,7 +36,7 @@ async handleNotification(notification: NotificationConfig, type: CONFIG_TYPE, da
 
   switch (type) {
     case CONFIG_TYPE.WEBHOOK:
-        await this.handleWebhook(notification as WebHookConfig, dataLocation, message)
+        await this.handleWebhook(notification as WebhookConfig, dataLocation, message)
         break
     case CONFIG_TYPE.FCM:
         await this.handleFCM(notification as FirebaseConfig, dataLocation, message)
@@ -49,7 +49,7 @@ async handleNotification(notification: NotificationConfig, type: CONFIG_TYPE, da
     }
   }
 
-  private async handleWebhook (webhook: WebHookConfig, dataLocation: string, message: string): Promise<void> {
+  private async handleWebhook (webhook: WebhookConfig, dataLocation: string, message: string): Promise<void> {
     const callbackObject: WebhookCallback = {
       location: dataLocation,
       message: message,

@@ -16,7 +16,7 @@ const port = 8080
 
 // authEnabled defaults to false
 const authEnabled: boolean = process.env.AUTH_ENABLED === 'true'
-if (authEnabled === false) {
+if (!authEnabled) {
   console.warn('WARNING: Authentication is disabled! Make sure this option turned off in production!\n')
 }
 

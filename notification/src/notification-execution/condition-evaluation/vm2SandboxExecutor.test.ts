@@ -49,7 +49,7 @@ describe('VM2SandboxExecutor', () => {
       expect(result).toBe(true)
     })
 
-    it('sould evaluate expression "data === undefined" on undefined data', () => {
+    it('should evaluate expression "data === undefined" on undefined data', () => {
       const object = undefined
       const expression = 'data === undefined'
 
@@ -58,7 +58,7 @@ describe('VM2SandboxExecutor', () => {
       expect(result).toBe(true)
     })
 
-    it('sould evaluate expression "data === undefined" on undefined data', () => {
+    it('should evaluate expression "data === undefined" on undefined data', () => {
       const object = undefined
       const expression = '!data'
 

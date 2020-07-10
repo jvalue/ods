@@ -12,7 +12,7 @@ export default class VM2SandboxExecutor implements SandboxExecutor {
   }
 
   evaluate(expression: string, data: object): boolean {
-    console.log(`Evaluating Expression: "${expression}" on data`)
+    console.log(`Evaluating expression: "${expression}" on data`)
     const wrapper =
       'f=function(data){' +
       'return ' +

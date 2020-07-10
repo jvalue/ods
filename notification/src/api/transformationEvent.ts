@@ -2,7 +2,7 @@
 import JobResult from './jobResult';
 
 /**
- * Event send by the Transformation service upon transformation finish
+ * Event send by the transformation service upon transformation finish
  */
 export interface TransformationEvent {
     pipelineId: number      // ID of the pipeline

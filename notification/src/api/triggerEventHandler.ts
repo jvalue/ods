@@ -16,14 +16,14 @@ export class TriggerEventHandler {
 
   /**
    * Handles an event message
-   * @param msg Message receveived from the message queue
+   * @param transformationEvent Message received from the message queue
    *
    * @returns true on success, else false
    */
   public async handleEvent(transformationEvent: TransformationEvent): Promise<void> {
     const isValid = this.isValidTransformationEvent(transformationEvent)
     if (!isValid) {
-        return Promise.reject('Trigger Event is not valid')
+        return Promise.reject('Trigger event is not valid')
     }
 
     const message = NotificationMessageFactory.buildMessage(transformationEvent)
@@ -56,7 +56,7 @@ export class TriggerEventHandler {
 
 
   /**
-      * Checks if this event is a valid Transformation event,
+      * Checks if this event is a valid transformation event,
       * by checking if all field variables exist and are set.
       *
       * @returns     true, if param event is a TransformationEvent, else false

@@ -16,7 +16,7 @@ export namespace NotificationMessageFactory {
     const jobError = event.jobResult.error    // Error of transformation (if exists)
 
     /*======================================================
-    *  Build Message for succesfull transformation/pipline
+    *  Build Message for successful transformation/pipeline
     *=======================================================*/
     if (jobError === undefined) {
       // Build Stats (Time measures for transformation execution)

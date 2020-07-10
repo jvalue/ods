@@ -2,10 +2,9 @@
 import axios from 'axios'
 
 import VM2SandboxExecutor from './condition-evaluation/vm2SandboxExecutor'
-import { WebHookConfig, NotficationConfigRequest, CONFIG_TYPE, NotificationConfig, SlackConfig } from '../notification-config/notificationConfig';
+import { WebhookConfig, CONFIG_TYPE, SlackConfig } from '../notification-config/notificationConfig';
 import NotificationExecutor from './notificationExecutor';
 import JSNotificationService from './notificationExecutor';
-import { TransformationEvent } from '../api/transformationEvent';
 import SlackCallback from '@/notification-execution/notificationCallbacks/slackCallback';
 
 jest.mock('axios')
@@ -29,7 +28,7 @@ describe('JSNotificationService', () => {
       console.log = jest.fn()
       /*=======================================================
        * An Event sent by the Transformation Service
-       * on succesful transformation/pipeline
+       * on successful transformation/pipeline
        * =====================================================*/
       data ={ value1: 1, b: 2 }
     })
@@ -45,7 +44,7 @@ describe('JSNotificationService', () => {
     it('should trigger notification when transformation failed and condition is "data == undefined', async () => {
       post.mockReturnValue(Promise.resolve())
 
-      const notificationConfig: WebHookConfig = {
+      const notificationConfig: WebhookConfig = {
         id: 1,
         pipelineId: 1,
         condition: 'data === undefined',
@@ -67,7 +66,7 @@ describe('JSNotificationService', () => {
     it('should trigger notification when transformation failed and condition is "!data', async () => {
       post.mockReturnValue(Promise.resolve())
 
-      const notificationConfig: WebHookConfig = {
+      const notificationConfig: WebhookConfig = {
         id: 1,
         pipelineId: 1,
         condition: '!data',
@@ -91,7 +90,7 @@ describe('JSNotificationService', () => {
     it('should trigger notification when condition is met', async () => {
       post.mockReturnValue(Promise.resolve())
 
-      const notificationConfig: WebHookConfig = {
+      const notificationConfig: WebhookConfig = {
         id: 1,
         pipelineId: 1,
         condition: 'data.value1 > 0',
@@ -113,7 +112,7 @@ describe('JSNotificationService', () => {
      * Test for malformed Condition
      */
     test('Notification does not trigger when condition is malformed', async () => {
-      const notificationConfig: WebHookConfig = {
+      const notificationConfig: WebhookConfig = {
         id: 1,
         pipelineId: 3,
         condition: 'asdfa;',

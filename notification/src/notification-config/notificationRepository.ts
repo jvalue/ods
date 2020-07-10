@@ -1,5 +1,5 @@
 import { NotificationSummary } from "./notificationSummary";
-import { FirebaseConfig, SlackConfig, WebHookConfig } from "./notificationConfig";
+import { FirebaseConfig, SlackConfig, WebhookConfig } from "./notificationConfig";
 
 export interface NotificationRepository {
   init(retries: number, backoff: number):void
@@ -7,15 +7,15 @@ export interface NotificationRepository {
   deleteConfigsForPipelineID(pipelineId: number): void
 
   getSlackConfig(id: number): Promise<SlackConfig>
-  getWebhookConfig(id: number): Promise<WebHookConfig>
+  getWebhookConfig(id: number): Promise<WebhookConfig>
   getFirebaseConfig(id: number): Promise<FirebaseConfig>
 
-  saveWebhookConfig(webhookConfig: WebHookConfig): Promise<WebHookConfig>
+  saveWebhookConfig(webhookConfig: WebhookConfig): Promise<WebhookConfig>
   saveSlackConfig(slackConfig: SlackConfig): Promise<SlackConfig>
   saveFirebaseConfig(firebaseConfig: FirebaseConfig): Promise<FirebaseConfig>
 
   updateSlackConfig(id: number, slackConfig: SlackConfig): Promise<SlackConfig>
-  updateWebhookConfig(id: number, webhookConfig: WebHookConfig): Promise<WebHookConfig>
+  updateWebhookConfig(id: number, webhookConfig: WebhookConfig): Promise<WebhookConfig>
   updateFirebaseConfig(id: number, firebaseConfig: FirebaseConfig): Promise<FirebaseConfig>
 
   deleteSlackConfig(id: number): Promise<void>

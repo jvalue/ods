@@ -15,7 +15,7 @@ export class NotificationConfig{
   condition!: string;
 }
 
-export class NotficationConfigRequest extends NotificationConfig{
+export class NotificationConfigRequest extends NotificationConfig{
   type!: CONFIG_TYPE
 }
 
@@ -37,7 +37,7 @@ export class SlackConfig extends NotificationConfig{
 
 
 @Entity()
-export class WebHookConfig extends NotificationConfig{
+export class WebhookConfig extends NotificationConfig{
 
   @PrimaryGeneratedColumn()
   id!: number
