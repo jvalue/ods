@@ -63,7 +63,7 @@ describe('Notification', () => {
 
       expect(receiverResponse.status).toEqual(200)
       expect(receiverResponse.body.location).toEqual(dataLocation)
-    })
+    }, 10000)
 
     test('Ttrigger not notifying webhook when condition is false', async() => {
         // SETUP: store notification config
@@ -109,11 +109,11 @@ describe('Notification', () => {
             .get('/webhook2')
 
         expect(receiverResponse.status).toEqual(404)
-    })
+    }, 10000)
 
     test('POST /slack triggers slack notification', async() => {
       // SETUP: store notification config
-      const slack = {
+      const slackConfig = {
         pipelineId: 3,
         condition: 'typeof data.niceString === "string"',
         channelId: '12',
@@ -122,7 +122,7 @@ describe('Notification', () => {
       }
       const notificationResponse = await request(URL)
       .post('/config/slack')
-      .send(webhookConfig)
+      .send(slackConfig)
       expect(notificationResponse.status).toEqual(200)
       const id = notificationResponse.body.id
 
@@ -159,7 +159,7 @@ describe('Notification', () => {
       expect(receiverResponse.status).toEqual(200)
       expect(receiverResponse.body.text)
           .toEqual(`Pipeline ${slackJob.pipelineName}(${slackJob.pipelineId}) has new data available. Fetch at ${dataLocation}.`)
-    })
+    }, 10000)
 
     function sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms))
