@@ -72,7 +72,7 @@ describe('Notification', () => {
             condition: 'data.value1 < 0',
             url: MOCK_RECEIVER_URL + '/webhook2'
         }
-        const notificationResponse = await request(URL)
+        let notificationResponse = await request(URL)
             .post('/config/webhook')
             .send(webhookConfig)
         expect(notificationResponse.status).toEqual(200)
