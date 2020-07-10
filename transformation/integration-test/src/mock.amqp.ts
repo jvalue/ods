@@ -198,52 +198,8 @@ export function publishAdapterEvent(odsDataEvent: object): void {
 }
 
 
-export function consumeFromNotificationChannel(callback: (event: object | null) => void): void{
-    // notificationChannel.prefetch(1) //assure that only one event is consumed
-    //notificationChannel.purgeQueue(notifQueueName)
-    notificationChannel.consume(notifQueueName, (msg: Message | null) => {
-        if (!msg) {
-            callback(msg)
-            return
-        }
-        const messageContent = msg.content.toString('utf-8')
-        const transformationEvent = JSON.parse(messageContent) 
-        callback(transformationEvent)
-    }, {noAck : true})
-}
-
-export function consumeFromODSDataChannel(callback: (event: object | null) => void): void {
-    //odsDataChannel.purgeQueue(odsDataQueueName)
-    odsDataChannel.prefetch(1) //assure that only one event is consumed
-    odsDataChannel.consume(odsDataQueueName, (msg: Message | null) => {
-        if (!msg) {
-            callback(msg)
-            return
-        }
-
-        odsDataChannel.ackAll()
-        const messageContent = msg.content.toString('utf-8')
-        const dataEvent = JSON.parse(messageContent)
-        callback(dataEvent)
-        
-    }, { noAck: true })
-}
-
 export async function consumeODSDataEvent(): Promise<object> {
-    //odsDataChannel.purgeQueue(odsDataQueueName)
-    // await new Promise((resolv, reject) => {
-    //     odsDataChannel.close(err => {
-
-    //         if (err)
-    //             reject(err)
-    //         resolv(err)
-    //     })
-        
-    // })
-
-    // odsDataChannel = await initStorageChannel(connection)
-
-    // odsDataChannel.prefetch(1) //assure that only one event is consumed
+    odsDataChannel.prefetch(1) //assure that only one event is consumed
     return new Promise((resolv, reject) => {
         odsDataChannel.consume(odsDataQueueName, (msg: Message | null) => {
             if (!msg) {
@@ -255,7 +211,6 @@ export async function consumeODSDataEvent(): Promise<object> {
             const messageContent = msg.content.toString('utf-8')
             const dataEvent = JSON.parse(messageContent)
 
-            console.warn(`Received ODS Data Event: ${messageContent}`)
             odsDataChannel.cancel(msg.fields.consumerTag!)  // Cancel consumption
             resolv(dataEvent)
         }, { noAck: true })
