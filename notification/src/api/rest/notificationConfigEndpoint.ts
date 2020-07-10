@@ -68,7 +68,7 @@ export class NotificationConfigEndpoint {
       const configs = await this.storageHandler.getSlackConfig(id)
       res.status(200).send(configs)
     } catch(e) {
-      res.status(404).send(`Could not find firebase config with id ${id}`)
+      res.status(404).send(`Could not find slack config with id ${id}`)
       res.end()
       return
     }
@@ -282,28 +282,26 @@ export class NotificationConfigEndpoint {
       return
     }
 
-    switch (configType) {
-      case CONFIG_TYPE.WEBHOOK:
-        this.deleteWebhook(req,res)
-        break
-
-      case CONFIG_TYPE.FCM:
-        this.deleteFCM(req,res)
-        break
-
-      case CONFIG_TYPE.SLACK:
-        this.deleteSlack(req,res)
-        break
-
-      case 'pipeline':
-        this.handlePipelineDelete(req, res)
-
-      default:
-        res.status(400).send(`Notification type ${configType} not supported!`)
-        return
+    try {
+      switch (configType) {
+        case CONFIG_TYPE.WEBHOOK:
+          this.deleteWebhook(req, res)
+          break
+        case CONFIG_TYPE.FCM:
+          this.deleteFCM(req, res)
+          break
+        case CONFIG_TYPE.SLACK:
+          this.deleteSlack(req, res)
+          break
+        case 'pipeline':
+          this.handlePipelineDelete(req, res)
+        default:
+          res.status(400).send(`Notification type ${configType} not supported!`)
+          return
+      }
+    } catch (e) {
+        res.status(404).send('Config not found.')
     }
-
-
   }
 
   /**
@@ -486,23 +484,25 @@ export class NotificationConfigEndpoint {
     }
 
     let updatedConfig: NotificationConfig
-    switch (configType) {
-      case 'webhook':
-        updatedConfig = await this.storageHandler.updateWebhookConfig(id, req.body as WebhookConfig)
-        break
-      case 'fcm':
-        updatedConfig = await this.storageHandler.updateFirebaseConfig(id, req.body as FirebaseConfig)
-        break
-      case 'slack':
-        updatedConfig = await this.storageHandler.updateSlackConfig(id, req.body as SlackConfig)
-        break
-      default:
-        res.status(400).send(`Notification type ${configType} not supported!`)
-        return
+    try {
+      switch (configType) {
+        case 'webhook':
+          updatedConfig = await this.storageHandler.updateWebhookConfig(id, req.body as WebhookConfig)
+          break
+        case 'fcm':
+          updatedConfig = await this.storageHandler.updateFirebaseConfig(id, req.body as FirebaseConfig)
+          break
+        case 'slack':
+          updatedConfig = await this.storageHandler.updateSlackConfig(id, req.body as SlackConfig)
+          break
+        default:
+          res.status(400).send(`Notification type ${configType} not supported!`)
+          return
+      }
+      res.status(200).send(updatedConfig)
+    } catch (e) {
+      res.status(404).send(`Could not find ${configType} config with id ${id}`)
     }
-
-    res.status(200).send(updatedConfig)
-    res.end()
   }
 
   /**
