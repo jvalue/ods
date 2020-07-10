@@ -22,6 +22,7 @@ export class NotificationExecutionEndpoint {
       return
     }
 
-    this.triggerEventHandler.handleEvent(triggerEvent)
+    await this.triggerEventHandler.handleEvent(triggerEvent)
+    res.status(200).send(`Successfully sent all notifications for pipeline ${triggerEvent.pipelineId}`)
   }
 }
