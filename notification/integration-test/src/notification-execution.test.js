@@ -65,7 +65,7 @@ describe('Notification', () => {
       expect(receiverResponse.body.location).toEqual(dataLocation)
     }, 10000)
 
-    test('Ttrigger not notifying webhook when condition is false', async() => {
+    test('Trigger not notifying webhook when condition is false', async() => {
         // SETUP: store notification config
         const webhookConfig = {
             pipelineId: 2,
@@ -98,16 +98,15 @@ describe('Notification', () => {
 
         // ACT
         const notificationTriggerResponse = await request(URL)
-        .post('/trigger')
-        .send(triggerEvent)
-
+          .post('/trigger')
+          .send(triggerEvent)
         expect(notificationTriggerResponse.status).toEqual(200)
         await sleep(3000) // wait for processing
 
         // ASSERT
         const receiverResponse = await request(MOCK_RECEIVER_URL)
             .get('/webhook2')
-
+            .send()
         expect(receiverResponse.status).toEqual(404)
 
         // CLEANUP
@@ -127,8 +126,8 @@ describe('Notification', () => {
         secret: '56'
       }
       const notificationResponse = await request(URL)
-      .post('/config/slack')
-      .send(slackConfig)
+        .post('/config/slack')
+        .send(slackConfig)
       expect(notificationResponse.status).toEqual(200)
       const id = notificationResponse.body.id
 
@@ -152,15 +151,15 @@ describe('Notification', () => {
 
       // ACT
       const notificationTriggerResponse = await request(URL)
-      .post('/trigger')
-      .send(triggerEvent)
-
+        .post('/trigger')
+        .send(triggerEvent)
       expect(notificationTriggerResponse.status).toEqual(200)
       await sleep(3000) // wait for processing
 
       // ASSERT
       const receiverResponse = await request(MOCK_RECEIVER_URL)
           .get('/slack/12/34/56')
+          .send()
 
       expect(receiverResponse.status).toEqual(200)
       expect(receiverResponse.body.text).toMatch(`${triggerEvent.pipelineName}`)
