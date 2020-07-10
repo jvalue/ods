@@ -53,13 +53,15 @@ describe('JSNotificationService', () => {
       }
 
       const message = "message"
-      await notificationService.handleNotification(notificationConfig, CONFIG_TYPE.WEBHOOK, message, undefined)
+      const dataLocation = "location"
+      await notificationService.handleNotification(notificationConfig, CONFIG_TYPE.WEBHOOK, dataLocation, message, undefined)
 
 
       expect(post).toHaveBeenCalledTimes(1)
       //check arguments for axios post
       expect(post.mock.calls[0][0]).toEqual(notificationConfig.url)
-      expect(post.mock.calls[0][1].location).toEqual(message)
+      expect(post.mock.calls[0][1].location).toEqual(dataLocation)
+      expect(post.mock.calls[0][1].message).toEqual(message)
     })
 
     it('should trigger notification when transformation failed and condition is "!data', async () => {
@@ -73,12 +75,14 @@ describe('JSNotificationService', () => {
       }
 
       const message = "message"
-      await notificationService.handleNotification(notificationConfig, CONFIG_TYPE.WEBHOOK, message, undefined)
+      const dataLocation = "location"
+      await notificationService.handleNotification(notificationConfig, CONFIG_TYPE.WEBHOOK, dataLocation, message, undefined)
 
       expect(post).toHaveBeenCalledTimes(1)
       //check arguments for axios post
       expect(post.mock.calls[0][0]).toEqual(notificationConfig.url)
-      expect(post.mock.calls[0][1].location).toEqual(message)
+      expect(post.mock.calls[0][1].location).toEqual(dataLocation)
+      expect(post.mock.calls[0][1].message).toEqual(message)
     })
 
     /**
@@ -95,12 +99,14 @@ describe('JSNotificationService', () => {
       }
 
       const message = "message"
-      await notificationService.handleNotification(notificationConfig, CONFIG_TYPE.WEBHOOK, message, data)
+      const dataLocation = "location"
+      await notificationService.handleNotification(notificationConfig, CONFIG_TYPE.WEBHOOK, dataLocation, message, data)
 
       expect(post).toHaveBeenCalledTimes(1)
       //check arguments for axios post
       expect(post.mock.calls[0][0]).toEqual(notificationConfig.url)
-      expect(post.mock.calls[0][1].location).toEqual(message)
+      expect(post.mock.calls[0][1].location).toEqual(dataLocation)
+      expect(post.mock.calls[0][1].message).toEqual(message)
     })
 
     /**
@@ -116,7 +122,8 @@ describe('JSNotificationService', () => {
 
       try {
         const message = "message"
-        await notificationService.handleNotification(notificationConfig, CONFIG_TYPE.WEBHOOK, message, data)
+        const dataLocation = "location"
+        await notificationService.handleNotification(notificationConfig, CONFIG_TYPE.WEBHOOK, dataLocation, message, data)
         fail()
       } catch (err) {
         expect(err.message).toEqual("Malformed expression received: asdfa;\n Error message: ReferenceError: asdfa is not defined")
@@ -140,7 +147,8 @@ describe('JSNotificationService', () => {
       }
 
       const message = "message"
-      await notificationService.handleNotification(request, CONFIG_TYPE.SLACK, message, data)
+      const dataLocation = "location"
+      await notificationService.handleNotification(request, CONFIG_TYPE.SLACK, dataLocation, message, data)
 
       const expectedObject: SlackCallback = {
         text: message

@@ -52,6 +52,7 @@ async handleNotification(notification: NotificationConfig, type: CONFIG_TYPE, da
   private async handleWebhook (webhook: WebHookConfig, dataLocation: string, message: string): Promise<void> {
     const callbackObject: WebhookCallback = {
       location: dataLocation,
+      message: message,
       timestamp: new Date(Date.now())
     }
     console.log(`Posting webhook to ${webhook.url}, callback object: ${JSON.stringify(callbackObject)}.`)
