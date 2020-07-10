@@ -33,20 +33,20 @@ export class TriggerEventHandler {
     const notificationJobs: Promise<void>[] = []
     for (const webhookConfig of configs.webhook) {
         notificationJobs.push(
-          this.notificationExecutor.handleNotification(webhookConfig, CONFIG_TYPE.WEBHOOK, message, data)
+          this.notificationExecutor.handleNotification(webhookConfig, CONFIG_TYPE.WEBHOOK, transformationEvent.dataLocation, message, data)
         )
     }
 
     for (const slackConfig of configs.slack) {
       notificationJobs.push(
-        this.notificationExecutor.handleNotification(slackConfig, CONFIG_TYPE.SLACK, message, data)
+        this.notificationExecutor.handleNotification(slackConfig, CONFIG_TYPE.SLACK, transformationEvent.dataLocation, message, data)
         )
     }
 
 
     for (const firebaseConfig of configs.firebase) {
       notificationJobs.push(
-        this.notificationExecutor.handleNotification(firebaseConfig, CONFIG_TYPE.FCM, message, data)
+        this.notificationExecutor.handleNotification(firebaseConfig, CONFIG_TYPE.FCM, transformationEvent.dataLocation, message, data)
         )
     }
 

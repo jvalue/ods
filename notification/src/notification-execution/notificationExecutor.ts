@@ -25,7 +25,7 @@ export default class NotificationExecutor {
       return VERSION
   }
 
-async handleNotification(notification: NotificationConfig, type: CONFIG_TYPE, message: string, data?: object): Promise<void> {
+async handleNotification(notification: NotificationConfig, type: CONFIG_TYPE, dataLocation: string, message: string, data?: object): Promise<void> {
   console.log(`NotificationRequest received for pipeline: ${notification.pipelineId}.`)
 
   const conditionHolds = this.executor.evaluate(notification.condition, data)
@@ -36,29 +36,29 @@ async handleNotification(notification: NotificationConfig, type: CONFIG_TYPE, me
 
   switch (type) {
     case CONFIG_TYPE.WEBHOOK:
-        await this.handleWebhook(notification as WebHookConfig, message)
+        await this.handleWebhook(notification as WebHookConfig, dataLocation, message)
         break
     case CONFIG_TYPE.FCM:
-        await this.handleFCM(notification as FirebaseConfig, message)
+        await this.handleFCM(notification as FirebaseConfig, dataLocation, message)
         break
     case CONFIG_TYPE.SLACK:
-        await this.handleSlack(notification as SlackConfig, message)
+        await this.handleSlack(notification as SlackConfig, dataLocation, message)
         break
     default:
         throw new Error('Notification type not implemented.')
     }
   }
 
-  private async handleWebhook (webhook: WebHookConfig, message: string): Promise<void> {
+  private async handleWebhook (webhook: WebHookConfig, dataLocation: string, message: string): Promise<void> {
     const callbackObject: WebhookCallback = {
-      location: message,
+      location: dataLocation,
       timestamp: new Date(Date.now())
     }
     console.log(`Posting webhook to ${webhook.url}, callback object: ${JSON.stringify(callbackObject)}.`)
     await axios.post(webhook.url, callbackObject)
   }
 
-  private async handleSlack (slack: SlackConfig, message: string): Promise<void> {
+  private async handleSlack (slack: SlackConfig, dataLocation: string, message: string): Promise<void> {
     let slackBaseUri = 'https://hooks.slack.com/services'
     if (process.env.MOCK_RECEIVER_HOST && process.env.MOCK_RECEIVER_PORT) {
       slackBaseUri = `http://${process.env.MOCK_RECEIVER_HOST}:${process.env.MOCK_RECEIVER_PORT}/slack`
@@ -71,7 +71,7 @@ async handleNotification(notification: NotificationConfig, type: CONFIG_TYPE, me
     await axios.post(url, callbackObject)
   }
 
-  private async handleFCM (firebaseRequest: FirebaseConfig, message: string): Promise<void> {
+  private async handleFCM (firebaseRequest: FirebaseConfig, dataLocation: string, message: string): Promise<void> {
     let app: App
     try {
       app = firebase.app(firebaseRequest.clientEmail)
@@ -89,10 +89,10 @@ async handleNotification(notification: NotificationConfig, type: CONFIG_TYPE, me
     const firebaseMessage: FcmCallback = {
       notification: {
         title: 'New Data Available',
-        body: message
+        body: dataLocation
       },
       data: {
-        textfield: 'textvalue'
+        message: message
       },
       topic: firebaseRequest.topic
     }
