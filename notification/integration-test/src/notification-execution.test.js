@@ -28,7 +28,7 @@ describe('Notification', () => {
       const notificationResponse = await request(URL)
           .post('/config/webhook')
           .send(webhookConfig)
-      expect(notificationResponse.status).toEqual(200)
+      expect(notificationResponse.status).toEqual(201)
       const id = notificationResponse.body.id
 
       // SETUP: trigger event
@@ -75,7 +75,7 @@ describe('Notification', () => {
         let notificationResponse = await request(URL)
             .post('/config/webhook')
             .send(webhookConfig)
-        expect(notificationResponse.status).toEqual(200)
+        expect(notificationResponse.status).toEqual(201)
         const id = notificationResponse.body.id
 
         // SETUP: trigger event
@@ -129,7 +129,7 @@ describe('Notification', () => {
       let notificationResponse = await request(URL)
         .post('/config/slack')
         .send(slackConfig)
-      expect(notificationResponse.status).toEqual(200)
+      expect(notificationResponse.status).toEqual(201)
       const id = notificationResponse.body.id
 
       // SETUP: trigger event

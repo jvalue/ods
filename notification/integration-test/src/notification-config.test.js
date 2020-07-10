@@ -62,7 +62,7 @@ describe('Notification', () => {
         let notificationResponse = await request(URL)
             .post('/config/webhook')
             .send(webhookConfig)
-        expect(notificationResponse.status).toEqual(200)
+        expect(notificationResponse.status).toEqual(201)
         const id = notificationResponse.body.id
 
         // compare response with initial webhook config
@@ -117,7 +117,7 @@ describe('Notification', () => {
       let notificationResponse = await request(URL)
           .post('/config/webhook')
           .send(webhookConfig)
-      expect(notificationResponse.status).toEqual(200)
+      expect(notificationResponse.status).toEqual(201)
       const id = notificationResponse.body.id
 
       notificationResponse = await request(URL)

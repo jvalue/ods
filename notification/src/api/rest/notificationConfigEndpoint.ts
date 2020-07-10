@@ -132,19 +132,16 @@ export class NotificationConfigEndpoint {
    * it to the database on success
    */
   handleConfigCreation  = async (req: express.Request, res: express.Response): Promise<void> => {
-    console.log(`Received notification config from Host ${req.connection.remoteAddress}`)
+    console.log(`Received request to create notification config from host ${req.connection.remoteAddress}`)
 
     const notificationType = req.params.configType
-
     if (!notificationType) {
-      console.error('No notification type provided')
       res.status(400).send('No notification type provided')
       res.end()
       return
     }
 
     const configRequest = req.body as NotificationConfig
-
     if (!NotificationConfigEndpoint.isValidNotificationConfig(configRequest)) {
       res.status(400).send('Malformed notification request.')
       return
@@ -172,16 +169,14 @@ export class NotificationConfigEndpoint {
    * it to the database on success
    */
   handleWebhookCreation = async (req: express.Request, res: express.Response): Promise<void> => {
-    console.log(`Received webhook config from Host ${req.connection.remoteAddress}`)
-
     const webhookConfig = req.body as WebhookConfig
     let savedConfig: WebhookConfig
 
     // Check for validity of the request
     if (!NotificationConfigEndpoint.isValidWebhookConfig(webhookConfig)) {
-      console.warn('Malformed webhook request.')
       res.status(400).send('Malformed webhook request.')
     }
+    console.log(`Creation of webhook config for pipeline ${webhookConfig.pipelineId} requested.`)
 
     // Persist Config
     try {
@@ -193,7 +188,7 @@ export class NotificationConfigEndpoint {
     }
 
     // return saved post back
-    res.status(200).send(savedConfig);
+    res.status(201).send(savedConfig);
   }
 
 
@@ -204,17 +199,15 @@ export class NotificationConfigEndpoint {
    * @param res Response for config creation
    */
   handleSlackCreation = async (req: express.Request, res: express.Response): Promise<void> => {
-    console.log(`Received config from Host ${req.connection.remoteAddress}`)
-
     const slackConfig: SlackConfig = req.body as SlackConfig
     let savedConfig: SlackConfig
 
      // Check for validity of the request
     if (!NotificationConfigEndpoint.isValidSlackConfig(slackConfig)) {
-      console.warn('Malformed slack request.')
       res.status(400).send('Malformed slack request.')
       return
     }
+    console.log(`Creation of webhook config for pipeline ${slackConfig.pipelineId} requested.`)
 
     // Persist Config
     try {
@@ -227,24 +220,21 @@ export class NotificationConfigEndpoint {
     }
 
     // return saved post back
-    res.status(200).send(savedConfig);
+    res.status(201).send(savedConfig);
   }
 
   /**
    * Persists a posted Firebase Config to the notification database service.
    */
   handleFCMCreation = async (req: express.Request, res: express.Response) => {
-    console.log(`Received config from Host ${req.connection.remoteAddress}`)
-
     const firebaseConfig : FirebaseConfig = req.body as FirebaseConfig
     let savedConfig: FirebaseConfig
 
-
     // Check for validity of the request
     if (!NotificationConfigEndpoint.isValidFirebaseConfig(firebaseConfig)) {
-      console.error('Malformed firebase request.')
       res.status(400).send('Malformed firebase request.')
     }
+    console.log(`Creation of webhook config for pipeline ${firebaseConfig.pipelineId} requested.`)
 
     try {
       savedConfig = await this.storageHandler.saveFirebaseConfig(firebaseConfig)
@@ -255,7 +245,7 @@ export class NotificationConfigEndpoint {
     }
 
     // return saved post back
-    res.status(200).send(savedConfig);
+    res.status(201).send(savedConfig);
   }
 
 
