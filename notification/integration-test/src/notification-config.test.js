@@ -105,4 +105,41 @@ describe('Notification', () => {
             .send()
         expect(notificationResponse.status).toEqual(404)
     })
+
+    test('Get All Notification Configs for Pipeline', async() => {
+      const webhookConfig = {
+          pipelineId: 879428,
+          condition: 'true',
+          url: MOCK_RECEIVER_URL + '/webhook1'
+      }
+
+      // POST / CREATE
+      let notificationResponse = await request(URL)
+          .post('/config/webhook')
+          .send(webhookConfig)
+      expect(notificationResponse.status).toEqual(200)
+      const id = notificationResponse.body.id
+
+      notificationResponse = await request(URL)
+          .get(`/config/pipeline/${webhookConfig.pipelineId}`)
+          .send()
+
+      expect(notificationResponse.status).toEqual(200)
+      expect(notificationResponse.body).toEqual({
+          webhook: [ {
+            id: id,
+            pipelineId: webhookConfig.pipelineId,
+            condition: webhookConfig.condition,
+            url: webhookConfig.url
+          } ],
+          slack: [],
+          firebase: []
+      })
+
+      // CLEANUP
+      notificationResponse = await request(URL)
+          .delete(`/config/webhook/${id}`)
+          .send()
+      expect(notificationResponse.status).toEqual(200)
+  })
 })

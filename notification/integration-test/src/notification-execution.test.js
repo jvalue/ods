@@ -163,9 +163,9 @@ describe('Notification', () => {
           .get('/slack/12/34/56')
 
       expect(receiverResponse.status).toEqual(200)
-      expect(receiverResponse.body.text).toMatch(`/(${triggerEvent.pipelineName})/i`)
-      expect(receiverResponse.body.text).toMatch(`/(${triggerEvent.pipelineId})/i`)
-      expect(receiverResponse.body.text).toMatch(`/(${triggerEvent.dataLocation})/i`)
+      expect(receiverResponse.body.text).toMatch(`${triggerEvent.pipelineName}`)
+      expect(receiverResponse.body.text).toMatch(`${triggerEvent.pipelineId}`)
+      expect(receiverResponse.body.text).toMatch(`${triggerEvent.dataLocation}`)
 
       // CLEANUP
       notificationResponse = await request(URL)
