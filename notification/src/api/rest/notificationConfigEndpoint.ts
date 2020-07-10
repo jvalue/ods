@@ -511,22 +511,23 @@ export class NotificationConfigEndpoint {
       return
     }
 
+    let updatedConfig: NotificationConfig
     switch (configType) {
       case 'webhook':
-           this.storageHandler.updateWebhookConfig(id, req.body as WebHookConfig)
+        updatedConfig = await this.storageHandler.updateWebhookConfig(id, req.body as WebHookConfig)
         break
       case 'fcm':
-        const config = req.body as FirebaseConfig
-        this.storageHandler.updateFirebaseConfig(id, req.body as FirebaseConfig)
+        updatedConfig = await this.storageHandler.updateFirebaseConfig(id, req.body as FirebaseConfig)
         break
       case 'slack':
-        this.storageHandler.updateSlackConfig(id, req.body as SlackConfig)
+        updatedConfig = await this.storageHandler.updateSlackConfig(id, req.body as SlackConfig)
         break
       default:
         res.status(400).send(`Notification type ${configType} not suppoerted!`)
         return
     }
 
+    res.status(200).send(updatedConfig)
     res.end()
   }
 
