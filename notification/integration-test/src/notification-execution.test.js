@@ -95,7 +95,6 @@ describe('Notification', () => {
               }
             }
         }
-
         // ACT
         const notificationTriggerResponse = await request(URL)
           .post('/trigger')
@@ -111,9 +110,11 @@ describe('Notification', () => {
 
         // CLEANUP
         notificationResponse = await request(URL)
-            .delete(`config/webhook/${id}`)
+            .delete(`/config/webhook/${id}`)
             .send()
         expect(notificationResponse.status).toEqual(200)
+
+        console.log("1")
     }, 10000)
 
     test('POST /slack triggers slack notification', async() => {
@@ -168,7 +169,7 @@ describe('Notification', () => {
 
       // CLEANUP
       notificationResponse = await request(URL)
-          .delete(`config/webhook/${id}`)
+          .delete(`/config/slack/${id}`)
           .send()
       expect(notificationResponse.status).toEqual(200)
     }, 10000)
