@@ -47,27 +47,7 @@ export class NotificationConfigEndpoint {
 
     // Get configs from database
     const configSummary = await this.storageHandler.getConfigsForPipeline(pipelineId)
-    const configs: object[] = []
-
-    configSummary.firebase.forEach((firebaseConfig) => {
-      const config = Object.assign({}, firebaseConfig) as any
-      config.type = CONFIG_TYPE.FCM
-      configs.push(config)
-    })
-
-    configSummary.slack.forEach((slackConfig) => {
-      const config = Object.assign({}, slackConfig) as any
-      config.type = CONFIG_TYPE.SLACK
-      configs.push(config)
-    })
-
-    configSummary.webhook.forEach((webhookConfig) => {
-      const config = Object.assign({}, webhookConfig) as any
-      config.type = CONFIG_TYPE.WEBHOOK
-      configs.push(config)
-    })
-
-    res.status(200).send(configs)
+    res.status(200).send(configSummary)
   }
 
   /**
