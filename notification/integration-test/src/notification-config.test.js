@@ -28,7 +28,7 @@ describe('Notification', () => {
 
 
     test('GET /config/pipeline/982323 requests notification configs for non-existing pipeline', async() => {
-        const receiverResponse = await request(MOCK_RECEIVER_URL)
+        const receiverResponse = await request(URL)
             .get('/config/pipeline/982323')
             .send()
 
@@ -48,9 +48,6 @@ describe('Notification', () => {
             .send()
 
         expect(receiverResponse.status).toEqual(404)
-
-        // expect empty list
-        expect(receiverResponse.body).toEqual('Internal Server error.')
     })
 
 
