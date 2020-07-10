@@ -28,8 +28,6 @@ Note that you need to delete existing docker images from your local docker daemo
 | *base_url*/pipelines  | POST  | PipelineConfig | PipelineConfig | Create a new pipeline (id will be set by the core service) |
 | *base_url*/pipelines/${id}  | PUT  | PipelineConfig | - | Update existing pipeline |
 | *base_url*/pipelines/${id}  | DELETE  | - | - | Delete existing pipeline |
-| *base_url*/pipelines/${id}/notifications  | POST  | NotificationConfig | NotificationConfig | Create notification for a pipeline |
-| *base_url*/pipelines/${id}/notifications/${notificationId}  | DELETE  | - | - | Delete notification |
 | *base_url*/pipelines  | DELETE  | - | - | Delete all pipelines |
 | *base_url*/events  | GET  | -  | Array of PipelineEvents  | Get all events |
 | *base_url*/events/${id}  | GET  | -  | PipelineEvent  | Get a event with id ${id} |
@@ -42,7 +40,6 @@ Note that you need to delete existing docker images from your local docker daemo
   "id": number,
   "datasourceId": number,
   "transformation": TransformationConfig,
-  "notifications": [*NotificationConfig]
   "metadata":PipelineMetadata
 }
 ```
@@ -71,42 +68,5 @@ Note that you need to delete existing docker images from your local docker daemo
   "displayName":String,
   "license":String,
   "description":String
-}
-```
-
-### NotificationConfig
-```
-WebhookNotification | SlackNotification | FirebaseNotification
-```
-
-### WebhookParams
-```
-{
-  "condition": String,
-  "type": "WEBHOOK",
-  "url": String (the url of the webhook you want to be triggered)
-}
-```
-
-### SlackParams
-```
-{
-  "condition": String,
-  "type": "SLACK",
-  "workspaceId": String (id of your slack workspace),
-  "channelId": String (id of the channel where the notification is to be posted),
-  "secret": String (secret part of the slack webhook, get it at slack management console)
-}
-```
-
-### FirebaseParams
-```
-{
-  "condition": String,
-  "type": "FCM",
-  "projectId": String (id of your firebase project),
-  "clientEmail": String (email of the firebase service account),
-  "privateKey: String (secret key associated with the service account),
-  "topic": String (topic under which the notification is to be posted)
 }
 ```
