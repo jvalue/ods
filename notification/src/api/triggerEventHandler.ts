@@ -27,7 +27,7 @@ export class TriggerEventHandler {
     }
 
     const message = NotificationMessageFactory.buildMessage(transformationEvent)
-    const data = transformationEvent.jobResult.data
+    const data = transformationEvent.data
     const configs = await this.notificationRepository.getConfigsForPipeline(transformationEvent.pipelineId)
 
     const notificationJobs: Promise<void>[] = []
@@ -62,6 +62,6 @@ export class TriggerEventHandler {
       * @returns     true, if param event is a TransformationEvent, else false
       */
   public isValidTransformationEvent(event: TransformationEvent): boolean {
-      return !!event.dataLocation && !!event.pipelineId && !!event.pipelineName && !!event.jobResult
+      return !!event.dataLocation && !!event.pipelineId && !!event.pipelineName && (!!event.data || !!event.error)
   }
 }
