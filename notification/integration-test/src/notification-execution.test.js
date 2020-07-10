@@ -109,6 +109,12 @@ describe('Notification', () => {
             .get('/webhook2')
 
         expect(receiverResponse.status).toEqual(404)
+
+        // CLEANUP
+        notificationResponse = await request(URL)
+            .delete(`config/webhook/${id}`)
+            .send()
+        expect(notificationResponse.status).toEqual(200)
     }, 10000)
 
     test('POST /slack triggers slack notification', async() => {
@@ -157,8 +163,15 @@ describe('Notification', () => {
           .get('/slack/12/34/56')
 
       expect(receiverResponse.status).toEqual(200)
-      expect(receiverResponse.body.text)
-          .toEqual(`Pipeline ${slackJob.pipelineName}(${slackJob.pipelineId}) has new data available. Fetch at ${dataLocation}.`)
+      expect(receiverResponse.body.text).toMatch(`/(${triggerEvent.pipelineName})/i`)
+      expect(receiverResponse.body.text).toMatch(`/(${triggerEvent.pipelineId})/i`)
+      expect(receiverResponse.body.text).toMatch(`/(${triggerEvent.dataLocation})/i`)
+
+      // CLEANUP
+      notificationResponse = await request(URL)
+          .delete(`config/webhook/${id}`)
+          .send()
+      expect(notificationResponse.status).toEqual(200)
     }, 10000)
 
     function sleep(ms) {
