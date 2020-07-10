@@ -126,7 +126,7 @@ describe('Notification', () => {
         workspaceId: '34',
         secret: '56'
       }
-      const notificationResponse = await request(URL)
+      let notificationResponse = await request(URL)
         .post('/config/slack')
         .send(slackConfig)
       expect(notificationResponse.status).toEqual(200)
