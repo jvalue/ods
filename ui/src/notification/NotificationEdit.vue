@@ -101,13 +101,10 @@ export default class NotificationEdit extends Vue implements NotificationEditDia
     return this.editedNotification
   }
 
-  //private pipelineId = -1
   private dialogOpen = false
 
-  // private notificationTypes = Object.values(CONFIG_TYPE)  // Convert CONFIG_TYPES to list
-  //private notificationTypes = CONFIG_TYPE
-  private notificationTypes = ['webhook', 'fcm', 'slack']
-  
+  private notificationTypes = Object.values(CONFIG_TYPE)  // Convert CONFIG_TYPES to list
+
   private defaultNotification: WebhookNotification = {
     id: -1,
     pipelineId: -1,
@@ -119,7 +116,7 @@ export default class NotificationEdit extends Vue implements NotificationEditDia
   private editedNotification: NotificationConfig = Object.assign({}, this.defaultNotification)
 
   openDialog (notificationConfig?: NotificationConfig): void {
-    
+
     if (notificationConfig) { // edit
       this.editedNotification = Object.assign({}, notificationConfig)
     } else { // create
@@ -131,7 +128,6 @@ export default class NotificationEdit extends Vue implements NotificationEditDia
   closeDialog (): void {
     this.editedNotification = Object.assign({}, this.defaultNotification)
     this.dialogOpen = false
-    //this.editedNotification.pipelineId = this.pipelineId
   }
 
   onSave (): void {
