@@ -92,7 +92,7 @@ describe('System-Test', () => {
     console.log(`[Test 1] Successfully created pipeline ${pipelineId} for datasource ${datasourceId}`)
 
     // Add notification to notification service
-    const notificationConfig = generateNotification('data.one === 1', MOCK_SERVER_DOCKER + '/notifications/test1')
+    const notificationConfig = generateWebhookNotification(pipelineId, 'data.one === 1', MOCK_SERVER_DOCKER + '/notifications/test1')
 
     console.log(`[Test 1] Trying to create notification: ${JSON.stringify(notificationConfig)}`)
     const notificationResponse = await request(NOTIFICATION_URL)
@@ -158,7 +158,7 @@ describe('System-Test', () => {
     console.log(`[Test 2] Successfully created pipeline ${pipelineId} for datasource ${datasourceId}`)
 
     // Add notification to notification service
-    const notificationConfig = generateNotification('data.count <= 2', MOCK_SERVER_DOCKER + '/notifications/test2')
+    const notificationConfig = generateWebhookNotification(pipelineId, 'data.count <= 2', MOCK_SERVER_DOCKER + '/notifications/test2')
 
     console.log(`[Test 2] Trying to create notification: ${JSON.stringify(notificationConfig)}`)
     const notificationResponse = await request(NOTIFICATION_URL)
@@ -238,7 +238,7 @@ describe('System-Test', () => {
     console.log(`[Test 3] Successfully created pipeline ${pipelineId} for datasource ${datasourceId}`)
 
     // Add notification to notification service
-    const notificationConfig = generateNotification('data.newField === 12', MOCK_SERVER_DOCKER + '/notifications/test3')
+    const notificationConfig = generateWebhookNotification(pipelineId, 'data.newField === 12', MOCK_SERVER_DOCKER + '/notifications/test3')
 
     console.log(`[Test 3] Trying to create notification: ${JSON.stringify(notificationConfig)}`)
     const notificationResponse = await request(NOTIFICATION_URL)
@@ -309,7 +309,7 @@ describe('System-Test', () => {
     console.log(`[Test 4] Successfully created pipeline ${pipelineId} for datasource ${datasourceId}`)
 
     // Add notification to notification service
-    const notificationConfig = generateNotification('data.one === 1', MOCK_SERVER_DOCKER + '/notifications/test4_1')
+    const notificationConfig = generateWebhookNotification(pipelineId, 'data.one === 1', MOCK_SERVER_DOCKER + '/notifications/test4_1')
 
     console.log(`[Test 4] Trying to create notification: ${JSON.stringify(notificationConfig)}`)
     const notificationResponse = await request(NOTIFICATION_URL)
@@ -356,7 +356,7 @@ describe('System-Test', () => {
     console.log(`[Test 4] Successfully updatedd pipeline ${pipelineId}.`)
 
     // Add another notification
-    const anotherNotification = generateNotification('data.two === "two"', MOCK_SERVER_DOCKER + '/notifications/test4_2')
+    const anotherNotification = generateWebhookNotification(pipelineId, 'data.two === "two"', MOCK_SERVER_DOCKER + '/notifications/test4_2')
 
     console.log(`[Test 4] Trying to create notification: ${JSON.stringify(anotherNotification)}`)
     const anotherNotificationResponse = await request(NOTIFICATION_URL)
@@ -425,9 +425,9 @@ describe('System-Test', () => {
     console.log(`[Test 5] Successfully created pipeline ${pipelineId} for datasource ${datasourceId}`)
 
     // Add notification to notification service
-    const notification1 = generateNotification('data.one === 1', MOCK_SERVER_DOCKER + '/notifications/test5_1')
-    const notification2 = generateNotification('data.one === 1', MOCK_SERVER_DOCKER + '/notifications/test5_2')
-    const notification3 = generateNotification('data.one < 1', MOCK_SERVER_DOCKER + '/notifications/test5_3')
+    const notification1 = generateWebhookNotification(pipelineId, 'data.one === 1', MOCK_SERVER_DOCKER + '/notifications/test5_1')
+    const notification2 = generateWebhookNotification(pipelineId, 'data.one === 1', MOCK_SERVER_DOCKER + '/notifications/test5_2')
+    const notification3 = generateWebhookNotification(pipelineId, 'data.one < 1', MOCK_SERVER_DOCKER + '/notifications/test5_3')
 
     console.log(`[Test 5] Trying to create notifications: ${JSON.stringify(notification1)}, ${JSON.stringify(notification2)}, ${JSON.stringify(notification3)}`)
     let notificationResponse = await request(NOTIFICATION_URL)
@@ -516,7 +516,7 @@ describe('System-Test', () => {
     console.log(`[Test 6] Successfully created pipeline ${pipelineId} for datasource ${datasourceId}`)
 
     // Add notification to notification service
-    const notificationConfig = generateNotification('data.one === 1', MOCK_SERVER_DOCKER + '/notifications/test6')
+    const notificationConfig = generateWebhookNotification(pipelineId, 'data.one === 1', MOCK_SERVER_DOCKER + '/notifications/test6')
 
     console.log(`[Test 6] Trying to create notification: ${JSON.stringify(notificationConfig)}`)
     const notificationResponse = await request(NOTIFICATION_URL)
@@ -552,11 +552,11 @@ describe('System-Test', () => {
   }, 30000)
 })
 
-function generateNotification (condition, url) {
+function generateWebhookNotification (pipelineId, condition, url) {
   return {
-    condition,
-    url,
-    type: 'WEBHOOK'
+    condition: condition,
+    url: url,
+    pipelineId: pipelineId
   }
 }
 
