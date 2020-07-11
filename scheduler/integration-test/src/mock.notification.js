@@ -9,46 +9,26 @@ const PORT = process.env.MOCK_NOTIFICATION_PORT || 8084
 const app = new Koa()
 app.use(bodyParser())
 
-const webhooks = new Map()
-const slacks = new Map()
-const firebases = new Map()
+const triggers = new Map()
 
 router.get('/', async ctx => {
   ctx.type = 'text/plain'
   ctx.body = 'ok'
 })
 
-router.post('/webhook', async ctx => {
-  webhooks.set(ctx.request.body.pipelineName, ctx.request.body)
-  ctx.status = 200
+router.post('/trigger', async ctx => {
+  const pipelineId = ctx.request.body.pipelineId
+  triggers.set("" + pipelineId, ctx.request.body)
+  console.log(`[Notification Mock] Stored trigger reachable under '/trigger/${pipelineId}' ${JSON.stringify(ctx.request.body)}`)
+  ctx.status = 201
 })
 
-router.post('/slack', async ctx => {
-  slacks.set(ctx.request.body.pipelineName, ctx.request.body)
-  ctx.status = 200
-})
-
-router.post('/fcm', async ctx => {
-  firebases.set(ctx.request.body.pipelineName, ctx.request.body)
-  ctx.status = 200
-})
-
-router.get('/webhook/:url', async ctx => {
-  const url = ctx.params.url
+router.get('/trigger/:pipelineId', async ctx => {
+  const pipelineId = ctx.params.pipelineId
   ctx.type = 'application/json'
-  ctx.body = webhooks.get(url)
-})
-
-router.get('/slack/:url', async ctx => {
-  const url = ctx.params.url
-  ctx.type = 'application/json'
-  ctx.body = slacks.get(url)
-})
-
-router.get('/fcm/:url', async ctx => {
-  const url = ctx.params.url
-  ctx.type = 'application/json'
-  ctx.body = firebases.get(url)
+  ctx.body = triggers.get("" + pipelineId)
+  console.log(`[Notification Mock] Requested trigger for pipeline ${pipelineId}: ${JSON.stringify(ctx.body)}`)
+  ctx.status = 200
 })
 
 app.use(router.routes())
