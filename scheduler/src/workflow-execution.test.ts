@@ -80,20 +80,6 @@ test('Should execute pipeline periodic', async () => {
   expect(mockExecuteTransformation).toHaveBeenCalledWith(transformation)
   expect(mockExecuteStorage).toHaveBeenCalledWith(pipelineConfig, transformedData)
 })
-
-test('Should not execute undefined transformation', async () => {
-  const datasourceConfig = generateDatasourceConfig(false)
-  const pipelineConfig = generatePipelineConfig(undefined) // transformation undefined
-
-  mockGetPipelinesForDatasource.mockReturnValue([pipelineConfig]) // register pipeline to follow datasource import
-
-  mockExecuteAdapter.mockResolvedValue(adapterResponse)
-
-  await PipelineExecution.execute(datasourceConfig)
-
-  expect(mockExecuteNotification).not.toBeCalled()
-})
-
 test('Should trigger notifications', async () => {
   const transformation: TransformationConfig = {
     dataLocation: 'hier'

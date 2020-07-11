@@ -17,12 +17,6 @@ export async function execute (datasourceConfig: DatasourceConfig, maxRetries = 
   // pipeline
   const followingPipelines = await CoreClient.getCachedPipelinesByDatasourceId(datasourceConfig.id)
   for (let pipelineConfig of followingPipelines) {
-
-    if(!pipelineConfig.transformation) {
-      console.log(`Transformation for pipeline ${pipelineConfig.id} has no transformation given. Not executing, not storing resulting data, and not notifying clients`)
-      continue
-    }
-
     const transformationResult =
         await retryableExecution(executeTransformation, { pipelineConfig: pipelineConfig, dataLocation: adapterResponse.location }, `Executing transformatins for pipeline ${pipelineConfig.id}`)
 
@@ -34,7 +28,7 @@ export async function execute (datasourceConfig: DatasourceConfig, maxRetries = 
     const dataLocation =
         await retryableExecution(executeStorage, { pipelineConfig: pipelineConfig, data: transformationResult.data! }, `Storing data for pipeline ${pipelineConfig.id}`)
 
-    await retryableExecution(executeNotification, { pipelineConfig: pipelineConfig, dataLocation: dataLocation, data: transformationResult, error: transformationResult.error }, `Notifying clients for pipeline ${pipelineConfig.id}`)
+    await retryableExecution(executeNotification, { pipelineConfig: pipelineConfig, dataLocation: dataLocation, data: transformationResult.data, error: transformationResult.error }, `Notifying clients for pipeline ${pipelineConfig.id}`)
   }
 }
 
