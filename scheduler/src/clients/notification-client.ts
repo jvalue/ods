@@ -10,7 +10,7 @@ const http = axios.create({
 
 export async function executeNotification (triggerEvent: NotificationTriggerEvent): Promise<void> {
   const response = await http.post(`trigger`, triggerEvent)
-  if (response.status !== 200 && response.status !== 204) {
+  if (response.status !== 200 && response.status !== 204 && response.status !== 201) {
     return Promise.reject(new Error(`Error contacting notification-service: Got status ${response.status} for triggering notification on URL ${NOTIFICATION_SERVICE_URL}.`))
   }
 }
