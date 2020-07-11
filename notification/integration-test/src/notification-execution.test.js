@@ -37,15 +37,8 @@ describe('Notification', () => {
           pipelineId: 1,
           pipelineName: "Integration-Test Pipeline 1",
           dataLocation: dataLocation,
-          jobResult: {
-            data: {
+          data: {
               value1: 1
-            },
-            stats: {
-              durationInMilliSeconds: 500,
-              startTimestamp: 12345,
-              endTimestamp: 12345
-            }
           }
       }
 
@@ -84,15 +77,8 @@ describe('Notification', () => {
             pipelineId: 2,
             pipelineName: "Integration-Test Pipeline 2 (not triggering)",
             dataLocation: dataLocation,
-            jobResult: {
-              data: {
+            data: {
                 value1: 1
-              },
-              stats: {
-                durationInMilliSeconds: 500,
-                startTimestamp: 12345,
-                endTimestamp: 12345
-              }
             }
         }
         // ACT
@@ -138,15 +124,8 @@ describe('Notification', () => {
           pipelineId: 3,
           pipelineName: "Integration-Test Pipeline 3 (Slack)",
           dataLocation: dataLocation,
-          jobResult: {
-            data: {
-              niceString: 'nice'
-            },
-            stats: {
-              durationInMilliSeconds: 500,
-              startTimestamp: 12345,
-              endTimestamp: 12345
-            }
+          data: {
+            niceString: 'nice'
           }
       }
 
