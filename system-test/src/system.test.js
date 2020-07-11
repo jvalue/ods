@@ -46,7 +46,7 @@ describe('System-Test', () => {
         timeout: 60000,
         log: true
       })
-  }, 22000)
+  }, 60000)
 
   afterAll(async () => {
     console.log('All tests done, removing adapter configs from ods...')
@@ -127,7 +127,7 @@ describe('System-Test', () => {
       .send()
     expect(deletionResponse.status).toEqual(204)
     sleep(2000) // takes up to 2sec to reach scheduler
-  }, 30000)
+  }, 60000)
 
   test('Test 2: Create periodic pipeline without transformation', async () => {
     // Prepare datasource mock
@@ -202,7 +202,7 @@ describe('System-Test', () => {
       .send()
     expect(deletionResponse.status).toEqual(204)
     sleep(2000) // takes up to 2sec to reach scheduler
-  }, 40000)
+  }, 60000)
 
   test('Test 3: Create non-periodic pipeline with transformation', async () => {
     // Prepare datasource mock
@@ -272,7 +272,7 @@ describe('System-Test', () => {
       .send()
     expect(deletionResponse.status).toEqual(204)
     sleep(2000) // takes up to 2sec to reach scheduler
-  }, 30000)
+  }, 60000)
 
   test('Test 4: Update periodic datasource with pipeline', async () => {
     // Prepare datasource mock
@@ -393,7 +393,7 @@ describe('System-Test', () => {
       .send()
     expect(deletionResponse.status).toEqual(204)
     sleep(2000) // takes up to 2sec to reach scheduler
-  }, 40000)
+  }, 60000)
 
   test('Test 5: Create pipeline with multiple notifications', async () => {
     // Prepare datasource mock
@@ -485,7 +485,7 @@ describe('System-Test', () => {
       .send()
     expect(deletionResponse.status).toEqual(204)
     sleep(2000) // takes up to 2sec to reach scheduler
-  }, 30000)
+  }, 60000)
 
   test('Test 6: Delete periodic pipeline', async () => {
     // Prepare dataource mock
@@ -549,7 +549,7 @@ describe('System-Test', () => {
       .send()
     expect(deletionResponse.status).toEqual(204)
     sleep(2000) // takes up to 2sec to reach scheduler
-  }, 30000)
+  }, 60000)
 })
 
 function generateWebhookNotification (pipelineId, condition, url) {
