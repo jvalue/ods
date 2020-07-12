@@ -20,11 +20,8 @@ describe('JSNotificationService', () => {
 
     let data: object
 
-    /**
-     * Execution before each test.
-     */
     beforeEach(() => {
-      notificationService = new JSNotificationService(new VM2SandboxExecutor()) // TODO: replace with mock
+      notificationService = new JSNotificationService(new VM2SandboxExecutor())
       console.log = jest.fn()
       /*=======================================================
        * An Event sent by the Transformation Service
@@ -33,9 +30,6 @@ describe('JSNotificationService', () => {
       data ={ value1: 1, b: 2 }
     })
 
-    /**
-     * Execution after each test
-     */
     afterEach(() => {
       jest.clearAllMocks()
     })
@@ -63,6 +57,7 @@ describe('JSNotificationService', () => {
       expect(post.mock.calls[0][1].message).toEqual(message)
     })
 
+
     it('should trigger notification when transformation failed and condition is "!data', async () => {
       post.mockReturnValue(Promise.resolve())
 
@@ -84,9 +79,7 @@ describe('JSNotificationService', () => {
       expect(post.mock.calls[0][1].message).toEqual(message)
     })
 
-    /**
-     * Test for transform data and
-     */
+
     it('should trigger notification when condition is met', async () => {
       post.mockReturnValue(Promise.resolve())
 
@@ -108,9 +101,7 @@ describe('JSNotificationService', () => {
       expect(post.mock.calls[0][1].message).toEqual(message)
     })
 
-    /**
-     * Test for malformed Condition
-     */
+
     test('Notification does not trigger when condition is malformed', async () => {
       const notificationConfig: WebhookConfig = {
         id: 1,
@@ -131,9 +122,7 @@ describe('JSNotificationService', () => {
       expect(post).not.toHaveBeenCalled()
     })
 
-    /**
-     * Test for Succesful Slack Request
-     */
+
     test('SLACK request', async () => {
 
       const request: SlackConfig = {

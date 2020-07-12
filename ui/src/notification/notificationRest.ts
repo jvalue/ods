@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from 'axios'
+import axios from 'axios'
 import NotificationConfig from '@/notification/notificationConfig'
 
 const NOTIFICATION_SERVICE_URL = process.env.VUE_APP_NOTIFICATION_SERVICE_URL as string
@@ -38,7 +38,7 @@ export async function getById(id: number, notificationType: string): Promise<Not
 
 export async function create(notificationConfig: NotificationConfig): Promise<NotificationConfig> {
   const notificationType = notificationConfig.type
-  // remove notificaitonId and type
+  // remove notificationId and type
   delete notificationConfig['id']
   delete notificationConfig['type']
 
@@ -51,7 +51,7 @@ export async function update(notificationConfig: NotificationConfig): Promise<vo
   const notificationType = notificationConfig.type
   const id = notificationConfig.id
 
-  // remove notificaitonId and type
+  // remove notificationId and type
   delete notificationConfig['id']
   delete notificationConfig['type']
 

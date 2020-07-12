@@ -4,16 +4,16 @@ import { TransformationEvent } from '../transformationEvent';
 
 /**
  * This class handles the communication with the AMQP service (rabbitmq)
- * It interacts with this channels:
+ * It interacts with these channels:
  *
  *      * Notification Channel:
  *       ----------------------
  *       A channel to notify the notification service that a transformation is done.
- *       (see TransformationEvent for details of the Event).
+ *       (see TransformationEvent for details of the event).
  *
  */
 export class AmqpHandler{
-    notifQueueName = process.env.AMQP_NOTIFICATION_QUEUE!     // Queue name of the Job Queue
+    notifQueueName = process.env.AMQP_NOTIFICATION_QUEUE!
 
     triggerEventHandler: TriggerEventHandler
 
@@ -37,7 +37,7 @@ export class AmqpHandler{
 
         let established: boolean = false    // amqp service connection result
         const handler: AmqpHandler = this   // for ability to access methods and members in callback
-        let errMsg: string = ''             // Error Message to be shown after final retry
+        let errMsg: string = ''             // Error message to be shown after final retry
 
         for (let i = 1; i <= retries; i++) {
             await this.backOff(backoff)
@@ -86,7 +86,7 @@ export class AmqpHandler{
                 durable: false,
             });
 
-            // Consume from Channel
+            // Consume from channel
             channel.consume(
                 this.notifQueueName,
                 async (msg: ConsumeMessage | null) => await this.handleEvent(msg),

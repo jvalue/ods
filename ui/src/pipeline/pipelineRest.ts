@@ -13,7 +13,7 @@ const http_core = axios.create({
   transformResponse: []
 })
 
-export async function getAllPipelines(): Promise<Pipeline[]> {
+export async function getAllPipelines (): Promise<Pipeline[]> {
   const response = await http_core.get('/')
   return JSON.parse(response.data)
 }
@@ -37,9 +37,8 @@ export async function createPipeline (pipeline: Pipeline): Promise<Pipeline> {
 export async function updatePipeline (pipeline: Pipeline): Promise<AxiosResponse> {
   return http_core.put(`/${pipeline.id}`, JSON.stringify(pipeline))
 }
-export async function deletePipeline(id: number): Promise<AxiosResponse> {
+export async function deletePipeline (id: number): Promise<AxiosResponse> {
   const response = await http_core.delete(`/${id}`)
 
-  //response = await http_core.delete(`/${id}`)
   return response
 }
