@@ -45,6 +45,5 @@ Content-Type: application/json
   },
   "metadata": {
     "displayName":"UKHotspots"
-  },
-  "notifications": [ ]
+  }
 }
