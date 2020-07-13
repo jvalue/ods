@@ -11,9 +11,6 @@ export class StorageContentEndpoint {
   constructor(contentRepository: StorageContentRepository, app: express.Application) {
     this.contentRepository = contentRepository
 
-    app.get('/', this.getHealthCheck)
-    app.get('/version', this.getVersion)
-
     // Request contents
     app.get('/bucket/:bucketId/content/:contentId', this.handleContentRequest)
     app.get('/bucket/:bucketId/content', this.handleContentsRequest)
@@ -25,10 +22,8 @@ export class StorageContentEndpoint {
     res.send('I am alive!')
   }
 
-  getVersion = (req: express.Request, res: express.Response): void => {
-    res.header('Content-Type', 'text/plain')
-    res.send(this.version)
-    res.end()
+  getVersion = (): string => {
+    return this.version
   }
 
 
