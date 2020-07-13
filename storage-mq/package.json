@@ -11,11 +11,9 @@
         "test": "jest"
     },
     "dependencies": {
-        "amqplib": "^0.5.6",
         "express": "^4.17.1",
-        "keycloak-connect": "^7.0.0",
-        "pg": "^8.2.1",
-        "reflect-metadata": "^0.1.13"
+        "amqplib": "^0.5.6",
+        "pg": "^8.2.1"
     },
     "devDependencies": {
         "@types/amqplib": "^0.5.13",
@@ -34,7 +32,6 @@
         "jest": "^25.5.4",
         "ts-jest": "^25.5.1",
         "tslib": "^1.13.0",
-        "typeorm": "^0.2.25",
         "typescript": "^3.9.5"
     },
     "homepage": "https://github.com/jvalue/open-data-service",
