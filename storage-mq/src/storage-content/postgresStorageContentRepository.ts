@@ -75,12 +75,28 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
         return Promise.resolve()
     }
 
-    getAllContent(tableIdentifier: string): Promise<import("./storageContent").StorageContent[]> {
-      throw new Error("Method not implemented.")
+    async getAllContent(tableIdentifier: string): Promise<StorageContent[]> {
+      console.debug(`Fetching all content from database, table "${tableIdentifier}"`)
+      await this.checkClassInvariant()
+
+      let client!: PoolClient
+      try {
+          client = await this.connectionPool.connect()
+          const resultSet = await client.query(`SELECT * FROM "${tableIdentifier}"`)
+          const content = resultSet.rows as StorageContent[]
+          return Promise.resolve(content)
+      } catch (error) {
+          console.error(`Could not get content from table ${tableIdentifier}: ${error}`)
+          return Promise.reject(error)
+      } finally {
+          if (client) {
+              client.release()
+          }
+      }
     }
 
     async getContent(tableIdentifier: string, contentId: string): Promise<StorageContent> {
-      console.debug(`Fetching data from database, table "${tableIdentifier}", id "${contentId}"`)
+      console.debug(`Fetching content from database, table "${tableIdentifier}", id "${contentId}"`)
       await this.checkClassInvariant()
 
       let client!: PoolClient
