@@ -1,9 +1,18 @@
+import { StorageStructureRepository } from "@/storage-structure/storageStructureRepository"
+
 export default class PipelineConfigEventHandler {
+  structureRepository: StorageStructureRepository
+
+  constructor(structureRepository: StorageStructureRepository) {
+    this.structureRepository = structureRepository
+  }
+
+
   handleCreation(pipelineCreatedEvent: PipelineCreatedEvent): Promise<void> {
-    return Promise.reject("Not implemented yet")
+    return this.structureRepository.create(pipelineCreatedEvent.pipelineId)
   }
   handleDeletion(pipelineDeletedEvent: PipelineDeletedEvent): Promise<void> {
-    return Promise.reject("Not implemented yet")
+    return this.structureRepository.delete(pipelineDeletedEvent.pipelineId)
   }
 }
 
