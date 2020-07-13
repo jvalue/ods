@@ -69,6 +69,8 @@ export class PipelineConfigConsumer {
             this.pipelineConfigEventHandler.handleCreation(JSON.parse(msg.content.toString()))
         } else if (msg.fields.routingKey === pipelineConfigDeletedTopic) {
             this.pipelineConfigEventHandler.handleDeletion(JSON.parse(msg.content.toString()))
+        } else {
+          console.debug("Received unsubscribed event on topic %s - doing nothing", msg.fields.routingKey);
         }
     }
 }
