@@ -8,6 +8,9 @@ import DatasourceConfig from './interfaces/datasource-config'
 import PipelineConfig from './interfaces/pipeline-config'
 import { AxiosError } from 'axios'
 import AdapterResponse from '@/interfaces/adapter-response'
+import AmqpClient from '@/clients/amqp-client'
+
+const amqpClient = new AmqpClient()
 
 export async function execute (datasourceConfig: DatasourceConfig, maxRetries = 3): Promise<void> {
   // adapter
@@ -102,8 +105,13 @@ async function executeNotification (args: { pipelineConfig: PipelineConfig, data
     error: error
   }
 
-  await NotificationClient.executeNotification(notificationTrigger)
-  console.log(`Successfully delivered notification request to transformation-service for ${pipelineConfig.id}`)
+  const success = amqpClient.publish(notificationTrigger)
+  if(!success) {
+    Promise.reject()
+  } else {
+    console.log(`Successfully published notification trigger to amqp exchange for pipeline ${pipelineConfig.id}`)
+    return
+  }
 }
 
 function sleep (ms: number): Promise<void> {
