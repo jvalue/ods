@@ -42,5 +42,4 @@ Content-Type: application/json
     "author": "icke",
     "license": "none"
   },
-  "notifications": []
 }

@@ -40,7 +40,6 @@ Content-Type: application/json
     "author": "icke",
     "license": "none"
   },
-  "notifications": []
 }
 
 
@@ -57,5 +56,4 @@ Content-Type: application/json
     "author": "icke",
     "license": "none"
   },
-  "notifications": []
 }

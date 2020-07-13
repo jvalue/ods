@@ -1,6 +1,5 @@
 package org.jvalue.ods.coreservice.rest.v1;
 
-import org.jvalue.ods.coreservice.model.notification.NotificationConfig;
 import org.jvalue.ods.coreservice.model.PipelineConfig;
 import org.jvalue.ods.coreservice.pipeline.PipelineManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,28 +81,4 @@ public class PipelinesEndpoint {
     public void deleteAllPipelines() {
         pipelineManager.deleteAllPipelines();
     }
-
-    @PostMapping("/{pipelineId}/notifications")
-    public NotificationConfig addNotification(
-            @PathVariable Long pipelineId,
-            @Valid @RequestBody NotificationConfig notificationConfig) {
-        try {
-            return pipelineManager.addNotification(pipelineId, notificationConfig);
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Pipeline not found", e);
-        }
-    }
-
-    @DeleteMapping("/{pipelineId}/notifications/{notificationId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeNotification(
-        @PathVariable Long pipelineId,
-        @PathVariable Long notificationId) {
-        try {
-            pipelineManager.removeNotification(pipelineId, notificationId);
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Pipeline or notification not found", e);
-        }
-    }
-
 }

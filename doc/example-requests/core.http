@@ -19,22 +19,7 @@ Content-Type: application/json
   "metadata": {
     "author": "icke",
     "license": "none"
-  },
-  "notifications": [
-    {
-      "condition": "data.test === 'abc'",
-      "type": "WEBHOOK",
-      "url": "http://www.mocky.io/v2/5dc94f7a2f0000680073eb96"
-    },
-    {
-      "condition": "typeof data.test === 'string'",
-      "type": "FCM",
-      "projectId": "{{fcmProjectId}}",
-      "clientEmail": "{{fcmClientEmail}}",
-      "privateKey": "{{fcmKey}}",
-      "topic": "{{fcmTopic}}"
-    }
-  ]
+  }
 }
 
 
@@ -52,22 +37,7 @@ Content-Type: application/json
   "metadata": {
     "author": "icke",
     "license": "none"
-  },
-  "notifications": [
-    {
-      "condition": "data.test === 'abc'",
-      "type": "WEBHOOK",
-      "url": "http://www.mocky.io/v2/5dc94f7a2f0000680073eb96"
-    },
-    {
-      "condition": "typeof data.test === 'string'",
-      "type": "FCM",
-      "projectId": "{{fcmProjectId}}",
-      "clientEmail": "{{fcmClientEmail}}",
-      "privateKey": "{{fcmKey}}",
-      "topic": "{{fcmTopic}}"
-    }
-  ]
+  }
 }
 
 

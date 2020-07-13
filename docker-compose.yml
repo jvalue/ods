@@ -102,7 +102,6 @@ services:
       - "traefik.http.routers.to-scheduler.rule=PathPrefix(`/api/scheduler`)"
       - "traefik.http.routers.to-scheduler.middlewares=scheduler-stripprefix@docker"
       - "traefik.http.middlewares.scheduler-stripprefix.stripprefix.prefixes=/api/scheduler"
-
   # ----------------- STORAGE SERVICE (/storage) --------------------
   storage: # Wraps postgres database with API
     image: ${DOCKER_REGISTRY}/storage
@@ -174,6 +173,22 @@ services:
       context: ./notification/
     environment:
       AUTH_ENABLED: 'false' #TODO: turn to true as soon as it works!
+
+      # Postgres connection vars
+      PGUSER: 'notification_usr'
+      PGHOST: 'notification-db'
+      PGPASSWORD: 'admin'
+      PGPORT: 5432,
+
+      # Rabbitmq connection details
+      AMQP_SERVICE_HOST: 'rabbitmq'
+      AMQP_SERVICE_USER: 'rabbit_adm'
+      AMQP_SERVICE_PWD: 'R4bb!7_4DM_p4SS'
+
+      AMQP_NOTIFICATION_QUEUE: 'NOTIF_QUEUE'
+    depends_on:
+      - notification-db
+      - rabbitmq
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-notification.rule=PathPrefix(`/api/notification`)"
@@ -181,7 +196,11 @@ services:
       - "traefik.http.middlewares.notification-stripprefix.stripprefix.prefixes=/api/notification"
       - "traefik.http.services.notification.loadbalancer.server.port=8080"
 
-
+  notification-db:
+    image: postgres
+    environment:
+      POSTGRES_USER: 'notification_usr'
+      POSTGRES_PASSWORD: 'admin'
   # ----------------- CORE SERVICE (/core) --------------------
   core:
     image: ${DOCKER_REGISTRY}/core

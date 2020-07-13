@@ -10,6 +10,7 @@ import StorageModule from '@/storage/module'
 import AuthModule from '@/components/auth/module'
 import DatasourceModule from '@/datasource/datasource.module'
 import PipelineModule from '@/pipeline/pipeline.module'
+import NotificationModule from './notification/notification.module';
 
 Vue.use(Vuetify)
 const vuetify = new Vuetify({
@@ -28,7 +29,8 @@ export const store = new Vuex.Store({
     transformation: TransformationModule,
     storage: StorageModule,
     datasource: DatasourceModule,
-    pipeline: PipelineModule
+    pipeline: PipelineModule,
+    notification: NotificationModule
   }
 })
 

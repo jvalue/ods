@@ -46,14 +46,6 @@ describe('Core', () => {
     expect(response.body.id).not.toEqual(pipelineConfig.id) // id not under control of client
     expect(response.body.datasourceId).toEqual(pipelineConfig.datasourceId)
 
-    // Check if notifications were stored correctly
-    expect(response.body.notifications).toHaveLength(pipelineConfig.notifications.length)
-    pipelineConfig.notifications.forEach(n => {
-      expect(response.body.notifications).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining(n)]))
-    })
-
     const delResponse = await request(URL)
       .delete('/pipelines/' + response.body.id)
       .send()
@@ -189,89 +181,6 @@ describe('Core', () => {
     expect(response.body.eventType).toEqual('PIPELINE_DELETE')
   })
 
-  test('POST /{pipelineId}/notifications', async () => {
-    const notificationConfig = {
-      condition: 'data.value1 === 5',
-      url: 'www.some-url.net',
-      type: 'WEBHOOK'
-    }
-
-    // add pipeline
-    const pipelineCreationResponse = await request(URL)
-      .post('/pipelines')
-      .send(pipelineConfig)
-
-    const pipelineId = pipelineCreationResponse.body.id
-
-    const notificationCreationResponse = await request(URL)
-      .post('/pipelines/' + pipelineId + '/notifications')
-      .send(notificationConfig)
-
-    // check if notification post worked
-    expect(notificationCreationResponse.status).toEqual(200)
-    expect(notificationCreationResponse.type).toEqual('application/json')
-    expect(notificationCreationResponse.body.type).toEqual('WEBHOOK')
-    expect(notificationCreationResponse.body.condition).toEqual('data.value1 === 5')
-    expect(notificationCreationResponse.body.url).toEqual('www.some-url.net')
-
-    // check if update event worked
-    const eventsResponse = await request(URL)
-      .get('/events/latest')
-      .send()
-
-    expect(eventsResponse.body.eventType).toEqual('PIPELINE_UPDATE')
-    expect(eventsResponse.body.pipelineId).toEqual(pipelineId)
-
-    // check if pipeline config was updated correctly
-    const pipelineResponse = await request(URL)
-      .get('/pipelines/' + pipelineId)
-      .send()
-
-    expect(pipelineResponse.body.notifications).toHaveLength(4)
-
-    // clean up
-    await request(URL)
-      .delete('/pipelines/ ' + pipelineId)
-      .send()
-  })
-
-  test('DELETE /{pipelineId}/notifications', async () => {
-    // add pipeline
-    const pipelineCreationResponse = await request(URL)
-      .post('/pipelines')
-      .send(pipelineConfig)
-
-    const pipelineId = pipelineCreationResponse.body.id
-    const notificationId = pipelineCreationResponse.body.notifications[0].notificationId
-
-    const notificationDeletionResponse = await request(URL)
-      .delete('/pipelines/' + pipelineId + '/notifications/' + notificationId)
-      .send()
-
-    // check if notification deletion worked
-    expect(notificationDeletionResponse.status).toEqual(204)
-
-    // check if update event worked
-    const eventsResponse = await request(URL)
-      .get('/events/latest')
-      .send()
-
-    expect(eventsResponse.body.eventType).toEqual('PIPELINE_UPDATE')
-    expect(eventsResponse.body.pipelineId).toEqual(pipelineId)
-
-    // check if pipeline config was updated correctly
-    const pipelineResponse = await request(URL)
-      .get('/pipelines/' + pipelineId)
-      .send()
-
-    expect(pipelineResponse.body.notifications).toHaveLength(2)
-
-    // clean up
-    await request(URL)
-      .delete('/pipelines/ ' + pipelineId)
-      .send()
-  })
-
   test('Persist long transformation function', async () => {
     const configToPersist = Object.assign({}, pipelineConfig)
     const crazyLongTransformation = {
@@ -314,27 +223,5 @@ const pipelineConfig = {
     license: 'none',
     displayName: 'test pipeline 1',
     description: 'integraiton testing pipeline'
-  },
-  notifications: [
-    {
-      condition: 'data.value1 > 10',
-      type: 'WEBHOOK',
-      url: 'http://www.webhookland.com'
-    },
-    {
-      condition: 'false',
-      type: 'SLACK',
-      workspaceId: '123',
-      channelId: '456',
-      secret: '789'
-    },
-    {
-      condition: '1 === 2',
-      type: 'FCM',
-      projectId: 'nebelalarm',
-      clientEmail: 'client@mail.yeah',
-      privateKey: 'verylongverysecretkey',
-      topic: 'interestingstuff'
-    }
-  ]
+  }
 }
