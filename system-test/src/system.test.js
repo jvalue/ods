@@ -6,8 +6,9 @@ const STORAGE_URL = process.env.STORAGE_API || 'http://localhost:9000/api/storag
 const SCHEDULER_URL = process.env.SCHEDULER_API || 'http://localhost:9000/api/scheduler'
 const ADAPTER_URL = process.env.ADAPTER_API || 'http://localhost:9000/api/adapter'
 const TRANSFORMATION_URL = process.env.TRANSFORMATION_API || 'http://localhost:9000/api/transformation'
+const NOTIFICATION_URL = process.env.NOTIFICATION_API || 'http://localhost:9000/api/notification'
 const MOCK_SERVER_URL = process.env.MOCK_SERVER_API || 'http://localhost:9000/api/system-tests/mock-server'
-const RABBIT_URL = process.env.RABBIT_API || 'http://localhost:9000/api/rabbitmq'
+const RABBIT_URL = `http://${process.env.RABBIT_HOST}:15672`
 
 const STORAGE_DOCKER = process.env.STORAGE_API || 'http://storage:3000' // needed to run tests outside of docker environment
 const MOCK_SERVER_DOCKER = process.env.MOCK_SERVER_API || 'http://mock-server:8080'
@@ -25,6 +26,7 @@ describe('System-Test', () => {
     console.log('Waiting for core-service with URL: ' + CORE_URL)
     console.log('Waiting for scheduler-service with URL: ' + SCHEDULER_URL)
     console.log('Waiting for transformation-service with URL: ' + TRANSFORMATION_URL)
+    console.log('Waiting for notification-service with URL: ' + NOTIFICATION_URL)
     console.log('Waiting for adapter-service with URL: ' + ADAPTER_URL)
     console.log('Waiting for storage-service with URL: ' + STORAGE_URL)
     console.log('Waiting for mock server with URL: ' + MOCK_SERVER_URL + '/')
@@ -36,14 +38,15 @@ describe('System-Test', () => {
         CORE_URL + '/version',
         SCHEDULER_URL,
         TRANSFORMATION_URL,
+        NOTIFICATION_URL + '/',
         ADAPTER_URL + '/version',
         MOCK_SERVER_URL + '/',
         RABBIT_URL
       ],
-        timeout: 20000,
+        timeout: 60000,
         log: true
       })
-  }, 22000)
+  }, 60000)
 
   afterAll(async () => {
     console.log('All tests done, removing adapter configs from ods...')
@@ -73,20 +76,31 @@ describe('System-Test', () => {
     const adapterResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(datasourceConfig)
+    expect(adapterResponse.status).toEqual(201)
     const datasourceId = adapterResponse.body.id
     console.log(`[Test 1] Successfully created datasource ${datasourceId}`)
 
     // Add pipeline to core service
     const pipelineConfig = generatePipelineConfig(datasourceId)
-    const notification = generateNotification('data.one === 1', MOCK_SERVER_DOCKER + '/notifications/test1')
-    pipelineConfig.notifications = [notification]
 
     console.log(`[Test 1] Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
     const pipelineResponse = await request(CORE_URL)
       .post('/pipelines')
       .send(pipelineConfig)
+    expect(pipelineResponse.status).toEqual(201)
     const pipelineId = pipelineResponse.body.id
     console.log(`[Test 1] Successfully created pipeline ${pipelineId} for datasource ${datasourceId}`)
+
+    // Add notification to notification service
+    const notificationConfig = generateWebhookNotification(pipelineId, 'data.one === 1', MOCK_SERVER_DOCKER + '/notifications/test1')
+
+    console.log(`[Test 1] Trying to create notification: ${JSON.stringify(notificationConfig)}`)
+    const notificationResponse = await request(NOTIFICATION_URL)
+      .post('/config/webhook')
+      .send(notificationConfig)
+    expect(notificationResponse.status).toEqual(201)
+    const notificationId = notificationResponse.body.id
+    console.log(`[Test 1] Successfully created notification ${notificationId} for pipeline ${pipelineId}`)
 
     // Wait for webhook notification
     const webhookResponse = await checkWebhook('test1', 2000)
@@ -113,7 +127,7 @@ describe('System-Test', () => {
       .send()
     expect(deletionResponse.status).toEqual(204)
     sleep(2000) // takes up to 2sec to reach scheduler
-  }, 30000)
+  }, 60000)
 
   test('Test 2: Create periodic pipeline without transformation', async () => {
     // Prepare datasource mock
@@ -128,20 +142,31 @@ describe('System-Test', () => {
     const adapterResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(datasourceConfig)
+    expect(adapterResponse.status).toEqual(201)
     const datasourceId = adapterResponse.body.id
     console.log(`[Test 2] Successfully created datasource ${datasourceId}`)
 
     // Add pipeline to core service
     const pipelineConfig = generatePipelineConfig(datasourceId)
-    const notification = generateNotification('data.count <= 2', MOCK_SERVER_DOCKER + '/notifications/test2')
-    pipelineConfig.notifications = [notification]
 
     console.log(`[Test 2] Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
     const pipelineResponse = await request(CORE_URL)
       .post('/pipelines')
       .send(pipelineConfig)
+    expect(pipelineResponse.status).toEqual(201)
     const pipelineId = pipelineResponse.body.id
     console.log(`[Test 2] Successfully created pipeline ${pipelineId} for datasource ${datasourceId}`)
+
+    // Add notification to notification service
+    const notificationConfig = generateWebhookNotification(pipelineId, 'data.count <= 2', MOCK_SERVER_DOCKER + '/notifications/test2')
+
+    console.log(`[Test 2] Trying to create notification: ${JSON.stringify(notificationConfig)}`)
+    const notificationResponse = await request(NOTIFICATION_URL)
+      .post('/config/webhook')
+      .send(notificationConfig)
+    expect(notificationResponse.status).toEqual(201)
+    const notificationId = notificationResponse.body.id
+    console.log(`[Test 2] Successfully created notification ${notificationId} for pipeline ${pipelineId}`)
 
     // Wait for webhook notification
     const webhookResponse = await checkWebhook('test2', 2000)
@@ -177,7 +202,7 @@ describe('System-Test', () => {
       .send()
     expect(deletionResponse.status).toEqual(204)
     sleep(2000) // takes up to 2sec to reach scheduler
-  }, 40000)
+  }, 60000)
 
   test('Test 3: Create non-periodic pipeline with transformation', async () => {
     // Prepare datasource mock
@@ -196,21 +221,32 @@ describe('System-Test', () => {
     const adapterResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(datasourceConfig)
+    expect(adapterResponse.status).toEqual(201)
     const datasourceId = adapterResponse.body.id
     console.log(`[Test 3] Successfully created datasource ${datasourceId}`)
 
     // Add pipeline to core service
     const pipelineConfig = generatePipelineConfig(datasourceId)
     pipelineConfig.transformation = { func: 'data.newField = 12;return data;' }
-    const notification = generateNotification('data.newField === 12', MOCK_SERVER_DOCKER + '/notifications/test3')
-    pipelineConfig.notifications = [notification]
 
     console.log(`[Test 3] Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
     const pipelineResponse = await request(CORE_URL)
       .post('/pipelines')
       .send(pipelineConfig)
+    expect(pipelineResponse.status).toEqual(201)
     const pipelineId = pipelineResponse.body.id
     console.log(`[Test 3] Successfully created pipeline ${pipelineId} for datasource ${datasourceId}`)
+
+    // Add notification to notification service
+    const notificationConfig = generateWebhookNotification(pipelineId, 'data.newField === 12', MOCK_SERVER_DOCKER + '/notifications/test3')
+
+    console.log(`[Test 3] Trying to create notification: ${JSON.stringify(notificationConfig)}`)
+    const notificationResponse = await request(NOTIFICATION_URL)
+      .post('/config/webhook')
+      .send(notificationConfig)
+    expect(notificationResponse.status).toEqual(201)
+    const notificationId = notificationResponse.body.id
+    console.log(`[Test 3] Successfully created notification ${notificationId} for pipeline ${pipelineId}`)
 
     // Wait for webhook notification
     const webhookResponse = await checkWebhook('test3', 2000)
@@ -236,7 +272,7 @@ describe('System-Test', () => {
       .send()
     expect(deletionResponse.status).toEqual(204)
     sleep(2000) // takes up to 2sec to reach scheduler
-  }, 30000)
+  }, 60000)
 
   test('Test 4: Update periodic datasource with pipeline', async () => {
     // Prepare datasource mock
@@ -257,20 +293,31 @@ describe('System-Test', () => {
     const adapterResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(datasource)
+    expect(adapterResponse.status).toEqual(201)
     const datasourceId = adapterResponse.body.id
     console.log(`[Test 4] Successfully created datasource ${datasourceId}`)
 
     // Add pipeline to core service
     const pipelineConfig = generatePipelineConfig(datasourceId)
-    const notification = generateNotification('data.one === 1', MOCK_SERVER_DOCKER + '/notifications/test4_1')
-    pipelineConfig.notifications = [notification]
 
     console.log(`[Test 4] Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
     const pipelineResponse = await request(CORE_URL)
       .post('/pipelines')
       .send(pipelineConfig)
+    expect(pipelineResponse.status).toEqual(201)
     const pipelineId = pipelineResponse.body.id
     console.log(`[Test 4] Successfully created pipeline ${pipelineId} for datasource ${datasourceId}`)
+
+    // Add notification to notification service
+    const notificationConfig = generateWebhookNotification(pipelineId, 'data.one === 1', MOCK_SERVER_DOCKER + '/notifications/test4_1')
+
+    console.log(`[Test 4] Trying to create notification: ${JSON.stringify(notificationConfig)}`)
+    const notificationResponse = await request(NOTIFICATION_URL)
+      .post('/config/webhook')
+      .send(notificationConfig)
+    expect(notificationResponse.status).toEqual(201)
+    const notificationId = notificationResponse.body.id
+    console.log(`[Test 4] Successfully created notification ${notificationId} for pipeline ${pipelineId}`)
 
     // Wait for webhook notification
     const webhookResponse = await checkWebhook('test4_1', 2000)
@@ -299,8 +346,6 @@ describe('System-Test', () => {
 
     // Create updated pipeline
     pipelineConfig.id = pipelineId
-    const anotherNotification = generateNotification('data.two === "two"', MOCK_SERVER_DOCKER + '/notifications/test4_2')
-    pipelineConfig.notifications = [notification, anotherNotification]
 
     console.log(`[Test 4] Pipeline ${pipelineId} update request triggered.`)
     // Update pipeline
@@ -309,6 +354,17 @@ describe('System-Test', () => {
       .send(pipelineConfig)
     expect(updateResponse.status).toEqual(204)
     console.log(`[Test 4] Successfully updatedd pipeline ${pipelineId}.`)
+
+    // Add another notification
+    const anotherNotification = generateWebhookNotification(pipelineId, 'data.two === "two"', MOCK_SERVER_DOCKER + '/notifications/test4_2')
+
+    console.log(`[Test 4] Trying to create notification: ${JSON.stringify(anotherNotification)}`)
+    const anotherNotificationResponse = await request(NOTIFICATION_URL)
+      .post('/config/webhook')
+      .send(anotherNotification)
+    expect(anotherNotificationResponse.status).toEqual(201)
+    const anotherNotificationId = anotherNotificationResponse.body.id
+    console.log(`[Test 4] Successfully created notification ${anotherNotificationId} for pipeline ${pipelineId}`)
 
     // Wait for webhook notification
     const secondWebhook = await checkWebhook('test4_2', 2000)
@@ -337,7 +393,7 @@ describe('System-Test', () => {
       .send()
     expect(deletionResponse.status).toEqual(204)
     sleep(2000) // takes up to 2sec to reach scheduler
-  }, 40000)
+  }, 60000)
 
   test('Test 5: Create pipeline with multiple notifications', async () => {
     // Prepare datasource mock
@@ -353,22 +409,45 @@ describe('System-Test', () => {
     const adapterResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(datasourceConfig)
+    expect(adapterResponse.status).toEqual(201)
     const datasourceId = adapterResponse.body.id
     console.log(`[Test 5] Successfully created datasource ${datasourceId}`)
 
     // Add pipeline to core service
     const pipelineConfig = generatePipelineConfig(datasourceId)
-    const notification1 = generateNotification('data.one === 1', MOCK_SERVER_DOCKER + '/notifications/test5_1')
-    const notification2 = generateNotification('data.one === 1', MOCK_SERVER_DOCKER + '/notifications/test5_2')
-    const notification3 = generateNotification('data.one < 1', MOCK_SERVER_DOCKER + '/notifications/test5_3')
-    pipelineConfig.notifications = [notification1, notification2, notification3]
 
     console.log(`[Test 5] Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
     const pipelineResponse = await request(CORE_URL)
       .post('/pipelines')
       .send(pipelineConfig)
+    expect(pipelineResponse.status).toEqual(201)
     const pipelineId = pipelineResponse.body.id
     console.log(`[Test 5] Successfully created pipeline ${pipelineId} for datasource ${datasourceId}`)
+
+    // Add notification to notification service
+    const notification1 = generateWebhookNotification(pipelineId, 'data.one === 1', MOCK_SERVER_DOCKER + '/notifications/test5_1')
+    const notification2 = generateWebhookNotification(pipelineId, 'data.one === 1', MOCK_SERVER_DOCKER + '/notifications/test5_2')
+    const notification3 = generateWebhookNotification(pipelineId, 'data.one < 1', MOCK_SERVER_DOCKER + '/notifications/test5_3')
+
+    console.log(`[Test 5] Trying to create notifications: ${JSON.stringify(notification1)}, ${JSON.stringify(notification2)}, ${JSON.stringify(notification3)}`)
+    let notificationResponse = await request(NOTIFICATION_URL)
+      .post('/config/webhook')
+      .send(notification1)
+    expect(notificationResponse.status).toEqual(201)
+    let notificationId = notificationResponse.body.id
+    console.log(`[Test 5] Successfully created notification ${notificationId} for pipeline ${pipelineId}`)
+    notificationResponse = await request(NOTIFICATION_URL)
+      .post('/config/webhook')
+      .send(notification2)
+      expect(notificationResponse.status).toEqual(201)
+    notificationId = notificationResponse.body.id
+    console.log(`[Test 5] Successfully created notification ${notificationId} for pipeline ${pipelineId}`)
+    notificationResponse = await request(NOTIFICATION_URL)
+      .post('/config/webhook')
+      .send(notification3)
+    expect(notificationResponse.status).toEqual(201)
+    notificationId = notificationResponse.body.id
+    console.log(`[Test 5] Successfully created notification ${notificationId} for pipeline ${pipelineId}`)
 
     // Wait for webhook notification
     const webhookResponse1 = await checkWebhook('test5_1', 2000)
@@ -406,7 +485,7 @@ describe('System-Test', () => {
       .send()
     expect(deletionResponse.status).toEqual(204)
     sleep(2000) // takes up to 2sec to reach scheduler
-  }, 30000)
+  }, 60000)
 
   test('Test 6: Delete periodic pipeline', async () => {
     // Prepare dataource mock
@@ -421,20 +500,31 @@ describe('System-Test', () => {
     const adapterResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(datasourceConfig)
+    expect(adapterResponse.status).toEqual(201)
     const datasourceId = adapterResponse.body.id
     console.log(`[Test 6] Successfully created datasource ${datasourceId}`)
 
     // Add pipeline to core service
     const pipelineConfig = generatePipelineConfig(datasourceId)
-    const notification = generateNotification('data.one === 1', MOCK_SERVER_DOCKER + '/notifications/test6')
-    pipelineConfig.notifications = [notification]
 
     console.log(`[Test 6] Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
     const pipelineResponse = await request(CORE_URL)
       .post('/pipelines')
       .send(pipelineConfig)
+    expect(pipelineResponse.status).toEqual(201)
     const pipelineId = pipelineResponse.body.id
     console.log(`[Test 6] Successfully created pipeline ${pipelineId} for datasource ${datasourceId}`)
+
+    // Add notification to notification service
+    const notificationConfig = generateWebhookNotification(pipelineId, 'data.one === 1', MOCK_SERVER_DOCKER + '/notifications/test6')
+
+    console.log(`[Test 6] Trying to create notification: ${JSON.stringify(notificationConfig)}`)
+    const notificationResponse = await request(NOTIFICATION_URL)
+      .post('/config/webhook')
+      .send(notificationConfig)
+    expect(notificationResponse.status).toEqual(201)
+    const notificationId = notificationResponse.body.id
+    console.log(`[Test 6] Successfully created notification ${notificationId} for pipeline ${pipelineId}`)
 
     // Wait for webhook notification
     const webhookResponse1 = await checkWebhook('test6', 2000)
@@ -459,14 +549,14 @@ describe('System-Test', () => {
       .send()
     expect(deletionResponse.status).toEqual(204)
     sleep(2000) // takes up to 2sec to reach scheduler
-  }, 30000)
+  }, 60000)
 })
 
-function generateNotification (condition, url) {
+function generateWebhookNotification (pipelineId, condition, url) {
   return {
-    condition,
-    url,
-    type: 'WEBHOOK'
+    condition: condition,
+    url: url,
+    pipelineId: pipelineId
   }
 }
 
@@ -506,8 +596,7 @@ function generatePipelineConfig (datasourceId) {
       license: 'AGPL v30',
       displayName: 'test1',
       description: 'system test 1'
-    },
-    notifications: []
+    }
   }
 }
 

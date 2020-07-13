@@ -1,6 +1,6 @@
 @adapterUrl = http://localhost:9000/api/adapter/datasources
 @coreUrl = http://localhost:9000/api/core
-
+@notificationUrl = http://localhost:9000/api/notification
 
 ### Get List Of Countries
 POST {{adapterUrl}}  HTTP/1.1
@@ -32,7 +32,7 @@ Content-Type: application/json
 # for a fresh install of the ods, the id will be 1.
 @dataSourceId = 1
 
-### Store data without modification and trigger a firebase notification
+### Store data without modification
 POST {{coreUrl}}/pipelines  HTTP/1.1
 Content-Type: application/json
 
@@ -43,15 +43,20 @@ Content-Type: application/json
   },
   "metadata": {
     "displayName":"covid"
-  },
-  "notifications": [
-    {
-      "condition": "true",
-      "type": "FCM",
-      "projectId": "{{fcmProjectId}}",
-      "clientEmail": "{{fcmClientEmail}}",
-      "privateKey": "{{fcmKey}}",
-      "topic": "{{fcmTopic}}"
-    }
-  ]
+  }
+}
+
+
+@pipelineId = 1
+### Trigger a firebase notification
+POST {{notificationUrl}}/config/fcm
+Content-Type: application/json
+
+{
+  "pipelineId": {{pipelineId}},
+  "condition": "true",
+  "projectId": "{{fcmProjectId}}",
+  "clientEmail": "{{fcmClientEmail}}",
+  "privateKey": "{{fcmKey}}",
+  "topic": "{{fcmTopic}}"
 }

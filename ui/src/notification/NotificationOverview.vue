@@ -4,7 +4,7 @@
       <v-card-title>
         <notification-edit
           ref="notificationEdit"
-          @pipelineSaved="onSave"
+          @save="onSave"
         />
         <v-btn
           class="ma-2"
@@ -42,21 +42,25 @@
 
       <v-data-table
         :headers="headers"
-        :items="selectedPipeline.notifications"
+        :items="notifications"
+        :loading="isLoadingNotifications"
         class="elevation-1"
       >
         <v-progress-linear
           slot="progress"
           indeterminate
         />
-        <template v-slot:item.notificationId="{ item }">
-          {{ item.notificationId }}
+        <template v-slot:item.id="{ item }">
+          {{ item.id }}
         </template>
         <template v-slot:item.type="{ item }">
           {{ item.type }}
         </template>
         <template v-slot:item.condition="{ item }">
           {{ item.condition }}
+        </template>
+         <template v-slot:item.id="{ item }">
+          {{ item.id }}
         </template>
         <template v-slot:item.action="{ item }">
           <v-btn
@@ -97,13 +101,16 @@
 import Component from 'vue-class-component'
 import Vue from 'vue'
 import { Action, State } from 'vuex-class'
-import Pipeline from '@/pipeline/pipeline'
-import NotificationConfig from '@/pipeline/notifications/notificationConfig'
-import NotificationEditDialog from '@/pipeline/notifications/notificationEditDialog'
-import NotificationEdit from '@/pipeline/notifications/NotificationEdit.vue'
 import { Ref } from 'vue-property-decorator'
 
-const namespace = { namespace: 'pipeline' }
+import Pipeline from '@/pipeline/pipeline'
+import NotificationConfig from '@/notification/notificationConfig'
+import NotificationEditDialog from '@/notification/notificationEditDialog'
+import NotificationEdit from '@/notification/NotificationEdit.vue'
+import * as RestClient from '@/notification/notificationRest'
+
+const pipelineNameSpace = { namespace: 'pipeline' }
+const notificationNameSpace = {namespace: 'notification'}
 
 @Component({
   components: {
@@ -111,24 +118,27 @@ const namespace = { namespace: 'pipeline' }
   }
 })
 export default class PipelineNotifications extends Vue {
-  @Action('loadPipelineById', namespace) private loadPipelineByIdAction!: (id: number) => void
+  @Action('loadConfigsbyPipelineId', notificationNameSpace) 
+  private loadConfigbyPipelineIdAction!: (id: number) => void
 
-  @Action('addNotification', namespace)
-  private addNotificationAction!: (notification: NotificationConfig) => Promise<Pipeline>
+  @Action('addNotification', notificationNameSpace)
+  private addNotificationAction!: (notification: NotificationConfig) => Promise<NotificationConfig[]>
 
-  @Action('removeNotification', namespace)
-  private removeNotificationAction!: (notification: NotificationConfig) => Promise<Pipeline>
+  @Action('removeNotification', notificationNameSpace)
+  private removeNotificationAction!: (notification: NotificationConfig) => Promise<NotificationConfig[]>
 
-  @Action('updateNotification', namespace)
-  private updateNotificationAction!: (notification: NotificationConfig) => Promise<Pipeline>
+  @Action('updateNotification', notificationNameSpace)
+  private updateNotificationAction!: (notification: NotificationConfig) => Promise<NotificationConfig[]>
 
-  @State('selectedPipeline', namespace) private selectedPipeline!: Pipeline
+  //@State('selectedPipeline', pipelineNameSpace) private selectedPipeline!: Pipeline
+  @State('notifications', notificationNameSpace) private notifications!: NotificationConfig[]
+  @State('isLoadingNotifications', notificationNameSpace) private isLoadingNotifications!: boolean;
 
   @Ref('notificationEdit')
   private notificationEdit!: NotificationEditDialog
 
-  private headers = [
-    { text: 'Id', value: 'notificationId' },
+  headers = [
+    { text: 'Id', value: 'id' },
     { text: 'Type', value: 'type' },
     { text: 'Condition', value: 'condition' },
     { text: 'Actions', value: 'action' }
@@ -137,35 +147,37 @@ export default class PipelineNotifications extends Vue {
   private isEdit = false
   private pipelineId = -1
 
-  private created (): void {
+  private async created () {
     console.log('Notification Overview created!')
     this.pipelineId = this.$route.params.pipelineId as unknown as number
-    this.loadPipelineByIdAction(this.pipelineId)
+    this.loadConfigbyPipelineIdAction(this.pipelineId)
   }
 
-  private onCreateNotification (): void {
+  private onCreateNotification () {
     this.isEdit = false
     this.notificationEdit.openDialog()
   }
 
-  private onEditNotification (notification: NotificationConfig): void {
+  private async onEditNotification (notification: NotificationConfig) {
     this.isEdit = true
     this.notificationEdit.openDialog(notification)
   }
 
-  private onDeleteNotification (notification: NotificationConfig): void {
-    this.removeNotificationAction(notification)
+  private async onDeleteNotification (notification: NotificationConfig) {
+     this.removeNotificationAction(notification)
   }
 
-  private onLoadNotifications (): void {
-    this.loadPipelineByIdAction(this.pipelineId)
+  private async onLoadNotifications () {
+    await this.loadConfigbyPipelineIdAction(this.pipelineId)
   }
 
-  private onNavigateBack (): void {
+  private onNavigateBack () {
     this.$router.push({ name: 'pipeline-overview' })
-  }
+  }   
 
-  private onSave (editedNotification: NotificationConfig): void {
+  private async onSave (editedNotification: NotificationConfig) {
+    editedNotification.pipelineId = this.pipelineId
+    
     if (this.isEdit) { // edit
       this.updateNotificationAction(editedNotification)
     } else { // create

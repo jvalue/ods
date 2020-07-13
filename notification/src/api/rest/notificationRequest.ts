@@ -7,7 +7,7 @@ export interface NotificationRequest {
   type: string;
 }
 
-export interface Webhook extends NotificationRequest{
+export interface Webhook extends NotificationRequest {
   url: string;
 }
 
@@ -17,7 +17,7 @@ export interface Slack extends NotificationRequest {
   secret: string;
 }
 
-export interface Firebase extends NotificationRequest{
+export interface Firebase extends NotificationRequest {
   projectId: string;
   clientEmail: string;
   privateKey: string;

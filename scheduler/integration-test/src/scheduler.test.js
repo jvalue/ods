@@ -79,44 +79,14 @@ describe('Scheduler', () => {
 
   test('Pipeline triggers correct notifications', async () => {
     await sleep(10000) // pipeline should have been executing until now!
-    const triggered = await request(MOCK_NOTIFICATION_URL).get('/webhook/nordstream')
+    const triggered = await request(MOCK_NOTIFICATION_URL).get(`/trigger/125`)
     expect(triggered.status).toEqual(200)
     expect(triggered.body).toEqual(
       {
         pipelineId: 125,
         pipelineName: 'nordstream',
-        type: 'WEBHOOK',
         data,
         dataLocation: MOCK_STORAGE_URL + '/125',
-        condition: 'data.field2 < 0',
-        url: 'should-also-be-triggered'
-      })
-
-    const alsoTriggered = await request(MOCK_NOTIFICATION_URL).get('/slack/nordstream')
-    expect(alsoTriggered.status).toEqual(200)
-    expect(alsoTriggered.type).toEqual('application/json')
-    expect(alsoTriggered.body).toEqual(
-      {
-        pipelineId: 125,
-        pipelineName: 'nordstream',
-        type: 'SLACK',
-        data,
-        condition: 'data.field2 === 123',
-        dataLocation: MOCK_STORAGE_URL + '/125',
-        url: 'should-be-triggered'
-      })
-    const alsoTriggeredToo = await request(MOCK_NOTIFICATION_URL).get('/fcm/nordstream')
-    expect(alsoTriggeredToo.status).toEqual(200)
-    expect(alsoTriggeredToo.type).toEqual('application/json')
-    expect(alsoTriggeredToo.body).toEqual(
-      {
-        pipelineId: 125,
-        pipelineName: 'nordstream',
-        type: 'FCM',
-        data,
-        condition: 'data.field2 === 123',
-        dataLocation: MOCK_STORAGE_URL + '/125',
-        url: 'should-be-triggered'
       })
   }, 12000)
 

@@ -3,26 +3,20 @@
     v-model="validForm"
   >
     <v-text-field
-      v-model="firebaseNotification.projectId"
-      label="Id of your firebase project"
+      v-model="slackNotification.workspaceId"
+      label="Id of your slack workspace"
       :rules="[ required ]"
       @keyup="formChanged"
     />
     <v-text-field
-      v-model="firebaseNotification.clientEmail"
-      label="Email of the service account to use"
+      v-model="slackNotification.channelId"
+      label="Id of the channel"
       :rules="[ required ]"
       @keyup="formChanged"
     />
     <v-text-field
-      v-model="firebaseNotification.topic"
-      label="notification topic"
-      :rules="[ required ]"
-      @keyup="formChanged"
-    />
-    <v-textarea
-      v-model="firebaseNotification.privateKey"
-      label="private key of the service account"
+      v-model="slackNotification.secret"
+      label="Incoming webhook secret"
       :rules="[ required ]"
       @keyup="formChanged"
     />
@@ -33,18 +27,19 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Emit, PropSync } from 'vue-property-decorator'
-import { FirebaseNotification } from './notificationConfig'
+
+import { SlackNotification } from '@/notification/notificationConfig'
 
 @Component({ })
-export default class FirebaseEdit extends Vue {
+export default class SlackEdit extends Vue {
   private validForm = false
 
   @PropSync('value')
-  private firebaseNotification!: FirebaseNotification
+  private slackNotification!: SlackNotification
 
   @Emit('value')
-  emitValue (): FirebaseNotification {
-    return this.firebaseNotification
+  emitValue (): SlackNotification {
+    return this.slackNotification
   }
 
   @Emit('validityChanged')

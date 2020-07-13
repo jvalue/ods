@@ -12,8 +12,7 @@ const PIPELINES = [
       func: 'return data;' // not performed in integration testing
     },
     persistence: {},
-    metadata: {},
-    notifications: []
+    metadata: {}
   },
   {
     id: 125,
@@ -24,24 +23,7 @@ const PIPELINES = [
     persistence: {},
     metadata: {
       displayName: 'nordstream'
-    },
-    notifications: [
-      {
-        type: 'SLACK',
-        condition: 'data.field2 === 123',
-        url: 'should-be-triggered'
-      },
-      {
-        type: 'WEBHOOK',
-        condition: 'data.field2 < 0',
-        url: 'should-also-be-triggered'
-      },
-      {
-        type: 'FCM',
-        condition: 'data.field2 === 123',
-        url: 'should-be-triggered'
-      }
-    ]
+    }
   }
 ]
 

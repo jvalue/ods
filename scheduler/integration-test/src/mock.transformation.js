@@ -9,10 +9,6 @@ const PORT = process.env.MOCK_TRANSFORMATION_PORT || 8083
 const app = new Koa()
 app.use(bodyParser())
 
-const webhooks = new Map()
-const slacks = new Map()
-const firebases = new Map()
-
 router.get('/', async ctx => {
   ctx.type = 'text/plain'
   ctx.body = 'ok'

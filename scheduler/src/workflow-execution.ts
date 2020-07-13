@@ -6,7 +6,6 @@ import * as StorageClient from './clients/storage-client'
 
 import DatasourceConfig from './interfaces/datasource-config'
 import PipelineConfig from './interfaces/pipeline-config'
-import NotificationConfig from './interfaces/notification-config'
 import { AxiosError } from 'axios'
 import AdapterResponse from '@/interfaces/adapter-response'
 
@@ -18,15 +17,18 @@ export async function execute (datasourceConfig: DatasourceConfig, maxRetries = 
   // pipeline
   const followingPipelines = await CoreClient.getCachedPipelinesByDatasourceId(datasourceConfig.id)
   for (let pipelineConfig of followingPipelines) {
-    const transformedData =
+    const transformationResult =
         await retryableExecution(executeTransformation, { pipelineConfig: pipelineConfig, dataLocation: adapterResponse.location }, `Executing transformatins for pipeline ${pipelineConfig.id}`)
 
-    const dataLocation =
-        await retryableExecution(executeStorage, { pipelineConfig: pipelineConfig, data: transformedData }, `Storing data for pipeline ${pipelineConfig.id}`)
+    if(!!transformationResult.error) {
+      console.log(`Transformation for pipeline ${pipelineConfig.id} went wrong. Not storing data or sending notifications.`)
+      continue
+    }
 
-    pipelineConfig.notifications.map(async notificationConfig => {
-      await retryableExecution(executeNotification, { notificationConfig: notificationConfig, pipelineConfig: pipelineConfig, data: transformedData, dataLocation: dataLocation }, `Notifying clients for pipeline ${pipelineConfig.id}`)
-    })
+    const dataLocation =
+        await retryableExecution(executeStorage, { pipelineConfig: pipelineConfig, data: transformationResult.data! }, `Storing data for pipeline ${pipelineConfig.id}`)
+
+    await retryableExecution(executeNotification, { pipelineConfig: pipelineConfig, dataLocation: dataLocation, data: transformationResult.data, error: transformationResult.error }, `Notifying clients for pipeline ${pipelineConfig.id}`)
   }
 }
 
@@ -56,7 +58,7 @@ async function executeAdapter (dataousrceConfig: DatasourceConfig): Promise<Adap
   return importedData
 }
 
-async function executeTransformation (args: { pipelineConfig: PipelineConfig, dataLocation: string }): Promise<object> {
+async function executeTransformation (args: { pipelineConfig: PipelineConfig, dataLocation: string }): Promise<TransformationClient.TransformationResult> {
   const pipelineConfig = args.pipelineConfig
   const dataLocation = args.dataLocation
 
@@ -70,7 +72,7 @@ async function executeTransformation (args: { pipelineConfig: PipelineConfig, da
   try {
     pipelineConfig.transformation.dataLocation = AdapterClient.ADAPTER_SERVICE_URL + dataLocation
     const jobResult = await TransformationClient.executeTransformation(pipelineConfig.transformation)
-    return jobResult.data
+    return jobResult
   } catch (e) {
     handleError(e)
     throw new Error('Failed to transform Data via Transformation Service')
@@ -87,15 +89,20 @@ async function executeStorage (args: { pipelineConfig: PipelineConfig, data: obj
   return dataLocation
 }
 
-async function executeNotification (args: { notificationConfig: NotificationConfig, pipelineConfig: PipelineConfig, data: object, dataLocation: string }): Promise<void> {
-  const notificationConfig = args.notificationConfig
+async function executeNotification (args: { pipelineConfig: PipelineConfig, dataLocation: string, data?: object, error?: object }): Promise<void> {
   const pipelineConfig = args.pipelineConfig
+  const data = args.data
+  const error = args.error
 
-  notificationConfig.data = args.data
-  notificationConfig.dataLocation = args.dataLocation
-  notificationConfig.pipelineId = pipelineConfig.id
-  notificationConfig.pipelineName = pipelineConfig.metadata.displayName
-  await NotificationClient.executeNotification(notificationConfig)
+  const notificationTrigger: NotificationClient.NotificationTriggerEvent = {
+    dataLocation: args.dataLocation,
+    pipelineId: pipelineConfig.id,
+    pipelineName: pipelineConfig.metadata.displayName,
+    data: data,
+    error: error
+  }
+
+  await NotificationClient.executeNotification(notificationTrigger)
   console.log(`Successfully delivered notification request to transformation-service for ${pipelineConfig.id}`)
 }
 

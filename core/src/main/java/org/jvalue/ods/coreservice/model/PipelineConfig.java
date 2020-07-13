@@ -2,7 +2,6 @@ package org.jvalue.ods.coreservice.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.jvalue.ods.coreservice.model.notification.NotificationConfig;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -27,21 +26,16 @@ public class PipelineConfig implements Serializable {
     @Embedded @NotNull
     private PipelineMetadata metadata;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<NotificationConfig> notifications;
-
     //Constructor for JPA
     public PipelineConfig() {}
 
     @JsonCreator
     public PipelineConfig(@JsonProperty("datasourceId")  Long datasourceId,
     @JsonProperty("transformation") TransformationConfig transformation,
-      @JsonProperty("metadata") PipelineMetadata metadata,
-      @JsonProperty("notifications") List<NotificationConfig> notifications) {
+      @JsonProperty("metadata") PipelineMetadata metadata) {
         this.datasourceId = datasourceId;
         this.transformation = transformation;
         this.metadata = metadata;
-        this.notifications = notifications;
     }
 
     public Long getId() {
@@ -72,18 +66,6 @@ public class PipelineConfig implements Serializable {
         return metadata;
     }
 
-    public List<NotificationConfig> getNotifications() {
-        return notifications;
-    }
-
-    public void addNotification(NotificationConfig notification) {
-        this.notifications.add(notification);
-    }
-
-    public void removeNotification(NotificationConfig notification) {
-        this.notifications.remove(notification);
-    }
-
     @Override
     public String toString() {
         return "PipelineConfig{" +
@@ -91,7 +73,6 @@ public class PipelineConfig implements Serializable {
           ", datasourceId=" + datasourceId +
           ", transformation=" + transformation +
           ", metadata=" + metadata +
-          ", notifications=" + notifications +
           '}';
     }
 
@@ -103,12 +84,11 @@ public class PipelineConfig implements Serializable {
         return Objects.equals(id, that.id) &&
           Objects.equals(datasourceId, that.datasourceId) &&
           Objects.equals(transformation, that.transformation) &&
-          Objects.equals(metadata, that.metadata) &&
-          Objects.equals(notifications, that.notifications);
+          Objects.equals(metadata, that.metadata);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, datasourceId, transformation, metadata, notifications);
+        return Objects.hash(id, datasourceId, transformation, metadata);
     }
 }
