@@ -1,5 +1,6 @@
-import { Pool, PoolConfig, PoolClient } from "pg"
+import { Pool, PoolConfig, PoolClient, QueryResult } from "pg"
 import { StorageContentRepository } from "./storageContentRepository"
+import { StorageContent } from "./storageContent"
 
 export class PostgresStorageContentRepository implements StorageContentRepository {
     connectionPool!: Pool
@@ -80,8 +81,44 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
     getContent(tableIdentifier: string, contentId: string): Promise<import("./storageContent").StorageContent> {
       throw new Error("Method not implemented.")
     }
-    saveContent(tableIdentifier: string, content: import("./storageContent").StorageContent): Promise<number> {
-      throw new Error("Method not implemented.")
+
+    async saveContent(tableIdentifier: string, content: StorageContent): Promise<number> {
+        console.debug(`Saving storage content data`)
+        await this.checkClassInvariant()
+
+        delete content.id  // id not under control of client
+
+        // Generate Query-String
+        const data = JSON.stringify(content.data).replace("'", "''") // Escape single quotes
+        const insertStatement = `SET search_path to storage; INSERT INTO "${tableIdentifier}" ("data", "license", "origin", "pipelineId", "timestamp") VALUES ('$1', '$2', '$3', $4, '$5') RETURNING *`
+        const values = [data, content.license, content.origin, parseInt(content.pipelineId), content.timestamp]
+
+        let client!: PoolClient  // Client to execute the query
+        try {
+            client = await this.connectionPool.connect()
+            const { rows } = await client.query(insertStatement, values)
+            console.debug("Content sucessfully persisted.")
+            return Promise.resolve(rows[0]["id"] as number)
+        } catch (err) {
+            const errMsg = `Could save content data: ${err}`
+            console.error(errMsg)
+            return Promise.reject(err)
+        } finally {
+            if (client) {
+                client.release()
+            }
+        }
     }
 
+    /**
+     * Generates a Insert-Statement for content data tables.\
+     * @param odsData odsData to generate VALUE-Clause for
+     * @returns string, containing a value clause
+     */
+    private generateInsertStatement(tableIdentifier: string, content: StorageContent): string {
+      const data = JSON.stringify(content.data).replace("'", "''") // Escape single quotes
+      const valueClause = `("data", "license", "origin", "pipelineId", "timestamp") VALUES
+              ('${data}', '${content.license}', '${content.origin}', ${content.pipelineId}, '${content.timestamp}')`
+      return `INSERT INTO "${tableIdentifier}" ${valueClause} `
+  }
 }
