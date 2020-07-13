@@ -38,6 +38,31 @@ export class StorageContentEndpoint {
    * @param res Response containing the content with contentId from bucket bucketId
    */
   handleContentRequest = async (req: express.Request, res: express.Response): Promise<void> => {
+    const bucketId = parseInt(req.params.bucketId)
+    const contentId = parseInt(req.params.contentId)
+
+    if (!bucketId || bucketId < 1) {
+      res.status(400).send(`Cannot request content: No valid bucket id provided`)
+      res.end()
+      return
+    }
+    if (!contentId || contentId < 1) {
+      res.status(400).send(`Cannot request content: No valid bucket id provided`)
+      res.end()
+      return
+    }
+
+    try {
+      const content = await this.contentRepository.getContent(`${bucketId}`, `${contentId}`)
+      res.status(200).send(content)
+      res.end()
+      return
+    } catch(err) {
+      console.error(`Could not get content on bucket ${bucketId} with content id "${contentId}"`)
+      res.status(500).send(`Could not get content on bucket ${bucketId} with content id "${contentId}`)
+      res.end()
+      return
+    }
   }
 
 
@@ -49,5 +74,24 @@ export class StorageContentEndpoint {
    * @param res Response containing  the data identified by bucketId
    */
   handleContentsRequest = async (req: express.Request, res: express.Response): Promise<void> => {
+    const bucketId = parseInt(req.params.bucketId)
+
+    if (!bucketId || bucketId < 1) {
+      res.status(400).send(`Cannot request content: No valid bucket id provided`)
+      res.end()
+      return
+    }
+
+    try {
+      const content = await this.contentRepository.getAllContent(`${bucketId}`)
+      res.status(200).send(content)
+      res.end()
+      return
+    } catch(err) {
+      console.error(`Could not get content on bucket ${bucketId}"`)
+      res.status(500).send(`Could not get content on bucket ${bucketId}`)
+      res.end()
+      return
+    }
   }
 }
