@@ -103,6 +103,40 @@ services:
       - "traefik.http.routers.to-scheduler.middlewares=scheduler-stripprefix@docker"
       - "traefik.http.middlewares.scheduler-stripprefix.stripprefix.prefixes=/api/scheduler"
   # ----------------- STORAGE SERVICE (/storage) --------------------
+
+  storage-mq:
+    image: ${DOCKER_REGISTRY}/storage-mq
+    build: ./storage-mq/
+    environment:
+      DATABASE_HOST: storage-db
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ods
+      DATABASE_USER: postgrest
+      DATABASE_PW: postgres-wrapper-pw
+
+      AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq'
+
+      AMQP_PIPELINE_CONFIG_EXCHANGE: 'ods_global'
+      AMQP_PIPELINE_CONFIG_QUEUE: 'storage-mq.pipeline-config'
+      AMQP_PIPELINE_CONFIG_TOPIC: 'pipeline.config.*'
+      AMQP_PIPELINE_CONFIG_CREATED_TOPIC: 'pipeline.config.created'
+      AMQP_PIPELINE_CONFIG_DELETED_TOPIC: 'pipeline.config.deleted'
+
+      AMQP_PIPELINE_EXECUTION_EXCHANGE: 'ods_global'
+      AMQP_PIPELINE_EXECUTION_QUEUE: 'storage-mq.pipeline-execution'
+      AMQP_PIPELINE_EXECUTION_TOPIC: 'pipeline.execution.*'
+      AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: 'pipeline.execution.success'
+    depends_on:
+      - storage-db
+      - storage-db-liquibase
+      - rabbitmq
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.to-storage-mq.rule=PathPrefix(`/api/storage-mq`)"
+      - "traefik.http.routers.to-storage-mq.middlewares=storage-mq-stripprefix@docker"
+      - "traefik.http.middlewares.storage-mq-stripprefix.stripprefix.prefixes=/api/storage-mq"
+      - "traefik.http.services.storage-mq.loadbalancer.server.port=8080"
+
   storage: # Wraps postgres database with API
     image: ${DOCKER_REGISTRY}/storage
     build: ./storage/postgrest/
