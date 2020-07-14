@@ -2,15 +2,13 @@ import * as AdapterClient from './clients/adapter-client'
 import * as CoreClient from './clients/core-client'
 import * as TransformationClient from './clients/transformation-client'
 import * as StorageClient from './clients/storage-client'
-import { AmqpClient, NotificationTriggerEvent } from './clients/amqp-client'
+import * as AmqpClient from './clients/amqp-client'
 
 import DatasourceConfig from './interfaces/datasource-config'
 import PipelineConfig from './interfaces/pipeline-config'
 import { AxiosError } from 'axios'
 import AdapterResponse from '@/interfaces/adapter-response'
-
-const amqpClient = new AmqpClient()
-amqpClient.init()
+import {NotificationTriggerEvent} from './clients/amqp-client'
 
 export async function execute (datasourceConfig: DatasourceConfig, maxRetries = 3): Promise<void> {
   // adapter
@@ -93,6 +91,7 @@ async function executeStorage (args: { pipelineConfig: PipelineConfig; data: obj
 }
 
 async function executeNotification (args: { pipelineConfig: PipelineConfig; dataLocation: string; data?: object; error?: object }): Promise<void> {
+  await AmqpClient.init()
   const pipelineConfig = args.pipelineConfig
   const data = args.data
   const error = args.error
@@ -105,7 +104,7 @@ async function executeNotification (args: { pipelineConfig: PipelineConfig; data
     error: error
   }
 
-  const success = amqpClient.publish(notificationTrigger)
+  const success = AmqpClient.publish(notificationTrigger)
   if (!success) {
     Promise.reject()
   } else {
