@@ -114,7 +114,7 @@ services:
       DATABASE_USER: postgrest
       DATABASE_PW: postgres-wrapper-pw
 
-      AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq'
+      AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
 
       AMQP_PIPELINE_CONFIG_EXCHANGE: 'ods_global'
       AMQP_PIPELINE_CONFIG_QUEUE: 'storage-mq.pipeline-config'
