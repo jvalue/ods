@@ -67,6 +67,28 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
         return new Promise(resolve => setTimeout(resolve, backOff * 1000));
     }
 
+    async existsTable(tableIdentifier: string): Promise<boolean> {
+      console.debug(`Checking if table "${tableIdentifier}" exists`)
+      if (!this.connectionPool) {
+          return Promise.reject("No connnection pool available")
+      }
+
+      let client!: PoolClient
+      try {
+          client = await this.connectionPool.connect()
+          const resultSet = await client.query(`SELECT to_regclass('storage.${tableIdentifier}')`)
+          const tableExists = !!resultSet.rows[0].to_regclass
+          console.debug(`Table ${tableIdentifier} exists: ${tableExists}`)
+          return Promise.resolve(tableExists)
+        } catch (error) {
+            console.error(`Error when checking if table ${tableIdentifier} exists:\n${error}`)
+            return Promise.reject(error)
+        } finally {
+            if (client) {
+                client.release()
+            }
+        }
+    }
 
     /**
      * This funcion will create a table (if not already exists) for storing pipeline data.
@@ -74,7 +96,14 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
      * @param tableIdentifier tableIdentifier for wich a table will be created with this name
      */
     async create(tableIdentifier: string): Promise<void> {
-        console.log(`Creating table "${tableIdentifier}"`)
+        console.debug(`Creating table "${tableIdentifier}"`)
+
+        const alreadyExists = await this.existsTable(tableIdentifier)
+        if(alreadyExists) {
+          console.debug(`Table "${tableIdentifier}" already exists - nothing to do here`)
+          return Promise.resolve()
+        }
+
         if (!this.connectionPool) {
             return Promise.reject("No connnection pool available")
         }
