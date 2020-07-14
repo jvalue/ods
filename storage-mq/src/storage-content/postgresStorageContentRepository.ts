@@ -3,7 +3,7 @@ import { StorageContentRepository } from "./storageContentRepository"
 import { StorageContent } from "./storageContent"
 
 export class PostgresStorageContentRepository implements StorageContentRepository {
-    connectionPool!: Pool
+    connectionPool?: Pool = undefined
 
     /**
      * Initializes the connection to the database.
@@ -13,7 +13,6 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
     public async init(retries: number, backoff: number): Promise<void> {
         console.debug('Initializing PostgresStorageStructureRepository')
         await this.initConnectionPool(retries, backoff)
-        return this.checkClassInvariant()
     }
 
     /**
@@ -24,7 +23,6 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
      * @returns reject promise on failure to connect
      */
     private async initConnectionPool(retries: number, backoff: number): Promise<void> {
-
         const poolConfig : PoolConfig = {
             host: process.env.DATABASE_HOST!,
             port: +process.env.DATABASE_PORT!,
@@ -35,6 +33,7 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
             idleTimeoutMillis: 30000,
             connectionTimeoutMillis: 2000
         }
+        console.debug(`Connecting to database with config:\n${JSON.stringify(poolConfig)}`)
 
         // try to establish connection
         for (let i = 1; i <= retries; i++) {
@@ -42,8 +41,9 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
             let client
             try {
               const connectionPool = new Pool(poolConfig)
-              client = await this.connectionPool.connect()
+              client = await connectionPool.connect()
               this.connectionPool = connectionPool
+              break
             } catch (error) {
               await this.sleep(backoff);
               continue
@@ -66,30 +66,19 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
         return new Promise(resolve => setTimeout(resolve, backOff * 1000));
     }
 
-
-    /**
-     * This function ensures that all objects are initialized
-     * for further interaction with the config database
-     *
-     * @returns rejects promise if invariants not met.
-     */
-    private checkClassInvariant(): Promise<void> {
-        if (!this.connectionPool) {
-            return Promise.reject("No connnection pool available")
-        }
-        return Promise.resolve()
-    }
-
     async existsTable(tableIdentifier: string): Promise<boolean> {
       console.debug(`Checking if table "${tableIdentifier}" exists`)
-      await this.checkClassInvariant()
+      if (!this.connectionPool) {
+          return Promise.reject("No connnection pool available")
+      }
 
       let client!: PoolClient
       try {
           client = await this.connectionPool.connect()
           const resultSet = await client.query(`SELECT to_regclass('storage.${tableIdentifier}')`)
-          console.debug(`Existance check on table "${tableIdentifier}" returned\n${resultSet}`)
-          return Promise.resolve(resultSet.rowCount > 0)
+          const tableExists = !!resultSet.rows[0].to_regclass
+          console.debug(`Table ${tableIdentifier} exists: ${tableExists}`)
+          return Promise.resolve(tableExists)
         } catch (error) {
             console.error(`Error when checking if table ${tableIdentifier} exists:\n${error}`)
             return Promise.reject(error)
@@ -102,7 +91,9 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
 
     async getAllContent(tableIdentifier: string): Promise<StorageContent[] | undefined> {
       console.debug(`Fetching all content from database, table "${tableIdentifier}"`)
-      await this.checkClassInvariant()
+      if (!this.connectionPool) {
+          return Promise.reject("No connnection pool available")
+      }
 
       const tableExists = await this.existsTable(tableIdentifier)
       if(!tableExists) {
@@ -127,7 +118,14 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
 
     async getContent(tableIdentifier: string, contentId: string): Promise<StorageContent | undefined> {
       console.debug(`Fetching content from database, table "${tableIdentifier}", id "${contentId}"`)
-      await this.checkClassInvariant()
+      if (!this.connectionPool) {
+          return Promise.reject("No connnection pool available")
+      }
+
+      const tableExists = await this.existsTable(tableIdentifier)
+      if(!tableExists) {
+        return Promise.resolve(undefined)
+      }
 
       let client!: PoolClient
       try {
@@ -150,7 +148,9 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
 
     async saveContent(tableIdentifier: string, content: StorageContent): Promise<number> {
         console.debug(`Saving storage content data`)
-        await this.checkClassInvariant()
+        if (!this.connectionPool) {
+            return Promise.reject("No connnection pool available")
+        }
 
         delete content.id  // id not under control of client
 
