@@ -8,7 +8,7 @@
         "start:transpiled": "node --max-http-header-size 10000000 dist/index.js",
         "transpile": "tsc",
         "lint": "./node_modules/.bin/eslint src --ext .ts,.js --fix",
-        "test": "jest"
+        "test": "jest --passWithNoTests"
     },
     "dependencies": {
         "express": "^4.17.1",
