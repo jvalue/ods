@@ -1,8 +1,11 @@
 const waitOn = require('wait-on')
+const request = require('supertest')
 const AMQP = require('amqplib')
 
 const URL = process.env.STORAGEMQ_API
 const AMQP_URL = process.env.AMQP_URL
+const AMQP_EXCHANGE = process.env.AMQP_EXCHANGE
+const AMQP_PIPELINE_CREATED_TOPIC = process.env.AMQP_PIPELINE_CREATED_TOPIC
 
 let amqpConnection = undefined
 
@@ -20,7 +23,27 @@ describe('Storage-MQ', () => {
   }, 60000)
 
   test('GET /version', async () => {
-    expect(true).toBeTruthy()
+    const response = await request(URL).get('/version')
+    expect(response.status).toEqual(200)
+    expect(response.type).toEqual('text/plain')
+    const semanticVersionRegEx = '^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)'
+    expect(response.text).toMatch(new RegExp(semanticVersionRegEx))
+  })
+
+  test('GET /bucket/3000/content on non-existing bucket should 404', async () => {
+    const response = await request(URL).get('/bucket/3000/content')
+    console.log(response.body)
+    expect(response.status).toEqual(404)
+  })
+  test('GET /bucket/3000/content/5 on non-existing bucket should 404', async () => {
+    const response = await request(URL).get('/bucket/3000/content/5')
+    console.log(response.body)
+    expect(response.status).toEqual(404)
+  })
+
+  test('GET /bucket/3000/content/5 on existing bucket but not existing content should 404', async () => {
+    const response = await request(URL).get('/bucket/3000/content/5')
+    expect(response.status).toEqual(404)
   })
 })
 
