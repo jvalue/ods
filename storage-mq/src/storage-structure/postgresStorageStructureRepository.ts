@@ -24,37 +24,42 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
      * @returns reject promise on failure to connect
      */
     private async initConnectionPool(retries: number, backoff: number): Promise<void> {
-        let connectionErr: boolean = false
 
-        const poolConfig : PoolConfig = {
-            host: process.env.DATABASE_HOST!,
-            port: +process.env.DATABASE_PORT!,
-            user: process.env.DATABASE_USER!,
-            password: process.env.DATABASE_PW!,
-            database: process.env.DATABASE_NAME!,
-            max: 20,
-            idleTimeoutMillis: 30000,
-            connectionTimeoutMillis: 2000
-        }
+      const poolConfig : PoolConfig = {
+          host: process.env.DATABASE_HOST!,
+          port: +process.env.DATABASE_PORT!,
+          user: process.env.DATABASE_USER!,
+          password: process.env.DATABASE_PW!,
+          database: process.env.DATABASE_NAME!,
+          max: 20,
+          idleTimeoutMillis: 30000,
+          connectionTimeoutMillis: 2000
+      }
 
-        // try to establish connection
-        for (let i = 1; i <= retries; i++) {
-            console.info(`Initiliazing database connection (${i}/${retries})`)
-
-            this.connectionPool = new Pool(poolConfig)
-            if (!this.connectionPool) {
-                connectionErr = true
-                await this.sleep(backoff);
-                continue
+      // try to establish connection
+      for (let i = 1; i <= retries; i++) {
+          console.info(`Initiliazing database connection (${i}/${retries})`)
+          let client
+          try {
+            const connectionPool = new Pool(poolConfig)
+            client = await this.connectionPool.connect()
+            this.connectionPool = connectionPool
+          } catch (error) {
+            await this.sleep(backoff);
+            continue
+          } finally {
+            if (client) {
+              client.release()
             }
-        }
+          }
+      }
 
-        if (connectionErr || !this.connectionPool) {
-            return Promise.reject("Connection to databse could not be established.")
-        }
+      if (!this.connectionPool) {
+          return Promise.reject("Connection to databse could not be established.")
+      }
 
-        console.info('Sucessfully established connection to storage-db database.')
-        return Promise.resolve()
+      console.info('Sucessfully established connection to storage-db database.')
+      return Promise.resolve()
     }
 
     private sleep(backOff: number): Promise<void> {

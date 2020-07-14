@@ -24,7 +24,6 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
      * @returns reject promise on failure to connect
      */
     private async initConnectionPool(retries: number, backoff: number): Promise<void> {
-        let connectionErr: boolean = false
 
         const poolConfig : PoolConfig = {
             host: process.env.DATABASE_HOST!,
@@ -40,16 +39,22 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
         // try to establish connection
         for (let i = 1; i <= retries; i++) {
             console.info(`Initiliazing database connection (${i}/${retries})`)
-
-            this.connectionPool = new Pool(poolConfig)
-            if (!this.connectionPool) {
-                connectionErr = true
-                await this.sleep(backoff);
-                continue
+            let client
+            try {
+              const connectionPool = new Pool(poolConfig)
+              client = await this.connectionPool.connect()
+              this.connectionPool = connectionPool
+            } catch (error) {
+              await this.sleep(backoff);
+              continue
+            } finally {
+              if (client) {
+                client.release()
+              }
             }
         }
 
-        if (connectionErr || !this.connectionPool) {
+        if (!this.connectionPool) {
             return Promise.reject("Connection to databse could not be established.")
         }
 
@@ -75,9 +80,34 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
         return Promise.resolve()
     }
 
-    async getAllContent(tableIdentifier: string): Promise<StorageContent[]> {
+    async existsTable(tableIdentifier: string): Promise<boolean> {
+      console.debug(`Checking if table "${tableIdentifier}" exists`)
+      await this.checkClassInvariant()
+
+      let client!: PoolClient
+      try {
+          client = await this.connectionPool.connect()
+          const resultSet = await client.query(`SELECT to_regclass('storage.${tableIdentifier}')`)
+          console.debug(`Existance check on table "${tableIdentifier}" returned\n${resultSet}`)
+          return Promise.resolve(resultSet.rowCount > 0)
+        } catch (error) {
+            console.error(`Error when checking if table ${tableIdentifier} exists:\n${error}`)
+            return Promise.reject(error)
+        } finally {
+            if (client) {
+                client.release()
+            }
+        }
+    }
+
+    async getAllContent(tableIdentifier: string): Promise<StorageContent[] | undefined> {
       console.debug(`Fetching all content from database, table "${tableIdentifier}"`)
       await this.checkClassInvariant()
+
+      const tableExists = await this.existsTable(tableIdentifier)
+      if(!tableExists) {
+        return Promise.resolve(undefined)
+      }
 
       let client!: PoolClient
       try {
@@ -95,7 +125,7 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
       }
     }
 
-    async getContent(tableIdentifier: string, contentId: string): Promise<StorageContent> {
+    async getContent(tableIdentifier: string, contentId: string): Promise<StorageContent | undefined> {
       console.debug(`Fetching content from database, table "${tableIdentifier}", id "${contentId}"`)
       await this.checkClassInvariant()
 
@@ -105,7 +135,7 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
           const resultSet = await client.query(`SELECT * FROM "${tableIdentifier}" WHERE id = ${contentId}`)
           const content = resultSet.rows as StorageContent[]
           if(!content || !content[0]) {
-            return Promise.reject(`Content with ${contentId} not found`)
+            return undefined
           }
           return Promise.resolve(content[0])
       } catch (error) {

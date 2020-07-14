@@ -24,7 +24,6 @@ const storageStructureRepositry = new PostgresStorageStructureRepository()
 const pipelineConfigEventHandler = new PipelineConfigEventHandler(storageStructureRepositry)
 const pipelineExecutionEventHandler = new PipelineExecutionEventHandler(storageContentRepository)
 
-const notificationConfigEndpoint = new StorageContentEndpoint(storageContentRepository, app)
 const amqpPipelineConfigConsumer = new PipelineConfigConsumer(pipelineConfigEventHandler)
 const amqpPipelineExecutionConsumer = new PipelineExecutionConsumer(pipelineExecutionEventHandler)
 
@@ -35,10 +34,15 @@ process.on('unhandledRejection', function(reason, p){
 
 app.listen(port, async () => {
 
+  await storageContentRepository.init(30, 2000)
+  await storageStructureRepositry.init(30, 2000)
+
   await amqpPipelineConfigConsumer.connect(30, 2000)
   await amqpPipelineExecutionConsumer.connect(30, 2000)
 
   console.log('Listening on port ' + port)
+
+  const notificationConfigEndpoint = new StorageContentEndpoint(storageContentRepository, app)
 
   app.get("/", (req: express.Request, res: express.Response): void => {
     res.status(200)
