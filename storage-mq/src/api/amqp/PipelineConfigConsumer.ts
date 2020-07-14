@@ -43,7 +43,7 @@ export class PipelineConfigConsumer {
     }
 
     private async initChannel(connection: AMQP.Connection) {
-        console.log(`Initializing queue "${pipelineConfigQueue}" on exchange "${pipelineConfigExchange} with topic ${pipelineConfigTopic}"`)
+        console.log(`Initializing queue "${pipelineConfigQueue}" on exchange "${pipelineConfigExchange}" with topic "${pipelineConfigTopic}"`)
         const channel = await connection.createChannel()
 
         channel.assertExchange(pipelineConfigExchange, 'topic', {
