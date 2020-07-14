@@ -58,7 +58,8 @@ export class PipelineExecutionConsumer {
         console.info(`Successfully initialized AMQP queue`)
     }
 
-    private async consumeEvent(msg: AMQP.ConsumeMessage | null) {
+    // use the f = () => {} syntax to access this
+    consumeEvent = async (msg: AMQP.ConsumeMessage | null) => {
         if(!msg) {
             console.debug("Received empty event when listening on pipeline configs - doing nothing")
           return
