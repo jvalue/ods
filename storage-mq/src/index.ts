@@ -42,7 +42,7 @@ app.listen(port, async () => {
 
   console.log('Listening on port ' + port)
 
-  const notificationConfigEndpoint = new StorageContentEndpoint(storageContentRepository, app)
+  const storageContentEndpoint = new StorageContentEndpoint(storageContentRepository, app)
 
   app.get("/", (req: express.Request, res: express.Response): void => {
     res.status(200)
@@ -52,7 +52,7 @@ app.listen(port, async () => {
   app.get("/version", (req: express.Request, res: express.Response): void => {
     res.header('Content-Type', 'text/plain')
     res.status(200)
-        .send(notificationConfigEndpoint.getVersion())
+        .send(storageContentEndpoint.getVersion())
     res.end()
   })
 })
