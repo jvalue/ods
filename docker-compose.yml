@@ -128,7 +128,7 @@ services:
       AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: 'pipeline.execution.success'
     depends_on:
       - storage-db
-      - storage-db-liquibase
+      - storage-db-liquibase # TODO: make sure the migration runs through before reading db structure
       - rabbitmq
     labels:
       - "traefik.enable=true"
