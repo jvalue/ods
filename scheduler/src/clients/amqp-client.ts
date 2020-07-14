@@ -9,17 +9,20 @@ const AMQP_URL = `amqp://${AMQP_USR}:${AMQP_PWD}@${AMQP_HOST}`
 
 export class AmqpClient {
   private channel: amqp.Channel | undefined
+  private initialized = false
 
-  constructor () {
-    this.init()
-  }
-
-  private async init (): Promise<void> {
-    try {
-      const connection = await this.connect()
-      this.channel = await this.initChannel(connection)
-    } catch (error) {
-      console.error(`Error initializing the AMQP Client: ${error}`)
+  public async init (): Promise<void> {
+    if(!this.initialized) {
+      try {
+        const connection = await this.connect()
+        this.channel = await this.initChannel(connection)
+        this.initialized = true
+      } catch (error) {
+        console.error(`Error initializing the AMQP Client: ${error}`)
+      }
+    } else {
+      console.log('AmqpClient initialization aborted: Already initialized.')
+      return
     }
   }
 
