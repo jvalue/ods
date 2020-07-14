@@ -28,6 +28,11 @@ const notificationConfigEndpoint = new StorageContentEndpoint(storageContentRepo
 const amqpPipelineConfigConsumer = new PipelineConfigConsumer(pipelineConfigEventHandler)
 const amqpPipelineExecutionConsumer = new PipelineExecutionConsumer(pipelineExecutionEventHandler)
 
+// global promise-rejected handler
+process.on('unhandledRejection', function(reason, p){
+  console.debug("Possibly Unhandled Rejection at: Promise ", p, " reason: ", reason);
+});
+
 app.listen(port, async () => {
 
   await amqpPipelineConfigConsumer.connect(30, 2000)
