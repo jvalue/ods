@@ -1,11 +1,8 @@
 import amqp from 'amqplib'
 
-const AMQP_HOST = process.env.AMQP_HOST
-const AMQP_USR = process.env.AMQP_USR
-const AMQP_PWD = process.env.AMQP_PWD
 const AMQP_EXCHANGE = process.env.AMQP_EXCHANGE || 'ods_global'
-const AMQP_KEY_SCHED = process.env.AMQP_KEY_SCHED || 'scheduler'
-const AMQP_URL = `amqp://${AMQP_USR}:${AMQP_PWD}@${AMQP_HOST}`
+const AMPQ_NOTIFICATION_EXECUTION_TOPIC = process.env.AMQP_NOTIFICATION_EXECUTION_TOPIC || 'notification.execution.*'
+const AMQP_URL = process.env.AMQP_URL!
 
 
 let channel: amqp.Channel
@@ -29,10 +26,10 @@ export async function init(): Promise<void> {
 async function connect(): Promise<amqp.Connection> {
   try {
     const connection = await amqp.connect(AMQP_URL)
-    console.log(`Connection to amqp host at ${AMQP_HOST} successful`)
+    console.log(`Connection to amqp host at ${AMQP_URL} successful`)
     return connection
   } catch (error) {
-    console.error(`Error connecting to amqp host at ${AMQP_HOST}: ${error}`)
+    console.error(`Error connecting to amqp host at ${AMQP_URL}: ${error}`)
     throw error
   }
 }
@@ -55,9 +52,9 @@ export function publish(content: NotificationTriggerEvent): boolean {
     return false
   } else {
     try {
-      return channel.publish(AMQP_EXCHANGE, AMQP_KEY_SCHED, Buffer.from(content))
+      return channel.publish(AMQP_EXCHANGE, AMPQ_NOTIFICATION_EXECUTION_TOPIC, Buffer.from(content))
     } catch (error) {
-      console.error(`Error publishing to exchange ${AMQP_EXCHANGE} under key ${AMQP_KEY_SCHED}: ${error}`)
+      console.error(`Error publishing to exchange ${AMQP_EXCHANGE} under key ${AMPQ_NOTIFICATION_EXECUTION_TOPIC}: ${error}`)
       return false
     }
   }
