@@ -10,6 +10,7 @@ import { AxiosError } from 'axios'
 import AdapterResponse from '@/interfaces/adapter-response'
 
 const amqpClient = new AmqpClient()
+amqpClient.init()
 
 export async function execute (datasourceConfig: DatasourceConfig, maxRetries = 3): Promise<void> {
   // adapter
