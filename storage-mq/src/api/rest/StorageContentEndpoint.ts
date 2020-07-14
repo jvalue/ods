@@ -13,7 +13,7 @@ export class StorageContentEndpoint {
 
     // Request contents
     app.get('/bucket/:bucketId/content/:contentId', this.handleContentRequest)
-    app.get('/bucket/:bucketId/content', this.handleContentsRequest)
+    app.get('/bucket/:bucketId/content', this.handleAllContentRequest)
   }
 
   // The following methods need arrow syntax because of javascript 'this' shenanigans
@@ -49,11 +49,17 @@ export class StorageContentEndpoint {
 
     try {
       const content = await this.contentRepository.getContent(`${bucketId}`, `${contentId}`)
-      res.status(200).send(content)
-      res.end()
-      return
+      if(!!content) {
+        res.status(200).send(content)
+        res.end()
+        return
+      } else {
+        res.status(404).send(`Content with id "${contentId}" not found in bucker "${bucketId}"`)
+        res.end()
+        return
+      }
     } catch(err) {
-      console.error(`Could not get content on bucket ${bucketId} with content id "${contentId}"`)
+      console.error(`Could not get content on bucket "${bucketId}" with content id "${contentId}"\n${err}`)
       res.status(500).send(`Could not get content on bucket ${bucketId} with content id "${contentId}`)
       res.end()
       return
@@ -68,7 +74,7 @@ export class StorageContentEndpoint {
    * @param req Request for data.
    * @param res Response containing  the data identified by bucketId
    */
-  handleContentsRequest = async (req: express.Request, res: express.Response): Promise<void> => {
+  handleAllContentRequest = async (req: express.Request, res: express.Response): Promise<void> => {
     const bucketId = parseInt(req.params.bucketId)
 
     if (!bucketId || bucketId < 1) {
@@ -79,11 +85,18 @@ export class StorageContentEndpoint {
 
     try {
       const content = await this.contentRepository.getAllContent(`${bucketId}`)
-      res.status(200).send(content)
-      res.end()
-      return
+      if(!!content) {
+        res.status(200).send(content)
+        res.end()
+        return
+      } else {
+        res.status(404).send(`Bucket "${bucketId}" does not exist`)
+        res.end()
+        return
+      }
     } catch(err) {
-      console.error(`Could not get content on bucket ${bucketId}"`)
+      console.error(`Could not get content on bucket "${bucketId}"\n${err}`)
+
       res.status(500).send(`Could not get content on bucket ${bucketId}`)
       res.end()
       return
