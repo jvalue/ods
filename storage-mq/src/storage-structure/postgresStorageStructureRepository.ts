@@ -3,7 +3,7 @@ import { Pool, PoolConfig, PoolClient } from "pg"
 
 export class PostgresStorageStructureRepository implements StorageStructureRepository {
 
-    connectionPool!: Pool
+    connectionPool?: Pool
 
     /**
      * Initializes the connection to the database.
@@ -13,7 +13,6 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
     public async init(retries: number, backoff: number): Promise<void> {
         console.debug('Initializing PostgresStorageStructureRepository')
         await this.initConnectionPool(retries, backoff)
-        return this.checkClassInvariant()
     }
 
     /**
@@ -35,6 +34,7 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
           idleTimeoutMillis: 30000,
           connectionTimeoutMillis: 2000
       }
+      console.debug(`Connecting to database with config:\n${JSON.stringify(poolConfig)}`)
 
       // try to establish connection
       for (let i = 1; i <= retries; i++) {
@@ -42,8 +42,9 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
           let client
           try {
             const connectionPool = new Pool(poolConfig)
-            client = await this.connectionPool.connect()
+            client = await connectionPool.connect()
             this.connectionPool = connectionPool
+            break
           } catch (error) {
             await this.sleep(backoff);
             continue
@@ -74,7 +75,9 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
      */
     async create(tableIdentifier: string): Promise<void> {
         console.log(`Creating table "${tableIdentifier}"`)
-        await this.checkClassInvariant()
+        if (!this.connectionPool) {
+            return Promise.reject("No connnection pool available")
+        }
 
         let client!: PoolClient // Client from Pool to execute the queries
         try {
@@ -101,7 +104,9 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
      */
     async delete(tableIdentifier: string): Promise<void> {
         console.log(`Dropping table "${tableIdentifier}`)
-        await this.checkClassInvariant()
+        if (!this.connectionPool) {
+            return Promise.reject("No connnection pool available")
+        }
 
         let client!: PoolClient
         try {
@@ -117,19 +122,6 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
         }
 
         console.log(`Successfully dropped table "${tableIdentifier}.`)
-        return Promise.resolve()
-    }
-
-    /**
-     * This function ensures that all objects are initialized
-     * for further interaction with the config database
-     *
-     * @returns rejects promise if invariants not met.
-     */
-    private checkClassInvariant(): Promise<void> {
-        if (!this.connectionPool) {
-            return Promise.reject("No connnection pool available")
-        }
         return Promise.resolve()
     }
 }
