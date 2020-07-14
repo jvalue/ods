@@ -104,6 +104,8 @@ services:
       - "traefik.http.routers.to-scheduler.rule=PathPrefix(`/api/scheduler`)"
       - "traefik.http.routers.to-scheduler.middlewares=scheduler-stripprefix@docker"
       - "traefik.http.middlewares.scheduler-stripprefix.stripprefix.prefixes=/api/scheduler"
+    depends_on:
+      - rabbitmq
   # ----------------- STORAGE SERVICE (/storage) --------------------
   storage: # Wraps postgres database with API
     image: ${DOCKER_REGISTRY}/storage
