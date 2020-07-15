@@ -4,19 +4,24 @@ const AMQP_EXCHANGE = process.env.AMQP_EXCHANGE || 'ods_global'
 const AMPQ_NOTIFICATION_EXECUTION_TOPIC = process.env.AMQP_NOTIFICATION_EXECUTION_TOPIC || 'notification.execution.*'
 const AMQP_URL = process.env.AMQP_URL!
 
-
 let channel: amqp.Channel
 let initialized = false
 
-export async function init(): Promise<void> {
+export async function init(retries: number, backoff: number): Promise<void> {
   if (!initialized) {
-    try {
-      const connection = await connect()
-      channel = await initChannel(connection)
-      initialized = true
-    } catch (error) {
-      console.error(`Error initializing the AMQP Client: ${error}`)
+    for (let i = 0; i <= retries; i++) {
+      try {
+        const connection = await connect()
+        channel = await initChannel(connection)
+        initialized = true
+        return
+      } catch (error) {
+        console.error(`Error initializing the AMQP Client (${i}/${retries}):
+        ${error}. Retrying in ${backoff}...`)
+        await sleep(backoff)
+      }
     }
+    Promise.reject(`Could not connect to AMQP broker at ${AMQP_URL}`)
   } else {
     console.log('AmqpClient initialization aborted: Already initialized.')
     return
@@ -58,6 +63,10 @@ export function publish(content: NotificationTriggerEvent): boolean {
       return false
     }
   }
+}
+
+function sleep(backoff: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, backoff * 1000))
 }
 
 export interface NotificationTriggerEvent {
