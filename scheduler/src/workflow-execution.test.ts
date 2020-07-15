@@ -95,7 +95,6 @@ test('Should trigger notifications', async () => {
 
   await PipelineExecution.execute(datasourceConfig)
 
-  expect(mockInitAmqp).toHaveBeenCalledTimes(1)
   expect(mockPublishAmqp).toHaveBeenCalledTimes(1)
 })
 
