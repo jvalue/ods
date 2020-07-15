@@ -1,7 +1,7 @@
 import amqp from 'amqplib'
 
 const AMQP_EXCHANGE = process.env.AMQP_EXCHANGE || 'ods_global'
-const AMPQ_NOTIFICATION_EXECUTION_TOPIC = process.env.AMQP_NOTIFICATION_EXECUTION_TOPIC || 'notification.execution.*'
+const AMPQ_NOTIFICATION_EXECUTION_TOPIC = process.env.AMQP_NOTIFICATION_EXECUTION_TOPIC || 'notification.execution.request'
 const AMQP_URL = process.env.AMQP_URL!
 
 let channel: amqp.Channel
