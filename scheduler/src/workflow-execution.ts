@@ -91,7 +91,6 @@ async function executeStorage (args: { pipelineConfig: PipelineConfig; data: obj
 }
 
 async function executeNotification (args: { pipelineConfig: PipelineConfig; dataLocation: string; data?: object; error?: object }): Promise<void> {
-  await AmqpClient.init()
   const pipelineConfig = args.pipelineConfig
   const data = args.data
   const error = args.error

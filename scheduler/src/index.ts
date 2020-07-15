@@ -5,6 +5,7 @@ import schedule from 'node-schedule'
 import * as Scheduling from './scheduling'
 import { ADAPTER_SERVICE_URL } from './clients/adapter-client'
 import * as CoreClient from './clients/core-client'
+import * as AmqpClient from './clients/amqp-client'
 
 const app = express()
 const port = 8080
@@ -91,6 +92,7 @@ process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 initPipelineConfigSync()
 initJobs()
+AmqpClient.init()
 
 process.on('SIGTERM', async () => {
   console.info('Scheduler: SIGTERM signal received.')
