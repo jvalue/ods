@@ -92,7 +92,7 @@ process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 initPipelineConfigSync()
 initJobs()
-AmqpClient.init()
+AmqpClient.init(3, 2)
 
 process.on('SIGTERM', async () => {
   console.info('Scheduler: SIGTERM signal received.')
