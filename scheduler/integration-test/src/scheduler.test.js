@@ -1,6 +1,7 @@
 /* eslint-env jest */
 const request = require('supertest')
 const waitOn = require('wait-on')
+const amqp = require('amqplib')
 
 const URL = process.env.SCHEDULER_API || 'http://localhost:8080'
 
@@ -16,9 +17,11 @@ const MOCK_TRANSFORMATION_PORT = process.env.MOCK_TRANSFORMATION_PORT || 8083
 const MOCK_TRANSFORMATION_HOST = process.env.MOCK_TRANSFORMATION_HOST || 'localhost'
 const MOCK_TRANSFORMATION_URL = 'http://' + MOCK_TRANSFORMATION_HOST + ':' + MOCK_TRANSFORMATION_PORT
 
-const MOCK_NOTIFICATION_PORT = process.env.MOCK_NOTIFICATION_PORT || 8084
-const MOCK_NOTIFICATION_HOST = process.env.MOCK_NOTIFICATION_HOST || 'localhost'
-const MOCK_NOTIFICATION_URL = 'http://' + MOCK_NOTIFICATION_HOST + ':' + MOCK_NOTIFICATION_PORT
+const AMQP_URL = process.env.AMQP_URL
+const AMQP_EXCHANGE = process.env.AMQP_EXCHANGE
+const AMQP_NOTIFICATION_TOPIC = process.env.NOTIFICATION_TOPIC
+const AMQP_IT_QUEUE = process.env.AMQP_IT_QUEUE
+const RABBIT_HEALTH_URL = process.env.RABBIT_HEALTH_URL
 
 const MOCK_STORAGE_PORT = process.env.MOCK_STORAGE_PORT || 8085
 const MOCK_STORAGE_HOST = process.env.MOCK_STORAGE_HOST || 'localhost'
@@ -34,6 +37,8 @@ const data = {
   test: 'abc' // from transformation service
 }
 
+let notificationStore = {}
+
 describe('Scheduler', () => {
   console.log('Scheduler-Service URL= ' + URL)
 
@@ -42,10 +47,10 @@ describe('Scheduler', () => {
     console.log('Waiting for service with URL: ' + MOCK_CORE_URL)
     console.log('Waiting for service with URL: ' + MOCK_ADAPTER_URL)
     console.log('Waiting for service with URL: ' + MOCK_TRANSFORMATION_URL)
-    console.log('Waiting for service with URL: ' + MOCK_NOTIFICATION_URL)
     console.log('Waiting for service with URL: ' + MOCK_STORAGE_URL)
+    console.log('Waiting for rabbitMQ with URL: ' + RABBIT_HEALTH_URL)
     await waitOn(
-      { resources: [MOCK_CORE_URL, MOCK_ADAPTER_URL, MOCK_TRANSFORMATION_URL, MOCK_NOTIFICATION_URL, MOCK_STORAGE_URL], timeout: 50000 })
+      { resources: [MOCK_CORE_URL, MOCK_ADAPTER_URL, MOCK_TRANSFORMATION_URL, MOCK_STORAGE_URL], timeout: 50000 })
     console.log('Waiting for service with URL: ' + pingUrl)
     await waitOn({ resources: [pingUrl], timeout: 50000 })
   }, 60000)
@@ -79,15 +84,15 @@ describe('Scheduler', () => {
 
   test('Pipeline triggers correct notifications', async () => {
     await sleep(10000) // pipeline should have been executing until now!
-    const triggered = await request(MOCK_NOTIFICATION_URL).get(`/trigger/125`)
-    expect(triggered.status).toEqual(200)
-    expect(triggered.body).toEqual(
+    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_NOTIFICATION_TOPIC, AMQP_IT_QUEUE)
+    expect(notificationStore).toEqual(
       {
         pipelineId: 125,
         pipelineName: 'nordstream',
         data,
         dataLocation: MOCK_STORAGE_URL + '/125',
       })
+    notificationStore = {}
   }, 12000)
 
   test('Pipeline processes events', async () => {
@@ -98,6 +103,19 @@ describe('Scheduler', () => {
     expect(response.body).toHaveLength(2)
   })
 })
+
+async function receiveAmqp (url, exchange, topic, queue) {
+  const connection = await amqp.connect(url)
+  const channel = await connection.createChannel()
+  await channel.assertExchange(exchange, 'topic', {durable: true})
+  const q = await channel.assertQueue(queue)
+  await channel.bindQueue(q.queue, exchange, topic)
+  await channel.consume(q.queue, consumeEvent)
+}
+
+async function consumeEvent (msg) {
+  notificationStore = JSON.parse(msg.content.toString())
+}
 
 function sleep (ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
