@@ -54,9 +54,14 @@ async function retryableExecution<T1, T2> (func: (arg: T1) => Promise<T2>, args:
 async function executeAdapter (dataousrceConfig: DatasourceConfig): Promise<AdapterResponse> {
   console.log(`Execute Adapter for Datasource ${dataousrceConfig.id}`)
 
-  const importedData = await AdapterClient.executeAdapter(dataousrceConfig)
-  console.log(`Sucessful import via Adapter for Datasource ${dataousrceConfig.id}`)
-  return importedData
+  try {
+    const importedData = await AdapterClient.executeAdapter(dataousrceConfig)
+    console.log(`Sucessful import via Adapter for Datasource ${dataousrceConfig.id}`)
+    return importedData
+  } catch (e) {
+    console.log(`Error executing adapter: ${e.code}`)
+    return Promise.reject()
+  }
 }
 
 async function executeTransformation (args: { pipelineConfig: PipelineConfig; dataLocation: string }): Promise<TransformationClient.TransformationResult> {
@@ -85,9 +90,14 @@ async function executeStorage (args: { pipelineConfig: PipelineConfig; data: obj
   const data = args.data
 
   console.log(`Storing data for ${pipelineConfig.id}`)
-  const dataLocation = await StorageClient.executeStorage(pipelineConfig, data)
-  console.log(`Sucessfully stored Data for Pipeline ${pipelineConfig.id}`)
-  return dataLocation
+  try {
+    const dataLocation = await StorageClient.executeStorage(pipelineConfig, data)
+    console.log(`Sucessfully stored Data for Pipeline ${pipelineConfig.id}`)
+    return dataLocation
+  } catch (e) {
+    console.log(`Error executing storage: ${e.code}`)
+    return Promise.reject()
+  }
 }
 
 async function executeNotification (args: { pipelineConfig: PipelineConfig; dataLocation: string; data?: object; error?: object }): Promise<void> {
