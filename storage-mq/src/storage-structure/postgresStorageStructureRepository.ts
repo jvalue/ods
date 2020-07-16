@@ -109,8 +109,6 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
                 "id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
                 "data" jsonb NOT NULL,
                 "timestamp" timestamp,
-                "origin" varchar,
-                "license" varchar,
                 "pipelineId" varchar,
                 CONSTRAINT "Data_pk_${tableIdentifier}" PRIMARY KEY (id)
               )`)

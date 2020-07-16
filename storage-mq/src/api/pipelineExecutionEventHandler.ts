@@ -11,11 +11,9 @@ export default class PipelineExecutionEventHandler {
   async handleSuccess(pipelineExecutedEvent: PipelineExecutedEvent): Promise<void> {
     await this.contentRepository.saveContent(pipelineExecutedEvent.pipelineId, {
       pipelineId: pipelineExecutedEvent.pipelineId,
-      origin: pipelineExecutedEvent.origin,
-      license: pipelineExecutedEvent.license,
       timestamp: pipelineExecutedEvent.timestamp,
       data: pipelineExecutedEvent.data,
-      id: -1
+      id: undefined
     })
     return Promise.resolve()
   }
@@ -23,10 +21,6 @@ export default class PipelineExecutionEventHandler {
 
 export interface PipelineExecutedEvent {
   pipelineId: string
-
   timestamp: Date
-  origin: string
-  license: string
-
   data: object
 }
