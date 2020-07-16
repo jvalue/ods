@@ -90,7 +90,7 @@ const amqpConnect = async (amqpUrl, retries, backoff) => {
     } catch(error) {
       console.info(`Error connecting to RabbitMQ: ${error}. Retrying in ${backoff} seconds`)
       console.info(`Connecting to Amqp broker (${i}/${retries})`);
-      await this.sleep(backoff)
+      await sleep(backoff)
       continue
     }
   }
