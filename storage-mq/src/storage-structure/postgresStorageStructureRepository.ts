@@ -64,8 +64,8 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
       return Promise.resolve()
     }
 
-    private sleep(backOff: number): Promise<void> {
-        return new Promise(resolve => setTimeout(resolve, backOff * 1000));
+    private sleep(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     async existsTable(tableIdentifier: string): Promise<boolean> {

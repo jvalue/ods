@@ -31,7 +31,7 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
             database: process.env.DATABASE_NAME!,
             max: 20,
             idleTimeoutMillis: 30000,
-            connectionTimeoutMillis: 2000
+            connectionTimeoutMillis: 2000,
         }
         console.debug(`Connecting to database with config:\n${JSON.stringify(poolConfig)}`)
 
@@ -63,8 +63,8 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
         return Promise.resolve()
     }
 
-    private sleep(backOff: number): Promise<void> {
-        return new Promise(resolve => setTimeout(resolve, backOff * 1000));
+    private sleep(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     async existsTable(tableIdentifier: string): Promise<boolean> {
