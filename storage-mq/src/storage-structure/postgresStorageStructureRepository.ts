@@ -141,7 +141,7 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
             client = await this.connectionPool.connect()
             await client.query(`DROP TABLE "${tableIdentifier}" CASCADE`)
         } catch (err) {
-            console.error(`Could not create ODSData table: ${err}`)
+            console.error(`Could not delete table: ${err}`)
             return Promise.reject(err)
         } finally {
             if (client) {
