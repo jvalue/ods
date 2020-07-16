@@ -23,7 +23,7 @@ describe('Storage-MQ', () => {
       storageMqHealth(pingUrl, 50000),
     ])
     amqpConnection = promiseResults[0]
-  }, 60000)
+  }, 90000)
 
   test('GET /version', async () => {
     const response = await request(URL).get('/version')
