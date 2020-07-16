@@ -1,6 +1,7 @@
-FROM node:12-alpine
+FROM node:lts-alpine
 
-COPY . .
+COPY ./src ./src
+COPY ./package*.json ./
 RUN npm ci
 
 EXPOSE 8080

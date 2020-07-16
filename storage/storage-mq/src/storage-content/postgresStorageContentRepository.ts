@@ -2,8 +2,10 @@ import { Pool, PoolConfig, PoolClient, QueryResult } from "pg"
 import { StorageContentRepository } from "./storageContentRepository"
 import { StorageContent } from "./storageContent"
 
+
 export class PostgresStorageContentRepository implements StorageContentRepository {
     connectionPool?: Pool = undefined
+    schema = process.env.DATABASE_SCHEMA
 
     /**
      * Initializes the connection to the database.
@@ -76,7 +78,7 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
       let client!: PoolClient
       try {
           client = await this.connectionPool.connect()
-          const resultSet = await client.query(`SELECT to_regclass('${tableIdentifier}')`)
+          const resultSet = await client.query(`SELECT to_regclass('${this.schema}.${tableIdentifier}')`)
           const tableExists = !!resultSet.rows[0].to_regclass
           console.debug(`Table ${tableIdentifier} exists: ${tableExists}`)
           return Promise.resolve(tableExists)
@@ -105,7 +107,7 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
       let client!: PoolClient
       try {
           client = await this.connectionPool.connect()
-          const resultSet = await client.query(`SELECT * FROM "${tableIdentifier}"`)
+          const resultSet = await client.query(`SELECT * FROM "${this.schema}"."${tableIdentifier}"`)
           const content = resultSet.rows as StorageContent[]
           return Promise.resolve(content)
       } catch (error) {
@@ -133,7 +135,7 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
       let client!: PoolClient
       try {
           client = await this.connectionPool.connect()
-          const resultSet = await client.query(`SELECT * FROM "${tableIdentifier}" WHERE id = $1`, [contentId])
+          const resultSet = await client.query(`SELECT * FROM "${this.schema}"."${tableIdentifier}" WHERE id = $1`, [contentId])
           const content = resultSet.rows as StorageContent[]
           if(!content || !content[0]) {
             console.debug(`No content found for table "${tableIdentifier}", id ${contentId}`)
@@ -161,7 +163,7 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
 
         // Generate Query-String
         const data = JSON.stringify(content.data).replace("'", "''") // Escape single quotes
-        const insertStatement = `INSERT INTO "${tableIdentifier}" ("data", "pipelineId", "timestamp") VALUES ($1, $2, $3) RETURNING *`
+        const insertStatement = `INSERT INTO "${this.schema}"."${tableIdentifier}" ("data", "pipelineId", "timestamp") VALUES ($1, $2, $3) RETURNING *`
         const values = [data, parseInt(content.pipelineId), content.timestamp]
 
         let client!: PoolClient  // Client to execute the query
