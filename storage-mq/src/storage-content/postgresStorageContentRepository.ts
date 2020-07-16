@@ -133,11 +133,13 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
       let client!: PoolClient
       try {
           client = await this.connectionPool.connect()
-          const resultSet = await client.query(`SELECT * FROM "${tableIdentifier}" WHERE id = ${contentId}`)
+          const resultSet = await client.query(`SELECT * FROM "${tableIdentifier}" WHERE id = $1`, [contentId])
           const content = resultSet.rows as StorageContent[]
           if(!content || !content[0]) {
+            console.debug(`No content found for table "${tableIdentifier}", id ${contentId}`)
             return undefined
           }
+          console.debug(`Fetched content for table "${tableIdentifier}", id ${contentId}: { pipelineId: ${content[0].pipelineId}, timestamp: ${content[0].timestamp}, data: <omitted in log>}`)
           return Promise.resolve(content[0])
       } catch (error) {
           console.error(`Could not get content from table ${tableIdentifier} with id ${contentId}: ${error}`)
@@ -159,8 +161,8 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
 
         // Generate Query-String
         const data = JSON.stringify(content.data).replace("'", "''") // Escape single quotes
-        const insertStatement = `INSERT INTO "${tableIdentifier}" ("data", "license", "origin", "pipelineId", "timestamp") VALUES ('$1', '$2', '$3', $4, '$5') RETURNING *`
-        const values = [data, content.license, content.origin, parseInt(content.pipelineId), content.timestamp]
+        const insertStatement = `INSERT INTO "${tableIdentifier}" ("data", "pipelineId", "timestamp") VALUES ($1, $2, $3) RETURNING *`
+        const values = [data, parseInt(content.pipelineId), content.timestamp]
 
         let client!: PoolClient  // Client to execute the query
         try {
@@ -178,16 +180,4 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
             }
         }
     }
-
-    /**
-     * Generates a Insert-Statement for content data tables.\
-     * @param odsData odsData to generate VALUE-Clause for
-     * @returns string, containing a value clause
-     */
-    private generateInsertStatement(tableIdentifier: string, content: StorageContent): string {
-      const data = JSON.stringify(content.data).replace("'", "''") // Escape single quotes
-      const valueClause = `("data", "license", "origin", "pipelineId", "timestamp") VALUES
-              ('${data}', '${content.license}', '${content.origin}', ${content.pipelineId}, '${content.timestamp}')`
-      return `INSERT INTO "${tableIdentifier}" ${valueClause} `
-  }
 }
