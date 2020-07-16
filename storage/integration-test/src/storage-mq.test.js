@@ -104,7 +104,7 @@ describe('Storage-MQ', () => {
     const contentResponse = await request(URL).get(`/bucket/${pipelineId}/content/1`)
     expect(contentResponse.status).toEqual(200)
     expect(contentResponse.type).toEqual('application/json')
-    expect(contentResponse.body.id).toEqual("1")
+    expect(contentResponse.body.id).toEqual(1)
     expect(contentResponse.body.timestamp).toEqual(pipelineExecutedEvent.timestamp.toISOString())
     expect(contentResponse.body.pipelineId).toEqual(pipelineExecutedEvent.pipelineId)
     expect(contentResponse.body.data).toEqual(pipelineExecutedEvent.data)

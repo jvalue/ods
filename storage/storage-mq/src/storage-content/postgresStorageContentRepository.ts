@@ -108,7 +108,7 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
       try {
           client = await this.connectionPool.connect()
           const resultSet = await client.query(`SELECT * FROM "${this.schema}"."${tableIdentifier}"`)
-          const content = resultSet.rows as StorageContent[]
+          const content = this.toContents(resultSet)
           return Promise.resolve(content)
       } catch (error) {
           console.error(`Could not get content from table ${tableIdentifier}: ${error}`)
@@ -136,7 +136,7 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
       try {
           client = await this.connectionPool.connect()
           const resultSet = await client.query(`SELECT * FROM "${this.schema}"."${tableIdentifier}" WHERE id = $1`, [contentId])
-          const content = resultSet.rows as StorageContent[]
+          const content = this.toContents(resultSet)
           if(!content || !content[0]) {
             console.debug(`No content found for table "${tableIdentifier}", id ${contentId}`)
             return undefined
@@ -181,5 +181,13 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
                 client.release()
             }
         }
+    }
+
+    toContents(resultSet: QueryResult<any>): StorageContent[] {
+      const contents = resultSet.rows as StorageContent[]
+      contents.forEach((x) => {
+        x.id = x.id ? +x.id : undefined // convert to number
+      })
+      return contents
     }
 }
