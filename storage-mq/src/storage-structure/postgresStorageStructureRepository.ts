@@ -44,6 +44,7 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
             const connectionPool = new Pool(poolConfig)
             client = await connectionPool.connect()
             this.connectionPool = connectionPool
+            console.info(`Successfully established database connection`)
             break
           } catch (error) {
             await this.sleep(backoff);
@@ -76,7 +77,7 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
       let client!: PoolClient
       try {
           client = await this.connectionPool.connect()
-          const resultSet = await client.query(`SELECT to_regclass('storage.${tableIdentifier}')`)
+          const resultSet = await client.query(`SELECT to_regclass('${tableIdentifier}')`)
           const tableExists = !!resultSet.rows[0].to_regclass
           console.debug(`Table ${tableIdentifier} exists: ${tableExists}`)
           return Promise.resolve(tableExists)
@@ -97,22 +98,22 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
      */
     async create(tableIdentifier: string): Promise<void> {
         console.debug(`Creating table "${tableIdentifier}"`)
-
-        const alreadyExists = await this.existsTable(tableIdentifier)
-        if(alreadyExists) {
-          console.debug(`Table "${tableIdentifier}" already exists - nothing to do here`)
-          return Promise.resolve()
-        }
-
         if (!this.connectionPool) {
             return Promise.reject("No connnection pool available")
         }
 
-        let client!: PoolClient // Client from Pool to execute the queries
+        let client!: PoolClient
         try {
-            client = await this.connectionPool.connect()  // Get a client from connection pool
-            const queryResult = await client.query(`Set search_path to storage; SELECT storage.createStructureForDataSource('${tableIdentifier}');`)
-
+            client = await this.connectionPool.connect()
+            await client.query(`CREATE TABLE IF NOT EXISTS "${tableIdentifier}" (
+                "id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
+                "data" jsonb NOT NULL,
+                "timestamp" timestamp,
+                "origin" varchar,
+                "license" varchar,
+                "pipelineId" varchar,
+                CONSTRAINT "Data_pk_${tableIdentifier}" PRIMARY KEY (id)
+              )`)
         } catch (err) {
             console.error(`Could not create table: ${err}`)
             return  Promise.reject(err)
@@ -122,7 +123,7 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
             }
         }
 
-        console.log(`Successfully created table "${tableIdentifier}.`)
+        console.debug(`Successfully created table "${tableIdentifier}"`)
         return Promise.resolve()
     }
 
@@ -139,8 +140,8 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
 
         let client!: PoolClient
         try {
-            client = await this.connectionPool.connect()  // Get a client from connection pool
-            await client.query(`Set search_path to storage;SELECT storage.deleteStructureForDataSource(${tableIdentifier});`)
+            client = await this.connectionPool.connect()
+            await client.query(`DROP TABLE "${tableIdentifier}" CASCADE`)
         } catch (err) {
             console.error(`Could not create ODSData table: ${err}`)
             return Promise.reject(err)
