@@ -9,37 +9,6 @@
     <changeSet id="v0.0.1-changeset1" author="Georg">
         <sql>CREATE SCHEMA storage;</sql>
         <sql>CREATE USER postgrest WITH PASSWORD 'postgres-wrapper-pw';</sql>
-        <createProcedure>
-            CREATE OR REPLACE FUNCTION storage.createStructureForDataSource(pipelineId varchar)
-                RETURNS void
-                LANGUAGE plpgsql
-                AS $$
-                BEGIN
-                    EXECUTE format('CREATE TABLE storage."%s" (
-                        id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ,
-                        data jsonb NOT NULL,
-                        "timestamp" timestamp,
-                        origin varchar,
-                        license varchar,
-                        "pipelineId" varchar,
-                        CONSTRAINT "Data_pk_%s" PRIMARY KEY (id)
-                    )', pipelineId, pipelineId);
-                    EXECUTE format('ALTER TABLE "%s" OWNER TO postgrest', pipelineId);
-                END;
-            $$;
-        </createProcedure>
-        <createProcedure>
-            CREATE OR REPLACE FUNCTION storage.deleteStructureForDataSource(pipelineId varchar)
-                RETURNS void
-                LANGUAGE plpgsql
-                AS $$
-                BEGIN
-                    EXECUTE format('DROP TABLE "%s" CASCADE', pipelineId);
-                END;
-            $$;
-        </createProcedure>
-        <sql>GRANT EXECUTE ON FUNCTION storage.createStructureForDataSource TO postgrest;</sql>
-        <sql>GRANT EXECUTE ON FUNCTION storage.deleteStructureForDataSource TO postgrest;</sql>
         <sql>GRANT ALL ON SCHEMA storage TO postgrest;</sql>
     </changeSet>
 </databaseChangeLog>
