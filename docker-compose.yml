@@ -111,8 +111,8 @@ services:
       DATABASE_HOST: storage-db
       DATABASE_PORT: 5432
       DATABASE_NAME: ods
-      DATABASE_USER: postgrest
-      DATABASE_PW: postgres-wrapper-pw
+      DATABASE_USER: storagemq
+      DATABASE_PW: storagemq-pw
 
       AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
 
