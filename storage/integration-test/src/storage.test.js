@@ -1,7 +1,8 @@
-const request = require('supertest')
 const waitOn = require('wait-on')
+const request = require('supertest')
+const AMQP = require('amqplib')
 
-const URL = process.env.STORAGE_API
+const STORAGE_URL = process.env.STORAGE_API
 const STORAGEMQ_URL = process.env.STORAGEMQ_API
 const AMQP_URL = process.env.AMQP_URL
 
@@ -12,13 +13,13 @@ const amqp_pipeline_execution_success_topic = "pipeline.execution.success"
 let amqpConnection = undefined
 
 describe('Storage', () => {
-  console.log('Storage-Service URL= ' + URL)
+  console.log('Storage-Service URL= ' + STORAGE_URL)
 
   beforeAll(async () => {
     try {
       const promiseResults = await Promise.all([
         amqpConnect(AMQP_URL, 40, 2000),
-        waitOn({ resources: [URL, `${STORAGEMQ_URL}/`], timeout: 80000, log: true })
+        waitOn({ resources: [STORAGE_URL, `${STORAGEMQ_URL}/`], timeout: 80000, log: true })
       ])
       amqpConnection = promiseResults[0]
     } catch (err) {
@@ -58,7 +59,7 @@ describe('Storage', () => {
     await sleep(1000) // time to process event
 
 
-    const response = await request(URL)
+    const response = await request(STORAGE_URL)
       .get(`/$${pipelineId}`)
     expect(response.status).toEqual(200)
     expect(response.body).toHaveLength(1)
