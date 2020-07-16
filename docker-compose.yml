@@ -147,6 +147,7 @@ services:
       DATABASE_NAME: ods
       DATABASE_USER: postgrest
       DATABASE_PW: postgres-wrapper-pw
+      DATABASE_ANON: web_anon
     depends_on:
       - storage-db
       - storage-db-liquibase # TODO: make sure the migration runs through before reading db structure
@@ -170,6 +171,8 @@ services:
 
   storage-db-ui: # management UI for Postgres
     image: adminer
+    ports:
+      - 8080:8080
 
   storage-db-liquibase: # perform database migration on start up
     image: ${DOCKER_REGISTRY}/storage-db-liquibase

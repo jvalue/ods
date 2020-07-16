@@ -61,13 +61,14 @@ describe('Storage', () => {
 
     const response = await request(STORAGE_URL)
       .get(`/${pipelineId}`)
+    console.log(response.body)
     expect(response.status).toEqual(200)
     expect(response.body).toHaveLength(1)
     expect(response.type).toEqual('application/json')
-    expect(response.body.id).toEqual("1")
-    expect(response.body.timestamp).toEqual(pipelineExecutedEvent.timestamp.toISOString())
-    expect(response.body.pipelineId).toEqual(pipelineExecutedEvent.pipelineId)
-    expect(response.body.data).toEqual(pipelineExecutedEvent.data)
+    expect(response.body[0].id).toEqual("1")
+    expect(response.body[0].timestamp).toEqual(pipelineExecutedEvent.timestamp.toISOString())
+    expect(response.body[0].pipelineId).toEqual(pipelineExecutedEvent.pipelineId)
+    expect(response.body[0].data).toEqual(pipelineExecutedEvent.data)
   })
 })
 
