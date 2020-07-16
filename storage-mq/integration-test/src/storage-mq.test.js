@@ -100,14 +100,19 @@ describe('Storage-MQ', () => {
     await sleep(1000) // time to process event
 
 
-    const response = await request(URL).get(`/bucket/${pipelineId}/content/1`)
-    console.log(response.body)
-    expect(response.status).toEqual(200)
-    expect(response.type).toEqual('application/json')
-    expect(response.body.id).toEqual("1")
-    expect(response.body.timestamp).toEqual(pipelineExecutedEvent.timestamp.toISOString())
-    expect(response.body.pipelineId).toEqual(pipelineExecutedEvent.pipelineId)
-    expect(response.body.data).toEqual(pipelineExecutedEvent.data)
+    const contentResponse = await request(URL).get(`/bucket/${pipelineId}/content/1`)
+    expect(contentResponse.status).toEqual(200)
+    expect(contentResponse.type).toEqual('application/json')
+    expect(contentResponse.body.id).toEqual("1")
+    expect(contentResponse.body.timestamp).toEqual(pipelineExecutedEvent.timestamp.toISOString())
+    expect(contentResponse.body.pipelineId).toEqual(pipelineExecutedEvent.pipelineId)
+    expect(contentResponse.body.data).toEqual(pipelineExecutedEvent.data)
+
+    const allContentResponse = await request(URL).get(`/bucket/${pipelineId}/content`)
+    expect(allContentResponse.status).toEqual(200)
+    expect(allContentResponse.type).toEqual('application/json')
+    expect(allContentResponse.body.length).toEqual(1)
+    expect(allContentResponse.body[0]).toEqual(contentResponse.body)
   })
 
   test('GET /bucket/3000/content/5 on existing bucket but not existing content should 404', async () => {
