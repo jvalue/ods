@@ -7,6 +7,7 @@ const AMQP_URL = process.env.AMQP_URL
 
 const amqp_exchange = "ods_global"
 const amqp_pipeline_config_created_topic = "pipeline.config.created"
+const amqp_pipeline_config_deleted_topic = "pipeline.config.deleted"
 const amqp_pipeline_execution_success_topic = "pipeline.execution.success"
 
 let amqpConnection = undefined
@@ -119,6 +120,43 @@ describe('Storage-MQ', () => {
     const response = await request(URL).get('/bucket/3000/content/5')
     expect(response.status).toEqual(404)
   })
+
+
+  test('Event-driven storage structure creation and deletion', async () => {
+    const pipelineId = "555"
+
+    const channel = await amqpConnection.createChannel()
+    channel.assertExchange(amqp_exchange, 'topic', {
+        durable: false
+    });
+
+    // create
+    const pipelineCreatedEvent = {
+      pipelineId: pipelineId
+    }
+    const createdEvent = JSON.stringify(pipelineCreatedEvent)
+
+    channel.publish(amqp_exchange, amqp_pipeline_config_created_topic, Buffer.from(createdEvent))
+    console.log("Sent via AMQP: %s:'%s'", amqp_pipeline_config_created_topic, createdEvent);
+
+    await sleep(1000) // time to process event
+
+    // delete
+    const pipelineDeletedEvent = {
+      pipelineId: pipelineId
+    }
+    const deletedEvent = JSON.stringify(pipelineDeletedEvent)
+
+    channel.publish(amqp_exchange, amqp_pipeline_config_deleted_topic, Buffer.from(deletedEvent))
+    console.log("Sent via AMQP: %s:'%s'", amqp_pipeline_config_deleted_topic, deletedEvent);
+
+    await sleep(1000) // time to process event
+
+    // content gone again
+    const response = await request(URL).get(`/bucket/${pipelineId}/content/`)
+    expect(response.status).toEqual(404)
+  })
+
 })
 
 
