@@ -116,6 +116,7 @@ jobs:
         run: |
           docker-compose -f docker-compose.yml build storage
           docker-compose -f docker-compose.yml build storage-db-liquibase
+          docker-compose -f docker-compose.yml build storage-mq
 
       - name: Integration-test
         run: |
@@ -123,6 +124,7 @@ jobs:
           docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d storage-db
           docker-compose -f docker-compose.yml -f docker-compose.it.yml up storage-db-liquibase
           docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d storage
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d storage-mq
           docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from storage-it storage-it
           docker-compose logs
           docker-compose -f docker-compose.yml -f docker-compose.it.yml down
@@ -131,9 +133,11 @@ jobs:
         run: |
           IMAGE_ID_STORAGE=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/storage
           IMAGE_ID_LIQUIBASE=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/storage-db-liquibase
+          IMAGE_ID_STORAGEMQ=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/storage-mq
 
           docker save $IMAGE_ID_STORAGE > storage_postgrest.tar
           docker save $IMAGE_ID_LIQUIBASE > storage_liquibase.tar
+          docker save $IMAGE_ID_STORAGEMQ > storage_mq.tar
 
       - name: Upload Storage Docker image as artifact
         uses: actions/upload-artifact@v1
@@ -146,6 +150,12 @@ jobs:
         with:
           name: liquibase-artifact
           path: storage_liquibase.tar
+
+      - name: Upload Storage-MQ Docker image as artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: storagemq-artifact
+          path: storage_mq.tar
 
 
   # ----------------- TRANSFORMATION SERVICE --------------------
@@ -268,6 +278,10 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: liquibase-artifact
+      - name: Download storagemq artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: storagemq-artifact
       - name: Download transformation artifact
         uses: actions/download-artifact@v1
         with:
@@ -283,10 +297,11 @@ jobs:
           docker load -i ./scheduler-artifact/scheduler.tar
           docker load -i ./storage-artifact/storage_postgrest.tar
           docker load -i ./liquibase-artifact/storage_liquibase.tar
+          docker load -i ./storagemq-artifact/storage_mq.tar
           docker load -i ./transformation-artifact/transformation.tar
           docker load -i ./notification-artifact/notification.tar
           docker load -i ./adapter-artifact/adapter.tar
-          docker-compose -f docker-compose.yml up -d core adapter transformation notification storage scheduler
+          docker-compose -f docker-compose.yml up -d core adapter transformation notification storage storage-mq scheduler
           docker-compose -f docker-compose.yml -f docker-compose.st.yml up --exit-code-from system-test system-test
           docker-compose logs
           docker-compose -f docker-compose.yml -f docker-compose.st.yml down
