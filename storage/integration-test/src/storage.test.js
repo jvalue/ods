@@ -1,64 +1,92 @@
 const request = require('supertest')
 const waitOn = require('wait-on')
 
-const URL = process.env.STORAGE_API || 'http://localhost:9000/storage'
+const URL = process.env.STORAGE_API
+const STORAGEMQ_URL = process.env.STORAGEMQ_API
+const AMQP_URL = process.env.AMQP_URL
+
+const amqp_exchange = "ods_global"
+const amqp_pipeline_config_created_topic = "pipeline.config.created"
+const amqp_pipeline_execution_success_topic = "pipeline.execution.success"
+
+let amqpConnection = undefined
 
 describe('Storage', () => {
   console.log('Storage-Service URL= ' + URL)
 
   beforeAll(async () => {
     try {
-      const pingUrl = URL
-      console.log('Waiting for service with URL: ' + pingUrl)
-      await waitOn({ resources: [pingUrl], timeout: 50000 })
-      console.log('[online] Service with URL:  ' + pingUrl)
+      const promiseResults = await Promise.all([
+        amqpConnect(AMQP_URL, 40, 2000),
+        waitOn({ resources: [URL, `${STORAGEMQ_URL}/`], timeout: 80000, log: true })
+      ])
+      amqpConnection = promiseResults[0]
     } catch (err) {
       process.exit(1)
     }
-  }, 60000)
+  }, 90000)
 
-  test('POST /rpc/createStructureForDatasource', async () => {
-    const reqBody = {
-      pipelineid: 'pipeline-123test'
+  test('GET on arrived data', async () => {
+    const pipelineId = "21398"
+
+    const channel = await amqpConnection.createChannel()
+    channel.assertExchange(amqp_exchange, 'topic', {
+        durable: false
+    });
+
+    const pipelineCreatedEvent = {
+      pipelineId: pipelineId
     }
+    const configEvent = JSON.stringify(pipelineCreatedEvent)
 
-    const response = await request(URL)
-      .post('/rpc/createstructurefordatasource')
-      .send(reqBody)
-    expect(response.status).toEqual(200)
-  })
+    channel.publish(amqp_exchange, amqp_pipeline_config_created_topic, Buffer.from(configEvent))
+    console.log("Sent via AMQP: %s:'%s'", amqp_pipeline_config_created_topic, configEvent);
 
-  test('POST /pipeline-123test', async () => {
-    const reqBody = {
-      data: {
-        argument1: 'string',
-        argument2: 123
-      }
+    await sleep(1000) // time to process event
+
+
+    const pipelineExecutedEvent = {
+      pipelineId: pipelineId,
+      timestamp: new Date(Date.now()),
+      data: { exampleNumber: 123, exampleString: "abc", exampleArray: [{x: "y"}, {t: 456}]}
     }
+    const executionEvent = JSON.stringify(pipelineExecutedEvent)
+
+    channel.publish(amqp_exchange, amqp_pipeline_execution_success_topic, Buffer.from(executionEvent))
+    console.log("Sent via AMQP: %s:'%s'", amqp_pipeline_execution_success_topic, executionEvent);
+
+    await sleep(1000) // time to process event
+
 
     const response = await request(URL)
-      .post('/pipeline-123test')
-      .send(reqBody)
-    expect(response.status).toEqual(201)
-  })
-
-  test('GET /pipeline-123test', async () => {
-    const response = await request(URL)
-      .get('/pipeline-123test')
+      .get(`/$${pipelineId}`)
     expect(response.status).toEqual(200)
     expect(response.body).toHaveLength(1)
-    expect(response.body[0].id).toBeDefined()
-    expect(response.body[0].data).toEqual({ argument1: 'string', argument2: 123 })
-  })
-
-  test('POST /rpc/deleteStructureForDatasource', async () => {
-    const reqBody = {
-      pipelineid: 'pipeline-123test'
-    }
-
-    const response = await request(URL)
-      .post('/rpc/deletestructurefordatasource')
-      .send(reqBody)
-    expect(response.status).toEqual(200)
+    expect(response.type).toEqual('application/json')
+    expect(response.body.id).toEqual("1")
+    expect(response.body.timestamp).toEqual(pipelineExecutedEvent.timestamp.toISOString())
+    expect(response.body.pipelineId).toEqual(pipelineExecutedEvent.pipelineId)
+    expect(response.body.data).toEqual(pipelineExecutedEvent.data)
   })
 })
+
+const amqpConnect = async (amqpUrl, retries, backoff) => {
+  console.log("AMQP URL: " + amqpUrl)
+  for (let i = 1; i <= retries; i++) {
+    try {
+      const connection = await AMQP.connect(amqpUrl)
+      console.log(`Successfully establish connection to AMQP broker (${amqpUrl})`)
+      return Promise.resolve(connection)
+    } catch(error) {
+      console.info(`Error connecting to RabbitMQ: ${error}. Retrying in ${backoff} seconds`)
+      console.info(`Connecting to Amqp broker (${i}/${retries})`);
+      await sleep(backoff)
+      continue
+    }
+  }
+  Promise.reject(`Could not establish connection to AMQP broker (${amqpUrl})`)
+}
+
+const sleep = (ms) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}

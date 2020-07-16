@@ -19,8 +19,8 @@ describe('Storage-MQ', () => {
     const pingUrl = URL + '/'
 
     const promiseResults = await Promise.all([
-      amqpConnect(AMQP_URL, 25, 2000),
-      storageMqHealth(pingUrl, 50000),
+      amqpConnect(AMQP_URL, 40, 2000),
+      storageMqHealth(pingUrl, 80000),
     ])
     amqpConnection = promiseResults[0]
   }, 90000)
