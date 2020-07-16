@@ -149,7 +149,6 @@ services:
     depends_on:
       - storage-db
       - storage-db-liquibase # TODO: make sure the migration runs through before reading db structure
-      - storage-mq
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-storage.rule=PathPrefix(`/api/storage`)"

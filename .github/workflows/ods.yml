@@ -123,8 +123,8 @@ jobs:
           docker-compose -f docker-compose.yml -f docker-compose.it.yml build storage-it
           docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d storage-db
           docker-compose -f docker-compose.yml -f docker-compose.it.yml up storage-db-liquibase
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d storage
           docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d storage-mq
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d storage
           docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from storage-it storage-it
           docker-compose logs
           docker-compose -f docker-compose.yml -f docker-compose.it.yml down
