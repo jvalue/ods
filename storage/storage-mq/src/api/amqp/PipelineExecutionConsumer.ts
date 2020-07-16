@@ -37,8 +37,8 @@ export class PipelineExecutionConsumer {
         Promise.reject(`Could not establish connection to AMQP Broker (${amqpUrl})`)
     }
 
-    private sleep(backOff: number): Promise<void> {
-        return new Promise(resolve => setTimeout(resolve, backOff * 1000));
+    private sleep(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     private async initChannel(connection: AMQP.Connection) {
