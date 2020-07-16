@@ -44,6 +44,7 @@ describe('Storage-MQ', () => {
   })
 
   test('Event-driven storage structure creation and no content', async () => {
+    const pipelineId = "333"
 
     const channel = await amqpConnection.createChannel()
     channel.assertExchange(amqp_exchange, 'topic', {
@@ -51,7 +52,7 @@ describe('Storage-MQ', () => {
     });
 
     const pipelineCreatedEvent = {
-      pipelineId: "333"
+      pipelineId: pipelineId
     }
     const event = JSON.stringify(pipelineCreatedEvent)
 
@@ -60,10 +61,10 @@ describe('Storage-MQ', () => {
 
     await sleep(2000) // time to process event
 
-    const response = await request(URL).get('/bucket/333/content/')
+    const response = await request(URL).get(`/bucket/${pipelineId}/content/`)
     console.log(response.body)
     expect(response.status).toEqual(200)
-    expect(response.type).toEqual('text/json')
+    expect(response.type).toEqual('application/json')
     expect(response.body).toEqual([])
   })
 

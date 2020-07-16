@@ -43,6 +43,7 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
               const connectionPool = new Pool(poolConfig)
               client = await connectionPool.connect()
               this.connectionPool = connectionPool
+              console.info(`Successfully established database connection`)
               break
             } catch (error) {
               await this.sleep(backoff);
@@ -75,7 +76,7 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
       let client!: PoolClient
       try {
           client = await this.connectionPool.connect()
-          const resultSet = await client.query(`SELECT to_regclass('storage.${tableIdentifier}')`)
+          const resultSet = await client.query(`SELECT to_regclass('${tableIdentifier}')`)
           const tableExists = !!resultSet.rows[0].to_regclass
           console.debug(`Table ${tableIdentifier} exists: ${tableExists}`)
           return Promise.resolve(tableExists)
@@ -97,6 +98,7 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
 
       const tableExists = await this.existsTable(tableIdentifier)
       if(!tableExists) {
+        console.debug(`Table "${tableIdentifier}" does not exist - returning no data`)
         return Promise.resolve(undefined)
       }
 
@@ -124,6 +126,7 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
 
       const tableExists = await this.existsTable(tableIdentifier)
       if(!tableExists) {
+        console.debug(`Table "${tableIdentifier}" does not exist - returning no data`)
         return Promise.resolve(undefined)
       }
 
@@ -156,7 +159,7 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
 
         // Generate Query-String
         const data = JSON.stringify(content.data).replace("'", "''") // Escape single quotes
-        const insertStatement = `SET search_path to storage; INSERT INTO "${tableIdentifier}" ("data", "license", "origin", "pipelineId", "timestamp") VALUES ('$1', '$2', '$3', $4, '$5') RETURNING *`
+        const insertStatement = `INSERT INTO "${tableIdentifier}" ("data", "license", "origin", "pipelineId", "timestamp") VALUES ('$1', '$2', '$3', $4, '$5') RETURNING *`
         const values = [data, content.license, content.origin, parseInt(content.pipelineId), content.timestamp]
 
         let client!: PoolClient  // Client to execute the query
