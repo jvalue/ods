@@ -4,6 +4,7 @@ import { Pool, PoolConfig, PoolClient } from "pg"
 export class PostgresStorageStructureRepository implements StorageStructureRepository {
 
     connectionPool?: Pool
+    schema = process.env.DATABASE_SCHEMA
 
     /**
      * Initializes the connection to the database.
@@ -77,7 +78,7 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
       let client!: PoolClient
       try {
           client = await this.connectionPool.connect()
-          const resultSet = await client.query(`SELECT to_regclass('${tableIdentifier}')`)
+          const resultSet = await client.query(`SELECT to_regclass('${this.schema}.${tableIdentifier}')`)
           const tableExists = !!resultSet.rows[0].to_regclass
           console.debug(`Table ${tableIdentifier} exists: ${tableExists}`)
           return Promise.resolve(tableExists)
@@ -105,12 +106,12 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
         let client!: PoolClient
         try {
             client = await this.connectionPool.connect()
-            await client.query(`CREATE TABLE IF NOT EXISTS "${tableIdentifier}" (
+            await client.query(`CREATE TABLE IF NOT EXISTS "${this.schema}"."${tableIdentifier}" (
                 "id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
                 "data" jsonb NOT NULL,
                 "timestamp" timestamp,
                 "pipelineId" varchar,
-                CONSTRAINT "Data_pk_${tableIdentifier}" PRIMARY KEY (id)
+                CONSTRAINT "Data_pk_${this.schema}_${tableIdentifier}" PRIMARY KEY (id)
               )`)
         } catch (err) {
             console.error(`Could not create table: ${err}`)
@@ -139,7 +140,7 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
         let client!: PoolClient
         try {
             client = await this.connectionPool.connect()
-            await client.query(`DROP TABLE "${tableIdentifier}" CASCADE`)
+            await client.query(`DROP TABLE "${this.schema}"."${tableIdentifier}" CASCADE`)
         } catch (err) {
             console.error(`Could not delete table: ${err}`)
             return Promise.reject(err)

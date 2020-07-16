@@ -113,6 +113,7 @@ services:
       DATABASE_NAME: ods
       DATABASE_USER: storagemq
       DATABASE_PW: storagemq-pw
+      DATABASE_SCHEMA: 'storage'
 
       AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
 

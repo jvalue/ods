@@ -60,7 +60,7 @@ describe('Storage', () => {
 
 
     const response = await request(STORAGE_URL)
-      .get(`/$${pipelineId}`)
+      .get(`/${pipelineId}`)
     expect(response.status).toEqual(200)
     expect(response.body).toHaveLength(1)
     expect(response.type).toEqual('application/json')
