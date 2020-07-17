@@ -69,7 +69,7 @@ describe('Storage', () => {
     expect(new Date(response.body[0].timestamp)).toEqual(new Date(pipelineExecutedEvent.timestamp)) // TODO: returned timestamp is not ISO String, but equal
     expect(response.body[0].pipelineId).toEqual(pipelineExecutedEvent.pipelineId)
     expect(response.body[0].data).toEqual(pipelineExecutedEvent.data)
-  })
+  }, 10000)
 })
 
 const amqpConnect = async (amqpUrl, retries, backoff) => {
