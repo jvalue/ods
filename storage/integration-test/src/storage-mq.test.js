@@ -31,18 +31,19 @@ describe('Storage-MQ', () => {
     expect(response.type).toEqual('text/plain')
     const semanticVersionRegEx = '^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)'
     expect(response.text).toMatch(new RegExp(semanticVersionRegEx))
-  })
+  }, 5000)
 
   test('GET /bucket/3000/content on non-existing bucket should 404', async () => {
     const response = await request(URL).get('/bucket/3000/content')
     console.log(response.body)
     expect(response.status).toEqual(404)
-  })
+  }, 5000)
+
   test('GET /bucket/3000/content/5 on non-existing bucket should 404', async () => {
     const response = await request(URL).get('/bucket/3000/content/5')
     console.log(response.body)
     expect(response.status).toEqual(404)
-  })
+  }, 5000)
 
   test('Event-driven storage structure creation and no content', async () => {
     const pipelineId = "333"
@@ -67,7 +68,7 @@ describe('Storage-MQ', () => {
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('application/json')
     expect(response.body).toEqual([])
-  })
+  }, 10000)
 
   test('Event-driven storage structure creation and content arrival', async () => {
     const pipelineId = "444"
@@ -114,12 +115,12 @@ describe('Storage-MQ', () => {
     expect(allContentResponse.type).toEqual('application/json')
     expect(allContentResponse.body.length).toEqual(1)
     expect(allContentResponse.body[0]).toEqual(contentResponse.body)
-  })
+  }, 10000)
 
   test('GET /bucket/3000/content/5 on existing bucket but not existing content should 404', async () => {
     const response = await request(URL).get('/bucket/3000/content/5')
     expect(response.status).toEqual(404)
-  })
+  }, 5000)
 
 
   test('Event-driven storage structure creation and deletion', async () => {
@@ -157,7 +158,7 @@ describe('Storage-MQ', () => {
     expect(response.status).toEqual(404)
   })
 
-})
+}, 10000)
 
 
 
@@ -180,7 +181,7 @@ const amqpConnect = async (amqpUrl, retries, backoff) => {
       continue
     }
   }
-  Promise.reject(`Could not establish connection to AMQP broker (${amqpUrl})`)
+  return Promise.reject(`Could not establish connection to AMQP broker (${amqpUrl})`)
 }
 
 const sleep = (ms) => {
