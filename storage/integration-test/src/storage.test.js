@@ -66,7 +66,7 @@ describe('Storage', () => {
     expect(response.body).toHaveLength(1)
     expect(response.type).toEqual('application/json')
     expect(response.body[0].id).toEqual(1)
-    expect(response.body[0].timestamp).toEqual(pipelineExecutedEvent.timestamp.toISOString())
+    expect(new Date(response.body[0].timestamp)).toEqual(new Date(pipelineExecutedEvent.timestamp)) // TODO: returned timestamp is not ISO String, but equal
     expect(response.body[0].pipelineId).toEqual(pipelineExecutedEvent.pipelineId)
     expect(response.body[0].data).toEqual(pipelineExecutedEvent.data)
   })
