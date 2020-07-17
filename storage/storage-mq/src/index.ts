@@ -32,7 +32,7 @@ process.on('unhandledRejection', function(reason, p){
   console.debug("Possibly Unhandled Rejection at: Promise ", p, " reason: ", reason);
 });
 
-app.listen(port, async () => {
+const server = app.listen(port, async () => {
 
   await storageContentRepository.init(30, 2000)
   await storageStructureRepositry.init(30, 2000)
@@ -55,4 +55,9 @@ app.listen(port, async () => {
         .send(storageContentEndpoint.getVersion())
     res.end()
   })
+})
+
+process.on('SIGTERM', async () => {
+  console.info('Storage-MQ: SIGTERM signal received.')
+  await server.close()
 })
