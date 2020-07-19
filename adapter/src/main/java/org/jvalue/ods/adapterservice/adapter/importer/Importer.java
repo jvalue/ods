@@ -13,6 +13,8 @@ public abstract class Importer {
     @JsonProperty("parameters")
     public abstract List<ImporterParameterDescription> getAvailableParameters();
 
+    protected abstract List<ImporterParameterDescription> getRequiredParameters();
+
     public final String fetch(Map<String, Object> parameters) {
       validateParameters(parameters);
       return doFetch(parameters);
@@ -23,7 +25,7 @@ public abstract class Importer {
       boolean illegalArguments = false;
       String illegalArgumentsMessage = "";
 
-      for (ImporterParameterDescription requiredParameter : getAvailableParameters()) {
+      for (ImporterParameterDescription requiredParameter : getRequiredParameters()) {
         if (inputParameters.get(requiredParameter.getName()) == null) {
           illegalArguments = true;
           illegalArgumentsMessage = illegalArgumentsMessage + getType() + " importer requires parameter "
