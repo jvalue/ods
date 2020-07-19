@@ -13,7 +13,9 @@ public abstract class Importer {
     @JsonProperty("parameters")
     public abstract List<ImporterParameterDescription> getAvailableParameters();
 
-    protected abstract List<ImporterParameterDescription> getRequiredParameters();
+    protected List<ImporterParameterDescription> getRequiredParameters() {
+      return getAvailableParameters();
+    }
 
     public final String fetch(Map<String, Object> parameters) {
       validateParameters(parameters);
