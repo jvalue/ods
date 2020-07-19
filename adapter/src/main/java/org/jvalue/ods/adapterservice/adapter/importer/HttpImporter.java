@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class HttpImporter extends Importer {
 
@@ -49,6 +50,10 @@ public class HttpImporter extends Importer {
     return parameters;
   }
 
+  @Override
+  protected List<ImporterParameterDescription> getRequiredParameters() {
+    return getAvailableParameters().stream().filter(x -> !x.getName().equals("defaultParameters")).collect(Collectors.toList());
+  }
   @Override
   protected String doFetch(Map<String, Object> parameters) {
     validateParameters(parameters);
