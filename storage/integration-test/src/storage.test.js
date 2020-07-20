@@ -27,6 +27,14 @@ describe('Storage', () => {
     }
   }, 90000)
 
+  afterAll(async () => {
+    if(amqpConnection) {
+      console.log("Closing AMQP connection...")
+      await amqpConnection.close()
+      console.log("AMQP connection closed")
+    }
+  }, 10000)
+
   test('GET on arrived data', async () => {
     const pipelineId = '21398'
 
