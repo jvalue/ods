@@ -6,11 +6,11 @@ const STORAGE_URL = process.env.STORAGE_API
 const STORAGEMQ_URL = process.env.STORAGEMQ_API
 const AMQP_URL = process.env.AMQP_URL
 
-const amqp_exchange = "ods_global"
-const amqp_pipeline_config_created_topic = "pipeline.config.created"
-const amqp_pipeline_execution_success_topic = "pipeline.execution.success"
+const amqp_exchange = 'ods_global'
+const amqp_pipeline_config_created_topic = 'pipeline.config.created'
+const amqp_pipeline_execution_success_topic = 'pipeline.execution.success'
 
-let amqpConnection = undefined
+let amqpConnection
 
 describe('Storage', () => {
   console.log('Storage-Service URL= ' + STORAGE_URL)
@@ -28,12 +28,12 @@ describe('Storage', () => {
   }, 90000)
 
   test('GET on arrived data', async () => {
-    const pipelineId = "21398"
+    const pipelineId = '21398'
 
     const channel = await amqpConnection.createChannel()
     channel.assertExchange(amqp_exchange, 'topic', {
-        durable: false
-    });
+      durable: false
+    })
 
     const pipelineCreatedEvent = {
       pipelineId: pipelineId
@@ -41,23 +41,21 @@ describe('Storage', () => {
     const configEvent = JSON.stringify(pipelineCreatedEvent)
 
     channel.publish(amqp_exchange, amqp_pipeline_config_created_topic, Buffer.from(configEvent))
-    console.log("Sent via AMQP: %s:'%s'", amqp_pipeline_config_created_topic, configEvent);
+    console.log("Sent via AMQP: %s:'%s'", amqp_pipeline_config_created_topic, configEvent)
 
     await sleep(1000) // time to process event
-
 
     const pipelineExecutedEvent = {
       pipelineId: pipelineId,
       timestamp: new Date(Date.now()),
-      data: { exampleNumber: 123, exampleString: "abc", exampleArray: [{x: "y"}, {t: 456}]}
+      data: { exampleNumber: 123, exampleString: 'abc', exampleArray: [{ x: 'y' }, { t: 456 }] }
     }
     const executionEvent = JSON.stringify(pipelineExecutedEvent)
 
     channel.publish(amqp_exchange, amqp_pipeline_execution_success_topic, Buffer.from(executionEvent))
-    console.log("Sent via AMQP: %s:'%s'", amqp_pipeline_execution_success_topic, executionEvent);
+    console.log("Sent via AMQP: %s:'%s'", amqp_pipeline_execution_success_topic, executionEvent)
 
     await sleep(1000) // time to process event
-
 
     const response = await request(STORAGE_URL)
       .get(`/${pipelineId}`)
@@ -73,15 +71,15 @@ describe('Storage', () => {
 })
 
 const amqpConnect = async (amqpUrl, retries, backoff) => {
-  console.log("AMQP URL: " + amqpUrl)
+  console.log('AMQP URL: ' + amqpUrl)
   for (let i = 1; i <= retries; i++) {
     try {
       const connection = await AMQP.connect(amqpUrl)
       console.log(`Successfully establish connection to AMQP broker (${amqpUrl})`)
       return Promise.resolve(connection)
-    } catch(error) {
+    } catch (error) {
       console.info(`Error connecting to RabbitMQ: ${error}. Retrying in ${backoff} seconds`)
-      console.info(`Connecting to Amqp broker (${i}/${retries})`);
+      console.info(`Connecting to Amqp broker (${i}/${retries})`)
       await sleep(backoff)
       continue
     }
@@ -90,5 +88,5 @@ const amqpConnect = async (amqpUrl, retries, backoff) => {
 }
 
 const sleep = (ms) => {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
