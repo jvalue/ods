@@ -29,8 +29,11 @@ public abstract class Importer {
       boolean illegalArguments = false;
       String illegalArgumentsMessage = "";
 
+
+      List<String> possibleParameters = getAvailableParameters().stream()
+        .map(ImporterParameterDescription::getName).collect(Collectors.toList());
       var unnecessaryArguments = inputParameters.keySet().stream()
-        .filter(o -> !getAvailableParameters().contains(o)).collect(Collectors.toList());
+        .filter(o -> !possibleParameters.contains(o)).collect(Collectors.toList());
       if (unnecessaryArguments.size() > 0) {
         illegalArguments = true;
         for (var argument :
