@@ -99,4 +99,12 @@ public class DatasourceTest {
     DatasourceTrigger trigger = new DatasourceTrigger(true, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse("1905-12-01T02:30:00.123Z"), 50000L);
     return new Datasource(protocolConfig, formatConfig, metadata, trigger);
   }
+
+  private Datasource generateParameterizableDatasource(String protocol, String format, String location, Map<String, String> defaultParameters) throws ParseException {
+    DatasourceProtocol protocolConfig = new DatasourceProtocol(protocol, Map.of("location", location, "defaultParameters", defaultParameters));
+    DatasourceFormat formatConfig = new DatasourceFormat(format, Map.of());
+    DatasourceMetadata metadata = new DatasourceMetadata("icke", "none", "TestName", "Describing...");
+    DatasourceTrigger trigger = new DatasourceTrigger(true, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse("1905-12-01T02:30:00.123Z"), 50000L);
+    return new Datasource(protocolConfig, formatConfig, metadata, trigger);
+  }
 }
