@@ -14,7 +14,8 @@ public abstract class Importer {
     public abstract List<ImporterParameterDescription> getAvailableParameters();
 
     protected List<ImporterParameterDescription> getRequiredParameters() {
-      return getAvailableParameters();
+      return getAvailableParameters().stream()
+        .filter(ImporterParameterDescription::isRequired).collect(Collectors.toList());
     }
 
     public final String fetch(Map<String, Object> parameters) {
