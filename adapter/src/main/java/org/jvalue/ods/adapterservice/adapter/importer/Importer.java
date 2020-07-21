@@ -2,6 +2,7 @@ package org.jvalue.ods.adapterservice.adapter.importer;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -27,6 +28,16 @@ public abstract class Importer {
     protected void validateParameters(Map<String, Object> inputParameters) {
       boolean illegalArguments = false;
       String illegalArgumentsMessage = "";
+
+      var unnecessaryArguments = inputParameters.keySet().stream()
+        .filter(o -> !getAvailableParameters().contains(o)).collect(Collectors.toList());
+      if (unnecessaryArguments.size() > 0) {
+        illegalArguments = true;
+        for (var argument :
+          unnecessaryArguments) {
+          illegalArgumentsMessage +=  argument + " is not needed by importer \n";
+        }
+      }
 
       for (ImporterParameterDescription requiredParameter : getRequiredParameters()) {
         if (inputParameters.get(requiredParameter.getName()) == null) {
