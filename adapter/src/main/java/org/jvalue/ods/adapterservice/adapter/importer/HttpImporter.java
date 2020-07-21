@@ -54,10 +54,6 @@ public class HttpImporter extends Importer {
   }
 
   @Override
-  protected List<ImporterParameterDescription> getRequiredParameters() {
-    return getAvailableParameters().stream().filter(x -> !x.getName().equals("defaultParameters")).collect(Collectors.toList());
-  }
-  @Override
   protected String doFetch(Map<String, Object> parameters) {
     validateParameters(parameters);
     String location = parameters.get("location").toString();
