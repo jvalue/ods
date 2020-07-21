@@ -66,13 +66,15 @@ public class DatasourceTest {
 
   @Test
   public void testFillQueryParameters() throws ParseException {
-    Datasource datasource = generateDatasource("HTTP", "JSON", "http://www.the-inder.net/{userId}/{dataId}");
+    Datasource datasource = generateParameterizableDatasource("HTTP", "JSON", "http://www.the-inder.net/{userId}/{dataId}", Map.of("userId", "1", "dataId", "123"));
     Map<String, String> parameters = new HashMap<>();
     parameters.put("userId", "1");
     parameters.put("dataId", "123");
     parameters.put("notAKey", "notAValue");
     RuntimeParameters runtimeParameters = new RuntimeParameters(parameters);
     DatasourceProtocol datasourceProtocol = datasource.fillQueryParameters(runtimeParameters);
+    assertEquals("http://www.the-inder.net/1/123", datasourceProtocol.getParameters().get("location"));
+    datasourceProtocol = datasource.fillQueryParameters(null);
     assertEquals("http://www.the-inder.net/1/123", datasourceProtocol.getParameters().get("location"));
   }
 
