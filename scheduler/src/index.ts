@@ -17,21 +17,26 @@ const CHRONJOB_EVERY_2_SECONDS = '*/2 * * * * *'
 const INITIAL_CONNECTION_RETRIES = parseInt(process.env.INITIAL_CONNECTION_RETRIES || '30')
 const INITIAL_CONNECTION_RETRY_BACKOFF = parseInt(process.env.INITIAL_CONNECTION_RETRY_BACKOFF || '3000')
 
-const server = app.listen(port, () => {
+const server = app.listen(port, async () => {
+  await initPipelineConfigSync(INITIAL_CONNECTION_RETRIES, INITIAL_CONNECTION_RETRY_BACKOFF)
+  await initJobs(INITIAL_CONNECTION_RETRIES, INITIAL_CONNECTION_RETRY_BACKOFF)
+  await AmqpClient.init(INITIAL_CONNECTION_RETRIES, INITIAL_CONNECTION_RETRY_BACKOFF)
   console.log('listening on port ' + port)
-})
 
-app.get('/', (req, res) => {
-  res.send('I am alive!')
-})
+  app.get('/', (req, res) => {
+    res.send('I am alive!')
+  })
 
-app.get('/version', (req, res) => {
-  res.header('Content-Type', 'text/plain')
-  res.send(API_VERSION)
-})
-app.get('/jobs', (req, res) => {
-  res.header('Content-Type', 'application/json')
-  res.json(Scheduling.getAllJobs())
+  app.get('/version', (req, res) => {
+    res.header('Content-Type', 'text/plain')
+    res.send(API_VERSION)
+  })
+
+  app.get('/jobs', (req, res) => {
+    res.header('Content-Type', 'application/json')
+    res.json(Scheduling.getAllJobs())
+  })
+
 })
 
 let datasourcePollingJob: schedule.Job
@@ -45,9 +50,9 @@ async function updateDatsources (): Promise<void> {
   }
 }
 
-async function initJobs (): Promise<void> {
+async function initJobs (retries = 30, retryBackoff = 3000): Promise<void> {
   console.log('Starting sync with Adapter Service on URL ' + ADAPTER_SERVICE_URL)
-  await Scheduling.initializeJobs(INITIAL_CONNECTION_RETRIES, INITIAL_CONNECTION_RETRY_BACKOFF)
+  await Scheduling.initializeJobs(retries, retryBackoff)
     .catch(() => {
       console.error('Scheduler: Initialization failed. Shutting down server...')
       server.close()
@@ -88,11 +93,6 @@ async function initPipelineConfigSync (retries = 30, retryBackoff = 3000): Promi
 process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
   console.log('Caught unhandled promise:', reason);
 });
-
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
-initPipelineConfigSync()
-initJobs()
-AmqpClient.init(3, 2)
 
 process.on('SIGTERM', async () => {
   console.info('Scheduler: SIGTERM signal received.')
