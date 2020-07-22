@@ -21,7 +21,6 @@ const mockGetPipelinesForDatasource = CoreClient.getCachedPipelinesByDatasourceI
 const mockExecuteAdapter = AdapterClient.executeAdapter as jest.Mock
 const mockExecuteTransformation = TransformationClient.executeTransformation as jest.Mock
 const mockExecuteStorage = StorageClient.executeStorage as jest.Mock
-const mockInitAmqp = AmqpClient.init as jest.Mock
 const mockPublishAmqp = AmqpClient.publish as jest.Mock
 
 const adapterResponse: AdapterResponse = {
