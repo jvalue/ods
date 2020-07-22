@@ -68,7 +68,7 @@ export function publish(content: NotificationTriggerEvent): boolean {
 }
 
 function sleep(backoff: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, backoff * 1000))
+  return new Promise(resolve => setTimeout(resolve, backoff))
 }
 
 export interface NotificationTriggerEvent {
