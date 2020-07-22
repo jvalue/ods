@@ -57,7 +57,9 @@ export function publish(content: NotificationTriggerEvent): boolean {
     return false
   } else {
     try {
-      return channel.publish(AMQP_EXCHANGE, AMPQ_NOTIFICATION_EXECUTION_TOPIC, Buffer.from(content))
+      const success = channel.publish(AMQP_EXCHANGE, AMPQ_NOTIFICATION_EXECUTION_TOPIC, Buffer.from(JSON.stringify(content)))
+      console.log(`Sent: ${JSON.stringify(content)} to topic ${AMPQ_NOTIFICATION_EXECUTION_TOPIC} in exchange ${AMQP_EXCHANGE}`)
+      return success
     } catch (error) {
       console.error(`Error publishing to exchange ${AMQP_EXCHANGE} under key ${AMPQ_NOTIFICATION_EXECUTION_TOPIC}: ${error}`)
       return false
