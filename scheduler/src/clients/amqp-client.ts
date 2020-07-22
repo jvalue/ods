@@ -42,7 +42,7 @@ async function connect(): Promise<amqp.Connection> {
 async function initChannel(connection: amqp.Connection): Promise<amqp.Channel> {
   try {
     const channel = await connection.createChannel()
-    await channel.assertExchange(AMQP_EXCHANGE, 'topic', {durable: true})
+    await channel.assertExchange(AMQP_EXCHANGE, 'topic', {durable: false})
     console.log(`Exchange ${AMQP_EXCHANGE} successfully initialized.`)
     return channel
   } catch (error) {
