@@ -145,7 +145,10 @@ Content-Type: application/json
     "type": "HTTP",
     "parameters": {
       "location": "https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/{station}/W/measurements.json?start=P1D",
-      "encoding": "UTF-8"
+      "encoding": "UTF-8",
+      "defaultParameters": {
+        "station": "BAMBERG"
+      }
     }
   },
   "format": {
