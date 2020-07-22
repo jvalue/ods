@@ -31,49 +31,35 @@ export class AmqpHandler{
      * @param retries   Number of retries to connect to the notification-config db
      * @param backoff   Time to wait until the next retry
      */
-    public async connect(retries: number, backoff: number) {
+    public async connect(retries: number, backoff: number): Promise<void> {
         console.log(`Connecting to AMQP broker un URL "${this.amqpUrl}"`)
 
-        let established: boolean = false    // amqp service connection result
-        const handler: AmqpHandler = this   // for ability to access methods and members in callback
-        let errMsg: string = ''             // Error message to be shown after final retry
-
-        for (let i = 1; i <= retries; i++) {
-            await this.backOff(backoff)
-            await AMQP.connect(this.amqpUrl, async function (error0: any, connection: AMQP.Connection) {
-                if (error0) {
-                    errMsg = `Error connecting to RabbitMQ: ${error0}.Retrying in ${backoff} seconds`
-                    console.info(`Connecting to Amqp handler (${i}/${retries})`);
-                    return
-                }
-                established = true
-
-                // create the channel
-                await handler.initChannel(connection)
-            })
-
-            if (established) {
-                break
+        let retry = 0
+        while(retry < retries) {
+            try {
+                console.log("Attempting to connect to AMQP Broker.")
+                const connection = await AMQP.connect(this.amqpUrl)
+                console.log("Connected to AMQP Broker.")
+                return await this.initChannel(connection)
+            } catch (e) {
+                retry ++
+                await this.backOff(backoff)
             }
         }
-
-        if (!established) {
-            console.error(`Could not establish connection to Amqp handler: ${errMsg}`)
-        } else {
-            console.info('Connected to amqpHandler')
-        }
+        console.log("Could not connect to AMQP Broker!")
+        return Promise.reject()
     }
 
     /**
      * Waits for a specific time period.
      *
-     * @param backOff   Period to wait in seconds
+     * @param ms   Period to wait in seconds
      */
-    private backOff(backOff: number): Promise<void> {
-        return new Promise(resolve => setTimeout(resolve, backOff * 1000));
+    private backOff(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    private async initChannel(connection: AMQP.Connection) {
+    private async initChannel(connection: AMQP.Connection): Promise<void> {
         console.log(`Initializing transformation channel "${this.transformationExecutedQueue}"`)
 
         const channel = await connection.createChannel()
@@ -89,6 +75,7 @@ export class AmqpHandler{
         channel.consume(q.queue, async (msg: AMQP.ConsumeMessage | null) => await this.handleEvent(msg))
 
         console.info(`Successfully initialized pipeline-executed queue "${this.transformationExecutedQueue}" on topic "${this.transformationExecutedTopic}"`)
+        return Promise.resolve()
     }
 
     private async handleEvent(msg: AMQP.ConsumeMessage | null): Promise<void> {
