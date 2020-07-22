@@ -39,6 +39,8 @@ const data = {
 
 let notificationStore = []
 
+let amqpConnection
+
 describe('Scheduler', () => {
   console.log('Scheduler-Service URL= ' + URL)
 
@@ -54,6 +56,14 @@ describe('Scheduler', () => {
     console.log('Waiting for service with URL: ' + pingUrl)
     await waitOn({ resources: [pingUrl], timeout: 50000 })
   }, 60000)
+
+  afterAll(async () => {
+    if(amqpConnection) {
+      console.log('Closing AMQP Connection...')
+      await amqpConnection.close()
+      console.log('AMQP Connection closed')
+    }
+  })
 
   test('GET /version', async () => {
     const response = await request(URL).get('/version')
@@ -111,8 +121,8 @@ describe('Scheduler', () => {
 })
 
 async function receiveAmqp (url, exchange, topic, queue) {
-  const connection = await amqp.connect(url)
-  const channel = await connection.createChannel()
+  amqpConnection = await amqp.connect(url)
+  const channel = await amqpConnection.createChannel()
   const q = await channel.assertQueue(queue)
   await channel.bindQueue(q.queue, exchange, topic)
   await channel.consume(q.queue, consumeEvent)
