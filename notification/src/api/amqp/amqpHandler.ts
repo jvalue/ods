@@ -1,4 +1,4 @@
-import { connect, Connection, ConsumeMessage, Channel } from "amqplib/callback_api"
+import * as AMQP from "amqplib"
 import { TriggerEventHandler } from "../triggerEventHandler";
 import { TransformationEvent } from '../transformationEvent';
 
@@ -13,7 +13,11 @@ import { TransformationEvent } from '../transformationEvent';
  *
  */
 export class AmqpHandler{
-    notifQueueName = process.env.AMQP_NOTIFICATION_QUEUE!
+    amqpUrl = process.env.AMQP_URL!
+    exchange = process.env.AMQP_PIPELINE_EXECUTION_EXCHANGE!
+    transformationExecutedQueue = process.env.AMQP_PIPELINE_EXECUTION_QUEUE!
+    transformationExecutedTopic = process.env.AMQP_PIPELINE_EXECUTION_TOPIC!
+    transformationExecutionSuccessTopic = process.env.AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC!
 
     triggerEventHandler: TriggerEventHandler
 
@@ -28,12 +32,7 @@ export class AmqpHandler{
      * @param backoff   Time to wait until the next retry
      */
     public async connect(retries: number, backoff: number) {
-        const rabbit_url = process.env.AMQP_SERVICE_HOST;
-        const rabbit_usr = process.env.AMQP_SERVICE_USER;
-        const rabbit_password = process.env.AMQP_SERVICE_PWD;
-        const rabit_amqp_url = 'amqp://' + rabbit_usr + ':' + rabbit_password + '@' + rabbit_url;
-
-        console.log("URL: " + rabit_amqp_url)
+        console.log(`Connecting to AMQP broker un URL "${this.amqpUrl}"`)
 
         let established: boolean = false    // amqp service connection result
         const handler: AmqpHandler = this   // for ability to access methods and members in callback
@@ -41,7 +40,7 @@ export class AmqpHandler{
 
         for (let i = 1; i <= retries; i++) {
             await this.backOff(backoff)
-            await connect(rabit_amqp_url, async function (error0: any, connection: Connection) {
+            await AMQP.connect(rabit_amqp_url, async function (error0: any, connection: AMQP.Connection) {
                 if (error0) {
                     errMsg = `Error connecting to RabbitMQ: ${error0}.Retrying in ${backoff} seconds`
                     console.info(`Connecting to Amqp handler (${i}/${retries})`);
@@ -74,40 +73,35 @@ export class AmqpHandler{
         return new Promise(resolve => setTimeout(resolve, backOff * 1000));
     }
 
-    private initChannel(connection: Connection) {
-        console.log(`Initializing transformation channel "${this.notifQueueName}"`)
+    private async initChannel(connection: AMQP.Connection) {
+        console.log(`Initializing transformation channel "${this.transformationExecutedQueue}"`)
 
-        connection.createChannel((error1: Error, channel: Channel) => {
-            if (error1) {
-                throw error1;
-            }
-
-            channel.assertQueue(this.notifQueueName, {
-                durable: false,
-            });
-
-            // Consume from channel
-            channel.consume(
-                this.notifQueueName,
-                async (msg: ConsumeMessage | null) => await this.handleEvent(msg),
-                { noAck: true }
-            );
+        const channel = await connection.createChannel()
+        channel.assertExchange(this.exchange, 'topic', {
+          durable: false
         });
-        console.info(`Successfully initialized transformation channel "${this.notifQueueName}"`)
+
+        const q = await channel.assertQueue(this.transformationExecutedQueue, {
+            exclusive: false
+        })
+
+        channel.bindQueue(q.queue, this.exchange, this.transformationExecutedTopic);
+        channel.consume(q.queue, async (msg: AMQP.ConsumeMessage | null) => await this.handleEvent(msg))
+
+        console.info(`Successfully initialized pipeline-executed queue "${this.transformationExecutedQueue}" on topic "${this.transformationExecutedTopic}"`)
     }
 
-    private async handleEvent(msg: ConsumeMessage | null): Promise<void> {
-      if (!msg) {
-        return Promise.reject('Could not receive notification event: Message is not set')
+    private async handleEvent(msg: AMQP.ConsumeMessage | null): Promise<void> {
+      if(!msg) {
+        console.debug("Received empty event when listening on pipeline executions - doing nothing")
+        return
       }
-
-      const eventMessage = JSON.parse(msg.content.toString())
-      const transformationEvent = eventMessage as TransformationEvent
-
-      console.log(`Received event from channel: Pipeline id: "${transformationEvent.pipelineId}",
-      pipeline name: "${transformationEvent.pipelineName}`)
-
-      return this.triggerEventHandler.handleEvent(transformationEvent)
+      console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString());
+      if(msg.fields.routingKey === this.transformationExecutionSuccessTopic) {
+          this.triggerEventHandler.handleEvent(JSON.parse(msg.content.toString()))
+      } else {
+        console.debug("Received unsubscribed event on topic %s - doing nothing", msg.fields.routingKey);
+      }
     }
 }
 
