@@ -91,7 +91,11 @@ async function initPipelineConfigSync (retries = 30, retryBackoff = 3000): Promi
 
 // log all promise rejections that happen (mostly because they happen in async and don't log the point where it happened)
 process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
-  console.log('Caught unhandled rejection: ', reason.code);
+  if (reason) {
+    console.log('Caught unhandled rejection: ', reason.code);
+  } else {
+    console.log(`Caught undefined unhandled rejection`)
+  }
 });
 
 process.on('SIGTERM', async () => {
