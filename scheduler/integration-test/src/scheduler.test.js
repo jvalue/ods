@@ -19,7 +19,7 @@ const MOCK_TRANSFORMATION_URL = 'http://' + MOCK_TRANSFORMATION_HOST + ':' + MOC
 
 const AMQP_URL = process.env.AMQP_URL
 const AMQP_EXCHANGE = process.env.AMQP_EXCHANGE
-const AMQP_NOTIFICATION_TOPIC = process.env.NOTIFICATION_TOPIC
+const AMQP_NOTIFICATION_TOPIC = process.env.AMQP_TOPIC
 const AMQP_IT_QUEUE = process.env.AMQP_IT_QUEUE
 const RABBIT_HEALTH_URL = process.env.RABBIT_HEALTH_URL
 
@@ -37,7 +37,7 @@ const data = {
   test: 'abc' // from transformation service
 }
 
-let notificationStore = {}
+let notificationStore = []
 
 describe('Scheduler', () => {
   console.log('Scheduler-Service URL= ' + URL)
@@ -83,16 +83,22 @@ describe('Scheduler', () => {
   }, 12000)
 
   test('Pipeline triggers correct notifications', async () => {
-    await sleep(10000) // pipeline should have been executing until now!
     await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_NOTIFICATION_TOPIC, AMQP_IT_QUEUE)
-    expect(notificationStore).toEqual(
+    await sleep(10000) // pipeline should have been executing until now!
+    expect(notificationStore).toContainEqual(
       {
         pipelineId: 125,
         pipelineName: 'nordstream',
         data,
         dataLocation: MOCK_STORAGE_URL + '/125',
       })
-    notificationStore = {}
+    expect(notificationStore).toContainEqual(
+      {
+        pipelineId: 123,
+        data,
+        dataLocation: MOCK_STORAGE_URL + '/123'
+      }
+    )
   }, 12000)
 
   test('Pipeline processes events', async () => {
@@ -107,14 +113,14 @@ describe('Scheduler', () => {
 async function receiveAmqp (url, exchange, topic, queue) {
   const connection = await amqp.connect(url)
   const channel = await connection.createChannel()
-  await channel.assertExchange(exchange, 'topic', {durable: true})
   const q = await channel.assertQueue(queue)
   await channel.bindQueue(q.queue, exchange, topic)
   await channel.consume(q.queue, consumeEvent)
 }
 
 async function consumeEvent (msg) {
-  notificationStore = JSON.parse(msg.content.toString())
+  console.log('Event received via amqp')
+  notificationStore.push(JSON.parse(msg.content.toString()))
 }
 
 function sleep (ms) {
