@@ -16,7 +16,7 @@ public class HttpImporter extends Importer {
   private final List<ImporterParameterDescription> parameters =  Collections.unmodifiableList(List.of(
       new ImporterParameterDescription("location", "String of the URI for the HTTP call", String.class),
       new ImporterParameterDescription("encoding", "Encoding of the source. Available encodings: ISO-8859-1, US-ASCII, UTF-8", String.class),
-      new ImporterParameterDescription("defaultParameters", "Default values for open parameters in the URI", RuntimeParameters.class)
+      new ImporterParameterDescription("defaultParameters", "Default values for open parameters in the URI", false, RuntimeParameters.class)
     ));
   private final RestTemplate restTemplate;
 
@@ -53,10 +53,6 @@ public class HttpImporter extends Importer {
     return parameters;
   }
 
-  @Override
-  protected List<ImporterParameterDescription> getRequiredParameters() {
-    return getAvailableParameters().stream().filter(x -> !x.getName().equals("defaultParameters")).collect(Collectors.toList());
-  }
   @Override
   protected String doFetch(Map<String, Object> parameters) {
     validateParameters(parameters);
