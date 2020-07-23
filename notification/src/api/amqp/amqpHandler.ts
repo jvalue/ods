@@ -29,9 +29,9 @@ export class AmqpHandler{
      * Connects to Amqp Service and initializes a channel
      *
      * @param retries   Number of retries to connect to the notification-config db
-     * @param backoff   Time to wait until the next retry
+     * @param ms   Time to wait until the next retry
      */
-    public async connect(retries: number, backoff: number): Promise<void> {
+    public async connect(retries: number, ms: number): Promise<void> {
         console.log(`Connecting to AMQP broker un URL "${this.amqpUrl}"`)
 
         let retry = 0
@@ -43,7 +43,7 @@ export class AmqpHandler{
                 return await this.initChannel(connection)
             } catch (e) {
                 retry ++
-                await this.backOff(backoff)
+                await this.backOff(ms)
             }
         }
         console.log("Could not connect to AMQP Broker!")
