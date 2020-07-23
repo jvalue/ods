@@ -49,6 +49,11 @@ public class HttpImporterTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
+    public void testTypoInArguments() throws IllegalArgumentException {
+        String result = importer.fetch(Map.of("locationS", from.getPath(), "encodingS", "UTF-8"));
+    }
+
+  @Test(expected = IllegalArgumentException.class)
     public void testFetchMissingURI() throws IOException {
         importer.fetch(Map.of());
     }
@@ -56,9 +61,9 @@ public class HttpImporterTest {
     @Test
     public void testSerialization() throws IOException {
         JsonNode expected = mapper.readTree("{\"parameters\":[" +
-            "{\"name\":\"location\", \"description\":\"String of the URI for the HTTP call\", \"type\":\"java.lang.String\"}," +
-            "{\"name\":\"encoding\", \"description\":\"Encoding of the source. Available encodings: ISO-8859-1, US-ASCII, UTF-8\", \"type\":\"java.lang.String\"}," +
-            "{\"name\":\"defaultParameters\", \"description\":\"Default values for open parameters in the URI\", \"type\":\"org.jvalue.ods.adapterservice.datasource.model.RuntimeParameters\"}" +
+            "{\"name\":\"location\", \"description\":\"String of the URI for the HTTP call\", \"type\":\"java.lang.String\", \"required\": true}," +
+            "{\"name\":\"encoding\", \"description\":\"Encoding of the source. Available encodings: ISO-8859-1, US-ASCII, UTF-8\", \"type\":\"java.lang.String\", \"required\": true}," +
+            "{\"name\":\"defaultParameters\", \"description\":\"Default values for open parameters in the URI\", \"type\":\"org.jvalue.ods.adapterservice.datasource.model.RuntimeParameters\", \"required\": false}" +
           "], \"type\":\"HTTP\",\"description\":\"Plain HTTP\"}");
         JsonNode result = mapper.valueToTree(importer);
 

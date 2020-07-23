@@ -5,6 +5,7 @@ import java.util.Objects;
 public class ImporterParameterDescription {
     private String name;
     private String description;
+    private boolean required;
     private Class type;
 
     private ImporterParameterDescription() {    }
@@ -12,10 +13,18 @@ public class ImporterParameterDescription {
     public ImporterParameterDescription(String name, String description, Class type) {
         this.name = name;
         this.description = description;
+        this.required = true;
         this.type = type;
     }
 
-    public String getName() {
+  public ImporterParameterDescription(String name, String description, boolean required, Class type) {
+    this.name = name;
+    this.description = description;
+    this.required = required;
+    this.type = type;
+  }
+
+  public String getName() {
         return name;
     }
 
@@ -39,18 +48,27 @@ public class ImporterParameterDescription {
         this.type = type;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ImporterParameterDescription that = (ImporterParameterDescription) o;
-        return Objects.equals(name, that.name) &&
-                Objects.equals(description, that.description) &&
-                Objects.equals(type, that.type);
-    }
+  public boolean isRequired() {
+    return required;
+  }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, description, type);
-    }
+  public void setRequired(boolean required) {
+    this.required = required;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof ImporterParameterDescription)) return false;
+    ImporterParameterDescription that = (ImporterParameterDescription) o;
+    return isRequired() == that.isRequired() &&
+      Objects.equals(getName(), that.getName()) &&
+      Objects.equals(getDescription(), that.getDescription()) &&
+      Objects.equals(getType(), that.getType());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getName(), getDescription(), isRequired(), getType());
+  }
 }
