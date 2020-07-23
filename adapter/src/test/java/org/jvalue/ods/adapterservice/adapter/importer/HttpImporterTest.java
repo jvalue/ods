@@ -57,7 +57,8 @@ public class HttpImporterTest {
     public void testSerialization() throws IOException {
         JsonNode expected = mapper.readTree("{\"parameters\":[" +
             "{\"name\":\"location\", \"description\":\"String of the URI for the HTTP call\", \"type\":\"java.lang.String\"}," +
-            "{\"name\":\"encoding\", \"description\":\"Encoding of the source. Available encodings: ISO-8859-1, US-ASCII, UTF-8\", \"type\":\"java.lang.String\"}" +
+            "{\"name\":\"encoding\", \"description\":\"Encoding of the source. Available encodings: ISO-8859-1, US-ASCII, UTF-8\", \"type\":\"java.lang.String\"}," +
+            "{\"name\":\"defaultParameters\", \"description\":\"Default values for open parameters in the URI\", \"type\":\"org.jvalue.ods.adapterservice.datasource.model.RuntimeParameters\"}" +
           "], \"type\":\"HTTP\",\"description\":\"Plain HTTP\"}");
         JsonNode result = mapper.valueToTree(importer);
 
