@@ -40,13 +40,13 @@ export class StorageHandler implements NotificationRepository {
  * and initializing a repository for the notification config
  *
  * @param retries:  Number of retries to connect to the database
- * @param backoff:  Time in seconds to backoff before next connection retry
+ * @param ms:  Time in seconds to backoff before next connection retry
  */
-    public async init(retries: number, backoff: number): Promise<void> {
+    public async init(retries: number, ms: number): Promise<void> {
         console.debug('Initializing storageHandler.')
         const handler: StorageHandler = this
 
-        this.dbConnection = await this.initConnection(retries, backoff)
+        this.dbConnection = await this.initConnection(retries, ms)
 
         if (!this.dbConnection) {
             console.error('Could not initialize storageHandler.')
@@ -72,11 +72,11 @@ export class StorageHandler implements NotificationRepository {
      *          - PGUSER:       USER     to connect to the storage db
      *
      * @param retries:  Number of retries to connect to the database
-     * @param backoff:  Time in seconds to backoff before next connection retry
+     * @param ms:  Time in seconds to backoff before next connection retry
      *
      * @returns     a Promise, containing either a Connection on success or null on failure
      */
-    private async initConnection(retries: number, backoff: number): Promise<Connection|null> {
+    private async initConnection(retries: number, ms: number): Promise<Connection|null> {
         let dbCon: null | Connection = null
         let connected: boolean = false
 
@@ -85,7 +85,7 @@ export class StorageHandler implements NotificationRepository {
             dbCon = await createConnection(this.connectionOptions).catch(() => { return null })
             if (!dbCon) {
                 console.info(`Initializing database connection (${i}/${retries})`)
-                await this.backOff(backoff);
+                await this.backOff(ms);
             } else {
                 connected = true
                 break;
@@ -103,10 +103,10 @@ export class StorageHandler implements NotificationRepository {
     /**
          * Waits for a specific time period (in seconds)
          *
-         * @param backOff   Period to wait in seconds
+         * @param ms   Period to wait in seconds
         */
-    private backOff(backOff: number): Promise<void> {
-        return new Promise(resolve => setTimeout(resolve, backOff * 1000));
+    private backOff(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     public async getSlackConfig(id: number): Promise<SlackConfig> {

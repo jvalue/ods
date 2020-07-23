@@ -220,6 +220,34 @@ test('POST datasources/{id}/trigger dynamic', async () => {
   expect(data.body.id).toBe(runtimeParameters.parameters.id)
 })
 
+test('POST datasources/{id}/trigger dynamic defaultvalues', async () => {
+  const datasourceResponse = await request(URL)
+    .post('/datasources')
+    .send(dynamicDatasourceConfig)
+  const datasourceId = datasourceResponse.body.id
+
+  const dataMetaData = await request(URL)
+    .post(`/datasources/${datasourceId}/trigger`)
+    .send(null)
+
+  const id = dataMetaData.body.id
+  const data = await request(URL)
+    .get(`/data/${id}`)
+    .send()
+
+  const delResponse = await request(URL)
+    .delete('/datasources/')
+    .send()
+
+  expect(delResponse.status).toEqual(204)
+  expect(datasourceResponse.status).toEqual(201)
+  expect(dataMetaData.status).toEqual(200)
+  expect(dataMetaData.body.id).toBeGreaterThanOrEqual(0)
+  expect(dataMetaData.body.location).toEqual(`/data/${id}`)
+  expect(data.status).toEqual(200)
+  expect(data.body.id).toBe(dynamicDatasourceConfig.protocol.parameters.defaultParameters.id)
+})
+
 test('POST datasources/{id}/trigger static', async () => {
   const datasourceResponse = await request(URL)
     .post('/datasources')
@@ -278,7 +306,11 @@ const dynamicDatasourceConfig = {
     type: 'HTTP',
     parameters: {
       location: MOCK_SERVER_URL + '/json/{id}',
-      encoding: 'UTF-8'
+      encoding: 'UTF-8',
+      defaultParameters: {
+        id: '1',
+        userId: '2'
+      }
     }
   },
   format: {
