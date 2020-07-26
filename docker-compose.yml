@@ -16,6 +16,7 @@ services:
         STORAGE_SERVICE_URL: /api/storage
         TRANSFORMATION_SERVICE_URL: /api/transformation
         NOTIFICATION_SERVICE_URL: /api/notification
+        API_ORCHESTRATION_URL: /api/apiorchestration
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-ui.rule=PathPrefix(`/`)"
@@ -44,6 +45,22 @@ services:
       - "traefik.http.middlewares.adapter-stripprefix.stripprefix.prefixes=/api/adapter"
       - "traefik.http.services.adapter.loadbalancer.server.port=8080"
 
+  api-configuration:
+    image: ${DOCKER_REGISTRY}/api-orchestration
+    ports:
+      - 8090:8090
+    build:
+      context: ./api-configuration/
+    depends_on:
+      - graphql-engine
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.to-apiorchestration.rule=PathPrefix(`/api/apiorchestration`)"
+      - "traefik.http.routers.to-apiorchestration.middlewares=apiorchestration-stripprefix@docker"
+      - "traefik.http.middlewares.apiorchestration-stripprefix.stripprefix.prefixes=/api/apiorchestration"
+      - "traefik.http.services.apiorchestration.loadbalancer.server.port=8090"
+
+  # ----------------- ADAPTER SERVICE (/adapter) --------------------
   adapter-db:
     image: postgres
     environment:
@@ -129,18 +146,34 @@ services:
 
   storage-db:
     image: postgres:12-alpine
+    ports:
+      - 5432:5432
     environment:
       POSTGRES_DB: ods
       POSTGRES_USER: ods_admin
       POSTGRES_PASSWORD: ods_pw
+
+  graphql-engine:
+    image: hasura/graphql-engine:v1.2.1
+    ports:
+      - "7654:8080"
+    depends_on:
+      - "storage"
+    restart: always
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://ods_admin:ods_pw@storage-db:5432/ods
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+#      HASURA_GRAPHQL_ADMIN_SECRET: "malte"
+
   # Uncomment this if you want to persist the data.
   # volumes:
   #   - "./pgdata:/var/lib/postgresql/data"
 
   storage-db-ui: # management UI for Postgres
     image: adminer
+    restart: always
     ports:
-      - 8080:8080
+      - 8989:8080
 
   storage-db-liquibase: # perform database migration on start up
     image: ${DOCKER_REGISTRY}/storage-db-liquibase

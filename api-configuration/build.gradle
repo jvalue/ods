@@ -1,0 +1,50 @@
+plugins {
+  id 'org.springframework.boot' version '2.2.2.RELEASE'
+  id 'java'
+}
+
+def props = new Properties()
+file("src/main/resources/application.properties").withInputStream { props.load(it)}
+
+apply plugin: 'io.spring.dependency-management'
+
+group = 'org.jvalue.ods'
+version = props.getProperty ("app.version")
+sourceCompatibility = '11'
+
+task testProps {
+  doFirst {
+    println version
+  }
+}
+
+repositories {
+  mavenCentral()
+  maven { url 'https://repo.spring.io/snapshot' }
+  maven { url 'https://repo.spring.io/milestone' }
+}
+
+test {
+  testLogging {
+
+
+    afterSuite { desc, result ->
+      if (!desc.parent) {
+        println "Tests run: ${result.testCount}, " +
+          "Failures: ${result.failedTestCount}, " +
+          "Skipped: ${result.skippedTestCount}"
+      }
+    }
+  }
+}
+
+dependencies {
+  implementation 'org.springframework.boot:spring-boot-starter-web'
+  compile group: 'org.json', name: 'json', version: '20200518'
+//  implementation 'org.springframework.boot:spring-boot-starter-security'
+//  implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+  implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+  implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv'
+
+  testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

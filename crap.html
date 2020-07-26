@@ -1,0 +1,68 @@
+<html>
+<!-- Das HTML Dokument beginnt -->
+
+<head>
+  <!-- Der Kopf des HTML Dokuments -->
+
+  <title>MensaApp</title>
+  <!-- Der Titel des Dokuments -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="http://code.jquery.com/mobile/1.2.1/jquery.mobile-1.2.1.min.css"/>
+  <script src="http://code.jquery.com/jquery-1.8.3.min.js"></script>
+  <script src="http://code.jquery.com/mobile/1.2.1/jquery.mobile-1.2.1.min.js"></script>
+  <script>
+    $(function () {
+      $(".widget input[type=submit], .widget a, .widget button").button();
+      $("button, input, a").click(function (event) {
+        event.preventDefault();
+      });
+    });
+  </script>
+
+</head>
+
+<body>
+<!-- Der Inhalt des HTML Dokuments -->
+<div data-role="page">
+  <div data-role="header">
+
+
+    <h1>MensaApp der FAU</h1>
+    <!-- �berschrift des Typs h1 -->
+  </div>
+  <div data-role="content">
+
+    </br>
+    <!-- Leerzeile 1 -->
+
+    <img src="http://www.werkswelt.de/data/uploads/gastronomie/slideshows/suedmensa-(3).jpg">
+    <!-- Mensa Bild einbinden -->
+
+    <br></br>
+    <!-- Zeilenumbruch und Leerzeile 2 -->
+
+    <p><b>Herzlich Willkommen auf der Startseite</b></p>
+    <!-- Textabsatz 1 -->
+
+    <p>Als Student haben Sie die M&ouml;glichkeit an folgenden Mensen zu speisen:</p>
+    <!-- Textabsatz 2 -->
+
+    <ul data-role="listview">
+      <!-- Ungeordnete Liste oder Aufz�hlung -->
+
+      <li><a href='http://www.werkswelt.de/index.php?id=lmpl'>Mensa Langemarckplatz</a></li>
+      <li><a href='http://www.werkswelt.de/index.php?id=sued'>S&uuml;dmensa</a></li>
+      <li><a href='http://www.werkswelt.de/index.php?id=isch'>Mensa Insel Sch&uuml;tt</a></li>
+      <li><a href='http://www.werkswelt.de/index.php?id=regb'>Mensa Regensburger Stra&szlig;e</a></li>
+      <li><a href='http://www.werkswelt.de/index.php?id=spau'>Ausgabemensa St. Paul</a></li>
+      <li><a href='http://www.werkswelt.de/index.php?id=mohm'>Mensateria Ohm</a></li>
+      <!-- Innerhalb eines ul-Tags d�rfen nur li-Tags liegen. Vor jedem Eintrag der Aufz�hlung muss ein <li>-Tag gesetzt werden. -->
+    </ul>
+    <button>Standorte</button>
+  </div>
+
+</div>
+</body>
+
+</html>

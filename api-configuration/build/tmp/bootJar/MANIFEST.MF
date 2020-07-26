@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Main-Class: org.springframework.boot.loader.JarLauncher
+Start-Class: org.jvalue.ods.apiConfigurationService.ApiConfigurationServ
+ iceApplication
+Spring-Boot-Version: 2.2.2.RELEASE
+Spring-Boot-Classes: BOOT-INF/classes/
+Spring-Boot-Lib: BOOT-INF/lib/
+
