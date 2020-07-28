@@ -50,7 +50,7 @@ services:
       MOCK_STORAGE_PORT: 8085
       AMQP_URL: amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672
       AMQP_EXCHANGE: ods_global
-      AMQP_TOPIC: 'notification.execution'
+      AMQP_TOPIC: 'pipeline.execution.success'
       AMQP_IT_QUEUE: scheduler-it.notification-execution
       RABBIT_HEALTH_URL: http://rabbitmq:15672
     depends_on:
