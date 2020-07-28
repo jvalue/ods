@@ -188,7 +188,7 @@ services:
       AMQP_URL: "amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672"
 
       AMQP_PIPELINE_EXECUTION_EXCHANGE: 'ods_global'
-      AMQP_PIPELINE_EXECUTION_QUEUE: 'storage-mq.pipeline-execution'
+      AMQP_PIPELINE_EXECUTION_QUEUE: 'notification.pipeline-execution'
       AMQP_PIPELINE_EXECUTION_TOPIC: 'pipeline.execution.*'
       AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: 'pipeline.execution.success'
 
