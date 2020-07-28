@@ -96,7 +96,7 @@ services:
       STORAGE_SERVICE_URL: http://storage:3000
       AMQP_URL: amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672
       AMQP_EXCHANGE: ods_global
-      AMQP_NOTIFICATION_EXECUTION_TOPIC: 'notification.execution'
+      AMQP_NOTIFICATION_EXECUTION_TOPIC: 'pipeline.execution.success'
       INITIAL_CONNECTION_RETRIES: 20
       INITIAL_CONNECTION_RETRY_BACKOFF: 5000
     labels:
