@@ -287,7 +287,7 @@ jobs:
           docker load -i ./notification-artifact/notification.tar
           docker load -i ./adapter-artifact/adapter.tar
           docker-compose -f docker-compose.yml up -d core adapter transformation notification storage
-          docker-compose -f docker-compose.yml -f docker-compose.st.yml up --exit-code-from system-test system-test notification
+          docker-compose -f docker-compose.yml -f docker-compose.st.yml up --exit-code-from system-test system-test
           docker-compose logs
           docker-compose -f docker-compose.yml -f docker-compose.st.yml down
 
