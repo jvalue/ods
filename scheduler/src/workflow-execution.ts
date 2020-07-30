@@ -1,14 +1,13 @@
 import * as AdapterClient from './clients/adapter-client'
 import * as CoreClient from './clients/core-client'
 import * as TransformationClient from './clients/transformation-client'
-import * as StorageClient from './clients/storage-client'
 import * as AmqpClient from './clients/amqp-client'
 
 import DatasourceConfig from './interfaces/datasource-config'
 import PipelineConfig from './interfaces/pipeline-config'
 import { AxiosError } from 'axios'
 import AdapterResponse from '@/interfaces/adapter-response'
-import {NotificationTriggerEvent} from './clients/amqp-client'
+import {PipelineExecutionSuccessEvent, PipelineExecutionErrorEvent} from './clients/amqp-client'
 
 export async function execute (datasourceConfig: DatasourceConfig, maxRetries = 3): Promise<void> {
   // adapter
@@ -26,10 +25,7 @@ export async function execute (datasourceConfig: DatasourceConfig, maxRetries = 
       continue
     }
 
-    const dataLocation =
-        await retryableExecution(executeStorage, { pipelineConfig: pipelineConfig, data: transformationResult.data! }, `Storing data for pipeline ${pipelineConfig.id}`)
-
-    await retryableExecution(executeNotification, { pipelineConfig: pipelineConfig, dataLocation: dataLocation, data: transformationResult.data, error: transformationResult.error }, `Notifying clients for pipeline ${pipelineConfig.id}`)
+    await retryableExecution(publishPipelineExecutionOutcome, { pipelineConfig: pipelineConfig, data: transformationResult.data, error: transformationResult.error }, `Notifying clients for pipeline ${pipelineConfig.id}`)
   }
 }
 
@@ -85,39 +81,38 @@ async function executeTransformation (args: { pipelineConfig: PipelineConfig; da
   }
 }
 
-async function executeStorage (args: { pipelineConfig: PipelineConfig; data: object }): Promise<string> {
-  const pipelineConfig = args.pipelineConfig
-  const data = args.data
-
-  console.log(`Storing data for ${pipelineConfig.id}`)
-  try {
-    const dataLocation = await StorageClient.executeStorage(pipelineConfig, data)
-    console.log(`Sucessfully stored Data for Pipeline ${pipelineConfig.id}`)
-    return dataLocation
-  } catch (e) {
-    console.log(`Error executing storage: ${e.code}`)
-    return Promise.reject()
-  }
-}
-
-async function executeNotification (args: { pipelineConfig: PipelineConfig; dataLocation: string; data?: object; error?: object }): Promise<void> {
+async function publishPipelineExecutionOutcome (args: { pipelineConfig: PipelineConfig; data?: object; error?: object }): Promise<void> {
   const pipelineConfig = args.pipelineConfig
   const data = args.data
   const error = args.error
 
-  const notificationTrigger: NotificationTriggerEvent = {
-    dataLocation: args.dataLocation,
-    pipelineId: pipelineConfig.id,
-    pipelineName: pipelineConfig.metadata.displayName,
-    data: data,
-    error: error
-  }
+  if (error){ // failed execution
+    const notificationTrigger: PipelineExecutionErrorEvent = {
+      pipelineId: pipelineConfig.id,
+      pipelineName: pipelineConfig.metadata.displayName,
+      error: error
+    }
 
-  const success = AmqpClient.publish(notificationTrigger)
-  if (!success) {
-    Promise.reject()
-  } else {
-    console.log(`Successfully published notification trigger to amqp exchange for pipeline ${pipelineConfig.id}`)
+    const success = AmqpClient.publishPipelineExecutionError(notificationTrigger)
+    if (!success) {
+      Promise.reject()
+    } else {
+      console.log(`Successfully published pipeline execution failure event to amqp exchange for pipeline ${pipelineConfig.id}`)
+    }
+  }
+  else {// successful execution
+    const notificationTrigger: PipelineExecutionSuccessEvent = {
+      pipelineId: pipelineConfig.id,
+      pipelineName: pipelineConfig.metadata.displayName,
+      data: data
+    }
+
+    const success = AmqpClient.publishPipelineExecutionSuccess(notificationTrigger)
+    if (!success) {
+      Promise.reject()
+    } else {
+      console.log(`Successfully published pipeline execution success event to amqp exchange for pipeline ${pipelineConfig.id}`)
+    }
   }
 }
 

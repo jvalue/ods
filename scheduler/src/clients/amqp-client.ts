@@ -1,7 +1,10 @@
 import amqp from 'amqplib'
 
 const AMQP_EXCHANGE = process.env.AMQP_EXCHANGE || 'ods_global'
-const AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC = process.env.AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC || 'notification.execution.request'
+const AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC = process.env.AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC || 'pipeline.execution.success'
+const AMQP_PIPELINE_EXECUTION_ERROR_TOPIC = process.env.AMQP_PIPELINE_EXECUTION_ERROR_TOPIC || 'pipeline.execution.error'
+const AMQP_PIPELINE_CONFIG_CREATION_TOPIC = process.env.AMQP_PIPELINE_CONFIG_CREATION_TOPIC || 'pipeline.config.created'
+const AMQP_PIPELINE_CONFIG_DELETION_TOPIC = process.env.AMQP_PIPELINE_CONFIG_DELETION_TOPIC || 'pipeline.config.deleted'
 const AMQP_URL = process.env.AMQP_URL!
 
 let channel: amqp.Channel
@@ -51,7 +54,7 @@ async function initChannel(connection: amqp.Connection): Promise<amqp.Channel> {
   }
 }
 
-export function publish(content: NotificationTriggerEvent): boolean {
+export function publishPipelineExecutionSuccess(content: PipelineExecutionSuccessEvent): boolean {
   if (!initialized || !channel) {
     console.error('Publish not possible, AMQP client not initialized.')
     return false
@@ -67,16 +70,76 @@ export function publish(content: NotificationTriggerEvent): boolean {
   }
 }
 
+export function publishPipelineExecutionError(content: PipelineExecutionErrorEvent): boolean {
+  if (!initialized || !channel) {
+    console.error('Publish not possible, AMQP client not initialized.')
+    return false
+  } else {
+    try {
+      const success = channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_ERROR_TOPIC, Buffer.from(JSON.stringify(content)))
+      console.log(`Sent: ${JSON.stringify(content)} to topic ${AMQP_PIPELINE_EXECUTION_ERROR_TOPIC} in exchange ${AMQP_EXCHANGE}`)
+      return success
+    } catch (error) {
+      console.error(`Error publishing to exchange ${AMQP_EXCHANGE} under key ${AMQP_PIPELINE_EXECUTION_ERROR_TOPIC}: ${error}`)
+      return false
+    }
+  }
+}
+
+export function publishPipelineCreation(content: PipelineConfigCreationEvent): boolean {
+  if (!initialized || !channel) {
+    console.error('Publish not possible, AMQP client not initialized.')
+    return false
+  } else {
+    try {
+      const success = channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_CREATION_TOPIC, Buffer.from(JSON.stringify(content)))
+      console.log(`Sent: ${JSON.stringify(content)} to topic ${AMQP_PIPELINE_CONFIG_CREATION_TOPIC} in exchange ${AMQP_EXCHANGE}`)
+      return success
+    } catch (error) {
+      console.error(`Error publishing to exchange ${AMQP_EXCHANGE} under key ${AMQP_PIPELINE_CONFIG_CREATION_TOPIC}: ${error}`)
+      return false
+    }
+  }
+}
+
+export function publishPipelineDeletion(content: PipelineConfigDeletionEvent): boolean {
+  if (!initialized || !channel) {
+    console.error('Publish not possible, AMQP client not initialized.')
+    return false
+  } else {
+    try {
+      const success = channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_DELETION_TOPIC, Buffer.from(JSON.stringify(content)))
+      console.log(`Sent: ${JSON.stringify(content)} to topic ${AMQP_PIPELINE_CONFIG_DELETION_TOPIC} in exchange ${AMQP_EXCHANGE}`)
+      return success
+    } catch (error) {
+      console.error(`Error publishing to exchange ${AMQP_EXCHANGE} under key ${AMQP_PIPELINE_CONFIG_DELETION_TOPIC}: ${error}`)
+      return false
+    }
+  }
+}
+
 function sleep(backoff: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, backoff))
 }
 
-export interface NotificationTriggerEvent {
+export interface PipelineExecutionSuccessEvent {
   pipelineId: number;
   pipelineName: string;
 
-  dataLocation: string; // url (location) of the queryable data
-
   data?: object;
-  error?: object;
+}
+
+export interface PipelineExecutionErrorEvent {
+  pipelineId: number;
+  pipelineName: string;
+
+  error: object;
+}
+
+export interface PipelineConfigCreationEvent {
+  pipelineId: number;
+}
+
+export interface PipelineConfigDeletionEvent {
+  pipelineId: number;
 }
