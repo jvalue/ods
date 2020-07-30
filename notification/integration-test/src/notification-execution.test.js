@@ -32,11 +32,9 @@ describe('Notification', () => {
       const id = notificationResponse.body.id
 
       // SETUP: trigger event
-      const dataLocation = 'storage/1234'
       const triggerEvent = {
           pipelineId: 1,
           pipelineName: "Integration-Test Pipeline 1",
-          dataLocation: dataLocation,
           data: {
               value1: 1
           }
@@ -55,7 +53,7 @@ describe('Notification', () => {
           .get('/webhook1')
 
       expect(receiverResponse.status).toEqual(200)
-      expect(receiverResponse.body.location).toEqual(dataLocation)
+      expect(receiverResponse.body.location).toEqual(`http://localhost:9000/storage/${triggerEvent.pipelineId}`)
     }, 10000)
 
     test('Trigger not notifying webhook when condition is false', async() => {
@@ -119,11 +117,9 @@ describe('Notification', () => {
       const id = notificationResponse.body.id
 
       // SETUP: trigger event
-      const dataLocation = 'storage/234'
       const triggerEvent = {
           pipelineId: 3,
           pipelineName: "Integration-Test Pipeline 3 (Slack)",
-          dataLocation: dataLocation,
           data: {
             niceString: 'nice'
           }
@@ -144,7 +140,7 @@ describe('Notification', () => {
       expect(receiverResponse.status).toEqual(200)
       expect(receiverResponse.body.text).toMatch(`${triggerEvent.pipelineName}`)
       expect(receiverResponse.body.text).toMatch(`${triggerEvent.pipelineId}`)
-      expect(receiverResponse.body.text).toMatch(`${triggerEvent.dataLocation}`)
+      expect(receiverResponse.body.text).toMatch(`http://localhost:9000/storage/${triggerEvent.pipelineId}`)
 
       // CLEANUP
       notificationResponse = await request(URL)

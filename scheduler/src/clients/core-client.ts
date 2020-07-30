@@ -1,7 +1,8 @@
 import axios from 'axios'
 import PipelineConfig from '../interfaces/pipeline-config'
 import PipelineEvent, { EventType } from '../interfaces/pipeline-event'
-import * as StorageClient from './storage-client'
+
+import * as AMQPClient from './amqp-client'
 
 export const CONFIG_SERVICE_URL = process.env.CONFIG_SERVICE_URL || 'http://localhost:8081'
 const CONFIG_SERVICE_PIPELINES_URL = CONFIG_SERVICE_URL + '/pipelines'
@@ -77,11 +78,12 @@ async function handleEvent(event: PipelineEvent): Promise<void> {
   switch (event.eventType) {
     case EventType.PIPELINE_DELETE: {
       deletePipelineFromCache(event.pipelineId)
+      AMQPClient.publishPipelineDeletion({pipelineId: event.pipelineId})
       break
     }
     case EventType.PIPELINE_CREATE:
       const pipeline = await getPipeline(event.pipelineId)
-      await createStorageStructure(pipeline.id)
+      AMQPClient.publishPipelineCreation({pipelineId: pipeline.id})
       addPipelineToCache(pipeline)
       break
     case EventType.PIPELINE_UPDATE: {
@@ -130,26 +132,4 @@ function deletePipelineFromCache(pipelineId: number) {
   const storedPipelines = datasourceid_to_pipelines.get(datasourceId) || []
   const cleanedPipelines = storedPipelines.filter((x) => x.id != pipelineId)
   datasourceid_to_pipelines.set(datasourceId, cleanedPipelines)
-}
-
-async function createStorageStructure (pipelineId: number, retries = 10): Promise<void> {
-  try {
-    console.log(`Creating storage structur for pipeline ${pipelineId}`)
-    return await StorageClient.createStructure(pipelineId)
-  } catch (e) {
-    if (retries === 0) {
-      return Promise.reject(new Error(`Could not create storage structure for pipeline ${pipelineId}.`))
-    }
-    if (e.code === '400') {
-      console.log(e.message)
-    }
-    if (e.code === '404') {
-      console.error(`Failed to communicate with Storage Service (${retries}) . Retrying ... `)
-    } else {
-      console.error(e)
-      console.error(`Retrying (${retries})...`)
-    }
-    await new Promise(resolve => setTimeout(resolve, 1000)) // sleep
-    return await createStorageStructure(retries - 1)
-  }
 }
