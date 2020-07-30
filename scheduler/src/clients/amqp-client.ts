@@ -1,7 +1,7 @@
 import amqp from 'amqplib'
 
 const AMQP_EXCHANGE = process.env.AMQP_EXCHANGE || 'ods_global'
-const AMPQ_NOTIFICATION_EXECUTION_TOPIC = process.env.AMQP_NOTIFICATION_EXECUTION_TOPIC || 'notification.execution.request'
+const AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC = process.env.AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC || 'notification.execution.request'
 const AMQP_URL = process.env.AMQP_URL!
 
 let channel: amqp.Channel
@@ -57,11 +57,11 @@ export function publish(content: NotificationTriggerEvent): boolean {
     return false
   } else {
     try {
-      const success = channel.publish(AMQP_EXCHANGE, AMPQ_NOTIFICATION_EXECUTION_TOPIC, Buffer.from(JSON.stringify(content)))
-      console.log(`Sent: ${JSON.stringify(content)} to topic ${AMPQ_NOTIFICATION_EXECUTION_TOPIC} in exchange ${AMQP_EXCHANGE}`)
+      const success = channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC, Buffer.from(JSON.stringify(content)))
+      console.log(`Sent: ${JSON.stringify(content)} to topic ${AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC} in exchange ${AMQP_EXCHANGE}`)
       return success
     } catch (error) {
-      console.error(`Error publishing to exchange ${AMQP_EXCHANGE} under key ${AMPQ_NOTIFICATION_EXECUTION_TOPIC}: ${error}`)
+      console.error(`Error publishing to exchange ${AMQP_EXCHANGE} under key ${AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC}: ${error}`)
       return false
     }
   }
