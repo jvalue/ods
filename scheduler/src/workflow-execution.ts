@@ -1,13 +1,14 @@
 import * as AdapterClient from './clients/adapter-client'
 import * as CoreClient from './clients/core-client'
 import * as TransformationClient from './clients/transformation-client'
-import * as NotificationClient from './clients/notification-client'
 import * as StorageClient from './clients/storage-client'
+import * as AmqpClient from './clients/amqp-client'
 
 import DatasourceConfig from './interfaces/datasource-config'
 import PipelineConfig from './interfaces/pipeline-config'
 import { AxiosError } from 'axios'
 import AdapterResponse from '@/interfaces/adapter-response'
+import {NotificationTriggerEvent} from './clients/amqp-client'
 
 export async function execute (datasourceConfig: DatasourceConfig, maxRetries = 3): Promise<void> {
   // adapter
@@ -16,11 +17,11 @@ export async function execute (datasourceConfig: DatasourceConfig, maxRetries = 
 
   // pipeline
   const followingPipelines = await CoreClient.getCachedPipelinesByDatasourceId(datasourceConfig.id)
-  for (let pipelineConfig of followingPipelines) {
+  for (const pipelineConfig of followingPipelines) {
     const transformationResult =
         await retryableExecution(executeTransformation, { pipelineConfig: pipelineConfig, dataLocation: adapterResponse.location }, `Executing transformatins for pipeline ${pipelineConfig.id}`)
 
-    if(!!transformationResult.error) {
+    if (transformationResult.error) {
       console.log(`Transformation for pipeline ${pipelineConfig.id} went wrong. Not storing data or sending notifications.`)
       continue
     }
@@ -32,7 +33,7 @@ export async function execute (datasourceConfig: DatasourceConfig, maxRetries = 
   }
 }
 
-async function retryableExecution<T1, T2>(func: (arg: T1) => Promise<T2>, args: T1, description: string, maxRetries = 3) : Promise<T2> {
+async function retryableExecution<T1, T2> (func: (arg: T1) => Promise<T2>, args: T1, description: string, maxRetries = 3): Promise<T2> {
   let retryNumber = 0
   while (retryNumber <= maxRetries) {
     if (retryNumber > 0) {
@@ -53,12 +54,17 @@ async function retryableExecution<T1, T2>(func: (arg: T1) => Promise<T2>, args: 
 async function executeAdapter (dataousrceConfig: DatasourceConfig): Promise<AdapterResponse> {
   console.log(`Execute Adapter for Datasource ${dataousrceConfig.id}`)
 
-  const importedData = await AdapterClient.executeAdapter(dataousrceConfig)
-  console.log(`Sucessful import via Adapter for Datasource ${dataousrceConfig.id}`)
-  return importedData
+  try {
+    const importedData = await AdapterClient.executeAdapter(dataousrceConfig)
+    console.log(`Sucessful import via Adapter for Datasource ${dataousrceConfig.id}`)
+    return importedData
+  } catch (e) {
+    console.log(`Error executing adapter: ${e.code}`)
+    return Promise.reject()
+  }
 }
 
-async function executeTransformation (args: { pipelineConfig: PipelineConfig, dataLocation: string }): Promise<TransformationClient.TransformationResult> {
+async function executeTransformation (args: { pipelineConfig: PipelineConfig; dataLocation: string }): Promise<TransformationClient.TransformationResult> {
   const pipelineConfig = args.pipelineConfig
   const dataLocation = args.dataLocation
 
@@ -79,22 +85,27 @@ async function executeTransformation (args: { pipelineConfig: PipelineConfig, da
   }
 }
 
-async function executeStorage (args: { pipelineConfig: PipelineConfig, data: object }): Promise<string> {
+async function executeStorage (args: { pipelineConfig: PipelineConfig; data: object }): Promise<string> {
   const pipelineConfig = args.pipelineConfig
   const data = args.data
 
   console.log(`Storing data for ${pipelineConfig.id}`)
-  const dataLocation = await StorageClient.executeStorage(pipelineConfig, data)
-  console.log(`Sucessfully stored Data for Pipeline ${pipelineConfig.id}`)
-  return dataLocation
+  try {
+    const dataLocation = await StorageClient.executeStorage(pipelineConfig, data)
+    console.log(`Sucessfully stored Data for Pipeline ${pipelineConfig.id}`)
+    return dataLocation
+  } catch (e) {
+    console.log(`Error executing storage: ${e.code}`)
+    return Promise.reject()
+  }
 }
 
-async function executeNotification (args: { pipelineConfig: PipelineConfig, dataLocation: string, data?: object, error?: object }): Promise<void> {
+async function executeNotification (args: { pipelineConfig: PipelineConfig; dataLocation: string; data?: object; error?: object }): Promise<void> {
   const pipelineConfig = args.pipelineConfig
   const data = args.data
   const error = args.error
 
-  const notificationTrigger: NotificationClient.NotificationTriggerEvent = {
+  const notificationTrigger: NotificationTriggerEvent = {
     dataLocation: args.dataLocation,
     pipelineId: pipelineConfig.id,
     pipelineName: pipelineConfig.metadata.displayName,
@@ -102,8 +113,12 @@ async function executeNotification (args: { pipelineConfig: PipelineConfig, data
     error: error
   }
 
-  await NotificationClient.executeNotification(notificationTrigger)
-  console.log(`Successfully delivered notification request to transformation-service for ${pipelineConfig.id}`)
+  const success = AmqpClient.publish(notificationTrigger)
+  if (!success) {
+    Promise.reject()
+  } else {
+    console.log(`Successfully published notification trigger to amqp exchange for pipeline ${pipelineConfig.id}`)
+  }
 }
 
 function sleep (ms: number): Promise<void> {
