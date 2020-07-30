@@ -10,11 +10,11 @@ export namespace NotificationMessageFactory {
    * @param event event to extract transformation results from
    * @returns message to be sent as notification
    */
-  export const buildMessage = (event: TransformationEvent): string => {
+  export const buildMessage = (event: TransformationEvent, dataLocation: string): string => {
     let message: string
     if (!event.error) {
       message = `Pipeline ${event.pipelineName} (Pipeline id:${event.pipelineId}) ` +
-        `has new data available. Fetch at ${event.dataLocation}.`
+        `has new data available. Fetch at ${dataLocation}.`
     } else {
       message = `Pipeline ${event.pipelineName}(Pipeline ID:${event.pipelineId}) failed. \n` +
           `${JSON.stringify(event.error)}`

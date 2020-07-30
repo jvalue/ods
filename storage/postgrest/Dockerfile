@@ -1,12 +1,5 @@
 FROM postgrest/postgrest
 
-# overwrite:
-ENV DATABASE_HOST=localhost
-ENV DATABASE_PORT=5432
-ENV DATABASE_NAME=ods
-ENV DATABASE_USER=postgrest
-ENV DATABASE_PW=postgres-wrapper-pw
-
 USER root
 
 RUN apt-get update \

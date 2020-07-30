@@ -63,6 +63,8 @@ services:
       context: ./storage/integration-test
     environment:
       STORAGE_API: http://storage:3000
+      STORAGEMQ_API: http://storage-mq:8080
+      AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
 
   # ----------------- TRANSFORMATION SERVICE (PORTS 9500 - 9599) --------------------
   transformation:

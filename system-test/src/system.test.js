@@ -10,8 +10,9 @@ const NOTIFICATION_URL = process.env.NOTIFICATION_API || 'http://localhost:9000/
 const MOCK_SERVER_URL = process.env.MOCK_SERVER_API || 'http://localhost:9000/api/system-tests/mock-server'
 const RABBIT_URL = process.env.RABBIT_API || 'http://localhost:15672'
 
-const STORAGE_DOCKER = process.env.STORAGE_API || 'http://storage:3000' // needed to run tests outside of docker environment
 const MOCK_SERVER_DOCKER = process.env.MOCK_SERVER_API || 'http://mock-server:8080'
+
+const expectedStorageLocationUrl = 'http://localhost:9000/storage'
 
 const sourceData = {
   one: 1,
@@ -106,7 +107,7 @@ describe('System-Test', () => {
     // Wait for webhook notification
     const webhookResponse = await checkWebhook('test1', 2000)
     console.log(`[Test 1] Webhook response body: ${JSON.stringify(webhookResponse.body)}`)
-    expect(webhookResponse.body.location).toEqual(STORAGE_DOCKER + '/' + pipelineId)
+    expect(webhookResponse.body.location).toEqual(expectedStorageLocationUrl + '/' + pipelineId)
     expect(webhookResponse.body.timestamp).toBeDefined()
 
     // Check if data has been stored correctly
@@ -172,13 +173,13 @@ describe('System-Test', () => {
     // Wait for webhook notification
     const webhookResponse = await checkWebhook('test2', 2000)
     console.log(`[Test 2] Webhook response body ${JSON.stringify(webhookResponse.body)}`)
-    expect(webhookResponse.body.location).toEqual(STORAGE_DOCKER + '/' + pipelineId)
+    expect(webhookResponse.body.location).toEqual(expectedStorageLocationUrl + '/' + pipelineId)
     expect(webhookResponse.body.timestamp).toBeDefined()
 
     // Wait for second notification
     const changedWebhook = await waitForWebhookChange('test2', webhookResponse.body, 2000)
     console.log(`[Test 2] Changed webhook response body ${JSON.stringify(changedWebhook.body)}`)
-    expect(webhookResponse.body.location).toEqual(STORAGE_DOCKER + '/' + pipelineId)
+    expect(webhookResponse.body.location).toEqual(expectedStorageLocationUrl + '/' + pipelineId)
     expect(webhookResponse.body.timestamp).toBeDefined()
 
     // Check if data has been stored correctly
@@ -252,7 +253,7 @@ describe('System-Test', () => {
     // Wait for webhook notification
     const webhookResponse = await checkWebhook('test3', 2000)
     console.log(`[Test 3] Webhook response body: ${JSON.stringify(webhookResponse.body)}`)
-    expect(webhookResponse.body.location).toEqual(STORAGE_DOCKER + '/' + pipelineId)
+    expect(webhookResponse.body.location).toEqual(expectedStorageLocationUrl + '/' + pipelineId)
     expect(webhookResponse.body.timestamp).toBeDefined()
 
     // Check if data has been stored correctly
@@ -323,7 +324,7 @@ describe('System-Test', () => {
     // Wait for webhook notification
     const webhookResponse = await checkWebhook('test4_1', 2000)
     console.log(`[Test 4] Webhook response body ${JSON.stringify(webhookResponse.body)}`)
-    expect(webhookResponse.body.location).toEqual(STORAGE_DOCKER + '/' + pipelineId)
+    expect(webhookResponse.body.location).toEqual(expectedStorageLocationUrl + '/' + pipelineId)
     expect(webhookResponse.body.timestamp).toBeDefined()
 
     // Check if data was stored correctly
@@ -369,7 +370,7 @@ describe('System-Test', () => {
 
     // Wait for webhook notification
     const secondWebhook = await checkWebhook('test4_2', 2000)
-    expect(secondWebhook.body.location).toEqual(STORAGE_DOCKER + '/' + pipelineId)
+    expect(secondWebhook.body.location).toEqual(expectedStorageLocationUrl + '/' + pipelineId)
     expect(secondWebhook.body.timestamp).toBeDefined()
 
     // Check if data has been stored correctly
@@ -452,7 +453,7 @@ describe('System-Test', () => {
 
     // Wait for webhook notification
     const webhookResponse1 = await checkWebhook('test5_1', 2000)
-    expect(webhookResponse1.body.location).toEqual(STORAGE_DOCKER + '/' + pipelineId)
+    expect(webhookResponse1.body.location).toEqual(expectedStorageLocationUrl + '/' + pipelineId)
     expect(webhookResponse1.body.timestamp).toBeDefined()
 
     // Check if data has been stored correctly
@@ -467,7 +468,7 @@ describe('System-Test', () => {
     const webhookResponse2 = await request(MOCK_SERVER_URL)
       .get('/notifications/test5_2')
     expect(webhookResponse2.status).toEqual(200)
-    expect(webhookResponse2.body.location).toEqual(STORAGE_DOCKER + '/' + pipelineId)
+    expect(webhookResponse2.body.location).toEqual(expectedStorageLocationUrl + '/' + pipelineId)
     expect(webhookResponse2.body.timestamp).toBeDefined()
 
     // Check if third webhook was triggered
@@ -529,7 +530,7 @@ describe('System-Test', () => {
 
     // Wait for webhook notification
     const webhookResponse1 = await checkWebhook('test6', 2000)
-    expect(webhookResponse1.body.location).toEqual(STORAGE_DOCKER + '/' + pipelineId)
+    expect(webhookResponse1.body.location).toEqual(expectedStorageLocationUrl + '/' + pipelineId)
     expect(webhookResponse1.body.timestamp).toBeDefined()
 
     // Delete pipeline from core service
