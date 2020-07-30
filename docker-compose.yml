@@ -231,6 +231,8 @@ services:
       AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: 'pipeline.execution.success'
 
       AMQP_NOTIFICATION_QUEUE: 'NOTIF_QUEUE'
+
+      NOTIFICATION_DATA_LOCATION_URL: 'http://localhost:9000/storage'
     depends_on:
       - notification-db
       - rabbitmq
