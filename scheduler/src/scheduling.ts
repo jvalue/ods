@@ -65,7 +65,6 @@ export async function updateDatasources (): Promise<void> {
       console.error('Failed to sync with adapter service on update.')
     } else {
       console.error('update failed')
-      console.error(e)
     }
   }
 }

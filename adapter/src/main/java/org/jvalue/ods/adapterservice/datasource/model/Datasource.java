@@ -11,6 +11,10 @@ import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Entity
 public class Datasource {
@@ -92,11 +96,20 @@ public class Datasource {
   }
 
     protected DatasourceProtocol fillQueryParameters(RuntimeParameters runtimeParameters) {
-      if (runtimeParameters == null || runtimeParameters.parameters == null || !this.getProtocol().getType().equals("HTTP")) {
+      if (!this.getProtocol().getType().equals("HTTP")) {
         return this.getProtocol();
       }
       String url = (String) this.getProtocol().getParameters().get("location");
-      for (Map.Entry<String, String> parameter : runtimeParameters.parameters.entrySet()) {
+      Map<String, String> defaultParameters = new HashMap<>();
+      if (this.getProtocol().getParameters().containsKey("defaultParameters")) {
+        defaultParameters = (Map<String, String>) this.getProtocol().getParameters().get("defaultParameters");
+      }
+      Map<String, String> triggerParameters = new HashMap<>();
+      if (runtimeParameters != null && runtimeParameters.parameters != null) {
+        triggerParameters = runtimeParameters.parameters;
+      }
+      Map<String, String> replacementParameters = Stream.of(defaultParameters, triggerParameters).flatMap(map -> map.entrySet().stream()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (v1, v2) -> v2));
+      for (Map.Entry<String, String> parameter : replacementParameters.entrySet()) {
         url = url.replace("{" + parameter.getKey() + "}", parameter.getValue());
       }
       HashMap<String, Object> parameters = new HashMap<>(this.getProtocol().getParameters());

@@ -37,8 +37,8 @@ const notificationExecutionEndpoint = new NotificationExecutionEndpoint(triggerE
 
 app.listen(port, async () => {
 
-  await storageHandler.init(30, 5)
-  await amqpHandler.connect(30,5)
+  await amqpHandler.connect(30, 2000)
+  await storageHandler.init(30, 2000)
 
   console.log('listening on port ' + port)
 
