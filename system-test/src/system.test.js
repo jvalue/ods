@@ -45,7 +45,8 @@ describe('System-Test', () => {
       ],
         timeout: 60000,
         log: true
-      })
+      }),
+    await sleep(2000) // give the system some more startup time
   }, 60000)
 
   afterAll(async () => {
