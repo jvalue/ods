@@ -1,7 +1,6 @@
 /* eslint-env jest */
 import * as PipelineExecution from './workflow-execution'
 import * as AdapterClient from './clients/adapter-client'
-import * as StorageClient from './clients/storage-client'
 import * as TransformationClient from './clients/transformation-client'
 import * as AmqpClient from './clients/amqp-client'
 import * as CoreClient from './clients/core-client'
@@ -11,7 +10,6 @@ import DatasourceConfig from './interfaces/datasource-config'
 import TransformationConfig from './interfaces/transformation-config'
 
 jest.mock('./clients/adapter-client')
-jest.mock('./clients/storage-client')
 jest.mock('./clients/transformation-client')
 jest.mock('./clients/core-client')
 jest.mock('./clients/amqp-client')
@@ -20,8 +18,7 @@ jest.mock('./clients/amqp-client')
 const mockGetPipelinesForDatasource = CoreClient.getCachedPipelinesByDatasourceId as jest.Mock
 const mockExecuteAdapter = AdapterClient.executeAdapter as jest.Mock
 const mockExecuteTransformation = TransformationClient.executeTransformation as jest.Mock
-const mockExecuteStorage = StorageClient.executeStorage as jest.Mock
-const mockPublishAmqp = AmqpClient.publish as jest.Mock
+const mockPublishExecutionSuccessAmqp = AmqpClient.publishPipelineExecutionSuccess as jest.Mock
 
 const adapterResponse: AdapterResponse = {
   id: 42,
@@ -58,8 +55,6 @@ test('Should execute pipeline once', async () => {
 
   expect(mockExecuteTransformation).toHaveBeenCalledWith(transformation)
   expect(mockExecuteTransformation).toHaveBeenCalledTimes(1)
-
-  expect(mockExecuteStorage).toHaveBeenCalledWith(pipelineConfig, transformedData)
 })
 
 test('Should execute pipeline periodic', async () => {
@@ -79,7 +74,6 @@ test('Should execute pipeline periodic', async () => {
   expect(mockGetPipelinesForDatasource).toHaveBeenCalledWith(datasourceConfig.id)
 
   expect(mockExecuteTransformation).toHaveBeenCalledWith(transformation)
-  expect(mockExecuteStorage).toHaveBeenCalledWith(pipelineConfig, transformedData)
 })
 
 test('Should trigger notifications', async () => {
@@ -94,7 +88,7 @@ test('Should trigger notifications', async () => {
 
   await PipelineExecution.execute(datasourceConfig)
 
-  expect(mockPublishAmqp).toHaveBeenCalledTimes(1)
+  expect(mockPublishExecutionSuccessAmqp).toHaveBeenCalledTimes(1)
 })
 
 function generateDatasourceConfig (periodic = true): DatasourceConfig {

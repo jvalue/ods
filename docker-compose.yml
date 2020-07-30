@@ -97,6 +97,9 @@ services:
       AMQP_URL: amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672
       AMQP_EXCHANGE: ods_global
       AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: 'pipeline.execution.success'
+      AMQP_PIPELINE_EXECUTION_ERROR_TOPIC: 'pipeline.execution.error'
+      AMQP_PIPELINE_CONFIG_CREATION_TOPIC: 'pipeline.config.created'
+      AMQP_PIPELINE_CONFIG_DELETION_TOPIC: 'pipeline.config.deleted'
       INITIAL_CONNECTION_RETRIES: 20
       INITIAL_CONNECTION_RETRY_BACKOFF: 5000
     labels:
