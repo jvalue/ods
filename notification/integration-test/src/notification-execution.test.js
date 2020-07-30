@@ -140,7 +140,7 @@ describe('Notification', () => {
       expect(receiverResponse.status).toEqual(200)
       expect(receiverResponse.body.text).toMatch(`${triggerEvent.pipelineName}`)
       expect(receiverResponse.body.text).toMatch(`${triggerEvent.pipelineId}`)
-      expect(receiverResponse.body.location).toEqual(`http://localhost:9000/storage/${triggerEvent.pipelineId}`)
+      expect(receiverResponse.body.text).toMatch(`http://localhost:9000/storage/${triggerEvent.pipelineId}`)
 
       // CLEANUP
       notificationResponse = await request(URL)
