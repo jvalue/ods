@@ -8,7 +8,7 @@ const ADAPTER_URL = process.env.ADAPTER_API || 'http://localhost:9000/api/adapte
 const TRANSFORMATION_URL = process.env.TRANSFORMATION_API || 'http://localhost:9000/api/transformation'
 const NOTIFICATION_URL = process.env.NOTIFICATION_API || 'http://localhost:9000/api/notification'
 const MOCK_SERVER_URL = process.env.MOCK_SERVER_API || 'http://localhost:9000/api/system-tests/mock-server'
-const RABBIT_URL = `http://${process.env.RABBIT_HOST}:15672`
+const RABBIT_URL = process.env.RABBIT_API || 'http://localhost:15672'
 
 const STORAGE_DOCKER = process.env.STORAGE_API || 'http://storage:3000' // needed to run tests outside of docker environment
 const MOCK_SERVER_DOCKER = process.env.MOCK_SERVER_API || 'http://mock-server:8080'
@@ -45,7 +45,8 @@ describe('System-Test', () => {
       ],
         timeout: 60000,
         log: true
-      })
+      }),
+    await sleep(2000) // give the system some more startup time
   }, 60000)
 
   afterAll(async () => {

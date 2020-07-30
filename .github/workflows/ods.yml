@@ -293,16 +293,15 @@ jobs:
 
       - name: Run Systemtest
         run: |
-          docker load -i ./core-artifact/core.tar
-          docker load -i ./scheduler-artifact/scheduler.tar
-          docker load -i ./storage-artifact/storage_postgrest.tar
-          docker load -i ./liquibase-artifact/storage_liquibase.tar
-          docker load -i ./storagemq-artifact/storage_mq.tar
-          docker load -i ./transformation-artifact/transformation.tar
-          docker load -i ./notification-artifact/notification.tar
+          docker load -i ./core-artifact/core.tar &
+          docker load -i ./scheduler-artifact/scheduler.tar &
+          docker load -i ./storage-artifact/storage_postgrest.tar &
+          docker load -i ./liquibase-artifact/storage_liquibase.tar &
+          docker load -i ./storagemq-artifact/storage_mq.tar &
+          docker load -i ./transformation-artifact/transformation.tar &
+          docker load -i ./notification-artifact/notification.tar &
           docker load -i ./adapter-artifact/adapter.tar
-          docker-compose -f docker-compose.yml up -d core adapter transformation notification storage storage-mq scheduler
-          docker-compose -f docker-compose.yml -f docker-compose.st.yml up --exit-code-from system-test system-test
+          docker-compose -f docker-compose.yml -f docker-compose.st.yml up --exit-code-from system-test core adapter transformation storage storage-mq notification scheduler system-test
           docker-compose logs
           docker-compose -f docker-compose.yml -f docker-compose.st.yml down
 

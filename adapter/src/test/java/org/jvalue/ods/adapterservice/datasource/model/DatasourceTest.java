@@ -66,13 +66,15 @@ public class DatasourceTest {
 
   @Test
   public void testFillQueryParameters() throws ParseException {
-    Datasource datasource = generateDatasource("HTTP", "JSON", "http://www.the-inder.net/{userId}/{dataId}");
+    Datasource datasource = generateParameterizableDatasource("HTTP", "JSON", "http://www.the-inder.net/{userId}/{dataId}", Map.of("userId", "1", "dataId", "123"));
     Map<String, String> parameters = new HashMap<>();
     parameters.put("userId", "1");
     parameters.put("dataId", "123");
     parameters.put("notAKey", "notAValue");
     RuntimeParameters runtimeParameters = new RuntimeParameters(parameters);
     DatasourceProtocol datasourceProtocol = datasource.fillQueryParameters(runtimeParameters);
+    assertEquals("http://www.the-inder.net/1/123", datasourceProtocol.getParameters().get("location"));
+    datasourceProtocol = datasource.fillQueryParameters(null);
     assertEquals("http://www.the-inder.net/1/123", datasourceProtocol.getParameters().get("location"));
   }
 
@@ -94,6 +96,14 @@ public class DatasourceTest {
 
   private Datasource generateDatasource(String protocol, String format, String location) throws ParseException {
     DatasourceProtocol protocolConfig = new DatasourceProtocol(protocol, Map.of("location", location));
+    DatasourceFormat formatConfig = new DatasourceFormat(format, Map.of());
+    DatasourceMetadata metadata = new DatasourceMetadata("icke", "none", "TestName", "Describing...");
+    DatasourceTrigger trigger = new DatasourceTrigger(true, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse("1905-12-01T02:30:00.123Z"), 50000L);
+    return new Datasource(protocolConfig, formatConfig, metadata, trigger);
+  }
+
+  private Datasource generateParameterizableDatasource(String protocol, String format, String location, Map<String, String> defaultParameters) throws ParseException {
+    DatasourceProtocol protocolConfig = new DatasourceProtocol(protocol, Map.of("location", location, "defaultParameters", defaultParameters));
     DatasourceFormat formatConfig = new DatasourceFormat(format, Map.of());
     DatasourceMetadata metadata = new DatasourceMetadata("icke", "none", "TestName", "Describing...");
     DatasourceTrigger trigger = new DatasourceTrigger(true, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse("1905-12-01T02:30:00.123Z"), 50000L);
