@@ -23,10 +23,6 @@ const AMQP_NOTIFICATION_TOPIC = process.env.AMQP_TOPIC
 const AMQP_IT_QUEUE = process.env.AMQP_IT_QUEUE
 const RABBIT_HEALTH_URL = process.env.RABBIT_HEALTH_URL
 
-const MOCK_STORAGE_PORT = process.env.MOCK_STORAGE_PORT || 8085
-const MOCK_STORAGE_HOST = process.env.MOCK_STORAGE_HOST || 'localhost'
-const MOCK_STORAGE_URL = 'http://' + MOCK_STORAGE_HOST + ':' + MOCK_STORAGE_PORT
-
 const data = {
   field1: 'abc', // 'field' variables from adapter data
   field2: 123,
@@ -37,7 +33,7 @@ const data = {
   test: 'abc' // from transformation service
 }
 
-let notificationStore = []
+let publishedEvents = []
 
 let amqpConnection
 
@@ -49,10 +45,9 @@ describe('Scheduler', () => {
     console.log('Waiting for service with URL: ' + MOCK_CORE_URL)
     console.log('Waiting for service with URL: ' + MOCK_ADAPTER_URL)
     console.log('Waiting for service with URL: ' + MOCK_TRANSFORMATION_URL)
-    console.log('Waiting for service with URL: ' + MOCK_STORAGE_URL)
     console.log('Waiting for rabbitMQ with URL: ' + RABBIT_HEALTH_URL)
     await waitOn(
-      { resources: [MOCK_CORE_URL, MOCK_ADAPTER_URL, MOCK_TRANSFORMATION_URL, MOCK_STORAGE_URL], timeout: 50000 })
+      { resources: [MOCK_CORE_URL, MOCK_ADAPTER_URL, MOCK_TRANSFORMATION_URL], timeout: 50000 })
     console.log('Waiting for service with URL: ' + pingUrl)
     await waitOn({ resources: [pingUrl], timeout: 50000 })
   }, 60000)
@@ -84,29 +79,19 @@ describe('Scheduler', () => {
     expect(response.body[1].datasourceConfig.id).toEqual(2)
   })
 
-  test('Pipeline runs with dummy data', async () => {
-    await sleep(10000) // pipeline should have been executing until now!
-    const response = await request(MOCK_STORAGE_URL).get('/125') // see what got stored
-    expect(response.status).toEqual(200)
-    expect(response.type).toEqual('application/json')
-    expect(response.body.data).toEqual(data)
-  }, 12000)
-
-  test('Pipeline triggers correct notifications', async () => {
+  test('Pipeline runs through with successful publish', async () => {
     await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_NOTIFICATION_TOPIC, AMQP_IT_QUEUE)
     await sleep(10000) // pipeline should have been executing until now!
-    expect(notificationStore).toContainEqual(
+    expect(publishedEvents).toContainEqual(
       {
         pipelineId: 125,
         pipelineName: 'nordstream',
-        data,
-        dataLocation: MOCK_STORAGE_URL + '/125',
+        data
       })
-    expect(notificationStore).toContainEqual(
+    expect(publishedEvents).toContainEqual(
       {
         pipelineId: 123,
-        data,
-        dataLocation: MOCK_STORAGE_URL + '/123'
+        data
       }
     )
   }, 12000)
@@ -129,8 +114,9 @@ async function receiveAmqp (url, exchange, topic, queue) {
 }
 
 async function consumeEvent (msg) {
-  console.log('Event received via amqp')
-  notificationStore.push(JSON.parse(msg.content.toString()))
+  const event = JSON.parse(msg.content.toString())
+  console.log(`Event received via amqp: ${JSON.stringify(event)}`)
+  publishedEvents.push(event)
 }
 
 function sleep (ms) {
