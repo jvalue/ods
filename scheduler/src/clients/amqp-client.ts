@@ -1,8 +1,6 @@
 import amqp from 'amqplib'
 
 const AMQP_EXCHANGE = process.env.AMQP_EXCHANGE || 'ods_global'
-const AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC = process.env.AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC || 'pipeline.execution.success'
-const AMQP_PIPELINE_EXECUTION_ERROR_TOPIC = process.env.AMQP_PIPELINE_EXECUTION_ERROR_TOPIC || 'pipeline.execution.error'
 const AMQP_PIPELINE_CONFIG_CREATION_TOPIC = process.env.AMQP_PIPELINE_CONFIG_CREATION_TOPIC || 'pipeline.config.created'
 const AMQP_PIPELINE_CONFIG_DELETION_TOPIC = process.env.AMQP_PIPELINE_CONFIG_DELETION_TOPIC || 'pipeline.config.deleted'
 const AMQP_URL = process.env.AMQP_URL!
@@ -51,38 +49,6 @@ async function initChannel(connection: amqp.Connection): Promise<amqp.Channel> {
   } catch (error) {
     console.error(`Error creating exchange ${AMQP_EXCHANGE}: ${error}`)
     throw error
-  }
-}
-
-export function publishPipelineExecutionSuccess(content: PipelineExecutionSuccessEvent): boolean {
-  if (!initialized || !channel) {
-    console.error('Publish not possible, AMQP client not initialized.')
-    return false
-  } else {
-    try {
-      const success = channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC, Buffer.from(JSON.stringify(content)))
-      console.log(`Sent: ${JSON.stringify(content)} to topic ${AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC} in exchange ${AMQP_EXCHANGE}`)
-      return success
-    } catch (error) {
-      console.error(`Error publishing to exchange ${AMQP_EXCHANGE} under key ${AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC}: ${error}`)
-      return false
-    }
-  }
-}
-
-export function publishPipelineExecutionError(content: PipelineExecutionErrorEvent): boolean {
-  if (!initialized || !channel) {
-    console.error('Publish not possible, AMQP client not initialized.')
-    return false
-  } else {
-    try {
-      const success = channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_ERROR_TOPIC, Buffer.from(JSON.stringify(content)))
-      console.log(`Sent: ${JSON.stringify(content)} to topic ${AMQP_PIPELINE_EXECUTION_ERROR_TOPIC} in exchange ${AMQP_EXCHANGE}`)
-      return success
-    } catch (error) {
-      console.error(`Error publishing to exchange ${AMQP_EXCHANGE} under key ${AMQP_PIPELINE_EXECUTION_ERROR_TOPIC}: ${error}`)
-      return false
-    }
   }
 }
 
