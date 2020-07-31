@@ -1,15 +1,14 @@
 import axios from 'axios'
 
 import ExecutionResult from '@/pipeline-execution/sandbox/executionResult'
-import JobResult from './interfaces/jobResult'
-import Stats from './interfaces/stats'
+import JobResult from '@/interfaces/jobResult'
+import Stats from '@/interfaces/stats'
 
-import TransformationService from './interfaces/transformationService'
 import SandboxExecutor from '@/pipeline-execution/sandbox/sandboxExecutor'
 
 const VERSION = '0.0.2'
 
-export default class JSTransformationService implements TransformationService {
+export default class PipelineExecutor {
   executor: SandboxExecutor
 
   constructor (executor: SandboxExecutor) {
