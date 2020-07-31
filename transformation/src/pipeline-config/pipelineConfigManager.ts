@@ -3,8 +3,8 @@ import { ExecutionResultPublisher } from "./executionResultPublisher";
 
 export class PipelineConfigManager {
 
-  pipelineExecutor: PipelineExecutor
-  executionResultPublisher: ExecutionResultPublisher
+  private pipelineExecutor: PipelineExecutor
+  private executionResultPublisher: ExecutionResultPublisher
 
   constructor(pipelineExecutor: PipelineExecutor, executionResultPublisher: ExecutionResultPublisher) {
     this.pipelineExecutor = pipelineExecutor

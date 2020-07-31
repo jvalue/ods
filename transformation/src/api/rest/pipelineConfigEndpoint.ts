@@ -36,11 +36,11 @@ export class PipelineConfigEndpoint {
       triggerRequest.func = 'return data;' // Undefined transformation functions are interpreted as identity function
     }
 
-    // TODO: trigger
+    this.pipelineConfigManager.triggerConfig(triggerRequest.pipelineId, triggerRequest.pipelineName, triggerRequest.func, triggerRequest.data)
 
     const answer = `Triggered pipeline ${triggerRequest.pipelineId}. Executing asynchronously...`
     res.setHeader('Content-Type', 'text/plain')
-    res.writeHead(204)
+    res.writeHead(200)
     res.write(answer)
     res.end()
   }
