@@ -1,10 +1,8 @@
-import axios from 'axios'
+import ExecutionResult from './sandbox/executionResult'
+import JobResult from './jobResult'
+import Stats from './stats'
 
-import ExecutionResult from '@/pipeline-execution/sandbox/executionResult'
-import JobResult from '@/interfaces/jobResult'
-import Stats from '@/interfaces/stats'
-
-import SandboxExecutor from '@/pipeline-execution/sandbox/sandboxExecutor'
+import SandboxExecutor from './sandbox/sandboxExecutor'
 
 const VERSION = '0.0.2'
 

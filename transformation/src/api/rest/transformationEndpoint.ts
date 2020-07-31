@@ -8,7 +8,7 @@ import axios from 'axios'
 
 import PipelineExecutor from '@/pipeline-execution/pipelineExecutor'
 import TransformationRequest from '@/interfaces/transformationRequest'
-import JobResult from '@/interfaces/jobResult'
+import JobResult from '@/pipeline-execution/jobResult'
 
 export class TransformationEndpoint {
   port: number
