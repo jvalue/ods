@@ -1,64 +1,23 @@
-import bodyParser from 'body-parser'
-import express, { Application, Request, Response } from 'express'
-import session, { MemoryStore } from 'express-session'
-import cors from 'cors'
-import { Server } from 'http'
-import Keycloak from 'keycloak-connect'
+import * as express from 'express'
 import axios from 'axios'
+
 
 import PipelineExecutor from '@/pipeline-execution/pipelineExecutor'
 import PipelineExecutionRequest from '@/api/rest/pipelineExecutionRequest'
 import JobResult from '@/pipeline-execution/jobResult'
 
 export class PipelineExecutionEndpoint {
-  port: number
-  app: Application
-  store?: MemoryStore
-  keycloak?: Keycloak
-
   transformationService: PipelineExecutor
 
-  constructor (transformationService: PipelineExecutor, port: number, auth: boolean) {
-    this.port = port
+  constructor (transformationService: PipelineExecutor, app: express.Application) {
     this.transformationService = transformationService
 
-    this.app = express()
-
-    this.app.use(cors())
-    this.app.use(bodyParser.json({ limit: '50mb' }))
-    this.app.use(bodyParser.urlencoded({ extended: false }))
-
-    this.store = undefined
-    if (auth) {
-      this.store = new session.MemoryStore()
-      this.keycloak = new Keycloak({ store: this.store })
-      this.app.use(this.keycloak.middleware())
-    }
-
-    this.app.get('/', this.getHealthCheck)
-    this.app.get('/version', this.getVersion)
-    this.app.post('/job', this.determineAuth(), this.postJob)
-  }
-
-  listen (): Server {
-    return this.app.listen(this.port, () => {
-      console.log('listening on port ' + this.port)
-    })
+    app.post('/job', this.postJob)
   }
 
   // The following methods need arrow syntax because of javascript 'this' shenanigans
 
-  getHealthCheck = (req: Request, res: Response): void => {
-    res.send('I am alive!')
-  }
-
-  getVersion = (req: Request, res: Response): void => {
-    res.header('Content-Type', 'text/plain')
-    res.send(this.transformationService.getVersion())
-    res.end()
-  }
-
-  postJob = async (req: Request, res: Response): Promise<void> => {
+  postJob = async (req: express.Request, res: express.Response): Promise<void> => {
     const transformation: PipelineExecutionRequest = req.body
     if (!transformation.data && !transformation.dataLocation) {
       res.writeHead(400)
@@ -87,13 +46,5 @@ export class PipelineExecutionEndpoint {
     }
     res.write(answer)
     res.end()
-  }
-
-  determineAuth = (): express.RequestHandler | [] => {
-    if (this.keycloak !== undefined) {
-      return this.keycloak.protect()
-    } else {
-      return []
-    }
   }
 }
