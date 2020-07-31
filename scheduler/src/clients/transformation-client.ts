@@ -8,8 +8,14 @@ const http = axios.create({
   headers: { 'Content-Type': 'application/json' }
 })
 
-export async function executeTransformation (config: TransformationConfig): Promise<TransformationResult> {
-  const response = await http.post('/job', config)
+export async function executeTransformation (pipelineId: number, pipelineName: string, func: string, dataLocation: string): Promise<TransformationResult> {
+  const trigger = {
+    pipelineId: pipelineId,
+    pipelineName: pipelineName,
+    func: func,
+    dataLocation: dataLocation
+  }
+  const response = await http.post(`/config/${pipelineId}/trigger`, trigger)
   return response.data
 }
 
