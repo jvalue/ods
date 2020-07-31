@@ -1,9 +1,8 @@
 /* eslint-env jest */
-import axios from 'axios'
 
-import TransformationService from './interfaces/transformationService'
+import TransformationService from './pipelineExecutor'
 
-import JSTransformationService from './jsTransformationService'
+import PipelineExecutor from './pipelineExecutor'
 import SandboxExecutor from '@/pipeline-execution/sandbox/sandboxExecutor'
 
 jest.mock('axios')
@@ -19,7 +18,7 @@ describe('JSTransformationService', () => {
         evaluate: jest.fn()
       }))
       sandboxExecutorMock = new SandboxMock()
-      transformationService = new JSTransformationService(sandboxExecutorMock)
+      transformationService = new PipelineExecutor(sandboxExecutorMock)
     })
 
     it('should call execute on the sandbox', () => {
@@ -44,7 +43,7 @@ describe('JSTransformationService', () => {
         evaluate: jest.fn()
       }))
       sandboxExecutorMock = new SandboxMock()
-      transformationService = new JSTransformationService(sandboxExecutorMock)
+      transformationService = new PipelineExecutor(sandboxExecutorMock)
     })
 
     it('should return an error if no return clause is included', () => {

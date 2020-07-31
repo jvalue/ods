@@ -6,7 +6,7 @@ import { Server } from 'http'
 import Keycloak from 'keycloak-connect'
 import axios from 'axios'
 
-import TransformationService from '@/interfaces/transformationService'
+import PipelineExecutor from '@/pipeline-execution/pipelineExecutor'
 import TransformationRequest from '@/interfaces/transformationRequest'
 import JobResult from '@/interfaces/jobResult'
 
@@ -16,9 +16,9 @@ export class TransformationEndpoint {
   store?: MemoryStore
   keycloak?: Keycloak
 
-  transformationService: TransformationService
+  transformationService: PipelineExecutor
 
-  constructor (transformationService: TransformationService, port: number, auth: boolean) {
+  constructor (transformationService: PipelineExecutor, port: number, auth: boolean) {
     this.port = port
     this.transformationService = transformationService
 
