@@ -1,5 +1,5 @@
-import { TransformationEndpoint } from './api/rest/transformationEndpoint'
-import VM2SandboxExecutor from './pipeline-execution/sandbox/vm2SandboxExecutor'
+import { TransformationEndpoint } from '@/api/rest/transformationEndpoint'
+import VM2SandboxExecutor from '@/pipeline-execution/sandbox/vm2SandboxExecutor'
 import PipelineExecutor from '@/pipeline-execution/pipelineExecutor'
 
 const port = 8080

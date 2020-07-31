@@ -1,9 +1,8 @@
 /* eslint-env jest */
-
 import TransformationService from './pipelineExecutor'
 
 import PipelineExecutor from './pipelineExecutor'
-import SandboxExecutor from '@/pipeline-execution/sandbox/sandboxExecutor'
+import SandboxExecutor from './sandbox/sandboxExecutor'
 
 jest.mock('axios')
 
