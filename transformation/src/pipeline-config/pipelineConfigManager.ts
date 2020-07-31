@@ -1,4 +1,4 @@
-import PipelineExecutor from "@/pipeline-execution/pipelineExecutor";
+import PipelineExecutor from "../pipeline-execution/pipelineExecutor";
 import { ExecutionResultPublisher } from "./executionResultPublisher";
 
 export class PipelineConfigManager {
