@@ -1,5 +1,5 @@
 import { TransformationEndpoint } from './api/rest/transformationEndpoint'
-import VM2SandboxExecutor from './vm2SandboxExecutor'
+import VM2SandboxExecutor from './pipeline-execution/sandbox/vm2SandboxExecutor'
 import JSTransformationService from './jsTransformationService'
 
 const port = 8080
