@@ -13,7 +13,7 @@ const AMQP_PIPELINE_EXECUTION_ERROR_TOPIC = process.env.AMQP_PIPELINE_EXECUTION_
 
 
 let amqpConnection
-const publishedEvents = new Map()
+const publishedEvents = new Map() // routing key -> received msgs []
 
 describe('Transformation Service', () => {
   console.log('Transformation-Service URL= ' + URL)
@@ -23,6 +23,10 @@ describe('Transformation Service', () => {
     console.log('Waiting for transformation-service with URL: ' + pingUrl)
     await waitOn({ resources: [pingUrl], timeout: 50000 })
     await connectAmqp(AMQP_URL)
+
+    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC, AMQP_IT_QUEUE)
+    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_ERROR_TOPIC, AMQP_IT_QUEUE)
+
   }, 60000)
 
   afterAll(async () => {
@@ -34,8 +38,6 @@ describe('Transformation Service', () => {
   })
 
   test('Pipeline runs through successfully with successful publish', async () => {
-    const testName = "test1"
-
     const trigger = {
       pipelineId: 125,
       pipelineName: 'nordstream',
@@ -51,10 +53,8 @@ describe('Transformation Service', () => {
       .send(trigger)
     expect(response.status).toEqual(200)
 
-
-    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC, AMQP_IT_QUEUE, testName)
     await sleep(10000) // pipeline should have been executing until now!
-    expect(publishedEvents.get(testName)).toContainEqual(
+    expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC)).toContainEqual(
       {
         pipelineId: trigger.pipelineId,
         pipelineName: trigger.pipelineName,
@@ -64,8 +64,6 @@ describe('Transformation Service', () => {
 
 
   test('Pipeline runs through with error with successful publish', async () => {
-    const testName = "test2"
-
     const trigger = {
       pipelineId: 125,
       pipelineName: 'nordstream',
@@ -81,14 +79,12 @@ describe('Transformation Service', () => {
       .send(trigger)
     expect(response.status).toEqual(200)
 
-
-    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_ERROR_TOPIC, AMQP_IT_QUEUE, testName)
     await sleep(10000) // pipeline should have been executing until now!
-    expect(publishedEvents.get(testName)).toBeDefined()
-    expect(publishedEvents.get(testName).length).toEqual(1)
-    expect(publishedEvents.get(testName).pipelineId).toEqual(trigger.pipelineId)
-    expect(publishedEvents.get(testName).pipelineName).toEqual(trigger.pipelineName)
-    expect(publishedEvents.get(testName).error).toBeDefined()
+    expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)).toBeDefined()
+    expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC).length).toEqual(1)
+    expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].pipelineId).toEqual(trigger.pipelineId)
+    expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].pipelineName).toEqual(trigger.pipelineName)
+    expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].error).toBeDefined()
   }, 12000)
 
 })
@@ -98,26 +94,21 @@ async function connectAmqp (url) {
   console.log(`Connected to AMQP on host "${url}"`)
 }
 
-async function receiveAmqp (url, exchange, topic, queue, testName) {
+async function receiveAmqp (url, exchange, topic, queue) {
   const channel = await amqpConnection.createChannel()
   const q = await channel.assertQueue(queue)
   await channel.bindQueue(q.queue, exchange, topic)
 
   console.log(`Listening on AMQP host "${url}" on exchange "${exchange}" for topic "${topic}"`)
 
-  const testName2 = testName
   await channel.consume(q.queue, async (msg) => {
-    console.log(`debug: ${testName}`)
-    console.log(`debug: ${this.testName}`)
-    console.log(`debug: ${testName2}`)
-    console.log(`debug: ${this.testName2}`)
     const event = JSON.parse(msg.content.toString())
     console.log(`Event received via amqp: ${JSON.stringify(event)}`)
-    if(!publishedEvents.get(testName)) {
-      publishedEvents.set(testName, [])
+    const routingKey = msg.fields.routingKey
+    if(!publishedEvents.get(routingKey)) {
+      publishedEvents.set(routingKey, [])
     }
-    publishedEvents.get(testName).push(event)
-    console.log(`Received the following events on this testname "${testName}": ${JSON.stringify(publishedEvents.get(testName))}`)
+    publishedEvents.get(routingKey).push(event)
   })
 }
 
