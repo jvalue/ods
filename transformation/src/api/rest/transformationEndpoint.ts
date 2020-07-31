@@ -7,7 +7,7 @@ import Keycloak from 'keycloak-connect'
 import axios from 'axios'
 
 import PipelineExecutor from '@/pipeline-execution/pipelineExecutor'
-import TransformationRequest from '@/interfaces/transformationRequest'
+import TransformationRequest from '@/api/rest/transformationRequest'
 import JobResult from '@/pipeline-execution/jobResult'
 
 export class TransformationEndpoint {
