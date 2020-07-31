@@ -2,9 +2,9 @@ import express from 'express'
 import cors from 'cors'
 import bodyParser from 'body-parser'
 
-import { PipelineExecutionEndpoint } from '@/api/rest/pipelineExecutionEndpoint'
-import VM2SandboxExecutor from '@/pipeline-execution/sandbox/vm2SandboxExecutor'
-import PipelineExecutor from '@/pipeline-execution/pipelineExecutor'
+import { PipelineExecutionEndpoint } from './api/rest/pipelineExecutionEndpoint'
+import VM2SandboxExecutor from './pipeline-execution/sandbox/vm2SandboxExecutor'
+import PipelineExecutor from './pipeline-execution/pipelineExecutor'
 const port = 8080
 
 const app = express()

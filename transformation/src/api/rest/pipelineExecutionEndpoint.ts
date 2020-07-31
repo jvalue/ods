@@ -2,9 +2,9 @@ import * as express from 'express'
 import axios from 'axios'
 
 
-import PipelineExecutor from '@/pipeline-execution/pipelineExecutor'
-import PipelineExecutionRequest from '@/api/rest/pipelineExecutionRequest'
-import JobResult from '@/pipeline-execution/jobResult'
+import PipelineExecutor from '../../pipeline-execution/pipelineExecutor'
+import PipelineExecutionRequest from '../../api/rest/pipelineExecutionRequest'
+import JobResult from '../../pipeline-execution/jobResult'
 
 export class PipelineExecutionEndpoint {
   transformationService: PipelineExecutor
