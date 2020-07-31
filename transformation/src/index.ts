@@ -1,4 +1,4 @@
-import { TransformationEndpoint } from '@/api/rest/transformationEndpoint'
+import { PipelineExecutionEndpoint } from '@/api/rest/pipelineExecutionEndpoint'
 import VM2SandboxExecutor from '@/pipeline-execution/sandbox/vm2SandboxExecutor'
 import PipelineExecutor from '@/pipeline-execution/pipelineExecutor'
 
@@ -12,6 +12,6 @@ if (authEnabled === false) {
 
 const sandboxExecutor = new VM2SandboxExecutor()
 const transformationService = new PipelineExecutor(sandboxExecutor)
-const transformationEndpoint = new TransformationEndpoint(transformationService, port, authEnabled)
+const transformationEndpoint = new PipelineExecutionEndpoint(transformationService, port, authEnabled)
 
 transformationEndpoint.listen()

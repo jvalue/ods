@@ -7,10 +7,10 @@ import Keycloak from 'keycloak-connect'
 import axios from 'axios'
 
 import PipelineExecutor from '@/pipeline-execution/pipelineExecutor'
-import TransformationRequest from '@/api/rest/transformationRequest'
+import PipelineExecutionRequest from '@/api/rest/pipelineExecutionRequest'
 import JobResult from '@/pipeline-execution/jobResult'
 
-export class TransformationEndpoint {
+export class PipelineExecutionEndpoint {
   port: number
   app: Application
   store?: MemoryStore
@@ -59,7 +59,7 @@ export class TransformationEndpoint {
   }
 
   postJob = async (req: Request, res: Response): Promise<void> => {
-    const transformation: TransformationRequest = req.body
+    const transformation: PipelineExecutionRequest = req.body
     if (!transformation.data && !transformation.dataLocation) {
       res.writeHead(400)
       res.end()
