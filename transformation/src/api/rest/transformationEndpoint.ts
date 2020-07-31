@@ -2,12 +2,13 @@ import bodyParser from 'body-parser'
 import express, { Application, Request, Response } from 'express'
 import session, { MemoryStore } from 'express-session'
 import cors from 'cors'
-import Keycloak from 'keycloak-connect'
-import TransformationService from './interfaces/transformationService'
-import TransformationRequest from './interfaces/transformationRequest'
 import { Server } from 'http'
-import JobResult from './interfaces/jobResult'
+import Keycloak from 'keycloak-connect'
 import axios from 'axios'
+
+import TransformationService from '@/interfaces/transformationService'
+import TransformationRequest from '@/interfaces/transformationRequest'
+import JobResult from '@/interfaces/jobResult'
 
 export class TransformationEndpoint {
   port: number
