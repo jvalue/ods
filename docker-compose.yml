@@ -201,6 +201,16 @@ services:
     image: ${DOCKER_REGISTRY}/transformation
     build:
       context: ./transformation/
+    depends_on:
+      - rabbitmq
+    environment:
+      CONNECTION_RETRIES: '30'
+      CONNECTION_BACKOFF_IN_MS: '2000'
+
+      AMQP_URL: "amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672"
+      AMQP_PIPELINE_EXECUTION_EXCHANGE: 'ods_global'
+      AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: 'pipeline.execution.success'
+      AMQP_PIPELINE_EXECUTION_ERROR_TOPIC: 'pipeline.execution.error'
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-transformation.rule=PathPrefix(`/api/transformation`)"
