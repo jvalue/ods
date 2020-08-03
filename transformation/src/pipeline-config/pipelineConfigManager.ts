@@ -68,15 +68,18 @@ export class PipelineConfigManager {
     return Promise.resolve()
   }
 
-  triggerConfig(pipelineId: number, pipelineName: string, func: string, data: object) {
-    const result = this.pipelineExecutor.executeJob(func, data)
+  async triggerConfig(datasourceId: number, data: object) {
 
-    if(result.error) {
-      this.executionResultPublisher.publishError(pipelineId, pipelineName, result.error.message)
-    } else if(result.data) {
-      this.executionResultPublisher.publishSuccess(pipelineId, pipelineName, result.data)
-    } else {
-      console.error(`Pipeline ${pipelineId} executed with ambiguous result: no data and no error!`)
+    const allConfigs = await this.getByDatasourceId(datasourceId)
+    for(const config of allConfigs) {
+      const result = this.pipelineExecutor.executeJob(config.transformation.func, data)
+      if(result.error) {
+        this.executionResultPublisher.publishError(config.id, config.metadata.displayName, result.error.message)
+      } else if(result.data) {
+        this.executionResultPublisher.publishSuccess(config.id, config.metadata.displayName, result.data)
+      } else {
+        console.error(`Pipeline ${config.id} executed with ambiguous result: no data and no error!`)
+      }
     }
   }
 }
