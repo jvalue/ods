@@ -16,7 +16,6 @@ services:
       context: ./system-test/
 
     environment:
-      CORE_API: http://core:8080
       STORAGE_API: http://storage:3000
       TRANSFORMATION_API: http://transformation:8080
       SCHEDULER_API: http://scheduler:8080
