@@ -2,16 +2,19 @@ import PipelineExecutor from "../pipeline-execution/pipelineExecutor";
 import { ExecutionResultPublisher } from "./publisher/executionResultPublisher";
 import PipelineConfigRepository from "./pipelineConfigRepository";
 import PipelineConfig from "./model/pipelineConfig";
+import { ConfigWritesPublisher } from "./publisher/configWritesPublisher";
 
 export class PipelineConfigManager {
 
   private pipelineExecutor: PipelineExecutor
-  private executionResultPublisher: ExecutionResultPublisher
   private pipelineConfigRepository: PipelineConfigRepository;
+  private configWritesPublisher: ConfigWritesPublisher;
+  private executionResultPublisher: ExecutionResultPublisher
 
-  constructor(pipelineConfigRepository: PipelineConfigRepository, pipelineExecutor: PipelineExecutor, executionResultPublisher: ExecutionResultPublisher) {
+  constructor(pipelineConfigRepository: PipelineConfigRepository, pipelineExecutor: PipelineExecutor, configWritesPublisher: ConfigWritesPublisher, executionResultPublisher: ExecutionResultPublisher) {
     this.pipelineConfigRepository = pipelineConfigRepository
     this.pipelineExecutor = pipelineExecutor
+    this.configWritesPublisher = configWritesPublisher
     this.executionResultPublisher = executionResultPublisher
   }
 

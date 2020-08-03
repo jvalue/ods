@@ -40,7 +40,7 @@ const server = app.listen(port, async () => {
   await executionResultPublisher.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
   await configWritesPublisher.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
 
-  const pipelineConfigManager = new PipelineConfigManager(pipelineConfigRepository, pipelineExecutor, executionResultPublisher)
+  const pipelineConfigManager = new PipelineConfigManager(pipelineConfigRepository, pipelineExecutor, configWritesPublisher, executionResultPublisher)
 
   const pipelineExecutionEndpoint = new PipelineExecutionEndpoint(pipelineExecutor, app)
   const pipelineConfigEndpoint = new PipelineConfigEndpoint(pipelineConfigManager, app)
