@@ -1,23 +1,41 @@
 const request = require('supertest')
 const waitOn = require('wait-on')
+const amqp = require('amqplib')
 
 const URL = process.env.TRANSFORMATION_API || 'http://localhost:8080'
+
+const AMQP_URL = process.env.AMQP_URL
+const AMQP_EXCHANGE = process.env.AMQP_EXCHANGE
+const AMQP_IT_QUEUE = process.env.AMQP_IT_QUEUE
+const AMQP_PIPELINE_CONFIG_CREATED_TOPIC = process.env.AMQP_PIPELINE_CONFIG_CREATED_TOPIC
+const AMQP_PIPELINE_CONFIG_UPDATED_TOPIC = process.env.AMQP_PIPELINE_CONFIG_UPDATED_TOPIC
+const AMQP_PIPELINE_CONFIG_DELETED_TOPIC = process.env.AMQP_PIPELINE_CONFIG_DELETED_TOPIC
+
+let amqpConnection
+const publishedEvents = new Map() // routing key -> received msgs []
 
 describe('Pipeline Config Test', () => {
   console.log('Core-Service URL= ' + URL)
 
   beforeAll(async () => {
-    try {
-      const pingUrl = URL + '/version'
-      console.log('Waiting for service with URL: ' + pingUrl)
-      await waitOn({ resources: [pingUrl], timeout: 50000 })
-      console.log('[online] Service with URL:  ' + pingUrl)
-    } catch (err) {
-      process.exit(1)
-    }
+    const pingUrl = URL + '/version'
+    console.log('Waiting for service with URL: ' + pingUrl)
+    await waitOn({ resources: [pingUrl], timeout: 50000 })
+    console.log('[online] Service with URL:  ' + pingUrl)
+
+    await connectAmqp(AMQP_URL)
+    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_CREATED_TOPIC, AMQP_IT_QUEUE)
+    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_UPDATED_TOPIC, AMQP_IT_QUEUE)
+    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_DELETED_TOPIC, AMQP_IT_QUEUE)
   }, 60000)
 
   afterAll(async () => {
+    if(amqpConnection) {
+      console.log('Closing AMQP Connection...')
+      await amqpConnection.close()
+      console.log('AMQP Connection closed')
+    }
+
     // clear stored configs
     await request(URL)
       .delete('/configs')
@@ -38,10 +56,11 @@ describe('Pipeline Config Test', () => {
       .send(pipelineConfig)
 
     expect(response.status).toEqual(201)
-    expect(response.header.location).toContain(response.body.id)
+    const configId = response.body.id
+    expect(response.header.location).toContain(configId)
 
     expect(response.body.id).toBeDefined()
-    expect(response.body.id).not.toEqual(pipelineConfig.id) // id not under control of client
+    expect(configId).not.toEqual(pipelineConfig.id) // id not under control of client
     expect(response.body.datasourceId).toEqual(pipelineConfig.datasourceId)
 
     expect(response.body.transformation).toEqual(pipelineConfig.transformation)
@@ -53,10 +72,20 @@ describe('Pipeline Config Test', () => {
     expect(response.body.metadata.creationTimestamp).toBeDefined()
 
     const delResponse = await request(URL)
-      .delete('/configs/' + response.body.id)
+      .delete('/configs/' + configId)
       .send()
 
     expect(delResponse.status).toEqual(204)
+
+    await sleep(1000)
+    expect(publishedEvents.get(AMQP_PIPELINE_CONFIG_CREATED_TOPIC)).toContainEqual({
+      pipelineId: configId,
+      pipelineName: pipelineConfig.metadata.displayName
+    })
+    expect(publishedEvents.get(AMQP_PIPELINE_CONFIG_DELETED_TOPIC)).toContainEqual({
+      pipelineId: configId,
+      pipelineName: pipelineConfig.metadata.displayName
+    })
   })
 
   test('PUT & DELETE /configs/{id}', async () => {
@@ -64,22 +93,21 @@ describe('Pipeline Config Test', () => {
       .post('/configs')
       .send(pipelineConfig)
 
-    const pipelineId = postResponse.body.id
-
+    const configId = postResponse.body.id
     const originalGetResponse = await request(URL)
-      .get('/configs/' + pipelineId)
+      .get('/configs/' + configId)
 
     const updatedConfig = Object.assign({}, pipelineConfig)
     updatedConfig.datasourceId = 999
 
     const putResponse = await request(URL)
-      .put('/configs/' + pipelineId)
+      .put('/configs/' + configId)
       .send(updatedConfig)
 
     expect(putResponse.status).toEqual(204)
 
     const updatedGetResponse = await request(URL)
-      .get('/configs/' + pipelineId)
+      .get('/configs/' + configId)
 
     expect(originalGetResponse.body.transformation).toEqual(updatedGetResponse.body.transformation)
     expect(originalGetResponse.body.metadata).toEqual(updatedGetResponse.body.metadata)
@@ -87,25 +115,51 @@ describe('Pipeline Config Test', () => {
     expect(originalGetResponse.body.datasourceId).not.toEqual(updatedGetResponse.body.datasourceId)
 
     const delResponse = await request(URL)
-      .delete('/configs/' + pipelineId)
+      .delete('/configs/' + configId)
       .send()
 
     expect(delResponse.status).toEqual(204)
+
+    await sleep(1000)
+    expect(publishedEvents.get(AMQP_PIPELINE_CONFIG_CREATED_TOPIC)).toContainEqual({
+      pipelineId: configId,
+      pipelineName: pipelineConfig.metadata.displayName
+    })
+    expect(publishedEvents.get(AMQP_PIPELINE_CONFIG_UPDATED_TOPIC)).toContainEqual({
+      pipelineId: configId,
+      pipelineName: pipelineConfig.metadata.displayName
+    })
+    expect(publishedEvents.get(AMQP_PIPELINE_CONFIG_DELETED_TOPIC)).toContainEqual({
+      pipelineId: configId,
+      pipelineName: pipelineConfig.metadata.displayName
+    })
   })
 
   test('DELETE /configs/', async () => {
-    await request(URL)
+    const response1 = await request(URL)
       .post('/configs')
       .send(pipelineConfig)
-    await request(URL)
+    const config1Id = response1.body.id
+    const response2 = await request(URL)
       .post('/configs')
       .send(pipelineConfig)
+    const config2Id = response2.body.id
 
     const delResponse = await request(URL)
       .delete('/configs/')
       .send()
 
     expect(delResponse.status).toEqual(204)
+
+    await sleep(1000)
+    expect(publishedEvents.get(AMQP_PIPELINE_CONFIG_DELETED_TOPIC)).toContainEqual({
+      pipelineId: config1Id,
+      pipelineName: pipelineConfig.metadata.displayName
+    })
+    expect(publishedEvents.get(AMQP_PIPELINE_CONFIG_DELETED_TOPIC)).toContainEqual({
+      pipelineId: config2Id,
+      pipelineName: pipelineConfig.metadata.displayName
+    })
   })
 
   test('Persist long transformation function', async () => {
@@ -146,7 +200,36 @@ const pipelineConfig = {
   metadata: {
     author: 'icke',
     license: 'none',
-    displayName: 'test pipeline 1',
+    displayName: 'test pipeline',
     description: 'integraiton testing pipeline'
   }
+}
+
+
+async function connectAmqp (url) {
+  amqpConnection = await amqp.connect(url)
+  console.log(`Connected to AMQP on host "${url}"`)
+}
+
+async function receiveAmqp (url, exchange, topic, queue) {
+  const channel = await amqpConnection.createChannel()
+  const q = await channel.assertQueue(queue)
+  await channel.bindQueue(q.queue, exchange, topic)
+
+  console.log(`Listening on AMQP host "${url}" on exchange "${exchange}" for topic "${topic}"`)
+
+  await channel.consume(q.queue, async (msg) => {
+    const event = JSON.parse(msg.content.toString())
+    const routingKey = msg.fields.routingKey
+    console.log(`Event received on topic "${routingKey}": ${JSON.stringify(event)}`)
+    if(!publishedEvents.get(routingKey)) {
+      publishedEvents.set(routingKey, [event])
+    } else {
+      publishedEvents.get(routingKey).push(event)
+    }
+  })
+}
+
+function sleep (ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
