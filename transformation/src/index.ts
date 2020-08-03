@@ -8,6 +8,7 @@ import PipelineExecutor from './pipeline-execution/pipelineExecutor'
 import { PipelineConfigEndpoint } from './api/rest/pipelineConfigEndpoint'
 import { PipelineConfigManager } from './pipeline-config/pipelineConfigManager'
 import AmqpExecutionResultPublisher from './pipeline-config/amqpExecutionResultPublisher'
+import PostgresPipelineConfigRepository from './pipeline-config/postgresPipelineConfigRepository'
 
 const CONNECTION_RETRIES = +process.env.CONNECTION_RETRIES!
 const CONNECTION_BACKOFF = +process.env.CONNECTION_BACKOFF_IN_MS!
@@ -21,6 +22,8 @@ app.use(bodyParser.urlencoded({ extended: false }))
 
 const sandboxExecutor = new VM2SandboxExecutor()
 const pipelineExecutor = new PipelineExecutor(sandboxExecutor)
+const pipelineConfigRepository = new PostgresPipelineConfigRepository()
+const executionResultPublisher = new AmqpExecutionResultPublisher()
 
 // global promise-rejected handler
 process.on('unhandledRejection', function(reason, p){
@@ -31,9 +34,10 @@ process.on('unhandledRejection', function(reason, p){
 const server = app.listen(port, async () => {
   console.log('Listening on port ' + port)
 
-  const executionResultPublisher = new AmqpExecutionResultPublisher()
+  await pipelineConfigRepository.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
   await executionResultPublisher.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
-  const pipelineConfigManager = new PipelineConfigManager(pipelineExecutor, executionResultPublisher)
+
+  const pipelineConfigManager = new PipelineConfigManager(pipelineConfigRepository, pipelineExecutor, executionResultPublisher)
 
   const pipelineExecutionEndpoint = new PipelineExecutionEndpoint(pipelineExecutor, app)
   const pipelineConfigEndpoint = new PipelineConfigEndpoint(pipelineConfigManager, app)
