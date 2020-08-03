@@ -7,7 +7,7 @@ import VM2SandboxExecutor from './pipeline-execution/sandbox/vm2SandboxExecutor'
 import PipelineExecutor from './pipeline-execution/pipelineExecutor'
 import { PipelineConfigEndpoint } from './api/rest/pipelineConfigEndpoint'
 import { PipelineConfigManager } from './pipeline-config/pipelineConfigManager'
-import AmqpExecutionResultPublisher from './pipeline-config/amqpExecutionResultPublisher'
+import AmqpExecutionResultPublisher from './pipeline-config/publisher/amqpExecutionResultPublisher'
 import PostgresPipelineConfigRepository from './pipeline-config/postgresPipelineConfigRepository'
 
 const CONNECTION_RETRIES = +process.env.CONNECTION_RETRIES!

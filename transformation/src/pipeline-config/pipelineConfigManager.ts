@@ -1,5 +1,5 @@
 import PipelineExecutor from "../pipeline-execution/pipelineExecutor";
-import { ExecutionResultPublisher } from "./executionResultPublisher";
+import { ExecutionResultPublisher } from "./publisher/executionResultPublisher";
 import PipelineConfigRepository from "./pipelineConfigRepository";
 import PipelineConfig from "./model/pipelineConfig";
 
