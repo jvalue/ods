@@ -39,9 +39,9 @@ const GET_ALL_STATEMENT = `
 const GET_ALL_BY_DATASOURCEID_STATEMENT = `
   SELECT * FROM "${POSTGRES_SCHEMA}"."${POSTGRES_TABLE}" WHERE datasourceId = $1`
 const DELETE_STATEMENT = `
-  DELETE FROM "${POSTGRES_SCHEMA}"."${POSTGRES_TABLE}" WHERE id = $1`
+  DELETE FROM "${POSTGRES_SCHEMA}"."${POSTGRES_TABLE}" WHERE id = $1 RETURNING *`
   const DELETE_ALL_STATEMENT = `
-    DELETE FROM "${POSTGRES_SCHEMA}"."${POSTGRES_TABLE}"`
+    DELETE FROM "${POSTGRES_SCHEMA}"."${POSTGRES_TABLE}" RETURNING *`
 
 export default class PostgresPipelineConfigRepository implements PipelineConfigRepository {
 
@@ -210,16 +210,18 @@ export default class PostgresPipelineConfigRepository implements PipelineConfigR
     return Promise.resolve()
   }
 
-  async delete(id: number): Promise<void> {
+  async delete(id: number): Promise<PipelineConfig> {
     const result = await this.executeQuery(DELETE_STATEMENT, [id])
+    const content = this.toPipelineConfigs(result)
     if(result.rowCount == 0) {
       return Promise.reject(`Could not find config with ${id} to delete`)
     }
-    return Promise.resolve()
+    return Promise.resolve(content[0])
   }
 
-  async deleteAll(): Promise<void> {
-    await this.executeQuery(DELETE_ALL_STATEMENT, [])
-    return Promise.resolve()
+  async deleteAll(): Promise<PipelineConfig[]> {
+    const result = await this.executeQuery(DELETE_ALL_STATEMENT, [])
+    const content = this.toPipelineConfigs(result)
+    return Promise.resolve(content)
   }
 }

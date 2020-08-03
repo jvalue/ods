@@ -6,6 +6,6 @@ export default interface PipelineConfigRepository {
   getAll(): Promise<PipelineConfig[]>;
   getByDatasourceId(datasourceId: number): Promise<PipelineConfig[]>;
   update(id: number, config: PipelineConfig): Promise<void>;
-  delete(id: number): Promise<void>;
-  deleteAll(): Promise<void>;
+  delete(id: number): Promise<PipelineConfig>;
+  deleteAll(): Promise<PipelineConfig[]>;
 }
