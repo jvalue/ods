@@ -201,9 +201,17 @@ services:
       context: ./transformation/
     depends_on:
       - rabbitmq
+      - pipeline-db
     environment:
       CONNECTION_RETRIES: '30'
       CONNECTION_BACKOFF_IN_MS: '2000'
+
+      POSTGRES_HOST: "pipeline-db"
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: "pipeline-service"
+      POSTGRES_PW: "pw"
+      POSTGRES_DB: "ods-pipelines"
+      POSTGRES_SCHEMA: "public" # other schemas have to be created somewhere before use!
 
       AMQP_URL: "amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672"
       AMQP_PIPELINE_EXECUTION_EXCHANGE: 'ods_global'
@@ -216,6 +224,12 @@ services:
       - "traefik.http.middlewares.transformation-stripprefix.stripprefix.prefixes=/api/transformation"
       - "traefik.http.services.transformation.loadbalancer.server.port=8080"
 
+  pipeline-db:
+    image: postgres
+    environment:
+      POSTGRES_USER: 'pipeline-service'
+      POSTGRES_PASSWORD: 'pw'
+      POSTGRES_DB: 'ods-pipelines'
 
   # ----------------- NOTIFICATION SERVICE (/notification) --------------------
   notification:
