@@ -18,8 +18,13 @@ export class PipelineConfigManager {
     this.executionResultPublisher = executionResultPublisher
   }
 
-  create(config: PipelineConfig): Promise<PipelineConfig> {
-    return this.pipelineConfigRepository.create(config)
+  async create(config: PipelineConfig): Promise<PipelineConfig> {
+    const savedConfig = await this.pipelineConfigRepository.create(config)
+    const success = this.configWritesPublisher.publishCreation(savedConfig.id, savedConfig.metadata.displayName)
+    if(!success) {
+      console.error(`Saved pipeline ${savedConfig.id} but was not able to publish success. Error handling not implemented!`)
+    }
+    return savedConfig
   }
 
   get(id: number): Promise<PipelineConfig | undefined> {
@@ -34,16 +39,33 @@ export class PipelineConfigManager {
     return this.pipelineConfigRepository.getByDatasourceId(datasourceId)
   }
 
-  update(id: number, config: PipelineConfig): Promise<void> {
-    return this.pipelineConfigRepository.update(id, config)
+  async update(id: number, config: PipelineConfig): Promise<void> {
+    await this.pipelineConfigRepository.update(id, config)
+    const success = this.configWritesPublisher.publishUpdate(id, config.metadata.displayName)
+    if(!success) {
+      console.error(`Updated pipeline ${id} but was not able to publish success. Error handling not implemented!`)
+    }
+    return Promise.resolve()
   }
 
-  delete(id: number): Promise<void> {
-    return this.pipelineConfigRepository.delete(id)
+  async delete(id: number): Promise<void> {
+    const deletedPipeline = await this.pipelineConfigRepository.delete(id)
+    const success = this.configWritesPublisher.publishDeletion(id, deletedPipeline.metadata.displayName)
+    if(!success) {
+      console.error(`Deleted pipeline ${id} but was not able to publish success. Error handling not implemented!`)
+    }
+    return Promise.resolve()
   }
 
-  deleteAll(): Promise<void> {
-    return this.pipelineConfigRepository.deleteAll()
+  async deleteAll(): Promise<void> {
+    const deletedConfigs = await this.pipelineConfigRepository.deleteAll()
+    for(const deletedConfig of deletedConfigs) {
+      const success = this.configWritesPublisher.publishDeletion(deletedConfig.id, deletedConfig.metadata.displayName)
+      if(!success) {
+        console.error(`Deleted pipeline ${deletedConfig.id} but was not able to publish success. Error handling not implemented!`)
+      }
+    }
+    return Promise.resolve()
   }
 
   triggerConfig(pipelineId: number, pipelineName: string, func: string, data: object) {
