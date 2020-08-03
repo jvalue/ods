@@ -1,14 +1,14 @@
-@baseURL = http://localhost:9000/api/core
+@baseURL = http://localhost:9000/api/transformation
 
 ### Get all pipelines
-GET {{baseURL}}/pipelines  HTTP/1.1
+GET {{baseURL}}/configs  HTTP/1.1
 
 ### Get pipeline x
 @pipelineid = 3
-GET {{baseURL}}/pipelines/{{pipelineid}}  HTTP/1.1
+GET {{baseURL}}/configs/{{pipelineid}}  HTTP/1.1
 
 ### Create a pipeline
-POST {{baseURL}}/pipelines  HTTP/1.1
+POST {{baseURL}}/configs  HTTP/1.1
 Content-Type: application/json
 
 {
@@ -26,7 +26,7 @@ Content-Type: application/json
 @pipelineId = 11
 
 ### Update a pipeline
-PUT {{baseURL}}/pipelines/{{pipelineId}}  HTTP/1.1
+PUT {{baseURL}}/configs/{{pipelineId}}  HTTP/1.1
 Content-Type: application/json
 
 {
@@ -43,4 +43,4 @@ Content-Type: application/json
 
 
 ### Delete all pipelines
-DELETE {{baseURL}}/pipelines/ HTTP/1.1
+DELETE {{baseURL}}/configs/ HTTP/1.1

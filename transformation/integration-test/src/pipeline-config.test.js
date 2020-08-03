@@ -15,7 +15,7 @@ let amqpConnection
 const publishedEvents = new Map() // routing key -> received msgs []
 
 describe('Pipeline Config Test', () => {
-  console.log('Core-Service URL= ' + URL)
+  console.log('Transformation-Service URL= ' + URL)
 
   beforeAll(async () => {
     const pingUrl = URL + '/version'

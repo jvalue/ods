@@ -5,7 +5,7 @@ metadata:
   namespace: {{NAMESPACE}}
   labels:
     app: ods
-    service: ui 
+    service: ui
 spec:
   replicas: 1
   selector:
@@ -26,8 +26,6 @@ spec:
           value: "{{BASE_URL}}auth"
         - name: UI_BASE_URL
           value: "{{BASE_URL}}"
-        - name: CORE_SERVICE_URL
-          value: "{{BASE_URL}}api/core"
         - name: STORAGE_SERVICE_URL
           value: "{{BASE_URL}}api/storage"
         - name: TRANSFORMATION_SERVICE_URL

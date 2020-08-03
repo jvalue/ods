@@ -267,27 +267,6 @@ services:
     environment:
       POSTGRES_USER: 'notification_usr'
       POSTGRES_PASSWORD: 'admin'
-  # ----------------- CORE SERVICE (/core) --------------------
-  core:
-    image: ${DOCKER_REGISTRY}/core
-    build:
-      context: ./core/
-    environment:
-      - DB_URL=jdbc:postgresql://core-db:5432/coreservice
-    depends_on:
-      - core-db
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.to-core.rule=PathPrefix(`/api/core`)"
-      - "traefik.http.routers.to-core.middlewares=core-stripprefix@docker"
-      - "traefik.http.middlewares.core-stripprefix.stripprefix.prefixes=/api/core"
-      - "traefik.http.services.core.loadbalancer.server.port=8080"
-
-  core-db:
-    image: postgres
-    environment:
-      - POSTGRES_USER=coreservice
-      - POSTGRES_PASSWORD=admin
 
 # -------------------- EDGE SERVER (PORT 9000) -----------------------------
   edge:
