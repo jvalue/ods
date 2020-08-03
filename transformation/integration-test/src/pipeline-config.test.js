@@ -17,6 +17,13 @@ describe('Pipeline Config Test', () => {
     }
   }, 60000)
 
+  afterAll(async () => {
+    // clear stored configs
+    await request(URL)
+      .delete('/configs')
+      .send()
+  })
+
   test('GET /configs', async () => {
     const response = await request(URL).get('/configs')
     expect(response.status).toEqual(200)
@@ -101,90 +108,10 @@ describe('Pipeline Config Test', () => {
     expect(delResponse.status).toEqual(204)
   })
 
-  test('GET /events', async () => {
-    const response = await request(URL)
-      .get('/events')
-      .send()
-
-    expect(response.status).toEqual(200)
-    expect(response.type).toEqual('application/json')
-  })
-
-  test('GET /events/pipeline/{id}', async () => {
-    const pipelinesResponse = await request(URL)
-      .post('/configs')
-      .send(pipelineConfig)
-    const pipelineId = pipelinesResponse.body.id
-
-    await request(URL)
-      .delete('/configs/' + pipelineId)
-
-    const eventsResponse = await request(URL)
-      .get('/events/pipeline/' + pipelineId)
-      .send()
-
-    expect(eventsResponse.status).toEqual(200)
-    expect(eventsResponse.type).toEqual('application/json')
-    expect(eventsResponse.body).toHaveLength(2)
-    expect(eventsResponse.body[0].pipelineId).toBe(pipelineId)
-    expect(eventsResponse.body[0].eventType).toEqual('PIPELINE_CREATE')
-    expect(eventsResponse.body[1].pipelineId).toBe(pipelineId)
-    expect(eventsResponse.body[1].eventType).toEqual('PIPELINE_DELETE')
-  })
-
-  test('GET /events [with offset]', async () => {
-    const pipelinesResponse = await request(URL)
-      .post('/configs')
-      .send(pipelineConfig)
-    const pipelineId = pipelinesResponse.body.id
-
-    await request(URL)
-      .delete('/configs/' + pipelineId)
-
-    const eventsResponse = await request(URL)
-      .get('/events/pipeline/' + pipelineId)
-      .send()
-    const eventId = eventsResponse.body[0].eventId
-
-    const eventsAfter = await request(URL)
-      .get('/events?after=' + eventId)
-      .send()
-
-    expect(eventsAfter.status).toEqual(200)
-    expect(eventsAfter.type).toEqual('application/json')
-    expect(eventsAfter.body).toHaveLength(1)
-    expect(eventsAfter.body[0].eventId).toBe(eventId + 1)
-    expect(eventsAfter.body[0].pipelineId).toBe(pipelineId)
-    expect(eventsAfter.body[0].eventType).toEqual('PIPELINE_DELETE')
-  })
-
-  test('GET /events/latest', async () => {
-    const postResponse = await request(URL)
-      .post('/configs')
-      .send(pipelineConfig)
-    const pipelineId = postResponse.body.id
-
-    await request(URL)
-      .delete('/configs/' + pipelineId)
-      .send()
-
-    const response = await request(URL)
-      .get('/events/latest')
-      .send()
-
-    expect(response.status).toEqual(200)
-    expect(response.type).toEqual('application/json')
-    expect(Object.keys(response.body)).toHaveLength(3)
-    expect(response.body.eventId).toBeTruthy()
-    expect(response.body.pipelineId).toBe(pipelineId)
-    expect(response.body.eventType).toEqual('PIPELINE_DELETE')
-  })
-
   test('Persist long transformation function', async () => {
     const configToPersist = Object.assign({}, pipelineConfig)
     const crazyLongTransformation = {
-      func: 'a'.repeat(256),
-      data: '{}'
+      func: 'a'.repeat(256)
     }
     configToPersist.transformation = crazyLongTransformation
 

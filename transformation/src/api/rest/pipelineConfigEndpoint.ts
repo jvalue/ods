@@ -12,7 +12,7 @@ export class PipelineConfigEndpoint {
   constructor (pipelineConfigManager: PipelineConfigManager, app: express.Application) {
     this.pipelineConfigManager = pipelineConfigManager
 
-    app.post('/config/:id/trigger', this.triggerConfigExecution)
+    app.post('/trigger', this.triggerConfigExecution)
     app.get('/configs', this.getAll)
     app.get('/configs/:id', this.getOne)
     app.post('/configs', this.create)
@@ -25,7 +25,7 @@ export class PipelineConfigEndpoint {
 
   triggerConfigExecution = async (req: express.Request, res: express.Response): Promise<void> => {
     const triggerRequest: PipelineConfigTriggerRequest = req.body
-    if (!triggerRequest.data && !triggerRequest.dataLocation || !triggerRequest.pipelineId) {
+    if (!triggerRequest.data && !triggerRequest.dataLocation || !triggerRequest.datasourceId) {
       res.writeHead(400)
       res.end()
       return
@@ -39,13 +39,10 @@ export class PipelineConfigEndpoint {
       console.log('Fetching successful.')
       triggerRequest.data = importResponse.data
     }
-    if (!triggerRequest.func) {
-      triggerRequest.func = 'return data;' // Undefined transformation functions are interpreted as identity function
-    }
 
-    this.pipelineConfigManager.triggerConfig(triggerRequest.pipelineId, triggerRequest.pipelineName, triggerRequest.func, triggerRequest.data)
+    this.pipelineConfigManager.triggerConfig(triggerRequest.datasourceId, triggerRequest.data)
 
-    const answer = `Triggered pipeline ${triggerRequest.pipelineId}. Executing asynchronously...`
+    const answer = `Triggered all pipelines for datasource ${triggerRequest.datasourceId}. Executing asynchronously...`
     res.setHeader('Content-Type', 'text/plain')
     res.writeHead(200)
     res.write(JSON.stringify(answer))
