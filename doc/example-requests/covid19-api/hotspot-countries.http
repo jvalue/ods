@@ -1,5 +1,5 @@
 @adapterUrl = http://localhost:9000/api/adapter/datasources
-@coreUrl = http://localhost:9000/api/core
+@pipelineUrl = http://localhost:9000/api/transformation
 
 
 ### Summary of new and total cases per country
@@ -34,7 +34,7 @@ Content-Type: application/json
 
 
 ### Show countries with more than 1000 new infections
-POST {{coreUrl}}/pipelines  HTTP/1.1
+POST {{pipelineUrl}}/pipelines  HTTP/1.1
 Content-Type: application/json
 
 {

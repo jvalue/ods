@@ -92,11 +92,3 @@ services:
       NOTIFICATION_API: http://notification:8080
       MOCK_RECEIVER_HOST: notification-it
       MOCK_RECEIVER_PORT: 8081
-
-  # ----------------- CORE SERVICE (PORTS 9600 - 9599) --------------------
-  core-it:
-    image: open-data-service/ods-main/core-it
-    build:
-      context: ./core/integration-test
-    environment:
-      CORE_API: http://core:8080

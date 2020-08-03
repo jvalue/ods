@@ -106,10 +106,9 @@ We use the microservice architectural style in this project. The microservices a
 | Microservice | Description |
 |----|----|
 | [Web-Client / UI](ui/README.md) | easy and seamless configuration of Sources, Pipelines | 
-| [Core-Service](core/README.md) | stores and manages configurations for Pipelines |
 | [Scheduler](scheduler/README.md) | orchestrates the executions of Pipelines |
 | [Adapter-Service](adapter/README.md) | fetches data from Sources and imports them into the system |
-| [Transformation-Service](transformation/README.md) | execution of data transformations |
+| [Transformation-Service](transformation/README.md) | definition of pipelines, execution of data transformations |
 | [Notification-Service](notification/README.md) | execution of notifications |
 | [Storage-Service](storage/README.md) | stores data of Pipelines and offers an API for querying |
 | [Auth-Service](auth/README.md) | user authentication and authorization |
