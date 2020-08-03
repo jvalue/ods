@@ -217,6 +217,9 @@ services:
       AMQP_PIPELINE_EXECUTION_EXCHANGE: 'ods_global'
       AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: 'pipeline.execution.success'
       AMQP_PIPELINE_EXECUTION_ERROR_TOPIC: 'pipeline.execution.error'
+      AMQP_PIPELINE_CONFIG_CREATED_TOPIC: 'pipeline.config.created'
+      AMQP_PIPELINE_CONFIG_UPDATED_TOPIC: 'pipeline.config.updated'
+      AMQP_PIPELINE_CONFIG_DELETED_TOPIC: 'pipeline.config.deleted'
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-transformation.rule=PathPrefix(`/api/transformation`)"
