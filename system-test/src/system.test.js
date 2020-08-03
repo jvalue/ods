@@ -230,7 +230,7 @@ describe('System-Test', () => {
 
     console.log(`[Test 3] Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
     const pipelineResponse = await request(TRANSFORMATION_URL)
-      .post('/pipelines')
+      .post('/configs')
       .send(pipelineConfig)
     expect(pipelineResponse.status).toEqual(201)
     const pipelineId = pipelineResponse.body.id
