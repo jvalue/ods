@@ -27,7 +27,7 @@ export default class AmqpExecutionResultPublisher implements ExecutionResultPubl
       pipelineName: pipelineName,
       error: errorMsg
     }
-    return this.publisher.publish(AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_ERROR_TOPIC, Buffer.from(JSON.stringify(content)))
+    return this.publisher.publish(AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_ERROR_TOPIC, content)
   }
 
   publishSuccess(pipelineId: number, pipelineName: string, result: object): boolean {
@@ -36,7 +36,7 @@ export default class AmqpExecutionResultPublisher implements ExecutionResultPubl
       pipelineName: pipelineName,
       data: result
     }
-    return this.publisher.publish(AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC, Buffer.from(JSON.stringify(content)))
+    return this.publisher.publish(AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC, content)
   }
 
 }
