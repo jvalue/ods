@@ -1,4 +1,4 @@
-import { ConfigWritesPublisher } from "./configWritesPublisher";
+import ConfigWritesPublisher from "./configWritesPublisher";
 import AmqpPublisher from "./amqpPublisher";
 
 const AMQP_URL = process.env.AMQP_URL!
