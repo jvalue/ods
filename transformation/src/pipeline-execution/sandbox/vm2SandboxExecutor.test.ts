@@ -1,5 +1,5 @@
 /* eslint-env jest */
-import SandboxExecutor from './interfaces/sandboxExecutor'
+import SandboxExecutor from './sandboxExecutor'
 import VM2SandboxExecutor from './vm2SandboxExecutor'
 
 describe('VM2SandboxExecutor', () => {
