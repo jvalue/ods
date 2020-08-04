@@ -1,7 +1,6 @@
 const request = require('supertest')
 const waitOn = require('wait-on')
 
-const CORE_URL = process.env.CORE_API || 'http://localhost:9000/api/core'
 const STORAGE_URL = process.env.STORAGE_API || 'http://localhost:9000/api/storage'
 const SCHEDULER_URL = process.env.SCHEDULER_API || 'http://localhost:9000/api/scheduler'
 const ADAPTER_URL = process.env.ADAPTER_API || 'http://localhost:9000/api/adapter'
@@ -24,7 +23,6 @@ const sourceData = {
 
 describe('System-Test', () => {
   beforeAll(async () => {
-    console.log('Waiting for core-service with URL: ' + CORE_URL)
     console.log('Waiting for scheduler-service with URL: ' + SCHEDULER_URL)
     console.log('Waiting for transformation-service with URL: ' + TRANSFORMATION_URL)
     console.log('Waiting for notification-service with URL: ' + NOTIFICATION_URL)
@@ -36,7 +34,6 @@ describe('System-Test', () => {
       {
         resources:
       [STORAGE_URL,
-        CORE_URL + '/version',
         SCHEDULER_URL,
         TRANSFORMATION_URL,
         NOTIFICATION_URL + '/',
@@ -56,8 +53,8 @@ describe('System-Test', () => {
       .delete('/')
       .send()
     console.log('All tests done, removing pipelines configs from ods...')
-    await request(CORE_URL)
-      .delete('/')
+    await request(TRANSFORMATION_URL)
+      .delete('/configs')
       .send()
     console.log('Cleaning up mock server...')
     await request(MOCK_SERVER_URL)
@@ -82,12 +79,12 @@ describe('System-Test', () => {
     const datasourceId = adapterResponse.body.id
     console.log(`[Test 1] Successfully created datasource ${datasourceId}`)
 
-    // Add pipeline to core service
+    // Add pipeline
     const pipelineConfig = generatePipelineConfig(datasourceId)
 
     console.log(`[Test 1] Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
-    const pipelineResponse = await request(CORE_URL)
-      .post('/pipelines')
+    const pipelineResponse = await request(TRANSFORMATION_URL)
+      .post('/configs')
       .send(pipelineConfig)
     expect(pipelineResponse.status).toEqual(201)
     const pipelineId = pipelineResponse.body.id
@@ -120,8 +117,8 @@ describe('System-Test', () => {
 
     // CLEAN-UP
     console.log('[Test 1] Cleaning up...')
-    let deletionResponse = await request(CORE_URL)
-      .delete(`/pipelines/${pipelineId}`)
+    let deletionResponse = await request(TRANSFORMATION_URL)
+      .delete(`/configs/${pipelineId}`)
       .send()
     expect(deletionResponse.status).toEqual(204)
     deletionResponse = await request(ADAPTER_URL)
@@ -148,12 +145,12 @@ describe('System-Test', () => {
     const datasourceId = adapterResponse.body.id
     console.log(`[Test 2] Successfully created datasource ${datasourceId}`)
 
-    // Add pipeline to core service
+    // Add pipeline
     const pipelineConfig = generatePipelineConfig(datasourceId)
 
     console.log(`[Test 2] Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
-    const pipelineResponse = await request(CORE_URL)
-      .post('/pipelines')
+    const pipelineResponse = await request(TRANSFORMATION_URL)
+      .post('/configs')
       .send(pipelineConfig)
     expect(pipelineResponse.status).toEqual(201)
     const pipelineId = pipelineResponse.body.id
@@ -195,8 +192,8 @@ describe('System-Test', () => {
 
     // CLEAN-UP
     console.log('[Test 2] Cleaning up...')
-    let deletionResponse = await request(CORE_URL)
-      .delete(`/pipelines/${pipelineId}`)
+    let deletionResponse = await request(TRANSFORMATION_URL)
+      .delete(`/configs/${pipelineId}`)
       .send()
     expect(deletionResponse.status).toEqual(204)
     deletionResponse = await request(ADAPTER_URL)
@@ -227,13 +224,13 @@ describe('System-Test', () => {
     const datasourceId = adapterResponse.body.id
     console.log(`[Test 3] Successfully created datasource ${datasourceId}`)
 
-    // Add pipeline to core service
+    // Add pipeline
     const pipelineConfig = generatePipelineConfig(datasourceId)
     pipelineConfig.transformation = { func: 'data.newField = 12;return data;' }
 
     console.log(`[Test 3] Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
-    const pipelineResponse = await request(CORE_URL)
-      .post('/pipelines')
+    const pipelineResponse = await request(TRANSFORMATION_URL)
+      .post('/configs')
       .send(pipelineConfig)
     expect(pipelineResponse.status).toEqual(201)
     const pipelineId = pipelineResponse.body.id
@@ -265,8 +262,8 @@ describe('System-Test', () => {
     expect(storageResponse.body[0].data).toEqual(expectedData)
 
     // CLEAN-UP
-    let deletionResponse = await request(CORE_URL)
-      .delete(`/pipelines/${pipelineId}`)
+    let deletionResponse = await request(TRANSFORMATION_URL)
+      .delete(`/configs/${pipelineId}`)
       .send()
     expect(deletionResponse.status).toEqual(204)
     deletionResponse = await request(ADAPTER_URL)
@@ -299,12 +296,12 @@ describe('System-Test', () => {
     const datasourceId = adapterResponse.body.id
     console.log(`[Test 4] Successfully created datasource ${datasourceId}`)
 
-    // Add pipeline to core service
+    // Add pipeline
     const pipelineConfig = generatePipelineConfig(datasourceId)
 
     console.log(`[Test 4] Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
-    const pipelineResponse = await request(CORE_URL)
-      .post('/pipelines')
+    const pipelineResponse = await request(TRANSFORMATION_URL)
+      .post('/configs')
       .send(pipelineConfig)
     expect(pipelineResponse.status).toEqual(201)
     const pipelineId = pipelineResponse.body.id
@@ -351,8 +348,8 @@ describe('System-Test', () => {
 
     console.log(`[Test 4] Pipeline ${pipelineId} update request triggered.`)
     // Update pipeline
-    updateResponse = await request(CORE_URL)
-      .put(`/pipelines/${pipelineId}`)
+    updateResponse = await request(TRANSFORMATION_URL)
+      .put(`/configs/${pipelineId}`)
       .send(pipelineConfig)
     expect(updateResponse.status).toEqual(204)
     console.log(`[Test 4] Successfully updatedd pipeline ${pipelineId}.`)
@@ -386,8 +383,8 @@ describe('System-Test', () => {
 
     // CLEAN-UP
     console.log('[Test 4] Cleaning up...')
-    let deletionResponse = await request(CORE_URL)
-      .delete(`/pipelines/${pipelineId}`)
+    let deletionResponse = await request(TRANSFORMATION_URL)
+      .delete(`/configs/${pipelineId}`)
       .send()
     expect(deletionResponse.status).toEqual(204)
     deletionResponse = await request(ADAPTER_URL)
@@ -415,12 +412,12 @@ describe('System-Test', () => {
     const datasourceId = adapterResponse.body.id
     console.log(`[Test 5] Successfully created datasource ${datasourceId}`)
 
-    // Add pipeline to core service
+    // Add pipeline
     const pipelineConfig = generatePipelineConfig(datasourceId)
 
     console.log(`[Test 5] Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
-    const pipelineResponse = await request(CORE_URL)
-      .post('/pipelines')
+    const pipelineResponse = await request(TRANSFORMATION_URL)
+      .post('/configs')
       .send(pipelineConfig)
     expect(pipelineResponse.status).toEqual(201)
     const pipelineId = pipelineResponse.body.id
@@ -478,8 +475,8 @@ describe('System-Test', () => {
 
     // CLEAN-UP
     console.log('[Test 5] Cleaning up...')
-    let deletionResponse = await request(CORE_URL)
-      .delete(`/pipelines/${pipelineId}`)
+    let deletionResponse = await request(TRANSFORMATION_URL)
+      .delete(`/configs/${pipelineId}`)
       .send()
     expect(deletionResponse.status).toEqual(204)
     deletionResponse = await request(ADAPTER_URL)
@@ -506,12 +503,12 @@ describe('System-Test', () => {
     const datasourceId = adapterResponse.body.id
     console.log(`[Test 6] Successfully created datasource ${datasourceId}`)
 
-    // Add pipeline to core service
+    // Add pipeline
     const pipelineConfig = generatePipelineConfig(datasourceId)
 
     console.log(`[Test 6] Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
-    const pipelineResponse = await request(CORE_URL)
-      .post('/pipelines')
+    const pipelineResponse = await request(TRANSFORMATION_URL)
+      .post('/configs')
       .send(pipelineConfig)
     expect(pipelineResponse.status).toEqual(201)
     const pipelineId = pipelineResponse.body.id
@@ -533,9 +530,9 @@ describe('System-Test', () => {
     expect(webhookResponse1.body.location).toEqual(expectedStorageLocationUrl + '/' + pipelineId)
     expect(webhookResponse1.body.timestamp).toBeDefined()
 
-    // Delete pipeline from core service
-    let deletionResponse = await request(CORE_URL)
-      .delete(`/pipelines/${pipelineId}`)
+    // Delete pipeline
+    let deletionResponse = await request(TRANSFORMATION_URL)
+      .delete(`/configs/${pipelineId}`)
     expect(deletionResponse.status).toEqual(204)
     console.log(`[Test 6] Pipeline ${pipelineId} deleted`)
     sleep(2000) // takes up to 2sec to reach scheduler

@@ -15,7 +15,7 @@ router.get('/', async ctx => {
   ctx.body = 'ok'
 })
 
-router.post('/config/:id/trigger', async ctx => {
+router.post('/trigger', async ctx => {
   const requestBody = ctx.request.body
   const pipelineId = `${requestBody.pipelineId}`
   if(!requests.get(pipelineId)) {
@@ -26,7 +26,7 @@ router.post('/config/:id/trigger', async ctx => {
   ctx.status = 200
 })
 
-router.get('/config/triggers/:id', async ctx => {
+router.get('/trigger', async ctx => {
   const pipelineId = `${ctx.params.id}`
   console.log(`Triggers for pipeline ${pipelineId} requested.`)
   if(!requests.get(pipelineId)) {

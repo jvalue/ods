@@ -1,5 +1,5 @@
 @adapterUrl = http://localhost:9000/api/adapter/datasources
-@coreUrl = http://localhost:9000/api/core
+@transformationUrl = http://localhost:9000/api/transformation
 
 @country = gb
 ### Get List Of Cases Per Country Per Province By Case Type
@@ -35,7 +35,7 @@ Content-Type: application/json
 
 
 ### Store province data points with more than 100 active cases
-POST {{coreUrl}}/pipelines  HTTP/1.1
+POST {{transformationUrl}}/configs  HTTP/1.1
 Content-Type: application/json
 
 {

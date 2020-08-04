@@ -1,5 +1,4 @@
 import axios, { AxiosResponse } from 'axios'
-import TransformationConfig from '@/interfaces/transformation-config'
 
 const TRANSFORMATION_SERVICE_URL = process.env.TRANSFORMATION_SERVICE_URL || 'http://localhost:8083'
 
@@ -8,18 +7,14 @@ const http = axios.create({
   headers: { 'Content-Type': 'application/json' }
 })
 
-export async function executeTransformation (pipelineId: number, pipelineName: string, func: string, dataLocation: string): Promise<TransformationResult> {
+export async function triggerPipelines (datasourceId: number, dataLocation: string): Promise<void> {
   const trigger = {
-    pipelineId: pipelineId,
-    pipelineName: pipelineName,
-    func: func,
+    datasourceId: datasourceId,
     dataLocation: dataLocation
   }
-  const response = await http.post(`/config/${pipelineId}/trigger`, trigger)
-  return response.data
-}
-
-export interface TransformationResult {
-  data?: object,
-  error?: object
+  const response = await http.post(`/trigger`, trigger)
+  if(response.status !== 200) {
+    return Promise.reject(`Triggering pipelines failed with status ${response.status}`)
+  }
+  return Promise.resolve()
 }

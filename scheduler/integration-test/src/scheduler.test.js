@@ -4,10 +4,6 @@ const waitOn = require('wait-on')
 
 const URL = process.env.SCHEDULER_API || 'http://localhost:8080'
 
-const MOCK_CORE_PORT = process.env.MOCK_CORE_PORT || 8081
-const MOCK_CORE_HOST = process.env.MOCK_CORE_HOST || 'localhost'
-const MOCK_CORE_URL = 'http://' + MOCK_CORE_HOST + ':' + MOCK_CORE_PORT
-
 const MOCK_ADAPTER_PORT = process.env.MOCK_ADAPTER_PORT || 8082
 const MOCK_ADAPTER_HOST = process.env.MOCK_ADAPTER_HOST || 'localhost'
 const MOCK_ADAPTER_URL = 'http://' + MOCK_ADAPTER_HOST + ':' + MOCK_ADAPTER_PORT
@@ -18,27 +14,16 @@ const MOCK_TRANSFORMATION_URL = 'http://' + MOCK_TRANSFORMATION_HOST + ':' + MOC
 
 const RABBIT_HEALTH_URL = process.env.RABBIT_HEALTH_URL
 
-const data = {
-  field1: 'abc', // 'field' variables from adapter data
-  field2: 123,
-  field3: {
-    name: 'simpleObject'
-  },
-  field4: [3, 5, 'a', 'z'],
-  test: 'abc' // from transformation service
-}
-
 describe('Scheduler', () => {
   console.log('Scheduler-Service URL= ' + URL)
 
   beforeAll(async () => {
     const pingUrl = URL + '/'
-    console.log('Waiting for service with URL: ' + MOCK_CORE_URL)
     console.log('Waiting for service with URL: ' + MOCK_ADAPTER_URL)
     console.log('Waiting for service with URL: ' + MOCK_TRANSFORMATION_URL)
     console.log('Waiting for rabbitMQ with URL: ' + RABBIT_HEALTH_URL)
     await waitOn(
-      { resources: [MOCK_CORE_URL, MOCK_ADAPTER_URL, MOCK_TRANSFORMATION_URL], timeout: 50000 })
+      { resources: [MOCK_ADAPTER_URL, MOCK_TRANSFORMATION_URL], timeout: 50000 })
     console.log('Waiting for service with URL: ' + pingUrl)
     await waitOn({ resources: [pingUrl], timeout: 50000 })
   }, 60000)
@@ -64,23 +49,20 @@ describe('Scheduler', () => {
 
   test('Pipeline runs through with successful publish', async () => {
     await sleep(10000) // pipeline should have been executing until now!
-    let response = await request(MOCK_TRANSFORMATION_URL).get(`/config/triggers/125`)
+    let response = await request(MOCK_TRANSFORMATION_URL).get(`/trigger`)
     expect(response.status).toEqual(200)
     expect(response.body).toContainEqual(
       {
-        pipelineId: 125,
-        pipelineName: 'nordstream',
-        dataLocation: "http://scheduler-it:8082/data/1",
-        func: "return 1;"
+        datasourceId: 1,
+        dataLocation: "http://scheduler-it:8082/data/1"
       })
 
-    response = await request(MOCK_TRANSFORMATION_URL).get(`/config/triggers/123`)
+    response = await request(MOCK_TRANSFORMATION_URL).get(`/trigger`)
     expect(response.status).toEqual(200)
     expect(response.body).toContainEqual(
       {
-        pipelineId: 123,
-        dataLocation: "http://scheduler-it:8082/data/1",
-        func: "return data;"
+        datasourceId: 1,
+        dataLocation: "http://scheduler-it:8082/data/1"
       }
     )
   }, 12000)

@@ -12,10 +12,6 @@ spec:
   rules:
   - http:
       paths:
-      - path: {{BASE_URL}}api/core(/|$)(.*)
-        backend:
-          serviceName: core-service
-          servicePort: 8080
       - path: {{BASE_URL}}api/transformation(/|$)(.*)
         backend:
           serviceName: transformation-service

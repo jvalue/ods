@@ -1,8 +1,6 @@
 export default interface PipelineConfigTriggerRequest {
-  pipelineId: number;
-  pipelineName: string;
+  datasourceId: number;
 
-  func: string;
   data: object;
   dataLocation: string;
 }

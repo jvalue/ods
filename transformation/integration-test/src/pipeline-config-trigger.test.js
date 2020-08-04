@@ -35,13 +35,35 @@ describe('Transformation Service', () => {
       await amqpConnection.close()
       console.log('AMQP Connection closed')
     }
+
+    // clear stored configs
+    await request(URL)
+      .delete('/configs')
+      .send()
   })
 
   test('Pipeline runs through successfully with successful publish', async () => {
+    const pipelineConfig = {
+      datasourceId: 12345,
+      transformation: {
+        func: 'return data.a + data.b;',
+      },
+      metadata: {
+        author: 'icke',
+        license: 'none',
+        displayName: 'test pipeline 1',
+        description: 'integraiton testing pipeline'
+      }
+    }
+    // create pipeline to persist
+    const creationResponse = await request(URL)
+      .post('/configs')
+      .send(pipelineConfig)
+    expect(creationResponse.status).toEqual(201)
+    const configId = creationResponse.body.id
+
     const trigger = {
-      pipelineId: 125,
-      pipelineName: 'nordstream',
-      func: 'return data;',
+      datasourceId: pipelineConfig.datasourceId,
       data: {
         a: 'abc',
         b: 123
@@ -49,41 +71,58 @@ describe('Transformation Service', () => {
     }
 
     const response = await request(URL)
-      .post('/config/125/trigger')
+      .post('/trigger')
       .send(trigger)
     expect(response.status).toEqual(200)
 
     await sleep(10000) // pipeline should have been executing until now!
     expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC)).toContainEqual(
       {
-        pipelineId: trigger.pipelineId,
-        pipelineName: trigger.pipelineName,
-        data: trigger.data
+        pipelineId: configId,
+        pipelineName: pipelineConfig.metadata.displayName,
+        data: trigger.data.a + trigger.data.b
       })
   }, 12000)
 
 
   test('Pipeline runs through with error with successful publish', async () => {
+    const pipelineConfig = {
+      datasourceId: 12346,
+      transformation: {
+        func: 'return asd.def;',
+      },
+      metadata: {
+        author: 'icke',
+        license: 'none',
+        displayName: 'test pipeline 2',
+        description: 'integraiton testing pipeline'
+      }
+    }
+    // create pipeline to persist
+    const creationResponse = await request(URL)
+      .post('/configs')
+      .send(pipelineConfig)
+    expect(creationResponse.status).toEqual(201)
+    const configId = creationResponse.body.id
+
+
     const trigger = {
-      pipelineId: 125,
-      pipelineName: 'nordstream',
-      func: 'return asd.dde;',
+      datasourceId: pipelineConfig.datasourceId,
       data: {
         a: 'abc',
         b: 123
       }
     }
-
     const response = await request(URL)
-      .post('/config/125/trigger')
+      .post('/trigger')
       .send(trigger)
     expect(response.status).toEqual(200)
 
     await sleep(10000) // pipeline should have been executing until now!
     expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)).toBeDefined()
     expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC).length).toEqual(1)
-    expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].pipelineId).toEqual(trigger.pipelineId)
-    expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].pipelineName).toEqual(trigger.pipelineName)
+    expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].pipelineId).toEqual(configId)
+    expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].pipelineName).toEqual(pipelineConfig.metadata.displayName)
     expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].error).toBeDefined()
   }, 12000)
 

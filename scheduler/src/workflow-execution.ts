@@ -1,9 +1,7 @@
 import * as AdapterClient from './clients/adapter-client'
-import * as CoreClient from './clients/core-client'
 import * as TransformationClient from './clients/transformation-client'
 
 import DatasourceConfig from './interfaces/datasource-config'
-import PipelineConfig from './interfaces/pipeline-config'
 import { AxiosError } from 'axios'
 import AdapterResponse from '@/interfaces/adapter-response'
 
@@ -13,16 +11,7 @@ export async function execute (datasourceConfig: DatasourceConfig, maxRetries = 
       await retryableExecution(executeAdapter, datasourceConfig, `Executing adapter for datasource ${datasourceConfig.id}`)
 
   // pipeline
-  const followingPipelines = await CoreClient.getCachedPipelinesByDatasourceId(datasourceConfig.id)
-  for (const pipelineConfig of followingPipelines) {
-    const transformationResult =
-        await retryableExecution(executeTransformation, { pipelineConfig: pipelineConfig, dataLocation: adapterResponse.location }, `Executing transformatins for pipeline ${pipelineConfig.id}`)
-
-    if (transformationResult.error) {
-      console.log(`Transformation for pipeline ${pipelineConfig.id} went wrong. Not storing data or sending notifications.`)
-      continue
-    }
-  }
+  await retryableExecution(triggerPipelines, { datasourceId: datasourceConfig.id, dataLocation: adapterResponse.location }, `Triggering pipelines based on datasource ${datasourceConfig.id}`)
 }
 
 async function retryableExecution<T1, T2> (func: (arg: T1) => Promise<T2>, args: T1, description: string, maxRetries = 3): Promise<T2> {
@@ -56,25 +45,17 @@ async function executeAdapter (dataousrceConfig: DatasourceConfig): Promise<Adap
   }
 }
 
-async function executeTransformation (args: { pipelineConfig: PipelineConfig; dataLocation: string }): Promise<TransformationClient.TransformationResult> {
-  const pipelineConfig = args.pipelineConfig
+async function triggerPipelines (args: { datasourceId: number; dataLocation: string }): Promise<void> {
+  const datasourceId = args.datasourceId
   const dataLocation = args.dataLocation
 
-  console.log(`Execute Pipeline Transformation ${pipelineConfig.id}`)
-  if (!pipelineConfig.transformation) {
-    pipelineConfig.transformation = {
-      dataLocation: AdapterClient.ADAPTER_SERVICE_URL + dataLocation,
-      func: "return data;"
-    }
-    console.log('Transformation undefined. ')
-  }
+  console.log(`Trigger all pipelines targeting datasource ${datasourceId}`)
+
   try {
-    pipelineConfig.transformation!.dataLocation = AdapterClient.ADAPTER_SERVICE_URL + dataLocation
-    const jobResult = await TransformationClient.executeTransformation(pipelineConfig.id, pipelineConfig.metadata.displayName, pipelineConfig.transformation!.func, pipelineConfig.transformation!.dataLocation)
-    return jobResult
+    await TransformationClient.triggerPipelines(datasourceId, dataLocation)
   } catch (e) {
     handleError(e)
-    throw new Error('Failed to transform Data via Transformation Service')
+    throw new Error('Failed trigger pipelines')
   }
 }
 

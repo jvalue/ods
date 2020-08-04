@@ -37,39 +37,6 @@ jobs:
           path: adapter.tar
 
 
-  # ----------------- CORE SERVICE --------------------
-
-  core-build:
-    name: CORE Build & Test
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Build and Test
-        run: |
-          docker-compose -f docker-compose.yml build core
-
-      - name: Integration-test
-        run: |
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml build core-it
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d core
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from core-it core-it
-          docker-compose logs
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml down
-
-      - name: Save Docker image as artifact
-        run: |
-          IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/core
-          docker save $IMAGE_ID > core.tar
-
-      - name: Upload Docker image as artifact
-        uses: actions/upload-artifact@v1
-        with:
-          name: core-artifact
-          path: core.tar
-
-
   # ----------------- SCHEDULER SERVICE --------------------
 
   scheduler-build:
@@ -253,7 +220,7 @@ jobs:
     name: Systemtest
     runs-on: ubuntu-latest
 
-    needs: [adapter-build, core-build, notification-build, scheduler-build, storage-build, transformation-build, ui-build]
+    needs: [adapter-build, notification-build, scheduler-build, storage-build, transformation-build, ui-build]
 
     steps:
       - uses: actions/checkout@v2
@@ -262,10 +229,6 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: adapter-artifact
-      - name: Download core artifact
-        uses: actions/download-artifact@v1
-        with:
-          name: core-artifact
       - name: Download scheduler artifact
         uses: actions/download-artifact@v1
         with:
@@ -293,7 +256,6 @@ jobs:
 
       - name: Run Systemtest
         run: |
-          docker load -i ./core-artifact/core.tar &
           docker load -i ./scheduler-artifact/scheduler.tar &
           docker load -i ./storage-artifact/storage_postgrest.tar &
           docker load -i ./liquibase-artifact/storage_liquibase.tar &
@@ -301,7 +263,7 @@ jobs:
           docker load -i ./transformation-artifact/transformation.tar &
           docker load -i ./notification-artifact/notification.tar &
           docker load -i ./adapter-artifact/adapter.tar
-          docker-compose -f docker-compose.yml -f docker-compose.st.yml up --exit-code-from system-test core adapter transformation storage storage-mq notification scheduler system-test
+          docker-compose -f docker-compose.yml -f docker-compose.st.yml up --exit-code-from system-test adapter transformation storage storage-mq notification scheduler system-test
           docker-compose logs
           docker-compose -f docker-compose.yml -f docker-compose.st.yml down
 
@@ -339,39 +301,6 @@ jobs:
           docker tag $IMAGE_ID $IMAGE_ID:latest
 
           docker push $IMAGE_ID:$ADAPTER_VERSION
-          docker push $IMAGE_ID:latest
-
-  core_upload:
-    name: Core Publish
-    runs-on: ubuntu-latest
-
-    needs: [systemtest]
-
-    if: github.ref == 'refs/heads/master'
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Download core artifact
-        uses: actions/download-artifact@v1
-        with:
-          name: core-artifact
-
-      - name: Load Docker Image from artifact
-        run: |
-          docker load -i ./core-artifact/core.tar
-
-      - name: Core Push to registry
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
-
-          CORE_VERSION=$(grep "version =" ./core/src/main/resources/application.properties | awk '{print $3}' | sed "s/[']//g")
-
-          IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/core
-
-          docker tag $IMAGE_ID $IMAGE_ID:$CORE_VERSION
-          docker tag $IMAGE_ID $IMAGE_ID:latest
-
-          docker push $IMAGE_ID:$CORE_VERSION
           docker push $IMAGE_ID:latest
 
   scheduler_upload:
