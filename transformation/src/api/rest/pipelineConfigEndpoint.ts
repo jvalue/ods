@@ -79,6 +79,9 @@ export class PipelineConfigEndpoint {
       return
     }
     const config = req.body as PipelineConfig
+    if(!config.transformation) {
+      config.transformation = { func: "return data;"}
+    }
     await this.pipelineConfigManager.update(+configId, config)
     res.setHeader('Content-Type', 'application/json')
     res.writeHead(204)
@@ -87,6 +90,9 @@ export class PipelineConfigEndpoint {
 
   create = async (req: express.Request, res: express.Response): Promise<void> => {
     const config = req.body as PipelineConfig
+    if(!config.transformation) {
+      config.transformation = { func: "return data;"}
+    }
     const savedConfig = await this.pipelineConfigManager.create(config)
     res.setHeader('Content-Type', 'application/json')
     res.setHeader("location", `/configs/${savedConfig.id}`)
