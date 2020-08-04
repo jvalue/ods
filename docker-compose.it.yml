@@ -38,16 +38,10 @@ services:
       context: ./scheduler/integration-test/
     environment:
       SCHEDULER_API: http://scheduler:8080
-      MOCK_CORE_HOST: scheduler-it
-      MOCK_CORE_PORT: 8081
       MOCK_ADAPTER_HOST: scheduler-it
       MOCK_ADAPTER_PORT: 8082
       MOCK_TRANSFORMATION_HOST: scheduler-it
       MOCK_TRANSFORMATION_PORT: 8083
-      MOCK_NOTIFICATION_HOST: scheduler-it
-      MOCK_NOTIFICATION_PORT: 8084
-      MOCK_STORAGE_HOST: scheduler-it
-      MOCK_STORAGE_PORT: 8085
       RABBIT_HEALTH_URL: http://rabbitmq:15672
     depends_on:
       - rabbitmq
@@ -79,6 +73,9 @@ services:
       AMQP_IT_QUEUE: 'transformation_it'
       AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: 'pipeline.execution.success'
       AMQP_PIPELINE_EXECUTION_ERROR_TOPIC: 'pipeline.execution.error'
+      AMQP_PIPELINE_CONFIG_CREATED_TOPIC: 'pipeline.config.created'
+      AMQP_PIPELINE_CONFIG_UPDATED_TOPIC: 'pipeline.config.updated'
+      AMQP_PIPELINE_CONFIG_DELETED_TOPIC: 'pipeline.config.deleted'
 
    # ----------------- NOTIFICATION SERVICE (PORTS #TODO) --------------------
   notification:
@@ -95,11 +92,3 @@ services:
       NOTIFICATION_API: http://notification:8080
       MOCK_RECEIVER_HOST: notification-it
       MOCK_RECEIVER_PORT: 8081
-
-  # ----------------- CORE SERVICE (PORTS 9600 - 9599) --------------------
-  core-it:
-    image: open-data-service/ods-main/core-it
-    build:
-      context: ./core/integration-test
-    environment:
-      CORE_API: http://core:8080

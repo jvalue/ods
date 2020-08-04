@@ -1,5 +1,5 @@
 @adapterUrl = http://localhost:9000/api/adapter/datasources
-@coreUrl = http://localhost:9000/api/core
+@pipelineUrl = http://localhost:9000/api/transformation
 @notificationUrl = http://localhost:9000/api/notification
 
 ### Get List Of Countries
@@ -33,7 +33,7 @@ Content-Type: application/json
 @dataSourceId = 1
 
 ### Store data without modification
-POST {{coreUrl}}/pipelines  HTTP/1.1
+POST {{pipelineUrl}}/configs  HTTP/1.1
 Content-Type: application/json
 
 {

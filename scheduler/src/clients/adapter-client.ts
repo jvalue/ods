@@ -35,6 +35,7 @@ export async function getLatestEventId (): Promise<number> {
 
 export async function executeAdapter (adapterConfig: AdapterConfig): Promise<AdapterResponse> {
   const response = await http.post('/dataImport', adapterConfig)
+  response.data.location = ADAPTER_SERVICE_URL + response.data.location
   return response.data
 }
 

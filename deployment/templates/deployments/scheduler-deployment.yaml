@@ -22,8 +22,6 @@ spec:
       - name: ods-registry-secret
       containers:
       - env:
-        - name: CONFIG_SERVICE_URL
-          value: "http://core-service:8080"
         - name: ADAPTER_SERVICE_URL
           value: "http://adapter-service:8080"
         - name: TRANSFORMATION_SERVICE_URL
