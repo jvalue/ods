@@ -1,13 +1,11 @@
 import * as AdapterClient from './clients/adapter-client'
 import * as CoreClient from './clients/core-client'
 import * as TransformationClient from './clients/transformation-client'
-import * as AmqpClient from './clients/amqp-client'
 
 import DatasourceConfig from './interfaces/datasource-config'
 import PipelineConfig from './interfaces/pipeline-config'
 import { AxiosError } from 'axios'
 import AdapterResponse from '@/interfaces/adapter-response'
-import {PipelineExecutionSuccessEvent, PipelineExecutionErrorEvent} from './clients/amqp-client'
 
 export async function execute (datasourceConfig: DatasourceConfig, maxRetries = 3): Promise<void> {
   // adapter
@@ -24,8 +22,6 @@ export async function execute (datasourceConfig: DatasourceConfig, maxRetries = 
       console.log(`Transformation for pipeline ${pipelineConfig.id} went wrong. Not storing data or sending notifications.`)
       continue
     }
-
-    await retryableExecution(publishPipelineExecutionOutcome, { pipelineConfig: pipelineConfig, data: transformationResult.data, error: transformationResult.error }, `Notifying clients for pipeline ${pipelineConfig.id}`)
   }
 }
 
@@ -67,52 +63,18 @@ async function executeTransformation (args: { pipelineConfig: PipelineConfig; da
   console.log(`Execute Pipeline Transformation ${pipelineConfig.id}`)
   if (!pipelineConfig.transformation) {
     pipelineConfig.transformation = {
-      dataLocation: AdapterClient.ADAPTER_SERVICE_URL + dataLocation
+      dataLocation: AdapterClient.ADAPTER_SERVICE_URL + dataLocation,
+      func: "return data;"
     }
     console.log('Transformation undefined. ')
   }
   try {
-    pipelineConfig.transformation.dataLocation = AdapterClient.ADAPTER_SERVICE_URL + dataLocation
-    const jobResult = await TransformationClient.executeTransformation(pipelineConfig.transformation)
+    pipelineConfig.transformation!.dataLocation = AdapterClient.ADAPTER_SERVICE_URL + dataLocation
+    const jobResult = await TransformationClient.executeTransformation(pipelineConfig.id, pipelineConfig.metadata.displayName, pipelineConfig.transformation!.func, pipelineConfig.transformation!.dataLocation)
     return jobResult
   } catch (e) {
     handleError(e)
     throw new Error('Failed to transform Data via Transformation Service')
-  }
-}
-
-async function publishPipelineExecutionOutcome (args: { pipelineConfig: PipelineConfig; data?: object; error?: object }): Promise<void> {
-  const pipelineConfig = args.pipelineConfig
-  const data = args.data
-  const error = args.error
-
-  if (error){ // failed execution
-    const notificationTrigger: PipelineExecutionErrorEvent = {
-      pipelineId: pipelineConfig.id,
-      pipelineName: pipelineConfig.metadata.displayName,
-      error: error
-    }
-
-    const success = AmqpClient.publishPipelineExecutionError(notificationTrigger)
-    if (!success) {
-      Promise.reject()
-    } else {
-      console.log(`Successfully published pipeline execution failure event to amqp exchange for pipeline ${pipelineConfig.id}`)
-    }
-  }
-  else {// successful execution
-    const notificationTrigger: PipelineExecutionSuccessEvent = {
-      pipelineId: pipelineConfig.id,
-      pipelineName: pipelineConfig.metadata.displayName,
-      data: data
-    }
-
-    const success = AmqpClient.publishPipelineExecutionSuccess(notificationTrigger)
-    if (!success) {
-      Promise.reject()
-    } else {
-      console.log(`Successfully published pipeline execution success event to amqp exchange for pipeline ${pipelineConfig.id}`)
-    }
   }
 }
 
