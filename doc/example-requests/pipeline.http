@@ -18,7 +18,8 @@ Content-Type: application/json
   },
   "metadata": {
     "author": "icke",
-    "license": "none"
+    "license": "none",
+    "displayName": "exampleRequest"
   }
 }
 
