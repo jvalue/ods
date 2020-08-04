@@ -5,10 +5,16 @@ import bodyParser from 'body-parser'
 import { PipelineExecutionEndpoint } from './api/rest/pipelineExecutionEndpoint'
 import VM2SandboxExecutor from './pipeline-execution/sandbox/vm2SandboxExecutor'
 import PipelineExecutor from './pipeline-execution/pipelineExecutor'
+import { PipelineConfigEndpoint } from './api/rest/pipelineConfigEndpoint'
+import { PipelineConfigManager } from './pipeline-config/pipelineConfigManager'
+import AmqpExecutionResultPublisher from './pipeline-config/amqpExecutionResultPublisher'
+
+const CONNECTION_RETRIES = +process.env.CONNECTION_RETRIES!
+const CONNECTION_BACKOFF = +process.env.CONNECTION_BACKOFF_IN_MS!
+
+
 const port = 8080
-
 const app = express()
-
 app.use(cors())
 app.use(bodyParser.json({ limit: '50mb' }))
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -25,7 +31,12 @@ process.on('unhandledRejection', function(reason, p){
 const server = app.listen(port, async () => {
   console.log('Listening on port ' + port)
 
+  const executionResultPublisher = new AmqpExecutionResultPublisher()
+  await executionResultPublisher.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
+  const pipelineConfigManager = new PipelineConfigManager(pipelineExecutor, executionResultPublisher)
+
   const pipelineExecutionEndpoint = new PipelineExecutionEndpoint(pipelineExecutor, app)
+  const pipelineConfigEndpoint = new PipelineConfigEndpoint(pipelineConfigManager, app)
 
   app.get("/", (req: express.Request, res: express.Response): void => {
     res.status(200)

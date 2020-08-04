@@ -1,7 +1,6 @@
 /* eslint-env jest */
 const request = require('supertest')
 const waitOn = require('wait-on')
-const amqp = require('amqplib')
 
 const URL = process.env.SCHEDULER_API || 'http://localhost:8080'
 
@@ -17,10 +16,6 @@ const MOCK_TRANSFORMATION_PORT = process.env.MOCK_TRANSFORMATION_PORT || 8083
 const MOCK_TRANSFORMATION_HOST = process.env.MOCK_TRANSFORMATION_HOST || 'localhost'
 const MOCK_TRANSFORMATION_URL = 'http://' + MOCK_TRANSFORMATION_HOST + ':' + MOCK_TRANSFORMATION_PORT
 
-const AMQP_URL = process.env.AMQP_URL
-const AMQP_EXCHANGE = process.env.AMQP_EXCHANGE
-const AMQP_NOTIFICATION_TOPIC = process.env.AMQP_TOPIC
-const AMQP_IT_QUEUE = process.env.AMQP_IT_QUEUE
 const RABBIT_HEALTH_URL = process.env.RABBIT_HEALTH_URL
 
 const data = {
@@ -32,10 +27,6 @@ const data = {
   field4: [3, 5, 'a', 'z'],
   test: 'abc' // from transformation service
 }
-
-let publishedEvents = []
-
-let amqpConnection
 
 describe('Scheduler', () => {
   console.log('Scheduler-Service URL= ' + URL)
@@ -51,14 +42,6 @@ describe('Scheduler', () => {
     console.log('Waiting for service with URL: ' + pingUrl)
     await waitOn({ resources: [pingUrl], timeout: 50000 })
   }, 60000)
-
-  afterAll(async () => {
-    if(amqpConnection) {
-      console.log('Closing AMQP Connection...')
-      await amqpConnection.close()
-      console.log('AMQP Connection closed')
-    }
-  })
 
   test('GET /version', async () => {
     const response = await request(URL).get('/version')
@@ -80,18 +63,24 @@ describe('Scheduler', () => {
   })
 
   test('Pipeline runs through with successful publish', async () => {
-    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_NOTIFICATION_TOPIC, AMQP_IT_QUEUE)
     await sleep(10000) // pipeline should have been executing until now!
-    expect(publishedEvents).toContainEqual(
+    let response = await request(MOCK_TRANSFORMATION_URL).get(`/config/triggers/125`)
+    expect(response.status).toEqual(200)
+    expect(response.body).toContainEqual(
       {
         pipelineId: 125,
         pipelineName: 'nordstream',
-        data
+        dataLocation: "http://scheduler-it:8082/data/1",
+        func: "return 1;"
       })
-    expect(publishedEvents).toContainEqual(
+
+    response = await request(MOCK_TRANSFORMATION_URL).get(`/config/triggers/123`)
+    expect(response.status).toEqual(200)
+    expect(response.body).toContainEqual(
       {
         pipelineId: 123,
-        data
+        dataLocation: "http://scheduler-it:8082/data/1",
+        func: "return data;"
       }
     )
   }, 12000)
@@ -104,20 +93,6 @@ describe('Scheduler', () => {
     expect(response.body).toHaveLength(2)
   })
 })
-
-async function receiveAmqp (url, exchange, topic, queue) {
-  amqpConnection = await amqp.connect(url)
-  const channel = await amqpConnection.createChannel()
-  const q = await channel.assertQueue(queue)
-  await channel.bindQueue(q.queue, exchange, topic)
-  await channel.consume(q.queue, consumeEvent)
-}
-
-async function consumeEvent (msg) {
-  const event = JSON.parse(msg.content.toString())
-  console.log(`Event received via amqp: ${JSON.stringify(event)}`)
-  publishedEvents.push(event)
-}
 
 function sleep (ms) {
   return new Promise(resolve => setTimeout(resolve, ms))

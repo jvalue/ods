@@ -48,10 +48,6 @@ services:
       MOCK_NOTIFICATION_PORT: 8084
       MOCK_STORAGE_HOST: scheduler-it
       MOCK_STORAGE_PORT: 8085
-      AMQP_URL: amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672
-      AMQP_EXCHANGE: ods_global
-      AMQP_TOPIC: 'pipeline.execution.success'
-      AMQP_IT_QUEUE: scheduler-it.notification-execution
       RABBIT_HEALTH_URL: http://rabbitmq:15672
     depends_on:
       - rabbitmq
@@ -77,6 +73,12 @@ services:
       context: ./transformation/integration-test/
     environment:
       TRANSFORMATION_API: http://transformation:8080
+
+      AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
+      AMQP_EXCHANGE: 'ods_global'
+      AMQP_IT_QUEUE: 'transformation_it'
+      AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: 'pipeline.execution.success'
+      AMQP_PIPELINE_EXECUTION_ERROR_TOPIC: 'pipeline.execution.error'
 
    # ----------------- NOTIFICATION SERVICE (PORTS #TODO) --------------------
   notification:
