@@ -1,7 +1,7 @@
 import { VM, VMScript } from 'vm2'
 
-import SandboxExecutor from './interfaces/sandboxExecutor'
-import ExecutionResult from './interfaces/executionResult'
+import SandboxExecutor from './sandboxExecutor'
+import ExecutionResult from './executionResult'
 import { convertRuntimeError, convertSyntaxError } from './vm2StacktraceParser'
 
 const FUNCTION_WRAP_PREFIX_LENGTH = 1

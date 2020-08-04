@@ -201,8 +201,6 @@ services:
     image: ${DOCKER_REGISTRY}/transformation
     build:
       context: ./transformation/
-    environment:
-      AUTH_ENABLED: 'false' #TODO: turn to true as soon as it works!
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-transformation.rule=PathPrefix(`/api/transformation`)"

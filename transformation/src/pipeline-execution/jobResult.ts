@@ -1,5 +1,5 @@
 import Stats from './stats'
-import JobError from './jobError'
+import JobError from './sandbox/jobError'
 
 export default interface JobResult {
   data?: object;
