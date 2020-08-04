@@ -82,7 +82,11 @@ export class PipelineConfigEndpoint {
     if(!config.transformation) {
       config.transformation = { func: "return data;"}
     }
-    await this.pipelineConfigManager.update(+configId, config)
+    try {
+      await this.pipelineConfigManager.update(+configId, config)
+    } catch (e) {
+      res.status(404).send(`Could not find config with id ${configId}: ${e}`)
+    }
     res.setHeader('Content-Type', 'application/json')
     res.writeHead(204)
     res.end()
@@ -118,6 +122,9 @@ export class PipelineConfigEndpoint {
       return
     }
     const config = await this.pipelineConfigManager.get(+configId)
+    if(!config) {
+      res.status(404).send(`Config not found`)
+    }
     res.setHeader('Content-Type', 'application/json')
     res.writeHead(200)
     res.write(JSON.stringify(config))
