@@ -10,6 +10,7 @@ import { PipelineConfigManager } from './pipeline-config/pipelineConfigManager'
 import AmqpExecutionResultPublisher from './pipeline-config/publisher/amqpExecutionResultPublisher'
 import PostgresPipelineConfigRepository from './pipeline-config/postgresPipelineConfigRepository'
 import AmqpConfigWritesPublisher from './pipeline-config/publisher/amqpConfigWritesPublisher'
+import { PipelineConfigConsumer } from './api/amqp/pipelineConfigConsumer'
 
 const CONNECTION_RETRIES = +process.env.CONNECTION_RETRIES!
 const CONNECTION_BACKOFF = +process.env.CONNECTION_BACKOFF_IN_MS!
@@ -42,8 +43,11 @@ const server = app.listen(port, async () => {
 
   const pipelineConfigManager = new PipelineConfigManager(pipelineConfigRepository, pipelineExecutor, configWritesPublisher, executionResultPublisher)
 
+  const pipelineConfigConsumer = new PipelineConfigConsumer(pipelineConfigManager)
   const pipelineExecutionEndpoint = new PipelineExecutionEndpoint(pipelineExecutor, app)
   const pipelineConfigEndpoint = new PipelineConfigEndpoint(pipelineConfigManager, app)
+
+  await pipelineConfigConsumer.connect(30, 2000)
 
   app.get("/", (req: express.Request, res: express.Response): void => {
     res.status(200)
