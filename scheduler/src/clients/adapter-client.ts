@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-import DatasourceConfig, { default as AdapterConfig } from '../interfaces/datasource-config'
+import DatasourceConfig from '../interfaces/datasource-config'
 import AdapterResponse from '@/interfaces/adapter-response'
 import DatasourceEvent from '@/interfaces/datasource-event'
 
@@ -33,7 +33,7 @@ export async function getLatestEventId (): Promise<number> {
 
 /** IMPORT JOB RELATED **/
 
-export async function executeAdapter (adapterConfig: AdapterConfig): Promise<AdapterResponse> {
+export async function executeAdapter (adapterConfig: DatasourceConfig): Promise<AdapterResponse> {
   const response = await http.post('/dataImport', adapterConfig)
   response.data.location = ADAPTER_SERVICE_URL + response.data.location
   return response.data

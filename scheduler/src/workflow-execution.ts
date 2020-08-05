@@ -8,12 +8,23 @@ import AdapterResponse from '@/interfaces/adapter-response'
 export async function execute (datasourceConfig: DatasourceConfig, maxRetries = 3): Promise<void> {
   // adapter
   const adapterResponse: AdapterResponse =
-      await retryableExecution(executeAdapter, datasourceConfig, `Executing adapter for datasource ${datasourceConfig.id}`)
+      await retryableExecution(
+        executeAdapter,
+        datasourceConfig,
+        `Executing adapter for datasource ${datasourceConfig.id}`,
+        maxRetries
+      )
 
   // pipeline
-  await retryableExecution(triggerPipelines, { datasourceId: datasourceConfig.id, dataLocation: adapterResponse.location }, `Triggering pipelines based on datasource ${datasourceConfig.id}`)
+  await retryableExecution(
+    triggerPipelines,
+    { datasourceId: datasourceConfig.id, dataLocation: adapterResponse.location },
+    `Triggering pipelines based on datasource ${datasourceConfig.id}`,
+    maxRetries
+  )
 }
 
+// eslint-disable-next-line max-len
 async function retryableExecution<T1, T2> (func: (arg: T1) => Promise<T2>, args: T1, description: string, maxRetries = 3): Promise<T2> {
   let retryNumber = 0
   while (retryNumber <= maxRetries) {
@@ -37,11 +48,12 @@ async function executeAdapter (dataousrceConfig: DatasourceConfig): Promise<Adap
 
   try {
     const importedData = await AdapterClient.executeAdapter(dataousrceConfig)
-    console.log(`Sucessful import via Adapter for Datasource ${dataousrceConfig.id}`)
+    console.log(`Successful import via Adapter for Datasource ${dataousrceConfig.id}`)
     return importedData
   } catch (e) {
-    console.log(`Error executing adapter: ${e.code}`)
-    return Promise.reject()
+    const msg = `Error executing adapter: ${e.code}`
+    console.log(msg)
+    return Promise.reject(new Error(msg))
   }
 }
 
