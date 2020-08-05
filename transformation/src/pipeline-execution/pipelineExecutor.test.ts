@@ -1,6 +1,4 @@
 /* eslint-env jest */
-import TransformationService from './pipelineExecutor'
-
 import PipelineExecutor from './pipelineExecutor'
 import SandboxExecutor from './sandbox/sandboxExecutor'
 
@@ -8,13 +6,13 @@ jest.mock('axios')
 
 describe('JSTransformationService', () => {
   describe('valid execution', () => {
-    let transformationService: TransformationService
+    let transformationService: PipelineExecutor
     let sandboxExecutorMock: jest.Mocked<SandboxExecutor>
 
     beforeEach(() => {
       const SandboxMock = jest.fn(() => ({
-        execute: jest.fn((func, data) => ({ data: {}, error: undefined })),
-        evaluate: jest.fn()
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        execute: jest.fn((func, data) => ({ data: {}, error: undefined }))
       }))
       sandboxExecutorMock = new SandboxMock()
       transformationService = new PipelineExecutor(sandboxExecutorMock)
@@ -33,11 +31,12 @@ describe('JSTransformationService', () => {
   })
 
   describe('invalid execution', () => {
-    let transformationService: TransformationService
+    let transformationService: PipelineExecutor
     let sandboxExecutorMock: jest.Mocked<SandboxExecutor>
 
     beforeEach(() => {
       const SandboxMock = jest.fn(() => ({
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         execute: jest.fn((func, data) => ({ data: undefined, error: undefined })),
         evaluate: jest.fn()
       }))
@@ -49,8 +48,7 @@ describe('JSTransformationService', () => {
       const jobResult = transformationService.executeJob('data.a = 1;', { a: 2 })
       expect(jobResult.data).toBeUndefined()
       if (jobResult.error === undefined) {
-        fail()
-        return
+        throw new Error('Fail test')
       }
       expect(jobResult.error.name).toBe('MissingReturnError')
     })
