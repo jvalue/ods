@@ -216,6 +216,10 @@ services:
       AMQP_PIPELINE_CONFIG_CREATED_TOPIC: 'pipeline.config.created'
       AMQP_PIPELINE_CONFIG_UPDATED_TOPIC: 'pipeline.config.updated'
       AMQP_PIPELINE_CONFIG_DELETED_TOPIC: 'pipeline.config.deleted'
+      AMQP_DATASOURCE_EXECUTION_EXCHANGE: 'ods_global'
+      AMQP_DATASOURCE_EXECUTION_TOPIC: 'datasource.execution.*'
+      AMQP_DATASOURCE_EXECUTION_SUCCESS_TOPIC: 'datasource.execution.success'
+      AMQP_TRANSFORMATION_EXECUTION_QUEUE: 'transformation.transformation-execution'
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-transformation.rule=PathPrefix(`/api/transformation`)"
