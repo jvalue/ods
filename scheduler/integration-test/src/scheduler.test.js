@@ -49,20 +49,20 @@ describe('Scheduler', () => {
 
   test('Pipeline runs through with successful publish', async () => {
     await sleep(10000) // pipeline should have been executing until now!
-    let response = await request(MOCK_TRANSFORMATION_URL).get(`/trigger`)
+    let response = await request(MOCK_TRANSFORMATION_URL).get('/trigger')
     expect(response.status).toEqual(200)
     expect(response.body).toContainEqual(
       {
         datasourceId: 1,
-        dataLocation: "http://scheduler-it:8082/data/1"
+        dataLocation: 'http://scheduler-it:8082/data/1'
       })
 
-    response = await request(MOCK_TRANSFORMATION_URL).get(`/trigger`)
+    response = await request(MOCK_TRANSFORMATION_URL).get('/trigger')
     expect(response.status).toEqual(200)
     expect(response.body).toContainEqual(
       {
         datasourceId: 1,
-        dataLocation: "http://scheduler-it:8082/data/1"
+        dataLocation: 'http://scheduler-it:8082/data/1'
       }
     )
   }, 12000)
