@@ -2,6 +2,8 @@ import express from 'express'
 import cors from 'cors'
 import bodyParser from 'body-parser'
 
+import { CONNECTION_RETRIES, CONNECTION_BACKOFF } from './env'
+
 import { PipelineExecutionEndpoint } from './api/rest/pipelineExecutionEndpoint'
 import VM2SandboxExecutor from './pipeline-execution/sandbox/vm2SandboxExecutor'
 import PipelineExecutor from './pipeline-execution/pipelineExecutor'
@@ -11,10 +13,6 @@ import AmqpExecutionResultPublisher from './pipeline-config/publisher/amqpExecut
 import PostgresPipelineConfigRepository from './pipeline-config/postgresPipelineConfigRepository'
 import AmqpConfigWritesPublisher from './pipeline-config/publisher/amqpConfigWritesPublisher'
 import { PipelineConfigConsumer } from './api/amqp/pipelineConfigConsumer'
-
-const CONNECTION_RETRIES = +process.env.CONNECTION_RETRIES!
-const CONNECTION_BACKOFF = +process.env.CONNECTION_BACKOFF_IN_MS!
-
 
 const port = 8080
 const app = express()
@@ -29,10 +27,9 @@ const executionResultPublisher = new AmqpExecutionResultPublisher()
 const configWritesPublisher = new AmqpConfigWritesPublisher()
 
 // global promise-rejected handler
-process.on('unhandledRejection', function(reason, p){
-  console.debug("Possibly Unhandled Rejection at: Promise ", p, " reason: ", reason);
-});
-
+process.on('unhandledRejection', function (reason, p) {
+  console.debug('Possibly Unhandled Rejection at: Promise ', p, ' reason: ', reason)
+})
 
 const server = app.listen(port, async () => {
   console.log('Listening on port ' + port)
@@ -41,23 +38,30 @@ const server = app.listen(port, async () => {
   await executionResultPublisher.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
   await configWritesPublisher.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
 
-  const pipelineConfigManager = new PipelineConfigManager(pipelineConfigRepository, pipelineExecutor, configWritesPublisher, executionResultPublisher)
+  const pipelineConfigManager = new PipelineConfigManager(
+    pipelineConfigRepository,
+    pipelineExecutor,
+    configWritesPublisher,
+    executionResultPublisher
+  )
 
   const pipelineConfigConsumer = new PipelineConfigConsumer(pipelineConfigManager)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const pipelineExecutionEndpoint = new PipelineExecutionEndpoint(pipelineExecutor, app)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const pipelineConfigEndpoint = new PipelineConfigEndpoint(pipelineConfigManager, app)
 
   await pipelineConfigConsumer.connect(30, 2000)
 
-  app.get("/", (req: express.Request, res: express.Response): void => {
+  app.get('/', (req: express.Request, res: express.Response): void => {
     res.status(200)
-        .send('I am alive!')
+      .send('I am alive!')
   })
 
-  app.get("/version", (req: express.Request, res: express.Response): void => {
+  app.get('/version', (req: express.Request, res: express.Response): void => {
     res.header('Content-Type', 'text/plain')
     res.status(200)
-        .send(pipelineExecutor.getVersion())
+      .send(pipelineExecutor.getVersion())
     res.end()
   })
 })
@@ -66,5 +70,3 @@ process.on('SIGTERM', async () => {
   console.info('Tramsformation-Service: SIGTERM signal received.')
   await server.close()
 })
-
-

@@ -15,7 +15,7 @@ export default class AmqpPublisher {
         await this.sleep(msBackoff)
       }
     }
-    Promise.reject(`Could not connect to AMQP broker at ${amqpUrl}`)
+    return Promise.reject(new Error(`Could not connect to AMQP broker at ${amqpUrl}`))
   }
 
   private async connect (amqpUrl: string): Promise<AMQP.Connection> {
@@ -32,7 +32,9 @@ export default class AmqpPublisher {
   private initChannel = async (connection: AMQP.Connection, exchange: string): Promise<AMQP.Channel> => {
     try {
       const channel = await connection.createChannel()
-      channel.assertExchange(exchange, 'topic')
+      await channel.assertExchange(exchange, 'topic', {
+        durable: false
+      })
       console.log(`Exchange ${exchange} successfully initialized.`)
       return channel
     } catch (error) {

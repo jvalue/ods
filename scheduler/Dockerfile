@@ -15,6 +15,10 @@ RUN npm ci
 COPY ./src ./src
 COPY ./tsconfig.json ./
 COPY ./jest.config.js ./
+COPY ./.eslintrc ./
+
+# lint project
+RUN npm run lint-ci
 
 # build and test
 RUN npm run transpile

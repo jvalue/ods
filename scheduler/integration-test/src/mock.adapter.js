@@ -30,7 +30,7 @@ router.post('/dataImport', async ctx => {
   ctx.body = dataImportResponse
 })
 
-router.get('/data/1', async  ctx => {
+router.get('/data/1', async ctx => {
   ctx.type = 'text/json'
   ctx.body = importedData
 })

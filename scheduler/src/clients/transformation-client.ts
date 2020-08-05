@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from 'axios'
+import axios from 'axios'
 
 const TRANSFORMATION_SERVICE_URL = process.env.TRANSFORMATION_SERVICE_URL || 'http://localhost:8083'
 
@@ -12,9 +12,9 @@ export async function triggerPipelines (datasourceId: number, dataLocation: stri
     datasourceId: datasourceId,
     dataLocation: dataLocation
   }
-  const response = await http.post(`/trigger`, trigger)
-  if(response.status !== 200) {
-    return Promise.reject(`Triggering pipelines failed with status ${response.status}`)
+  const response = await http.post('/trigger', trigger)
+  if (response.status !== 200) {
+    return Promise.reject(new Error(`Triggering pipelines failed with status ${response.status}`))
   }
   return Promise.resolve()
 }

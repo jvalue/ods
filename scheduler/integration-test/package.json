@@ -8,17 +8,18 @@
     "pretest": "(npm run mock:adapter &) && (npm run mock:transformation &)",
     "test": "jest",
     "posttest": "killall node",
-    "lint": "./node_modules/.bin/eslint src --ext .js --fix"
+    "lint": "./node_modules/.bin/eslint src --ext .js --fix",
+    "lint-ci": "./node_modules/.bin/eslint src --ext .js --max-warnings=0"
   },
   "devDependencies": {
-    "eslint": "^6.8.0",
+    "eslint": "^7.6.0",
     "eslint-config-standard": "^14.1.1",
-    "eslint-plugin-import": "^2.21.2",
-    "eslint-plugin-jest": "^23.13.2",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-jest": "^23.20.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "jest": "^25.5.4",
+    "jest": "^26.2.2",
     "supertest": "^4.0.2"
   },
   "jest": {
@@ -26,9 +27,9 @@
   },
   "dependencies": {
     "axios": "^0.19.2",
-    "koa": "^2.12.0",
+    "koa": "^2.13.0",
     "koa-bodyparser": "^4.3.0",
-    "koa-router": "^8.0.8",
-    "wait-on": "^4.0.2"
+    "koa-router": "^9.1.0",
+    "wait-on": "^5.1.0"
   }
 }

@@ -1,4 +1,5 @@
 /* eslint-env jest */
+//@ts-check
 const request = require('supertest')
 const waitOn = require('wait-on')
 
@@ -137,8 +138,4 @@ describe('Transformation Service', () => {
     expect(stats.durationInMilliSeconds).toBeGreaterThan(0)
     expect(stats.endTimestamp).toBeGreaterThanOrEqual(stats.startTimestamp)
   })
-
-  function sleep (ms) {
-    return new Promise(resolve => setTimeout(resolve, ms))
-  }
 })

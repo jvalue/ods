@@ -4,7 +4,8 @@
   "description": "Transformation Service Integration-Tests",
   "scripts": {
     "test": "jest --runInBand",
-    "lint": "./node_modules/.bin/eslint src --ext .js --fix"
+    "lint": "./node_modules/.bin/eslint src --ext .js --fix",
+    "lint-ci": "./node_modules/.bin/eslint src --ext .js --max-warnings=0"
   },
   "devDependencies": {
     "amqplib": "0.6.0",

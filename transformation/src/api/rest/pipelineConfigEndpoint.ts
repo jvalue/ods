@@ -5,7 +5,6 @@ import PipelineConfigTriggerRequest from '../pipelineConfigTriggerRequest'
 import { PipelineConfigManager } from '../../pipeline-config/pipelineConfigManager'
 import PipelineConfig from '@/pipeline-config/model/pipelineConfig'
 
-
 export class PipelineConfigEndpoint {
   pipelineConfigManager: PipelineConfigManager
 
@@ -25,7 +24,7 @@ export class PipelineConfigEndpoint {
 
   triggerConfigExecution = async (req: express.Request, res: express.Response): Promise<void> => {
     const triggerRequest: PipelineConfigTriggerRequest = req.body
-    if (!triggerRequest.data && !triggerRequest.dataLocation || !triggerRequest.datasourceId) {
+    if ((!triggerRequest.data && !triggerRequest.dataLocation) || !triggerRequest.datasourceId) {
       res.writeHead(400)
       res.end()
       return
@@ -40,6 +39,8 @@ export class PipelineConfigEndpoint {
       triggerRequest.data = importResponse.data
     }
 
+    // trigger is asynchronous! not waiting for finished execution...
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.pipelineConfigManager.triggerConfig(triggerRequest.datasourceId, triggerRequest.data)
 
     const answer = `Triggered all pipelines for datasource ${triggerRequest.datasourceId}. Executing asynchronously...`
@@ -51,36 +52,35 @@ export class PipelineConfigEndpoint {
 
   delete = async (req: express.Request, res: express.Response): Promise<void> => {
     const configId = req.params.id
-    if(!configId) {
+    if (!configId) {
       res.writeHead(400)
-      res.write("Path parameter id is missing or is incorrect")
+      res.write('Path parameter id is missing or is incorrect')
       res.end()
       return
     }
-    const config = await this.pipelineConfigManager.delete(+configId)
+    await this.pipelineConfigManager.delete(+configId)
     res.setHeader('Content-Type', 'application/json')
     res.writeHead(204)
     res.end()
   }
 
-
   deleteAll = async (req: express.Request, res: express.Response): Promise<void> => {
-    const config = await this.pipelineConfigManager.deleteAll()
+    await this.pipelineConfigManager.deleteAll()
     res.writeHead(204)
     res.end()
   }
 
   update = async (req: express.Request, res: express.Response): Promise<void> => {
     const configId = req.params.id
-    if(!configId) {
+    if (!configId) {
       res.writeHead(400)
-      res.write("Path parameter id is missing or is incorrect")
+      res.write('Path parameter id is missing or is incorrect')
       res.end()
       return
     }
     const config = req.body as PipelineConfig
-    if(!config.transformation) {
-      config.transformation = { func: "return data;"}
+    if (!config.transformation) {
+      config.transformation = { func: 'return data;' }
     }
     try {
       await this.pipelineConfigManager.update(+configId, config)
@@ -94,12 +94,12 @@ export class PipelineConfigEndpoint {
 
   create = async (req: express.Request, res: express.Response): Promise<void> => {
     const config = req.body as PipelineConfig
-    if(!config.transformation) {
-      config.transformation = { func: "return data;"}
+    if (!config.transformation) {
+      config.transformation = { func: 'return data;' }
     }
     const savedConfig = await this.pipelineConfigManager.create(config)
     res.setHeader('Content-Type', 'application/json')
-    res.setHeader("location", `/configs/${savedConfig.id}`)
+    res.setHeader('location', `/configs/${savedConfig.id}`)
     res.writeHead(201)
     res.write(JSON.stringify(savedConfig))
     res.end()
@@ -115,15 +115,15 @@ export class PipelineConfigEndpoint {
 
   getOne = async (req: express.Request, res: express.Response): Promise<void> => {
     const configId = req.params.id
-    if(!configId) {
+    if (!configId) {
       res.writeHead(400)
-      res.write("Path parameter id is missing or is incorrect")
+      res.write('Path parameter id is missing or is incorrect')
       res.end()
       return
     }
     const config = await this.pipelineConfigManager.get(+configId)
-    if(!config) {
-      res.status(404).send(`Config not found`)
+    if (!config) {
+      res.status(404).send('Config not found')
     }
     res.setHeader('Content-Type', 'application/json')
     res.writeHead(200)
@@ -133,7 +133,7 @@ export class PipelineConfigEndpoint {
 
   getAll = async (req: express.Request, res: express.Response): Promise<void> => {
     const datasourceId = req.query.datasourceId
-    if(datasourceId) {
+    if (datasourceId) {
       return this.getByDatasourceId(+datasourceId, req, res)
     }
 
