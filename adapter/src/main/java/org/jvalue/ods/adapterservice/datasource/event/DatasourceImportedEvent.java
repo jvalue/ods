@@ -21,4 +21,12 @@ public class DatasourceImportedEvent implements Serializable {
   public String getDataLocation() {
     return this.dataLocation;
   }
+
+  @Override
+  public String toString() {
+    return "DatasourceImportedEvent{" +
+            "datasourceId=" + datasourceId +
+            ", dataLocation='" + dataLocation + '\'' +
+            '}';
+  }
 }
