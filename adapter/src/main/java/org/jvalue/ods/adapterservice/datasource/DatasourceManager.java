@@ -98,7 +98,8 @@ public class DatasourceManager {
    try {
       Adapter adapter = adapterFactory.getAdapter(adapterConfig);
       DataBlob.MetaData executionResult = adapter.executeJob(adapterConfig);
-      this.rabbitTemplate.convertAndSend(RabbitConfiguration.DATA_IMPORT_QUEUE, new DatasourceImportedEvent(id, executionResult.getLocation()));
+      DatasourceImportedEvent importedEvent = new DatasourceImportedEvent(id, executionResult.getLocation());
+      this.rabbitTemplate.convertAndSend(RabbitConfiguration.AMPQ_EXCHANGE, RabbitConfiguration.AMQP_IMPORT_SUCCESS_TOPIC, importedEvent);
       return executionResult;
    } catch (Exception e) {
      if(e instanceof IllegalArgumentException) {
