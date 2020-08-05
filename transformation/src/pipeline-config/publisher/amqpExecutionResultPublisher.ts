@@ -3,7 +3,7 @@ import {
   AMQP_EXCHANGE,
   AMQP_PIPELINE_EXECUTION_ERROR_TOPIC,
   AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC
-} from '@/env'
+} from '../../env'
 import AmqpPublisher from './amqpPublisher'
 import { ExecutionResultPublisher } from './executionResultPublisher'
 
