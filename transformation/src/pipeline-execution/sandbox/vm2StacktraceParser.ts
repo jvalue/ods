@@ -12,7 +12,7 @@ export function parseStacktraceLine (line: string): [string, string, number, num
   if (match === null) {
     throw new Error('Unexpected stacktrace line format')
   }
-  const [_, functionName, fileName, lineNumber, position] = match
+  const [, functionName, fileName, lineNumber, position] = match
   return [functionName, fileName, parseInt(lineNumber), parseInt(position)]
 }
 
@@ -26,7 +26,7 @@ function parseSyntaxErrorHeader (header: string): [string, number] {
   if (match === null) {
     throw new Error('Unexpected stacktrace format')
   }
-  const [_, fileName, lineNumber] = match
+  const [, fileName, lineNumber] = match
   return [fileName, parseInt(lineNumber)]
 }
 
@@ -71,7 +71,7 @@ export function convertSyntaxError (error: Error, prefixLength: number): JobErro
   const lines = error.stack.split('\n')
 
   const header = lines[0]
-  const [_, lineNumber] = parseSyntaxErrorHeader(header)
+  const [, lineNumber] = parseSyntaxErrorHeader(header)
   const lineNumberAdjusted = lineNumber - prefixLength
 
   const markers = lines[2]
@@ -120,7 +120,7 @@ export function convertRuntimeError (error: Error, prefixLength: number): JobErr
   const message = lines[0]
 
   const topFrame = lines[1]
-  const [_, __, lineNumber, position] = parseStacktraceLine(topFrame)
+  const [, , lineNumber, position] = parseStacktraceLine(topFrame)
   const lineNumberAdjusted = lineNumber - prefixLength
 
   const newLines = rewriteStacktrace(lines.slice(1), prefixLength)

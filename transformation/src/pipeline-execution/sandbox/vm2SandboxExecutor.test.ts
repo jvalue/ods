@@ -42,8 +42,7 @@ describe('VM2SandboxExecutor', () => {
       const { data: result, error } = e.execute('syntax error', {})
       expect(result).toEqual(undefined)
       if (error === undefined) {
-        fail()
-        return
+        throw new Error('Fail test')
       }
       expect(error.name).toBe('SyntaxError')
       expect(error.lineNumber).toBe(1)
@@ -54,8 +53,7 @@ describe('VM2SandboxExecutor', () => {
       const { data: result, error } = e.execute('c = Math.max(a', {})
       expect(result).toEqual(undefined)
       if (error === undefined) {
-        fail()
-        return
+        throw new Error('Fail test')
       }
       expect(error.name).toBe('SyntaxError')
       expect(error.lineNumber).toBe(1)
@@ -66,8 +64,7 @@ describe('VM2SandboxExecutor', () => {
       const { data: result, error } = e.execute('return somethingThatIsntThere;', {})
       expect(result).toEqual(undefined)
       if (error === undefined) {
-        fail()
-        return
+        throw new Error('Fail test')
       }
       expect(error.name).toBe('ReferenceError')
       expect(error.lineNumber).toBe(1)
@@ -82,8 +79,7 @@ function test(data) {
 return test(data);`, {})
       expect(result).toEqual(undefined)
       if (error === undefined) {
-        fail()
-        return
+        throw new Error('Fail test')
       }
       expect(error.name).toBe('TypeError')
       expect(error.stacktrace[0]).toBe('    at test (main:3:12)')
@@ -94,8 +90,7 @@ return test(data);`, {})
       const { data, error } = e.execute('while(true) {}\nreturn data;', {})
       expect(data).toEqual(undefined)
       if (error === undefined) {
-        fail()
-        return
+        throw new Error('Fail test')
       }
       expect(error.name).toBe('TimeoutError')
       expect(error.lineNumber).toBe(0)
@@ -110,8 +105,7 @@ return test(data);`, {})
       { a: 1 })
       expect(data).toEqual(undefined)
       if (error === undefined) {
-        fail()
-        return
+        throw new Error('Fail test')
       }
       expect(error.name).toBe('ReferenceError')
       expect(error.message).toBe('ReferenceError: require is not defined')
@@ -123,8 +117,7 @@ return test(data);`, {})
       { a: 1 })
       expect(data).toEqual(undefined)
       if (error === undefined) {
-        fail()
-        return
+        throw new Error('Fail test')
       }
       expect(error.name).toBe('ReferenceError')
       expect(error.message).toBe('ReferenceError: process is not defined')
@@ -135,8 +128,7 @@ return test(data);`, {})
       const { data, error } = result
       expect(data).toEqual(undefined)
       if (error === undefined) {
-        fail()
-        return
+        throw new Error('Fail test')
       }
       expect(error.name).toBe('ReferenceError')
       expect(error.message).toBe('ReferenceError: process is not defined')

@@ -1,4 +1,5 @@
 /* eslint-env jest */
+//@ts-check
 const request = require('supertest')
 const waitOn = require('wait-on')
 const amqp = require('amqplib')
@@ -10,7 +11,6 @@ const AMQP_EXCHANGE = process.env.AMQP_EXCHANGE
 const AMQP_IT_QUEUE = process.env.AMQP_IT_QUEUE
 const AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC = process.env.AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC
 const AMQP_PIPELINE_EXECUTION_ERROR_TOPIC = process.env.AMQP_PIPELINE_EXECUTION_ERROR_TOPIC
-
 
 let amqpConnection
 const publishedEvents = new Map() // routing key -> received msgs []
@@ -26,11 +26,10 @@ describe('Transformation Service', () => {
 
     await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC, AMQP_IT_QUEUE)
     await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_ERROR_TOPIC, AMQP_IT_QUEUE)
-
   }, 60000)
 
   afterAll(async () => {
-    if(amqpConnection) {
+    if (amqpConnection) {
       console.log('Closing AMQP Connection...')
       await amqpConnection.close()
       console.log('AMQP Connection closed')
@@ -46,7 +45,7 @@ describe('Transformation Service', () => {
     const pipelineConfig = {
       datasourceId: 12345,
       transformation: {
-        func: 'return data.a + data.b;',
+        func: 'return data.a + data.b;'
       },
       metadata: {
         author: 'icke',
@@ -84,12 +83,11 @@ describe('Transformation Service', () => {
       })
   }, 12000)
 
-
   test('Pipeline runs through with error with successful publish', async () => {
     const pipelineConfig = {
       datasourceId: 12346,
       transformation: {
-        func: 'return asd.def;',
+        func: 'return asd.def;'
       },
       metadata: {
         author: 'icke',
@@ -105,7 +103,6 @@ describe('Transformation Service', () => {
     expect(creationResponse.status).toEqual(201)
     const configId = creationResponse.body.id
 
-
     const trigger = {
       datasourceId: pipelineConfig.datasourceId,
       data: {
@@ -120,12 +117,11 @@ describe('Transformation Service', () => {
 
     await sleep(10000) // pipeline should have been executing until now!
     expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)).toBeDefined()
-    expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC).length).toEqual(1)
+    expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)).toHaveLength(1)
     expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].pipelineId).toEqual(configId)
     expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].pipelineName).toEqual(pipelineConfig.metadata.displayName)
     expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].error).toBeDefined()
   }, 12000)
-
 })
 
 async function connectAmqp (url) {
@@ -144,7 +140,7 @@ async function receiveAmqp (url, exchange, topic, queue) {
     const event = JSON.parse(msg.content.toString())
     console.log(`Event received via amqp: ${JSON.stringify(event)}`)
     const routingKey = msg.fields.routingKey
-    if(!publishedEvents.get(routingKey)) {
+    if (!publishedEvents.get(routingKey)) {
       publishedEvents.set(routingKey, [])
     }
     publishedEvents.get(routingKey).push(event)

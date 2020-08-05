@@ -1,3 +1,5 @@
+/* eslint-env jest */
+//@ts-check
 const request = require('supertest')
 const waitOn = require('wait-on')
 const amqp = require('amqplib')
@@ -30,7 +32,7 @@ describe('Pipeline Config Test', () => {
   }, 60000)
 
   afterAll(async () => {
-    if(amqpConnection) {
+    if (amqpConnection) {
       console.log('Closing AMQP Connection...')
       await amqpConnection.close()
       console.log('AMQP Connection closed')
@@ -195,7 +197,7 @@ const pipelineConfig = {
   id: 12345,
   datasourceId: 1,
   transformation: {
-    func: 'return data+data;',
+    func: 'return data+data;'
   },
   metadata: {
     author: 'icke',
@@ -204,7 +206,6 @@ const pipelineConfig = {
     description: 'integraiton testing pipeline'
   }
 }
-
 
 async function connectAmqp (url) {
   amqpConnection = await amqp.connect(url)
@@ -222,7 +223,7 @@ async function receiveAmqp (url, exchange, topic, queue) {
     const event = JSON.parse(msg.content.toString())
     const routingKey = msg.fields.routingKey
     console.log(`Event received on topic "${routingKey}": ${JSON.stringify(event)}`)
-    if(!publishedEvents.get(routingKey)) {
+    if (!publishedEvents.get(routingKey)) {
       publishedEvents.set(routingKey, [event])
     } else {
       publishedEvents.get(routingKey).push(event)

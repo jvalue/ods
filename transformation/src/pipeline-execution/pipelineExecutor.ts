@@ -7,7 +7,7 @@ import SandboxExecutor from './sandbox/sandboxExecutor'
 const VERSION = '0.0.2'
 
 export default class PipelineExecutor {
-  executor: SandboxExecutor
+  private executor: SandboxExecutor
 
   constructor (executor: SandboxExecutor) {
     this.executor = executor
