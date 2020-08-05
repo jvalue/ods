@@ -1,6 +1,9 @@
 package org.jvalue.ods.adapterservice.config;
 
 import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,5 +17,17 @@ public class RabbitConfiguration {
     @Bean
     public TopicExchange exchange() {
         return new TopicExchange(AMPQ_EXCHANGE);
+    }
+
+    @Bean
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
+        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        rabbitTemplate.setMessageConverter(jackson2JsonConverter());
+        return rabbitTemplate;
+    }
+
+    @Bean
+    public Jackson2JsonMessageConverter jackson2JsonConverter() {
+        return new Jackson2JsonMessageConverter();
     }
 }
