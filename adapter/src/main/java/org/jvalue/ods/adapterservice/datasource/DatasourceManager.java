@@ -100,6 +100,7 @@ public class DatasourceManager {
       DataBlob.MetaData executionResult = adapter.executeJob(adapterConfig);
       DatasourceImportedEvent importedEvent = new DatasourceImportedEvent(id, executionResult.getLocation());
       this.rabbitTemplate.convertAndSend(RabbitConfiguration.AMPQ_EXCHANGE, RabbitConfiguration.AMQP_IMPORT_SUCCESS_TOPIC, importedEvent);
+      System.out.println("Published event " + importedEvent.toString() + " on exchange " + RabbitConfiguration.AMPQ_EXCHANGE + " under topic: " + RabbitConfiguration.AMQP_IMPORT_SUCCESS_TOPIC);
       return executionResult;
    } catch (Exception e) {
      if(e instanceof IllegalArgumentException) {
