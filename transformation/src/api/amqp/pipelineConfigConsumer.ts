@@ -47,14 +47,12 @@ export class PipelineConfigConsumer {
     console.log(`Initializing queue "${transformationExecutionQueue}" on exchange "${datasourceExecutionExchange}" with topic "${datasourceExecutionTopic}"`)
     const channel = await connection.createChannel()
 
-    await channel.assertExchange(datasourceExecutionExchange, 'topic', {
-      durable: false
-    })
+    await channel.assertExchange(datasourceExecutionExchange, 'topic')
 
     const q = await channel.assertQueue(transformationExecutionQueue, {
       exclusive: false,
     })
-    await channel.bindQueue(q.queue, datasourceExecutionExchange, datasourceExecutionExchange)
+    await channel.bindQueue(q.queue, datasourceExecutionExchange, datasourceExecutionTopic)
 
     await channel.consume(q.queue, this.consumeEvent)
     console.info(`Successfully initialized AMQP queue`)
