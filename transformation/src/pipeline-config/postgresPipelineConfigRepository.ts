@@ -1,6 +1,6 @@
 import { Pool, PoolConfig, PoolClient, QueryResult } from 'pg'
 
-import { POSTGRES_SCHEMA, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB } from '@/env'
+import { POSTGRES_SCHEMA, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB } from '../env'
 import PipelineConfig from './model/pipelineConfig'
 import PipelineConfigRepository from './pipelineConfigRepository'
 

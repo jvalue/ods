@@ -6,7 +6,7 @@ import {
   AMQP_PIPELINE_CONFIG_CREATED_TOPIC,
   AMQP_PIPELINE_CONFIG_UPDATED_TOPIC,
   AMQP_PIPELINE_CONFIG_DELETED_TOPIC
-} from '@/env'
+} from '../../env'
 
 export default class AmqpConfigWritesPublisher implements ConfigWritesPublisher {
   private publisher: AmqpPublisher
