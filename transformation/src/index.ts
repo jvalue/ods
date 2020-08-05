@@ -14,7 +14,6 @@ import AmqpConfigWritesPublisher from './pipeline-config/publisher/amqpConfigWri
 const CONNECTION_RETRIES = +process.env.CONNECTION_RETRIES!
 const CONNECTION_BACKOFF = +process.env.CONNECTION_BACKOFF_IN_MS!
 
-
 const port = 8080
 const app = express()
 app.use(cors())
@@ -28,10 +27,9 @@ const executionResultPublisher = new AmqpExecutionResultPublisher()
 const configWritesPublisher = new AmqpConfigWritesPublisher()
 
 // global promise-rejected handler
-process.on('unhandledRejection', function(reason, p){
-  console.debug("Possibly Unhandled Rejection at: Promise ", p, " reason: ", reason);
-});
-
+process.on('unhandledRejection', function (reason, p) {
+  console.debug('Possibly Unhandled Rejection at: Promise ', p, ' reason: ', reason)
+})
 
 const server = app.listen(port, async () => {
   console.log('Listening on port ' + port)
@@ -40,20 +38,27 @@ const server = app.listen(port, async () => {
   await executionResultPublisher.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
   await configWritesPublisher.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
 
-  const pipelineConfigManager = new PipelineConfigManager(pipelineConfigRepository, pipelineExecutor, configWritesPublisher, executionResultPublisher)
+  const pipelineConfigManager = new PipelineConfigManager(
+    pipelineConfigRepository,
+    pipelineExecutor,
+    configWritesPublisher,
+    executionResultPublisher
+  )
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const pipelineExecutionEndpoint = new PipelineExecutionEndpoint(pipelineExecutor, app)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const pipelineConfigEndpoint = new PipelineConfigEndpoint(pipelineConfigManager, app)
 
-  app.get("/", (req: express.Request, res: express.Response): void => {
+  app.get('/', (req: express.Request, res: express.Response): void => {
     res.status(200)
-        .send('I am alive!')
+      .send('I am alive!')
   })
 
-  app.get("/version", (req: express.Request, res: express.Response): void => {
+  app.get('/version', (req: express.Request, res: express.Response): void => {
     res.header('Content-Type', 'text/plain')
     res.status(200)
-        .send(pipelineExecutor.getVersion())
+      .send(pipelineExecutor.getVersion())
     res.end()
   })
 })
@@ -62,5 +67,3 @@ process.on('SIGTERM', async () => {
   console.info('Tramsformation-Service: SIGTERM signal received.')
   await server.close()
 })
-
-
