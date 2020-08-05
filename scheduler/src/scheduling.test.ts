@@ -1,7 +1,12 @@
 /* eslint-env jest */
 
 import * as Scheduling from './scheduling'
-import { executeAdapter, getLatestEventId, getAllDatasources, getEventsAfter, getDatasource } from './clients/adapter-client'
+import {
+  executeAdapter,
+  getLatestEventId,
+  getAllDatasources,
+  getEventsAfter, getDatasource
+} from './clients/adapter-client'
 import { EventType } from './interfaces/datasource-event'
 import DatasourceConfig from './interfaces/datasource-config'
 import * as WorkflowExecution from './workflow-execution'
@@ -237,6 +242,6 @@ function generateConfig (periodic: boolean, firstExecution: Date, interval: numb
       periodic: periodic,
       firstExecution: firstExecution,
       interval: interval
-    },
+    }
   }
 }

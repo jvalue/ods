@@ -7,10 +7,10 @@ export default interface DatasourceConfig {
 }
 
 export interface DatasourceProtocol {
-  type: String,
+  type: string;
   parameters: {
-    location?: String
-  }
+    location?: string;
+  };
 }
 
 export interface DatasourceTrigger {
