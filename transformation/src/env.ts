@@ -1,13 +1,15 @@
+const isEmpty = (value: string | undefined): boolean => !value || value === ''
+
 const getEnv = (envName: string): string => {
   const env = process.env[envName]
-  if (env) {
-    console.log(`[Evnironment Variable] ${envName} = ${env}`)
-    return env
-  } else {
-    console.error(`Environment variable ${envName} is not defined, but is required`)
-    console.error('Shutting down service')
+  if (isEmpty(env)) {
+    console.error(`Required environment variable ${envName} is not defined or empty`)
+    console.error('Unable to proceed with service')
     process.exit(-2)
   }
+
+  console.log(`[Environment Variable] ${envName} = ${env}`)
+  return env as string
 }
 
 export const CONNECTION_RETRIES = +getEnv('CONNECTION_RETRIES')
