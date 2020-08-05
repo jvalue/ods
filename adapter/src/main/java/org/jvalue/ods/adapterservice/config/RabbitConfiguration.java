@@ -12,7 +12,7 @@ public class RabbitConfiguration {
     public static final String AMQP_IMPORT_FAILED_TOPIC = System.getenv("AMQP_IMPORT_FAILED_TOPIC");
 
     @Bean
-    public TopicExchange odsExchange() {
+    public TopicExchange exchange() {
         return new TopicExchange(AMPQ_EXCHANGE);
     }
 }
