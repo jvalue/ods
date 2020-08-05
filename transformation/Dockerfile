@@ -18,7 +18,7 @@ COPY ./.eslintrc ./
 COPY ./jest.config.js ./
 
 # build and test
-RUN npm run lint
+RUN npm run lint-ci
 RUN npm run transpile
 RUN npm run test
 
