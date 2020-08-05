@@ -17,6 +17,7 @@ COPY ./tsconfig.json ./
 COPY ./jest.config.js ./
 
 # build and test
+RUN npm run lint
 RUN npm run transpile
 RUN npm run test
 
