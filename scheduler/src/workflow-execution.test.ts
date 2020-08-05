@@ -16,11 +16,6 @@ const adapterResponse: AdapterResponse = {
   location: '/data/42'
 }
 
-const importedData = {
-  value1: 1,
-  value2: 'zwo'
-}
-
 afterEach(() => {
   jest.clearAllMocks()
 })
@@ -70,6 +65,6 @@ function generateDatasourceConfig (periodic = true): DatasourceConfig {
       displayName: 'datasource 123',
       creationTimestamp: new Date(Date.now() + 5000),
       license: 'license 123'
-    },
+    }
   }
 }

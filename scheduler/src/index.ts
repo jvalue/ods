@@ -32,7 +32,6 @@ const server = app.listen(port, async () => {
     res.header('Content-Type', 'application/json')
     res.json(Scheduling.getAllJobs())
   })
-
 })
 
 let datasourcePollingJob: schedule.Job
@@ -61,15 +60,17 @@ async function initJobs (retries = 30, retryBackoff = 3000): Promise<void> {
     updateDatsources)
 }
 
-
-// log all promise rejections that happen (mostly because they happen in async and don't log the point where it happened)
-process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
+// log all promise rejections that happen
+// (mostly because they happen in async and don't log the point where it happened)
+// For more information see https://nodejs.org/api/process.html#process_event_unhandledrejection
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+process.on('unhandledRejection', (reason: Error | any, promise: Promise<any>) => {
   if (reason) {
-    console.log('Caught unhandled rejection: ', reason.code);
+    console.log('Unhandled Rejection at:', promise, 'reason:', reason, ' reason code:', reason.code)
   } else {
-    console.log(`Caught undefined unhandled rejection`)
+    console.log('Unhandled Rejection at:', promise)
   }
-});
+})
 
 process.on('SIGTERM', async () => {
   console.info('Scheduler: SIGTERM signal received.')

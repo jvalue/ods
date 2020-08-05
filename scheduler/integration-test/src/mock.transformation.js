@@ -18,7 +18,7 @@ router.get('/', async ctx => {
 router.post('/trigger', async ctx => {
   const requestBody = ctx.request.body
   const pipelineId = `${requestBody.pipelineId}`
-  if(!requests.get(pipelineId)) {
+  if (!requests.get(pipelineId)) {
     requests.set(pipelineId, [])
   }
   requests.get(pipelineId).push(requestBody)
@@ -29,9 +29,9 @@ router.post('/trigger', async ctx => {
 router.get('/trigger', async ctx => {
   const pipelineId = `${ctx.params.id}`
   console.log(`Triggers for pipeline ${pipelineId} requested.`)
-  if(!requests.get(pipelineId)) {
+  if (!requests.get(pipelineId)) {
     ctx.status = 400
-    ctx.body =`No triggers received on pipeline ${pipelineId}`
+    ctx.body = `No triggers received on pipeline ${pipelineId}`
   } else {
     ctx.status = 200
     ctx.body = requests.get(pipelineId)
