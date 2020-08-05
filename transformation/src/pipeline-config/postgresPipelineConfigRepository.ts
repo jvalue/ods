@@ -1,14 +1,9 @@
 import { Pool, PoolConfig, PoolClient, QueryResult } from 'pg'
 
+import { POSTGRES_SCHEMA, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB } from '@/env'
 import PipelineConfig from './model/pipelineConfig'
 import PipelineConfigRepository from './pipelineConfigRepository'
 
-const POSTGRES_HOST = process.env.POSTGRES_HOST!
-const POSTGRES_PORT = +process.env.POSTGRES_PORT!
-const POSTGRES_USER = process.env.POSTGRES_USER!
-const POSTGRES_PW = process.env.POSTGRES_PW!
-const POSTGRES_DB = process.env.POSTGRES_DB!
-const POSTGRES_SCHEMA = process.env.POSTGRES_SCHEMA!
 const POSTGRES_TABLE = 'PipelineConfigs'
 
 const TABLE_CREATION_STATEMENT = `
