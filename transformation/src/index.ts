@@ -2,6 +2,8 @@ import express from 'express'
 import cors from 'cors'
 import bodyParser from 'body-parser'
 
+import { CONNECTION_RETRIES, CONNECTION_BACKOFF } from './env'
+
 import { PipelineExecutionEndpoint } from './api/rest/pipelineExecutionEndpoint'
 import VM2SandboxExecutor from './pipeline-execution/sandbox/vm2SandboxExecutor'
 import PipelineExecutor from './pipeline-execution/pipelineExecutor'
@@ -10,9 +12,6 @@ import { PipelineConfigManager } from './pipeline-config/pipelineConfigManager'
 import AmqpExecutionResultPublisher from './pipeline-config/publisher/amqpExecutionResultPublisher'
 import PostgresPipelineConfigRepository from './pipeline-config/postgresPipelineConfigRepository'
 import AmqpConfigWritesPublisher from './pipeline-config/publisher/amqpConfigWritesPublisher'
-
-const CONNECTION_RETRIES = +process.env.CONNECTION_RETRIES!
-const CONNECTION_BACKOFF = +process.env.CONNECTION_BACKOFF_IN_MS!
 
 const port = 8080
 const app = express()

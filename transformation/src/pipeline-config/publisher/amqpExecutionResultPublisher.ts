@@ -1,10 +1,11 @@
+import {
+  AMQP_URL,
+  AMQP_EXCHANGE,
+  AMQP_PIPELINE_EXECUTION_ERROR_TOPIC,
+  AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC
+} from '@/env'
 import AmqpPublisher from './amqpPublisher'
 import { ExecutionResultPublisher } from './executionResultPublisher'
-
-const AMQP_URL = process.env.AMQP_URL!
-const AMQP_EXCHANGE = process.env.AMQP_PIPELINE_EXECUTION_EXCHANGE!
-const AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC = process.env.AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC!
-const AMQP_PIPELINE_EXECUTION_ERROR_TOPIC = process.env.AMQP_PIPELINE_EXECUTION_ERROR_TOPIC!
 
 export default class AmqpExecutionResultPublisher implements ExecutionResultPublisher {
   private publisher: AmqpPublisher
