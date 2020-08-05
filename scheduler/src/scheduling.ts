@@ -33,7 +33,7 @@ export async function initializeJobs (retries = 30, retryBackoff = 3000): Promis
       return Promise.reject(new Error('Failed to initialize datasource/pipeline scheduler.'))
     }
     if (e.code === 'ECONNREFUSED' || e.code === 'ENOTFOUND') {
-      console.error(`Failed to sync with Adapter Service on initialization (${retries}) . Retrying after ${retryBackoff}ms... `)
+      console.error(`Failed to sync with Adapter Service on init (${retries}) . Retrying after ${retryBackoff}ms... `)
     } else {
       console.error(e)
       console.error(`Retrying (${retries})...`)
@@ -132,7 +132,9 @@ export function determineExecutionDate (datasourceConfig: DatasourceConfig): Dat
 
 export function scheduleDatasource (datasourceConfig: DatasourceConfig): ExecutionJob {
   const executionDate: Date = determineExecutionDate(datasourceConfig)
-  console.log(`Datasource ${datasourceConfig.id} with consecuting pipelines scheduled for next execution at ${executionDate.toLocaleString()}.`)
+  console.log(`Datasource ${datasourceConfig.id} with consecutive pipelines scheduled 
+  for next execution at ${executionDate.toLocaleString()}.`)
+
   const datasourceId = datasourceConfig.id
 
   const scheduledJob = schedule.scheduleJob(`Datasource ${datasourceId}`, executionDate, () =>
@@ -144,7 +146,7 @@ export function scheduleDatasource (datasourceConfig: DatasourceConfig): Executi
   return datasourceJob
 }
 
-async function execute(datasourceConfig: DatasourceConfig) {
+async function execute (datasourceConfig: DatasourceConfig): Promise<void> {
   await WorkflowExecution.execute(datasourceConfig)
 
   if (datasourceConfig.trigger.periodic) {
@@ -152,7 +154,7 @@ async function execute(datasourceConfig: DatasourceConfig) {
   } else {
     console.log(`Datasource ${datasourceConfig.id} is not periodic. Removing it from scheduling.`)
     removeJob(datasourceConfig.id)
-    console.log(`Succesfully removed datasource ${datasourceConfig.id} from scheduling.`)
+    console.log(`Successfully removed datasource ${datasourceConfig.id} from scheduling.`)
   }
 }
 
@@ -162,7 +164,7 @@ export async function upsertJob (datasourceConfig: DatasourceConfig): Promise<Ex
 
   console.log(`[${datasourceState}] datasource detected with id ${datasourceConfig.id}.`)
 
-  if (! isNewDatasource) {
+  if (!isNewDatasource) {
     cancelJob(datasourceConfig.id)
   }
 
