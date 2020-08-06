@@ -8,18 +8,18 @@ public class ImportFailedEvent implements Serializable {
 
     private final Long datasourceId;
 
-    private final String errmsg;
+    private final String error;
 
-    public ImportFailedEvent(@JsonProperty("datasourceId") Long datasourceId, @JsonProperty("error") String errmsg) {
+    public ImportFailedEvent(@JsonProperty("datasourceId") Long datasourceId, @JsonProperty("error") String error) {
         this.datasourceId = datasourceId;
-        this.errmsg = errmsg;
+        this.error = error;
     }
 
     @Override
     public String toString() {
         return "ImportFailedEvent{" +
                 "datasourceId=" + datasourceId +
-                ", errmsg='" + errmsg + '\'' +
+                ", errmsg='" + error + '\'' +
                 '}';
     }
 
@@ -27,8 +27,8 @@ public class ImportFailedEvent implements Serializable {
         return datasourceId;
     }
 
-    public String getErrmsg() {
-        return errmsg;
+    public String getError() {
+        return error;
     }
 
 }
