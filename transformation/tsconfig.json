@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2018",
     "module": "commonjs",
     "strict": true,
     "jsx": "preserve",
@@ -13,7 +13,7 @@
     "paths": {
       "@/*": ["src/*"]
     },
-    "lib": ["es5"],
+    "lib": ["es2018"],
     "outDir": "dist"
   },
   "include": [
