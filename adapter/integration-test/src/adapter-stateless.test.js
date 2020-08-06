@@ -12,8 +12,7 @@ describe('Adapter Stateless', () => {
     try {
       const pingUrl = URL + '/version'
       console.log('Starting adapter stateless test')
-      console.log(`Waiting for services: ${pingUrl} ${MOCK_SERVER_URL}, ${RABBIT_URL}`)
-      await waitOn({ resources: [MOCK_SERVER_URL, RABBIT_URL, pingUrl], timeout: 50000 })
+      await waitOn({ resources: [MOCK_SERVER_URL, RABBIT_URL, pingUrl], timeout: 50000, log: true })
       console.log('Wait on complete')
     } catch (err) {
       process.exit(1)

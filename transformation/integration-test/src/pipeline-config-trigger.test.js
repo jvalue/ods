@@ -22,8 +22,7 @@ describe('Transformation Service Config Trigger', () => {
   beforeAll(async () => {
     console.log('Starting config trigger tests..')
     const pingUrl = URL + '/'
-    console.log('Waiting for transformation-service with URL: ' + pingUrl)
-    await waitOn({ resources: [pingUrl], timeout: 50000 })
+    await waitOn({ resources: [pingUrl], timeout: 50000, log: true })
     await connectAmqp(AMQP_URL)
 
     await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_TOPIC, AMQP_IT_QUEUE)

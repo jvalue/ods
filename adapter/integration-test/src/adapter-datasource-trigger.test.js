@@ -22,8 +22,7 @@ describe('Adapter Sources Trigger', () => {
   beforeAll(async () => {
     console.log('Starting adapter sources trigger test')
     const pingUrl = URL + '/version'
-    console.log(`Waiting for services: ${MOCK_SERVER_URL} and ${pingUrl}`)
-    await waitOn({ resources: [MOCK_SERVER_URL, pingUrl], timeout: 50000 })
+    await waitOn({ resources: [MOCK_SERVER_URL, pingUrl], timeout: 50000, log: true })
     console.log(`Services available. Connecting to amqp at ${AMQP_URL} ...`)
     await connectAmqp(AMQP_URL)
 

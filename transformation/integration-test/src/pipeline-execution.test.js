@@ -10,8 +10,7 @@ describe('Transformation Service Execution', () => {
   beforeAll(async () => {
     console.log('Starting pipeline execution tests..')
     const pingUrl = URL + '/'
-    console.log('Waiting for transformation-service with URL: ' + pingUrl)
-    await waitOn({ resources: [pingUrl], timeout: 50000 })
+    await waitOn({ resources: [pingUrl], timeout: 50000, log: true })
   }, 60000)
 
   test('GET /version', async () => {
