@@ -11,53 +11,53 @@ app.use(bodyParser())
 const notifications = new Map()
 
 router.get('/', async ctx => {
-    ctx.type = 'text/plain'
-    ctx.body = 'ok'
+  ctx.type = 'text/plain'
+  ctx.body = 'ok'
 })
 
 router.get('/:path', async ctx => {
-    const path = ctx.params.path
-    const notification = notifications.get(path)
-    if (!notification) {
-        ctx.throw(404)
-    } else {
-        ctx.body = notification
-        ctx.type = 'application/json'
-        ctx.status = 200
-    }
+  const path = ctx.params.path
+  const notification = notifications.get(path)
+  if (!notification) {
+    ctx.throw(404)
+  } else {
+    ctx.body = notification
+    ctx.type = 'application/json'
+    ctx.status = 200
+  }
 })
 
 router.post('/:path', async ctx => {
-    const path = ctx.params.path
-    console.log(`Notification on /${path} triggered.`)
-    notifications.set(path, ctx.request.body)
-    ctx.status = 201
+  const path = ctx.params.path
+  console.log(`Notification on /${path} triggered.`)
+  notifications.set(path, ctx.request.body)
+  ctx.status = 201
 })
 
 router.get('/slack/*', async ctx => {
-    const notification = notifications.get('slack')
-    if (!notification) {
-        ctx.throw(404)
-    } else {
-        ctx.body = notification
-        ctx.type = 'application/json'
-        ctx.status = 200
-    }
+  const notification = notifications.get('slack')
+  if (!notification) {
+    ctx.throw(404)
+  } else {
+    ctx.body = notification
+    ctx.type = 'application/json'
+    ctx.status = 200
+  }
 })
 
 router.post('/slack/*', async ctx => {
-    console.log('Slack notification triggered.')
-    notifications.set('slack', ctx.request.body)
-    ctx.status = 201
+  console.log('Slack notification triggered.')
+  notifications.set('slack', ctx.request.body)
+  ctx.status = 201
 })
 
 app.use(router.routes())
 
 const server = app.listen(PORT, () => console.log(`Starting mock notification receiver on port ${PORT}`))
 
-process.on('SIGTERM', async() => {
-    console.info('Mock-Notification-Receiver: SIGTERM signal received.')
-    await server.close()
+process.on('SIGTERM', async () => {
+  console.info('Mock-Notification-Receiver: SIGTERM signal received.')
+  await server.close()
 })
 
 module.exports = server
