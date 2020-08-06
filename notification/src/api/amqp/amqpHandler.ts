@@ -1,6 +1,5 @@
 import * as AMQP from 'amqplib'
 import { TriggerEventHandler } from '../triggerEventHandler'
-import { TransformationEvent } from '../transformationEvent'
 
 /**
  * This class handles the communication with the AMQP service (rabbitmq)
@@ -46,8 +45,8 @@ export class AmqpHandler {
         await this.backOff(ms)
       }
     }
-    console.log('Could not connect to AMQP Broker!')
-    return Promise.reject()
+    console.error('Could not connect to AMQP Broker')
+    return Promise.reject(new Error('Could not connect to AMQP Broker'))
   }
 
   /**
@@ -63,7 +62,7 @@ export class AmqpHandler {
     console.log(`Initializing transformation channel "${this.transformationExecutedQueue}"`)
 
     const channel = await connection.createChannel()
-    channel.assertExchange(this.exchange, 'topic', {
+    await channel.assertExchange(this.exchange, 'topic', {
       durable: false
     })
 
@@ -71,10 +70,13 @@ export class AmqpHandler {
       exclusive: false
     })
 
-    channel.bindQueue(q.queue, this.exchange, this.transformationExecutedTopic)
-    channel.consume(q.queue, async (msg: AMQP.ConsumeMessage | null) => await this.handleEvent(msg))
+    await channel.bindQueue(q.queue, this.exchange, this.transformationExecutedTopic)
+    await channel.consume(q.queue, async (msg: AMQP.ConsumeMessage | null) => await this.handleEvent(msg))
 
-    console.info(`Successfully initialized pipeline-executed queue "${this.transformationExecutedQueue}" on topic "${this.transformationExecutedTopic}"`)
+    console.info(
+      `Successfully initialized pipeline-executed queue "${this.transformationExecutedQueue}" ` +
+      `on topic "${this.transformationExecutedTopic}"`
+    )
     return Promise.resolve()
   }
 
@@ -85,7 +87,7 @@ export class AmqpHandler {
     }
     console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
     if (msg.fields.routingKey === this.transformationExecutionSuccessTopic) {
-      this.triggerEventHandler.handleEvent(JSON.parse(msg.content.toString()))
+      await this.triggerEventHandler.handleEvent(JSON.parse(msg.content.toString()))
     } else {
       console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
     }

@@ -28,7 +28,10 @@ export default class VM2SandboxExecutor implements SandboxExecutor {
       throw new Error(`Malformed expression received: ${expression}\n Error message: ${err}`)
     }
     if (typeof result !== 'boolean') {
-      throw new Error(`Malformed expression received: ${expression}\n Error message: Expected result to be a boolean expression!`)
+      throw new Error(
+        `Malformed expression received: ${expression}\n Error message: ` +
+        'Expected result to be a boolean expression!'
+      )
     } else {
       return result
     }

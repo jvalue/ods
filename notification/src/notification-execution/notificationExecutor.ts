@@ -1,7 +1,13 @@
 import axios from 'axios'
 import * as firebase from 'firebase-admin'
 
-import { CONFIG_TYPE, NotificationConfig, WebhookConfig, SlackConfig, FirebaseConfig } from '../notification-config/notificationConfig'
+import {
+  CONFIG_TYPE,
+  NotificationConfig,
+  WebhookConfig,
+  SlackConfig,
+  FirebaseConfig
+} from '../notification-config/notificationConfig'
 
 import SlackCallback from './notificationCallbacks/slackCallback'
 import WebhookCallback from './notificationCallbacks/webhookCallback'
@@ -23,7 +29,13 @@ export default class NotificationExecutor {
     return VERSION
   }
 
-  async handleNotification (notification: NotificationConfig, type: CONFIG_TYPE, dataLocation: string, message: string, data?: object): Promise<void> {
+  async handleNotification (
+    notification: NotificationConfig,
+    type: CONFIG_TYPE,
+    dataLocation: string,
+    message: string,
+    data?: object
+  ): Promise<void> {
     console.log(`NotificationRequest received for pipeline: ${notification.pipelineId}.`)
 
     const conditionHolds = this.executor.evaluate(notification.condition, data)

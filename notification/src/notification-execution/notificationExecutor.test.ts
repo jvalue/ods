@@ -4,7 +4,6 @@ import axios from 'axios'
 import VM2SandboxExecutor from './condition-evaluation/vm2SandboxExecutor'
 import { WebhookConfig, CONFIG_TYPE, SlackConfig } from '../notification-config/notificationConfig'
 import NotificationExecutor from './notificationExecutor'
-import JSNotificationService from './notificationExecutor'
 import SlackCallback from '@/notification-execution/notificationCallbacks/slackCallback'
 
 jest.mock('axios')
@@ -18,7 +17,7 @@ describe('JSNotificationService', () => {
     let data: object
 
     beforeEach(() => {
-      notificationService = new JSNotificationService(new VM2SandboxExecutor())
+      notificationService = new NotificationExecutor(new VM2SandboxExecutor())
       console.log = jest.fn()
       /* =======================================================
        * An Event sent by the Transformation Service
@@ -43,7 +42,13 @@ describe('JSNotificationService', () => {
 
       const message = 'message'
       const dataLocation = 'location'
-      await notificationService.handleNotification(notificationConfig, CONFIG_TYPE.WEBHOOK, dataLocation, message, undefined)
+      await notificationService.handleNotification(
+        notificationConfig,
+        CONFIG_TYPE.WEBHOOK,
+        dataLocation,
+        message,
+        undefined
+      )
 
       expect(post).toHaveBeenCalledTimes(1)
       // check arguments for axios post
@@ -64,7 +69,13 @@ describe('JSNotificationService', () => {
 
       const message = 'message'
       const dataLocation = 'location'
-      await notificationService.handleNotification(notificationConfig, CONFIG_TYPE.WEBHOOK, dataLocation, message, undefined)
+      await notificationService.handleNotification(
+        notificationConfig,
+        CONFIG_TYPE.WEBHOOK,
+        dataLocation,
+        message,
+        undefined
+      )
 
       expect(post).toHaveBeenCalledTimes(1)
       // check arguments for axios post
@@ -105,10 +116,19 @@ describe('JSNotificationService', () => {
       try {
         const message = 'message'
         const dataLocation = 'location'
-        await notificationService.handleNotification(notificationConfig, CONFIG_TYPE.WEBHOOK, dataLocation, message, data)
-        fail()
+        await notificationService.handleNotification(
+          notificationConfig,
+          CONFIG_TYPE.WEBHOOK,
+          dataLocation,
+          message,
+          data
+        )
+        throw new Error('Fail test')
       } catch (err) {
-        expect(err.message).toEqual('Malformed expression received: asdfa;\n Error message: ReferenceError: asdfa is not defined')
+        expect(err.message).toEqual(
+          'Malformed expression received: asdfa;\n Error message: ' +
+          'ReferenceError: asdfa is not defined'
+        )
       }
 
       expect(post).not.toHaveBeenCalled()

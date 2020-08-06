@@ -1,5 +1,5 @@
 import { TransformationEvent } from './transformationEvent'
-import { NotificationMessageFactory } from './notificationMessageFactory'
+import * as NotificationMessageFactory from './notificationMessageFactory'
 import { NotificationRepository } from '../notification-config/notificationRepository'
 import NotificationExecutor from '../notification-execution/notificationExecutor'
 import { CONFIG_TYPE } from '../notification-config/notificationConfig'
@@ -24,7 +24,7 @@ export class TriggerEventHandler {
   public async handleEvent (transformationEvent: TransformationEvent): Promise<void> {
     const isValid = this.isValidTransformationEvent(transformationEvent)
     if (!isValid) {
-      return Promise.reject('Trigger event is not valid')
+      return Promise.reject(new Error('Trigger event is not valid'))
     }
 
     const dataLocation = `${NOTIFICATION_DATA_LOCATION_URL}/${transformationEvent.pipelineId}`
