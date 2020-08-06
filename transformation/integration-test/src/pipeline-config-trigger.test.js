@@ -1,5 +1,5 @@
 /* eslint-env jest */
-//@ts-check
+// @ts-check
 const request = require('supertest')
 const waitOn = require('wait-on')
 const amqp = require('amqplib')
@@ -11,6 +11,7 @@ const AMQP_EXCHANGE = process.env.AMQP_EXCHANGE
 const AMQP_IT_QUEUE = process.env.AMQP_IT_QUEUE
 const AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC = process.env.AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC
 const AMQP_PIPELINE_EXECUTION_ERROR_TOPIC = process.env.AMQP_PIPELINE_EXECUTION_ERROR_TOPIC
+const AMQP_IMPORT_SUCCESS_TOPIC = process.env.AMQP_IMPORT_SUCCESS_TOPIC
 
 let amqpConnection
 const publishedEvents = new Map() // routing key -> received msgs []
@@ -122,6 +123,48 @@ describe('Transformation Service', () => {
     expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].pipelineName).toEqual(pipelineConfig.metadata.displayName)
     expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].error).toBeDefined()
   }, 12000)
+
+  test('Event Driven Trigger', async () => {
+    const pipelineConfig = {
+      datasourceId: 12345,
+      transformation: {
+        func: 'return data.a + data.b;'
+      },
+      metadata: {
+        author: 'icke',
+        license: 'none',
+        displayName: 'test pipeline 1',
+        description: 'integraiton testing pipeline'
+      }
+    }
+    // create pipeline to persist
+    const creationResponse = await request(URL)
+      .post('/configs')
+      .send(pipelineConfig)
+    expect(creationResponse.status).toEqual(201)
+    const configId = creationResponse.body.id
+
+    const channel = await amqpConnection.createChannel()
+    channel.assertExchange(AMQP_EXCHANGE, 'topic')
+
+    const importSuccessEvent = {
+      datasourceId: 12345,
+      data: {
+        a: 1,
+        b: 2
+      }
+    }
+    channel.publish(AMQP_EXCHANGE, AMQP_IMPORT_SUCCESS_TOPIC, Buffer.from(importSuccessEvent))
+    console.log("Sent via AMQP: %s:'%s'", AMQP_IMPORT_SUCCESS_TOPIC, importSuccessEvent)
+
+    await sleep(10000) // pipeline should have been executing until now!
+    expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC)).toContainEqual(
+      {
+        pipelineId: configId,
+        pipelineName: pipelineConfig.metadata.displayName,
+        data: importSuccessEvent.data.a + importSuccessEvent.data.b
+      })
+  })
 })
 
 async function connectAmqp (url) {
