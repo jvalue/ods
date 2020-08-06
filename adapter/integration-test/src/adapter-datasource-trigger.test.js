@@ -156,7 +156,7 @@ describe('Adapter Sources Trigger', () => {
     const datasourceId = datasourceResponse.body.id
 
     const triggerResponse = await request(URL)
-      .post(`/datasource/${datasourceId}/trigger`)
+      .post(`/datasources/${datasourceId}/trigger`)
       .send()
 
     expect(triggerResponse.status).toBeGreaterThan(300) // request should fail (no 2xx status)
@@ -166,10 +166,10 @@ describe('Adapter Sources Trigger', () => {
       .send()
 
     expect(delResponse.status).toEqual(204)
+
     // check for rabbitmq notification
     expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)).toBeDefined()
     expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)).toHaveLength(1)
-    expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)[0]).toHaveLength(3)
     expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)[0].datasourceId).toEqual(datasourceId)
     expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)[0].error).toBeDefined()
   })
@@ -259,3 +259,4 @@ const runtimeParameters = {
     id: '2'
   }
 }
+
