@@ -4,7 +4,6 @@ import { TransformationEvent } from '../transformationEvent'
 import { TriggerEventHandler } from '../triggerEventHandler'
 
 export class NotificationExecutionEndpoint {
-
   triggerEventHandler: TriggerEventHandler
 
   constructor (triggerEventHandler: TriggerEventHandler, app: express.Application) {

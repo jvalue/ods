@@ -36,7 +36,7 @@ describe('VM2SandboxExecutor', () => {
         e.evaluate(expression, object)
         fail()
       } catch (err) {
-        expect(err.message).toEqual("Malformed expression received: 1 + 1\n Error message: Expected result to be a boolean expression!")
+        expect(err.message).toEqual('Malformed expression received: 1 + 1\n Error message: Expected result to be a boolean expression!')
       }
     })
 
