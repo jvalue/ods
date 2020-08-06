@@ -69,6 +69,12 @@ describe('Adapter Sources Trigger', () => {
     expect(dataMetaData.body.location).toEqual(`/data/${id}`)
     expect(data.status).toEqual(200)
     expect(data.body.id).toBe(runtimeParameters.parameters.id)
+
+    // check for rabbitmq notification
+    expect(publishedEvents.get(datasourceExecutionSuccessTopic)).toContainEqual({
+      datasourceId: datasourceId,
+      dataLocation: `/data/${id}`
+    })
   })
 
   test('POST datasources/{id}/trigger dynamic defaultvalues', async () => {
@@ -97,6 +103,12 @@ describe('Adapter Sources Trigger', () => {
     expect(dataMetaData.body.location).toEqual(`/data/${id}`)
     expect(data.status).toEqual(200)
     expect(data.body.id).toBe(dynamicDatasourceConfig.protocol.parameters.defaultParameters.id)
+
+    // check for rabbitmq notification
+    expect(publishedEvents.get(datasourceExecutionSuccessTopic)).toContainEqual({
+      datasourceId: datasourceId,
+      dataLocation: `/data/${id}`
+    })
   })
 
   test('POST datasources/{id}/trigger static', async () => {
@@ -124,6 +136,12 @@ describe('Adapter Sources Trigger', () => {
     expect(dataMetaData.body.location).toEqual(`/data/${id}`)
     expect(normalData.status).toEqual(200)
     expect(normalData.body.id).toBe('1')
+
+    // check for rabbitmq notification
+    expect(publishedEvents.get(datasourceExecutionSuccessTopic)).toContainEqual({
+      datasourceId: datasourceId,
+      dataLocation: `/data/${id}`
+    })
   })
 })
 
