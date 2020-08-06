@@ -12,7 +12,8 @@ const AMQP_IT_QUEUE = process.env.AMQP_IT_QUEUE
 const MOCK_SERVER_PORT = process.env.MOCK_SERVER_PORT || 8081
 const MOCK_SERVER_HOST = process.env.MOCK_SERVER_HOST || 'localhost'
 const MOCK_SERVER_URL = 'http://' + MOCK_SERVER_HOST + ':' + MOCK_SERVER_PORT
-const datasourceExecutionSuccessTopic = process.env.AMQP_IMPORT_SUCCESS_TOPIC
+const EXECUTION_SUCCESS_TOPIC = process.env.AMQP_IMPORT_SUCCESS_TOPIC
+const EXECUTION_FAILED_TOPIC = process.env.AMQP_IMPORT_FAILED_TOPIC
 
 let amqpConnection
 const publishedEvents = new Map() // routing key -> received msgs []
@@ -26,7 +27,8 @@ describe('Adapter Sources Trigger', () => {
     console.log(`Services available. Connecting to amqp at ${AMQP_URL} ...`)
     await connectAmqp(AMQP_URL)
 
-    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, datasourceExecutionSuccessTopic, AMQP_IT_QUEUE)
+    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, EXECUTION_SUCCESS_TOPIC, AMQP_IT_QUEUE)
+    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, EXECUTION_FAILED_TOPIC, AMQP_IT_QUEUE)
     console.log('Amqp connection established')
   }, 60000)
 
@@ -71,7 +73,7 @@ describe('Adapter Sources Trigger', () => {
     expect(data.body.id).toBe(runtimeParameters.parameters.id)
 
     // check for rabbitmq notification
-    expect(publishedEvents.get(datasourceExecutionSuccessTopic)).toContainEqual({
+    expect(publishedEvents.get(EXECUTION_SUCCESS_TOPIC)).toContainEqual({
       datasourceId: datasourceId,
       dataLocation: `/data/${id}`
     })
@@ -105,7 +107,7 @@ describe('Adapter Sources Trigger', () => {
     expect(data.body.id).toBe(dynamicDatasourceConfig.protocol.parameters.defaultParameters.id)
 
     // check for rabbitmq notification
-    expect(publishedEvents.get(datasourceExecutionSuccessTopic)).toContainEqual({
+    expect(publishedEvents.get(EXECUTION_SUCCESS_TOPIC)).toContainEqual({
       datasourceId: datasourceId,
       dataLocation: `/data/${id}`
     })
@@ -138,10 +140,33 @@ describe('Adapter Sources Trigger', () => {
     expect(normalData.body.id).toBe('1')
 
     // check for rabbitmq notification
-    expect(publishedEvents.get(datasourceExecutionSuccessTopic)).toContainEqual({
+    expect(publishedEvents.get(EXECUTION_SUCCESS_TOPIC)).toContainEqual({
       datasourceId: datasourceId,
       dataLocation: `/data/${id}`
     })
+  })
+
+  test('POST datasource/{id}/trigger FAIL', async () => {
+    const brokenDatasourceConfig = Object.assign({}, staticDatasourceConfig)
+    brokenDatasourceConfig.protocol.parameters.location = 'LOL'
+    const datasourceResponse = await request(URL)
+      .post('/datasources')
+      .send(brokenDatasourceConfig)
+
+    const datasourceId = datasourceResponse.body.id
+
+    const triggerResponse = await request(URL)
+      .post(`datasource/${datasourceId}/trigger`)
+      .send()
+
+    expect(triggerResponse.status).toBeGreaterThan(300) // request should fail (no 2xx status)
+
+    // check for rabbitmq notification
+    expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)).toBeDefined()
+    expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)).toHaveLength(1)
+    expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)[0]).toHaveLength(3)
+    expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)[0].datasourceId).toEqual(datasourceId)
+    expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)[0].error).toBeDefined()
   })
 })
 
