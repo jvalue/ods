@@ -8,18 +8,13 @@ const MOCK_SERVER_URL = 'http://' + MOCK_SERVER_HOST + ':' + MOCK_SERVER_PORT
 const RABBIT_URL = `http://${process.env.RABBIT_HOST}:15672`
 
 describe('Adapter Configuration', () => {
-  console.log('Adapter-Service URL= ' + URL)
-
   beforeAll(async () => {
     try {
+      console.log('Starting adapter configuration test')
       const pingUrl = URL + '/version'
-      console.log('Waiting for service with URL: ' + pingUrl)
-      console.log('Waiting for service with URL: ' + MOCK_SERVER_URL)
-      console.log('Waiting for service with URL: ' + RABBIT_URL)
+      console.log(`Waiting for services: ${pingUrl}, ${MOCK_SERVER_URL}, ${RABBIT_URL}`)
       await waitOn({ resources: [pingUrl, MOCK_SERVER_URL, RABBIT_URL], timeout: 50000 })
-      console.log('[online] Service with URL:  ' + pingUrl)
-      console.log('[online] Service with URL:  ' + MOCK_SERVER_URL)
-      console.log('[online] Service with URL:  ' + RABBIT_URL)
+      console.log('Wait-on complete')
     } catch (err) {
       process.exit(1)
     }

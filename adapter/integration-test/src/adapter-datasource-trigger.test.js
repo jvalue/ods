@@ -17,16 +17,17 @@ const datasourceExecutionSuccessTopic = process.env.AMQP_DATASOURCE_EXECUTION_SU
 let amqpConnection
 const publishedEvents = new Map() // routing key -> received msgs []
 
-describe('Adapter Service', () => {
-  console.log('Adapter-Service URL= ' + URL)
-
+describe('Adapter Sources Trigger', () => {
   beforeAll(async () => {
+    console.log('Starting adapter sources trigger test')
     const pingUrl = URL + '/'
-    console.log('Waiting for adapter`-service with URL: ' + pingUrl)
-    await waitOn({ resources: [pingUrl], timeout: 50000 })
+    console.log(`Waiting for services: ${MOCK_SERVER_URL} and ${pingUrl}`)
+    await waitOn({ resources: [MOCK_SERVER_URL, pingUrl], timeout: 50000 })
+    console.log('Services available. Connecting to amqp...')
     await connectAmqp(AMQP_URL)
 
     await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, datasourceExecutionSuccessTopic, AMQP_IT_QUEUE)
+    console.log('Amqp connection established')
   }, 60000)
 
   afterAll(async () => {

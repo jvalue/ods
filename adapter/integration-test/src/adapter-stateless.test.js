@@ -8,23 +8,13 @@ const MOCK_SERVER_URL = 'http://' + MOCK_SERVER_HOST + ':' + MOCK_SERVER_PORT
 const RABBIT_URL = `http://${process.env.RABBIT_HOST}:15672`
 
 describe('Adapter Stateless', () => {
-  console.log('Adapter-Service URL= ' + URL)
-
   beforeAll(async () => {
     try {
-      console.log('Waiting for service with URL: ' + MOCK_SERVER_URL)
-      await waitOn({ resources: [MOCK_SERVER_URL, RABBIT_URL], timeout: 50000 })
-      console.log('[online] Service with URL:  ' + MOCK_SERVER_URL)
-      console.log('[online] Service with URL:  ' + RABBIT_URL)
-    } catch (err) {
-      process.exit(1)
-    }
-
-    try {
       const pingUrl = URL + '/version'
-      console.log('Waiting for service with URL: ' + pingUrl)
-      await waitOn({ resources: [pingUrl], timeout: 50000 })
-      console.log('[online] Service with URL:  ' + pingUrl)
+      console.log('Starting adapter stateless test')
+      console.log(`Waiting for services: ${pingUrl} ${MOCK_SERVER_URL}, ${RABBIT_URL}`)
+      await waitOn({ resources: [MOCK_SERVER_URL, RABBIT_URL, pingUrl], timeout: 50000 })
+      console.log('Wait on complete')
     } catch (err) {
       process.exit(1)
     }
