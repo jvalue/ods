@@ -5,10 +5,10 @@ const waitOn = require('wait-on')
 
 const URL = process.env.TRANSFORMATION_API || 'http://localhost:8080'
 
-describe('Transformation Service', () => {
-  console.log('Transformation-Service URL= ' + URL)
+describe('Transformation Service Execution', () => {
 
   beforeAll(async () => {
+    console.log('Starting pipeline execution tests..')
     const pingUrl = URL + '/'
     console.log('Waiting for transformation-service with URL: ' + pingUrl)
     await waitOn({ resources: [pingUrl], timeout: 50000 })

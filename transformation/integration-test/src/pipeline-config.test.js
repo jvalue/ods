@@ -17,9 +17,9 @@ let amqpConnection
 const publishedEvents = new Map() // routing key -> received msgs []
 
 describe('Pipeline Config Test', () => {
-  console.log('Transformation-Service URL= ' + URL)
 
   beforeAll(async () => {
+    console.log('Starting pipeline config tests..')
     const pingUrl = URL + '/version'
     console.log('Waiting for service with URL: ' + pingUrl)
     await waitOn({ resources: [pingUrl], timeout: 50000 })
