@@ -3,6 +3,7 @@ import { Connection, ConnectionOptions, createConnection, Repository } from 'typ
 import { NotificationRepository } from './notificationRepository'
 import { NotificationSummary } from './notificationSummary'
 import { SlackConfig, WebhookConfig, FirebaseConfig } from './notificationConfig'
+import { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB } from '../env'
 
 /**
  * This class handles Requests to the notification database
@@ -17,11 +18,11 @@ export class StorageHandler implements NotificationRepository {
 
   private connectionOptions: ConnectionOptions = {
     type: 'postgres',
-    host: process.env.PGHOST,
-    port: +process.env.PGPORT!,
-    username: process.env.PGUSER,
-    password: process.env.PGPASSWORD,
-    database: process.env.PGUSER,
+    host: POSTGRES_HOST,
+    port: POSTGRES_PORT,
+    username: POSTGRES_USER,
+    password: POSTGRES_PW,
+    database: POSTGRES_DB,
     synchronize: true,
     // logging: true,
     entities: [
