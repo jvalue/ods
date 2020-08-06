@@ -51,7 +51,7 @@ const server = app.listen(port, async () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const pipelineConfigEndpoint = new PipelineConfigEndpoint(pipelineConfigManager, app)
 
-  await pipelineConfigConsumer.connect(30, 2000)
+  await pipelineConfigConsumer.connect(CONNECTION_RETRIES, CONNECTION_BACKOFF)
 
   app.get('/', (req: express.Request, res: express.Response): void => {
     res.status(200)
