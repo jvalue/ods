@@ -22,6 +22,8 @@ const sourceData = {
 }
 
 const TIMEOUT = 60000
+
+// This startup delay ensures that the scheduler will be reachable
 const STARTUP_DELAY = 2000
 
 describe('System-Test', () => {
@@ -91,7 +93,7 @@ describe('System-Test', () => {
     console.log(`[Test 1] Successfully created notification ${notificationId} for pipeline ${pipelineId}`)
 
     // Wait for webhook notification
-    const webhookResponse = await checkWebhook('test1', 2000)
+    const webhookResponse = await checkWebhook('test1', STARTUP_DELAY)
     console.log(`[Test 1] Webhook response body: ${JSON.stringify(webhookResponse.body)}`)
     expect(webhookResponse.body.location).toEqual(expectedStorageLocationUrl + '/' + pipelineId)
     expect(webhookResponse.body.timestamp).toBeDefined()
@@ -109,8 +111,8 @@ describe('System-Test', () => {
     expect(deletionResponse.status).toEqual(204)
     deletionResponse = await request(ADAPTER_URL).delete(`/datasources/${datasourceId}`).send()
     expect(deletionResponse.status).toEqual(204)
-    sleep(2000) // takes up to 2sec to reach scheduler
-  }, 60000)
+    sleep(STARTUP_DELAY)
+  }, TIMEOUT)
 
   test('Test 2: Create periodic pipeline without transformation', async () => {
     // Prepare datasource mock
@@ -148,13 +150,13 @@ describe('System-Test', () => {
     console.log(`[Test 2] Successfully created notification ${notificationId} for pipeline ${pipelineId}`)
 
     // Wait for webhook notification
-    const webhookResponse = await checkWebhook('test2', 2000)
+    const webhookResponse = await checkWebhook('test2', STARTUP_DELAY)
     console.log(`[Test 2] Webhook response body ${JSON.stringify(webhookResponse.body)}`)
     expect(webhookResponse.body.location).toEqual(expectedStorageLocationUrl + '/' + pipelineId)
     expect(webhookResponse.body.timestamp).toBeDefined()
 
     // Wait for second notification
-    const changedWebhook = await waitForWebhookChange('test2', webhookResponse.body, 2000)
+    const changedWebhook = await waitForWebhookChange('test2', webhookResponse.body, STARTUP_DELAY)
     console.log(`[Test 2] Changed webhook response body ${JSON.stringify(changedWebhook.body)}`)
     expect(webhookResponse.body.location).toEqual(expectedStorageLocationUrl + '/' + pipelineId)
     expect(webhookResponse.body.timestamp).toBeDefined()
@@ -175,8 +177,8 @@ describe('System-Test', () => {
     expect(deletionResponse.status).toEqual(204)
     deletionResponse = await request(ADAPTER_URL).delete(`/datasources/${datasourceId}`).send()
     expect(deletionResponse.status).toEqual(204)
-    sleep(2000) // takes up to 2sec to reach scheduler
-  }, 60000)
+    sleep(STARTUP_DELAY)
+  }, TIMEOUT)
 
   test('Test 3: Create non-periodic pipeline with transformation', async () => {
     // Prepare datasource mock
@@ -219,7 +221,7 @@ describe('System-Test', () => {
     console.log(`[Test 3] Successfully created notification ${notificationId} for pipeline ${pipelineId}`)
 
     // Wait for webhook notification
-    const webhookResponse = await checkWebhook('test3', 2000)
+    const webhookResponse = await checkWebhook('test3', STARTUP_DELAY)
     console.log(`[Test 3] Webhook response body: ${JSON.stringify(webhookResponse.body)}`)
     expect(webhookResponse.body.location).toEqual(expectedStorageLocationUrl + '/' + pipelineId)
     expect(webhookResponse.body.timestamp).toBeDefined()
@@ -236,8 +238,8 @@ describe('System-Test', () => {
     expect(deletionResponse.status).toEqual(204)
     deletionResponse = await request(ADAPTER_URL).delete(`/datasources/${datasourceId}`).send()
     expect(deletionResponse.status).toEqual(204)
-    sleep(2000) // takes up to 2sec to reach scheduler
-  }, 60000)
+    sleep(STARTUP_DELAY)
+  }, TIMEOUT)
 
   test('Test 4: Update periodic datasource with pipeline', async () => {
     // Prepare datasource mock
@@ -279,7 +281,7 @@ describe('System-Test', () => {
     console.log(`[Test 4] Successfully created notification ${notificationId} for pipeline ${pipelineId}`)
 
     // Wait for webhook notification
-    const webhookResponse = await checkWebhook('test4_1', 2000)
+    const webhookResponse = await checkWebhook('test4_1', STARTUP_DELAY)
     console.log(`[Test 4] Webhook response body ${JSON.stringify(webhookResponse.body)}`)
     expect(webhookResponse.body.location).toEqual(expectedStorageLocationUrl + '/' + pipelineId)
     expect(webhookResponse.body.timestamp).toBeDefined()
@@ -298,7 +300,7 @@ describe('System-Test', () => {
     // Update datasource
     let updateResponse = await request(ADAPTER_URL).put(`/datasources/${datasourceId}`).send(datasource)
     expect(updateResponse.status).toEqual(204)
-    console.log(`[Test 4] Successfully updatedd datasource ${datasourceId}.`)
+    console.log(`[Test 4] Successfully updated datasource ${datasourceId}.`)
 
     // Create updated pipeline
     pipelineConfig.id = pipelineId
@@ -307,7 +309,7 @@ describe('System-Test', () => {
     // Update pipeline
     updateResponse = await request(TRANSFORMATION_URL).put(`/configs/${pipelineId}`).send(pipelineConfig)
     expect(updateResponse.status).toEqual(204)
-    console.log(`[Test 4] Successfully updatedd pipeline ${pipelineId}.`)
+    console.log(`[Test 4] Successfully updated pipeline ${pipelineId}.`)
 
     // Add another notification
     const anotherNotification = generateWebhookNotification(
@@ -325,7 +327,7 @@ describe('System-Test', () => {
     console.log(`[Test 4] Successfully created notification ${anotherNotificationId} for pipeline ${pipelineId}`)
 
     // Wait for webhook notification
-    const secondWebhook = await checkWebhook('test4_2', 2000)
+    const secondWebhook = await checkWebhook('test4_2', STARTUP_DELAY)
     expect(secondWebhook.body.location).toEqual(expectedStorageLocationUrl + '/' + pipelineId)
     expect(secondWebhook.body.timestamp).toBeDefined()
 
@@ -345,8 +347,8 @@ describe('System-Test', () => {
     expect(deletionResponse.status).toEqual(204)
     deletionResponse = await request(ADAPTER_URL).delete(`/datasources/${datasourceId}`).send()
     expect(deletionResponse.status).toEqual(204)
-    sleep(2000) // takes up to 2sec to reach scheduler
-  }, 60000)
+    sleep(STARTUP_DELAY)
+  }, TIMEOUT)
 
   test('Test 5: Create pipeline with multiple notifications', async () => {
     // Prepare datasource mock
@@ -407,7 +409,7 @@ describe('System-Test', () => {
     console.log(`[Test 5] Successfully created notification ${notificationId} for pipeline ${pipelineId}`)
 
     // Wait for webhook notification
-    const webhookResponse1 = await checkWebhook('test5_1', 2000)
+    const webhookResponse1 = await checkWebhook('test5_1', STARTUP_DELAY)
     expect(webhookResponse1.body.location).toEqual(expectedStorageLocationUrl + '/' + pipelineId)
     expect(webhookResponse1.body.timestamp).toBeDefined()
 
@@ -434,8 +436,8 @@ describe('System-Test', () => {
     expect(deletionResponse.status).toEqual(204)
     deletionResponse = await request(ADAPTER_URL).delete(`/datasources/${datasourceId}`).send()
     expect(deletionResponse.status).toEqual(204)
-    sleep(2000) // takes up to 2sec to reach scheduler
-  }, 60000)
+    sleep(STARTUP_DELAY)
+  }, TIMEOUT)
 
   test('Test 6: Delete periodic pipeline', async () => {
     // Prepare dataource mock
@@ -473,7 +475,7 @@ describe('System-Test', () => {
     console.log(`[Test 6] Successfully created notification ${notificationId} for pipeline ${pipelineId}`)
 
     // Wait for webhook notification
-    const webhookResponse1 = await checkWebhook('test6', 2000)
+    const webhookResponse1 = await checkWebhook('test6', STARTUP_DELAY)
     expect(webhookResponse1.body.location).toEqual(expectedStorageLocationUrl + '/' + pipelineId)
     expect(webhookResponse1.body.timestamp).toBeDefined()
 
@@ -481,7 +483,7 @@ describe('System-Test', () => {
     let deletionResponse = await request(TRANSFORMATION_URL).delete(`/configs/${pipelineId}`)
     expect(deletionResponse.status).toEqual(204)
     console.log(`[Test 6] Pipeline ${pipelineId} deleted`)
-    sleep(2000) // takes up to 2sec to reach scheduler
+    sleep(STARTUP_DELAY)
 
     const unchanged = await webhookRemainsUnchanged('test6', 5000)
     expect(unchanged).toEqual(true)
@@ -491,8 +493,8 @@ describe('System-Test', () => {
     expect(deletionResponse.status).toEqual(204)
     deletionResponse = await request(ADAPTER_URL).delete(`/datasources/${datasourceId}`).send()
     expect(deletionResponse.status).toEqual(204)
-    sleep(2000) // takes up to 2sec to reach scheduler
-  }, 60000)
+    sleep(STARTUP_DELAY)
+  }, TIMEOUT)
 })
 
 function generateWebhookNotification (pipelineId, condition, url) {
