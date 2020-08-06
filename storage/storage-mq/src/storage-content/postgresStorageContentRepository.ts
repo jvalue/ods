@@ -170,10 +170,10 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
         try {
             client = await this.connectionPool.connect()
             const { rows } = await client.query(insertStatement, values)
-            console.debug("Content sucessfully persisted.")
+            console.debug("Content successfully persisted.")
             return Promise.resolve(rows[0]["id"] as number)
         } catch (err) {
-            const errMsg = `Could save content data: ${err}`
+            const errMsg = `Could not save content data: ${err}`
             console.error(errMsg)
             return Promise.reject(err)
         } finally {
