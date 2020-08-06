@@ -11,6 +11,7 @@ import { NotificationExecutionEndpoint } from './api/rest/notificationExecutionE
 import { StorageHandler } from './notification-config/storageHandler'
 import { AmqpHandler } from './api/amqp/amqpHandler'
 import { TriggerEventHandler } from './api/triggerEventHandler'
+import { CONNECTION_RETRIES, CONNECTION_BACKOFF } from './env'
 
 const port = 8080
 
@@ -32,12 +33,14 @@ app.use(cors())
 app.use(bodyParser.json({ limit: '50mb' }))
 app.use(bodyParser.urlencoded({ extended: false }))
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const notificationConfigEndpoint = new NotificationConfigEndpoint(storageHandler, app)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const notificationExecutionEndpoint = new NotificationExecutionEndpoint(triggerEventHandler, app)
 
 app.listen(port, async () => {
-  await amqpHandler.connect(30, 2000)
-  await storageHandler.init(30, 2000)
+  await amqpHandler.connect(CONNECTION_RETRIES, CONNECTION_BACKOFF)
+  await storageHandler.init(CONNECTION_RETRIES, CONNECTION_RETRIES)
 
   console.log('listening on port ' + port)
 
