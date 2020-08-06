@@ -12,7 +12,7 @@ const AMQP_IT_QUEUE = process.env.AMQP_IT_QUEUE
 const MOCK_SERVER_PORT = process.env.MOCK_SERVER_PORT || 8081
 const MOCK_SERVER_HOST = process.env.MOCK_SERVER_HOST || 'localhost'
 const MOCK_SERVER_URL = 'http://' + MOCK_SERVER_HOST + ':' + MOCK_SERVER_PORT
-const datasourceExecutionSuccessTopic = process.env.AMQP_DATASOURCE_EXECUTION_SUCCESS_TOPIC
+const datasourceExecutionSuccessTopic = process.env.AMQP_IMPORT_SUCCESS_TOPIC
 
 let amqpConnection
 const publishedEvents = new Map() // routing key -> received msgs []
@@ -23,7 +23,7 @@ describe('Adapter Sources Trigger', () => {
     const pingUrl = URL + '/version'
     console.log(`Waiting for services: ${MOCK_SERVER_URL} and ${pingUrl}`)
     await waitOn({ resources: [MOCK_SERVER_URL, pingUrl], timeout: 50000 })
-    console.log('Services available. Connecting to amqp...')
+    console.log(`Services available. Connecting to amqp at ${AMQP_URL} ...`)
     await connectAmqp(AMQP_URL)
 
     await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, datasourceExecutionSuccessTopic, AMQP_IT_QUEUE)
