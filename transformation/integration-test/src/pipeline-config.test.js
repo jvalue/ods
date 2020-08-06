@@ -1,5 +1,5 @@
 /* eslint-env jest */
-//@ts-check
+// @ts-check
 const request = require('supertest')
 const waitOn = require('wait-on')
 const amqp = require('amqplib')

@@ -81,6 +81,7 @@ services:
       AMQP_PIPELINE_CONFIG_CREATED_TOPIC: 'pipeline.config.created'
       AMQP_PIPELINE_CONFIG_UPDATED_TOPIC: 'pipeline.config.updated'
       AMQP_PIPELINE_CONFIG_DELETED_TOPIC: 'pipeline.config.deleted'
+      AMQP_IMPORT_SUCCESS_TOPIC: 'datasource.execution.success'
 
    # ----------------- NOTIFICATION SERVICE (PORTS #TODO) --------------------
   notification:
