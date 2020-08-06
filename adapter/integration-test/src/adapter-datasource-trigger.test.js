@@ -156,11 +156,16 @@ describe('Adapter Sources Trigger', () => {
     const datasourceId = datasourceResponse.body.id
 
     const triggerResponse = await request(URL)
-      .post(`datasource/${datasourceId}/trigger`)
+      .post(`/datasource/${datasourceId}/trigger`)
       .send()
 
     expect(triggerResponse.status).toBeGreaterThan(300) // request should fail (no 2xx status)
 
+    const delResponse = await request(URL)
+      .delete('/datasources/')
+      .send()
+
+    expect(delResponse.status).toEqual(204)
     // check for rabbitmq notification
     expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)).toBeDefined()
     expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)).toHaveLength(1)
