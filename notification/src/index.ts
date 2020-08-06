@@ -15,12 +15,6 @@ import { CONNECTION_RETRIES, CONNECTION_BACKOFF } from './env'
 
 const port = 8080
 
-// authEnabled defaults to false
-const authEnabled: boolean = process.env.AUTH_ENABLED === 'true'
-if (!authEnabled) {
-  console.warn('WARNING: Authentication is disabled! Make sure this option turned off in production!\n')
-}
-
 const sandboxExecutor = new VM2SandboxExecutor()
 const notificationExecutor = new NotificationExecutor(sandboxExecutor)
 const storageHandler = new StorageHandler()
