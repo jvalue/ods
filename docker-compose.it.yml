@@ -19,6 +19,7 @@ services:
       RABBIT_HOST: rabbitmq
       AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
       AMQP_EXCHANGE: 'ods_global'
+      AMQP_IMPORT_TOPIC: 'datasource.execution.*'
       AMQP_IMPORT_SUCCESS_TOPIC: 'datasource.execution.success'
       AMQP_IMPORT_FAILED_TOPIC: 'datasource.execution.failed'
 
