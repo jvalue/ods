@@ -13,6 +13,7 @@ const AMQP_IT_QUEUE = process.env.AMQP_IT_QUEUE
 const MOCK_SERVER_PORT = process.env.MOCK_SERVER_PORT || 8081
 const MOCK_SERVER_HOST = process.env.MOCK_SERVER_HOST || 'localhost'
 const MOCK_SERVER_URL = 'http://' + MOCK_SERVER_HOST + ':' + MOCK_SERVER_PORT
+const EXECUTION_TOPIC = process.env.AMQP_IMPORT_TOPIC
 const EXECUTION_SUCCESS_TOPIC = process.env.AMQP_IMPORT_SUCCESS_TOPIC
 const EXECUTION_FAILED_TOPIC = process.env.AMQP_IMPORT_FAILED_TOPIC
 
@@ -27,8 +28,7 @@ describe('Adapter Sources Trigger', () => {
     console.log(`Services available. Connecting to amqp at ${AMQP_URL} ...`)
     await connectAmqp(AMQP_URL)
 
-    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, EXECUTION_SUCCESS_TOPIC, AMQP_IT_QUEUE)
-    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, EXECUTION_FAILED_TOPIC, AMQP_IT_QUEUE)
+    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, EXECUTION_TOPIC, AMQP_IT_QUEUE)
     console.log('Amqp connection established')
   }, 60000)
 
@@ -182,6 +182,7 @@ async function connectAmqp (url) {
 
 async function receiveAmqp (url, exchange, topic, queue) {
   const channel = await amqpConnection.createChannel()
+  await channel.assertExchange(exchange, 'topic')
   const q = await channel.assertQueue(queue)
   await channel.bindQueue(q.queue, exchange, topic)
 
