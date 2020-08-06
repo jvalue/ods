@@ -22,6 +22,7 @@ services:
       AMQP_IMPORT_TOPIC: 'datasource.execution.*'
       AMQP_IMPORT_SUCCESS_TOPIC: 'datasource.execution.success'
       AMQP_IMPORT_FAILED_TOPIC: 'datasource.execution.failed'
+      AMQP_IT_QUEUE: adapter-it
 
     depends_on:
       - rabbitmq
