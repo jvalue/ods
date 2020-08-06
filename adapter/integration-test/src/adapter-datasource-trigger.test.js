@@ -4,7 +4,7 @@ const request = require('supertest')
 const waitOn = require('wait-on')
 const amqp = require('amqplib')
 
-const URL = process.env.ADAPTER_API || 'http://localhost:8080'
+const URL = process.env.ADAPTER_API || 'http://localhost:9000/api/adapter'
 
 const AMQP_URL = process.env.AMQP_URL
 const AMQP_EXCHANGE = process.env.AMQP_EXCHANGE
@@ -20,7 +20,7 @@ const publishedEvents = new Map() // routing key -> received msgs []
 describe('Adapter Sources Trigger', () => {
   beforeAll(async () => {
     console.log('Starting adapter sources trigger test')
-    const pingUrl = URL + '/'
+    const pingUrl = URL + '/version'
     console.log(`Waiting for services: ${MOCK_SERVER_URL} and ${pingUrl}`)
     await waitOn({ resources: [MOCK_SERVER_URL, pingUrl], timeout: 50000 })
     console.log('Services available. Connecting to amqp...')
