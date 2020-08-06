@@ -70,13 +70,14 @@ export class PipelineConfigConsumer {
   consumeEvent = async (msg: AMQP.ConsumeMessage | null): Promise<void> => {
     if (!msg) {
       console.debug('Received empty event when listening on transformation executions - doing nothing')
-    }
-    console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
-    if (msg.fields.routingKey === datasourceExecutionSuccessTopic) {
-      const triggerRequest: pipelineConfigTriggerRequest = JSON.parse(msg.content.toString())
-      await this.pipelineManager.triggerConfig(triggerRequest.datasourceId, triggerRequest.data)
     } else {
-      console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
+      console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
+      if (msg.fields.routingKey === datasourceExecutionSuccessTopic) {
+        const triggerRequest: pipelineConfigTriggerRequest = JSON.parse(msg.content.toString())
+        await this.pipelineManager.triggerConfig(triggerRequest.datasourceId, triggerRequest.data)
+      } else {
+        console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
+      }
     }
   }
 }
