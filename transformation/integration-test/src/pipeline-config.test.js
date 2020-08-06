@@ -21,8 +21,7 @@ describe('Pipeline Config Test', () => {
   beforeAll(async () => {
     console.log('Starting pipeline config tests..')
     const pingUrl = URL + '/version'
-    console.log('Waiting for service with URL: ' + pingUrl)
-    await waitOn({ resources: [pingUrl], timeout: 50000 })
+    await waitOn({ resources: [pingUrl], timeout: 50000, log: true })
     console.log('[online] Service with URL:  ' + pingUrl)
 
     await connectAmqp(AMQP_URL)

@@ -12,9 +12,7 @@ describe('Adapter Configuration', () => {
     try {
       console.log('Starting adapter configuration test')
       const pingUrl = URL + '/version'
-      console.log(`Waiting for services: ${pingUrl}, ${MOCK_SERVER_URL}, ${RABBIT_URL}`)
-      await waitOn({ resources: [pingUrl, MOCK_SERVER_URL, RABBIT_URL], timeout: 50000 })
-      console.log('Wait-on complete')
+      await waitOn({ resources: [pingUrl, MOCK_SERVER_URL, RABBIT_URL], timeout: 50000, log: true })
     } catch (err) {
       process.exit(1)
     }
