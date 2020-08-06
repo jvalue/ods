@@ -1,5 +1,6 @@
 package org.jvalue.ods.adapterservice.config;
 
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -21,7 +22,13 @@ public class RabbitConfiguration {
 
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
-        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory) {
+            @Override
+            public void convertAndSend(String exchange, String routingKey, Object object) throws AmqpException {
+                super.convertAndSend(exchange, routingKey, object);
+                System.out.println("Published event " + object.toString() + " on exchange " + exchange + " under topic: " + routingKey);
+            }
+        };
         rabbitTemplate.setMessageConverter(jackson2JsonConverter());
         return rabbitTemplate;
     }
@@ -30,4 +37,5 @@ public class RabbitConfiguration {
     public Jackson2JsonMessageConverter jackson2JsonConverter() {
         return new Jackson2JsonMessageConverter();
     }
+
 }
