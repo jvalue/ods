@@ -7,7 +7,8 @@
     "pretest": "npm run mock:receiver &",
     "test": "jest",
     "posttest": "killall node",
-    "lint": "./node_modules/.bin/eslint src --ext .js --fix"
+    "lint": "./node_modules/.bin/eslint src --ext .js --fix",
+    "lint-ci": "./node_modules/.bin/eslint src --ext .js --max-warnings=0"
   },
   "devDependencies": {
     "eslint": "^6.0.0",
