@@ -149,35 +149,6 @@ async function receiveAmqp (url, exchange, topic, queue) {
   })
 }
 
-function sleep (ms) {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
-
-const datasourceConfig = {
-  id: 12345,
-  protocol: {
-    type: 'HTTP',
-    parameters: {
-      location: 'http://www.nodisrespect.org'
-    }
-  },
-  format: {
-    type: 'XML',
-    parameters: {}
-  },
-  trigger: {
-    firstExecution: '1905-12-01T02:30:00.123Z',
-    periodic: true,
-    interval: 50000
-  },
-  metadata: {
-    author: 'icke',
-    license: 'none',
-    displayName: 'test datasource 1',
-    description: 'integraiton testing datasources'
-  }
-}
-
 const dynamicDatasourceConfig = {
   id: 54321,
   protocol: {
