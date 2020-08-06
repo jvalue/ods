@@ -6,6 +6,7 @@ const amqp = require('amqplib')
 
 const URL = process.env.ADAPTER_API || 'http://localhost:9000/api/adapter'
 
+const RABBIT_HEALTH = `http://${process.env.RABBIT_HOST}:15672`
 const AMQP_URL = process.env.AMQP_URL
 const AMQP_EXCHANGE = process.env.AMQP_EXCHANGE
 const AMQP_IT_QUEUE = process.env.AMQP_IT_QUEUE
@@ -22,7 +23,7 @@ describe('Adapter Sources Trigger', () => {
   beforeAll(async () => {
     console.log('Starting adapter sources trigger test')
     const pingUrl = URL + '/version'
-    await waitOn({ resources: [MOCK_SERVER_URL, pingUrl], timeout: 50000, log: true })
+    await waitOn({ resources: [MOCK_SERVER_URL, pingUrl, RABBIT_HEALTH], timeout: 50000, log: true })
     console.log(`Services available. Connecting to amqp at ${AMQP_URL} ...`)
     await connectAmqp(AMQP_URL)
 
