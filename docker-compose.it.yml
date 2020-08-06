@@ -76,6 +76,7 @@ services:
       AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
       AMQP_EXCHANGE: 'ods_global'
       AMQP_IT_QUEUE: 'transformation_it'
+      AMQP_PIPELINE_EXECUTION_TOPIC: 'pipeline.execution.*'
       AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: 'pipeline.execution.success'
       AMQP_PIPELINE_EXECUTION_ERROR_TOPIC: 'pipeline.execution.error'
       AMQP_PIPELINE_CONFIG_CREATED_TOPIC: 'pipeline.config.created'
