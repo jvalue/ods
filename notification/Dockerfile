@@ -5,10 +5,12 @@ WORKDIR /build
 COPY ./src ./src
 COPY ./package*.json ./
 COPY ./tsconfig.json ./
+COPY ./.eslint* ./
 COPY ./jest.config.js ./
 
 # Install dependencies and run build
 RUN npm ci
+RUN npm run lint-ci
 RUN npm run transpile
 RUN npm run test
 
