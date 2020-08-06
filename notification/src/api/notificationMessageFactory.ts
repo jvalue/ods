@@ -1,4 +1,4 @@
-import { TransformationEvent } from "./transformationEvent"
+import { TransformationEvent } from './transformationEvent'
 
 export namespace NotificationMessageFactory {
 
