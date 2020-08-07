@@ -5,7 +5,8 @@ import storageRoutes from '@/storage/router'
 import datasourceRoutes from '@/datasource/router'
 import pipelineRoutes from '@/pipeline/router'
 import notificationRoutes from '@/notification/router'
-import { isAuthenticated, keycloakLogin } from './keycloak'
+import { isAuthenticated, login } from './authentication'
+import {log} from 'util';
 
 Vue.use(Router)
 
@@ -39,11 +40,9 @@ const router = new Router({
   routes
 })
 
-const AUTH_DISABLED: boolean = process.env.VUE_APP_AUTH_DISABLED === 'true'
-
 router.beforeEach((to, from, next) => {
-  if (!AUTH_DISABLED && to.meta.requiresAuth && !isAuthenticated()) {
-    keycloakLogin()
+  if (to.meta.requiresAuth && !isAuthenticated()) {
+    login()
   }
   next()
 })
