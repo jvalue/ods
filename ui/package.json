@@ -10,7 +10,6 @@
     "dependencies": {
         "axios": "^0.19.2",
         "clipboard-copy": "^3.1.0",
-        "keycloak-js": "8.0.1",
         "vue": "^2.6.11",
         "vue-class-component": "^7.2.3",
         "vue-monaco": "^1.2.1",
