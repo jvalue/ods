@@ -57,10 +57,6 @@ services:
       AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
 
   # ----------------- TRANSFORMATION SERVICE (PORTS 9500 - 9599) --------------------
-  transformation:
-    environment:
-      AUTH_ENABLED: 'false'
-
   transformation-it:
     image: open-data-service/ods-main/transformation-it
     build:
@@ -80,7 +76,6 @@ services:
    # ----------------- NOTIFICATION SERVICE (PORTS #TODO) --------------------
   notification:
     environment:
-      AUTH_ENABLED: 'false'
       MOCK_RECEIVER_HOST: notification-it
       MOCK_RECEIVER_PORT: 8081
 
