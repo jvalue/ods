@@ -22,8 +22,6 @@ spec:
       - name: ods-registry-secret
       containers:
       - env:
-        - name: AUTH_ENABLED
-          value: "false"
         image: registry.gitlab.com/profoss/open-data-service/ods-main/transformation:{{IMAGE_TAG}}
         imagePullPolicy: Always
         name: transformation-service
