@@ -63,9 +63,7 @@ export class AmqpHandler {
     console.log(`Initializing transformation channel "${AMQP_PIPELINE_EXECUTION_QUEUE}"`)
 
     const channel = await connection.createChannel()
-    await channel.assertExchange(AMQP_PIPELINE_EXECUTION_EXCHANGE, 'topic', {
-      durable: false
-    })
+    await channel.assertExchange(AMQP_PIPELINE_EXECUTION_EXCHANGE, 'topic')
 
     const q = await channel.assertQueue(AMQP_PIPELINE_EXECUTION_QUEUE, {
       exclusive: false
