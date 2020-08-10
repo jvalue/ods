@@ -203,6 +203,9 @@ services:
       PGPASSWORD: 'admin'
       PGPORT: 5432,
 
+      CONNECTION_RETRIES = 30
+      CONNECTION_BACKOFF_IN_MS = 2000
+
       AMQP_URL: "amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672"
       AMQP_PIPELINE_EXECUTION_EXCHANGE: 'ods_global'
       AMQP_PIPELINE_EXECUTION_QUEUE: 'notification.pipeline-execution'
