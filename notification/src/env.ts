@@ -15,10 +15,10 @@ const getEnv = (envName: string): string => {
 export const CONNECTION_RETRIES = +getEnv('CONNECTION_RETRIES')
 export const CONNECTION_BACKOFF = +getEnv('CONNECTION_BACKOFF_IN_MS')
 
-export const POSTGRES_HOST = getEnv('POSTGRES_HOST')
-export const POSTGRES_PORT = +getEnv('POSTGRES_PORT')
-export const POSTGRES_USER = getEnv('POSTGRES_USER')
-export const POSTGRES_PW = getEnv('POSTGRES_PW')
+export const POSTGRES_HOST = getEnv('PGHOST')
+export const POSTGRES_PORT = +getEnv('PGPORT')
+export const POSTGRES_USER = getEnv('PGUSER')
+export const POSTGRES_PW = getEnv('PGPASSWORD')
 export const POSTGRES_DB = getEnv('POSTGRES_DB')
 
 export const AMQP_URL = getEnv('AMQP_URL')
