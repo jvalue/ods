@@ -47,7 +47,10 @@
 
         <v-divider />
 
-        <v-list-item @click="onEditProfile">
+        <v-list-item
+          disabled
+          @click="onEditProfile"
+        >
           <v-list-item-title>Edit Profile</v-list-item-title>
         </v-list-item>
         <v-list-item @click="onLogout">
@@ -62,7 +65,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Action, State } from 'vuex-class'
-import { KeycloakProfile } from 'keycloak-js'
+import { UserProfile } from '@/authentication'
 
 const namespace = { namespace: 'auth' }
 
@@ -74,26 +77,26 @@ export default class Login extends Vue {
   private isAuthenticated!: boolean;
 
   @State('userProfile', namespace)
-  private userProfile!: KeycloakProfile;
+  private userProfile!: UserProfile;
 
   @Action('login', namespace)
-  private login!: () => void;
+  private login!: () => Promise<boolean>;
 
   @Action('logout', namespace)
-  private logout!: () => void;
+  private logout!: () => boolean;
 
   @Action('editProfile', namespace)
-  private editProfile!: () => void;
+  private editProfile!: () => Promise<boolean>;
 
-  @Action('initKeycloak', namespace)
-  private initKeycloak!: () => void;
+  @Action('init', namespace)
+  private init!: () => Promise<boolean>;
 
-  private mounted (): void {
-    this.initKeycloak()
+  private async mounted (): Promise<void> {
+    await this.init()
   }
 
-  private onLogin (): void {
-    this.login()
+  private async onLogin (): Promise<void> {
+    await this.login()
   }
 
   private onLogout (): void {
@@ -101,8 +104,8 @@ export default class Login extends Vue {
     this.menu = false
   }
 
-  private onEditProfile (): void {
-    this.editProfile()
+  private async onEditProfile (): Promise<void> {
+    await this.editProfile()
   }
 }
 </script>

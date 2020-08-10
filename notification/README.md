@@ -1,9 +1,5 @@
 # Open Data Service - Notification-Service
 
-## Getting started
-
-Make sure they Keycloak container is running (see `../auth`).
-
 ## Build
 
 `npm install`

@@ -20,7 +20,6 @@ WORKDIR /app
 
 COPY --from=builder /build/dist/ ./dist/
 COPY --from=builder /build/package*.json ./
-COPY ./keycloak.json ./
 
 RUN npm ci --only=production
 EXPOSE 8080

@@ -1,30 +1,22 @@
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
 import {
-  keycloakLogin,
-  loadKeycloakUserProfile,
+  UserProfile,
+  login,
+  getUserProfile,
   isAuthenticated,
-  keycloakInit,
-  keycloakEditProfile
-} from '@/keycloak'
-// eslint-disable-next-line no-unused-vars
-import { KeycloakProfile } from 'keycloak-js'
-
-const AUTH_DISABLED: boolean = process.env.VUE_APP_AUTH_DISABLED === 'true'
-const AUTH_SERVICE_URL: string = process.env.VUE_APP_AUTH_SERVICE_URL as string
+  initAuthentication,
+  editUserProfile
+} from '@/authentication'
 
 @Module({ namespaced: true })
 export default class AuthModule extends VuexModule {
   private isAuth = false
 
-  private userProfile: KeycloakProfile = {}
+  private userProfile: UserProfile = {}
 
   @Action({ commit: 'setAuth' })
-  public async initKeycloak (): Promise<boolean> {
-    if (AUTH_DISABLED) {
-      return false
-    }
-    console.log(`Using '${AUTH_SERVICE_URL}' as Keycloak URL`)
-    await keycloakInit(AUTH_SERVICE_URL)
+  public async init (): Promise<boolean> {
+    await initAuthentication()
     const isAuth = isAuthenticated()
 
     if (isAuth) {
@@ -35,7 +27,7 @@ export default class AuthModule extends VuexModule {
 
   @Action({ commit: 'setAuth' })
   public async login (): Promise<boolean> {
-    const isSuccessful: boolean = await keycloakLogin()
+    const isSuccessful: boolean = await login()
 
     if (isSuccessful) {
       this.context.dispatch('loadUserProfile')
@@ -52,20 +44,12 @@ export default class AuthModule extends VuexModule {
 
   @Action
   public async editProfile (): Promise<boolean> {
-    return keycloakEditProfile()
+    return await editUserProfile()
   }
 
   @Action({ commit: 'setUserProfile' })
-  public async loadUserProfile (): Promise<Keycloak.KeycloakProfile> {
-    return new Promise((resolve, reject) => {
-      loadKeycloakUserProfile()
-        .then(profile => {
-          resolve(profile)
-        })
-        .catch(err => {
-          reject(err)
-        })
-    })
+  public async loadUserProfile (): Promise<UserProfile> {
+    return await getUserProfile()
   }
 
   @Mutation
@@ -73,7 +57,7 @@ export default class AuthModule extends VuexModule {
     this.isAuth = value
   }
 
-  @Mutation private setUserProfile (value: KeycloakProfile): void {
+  @Mutation private setUserProfile (value: UserProfile): void {
     this.userProfile = value
   }
 }
