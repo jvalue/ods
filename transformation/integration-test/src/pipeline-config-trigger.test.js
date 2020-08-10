@@ -18,7 +18,6 @@ let amqpConnection
 const publishedEvents = new Map() // routing key -> received msgs []
 
 describe('Transformation Service Config Trigger', () => {
-
   beforeAll(async () => {
     console.log('Starting config trigger tests..')
     const pingUrl = URL + '/'
