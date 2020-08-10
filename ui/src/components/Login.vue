@@ -105,7 +105,7 @@ export default class Login extends Vue {
   }
 
   private async onEditProfile (): Promise<void> {
-    this.editProfile()
+    await this.editProfile()
   }
 }
 </script>
