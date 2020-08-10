@@ -6,7 +6,6 @@ const waitOn = require('wait-on')
 const URL = process.env.TRANSFORMATION_API || 'http://localhost:8080'
 
 describe('Transformation Service Execution', () => {
-
   beforeAll(async () => {
     console.log('Starting pipeline execution tests..')
     const pingUrl = URL + '/'

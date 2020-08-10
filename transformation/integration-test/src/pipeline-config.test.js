@@ -17,7 +17,6 @@ let amqpConnection
 const publishedEvents = new Map() // routing key -> received msgs []
 
 describe('Pipeline Config Test', () => {
-
   beforeAll(async () => {
     console.log('Starting pipeline config tests..')
     const pingUrl = URL + '/version'
