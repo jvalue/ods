@@ -47,7 +47,7 @@
 
         <v-divider />
 
-        <v-list-item @click="onEditProfile">
+        <v-list-item>
           <v-list-item-title>Edit Profile</v-list-item-title>
         </v-list-item>
         <v-list-item @click="onLogout">
@@ -77,23 +77,23 @@ export default class Login extends Vue {
   private userProfile!: UserProfile;
 
   @Action('login', namespace)
-  private login!: () => void;
+  private login!: () => Promise<boolean>;
 
   @Action('logout', namespace)
-  private logout!: () => void;
+  private logout!: () => boolean;
 
   @Action('editProfile', namespace)
-  private editProfile!: () => void;
+  private editProfile!: () => Promise<boolean>;
 
   @Action('init', namespace)
-  private init!: () => void;
+  private init!: () => Promise<boolean>;
 
-  private mounted (): void {
-    this.init()
+  private async mounted (): Promise<void> {
+    await this.init()
   }
 
-  private onLogin (): void {
-    this.login()
+  private async onLogin (): Promise<void> {
+    await this.login()
   }
 
   private onLogout (): void {
@@ -101,7 +101,7 @@ export default class Login extends Vue {
     this.menu = false
   }
 
-  private onEditProfile (): void {
+  private async onEditProfile (): Promise<void> {
     this.editProfile()
   }
 }
