@@ -202,6 +202,7 @@ services:
       PGHOST: 'notification-db'
       PGPASSWORD: 'admin'
       PGPORT: 5432
+      POSTGRES_DB: 'ods-notifications'
 
       CONNECTION_RETRIES: 30
       CONNECTION_BACKOFF_IN_MS: 2000
