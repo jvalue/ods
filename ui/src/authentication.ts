@@ -5,20 +5,19 @@ export interface UserProfile {
 }
 
 const currentUserProfile: UserProfile = {
-  firstName: 'Max',
-  lastName: 'Mustermann',
-  email: 'max.mustermann@test.de'
+  firstName: 'Test',
+  lastName: 'User',
+  email: 'test.user@value-ods.com'
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
 export async function initAuthentication (): Promise<void> {
+  return Promise.resolve()
 }
 
 export function isAuthenticated (): boolean {
   return true
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
 export async function login (): Promise<boolean> {
   return true
 }
