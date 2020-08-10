@@ -6,7 +6,6 @@ import datasourceRoutes from '@/datasource/router'
 import pipelineRoutes from '@/pipeline/router'
 import notificationRoutes from '@/notification/router'
 import { isAuthenticated, login } from './authentication'
-import {log} from 'util';
 
 Vue.use(Router)
 
@@ -40,9 +39,9 @@ const router = new Router({
   routes
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   if (to.meta.requiresAuth && !isAuthenticated()) {
-    login()
+    await login()
   }
   next()
 })
