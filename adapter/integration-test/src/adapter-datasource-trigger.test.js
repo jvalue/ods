@@ -61,7 +61,7 @@ describe('Adapter Sources Trigger', () => {
       .send()
 
     const delResponse = await request(URL)
-      .delete('/datasources/')
+      .delete(`/datasources/${datasourceId}`)
       .send()
 
     expect(delResponse.status).toEqual(204)
@@ -95,7 +95,7 @@ describe('Adapter Sources Trigger', () => {
       .send()
 
     const delResponse = await request(URL)
-      .delete('/datasources/')
+      .delete(`/datasources/${datasourceId}`)
       .send()
 
     expect(delResponse.status).toEqual(204)
@@ -129,7 +129,7 @@ describe('Adapter Sources Trigger', () => {
       .send()
 
     const delResponse = await request(URL)
-      .delete('/datasources/')
+      .delete(`/datasources/${datasourceId}`)
       .send()
 
     expect(delResponse.status).toEqual(204)
@@ -162,7 +162,7 @@ describe('Adapter Sources Trigger', () => {
     expect(triggerResponse.status).toBeGreaterThan(300) // request should fail (no 2xx status)
 
     const delResponse = await request(URL)
-      .delete('/datasources/')
+      .delete(`/datasources/${datasourceId}`)
       .send()
 
     expect(delResponse.status).toEqual(204)
@@ -260,4 +260,3 @@ const runtimeParameters = {
     id: '2'
   }
 }
-
