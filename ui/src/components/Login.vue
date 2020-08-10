@@ -47,7 +47,10 @@
 
         <v-divider />
 
-        <v-list-item>
+        <v-list-item
+          disabled
+          @click="onEditProfile"
+        >
           <v-list-item-title>Edit Profile</v-list-item-title>
         </v-list-item>
         <v-list-item @click="onLogout">
