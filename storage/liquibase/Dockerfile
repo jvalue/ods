@@ -1,6 +1,8 @@
 FROM webdevops/liquibase:postgres
 
 USER root
+ENV CONNECTION_RETRIES=5
+ENV CONNECTION_BACKOFF_IN_SECONDS=2
 ENV DATABASE_URL=$LIQUIBASE_URL
 
 COPY ./changelog.xml /liquibase/changelog.xml
