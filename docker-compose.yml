@@ -106,6 +106,9 @@ services:
     image: ${DOCKER_REGISTRY}/storage-mq
     build: ./storage/storage-mq/
     environment:
+      CONNECTION_RETRIES: 30
+      CONNECTION_BACKOFF_IN_MS: 2000
+
       POSTGRES_HOST: storage-db
       POSTGRES_PORT: 5432
       POSTGRES_DB: ods
