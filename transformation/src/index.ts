@@ -12,6 +12,7 @@ import { PipelineConfigManager } from './pipeline-config/pipelineConfigManager'
 import AmqpExecutionResultPublisher from './pipeline-config/publisher/amqpExecutionResultPublisher'
 import PostgresPipelineConfigRepository from './pipeline-config/postgresPipelineConfigRepository'
 import AmqpConfigWritesPublisher from './pipeline-config/publisher/amqpConfigWritesPublisher'
+import { PipelineConfigConsumer } from './api/amqp/pipelineConfigConsumer'
 
 const port = 8080
 const app = express()
@@ -44,10 +45,13 @@ const server = app.listen(port, async () => {
     executionResultPublisher
   )
 
+  const pipelineConfigConsumer = new PipelineConfigConsumer(pipelineConfigManager)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const pipelineExecutionEndpoint = new PipelineExecutionEndpoint(pipelineExecutor, app)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const pipelineConfigEndpoint = new PipelineConfigEndpoint(pipelineConfigManager, app)
+
+  await pipelineConfigConsumer.connect(CONNECTION_RETRIES, CONNECTION_BACKOFF)
 
   app.get('/', (req: express.Request, res: express.Response): void => {
     res.status(200)
