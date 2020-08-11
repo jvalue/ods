@@ -1,5 +1,4 @@
-import { WebhookConfig, SlackConfig, FirebaseConfig } from './notificationConfig';
-
+import { WebhookConfig, SlackConfig, FirebaseConfig } from './notificationConfig'
 
 /**
  * NotificationSummary will be returned upon a request for
@@ -11,10 +10,10 @@ import { WebhookConfig, SlackConfig, FirebaseConfig } from './notificationConfig
  */
 export interface NotificationSummary {
 
-    webhook: WebhookConfig[]
+  webhook: WebhookConfig[];
 
-    slack: SlackConfig[]
+  slack: SlackConfig[];
 
-    firebase: FirebaseConfig[]
+  firebase: FirebaseConfig[];
 
 }
