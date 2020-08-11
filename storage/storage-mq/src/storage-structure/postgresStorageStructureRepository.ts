@@ -3,6 +3,17 @@ import { PoolConfig } from 'pg'
 import { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB, POSTGRES_SCHEMA } from '../env'
 import PostgresRepository from '@/util/postgresRepository'
 
+const EXISTS_TABLE_STATEMENT = (schema: string, table: string): string => `SELECT to_regclass('${schema}.${table}')`
+const CREATE_BUCKET_STATEMENT =
+(schema: string, table: string): string => `CREATE TABLE IF NOT EXISTS "${schema}"."${table}" (
+  "id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
+  "data" jsonb NOT NULL,
+  "timestamp" timestamp,
+  "pipelineId" varchar,
+  CONSTRAINT "Data_pk_${schema}_${table}" PRIMARY KEY (id)
+  )`
+const DELETE_BUCKET_STATEMENT = (schema: string, table: string): string => `DROP TABLE "${schema}"."${table}" CASCADE`
+
 export class PostgresStorageStructureRepository implements StorageStructureRepository {
   private postgresRepo: PostgresRepository
 
@@ -34,7 +45,7 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
 
   async existsTable (tableIdentifier: string): Promise<boolean> {
     const resultSet =
-      await this.postgresRepo.executeQuery(`SELECT to_regclass('${POSTGRES_SCHEMA}.${tableIdentifier}')`, [])
+      await this.postgresRepo.executeQuery(EXISTS_TABLE_STATEMENT(POSTGRES_SCHEMA, tableIdentifier), [])
     const tableExists = !!resultSet.rows[0].to_regclass
     console.debug(`Table ${tableIdentifier} exists: ${tableExists}`)
     return Promise.resolve(tableExists)
@@ -46,13 +57,7 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
      * @param tableIdentifier tableIdentifier for wich a table will be created with this name
      */
   async create (tableIdentifier: string): Promise<void> {
-    await this.postgresRepo.executeQuery(`CREATE TABLE IF NOT EXISTS "${POSTGRES_SCHEMA}"."${tableIdentifier}" (
-                "id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
-                "data" jsonb NOT NULL,
-                "timestamp" timestamp,
-                "pipelineId" varchar,
-                CONSTRAINT "Data_pk_${POSTGRES_SCHEMA}_${tableIdentifier}" PRIMARY KEY (id)
-              )`, [])
+    await this.postgresRepo.executeQuery(CREATE_BUCKET_STATEMENT(POSTGRES_SCHEMA, tableIdentifier), [])
   }
 
   /**
@@ -60,6 +65,6 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
      * @param tableIdentifier name of the table to be dropped
      */
   async delete (tableIdentifier: string): Promise<void> {
-    await this.postgresRepo.executeQuery(`DROP TABLE "${POSTGRES_SCHEMA}"."${tableIdentifier}" CASCADE`, [])
+    await this.postgresRepo.executeQuery(DELETE_BUCKET_STATEMENT(POSTGRES_SCHEMA, tableIdentifier), [])
   }
 }
