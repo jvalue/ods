@@ -11,6 +11,7 @@ import PipelineExecutionEventHandler from './api/pipelineExecutionEventHandler'
 import { PipelineExecutionConsumer } from './api/amqp/PipelineExecutionConsumer'
 import { CONNECTION_RETRIES, CONNECTION_BACKOFF } from './env'
 import PostgresRepository from './util/postgresRepository'
+import AmqpConsumer from './util/amqpConsumer'
 
 const port = 8080
 const app = express()
@@ -25,8 +26,8 @@ const storageStructureRepositry = new PostgresStorageStructureRepository(new Pos
 const pipelineConfigEventHandler = new PipelineConfigEventHandler(storageStructureRepositry)
 const pipelineExecutionEventHandler = new PipelineExecutionEventHandler(storageContentRepository)
 
-const amqpPipelineConfigConsumer = new PipelineConfigConsumer(pipelineConfigEventHandler)
-const amqpPipelineExecutionConsumer = new PipelineExecutionConsumer(pipelineExecutionEventHandler)
+const amqpPipelineConfigConsumer = new PipelineConfigConsumer(pipelineConfigEventHandler, new AmqpConsumer())
+const amqpPipelineExecutionConsumer = new PipelineExecutionConsumer(pipelineExecutionEventHandler, new AmqpConsumer())
 
 // global promise-rejected handler
 process.on('unhandledRejection', function (reason, p) {
