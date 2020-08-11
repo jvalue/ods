@@ -6,9 +6,9 @@ const STORAGE_URL = process.env.STORAGE_API
 const STORAGEMQ_URL = process.env.STORAGEMQ_API
 const AMQP_URL = process.env.AMQP_URL
 
-const amqp_exchange = 'ods_global'
-const amqp_pipeline_config_created_topic = 'pipeline.config.created'
-const amqp_pipeline_execution_success_topic = 'pipeline.execution.success'
+const AMQP_EXCHANGE = 'ods_global'
+const AMQP_PIPELINE_CONFIG_CREATED_TOPIC = 'pipeline.config.created'
+const AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC = 'pipeline.execution.success'
 
 let amqpConnection
 
@@ -28,10 +28,10 @@ describe('Storage', () => {
   }, 90000)
 
   afterAll(async () => {
-    if(amqpConnection) {
-      console.log("Closing AMQP connection...")
+    if (amqpConnection) {
+      console.log('Closing AMQP connection...')
       await amqpConnection.close()
-      console.log("AMQP connection closed")
+      console.log('AMQP connection closed')
     }
   }, 10000)
 
@@ -39,7 +39,7 @@ describe('Storage', () => {
     const pipelineId = '21398'
 
     const channel = await amqpConnection.createChannel()
-    channel.assertExchange(amqp_exchange, 'topic', {
+    channel.assertExchange(AMQP_EXCHANGE, 'topic', {
       durable: false
     })
 
@@ -48,8 +48,8 @@ describe('Storage', () => {
     }
     const configEvent = JSON.stringify(pipelineCreatedEvent)
 
-    channel.publish(amqp_exchange, amqp_pipeline_config_created_topic, Buffer.from(configEvent))
-    console.log("Sent via AMQP: %s:'%s'", amqp_pipeline_config_created_topic, configEvent)
+    channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_CREATED_TOPIC, Buffer.from(configEvent))
+    console.log("Sent via AMQP: %s:'%s'", AMQP_PIPELINE_CONFIG_CREATED_TOPIC, configEvent)
 
     await sleep(1000) // time to process event
 
@@ -60,8 +60,8 @@ describe('Storage', () => {
     }
     const executionEvent = JSON.stringify(pipelineExecutedEvent)
 
-    channel.publish(amqp_exchange, amqp_pipeline_execution_success_topic, Buffer.from(executionEvent))
-    console.log("Sent via AMQP: %s:'%s'", amqp_pipeline_execution_success_topic, executionEvent)
+    channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC, Buffer.from(executionEvent))
+    console.log("Sent via AMQP: %s:'%s'", AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC, executionEvent)
 
     await sleep(1000) // time to process event
 
@@ -92,7 +92,7 @@ const amqpConnect = async (amqpUrl, retries, backoff) => {
       continue
     }
   }
-  Promise.reject(`Could not establish connection to AMQP broker (${amqpUrl})`)
+  Promise.reject(new Error(`Could not establish connection to AMQP broker (${amqpUrl})`))
 }
 
 const sleep = (ms) => {
