@@ -23,8 +23,7 @@ export default class AmqpConsumer {
       console.log(`Connection to amqp host at ${amqpUrl} successful`)
       return connection
     } catch (error) {
-      console.error(`Error connecting to amqp host at ${amqpUrl}: ${error}`)
-      throw error
+      return Promise.reject(new Error(`Error connecting to amqp host at ${amqpUrl}: ${error}`))
     }
   }
 
@@ -37,8 +36,7 @@ export default class AmqpConsumer {
       console.log(`Exchange ${exchange} successfully initialized.`)
       return channel
     } catch (error) {
-      console.error(`Error creating exchange ${exchange}: ${error}`)
-      throw error
+      return Promise.reject(new Error(`Error creating exchange ${exchange}: ${error}`))
     }
   }
 
@@ -53,7 +51,6 @@ export default class AmqpConsumer {
     consumeEvent: (msg: AMQP.ConsumeMessage | null) => void
   ): Promise<void> {
     if (!this.connection) {
-      console.error('Consume not possible, AMQP client not initialized.')
       return Promise.reject(new Error('Consume not possible, AMQP client not initialized.'))
     }
 
@@ -65,7 +62,7 @@ export default class AmqpConsumer {
       await channel.bindQueue(q.queue, exchange, topic)
       await channel.consume(q.queue, consumeEvent)
     } catch (error) {
-      console.error(`Error subscribing to exchange ${exchange} under key ${topic}: ${error}`)
+      return Promise.reject(new Error(`Error subscribing to exchange ${exchange} under key ${topic}: ${error}`))
     }
   }
 }
