@@ -91,19 +91,23 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
 
     const { rows } = await this.postgresRepository
       .executeQuery(INSERT_CONTENT_STATEMENT(POSTGRES_SCHEMA, tableIdentifier), values)
-    console.debug('Content successfully persisted.')
-    return Promise.resolve(rows[0].id as number)
+    const id = rows[0].id as number
+    console.debug(`Content successfully persisted with id ${id}`)
+    return Promise.resolve(id)
   }
 
   private toContents (resultSet: QueryResult<object>): StorageContent[] {
     const contents = resultSet.rows as StorageContent[]
-    contents.forEach((x) => {
-      x.id = x.id ? +x.id : undefined // convert to number
-    })
+    contents.forEach(x => this.contentIdAsNumber(x))
     return contents
   }
 
   private escapeQuotes (data: object): string {
     return JSON.stringify(data).replace("'", "''")
+  }
+
+  private contentIdAsNumber (x: StorageContent): StorageContent {
+    x.id = x.id ? +x.id : undefined
+    return x
   }
 }
