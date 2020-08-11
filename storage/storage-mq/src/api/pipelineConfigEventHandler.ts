@@ -1,4 +1,4 @@
-import { StorageStructureRepository } from '@/storage-structure/storageStructureRepository'
+import { StorageStructureRepository } from '../storage-structure/storageStructureRepository'
 
 export default class PipelineConfigEventHandler {
   structureRepository: StorageStructureRepository

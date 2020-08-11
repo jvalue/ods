@@ -1,5 +1,5 @@
 import * as express from 'express'
-import { StorageContentRepository } from '@/storage-content/storageContentRepository'
+import { StorageContentRepository } from '../../storage-content/storageContentRepository'
 
 export class StorageContentEndpoint {
   version = '0.0.1'
