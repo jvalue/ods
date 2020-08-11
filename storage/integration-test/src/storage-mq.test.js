@@ -26,9 +26,7 @@ describe('Storage-MQ', () => {
 
   afterAll(async () => {
     if (amqpConnection) {
-      console.log('Closing AMQP connection...')
       await amqpConnection.close()
-      console.log('AMQP connection closed')
     }
   }, 10000)
 
