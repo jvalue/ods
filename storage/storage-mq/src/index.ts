@@ -34,11 +34,17 @@ process.on('unhandledRejection', function (reason, p) {
 })
 
 const server = app.listen(port, async () => {
-  await storageContentRepository.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
-  await storageStructureRepositry.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
+  try {
+    await storageContentRepository.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
+    await storageStructureRepositry.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
 
-  await amqpPipelineConfigConsumer.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
-  await amqpPipelineExecutionConsumer.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
+    await amqpPipelineConfigConsumer.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
+    await amqpPipelineExecutionConsumer.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
+  } catch (error) {
+    console.error(`Fatal error at startup: ${error}`)
+    console.error('Shutting down...')
+    process.exit(-1)
+  }
 
   console.log('Listening on port ' + port)
 
