@@ -1,14 +1,13 @@
-import { StorageContentRepository } from "@/storage-content/storageContentRepository"
+import { StorageContentRepository } from '@/storage-content/storageContentRepository'
 
 export default class PipelineExecutionEventHandler {
   contentRepository: StorageContentRepository
 
-  constructor(contentRepository: StorageContentRepository) {
+  constructor (contentRepository: StorageContentRepository) {
     this.contentRepository = contentRepository
   }
 
-
-  async handleSuccess(pipelineExecutedEvent: PipelineExecutedEvent): Promise<void> {
+  async handleSuccess (pipelineExecutedEvent: PipelineExecutedEvent): Promise<void> {
     await this.contentRepository.saveContent(pipelineExecutedEvent.pipelineId, {
       pipelineId: pipelineExecutedEvent.pipelineId,
       timestamp: pipelineExecutedEvent.timestamp,
@@ -20,7 +19,7 @@ export default class PipelineExecutionEventHandler {
 }
 
 export interface PipelineExecutedEvent {
-  pipelineId: string
-  timestamp: Date
-  data: object
+  pipelineId: string;
+  timestamp: Date;
+  data: object;
 }

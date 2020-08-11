@@ -28,12 +28,11 @@ const amqpPipelineConfigConsumer = new PipelineConfigConsumer(pipelineConfigEven
 const amqpPipelineExecutionConsumer = new PipelineExecutionConsumer(pipelineExecutionEventHandler)
 
 // global promise-rejected handler
-process.on('unhandledRejection', function(reason, p){
-  console.debug("Possibly Unhandled Rejection at: Promise ", p, " reason: ", reason);
-});
+process.on('unhandledRejection', function (reason, p) {
+  console.debug('Possibly Unhandled Rejection at: Promise ', p, ' reason: ', reason)
+})
 
 const server = app.listen(port, async () => {
-
   await storageContentRepository.init(30, 2000)
   await storageStructureRepositry.init(30, 2000)
 
@@ -44,15 +43,15 @@ const server = app.listen(port, async () => {
 
   const storageContentEndpoint = new StorageContentEndpoint(storageContentRepository, app)
 
-  app.get("/", (req: express.Request, res: express.Response): void => {
+  app.get('/', (req: express.Request, res: express.Response): void => {
     res.status(200)
-        .send('I am alive!')
+      .send('I am alive!')
   })
 
-  app.get("/version", (req: express.Request, res: express.Response): void => {
+  app.get('/version', (req: express.Request, res: express.Response): void => {
     res.header('Content-Type', 'text/plain')
     res.status(200)
-        .send(storageContentEndpoint.getVersion())
+      .send(storageContentEndpoint.getVersion())
     res.end()
   })
 })
