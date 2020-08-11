@@ -13,9 +13,7 @@ describe('Notification', () => {
 
   beforeAll(async () => {
     const pingUrl = URL + '/'
-    console.log('Waiting for notification-service with URL: ' + pingUrl)
-    console.log('Waiting for mock webhook receiver with URL: ' + MOCK_RECEIVER_URL)
-    await waitOn({ resources: [pingUrl, MOCK_RECEIVER_URL], timeout: 50000 })
+    await waitOn({ resources: [pingUrl, MOCK_RECEIVER_URL], timeout: 50000, log: true })
   }, 60000)
 
   test('Trigger webhook', async () => {
