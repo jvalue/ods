@@ -9,9 +9,9 @@ import { PipelineConfigConsumer } from './api/amqp/PipelineConfigConsumer'
 import PipelineConfigEventHandler from './api/pipelineConfigEventHandler'
 import PipelineExecutionEventHandler from './api/pipelineExecutionEventHandler'
 import { PipelineExecutionConsumer } from './api/amqp/PipelineExecutionConsumer'
+import { CONNECTION_RETRIES, CONNECTION_BACKOFF } from './env'
 
 const port = 8080
-
 const app = express()
 
 app.use(cors())
@@ -33,11 +33,11 @@ process.on('unhandledRejection', function (reason, p) {
 })
 
 const server = app.listen(port, async () => {
-  await storageContentRepository.init(30, 2000)
-  await storageStructureRepositry.init(30, 2000)
+  await storageContentRepository.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
+  await storageStructureRepositry.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
 
-  await amqpPipelineConfigConsumer.connect(30, 2000)
-  await amqpPipelineExecutionConsumer.connect(30, 2000)
+  await amqpPipelineConfigConsumer.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
+  await amqpPipelineExecutionConsumer.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
 
   console.log('Listening on port ' + port)
 
