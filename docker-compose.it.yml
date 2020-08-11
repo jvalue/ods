@@ -49,7 +49,6 @@ services:
       MOCK_ADAPTER_PORT: 8082
       MOCK_TRANSFORMATION_HOST: scheduler-it
       MOCK_TRANSFORMATION_PORT: 8083
-      RABBIT_HEALTH_URL: http://rabbitmq:15672
     depends_on:
       - rabbitmq
 
