@@ -12,8 +12,6 @@ const MOCK_TRANSFORMATION_PORT = process.env.MOCK_TRANSFORMATION_PORT || 8083
 const MOCK_TRANSFORMATION_HOST = process.env.MOCK_TRANSFORMATION_HOST || 'localhost'
 const MOCK_TRANSFORMATION_URL = 'http://' + MOCK_TRANSFORMATION_HOST + ':' + MOCK_TRANSFORMATION_PORT
 
-const RABBIT_HEALTH_URL = process.env.RABBIT_HEALTH_URL
-
 describe('Scheduler', () => {
   console.log('Scheduler-Service URL= ' + URL)
 
