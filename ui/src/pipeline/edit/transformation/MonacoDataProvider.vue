@@ -17,9 +17,12 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { Prop } from 'vue-property-decorator'
+import { Prop, Watch } from 'vue-property-decorator'
 
 import MonacoEditor from 'vue-monaco'
+import { Mutation, State, Action } from 'vuex-class'
+
+const namespace = { namespace: 'transformation' }
 
 @Component({
   components: {
@@ -27,29 +30,42 @@ import MonacoEditor from 'vue-monaco'
   }
 })
 export default class MonacoDataProvider extends Vue {
-  @Prop() readonly value!: object
-
-  editorOptions = {
+  private editorOptions = {
     minimap: {
       enabled: false
     }
   }
 
-  object = this.value
-  text = this.formatJson(this.value)
+  /** from vuex module */
+  @State('data', namespace)
+  private data!: any | null
+
+  /** from vuex module */
+  @Action('setDataAndSubmit', namespace)
+  private setDataAndSubmit!: (value: any) => void
+
+  /** displayed in the monaco instance */
+  text = ''
+
+  /** JSON parsing errors*/
   error: Error | null = null
 
   private formatJson (o: object): string {
     return JSON.stringify(o, null, '  ')
   }
 
+  @Watch('data')
+  onDataChange (): void {
+    console.log('data change')
+    this.text = this.formatJson(this.data)
+  }
+
   onChange (): void {
     try {
       const newObject = JSON.parse(this.text)
-      this.object = newObject
+      this.setDataAndSubmit(newObject)
       // this.text = this.formatJson(newObject) // TODO: improve automatic formatting
       this.error = null
-      this.$emit('input', newObject)
     } catch (error) {
       this.error = error
     }
