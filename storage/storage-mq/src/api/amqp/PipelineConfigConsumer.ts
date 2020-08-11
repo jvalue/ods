@@ -1,5 +1,5 @@
 import * as AMQP from 'amqplib'
-import AmqpConsumer from './amqpConsumer'
+import AmqpConsumer from '../../util/amqpConsumer'
 import PipelineConfigEventHandler from '../pipelineConfigEventHandler'
 import {
   AMQP_URL,
@@ -14,9 +14,9 @@ export class PipelineConfigConsumer {
   private consumer: AmqpConsumer
   private pipelineConfigEventHandler: PipelineConfigEventHandler
 
-  constructor (pipelineConfigEventHandler: PipelineConfigEventHandler) {
+  constructor (pipelineConfigEventHandler: PipelineConfigEventHandler, consumer: AmqpConsumer) {
     this.pipelineConfigEventHandler = pipelineConfigEventHandler
-    this.consumer = new AmqpConsumer()
+    this.consumer = consumer
   }
 
   async init (retries: number, msBackoff: number): Promise<void> {
