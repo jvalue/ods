@@ -86,7 +86,7 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
     delete content.id // id not under control of client
 
     // Generate Query-String
-    const data = JSON.stringify(content.data).replace("'", "''") // Escape single quotes
+    const data = this.escapeQuotes(content.data)
     const values = [data, parseInt(content.pipelineId), content.timestamp]
 
     const { rows } = await this.postgresRepository
@@ -95,11 +95,15 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
     return Promise.resolve(rows[0].id as number)
   }
 
-  toContents (resultSet: QueryResult<object>): StorageContent[] {
+  private toContents (resultSet: QueryResult<object>): StorageContent[] {
     const contents = resultSet.rows as StorageContent[]
     contents.forEach((x) => {
       x.id = x.id ? +x.id : undefined // convert to number
     })
     return contents
+  }
+
+  private escapeQuotes (data: object): string {
+    return JSON.stringify(data).replace("'", "''")
   }
 }
