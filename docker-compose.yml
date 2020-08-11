@@ -198,11 +198,11 @@ services:
       context: ./notification/
     environment:
       # Postgres connection vars
-      PGUSER: 'notification_usr'
-      PGHOST: 'notification-db'
-      PGPASSWORD: 'admin'
-      PGPORT: 5432
+      POSTGRES_HOST: 'notification-db'
+      POSTGRES_PORT: 5432
       POSTGRES_DB: 'ods-notifications'
+      POSTGRES_USER: 'notification_usr'
+      POSTGRES_PW: 'admin'
 
       CONNECTION_RETRIES: 30
       CONNECTION_BACKOFF_IN_MS: 2000
