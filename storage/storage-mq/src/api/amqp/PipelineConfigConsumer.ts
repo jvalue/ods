@@ -1,63 +1,26 @@
 import * as AMQP from 'amqplib'
+import AmqpConsumer from './amqpConsumer'
 import PipelineConfigEventHandler from '../pipelineConfigEventHandler'
 
-const amqpUrl = process.env.AMQP_URL!
-const pipelineConfigExchange = process.env.AMQP_PIPELINE_CONFIG_EXCHANGE!
-const pipelineConfigQueue = process.env.AMQP_PIPELINE_CONFIG_QUEUE!
-const pipelineConfigTopic = process.env.AMQP_PIPELINE_CONFIG_TOPIC!
-const pipelineConfigCreatedTopic = process.env.AMQP_PIPELINE_CONFIG_CREATED_TOPIC!
-const pipelineConfigDeletedTopic = process.env.AMQP_PIPELINE_CONFIG_DELETED_TOPIC!
+const AMQP_URL = process.env.AMQP_URL!
+const AMQP_CONFIG_EXCHANGE = process.env.AMQP_PIPELINE_CONFIG_EXCHANGE!
+const AMQP_CONFIG_QUEUE = process.env.AMQP_PIPELINE_CONFIG_QUEUE!
+const AMQP_CONFIG_TOPIC = process.env.AMQP_PIPELINE_CONFIG_TOPIC!
+const AMQP_CONFIG_CREATED_TOPIC = process.env.AMQP_PIPELINE_CONFIG_CREATED_TOPIC!
+const AMQP_CONFIG_DELETED_TOPIC = process.env.AMQP_PIPELINE_CONFIG_DELETED_TOPIC!
 
 export class PipelineConfigConsumer {
-  pipelineConfigEventHandler: PipelineConfigEventHandler
+  private consumer: AmqpConsumer
+  private pipelineConfigEventHandler: PipelineConfigEventHandler
 
   constructor (pipelineConfigEventHandler: PipelineConfigEventHandler) {
     this.pipelineConfigEventHandler = pipelineConfigEventHandler
+    this.consumer = new AmqpConsumer()
   }
 
-  /**
-     * Connects to Amqp Service and initializes a channel
-     * @param retries   Number of retries to connect to the notification-config db
-     * @param backoff   Time to wait until the next retry
-     */
-  public async connect (retries: number, backoff: number): Promise<void> {
-    console.log('AMQP URL: ' + amqpUrl)
-    for (let i = 1; i <= retries; i++) {
-      try {
-        const connection = await AMQP.connect(amqpUrl)
-        await this.initChannel(connection)
-        return
-      } catch (error) {
-        console.info(`Error connecting to RabbitMQ: ${error}. Retrying in ${backoff} seconds`)
-        console.info(`Connecting to Amqp handler (${i}/${retries})`)
-        await this.sleep(backoff)
-        continue
-      }
-    }
-    return Promise.reject(new Error(`Could not establish connection to AMQP Broker (${amqpUrl})`))
-  }
-
-  private sleep (ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms))
-  }
-
-  private async initChannel (connection: AMQP.Connection): Promise<void> {
-    console.log(
-      `Initializing queue "${pipelineConfigQueue}" on exchange "${pipelineConfigExchange}" ` +
-      ` with topic "${pipelineConfigTopic}"`
-    )
-
-    await channel.assertExchange(pipelineConfigExchange, 'topic', {
-      durable: false
-    })
-
-    const q = await channel.assertQueue(pipelineConfigQueue, {
-      exclusive: false
-    })
-    await channel.bindQueue(q.queue, pipelineConfigExchange, pipelineConfigTopic)
-
-    await channel.consume(q.queue, this.consumeEvent)
-    console.info('Successfully initialized AMQP queue')
+  async init (retries: number, msBackoff: number): Promise<void> {
+    await this.consumer.init(AMQP_URL, retries, msBackoff)
+    return this.consumer.consume(AMQP_CONFIG_EXCHANGE, AMQP_CONFIG_TOPIC, AMQP_CONFIG_QUEUE, this.consumeEvent)
   }
 
   // use the f = () => {} syntax to access this
@@ -67,9 +30,9 @@ export class PipelineConfigConsumer {
       return
     }
     console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
-    if (msg.fields.routingKey === pipelineConfigCreatedTopic) {
+    if (msg.fields.routingKey === AMQP_CONFIG_CREATED_TOPIC) {
       await this.pipelineConfigEventHandler.handleCreation(JSON.parse(msg.content.toString()))
-    } else if (msg.fields.routingKey === pipelineConfigDeletedTopic) {
+    } else if (msg.fields.routingKey === AMQP_CONFIG_DELETED_TOPIC) {
       await this.pipelineConfigEventHandler.handleDeletion(JSON.parse(msg.content.toString()))
     } else {
       console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
