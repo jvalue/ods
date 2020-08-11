@@ -209,19 +209,20 @@ services:
       context: ./notification/
     environment:
       # Postgres connection vars
-      PGUSER: 'notification_usr'
-      PGHOST: 'notification-db'
-      PGPASSWORD: 'admin'
-      PGPORT: 5432,
+      POSTGRES_HOST: 'notification-db'
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: 'ods-notifications'
+      POSTGRES_USER: 'notification_usr'
+      POSTGRES_PW: 'admin'
 
-      # Rabbitmq connection details
+      CONNECTION_RETRIES: 30
+      CONNECTION_BACKOFF_IN_MS: 2000
+
       AMQP_URL: "amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672"
-
       AMQP_PIPELINE_EXECUTION_EXCHANGE: 'ods_global'
       AMQP_PIPELINE_EXECUTION_QUEUE: 'notification.pipeline-execution'
       AMQP_PIPELINE_EXECUTION_TOPIC: 'pipeline.execution.*'
       AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: 'pipeline.execution.success'
-
       AMQP_NOTIFICATION_QUEUE: 'NOTIF_QUEUE'
 
       NOTIFICATION_DATA_LOCATION_URL: 'http://localhost:9000/storage'
@@ -240,6 +241,7 @@ services:
     environment:
       POSTGRES_USER: 'notification_usr'
       POSTGRES_PASSWORD: 'admin'
+      POSTGRES_DB: 'ods-notifications'
 
 # -------------------- EDGE SERVER (PORT 9000) -----------------------------
   edge:

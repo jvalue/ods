@@ -1,6 +1,6 @@
 import { VM } from 'vm2'
 
-import SandboxExecutor from './sandboxExecutor';
+import SandboxExecutor from './sandboxExecutor'
 
 export default class VM2SandboxExecutor implements SandboxExecutor {
   vm: VM;
@@ -11,7 +11,7 @@ export default class VM2SandboxExecutor implements SandboxExecutor {
     })
   }
 
-  evaluate(expression: string, data: object): boolean {
+  evaluate (expression: string, data: object): boolean {
     console.log(`Evaluating expression: "${expression}" on data`)
     const wrapper =
       'f=function(data){' +
@@ -28,7 +28,10 @@ export default class VM2SandboxExecutor implements SandboxExecutor {
       throw new Error(`Malformed expression received: ${expression}\n Error message: ${err}`)
     }
     if (typeof result !== 'boolean') {
-      throw new Error(`Malformed expression received: ${expression}\n Error message: Expected result to be a boolean expression!`)
+      throw new Error(
+        `Malformed expression received: ${expression}\n Error message: ` +
+        'Expected result to be a boolean expression!'
+      )
     } else {
       return result
     }
