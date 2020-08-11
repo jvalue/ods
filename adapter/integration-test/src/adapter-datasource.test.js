@@ -8,18 +8,11 @@ const MOCK_SERVER_URL = 'http://' + MOCK_SERVER_HOST + ':' + MOCK_SERVER_PORT
 const RABBIT_URL = `http://${process.env.RABBIT_HOST}:15672`
 
 describe('Adapter Configuration', () => {
-  console.log('Adapter-Service URL= ' + URL)
-
   beforeAll(async () => {
     try {
+      console.log('Starting adapter configuration test')
       const pingUrl = URL + '/version'
-      console.log('Waiting for service with URL: ' + pingUrl)
-      console.log('Waiting for service with URL: ' + MOCK_SERVER_URL)
-      console.log('Waiting for service with URL: ' + RABBIT_URL)
-      await waitOn({ resources: [pingUrl, MOCK_SERVER_URL, RABBIT_URL], timeout: 50000 })
-      console.log('[online] Service with URL:  ' + pingUrl)
-      console.log('[online] Service with URL:  ' + MOCK_SERVER_URL)
-      console.log('[online] Service with URL:  ' + RABBIT_URL)
+      await waitOn({ resources: [pingUrl, MOCK_SERVER_URL, RABBIT_URL], timeout: 50000, log: true })
     } catch (err) {
       process.exit(1)
     }
@@ -192,89 +185,6 @@ describe('Adapter Configuration', () => {
   })
 })
 
-test('POST datasources/{id}/trigger dynamic', async () => {
-  const datasourceResponse = await request(URL)
-    .post('/datasources')
-    .send(dynamicDatasourceConfig)
-  const datasourceId = datasourceResponse.body.id
-
-  const dataMetaData = await request(URL)
-    .post(`/datasources/${datasourceId}/trigger`)
-    .send(runtimeParameters)
-
-  const id = dataMetaData.body.id
-  const data = await request(URL)
-    .get(`/data/${id}`)
-    .send()
-
-  const delResponse = await request(URL)
-    .delete('/datasources/')
-    .send()
-
-  expect(delResponse.status).toEqual(204)
-  expect(datasourceResponse.status).toEqual(201)
-  expect(dataMetaData.status).toEqual(200)
-  expect(dataMetaData.body.id).toBeGreaterThanOrEqual(0)
-  expect(dataMetaData.body.location).toEqual(`/data/${id}`)
-  expect(data.status).toEqual(200)
-  expect(data.body.id).toBe(runtimeParameters.parameters.id)
-})
-
-test('POST datasources/{id}/trigger dynamic defaultvalues', async () => {
-  const datasourceResponse = await request(URL)
-    .post('/datasources')
-    .send(dynamicDatasourceConfig)
-  const datasourceId = datasourceResponse.body.id
-
-  const dataMetaData = await request(URL)
-    .post(`/datasources/${datasourceId}/trigger`)
-    .send(null)
-
-  const id = dataMetaData.body.id
-  const data = await request(URL)
-    .get(`/data/${id}`)
-    .send()
-
-  const delResponse = await request(URL)
-    .delete('/datasources/')
-    .send()
-
-  expect(delResponse.status).toEqual(204)
-  expect(datasourceResponse.status).toEqual(201)
-  expect(dataMetaData.status).toEqual(200)
-  expect(dataMetaData.body.id).toBeGreaterThanOrEqual(0)
-  expect(dataMetaData.body.location).toEqual(`/data/${id}`)
-  expect(data.status).toEqual(200)
-  expect(data.body.id).toBe(dynamicDatasourceConfig.protocol.parameters.defaultParameters.id)
-})
-
-test('POST datasources/{id}/trigger static', async () => {
-  const datasourceResponse = await request(URL)
-    .post('/datasources')
-    .send(staticDatasourceConfig)
-  const datasourceId = datasourceResponse.body.id
-
-  const dataMetaData = await request(URL)
-    .post(`/datasources/${datasourceId}/trigger`)
-    .send(null)
-
-  const id = dataMetaData.body.id
-  const normalData = await request(URL)
-    .get(`/data/${id}`)
-    .send()
-
-  const delResponse = await request(URL)
-    .delete('/datasources/')
-    .send()
-
-  expect(delResponse.status).toEqual(204)
-  expect(dataMetaData.status).toEqual(200)
-  expect(dataMetaData.body.id).toBeGreaterThanOrEqual(0)
-  expect(dataMetaData.body.location).toEqual(`/data/${id}`)
-  expect(normalData.status).toEqual(200)
-  expect(normalData.body.id).toBe('1')
-})
-
 const datasourceConfig = {
   id: 12345,
   protocol: {
@@ -297,67 +207,5 @@ const datasourceConfig = {
     license: 'none',
     displayName: 'test datasource 1',
     description: 'integraiton testing datasources'
-  }
-}
-
-const dynamicDatasourceConfig = {
-  id: 54321,
-  protocol: {
-    type: 'HTTP',
-    parameters: {
-      location: MOCK_SERVER_URL + '/json/{id}',
-      encoding: 'UTF-8',
-      defaultParameters: {
-        id: '1',
-        userId: '2'
-      }
-    }
-  },
-  format: {
-    type: 'JSON',
-    parameters: {}
-  },
-  trigger: {
-    firstExecution: '1905-12-01T02:30:00.123Z',
-    periodic: false,
-    interval: 50000
-  },
-  metadata: {
-    author: 'icke',
-    license: 'none',
-    displayName: 'test datasource 2',
-    description: 'integration testing dynamic datasources'
-  }
-}
-
-const staticDatasourceConfig = {
-  id: -1,
-  protocol: {
-    type: 'HTTP',
-    parameters: {
-      location: MOCK_SERVER_URL + '/json/1',
-      encoding: 'UTF-8'
-    }
-  },
-  format: {
-    type: 'JSON',
-    parameters: {}
-  },
-  trigger: {
-    firstExecution: '1905-12-01T02:30:00.123Z',
-    periodic: false,
-    interval: 50000
-  },
-  metadata: {
-    author: 'icke',
-    license: 'none',
-    displayName: 'test datasource 2',
-    description: 'integration testing dynamic datasources'
-  }
-}
-
-const runtimeParameters = {
-  parameters: {
-    id: '2'
   }
 }

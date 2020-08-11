@@ -32,9 +32,7 @@ export default class AmqpPublisher {
   private initChannel = async (connection: AMQP.Connection, exchange: string): Promise<AMQP.Channel> => {
     try {
       const channel = await connection.createChannel()
-      await channel.assertExchange(exchange, 'topic', {
-        durable: false
-      })
+      await channel.assertExchange(exchange, 'topic')
       console.log(`Exchange ${exchange} successfully initialized.`)
       return channel
     } catch (error) {

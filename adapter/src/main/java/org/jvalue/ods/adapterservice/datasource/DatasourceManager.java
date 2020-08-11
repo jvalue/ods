@@ -8,6 +8,7 @@ import org.jvalue.ods.adapterservice.config.RabbitConfiguration;
 import org.jvalue.ods.adapterservice.datasource.event.DatasourceEvent;
 import org.jvalue.ods.adapterservice.datasource.event.DatasourceImportedEvent;
 import org.jvalue.ods.adapterservice.datasource.event.EventType;
+import org.jvalue.ods.adapterservice.datasource.event.ImportFailedEvent;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
 import org.jvalue.ods.adapterservice.datasource.model.DatasourceMetadata;
 import org.jvalue.ods.adapterservice.datasource.model.RuntimeParameters;
@@ -98,9 +99,12 @@ public class DatasourceManager {
    try {
       Adapter adapter = adapterFactory.getAdapter(adapterConfig);
       DataBlob.MetaData executionResult = adapter.executeJob(adapterConfig);
-      this.rabbitTemplate.convertAndSend(RabbitConfiguration.DATA_IMPORT_QUEUE, new DatasourceImportedEvent(id, executionResult.getLocation()));
+      DatasourceImportedEvent importedEvent = new DatasourceImportedEvent(id, executionResult.getLocation());
+      this.rabbitTemplate.convertAndSend(RabbitConfiguration.AMPQ_EXCHANGE, RabbitConfiguration.AMQP_IMPORT_SUCCESS_TOPIC, importedEvent);
       return executionResult;
    } catch (Exception e) {
+       ImportFailedEvent failedEvent = new ImportFailedEvent(id, e.getMessage());
+       this.rabbitTemplate.convertAndSend(RabbitConfiguration.AMPQ_EXCHANGE, RabbitConfiguration.AMQP_IMPORT_FAILED_TOPIC, failedEvent);
      if(e instanceof IllegalArgumentException) {
        System.err.println("Data Import request failed. Malformed Request: " + e.getMessage());
        throw e;
