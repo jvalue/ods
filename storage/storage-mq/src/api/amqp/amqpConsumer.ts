@@ -55,17 +55,17 @@ export default class AmqpConsumer {
     if (!this.connection) {
       console.error('Consume not possible, AMQP client not initialized.')
       return Promise.reject(new Error('Consume not possible, AMQP client not initialized.'))
-    } else {
-      try {
-        const channel = await this.initChannel(this.connection, exchange)
-        const q = await channel.assertQueue(queueName, {
-          exclusive: false
-        })
-        await channel.bindQueue(q.queue, exchange, topic)
-        await channel.consume(q.queue, consumeEvent)
-      } catch (error) {
-        console.error(`Error subscribing to exchange ${exchange} under key ${topic}: ${error}`)
-      }
+    }
+
+    try {
+      const channel = await this.initChannel(this.connection, exchange)
+      const q = await channel.assertQueue(queueName, {
+        exclusive: false
+      })
+      await channel.bindQueue(q.queue, exchange, topic)
+      await channel.consume(q.queue, consumeEvent)
+    } catch (error) {
+      console.error(`Error subscribing to exchange ${exchange} under key ${topic}: ${error}`)
     }
   }
 }
