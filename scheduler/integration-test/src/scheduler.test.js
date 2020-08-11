@@ -19,11 +19,8 @@ describe('Scheduler', () => {
 
   beforeAll(async () => {
     const pingUrl = URL + '/'
-    console.log('Waiting for service with URL: ' + MOCK_ADAPTER_URL)
-    console.log('Waiting for service with URL: ' + MOCK_TRANSFORMATION_URL)
-    console.log('Waiting for rabbitMQ with URL: ' + RABBIT_HEALTH_URL)
     await waitOn(
-      { resources: [MOCK_ADAPTER_URL, MOCK_TRANSFORMATION_URL], timeout: 50000 })
+      { resources: [MOCK_ADAPTER_URL, MOCK_TRANSFORMATION_URL], timeout: 50000, log: true })
     console.log('Waiting for service with URL: ' + pingUrl)
     await waitOn({ resources: [pingUrl], timeout: 50000 })
   }, 60000)
