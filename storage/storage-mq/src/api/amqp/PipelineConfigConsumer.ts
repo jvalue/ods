@@ -34,41 +34,43 @@ export class PipelineConfigConsumer {
         continue
       }
     }
-    Promise.reject(`Could not establish connection to AMQP Broker (${amqpUrl})`)
+    return Promise.reject(new Error(`Could not establish connection to AMQP Broker (${amqpUrl})`))
   }
 
   private sleep (ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms))
   }
 
-  private async initChannel (connection: AMQP.Connection) {
-    console.log(`Initializing queue "${pipelineConfigQueue}" on exchange "${pipelineConfigExchange}" with topic "${pipelineConfigTopic}"`)
-    const channel = await connection.createChannel()
+  private async initChannel (connection: AMQP.Connection): Promise<void> {
+    console.log(
+      `Initializing queue "${pipelineConfigQueue}" on exchange "${pipelineConfigExchange}" ` +
+      ` with topic "${pipelineConfigTopic}"`
+    )
 
-    channel.assertExchange(pipelineConfigExchange, 'topic', {
+    await channel.assertExchange(pipelineConfigExchange, 'topic', {
       durable: false
     })
 
     const q = await channel.assertQueue(pipelineConfigQueue, {
       exclusive: false
     })
-    channel.bindQueue(q.queue, pipelineConfigExchange, pipelineConfigTopic)
+    await channel.bindQueue(q.queue, pipelineConfigExchange, pipelineConfigTopic)
 
-    channel.consume(q.queue, this.consumeEvent)
+    await channel.consume(q.queue, this.consumeEvent)
     console.info('Successfully initialized AMQP queue')
   }
 
   // use the f = () => {} syntax to access this
-  consumeEvent = async (msg: AMQP.ConsumeMessage | null) => {
+  consumeEvent = async (msg: AMQP.ConsumeMessage | null): Promise<void> => {
     if (!msg) {
       console.debug('Received empty event when listening on pipeline configs - doing nothing')
       return
     }
     console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
     if (msg.fields.routingKey === pipelineConfigCreatedTopic) {
-      this.pipelineConfigEventHandler.handleCreation(JSON.parse(msg.content.toString()))
+      await this.pipelineConfigEventHandler.handleCreation(JSON.parse(msg.content.toString()))
     } else if (msg.fields.routingKey === pipelineConfigDeletedTopic) {
-      this.pipelineConfigEventHandler.handleDeletion(JSON.parse(msg.content.toString()))
+      await this.pipelineConfigEventHandler.handleDeletion(JSON.parse(msg.content.toString()))
     } else {
       console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
     }
