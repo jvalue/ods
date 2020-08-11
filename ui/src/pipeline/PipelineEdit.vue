@@ -35,6 +35,7 @@
                 v-model="dialogPipeline.datasourceId"
                 label="Referenced Datasource Id"
                 :rules="[required]"
+                :readonly="isDatasourcePreselected"
               />
             </v-form>
             <stepper-button-group
@@ -55,6 +56,7 @@
           <v-stepper-content step="2">
             <pipeline-transformation-config
               v-model="dialogPipeline.transformation"
+              :datasource-id="dialogPipeline.datasourceId"
               @validityChanged="validStep2 = $event"
             />
             <stepper-button-group
@@ -133,6 +135,7 @@ export default class PipelineEdit extends Vue {
   @State('selectedPipeline', pipelineNamespace) private selectedPipeline!: Pipeline
 
   private isEditMode = false
+  private isDatasourcePreselected = false
 
   private dialogStep = 1
 
@@ -158,6 +161,12 @@ export default class PipelineEdit extends Vue {
     if (this.isEditMode) {
       const id = (this.$route.params.pipelineId as unknown) as number
       this.loadPipelineByIdAction(id)
+    } else {
+      const datasourceId = (this.$route.params.datasourceId as unknown) as number
+      if (datasourceId) {
+        this.isDatasourcePreselected = true
+        this.dialogPipeline.datasourceId = datasourceId
+      }
     }
   }
 
