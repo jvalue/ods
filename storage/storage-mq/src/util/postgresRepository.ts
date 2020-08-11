@@ -33,7 +33,7 @@ export default class PostgresRepository {
     }
 
     if (!this.connectionPool) {
-      return Promise.reject(new Error('Connection to databse could not be established.'))
+      return Promise.reject(new Error('Connection to database could not be established.'))
     }
 
     console.info('Sucessfully established connection to database.')
