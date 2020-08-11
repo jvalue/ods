@@ -1,7 +1,7 @@
 import { Pool, PoolConfig, PoolClient, QueryResult } from 'pg'
 import { StorageContentRepository } from './storageContentRepository'
 import { StorageContent } from './storageContent'
-import { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB, POSTGRES_SCHEMA } from '@/env'
+import { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB, POSTGRES_SCHEMA } from '../env'
 
 export class PostgresStorageContentRepository implements StorageContentRepository {
   connectionPool?: Pool = undefined

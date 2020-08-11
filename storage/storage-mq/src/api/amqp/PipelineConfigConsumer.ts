@@ -8,7 +8,7 @@ import {
   AMQP_PIPELINE_CONFIG_QUEUE,
   AMQP_PIPELINE_CONFIG_CREATED_TOPIC,
   AMQP_PIPELINE_CONFIG_DELETED_TOPIC
-} from '@/env'
+} from '../../env'
 
 export class PipelineConfigConsumer {
   private consumer: AmqpConsumer

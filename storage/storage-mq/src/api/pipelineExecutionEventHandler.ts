@@ -1,4 +1,4 @@
-import { StorageContentRepository } from '@/storage-content/storageContentRepository'
+import { StorageContentRepository } from '../storage-content/storageContentRepository'
 
 export default class PipelineExecutionEventHandler {
   contentRepository: StorageContentRepository

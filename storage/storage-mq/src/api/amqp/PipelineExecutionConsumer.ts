@@ -7,7 +7,7 @@ import {
   AMQP_PIPELINE_EXECUTION_TOPIC,
   AMQP_PIPELINE_EXECUTION_QUEUE,
   AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC
-} from '@/env'
+} from '../../env'
 
 export class PipelineExecutionConsumer {
   private consumer: AmqpConsumer

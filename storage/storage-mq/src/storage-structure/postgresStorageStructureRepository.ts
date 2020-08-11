@@ -1,6 +1,6 @@
 import { StorageStructureRepository } from './storageStructureRepository'
 import { Pool, PoolConfig, PoolClient } from 'pg'
-import { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB, POSTGRES_SCHEMA } from '@/env'
+import { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB, POSTGRES_SCHEMA } from '../env'
 
 export class PostgresStorageStructureRepository implements StorageStructureRepository {
   connectionPool?: Pool
