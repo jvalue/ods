@@ -145,6 +145,10 @@ services:
       DATABASE_NAME: ods
       DATABASE_USER: ods_admin
       DATABASE_PW: ods_pw
+      CONNECTION_RETRIES: 5
+      CONNECTION_BACKOFF_IN_SECONDS: 2
+    depends_on:
+      - storage-db
 
   storage-swagger: # API documentation for storage service
     image: swaggerapi/swagger-ui
