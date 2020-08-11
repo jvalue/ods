@@ -10,6 +10,7 @@ import PipelineConfigEventHandler from './api/pipelineConfigEventHandler'
 import PipelineExecutionEventHandler from './api/pipelineExecutionEventHandler'
 import { PipelineExecutionConsumer } from './api/amqp/PipelineExecutionConsumer'
 import { CONNECTION_RETRIES, CONNECTION_BACKOFF } from './env'
+import PostgresRepository from './util/postgresRepository'
 
 const port = 8080
 const app = express()
@@ -18,8 +19,8 @@ app.use(cors())
 app.use(bodyParser.json({ limit: '50mb' }))
 app.use(bodyParser.urlencoded({ extended: false }))
 
-const storageContentRepository = new PostgresStorageContentRepository()
-const storageStructureRepositry = new PostgresStorageStructureRepository()
+const storageContentRepository = new PostgresStorageContentRepository(new PostgresRepository())
+const storageStructureRepositry = new PostgresStorageStructureRepository(new PostgresRepository())
 
 const pipelineConfigEventHandler = new PipelineConfigEventHandler(storageStructureRepositry)
 const pipelineExecutionEventHandler = new PipelineExecutionEventHandler(storageContentRepository)
