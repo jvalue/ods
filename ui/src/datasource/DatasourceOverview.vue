@@ -87,6 +87,20 @@
               mdi mdi-delete
             </v-icon>
           </v-btn>
+          <v-btn
+            depressed
+            small
+            class="ma-2"
+            @click="onCreatePipeline(item)"
+          >
+            Create Pipeline
+            <v-icon
+              dark
+              right
+            >
+              mdi mdi-pipe
+            </v-icon>
+          </v-btn>
         </template>
       </v-data-table>
     </v-card>
@@ -137,6 +151,10 @@ export default class DatsourceOverview extends Vue {
 
   private onDelete (datasource: Datasource): void {
     this.deleteDatasourceAction(datasource.id)
+  }
+
+  private onCreatePipeline (datasource: Datasource): void {
+    this.$router.push({ name: 'pipeline-new', params: { datasourceId: `${datasource.id}` } })
   }
 
   private filterOnlyDisplayName (value: object, search: string, item: Datasource): boolean {
