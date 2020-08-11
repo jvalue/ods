@@ -4,6 +4,13 @@ import PostgresRepository from '@/util/postgresRepository'
 import { StorageContent } from './storageContent'
 import { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB, POSTGRES_SCHEMA } from '../env'
 
+const EXISTS_TABLE_STATEMENT = (schema: string, table: string): string => `SELECT to_regclass('"${schema}"."${table}"')`
+const GET_ALL_CONTENT_STATEMENT = (schema: string, table: string): string => `SELECT * FROM "${schema}"."${table}"`
+const GET_CONTENT_STATEMENT =
+  (schema: string, table: string): string => `SELECT * FROM "${schema}"."${table}" WHERE id = $1`
+const INSERT_CONTENT_STATEMENT = (schema: string, table: string): string =>
+  `INSERT INTO "${schema}"."${table}" ("data", "pipelineId", "timestamp") VALUES ($1, $2, $3) RETURNING *`
+
 export class PostgresStorageContentRepository implements StorageContentRepository {
   postgresRepository: PostgresRepository
 
@@ -35,7 +42,7 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
 
   async existsTable (tableIdentifier: string): Promise<boolean> {
     const resultSet =
-      await this.postgresRepository.executeQuery(`SELECT to_regclass('${POSTGRES_SCHEMA}.${tableIdentifier}')`, [])
+      await this.postgresRepository.executeQuery(EXISTS_TABLE_STATEMENT(POSTGRES_SCHEMA, tableIdentifier), [])
     const tableExists = !!resultSet.rows[0].to_regclass
     return Promise.resolve(tableExists)
   }
@@ -48,7 +55,7 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
     }
 
     const resultSet =
-      await this.postgresRepository.executeQuery(`SELECT * FROM "${POSTGRES_SCHEMA}"."${tableIdentifier}"`, [])
+      await this.postgresRepository.executeQuery(GET_ALL_CONTENT_STATEMENT(POSTGRES_SCHEMA, tableIdentifier), [])
     const content = this.toContents(resultSet)
     return Promise.resolve(content)
   }
@@ -61,7 +68,7 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
     }
 
     const resultSet = await this.postgresRepository.executeQuery(
-      `SELECT * FROM "${POSTGRES_SCHEMA}"."${tableIdentifier}" WHERE id = $1`, [contentId]
+      GET_CONTENT_STATEMENT(POSTGRES_SCHEMA, tableIdentifier), [contentId]
     )
     const content = this.toContents(resultSet)
     if (!content || !content[0]) {
@@ -80,12 +87,10 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
 
     // Generate Query-String
     const data = JSON.stringify(content.data).replace("'", "''") // Escape single quotes
-    const insertStatement =
-      `INSERT INTO "${POSTGRES_SCHEMA}"."${tableIdentifier}" ("data", "pipelineId", "timestamp")
-      VALUES ($1, $2, $3) RETURNING *`
     const values = [data, parseInt(content.pipelineId), content.timestamp]
 
-    const { rows } = await this.postgresRepository.executeQuery(insertStatement, values)
+    const { rows } = await this.postgresRepository
+      .executeQuery(INSERT_CONTENT_STATEMENT(POSTGRES_SCHEMA, tableIdentifier), values)
     console.debug('Content successfully persisted.')
     return Promise.resolve(rows[0].id as number)
   }
