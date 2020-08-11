@@ -10,7 +10,6 @@ export default class PostgresRepository {
    * @returns reject promise on failure to connect
    */
   public async init (poolConfig: PoolConfig, retries: number, backoffMs: number): Promise<void> {
-    console.debug('Initializing databse connection')
     console.debug(`Connecting to database with config:\n${JSON.stringify(poolConfig)}`)
 
     // try to establish connection
