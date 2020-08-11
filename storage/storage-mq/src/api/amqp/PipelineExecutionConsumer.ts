@@ -33,39 +33,42 @@ export class PipelineExecutionConsumer {
         continue
       }
     }
-    Promise.reject(`Could not establish connection to AMQP Broker (${amqpUrl})`)
+    return Promise.reject(new Error(`Could not establish connection to AMQP Broker (${amqpUrl})`))
   }
 
   private sleep (ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms))
   }
 
-  private async initChannel (connection: AMQP.Connection) {
-    console.log(`Initializing queue "${pipelineExecutionQueue}" on exchange "${pipelineExecutionExchange}" with topic "${pipelineExecutionTopic}"`)
+  private async initChannel (connection: AMQP.Connection): Promise<void> {
+    console.log(
+      `Initializing queue "${pipelineExecutionQueue}" on exchange "${pipelineExecutionExchange}" ` +
+      `with topic "${pipelineExecutionTopic}"`
+    )
     const channel = await connection.createChannel()
 
-    channel.assertExchange(pipelineExecutionExchange, 'topic', {
+    await channel.assertExchange(pipelineExecutionExchange, 'topic', {
       durable: false
     })
 
     const q = await channel.assertQueue(pipelineExecutionQueue, {
       exclusive: false
     })
-    channel.bindQueue(q.queue, pipelineExecutionExchange, pipelineExecutionTopic)
+    await channel.bindQueue(q.queue, pipelineExecutionExchange, pipelineExecutionTopic)
 
-    channel.consume(q.queue, this.consumeEvent)
+    await channel.consume(q.queue, this.consumeEvent)
     console.info('Successfully initialized AMQP queue')
   }
 
   // use the f = () => {} syntax to access this
-  consumeEvent = async (msg: AMQP.ConsumeMessage | null) => {
+  consumeEvent = async (msg: AMQP.ConsumeMessage | null): Promise<void> => {
     if (!msg) {
       console.debug('Received empty event when listening on pipeline configs - doing nothing')
       return
     }
     console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
     if (msg.fields.routingKey === pipelineExecutionSuccessTopic) {
-      this.pipelineExecutionEventHandler.handleSuccess(JSON.parse(msg.content.toString()))
+      await this.pipelineExecutionEventHandler.handleSuccess(JSON.parse(msg.content.toString()))
     } else {
       console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
     }
