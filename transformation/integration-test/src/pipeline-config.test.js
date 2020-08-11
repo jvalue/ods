@@ -1,5 +1,5 @@
 /* eslint-env jest */
-//@ts-check
+// @ts-check
 const request = require('supertest')
 const waitOn = require('wait-on')
 const amqp = require('amqplib')
@@ -17,12 +17,10 @@ let amqpConnection
 const publishedEvents = new Map() // routing key -> received msgs []
 
 describe('Pipeline Config Test', () => {
-  console.log('Transformation-Service URL= ' + URL)
-
   beforeAll(async () => {
+    console.log('Starting pipeline config tests..')
     const pingUrl = URL + '/version'
-    console.log('Waiting for service with URL: ' + pingUrl)
-    await waitOn({ resources: [pingUrl], timeout: 50000 })
+    await waitOn({ resources: [pingUrl], timeout: 50000, log: true })
     console.log('[online] Service with URL:  ' + pingUrl)
 
     await connectAmqp(AMQP_URL)
