@@ -12,18 +12,13 @@ const MOCK_TRANSFORMATION_PORT = process.env.MOCK_TRANSFORMATION_PORT || 8083
 const MOCK_TRANSFORMATION_HOST = process.env.MOCK_TRANSFORMATION_HOST || 'localhost'
 const MOCK_TRANSFORMATION_URL = 'http://' + MOCK_TRANSFORMATION_HOST + ':' + MOCK_TRANSFORMATION_PORT
 
-const RABBIT_HEALTH_URL = process.env.RABBIT_HEALTH_URL
-
 describe('Scheduler', () => {
   console.log('Scheduler-Service URL= ' + URL)
 
   beforeAll(async () => {
     const pingUrl = URL + '/'
-    console.log('Waiting for service with URL: ' + MOCK_ADAPTER_URL)
-    console.log('Waiting for service with URL: ' + MOCK_TRANSFORMATION_URL)
-    console.log('Waiting for rabbitMQ with URL: ' + RABBIT_HEALTH_URL)
     await waitOn(
-      { resources: [MOCK_ADAPTER_URL, MOCK_TRANSFORMATION_URL], timeout: 50000 })
+      { resources: [MOCK_ADAPTER_URL, MOCK_TRANSFORMATION_URL], timeout: 50000, log: true })
     console.log('Waiting for service with URL: ' + pingUrl)
     await waitOn({ resources: [pingUrl], timeout: 50000 })
   }, 60000)
