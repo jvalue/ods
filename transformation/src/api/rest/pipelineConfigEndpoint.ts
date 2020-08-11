@@ -1,7 +1,7 @@
 import * as express from 'express'
 import axios from 'axios'
 
-import PipelineConfigTriggerRequest from './pipelineConfigTriggerRequest'
+import PipelineConfigTriggerRequest from '../pipelineConfigTriggerRequest'
 import { PipelineConfigManager } from '../../pipeline-config/pipelineConfigManager'
 import PipelineConfig from '@/pipeline-config/model/pipelineConfig'
 
