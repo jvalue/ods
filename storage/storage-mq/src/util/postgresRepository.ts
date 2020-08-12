@@ -11,7 +11,7 @@ export default class PostgresRepository {
    */
   public async init (poolConfig: PoolConfig, retries: number, backoffMs: number): Promise<void> {
     this.connectionPool = await this.connectWithRetry(poolConfig, retries, backoffMs)
-    console.info('Sucessfully established connection to database.')
+    console.info('Successfully established connection to database.')
   }
 
   private async connectWithRetry (poolConfig: PoolConfig, retries: number, backoffMs: number): Promise<Pool> {
@@ -52,7 +52,7 @@ export default class PostgresRepository {
 
   private assertInitialized (): Promise<void> {
     if (!this.connectionPool) {
-      return Promise.reject(new Error('No connnection pool available'))
+      return Promise.reject(new Error('No connection pool available'))
     } else {
       return Promise.resolve()
     }
