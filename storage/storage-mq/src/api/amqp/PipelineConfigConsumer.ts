@@ -29,7 +29,7 @@ export class PipelineConfigConsumer {
     )
   }
 
-  // use the f = () => {} syntax to access this
+  // use the f = () => {} syntax to access 'this' scope
   consumeEvent = async (msg: AMQP.ConsumeMessage | null): Promise<void> => {
     if (!msg) {
       console.debug('Received empty event when listening on pipeline configs - doing nothing')
