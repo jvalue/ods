@@ -73,12 +73,15 @@ services:
     image: ${DOCKER_REGISTRY}/storage-mq
     build: ./storage/storage-mq/
     environment:
-      DATABASE_HOST: storage-db
-      DATABASE_PORT: 5432
-      DATABASE_NAME: ods
-      DATABASE_USER: storagemq
-      DATABASE_PW: storagemq-pw
-      DATABASE_SCHEMA: 'storage'
+      CONNECTION_RETRIES: 30
+      CONNECTION_BACKOFF_IN_MS: 2000
+
+      POSTGRES_HOST: storage-db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ods
+      POSTGRES_USER: storagemq
+      POSTGRES_PW: storagemq-pw
+      POSTGRES_SCHEMA: 'storage'
 
       AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
 
