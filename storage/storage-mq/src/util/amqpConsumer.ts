@@ -4,27 +4,24 @@ export default class AmqpConsumer {
   private connection?: AMQP.Connection
 
   public async init (amqpUrl: string, retries: number, msBackoff: number): Promise<void> {
+    let lastError: Error | undefined
     for (let i = 0; i <= retries; i++) {
       try {
         this.connection = await this.connect(amqpUrl)
         return
       } catch (error) {
-        console.error(`Error initializing the AMQP Client (${i}/${retries}):
-        ${error}. Retrying in ${msBackoff}...`)
-        await this.sleep(msBackoff)
+        console.error(`Error connecting to AMQP (${i}/${retries})`)
+        lastError = error
       }
+      await this.sleep(msBackoff)
     }
-    return Promise.reject(new Error(`Could not connect to AMQP broker at ${amqpUrl}`))
+    return Promise.reject(lastError)
   }
 
   private async connect (amqpUrl: string): Promise<AMQP.Connection> {
-    try {
-      const connection = await AMQP.connect(amqpUrl)
-      console.log(`Connection to amqp host at ${amqpUrl} successful`)
-      return connection
-    } catch (error) {
-      return Promise.reject(new Error(`Error connecting to amqp host at ${amqpUrl}: ${error}`))
-    }
+    const connection = await AMQP.connect(amqpUrl)
+    console.log(`Connection to amqp host at ${amqpUrl} successful`)
+    return connection
   }
 
   private initChannel = async (connection: AMQP.Connection, exchange: string): Promise<AMQP.Channel> => {
