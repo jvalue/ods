@@ -12,13 +12,13 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { Watch, Prop } from 'vue-property-decorator'
+import { Watch } from 'vue-property-decorator'
 
 import MonacoEditor, { MonacoEditorConstructor } from 'vue-monaco'
 import * as monaco from 'monaco-editor'
 
 import { JobResult, JobError } from './transformation'
-import { Action, State, Mutation } from 'vuex-class'
+import { Action, State } from 'vuex-class'
 import { Data } from '../../../datasource/datasource'
 
 const namespace = { namespace: 'transformation' }
@@ -45,7 +45,7 @@ export default class CodeEditor extends Vue {
   @Action('setFunctionAndSubmit', namespace)
   private setFunctionAndSubmit!: (value: string) => void
 
-  private get code () {
+  private get code (): string {
     return this.function
   }
 
