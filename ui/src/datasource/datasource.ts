@@ -25,7 +25,9 @@ export interface Trigger {
   firstExecution: Date;
 }
 
-export interface Data {
+export interface DataLocation {
   id: number;
   location: string;
 }
+
+export type Data = object
