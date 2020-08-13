@@ -96,12 +96,10 @@ export default class PipelineTransformationConfig extends Vue {
 
   @Watch('datasourceId')
   onDatasourceIdChanged (): void {
-    console.log(this.datasourceId)
     this.loadDataFromDatasource(this.datasourceId)
   }
 
   created (): void {
-    console.log('created')
     this.loadDataFromDatasource(this.datasourceId)
     this.setFunctionAndSubmit(this.value.func)
   }
@@ -119,13 +117,11 @@ export default class PipelineTransformationConfig extends Vue {
 
   @Watch('value')
   onValueChanged (): void {
-    console.log('value changed')
     this.setFunctionAndSubmit(this.value.func)
   }
 
   @Watch('function')
   onFunctionChanged (): void {
-    console.log('function changed')
     this.emitValue()
   }
 

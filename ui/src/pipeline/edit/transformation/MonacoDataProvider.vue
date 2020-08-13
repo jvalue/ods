@@ -56,7 +56,6 @@ export default class MonacoDataProvider extends Vue {
 
   @Watch('data')
   onDataChange (): void {
-    console.log('data change')
     this.text = this.formatJson(this.data)
   }
 

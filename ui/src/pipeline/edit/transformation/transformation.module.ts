@@ -61,10 +61,8 @@ export default class TransformationModule extends VuexModule {
 
   @Action
   public async scheduleSubmit (): Promise<void> {
-    console.log('scheduling')
     if (this.timeoutHandle !== null) {
       window.clearTimeout(this.timeoutHandle)
-      console.log('clearing')
     }
     const handle = window.setTimeout(() => this.context.dispatch('transformData'), 1500)
     this.context.commit('setTimeoutHandle', handle)
@@ -72,9 +70,7 @@ export default class TransformationModule extends VuexModule {
 
   @Action
   public async transformData (): Promise<void> {
-    console.log('transforming data')
     if (this.data === null) {
-      console.log('data null, canceling')
       return
     }
     this.context.commit('setIsLoadingResult', true)
