@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from 'axios'
-import Datasource, { Data } from './datasource'
+import Datasource, { Data, DataLocation } from './datasource'
 
 const ADAPTER_SERVICE_URL = process.env.VUE_APP_ADAPTER_SERVICE_URL as string
 
@@ -49,11 +49,11 @@ export async function deleteDatasource (id: number): Promise<AxiosResponse> {
   return http.delete(`/datasources/${id}`)
 }
 
-export async function getDatasourceData (id: number): Promise<any> {
+export async function getDatasourceData (id: number): Promise<Data> {
   const importResponse = await http.post<string>(`/datasources/${id}/trigger`)
-  const jsonResponse = JSON.parse(importResponse.data) as Data
+  const jsonResponse = JSON.parse(importResponse.data) as DataLocation
   const location = jsonResponse.location
   const dataResponse = await http.get<string>(location)
-  const data = JSON.parse(dataResponse.data)
+  const data = JSON.parse(dataResponse.data) as Data
   return data
 }

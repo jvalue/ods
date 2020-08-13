@@ -21,6 +21,7 @@ import { Prop, Watch } from 'vue-property-decorator'
 
 import MonacoEditor from 'vue-monaco'
 import { Mutation, State, Action } from 'vuex-class'
+import { Data } from '@/datasource/datasource'
 
 const namespace = { namespace: 'transformation' }
 
@@ -38,11 +39,11 @@ export default class MonacoDataProvider extends Vue {
 
   /** from vuex module */
   @State('data', namespace)
-  private data!: any | null
+  private data!: Data | null
 
   /** from vuex module */
   @Action('setDataAndSubmit', namespace)
-  private setDataAndSubmit!: (value: any) => void
+  private setDataAndSubmit!: (value: Data) => void
 
   /** displayed in the monaco instance */
   text = ''
@@ -56,6 +57,7 @@ export default class MonacoDataProvider extends Vue {
 
   @Watch('data')
   onDataChange (): void {
+    if (this.data === null) return
     this.text = this.formatJson(this.data)
   }
 

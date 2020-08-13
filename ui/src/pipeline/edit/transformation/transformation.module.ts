@@ -4,10 +4,11 @@ import * as TransformationRest from './transformationRest'
 import { TransformationRequest, JobResult } from './transformation'
 
 import * as DatasourceRest from '@/datasource/datasourceRest'
+import { Data } from '@/datasource/datasource'
 
 @Module({ namespaced: true })
 export default class TransformationModule extends VuexModule {
-  private data: any | null = null
+  private data: Data | null = null
   private function = ''
   private result: JobResult | null = null
 
@@ -16,12 +17,12 @@ export default class TransformationModule extends VuexModule {
 
   private timeoutHandle: number | null = null
 
-  @Mutation public setData (value: any): void {
+  @Mutation public setData (value: Data): void {
     this.data = value
     this.isLoadingData = false
   }
 
-  @Action public setDataAndSubmit (value: any): void {
+  @Action public setDataAndSubmit (value: Data): void {
     this.context.commit('setData', value)
     this.context.dispatch('scheduleSubmit')
   }

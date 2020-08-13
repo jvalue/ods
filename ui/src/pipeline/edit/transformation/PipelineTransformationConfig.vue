@@ -46,6 +46,7 @@ import { JobResult, TransformationRequest } from './transformation'
 import MonacoDataProvider from './MonacoDataProvider.vue'
 import CodeEditor from './CodeEditor.vue'
 import ResultView from './ResultView.vue'
+import { Data } from '@/datasource/datasource'
 
 const namespace = { namespace: 'transformation' }
 
@@ -64,7 +65,7 @@ export default class PipelineTransformationConfig extends Vue {
 
   /** from vuex module */
   @State('data', namespace)
-  private data!: any
+  private data!: Data | null
 
   /** from vuex module */
   @State('function', namespace)

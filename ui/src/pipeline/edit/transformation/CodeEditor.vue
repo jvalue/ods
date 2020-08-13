@@ -19,6 +19,7 @@ import * as monaco from 'monaco-editor'
 
 import { JobResult, JobError } from './transformation'
 import { Action, State, Mutation } from 'vuex-class'
+import { Data } from '../../../datasource/datasource'
 
 const namespace = { namespace: 'transformation' }
 
@@ -30,7 +31,7 @@ const namespace = { namespace: 'transformation' }
 export default class CodeEditor extends Vue {
   /** from vuex module */
   @Action('data', namespace)
-  private data!: any
+  private data!: Data | null
 
   /** from vuex module */
   @State('function', namespace)
@@ -42,7 +43,7 @@ export default class CodeEditor extends Vue {
 
   /** from vuex module */
   @Action('setFunctionAndSubmit', namespace)
-  private setFunctionAndSubmit!: (value: any) => void
+  private setFunctionAndSubmit!: (value: string) => void
 
   private get code () {
     return this.function
@@ -148,6 +149,7 @@ export default class CodeEditor extends Vue {
   }
 
   editorDidMount (): void {
+    if (this.data === null) return
     this.setEditorJavascriptDefaults(this.data)
   }
 }
