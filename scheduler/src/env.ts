@@ -12,5 +12,6 @@ const getEnv = (envName: string): string => {
   return env as string
 }
 
+export const MAX_TRIGGER_RETRIES = +getEnv('MAX_TRIGGER_RETRIES')
 export const INITIAL_CONNECTION_RETRIES = +getEnv('INITIAL_CONNECTION_RETRIES')
 export const INITIAL_CONNECTION_RETRY_BACKOFF = +getEnv('INITIAL_CONNECTION_RETRY_BACKOFF')

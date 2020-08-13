@@ -39,4 +39,6 @@ export async function executeAdapter (adapterConfig: DatasourceConfig): Promise<
   return response.data
 }
 
-/** DATASOURCE EVENTS RELATED **/
+export async function triggerDatasource (datasourceId: number): Promise<void> {
+  return await http.post(`/datasources/${datasourceId}/trigger`)
+}
