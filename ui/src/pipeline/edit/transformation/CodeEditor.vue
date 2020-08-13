@@ -66,6 +66,11 @@ export default class CodeEditor extends Vue {
   private lib: monaco.IDisposable | null = null
   private decorations: string[] = []
 
+  /**
+   * Set autocomplete details for the data object
+   * @param {Data} data the example data
+   * @returns {void}
+   */
   setEditorJavascriptDefaults (data: object): void {
     const monaco = this.$refs.editor.monaco
     const json = JSON.stringify(data)
