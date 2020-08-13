@@ -22,6 +22,7 @@ export default class TransformationModule extends VuexModule {
     this.isLoadingData = false
   }
 
+  // has to be an action because of the asynchronous submit
   @Action public setDataAndSubmit (value: Data): void {
     this.context.commit('setData', value)
     this.context.dispatch('scheduleSubmit')
@@ -31,6 +32,7 @@ export default class TransformationModule extends VuexModule {
     this.function = value
   }
 
+  // has to be an action because of the asynchronous submit
   @Action public setFunctionAndSubmit (value: string): void {
     this.context.commit('setFunction', value)
     this.context.dispatch('scheduleSubmit')
@@ -62,10 +64,13 @@ export default class TransformationModule extends VuexModule {
 
   @Action
   public async scheduleSubmit (): Promise<void> {
+    // if there is another submit schedule, abort it
     if (this.timeoutHandle !== null) {
       window.clearTimeout(this.timeoutHandle)
     }
+    // schedule the dispatch and get the handle
     const handle = window.setTimeout(() => this.context.dispatch('transformData'), 1500)
+    // save the handle in the module state
     this.context.commit('setTimeoutHandle', handle)
   }
 
@@ -75,9 +80,11 @@ export default class TransformationModule extends VuexModule {
       return
     }
     this.context.commit('setIsLoadingResult', true)
+    // reset timeout handle
     this.context.commit('setTimeoutHandle', null)
     const request: TransformationRequest = { data: this.data, func: this.function }
     const result = await TransformationRest.transformData(request)
+    // save the result in the module state
     this.context.commit('setResult', result)
   }
 }
