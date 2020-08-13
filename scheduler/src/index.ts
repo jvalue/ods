@@ -6,8 +6,8 @@ import * as Scheduling from './scheduling'
 
 import {
   INITIAL_CONNECTION_RETRIES,
-  INITIAL_CONNECTION_RETRY_BACKOFF,
-  }
+  INITIAL_CONNECTION_RETRY_BACKOFF
+}
   from './env'
 
 const app = express()
@@ -16,7 +16,6 @@ const port = 8080
 const API_VERSION = '0.0.1'
 
 const CHRONJOB_EVERY_2_SECONDS = '*/2 * * * * *'
-
 
 const server = app.listen(port, async () => {
   await initJobs(INITIAL_CONNECTION_RETRIES, INITIAL_CONNECTION_RETRY_BACKOFF)
