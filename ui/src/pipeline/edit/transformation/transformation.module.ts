@@ -57,7 +57,7 @@ export default class TransformationModule extends VuexModule {
   public async loadDataFromDatasource (datasourceId: number): Promise<void> {
     this.context.commit('setIsLoadingData', true)
     const data = await DatasourceRest.getDatasourceData(datasourceId)
-    this.context.commit('setData', data)
+    this.context.dispatch('setDataAndSubmit', data)
   }
 
   @Action
