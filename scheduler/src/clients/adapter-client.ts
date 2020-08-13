@@ -3,7 +3,7 @@ import axios from 'axios'
 import DatasourceConfig from '../interfaces/datasource-config'
 import DatasourceEvent from '@/interfaces/datasource-event'
 
-export const ADAPTER_SERVICE_URL = process.env.ADAPTER_SERVICE_URL || 'http://localhost:8082'
+import { ADAPTER_SERVICE_URL } from '../env'
 
 const http = axios.create({
   baseURL: ADAPTER_SERVICE_URL,
