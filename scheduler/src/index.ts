@@ -3,11 +3,11 @@ import express from 'express'
 import schedule from 'node-schedule'
 
 import * as Scheduling from './scheduling'
-import { ADAPTER_SERVICE_URL } from './clients/adapter-client'
 
 import {
   INITIAL_CONNECTION_RETRIES,
-  INITIAL_CONNECTION_RETRY_BACKOFF }
+  INITIAL_CONNECTION_RETRY_BACKOFF,
+  }
   from './env'
 
 const app = express()
@@ -49,7 +49,6 @@ async function updateDatsources (): Promise<void> {
 }
 
 async function initJobs (retries = 30, retryBackoff = 3000): Promise<void> {
-  console.log('Starting sync with Adapter Service on URL ' + ADAPTER_SERVICE_URL)
   await Scheduling.initializeJobs(retries, retryBackoff)
     .catch(() => {
       console.error('Scheduler: Initialization failed. Shutting down server...')
