@@ -5,9 +5,10 @@ import schedule from 'node-schedule'
 import * as AdapterClient from './clients/adapter-client'
 import * as Scheduling from './scheduling'
 
-import * as WorkflowExecution from './workflow-execution'
 import DatasourceConfig from './interfaces/datasource-config'
 import DatasourceEvent, { EventType } from './interfaces/datasource-event'
+
+import { MAX_TRIGGER_RETRIES } from './env'
 
 const allJobs: Map<number, ExecutionJob> = new Map() // datasourceId -> job
 let currentEventId: number
@@ -132,7 +133,7 @@ export function determineExecutionDate (datasourceConfig: DatasourceConfig): Dat
 
 export function scheduleDatasource (datasourceConfig: DatasourceConfig): ExecutionJob {
   const executionDate: Date = determineExecutionDate(datasourceConfig)
-  console.log(`Datasource ${datasourceConfig.id} with consecutive pipelines scheduled 
+  console.log(`Datasource ${datasourceConfig.id} with consecutive pipelines scheduled
   for next execution at ${executionDate.toLocaleString()}.`)
 
   const datasourceId = datasourceConfig.id
@@ -147,7 +148,23 @@ export function scheduleDatasource (datasourceConfig: DatasourceConfig): Executi
 }
 
 async function execute (datasourceConfig: DatasourceConfig): Promise<void> {
-  await WorkflowExecution.execute(datasourceConfig)
+  const datasourceId = datasourceConfig.id
+  for (let i = 0; i < MAX_TRIGGER_RETRIES; i++) {
+    try {
+      await AdapterClient.triggerDatasource(datasourceId)
+      console.log(`Datasource ${datasourceId} triggered.`)
+    } catch (httpError) {
+      if (httpError.response) {
+        console.log(`Adapter was reachable but triggering datasource failed:
+         ${httpError.response.status}: ${httpError.response.data}`)
+      } else if (httpError.request) {
+        console.log(`Not able to reach adapter when triggering datasource ${datasourceId}: ${httpError.request}`)
+      } else {
+        console.log(`Triggering datasource ${datasourceId} failed: ${httpError.message}`)
+      }
+      console.log(`Retrying (${i}/${MAX_TRIGGER_RETRIES})`)
+    }
+  }
 
   if (datasourceConfig.trigger.periodic) {
     scheduleDatasource(datasourceConfig)
