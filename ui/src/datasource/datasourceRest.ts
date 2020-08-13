@@ -55,6 +55,5 @@ export async function getDatasourceData (id: number): Promise<any> {
   const location = jsonResponse.location
   const dataResponse = await http.get<string>(location)
   const data = JSON.parse(dataResponse.data)
-  console.log(data)
   return data
 }
