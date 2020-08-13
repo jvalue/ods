@@ -17,10 +17,10 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { Prop, Watch } from 'vue-property-decorator'
+import { Watch } from 'vue-property-decorator'
 
 import MonacoEditor from 'vue-monaco'
-import { Mutation, State, Action } from 'vuex-class'
+import { Action, State } from 'vuex-class'
 import { Data } from '@/datasource/datasource'
 
 const namespace = { namespace: 'transformation' }
@@ -48,7 +48,7 @@ export default class MonacoDataProvider extends Vue {
   /** displayed in the monaco instance */
   text = ''
 
-  /** JSON parsing errors*/
+  /** JSON parsing errors */
   error: Error | null = null
 
   private formatJson (o: object): string {

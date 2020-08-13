@@ -38,10 +38,10 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 
 import { Emit, Watch, Prop } from 'vue-property-decorator'
-import { Action, State, Mutation } from 'vuex-class'
+import { Action, State } from 'vuex-class'
 
 import { TransformationConfig } from '../../pipeline'
-import { JobResult, TransformationRequest } from './transformation'
+import { JobResult } from './transformation'
 
 import MonacoDataProvider from './MonacoDataProvider.vue'
 import CodeEditor from './CodeEditor.vue'
