@@ -57,7 +57,6 @@ services:
       context: ./scheduler/
     environment:
       ADAPTER_SERVICE_URL: http://adapter:8080
-      TRANSFORMATION_SERVICE_URL: http://transformation:8080
       INITIAL_CONNECTION_RETRIES: 20
       INITIAL_CONNECTION_RETRY_BACKOFF: 5000
       MAX_TRIGGER_RETRIES: 2
