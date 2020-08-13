@@ -101,7 +101,9 @@ export default class PipelineTransformationConfig extends Vue {
   }
 
   created (): void {
-    this.loadDataFromDatasource(this.datasourceId)
+    if (this.datasourceId !== -1) {
+      this.loadDataFromDatasource(this.datasourceId)
+    }
     this.setFunctionAndSubmit(this.value.func)
   }
 
