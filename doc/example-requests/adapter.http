@@ -132,7 +132,7 @@ Content-Type: application/json
   }
 }
 
-### Performe Manual Data Import without runtime parameters
+### Perform manual data import without runtime parameters
 POST {{baseURL}}/datasources/{{datasourceId}}/trigger HTTP/1.1
 Content-Type: application/json
 
@@ -167,7 +167,7 @@ Content-Type: application/json
   }
 }
 
-### Perform Manual Data Import with runtime parameters
+### Perform manual data import with runtime parameters
 POST {{baseURL}}/datasources/{{datasourceId}}/trigger HTTP/1.1
 Content-Type: application/json
 
