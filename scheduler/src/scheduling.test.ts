@@ -16,6 +16,10 @@ const mockedGetAllDatasources = getAllDatasources as jest.Mock
 const mockedGetEventsAfter = getEventsAfter as jest.Mock
 const mockedGetDatasource = getDatasource as jest.Mock
 
+jest.mock('./env', () => () => ({
+  MAX_TRIGGER_RETRIES: 2
+}))
+
 describe('Scheduler', () => {
   test('should initialize jobs correctly', async () => {
     const config = generateConfig(true, new Date(Date.now() + 5000), 6000)
