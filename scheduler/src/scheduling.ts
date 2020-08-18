@@ -147,6 +147,16 @@ export function scheduleDatasource (datasourceConfig: DatasourceConfig): Executi
   return datasourceJob
 }
 
+const reschedule = (datasourceConfig: DatasourceConfig): void => {
+  if (datasourceConfig.trigger.periodic) {
+    scheduleDatasource(datasourceConfig)
+  } else {
+    console.log(`Datasource ${datasourceConfig.id} is not periodic. Removing it from scheduling.`)
+    removeJob(datasourceConfig.id)
+    console.log(`Successfully removed datasource ${datasourceConfig.id} from scheduling.`)
+  }
+}
+
 async function execute (datasourceConfig: DatasourceConfig): Promise<void> {
   const datasourceId = datasourceConfig.id
   for (let i = 0; i < MAX_TRIGGER_RETRIES; i++) {
@@ -155,24 +165,21 @@ async function execute (datasourceConfig: DatasourceConfig): Promise<void> {
       console.log(`Datasource ${datasourceId} triggered.`)
     } catch (httpError) {
       if (httpError.response) {
-        console.log(`Adapter was reachable but triggering datasource failed:
+        console.debug(`Adapter was reachable but triggering datasource failed:
          ${httpError.response.status}: ${httpError.response.data}`)
       } else if (httpError.request) {
-        console.log(`Not able to reach adapter when triggering datasource ${datasourceId}: ${httpError.request}`)
+        console.debug(`Not able to reach adapter when triggering datasource ${datasourceId}: ${httpError.request}`)
       } else {
-        console.log(`Triggering datasource ${datasourceId} failed: ${httpError.message}`)
+        console.debug(`Triggering datasource ${datasourceId} failed: ${httpError.message}`)
       }
-      console.log(`Retrying (${i}/${MAX_TRIGGER_RETRIES})`)
+      if (i === MAX_TRIGGER_RETRIES - 1) { // last retry
+        console.error(`Could not trigger datasource ${datasourceId}: ${httpError}`)
+        break
+      }
+      console.info(`Triggering datasource failed - retrying (${i}/${MAX_TRIGGER_RETRIES})`)
     }
   }
-
-  if (datasourceConfig.trigger.periodic) {
-    scheduleDatasource(datasourceConfig)
-  } else {
-    console.log(`Datasource ${datasourceConfig.id} is not periodic. Removing it from scheduling.`)
-    removeJob(datasourceConfig.id)
-    console.log(`Successfully removed datasource ${datasourceConfig.id} from scheduling.`)
-  }
+  reschedule(datasourceConfig)
 }
 
 export async function upsertJob (datasourceConfig: DatasourceConfig): Promise<ExecutionJob> {
