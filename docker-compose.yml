@@ -60,11 +60,6 @@ services:
       INITIAL_CONNECTION_RETRY_BACKOFF: 5000
     build:
       context: ./scheduler/
-      args:
-        - MAX_TRIGGER_RETRIES=2
-        - ADAPTER_SERVICE_URL=http://adapter:8080
-        - INITIAL_CONNECTION_RETRIES=20
-        - INITIAL_CONNECTION_RETRY_BACKOFF=5000
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-scheduler.rule=PathPrefix(`/api/scheduler`)"
