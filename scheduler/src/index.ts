@@ -5,8 +5,8 @@ import schedule from 'node-schedule'
 import * as Scheduling from './scheduling'
 
 import {
-  INITIAL_CONNECTION_RETRIES,
-  INITIAL_CONNECTION_RETRY_BACKOFF
+  CONNECTION_RETRIES,
+  CONNECTION_BACKOFF_IN_MS
 }
   from './env'
 
@@ -18,7 +18,7 @@ const API_VERSION = '0.0.1'
 const CHRONJOB_EVERY_2_SECONDS = '*/2 * * * * *'
 
 const server = app.listen(port, async () => {
-  await initJobs(INITIAL_CONNECTION_RETRIES, INITIAL_CONNECTION_RETRY_BACKOFF)
+  await initJobs(CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS)
   console.log('listening on port ' + port)
 
   app.get('/', (req, res) => {
