@@ -3,7 +3,12 @@ import express from 'express'
 import schedule from 'node-schedule'
 
 import * as Scheduling from './scheduling'
-import { ADAPTER_SERVICE_URL } from './clients/adapter-client'
+
+import {
+  CONNECTION_RETRIES,
+  CONNECTION_BACKOFF_IN_MS
+}
+  from './env'
 
 const app = express()
 const port = 8080
@@ -12,11 +17,8 @@ const API_VERSION = '0.0.1'
 
 const CHRONJOB_EVERY_2_SECONDS = '*/2 * * * * *'
 
-const INITIAL_CONNECTION_RETRIES = parseInt(process.env.INITIAL_CONNECTION_RETRIES || '30')
-const INITIAL_CONNECTION_RETRY_BACKOFF = parseInt(process.env.INITIAL_CONNECTION_RETRY_BACKOFF || '3000')
-
 const server = app.listen(port, async () => {
-  await initJobs(INITIAL_CONNECTION_RETRIES, INITIAL_CONNECTION_RETRY_BACKOFF)
+  await initJobs(CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS)
   console.log('listening on port ' + port)
 
   app.get('/', (req, res) => {
@@ -46,7 +48,6 @@ async function updateDatsources (): Promise<void> {
 }
 
 async function initJobs (retries = 30, retryBackoff = 3000): Promise<void> {
-  console.log('Starting sync with Adapter Service on URL ' + ADAPTER_SERVICE_URL)
   await Scheduling.initializeJobs(retries, retryBackoff)
     .catch(() => {
       console.error('Scheduler: Initialization failed. Shutting down server...')

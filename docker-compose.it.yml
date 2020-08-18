@@ -33,11 +33,7 @@ services:
     ports:
       - "9300:8080"
     environment:
-      CONFIG_SERVICE_URL: http://scheduler-it:8081
-      ADAPTER_SERVICE_URL: http://scheduler-it:8082
-      TRANSFORMATION_SERVICE_URL: http://scheduler-it:8083
-      NOTIFICATION_SERVICE_URL: http://scheduler-it:8084
-      STORAGE_SERVICE_URL: http://scheduler-it:8085
+      ADAPTER_SERVICE_URL: http://scheduler-it:8081
 
   scheduler-it:
     image: open-data-service/ods-main/scheduler-it
@@ -46,9 +42,7 @@ services:
     environment:
       SCHEDULER_API: http://scheduler:8080
       MOCK_ADAPTER_HOST: scheduler-it
-      MOCK_ADAPTER_PORT: 8082
-      MOCK_TRANSFORMATION_HOST: scheduler-it
-      MOCK_TRANSFORMATION_PORT: 8083
+      MOCK_ADAPTER_PORT: 8081
     depends_on:
       - rabbitmq
 
