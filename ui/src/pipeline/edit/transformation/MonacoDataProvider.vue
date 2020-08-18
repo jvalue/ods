@@ -65,7 +65,6 @@ export default class MonacoDataProvider extends Vue {
     try {
       const newObject = JSON.parse(this.text)
       this.setDataAndSubmit(newObject)
-      // this.text = this.formatJson(newObject) // TODO: improve automatic formatting
       this.error = null
     } catch (error) {
       this.error = error
