@@ -24,3 +24,10 @@ export interface Trigger {
   interval: number;
   firstExecution: Date;
 }
+
+export interface DataLocation {
+  id: number;
+  location: string;
+}
+
+export type Data = object

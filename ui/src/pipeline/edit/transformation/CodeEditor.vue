@@ -12,12 +12,16 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { Watch, Prop } from 'vue-property-decorator'
+import { Watch } from 'vue-property-decorator'
 
 import MonacoEditor, { MonacoEditorConstructor } from 'vue-monaco'
 import * as monaco from 'monaco-editor'
 
 import { JobResult, JobError } from './transformation'
+import { Action, State } from 'vuex-class'
+import { Data } from '../../../datasource/datasource'
+
+const namespace = { namespace: 'transformation' }
 
 @Component({
   components: {
@@ -25,9 +29,29 @@ import { JobResult, JobError } from './transformation'
   }
 })
 export default class CodeEditor extends Vue {
-  @Prop() readonly value!: string
-  @Prop() readonly data!: object
-  @Prop() readonly result!: JobResult | null
+  /** from vuex module */
+  @Action('data', namespace)
+  private data!: Data | null
+
+  /** from vuex module */
+  @State('function', namespace)
+  private function!: string
+
+  /** from vuex module */
+  @State('result', namespace)
+  private result!: JobResult | null
+
+  /** from vuex module */
+  @Action('setFunctionAndSubmit', namespace)
+  private setFunctionAndSubmit!: (value: string) => void
+
+  private get code (): string {
+    return this.function
+  }
+
+  private set code (value: string) {
+    this.setFunctionAndSubmit(value)
+  }
 
   public $refs!: Vue['$refs'] & {
     editor: MonacoEditorConstructor;
@@ -42,14 +66,11 @@ export default class CodeEditor extends Vue {
   private lib: monaco.IDisposable | null = null
   private decorations: string[] = []
 
-  get code (): string {
-    return this.value
-  }
-
-  set code (code: string) {
-    this.$emit('input', code)
-  }
-
+  /**
+   * Set autocomplete details for the data object
+   * @param {Data} data the example data
+   * @returns {void}
+   */
   setEditorJavascriptDefaults (data: object): void {
     const monaco = this.$refs.editor.monaco
     const json = JSON.stringify(data)
@@ -133,6 +154,7 @@ export default class CodeEditor extends Vue {
   }
 
   editorDidMount (): void {
+    if (this.data === null) return
     this.setEditorJavascriptDefaults(this.data)
   }
 }
