@@ -1,10 +1,11 @@
 FROM node:lts-alpine as builder
 
-COPY ./src ./src
 COPY ./package*.json ./
-COPY ./.eslintrc ./
-
 RUN npm ci
+
+COPY ./.eslintrc ./
+COPY ./src ./src
+
 RUN npm run lint
 
 EXPOSE 8080
