@@ -3,7 +3,7 @@ import axios from 'axios'
 
 import { PipelineConfigTriggerRequestValidator } from '../pipelineConfigTriggerRequest'
 import { PipelineConfigManager } from '@/pipeline-config/pipelineConfigManager'
-import { PipelineConfig } from '@/pipeline-config/model/pipelineConfig'
+import { PipelineConfigValidator } from '@/pipeline-config/model/pipelineConfig'
 
 export class PipelineConfigEndpoint {
   pipelineConfigManager: PipelineConfigManager
@@ -25,10 +25,7 @@ export class PipelineConfigEndpoint {
   triggerConfigExecution = async (req: express.Request, res: express.Response): Promise<void> => {
     const validator = new PipelineConfigTriggerRequestValidator()
     if (!validator.validate(req.body)) {
-      res.status(400)
-      res.json({
-        errors: validator.getErrors()
-      })
+      res.status(400).json({ errors: validator.getErrors() })
       return
     }
     const triggerRequest = req.body
@@ -75,10 +72,12 @@ export class PipelineConfigEndpoint {
       res.status(400).send('Path parameter id is missing or is incorrect')
       return
     }
-    const config = req.body as PipelineConfig // TODO validate input
-    if (!config.transformation) {
-      config.transformation = { func: 'return data;' }
+    const validator = new PipelineConfigValidator()
+    if (!validator.validate(req.body)) {
+      res.status(400).json({ errors: validator.getErrors() })
+      return
     }
+    const config = req.body
     try {
       await this.pipelineConfigManager.update(configId, config)
     } catch (e) {
@@ -90,10 +89,12 @@ export class PipelineConfigEndpoint {
   }
 
   create = async (req: express.Request, res: express.Response): Promise<void> => {
-    const config = req.body as PipelineConfig // TODO validate input
-    if (!config.transformation) {
-      config.transformation = { func: 'return data;' }
+    const validator = new PipelineConfigValidator()
+    if (!validator.validate(req.body)) {
+      res.status(400).json({ errors: validator.getErrors() })
+      return
     }
+    const config = req.body
     const savedConfig = await this.pipelineConfigManager.create(config)
     res.location(`/configs/${savedConfig.id}`).status(201).json(savedConfig)
   }
