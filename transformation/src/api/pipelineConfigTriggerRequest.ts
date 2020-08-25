@@ -11,6 +11,10 @@ export class PipelineConfigTriggerRequestValidator {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   validate (requestBody: any): requestBody is PipelineConfigTriggerRequest {
     this.errors = []
+    if (typeof requestBody !== 'object') {
+      this.errors.push('\'PipelineConfigTriggerRequest\' must be an object')
+      return false
+    }
     if (!('datasourceId' in requestBody)) {
       this.errors.push('\'datasourceId\' property is missing')
     } else if (!(typeof requestBody.datasourceId === 'number')) {
