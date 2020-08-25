@@ -1,4 +1,4 @@
-export default interface PipelineConfig {
+export interface PipelineConfig {
   id: number;
   datasourceId: number;
   transformation: TransformationConfig;

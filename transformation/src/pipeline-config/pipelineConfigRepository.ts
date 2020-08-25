@@ -1,4 +1,4 @@
-import PipelineConfig from './model/pipelineConfig'
+import { PipelineConfig } from './model/pipelineConfig'
 
 export default interface PipelineConfigRepository {
   create(config: PipelineConfig): Promise<PipelineConfig>;

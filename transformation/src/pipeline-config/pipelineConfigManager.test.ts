@@ -6,7 +6,7 @@ import PipelineConfigRepository from './pipelineConfigRepository'
 import { PipelineConfigManager } from './pipelineConfigManager'
 import PipelineExecutor from '../pipeline-execution/pipelineExecutor'
 import { ExecutionResultPublisher } from './publisher/executionResultPublisher'
-import PipelineConfig from './model/pipelineConfig'
+import { PipelineConfig } from './model/pipelineConfig'
 import VM2SandboxExecutor from '../pipeline-execution/sandbox/vm2SandboxExecutor'
 
 jest.mock('../pipeline-execution/pipelineExecutor')

@@ -1,7 +1,7 @@
 import PipelineExecutor from '../pipeline-execution/pipelineExecutor'
 import { ExecutionResultPublisher } from './publisher/executionResultPublisher'
 import PipelineConfigRepository from './pipelineConfigRepository'
-import PipelineConfig from './model/pipelineConfig'
+import { PipelineConfig } from './model/pipelineConfig'
 import ConfigWritesPublisher from './publisher/configWritesPublisher'
 
 export class PipelineConfigManager {

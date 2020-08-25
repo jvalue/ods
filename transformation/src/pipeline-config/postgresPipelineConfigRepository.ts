@@ -1,7 +1,7 @@
 import { Pool, PoolConfig, PoolClient, QueryResult } from 'pg'
 
 import { POSTGRES_SCHEMA, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB } from '../env'
-import PipelineConfig from './model/pipelineConfig'
+import { PipelineConfig } from './model/pipelineConfig'
 import PipelineConfigRepository from './pipelineConfigRepository'
 
 const POSTGRES_TABLE = 'PipelineConfigs'
@@ -44,8 +44,9 @@ interface DatabasePipeline {
   func: string;
   author: string;
   displayName: string;
-  license: string; description:
-  string; createdAt: Date;
+  license: string;
+  description: string;
+  createdAt: Date;
 }
 
 export default class PostgresPipelineConfigRepository implements PipelineConfigRepository {
