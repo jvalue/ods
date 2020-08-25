@@ -2,8 +2,8 @@ import * as express from 'express'
 import axios from 'axios'
 
 import { PipelineConfigTriggerRequestValidator } from '../pipelineConfigTriggerRequest'
-import { PipelineConfigManager } from '../../pipeline-config/pipelineConfigManager'
-import PipelineConfig from '@/pipeline-config/model/pipelineConfig'
+import { PipelineConfigManager } from '@/pipeline-config/pipelineConfigManager'
+import { PipelineConfig } from '@/pipeline-config/model/pipelineConfig'
 
 export class PipelineConfigEndpoint {
   pipelineConfigManager: PipelineConfigManager
@@ -75,7 +75,7 @@ export class PipelineConfigEndpoint {
       res.status(400).send('Path parameter id is missing or is incorrect')
       return
     }
-    const config = req.body as PipelineConfig
+    const config = req.body as PipelineConfig // TODO validate input
     if (!config.transformation) {
       config.transformation = { func: 'return data;' }
     }
