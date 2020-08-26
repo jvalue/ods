@@ -1,7 +1,7 @@
 import PipelineExecutor from '../pipeline-execution/pipelineExecutor'
 import { ExecutionResultPublisher } from './publisher/executionResultPublisher'
 import PipelineConfigRepository from './pipelineConfigRepository'
-import { PipelineConfig } from './model/pipelineConfig'
+import { PipelineConfig, PipelineConfigDTO } from './model/pipelineConfig'
 import ConfigWritesPublisher from './publisher/configWritesPublisher'
 
 export class PipelineConfigManager {
@@ -22,7 +22,7 @@ export class PipelineConfigManager {
     this.executionResultPublisher = executionResultPublisher
   }
 
-  async create (config: PipelineConfig): Promise<PipelineConfig> {
+  async create (config: PipelineConfigDTO): Promise<PipelineConfig> {
     const savedConfig = await this.pipelineConfigRepository.create(config)
     const success = this.configWritesPublisher.publishCreation(savedConfig.id, savedConfig.metadata.displayName)
     if (!success) {
@@ -46,7 +46,7 @@ export class PipelineConfigManager {
     return this.pipelineConfigRepository.getByDatasourceId(datasourceId)
   }
 
-  async update (id: number, config: PipelineConfig): Promise<void> {
+  async update (id: number, config: PipelineConfigDTO): Promise<void> {
     await this.pipelineConfigRepository.update(id, config)
     const success = this.configWritesPublisher.publishUpdate(id, config.metadata.displayName)
     if (!success) {
