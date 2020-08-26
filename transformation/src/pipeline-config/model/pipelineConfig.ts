@@ -17,21 +17,28 @@ export interface Metadata {
   creationTimestamp: Date;
 }
 
-export class PipelineConfigValidator {
+export interface PipelineConfigDTO {
+  datasourceId: number;
+  transformation: TransformationConfig;
+  metadata: MetadataDTO;
+}
+
+export interface MetadataDTO {
+  author: string;
+  displayName: string;
+  license: string;
+  description: string;
+}
+
+export class PipelineConfigDTOValidator {
   private errors: string[] = []
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  validate (pipelineConfig: any): pipelineConfig is PipelineConfig {
+  validate (pipelineConfig: any): pipelineConfig is PipelineConfigDTO {
     this.errors = []
     if (typeof pipelineConfig !== 'object') {
       this.errors.push('\'PipelineConfig\' must be an object')
       return false
-    }
-
-    if (!('id' in pipelineConfig)) {
-      this.errors.push('\'id\' property is missing')
-    } else if (typeof pipelineConfig.id !== 'number') {
-      this.errors.push('\'id\' property must be a number')
     }
 
     if (!('datasourceId' in pipelineConfig)) {
@@ -81,14 +88,6 @@ export class PipelineConfigValidator {
       } else if (typeof pipelineConfig.metadata.description !== 'string') {
         this.errors.push('\'metadata.description\' property must be a string')
       }
-
-      if (!('creationTimestamp' in pipelineConfig.metadata)) {
-        this.errors.push('\'metadata.creationTimestamp\' property is missing')
-      }/* else if (typeof metadata.creationTimestamp !== 'object') {
-        this.errors.push('\'metadata.creationTimestamp\' property must be an object')
-      }
-      */
-      // ToDo: proper date checking
     }
 
     return this.errors.length === 0

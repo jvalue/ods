@@ -1,7 +1,7 @@
 import { Pool, PoolConfig, PoolClient, QueryResult } from 'pg'
 
 import { POSTGRES_SCHEMA, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB } from '../env'
-import { PipelineConfig } from './model/pipelineConfig'
+import { PipelineConfig, PipelineConfigDTO } from './model/pipelineConfig'
 import PipelineConfigRepository from './pipelineConfigRepository'
 
 const POSTGRES_TABLE = 'PipelineConfigs'
@@ -160,10 +160,7 @@ export default class PostgresPipelineConfigRepository implements PipelineConfigR
     }
   }
 
-  async create (config: PipelineConfig): Promise<PipelineConfig> {
-    delete config.id // id not under control of client
-    config.metadata.creationTimestamp = new Date()
-
+  async create (config: PipelineConfigDTO): Promise<PipelineConfig> {
     const values = [
       config.datasourceId,
       config.transformation.func,
@@ -171,7 +168,7 @@ export default class PostgresPipelineConfigRepository implements PipelineConfigR
       config.metadata.displayName,
       config.metadata.license,
       config.metadata.description,
-      config.metadata.creationTimestamp
+      new Date()
     ]
     const { rows } = await this.executeQuery(INSERT_STATEMENT, values)
     return Promise.resolve(this.toPipelineConfig(rows[0]))
@@ -198,7 +195,7 @@ export default class PostgresPipelineConfigRepository implements PipelineConfigR
     return Promise.resolve(content)
   }
 
-  async update (id: number, config: PipelineConfig): Promise<void> {
+  async update (id: number, config: PipelineConfigDTO): Promise<void> {
     const values = [
       id,
       config.datasourceId,

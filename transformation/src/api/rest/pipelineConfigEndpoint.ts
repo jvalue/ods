@@ -3,7 +3,7 @@ import axios from 'axios'
 
 import { PipelineConfigTriggerRequestValidator } from '../pipelineConfigTriggerRequest'
 import { PipelineConfigManager } from '@/pipeline-config/pipelineConfigManager'
-import { PipelineConfigValidator } from '@/pipeline-config/model/pipelineConfig'
+import { PipelineConfigDTOValidator } from '../../pipeline-config/model/pipelineConfig'
 
 export class PipelineConfigEndpoint {
   pipelineConfigManager: PipelineConfigManager
@@ -72,7 +72,7 @@ export class PipelineConfigEndpoint {
       res.status(400).send('Path parameter id is missing or is incorrect')
       return
     }
-    const validator = new PipelineConfigValidator()
+    const validator = new PipelineConfigDTOValidator()
     if (!validator.validate(req.body)) {
       res.status(400).json({ errors: validator.getErrors() })
       return
@@ -89,7 +89,7 @@ export class PipelineConfigEndpoint {
   }
 
   create = async (req: express.Request, res: express.Response): Promise<void> => {
-    const validator = new PipelineConfigValidator()
+    const validator = new PipelineConfigDTOValidator()
     if (!validator.validate(req.body)) {
       res.status(400).json({ errors: validator.getErrors() })
       return
