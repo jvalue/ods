@@ -1,7 +1,8 @@
 /* eslint-env jest */
-import { PipelineConfigDTO, PipelineConfigDTOValidator } from './pipelineConfig'
+import { PipelineConfigDTOValidator } from './pipelineConfig'
 
-const validPipelineConfig = (): PipelineConfigDTO => ({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const validPipelineConfig = (): any => ({
   datasourceId: 1,
   transformation: {
     func: 'return data+data;'
@@ -15,33 +16,85 @@ const validPipelineConfig = (): PipelineConfigDTO => ({
 })
 
 describe('PipelineConfigDTOValidator', () => {
-  test('should reject invalid pipeline config', () => {
-    const validator = new PipelineConfigDTOValidator()
+  let validator: PipelineConfigDTOValidator
+
+  beforeAll(() => {
+    validator = new PipelineConfigDTOValidator()
+  })
+
+  test('should reject undefined', () => {
     expect(validator.validate(undefined)).toBeFalsy()
+  })
+
+  test('should reject empty object and array', () => {
     expect(validator.validate([])).toBeFalsy()
     expect(validator.validate({})).toBeFalsy()
-    expect(validator.validate({ datasourceId: 1 })).toBeFalsy()
-    expect(validator.validate({ metadata: { author: 'icke' } })).toBeFalsy()
-    expect(validator.validate({ datasourceId: 1, metadata: { author: 123 } })).toBeFalsy()
-    expect(validator.validate({ datasourceId: 1, metadata: { author: 'icke', license: 'foo' } })).toBeFalsy()
-    const config = validPipelineConfig()
-    delete config.transformation.func
-    expect(validator.validate(config)).toBeFalsy()
+  })
+
+  test('should reject missing or invalid datasourceId', () => {
+    const missingDatasourceIdConfig = validPipelineConfig()
+    delete missingDatasourceIdConfig.datasourceId
+    expect(validator.validate(missingDatasourceIdConfig)).toBeFalsy()
+
+    const invalidDatasourceIdConfig = validPipelineConfig()
+    invalidDatasourceIdConfig.datasourceId = ''
+    expect(validator.validate(invalidDatasourceIdConfig)).toBeFalsy()
+  })
+
+  test('should reject missing or invalid metadata', () => {
+    const missingMetadataConfig = validPipelineConfig()
+    delete missingMetadataConfig.metadata
+    expect(validator.validate(missingMetadataConfig)).toBeFalsy()
+
+    const invalidMetadataConfig = validPipelineConfig()
+    invalidMetadataConfig.metadata = ''
+    expect(validator.validate(invalidMetadataConfig)).toBeFalsy()
+
+    const missingMetadataPropertiesConfig = validPipelineConfig()
+    missingMetadataPropertiesConfig.metadata = {}
+    expect(validator.validate(missingMetadataPropertiesConfig)).toBeFalsy()
+
+    const invalidMetadataAuthorConfig = validPipelineConfig()
+    invalidMetadataAuthorConfig.metadata.author = 123
+    expect(validator.validate(invalidMetadataAuthorConfig)).toBeFalsy()
+
+    const invalidMetadataDisplayNameConfig = validPipelineConfig()
+    invalidMetadataDisplayNameConfig.metadata.displayName = 123
+    expect(validator.validate(invalidMetadataDisplayNameConfig)).toBeFalsy()
+
+    const invalidMetadataLicenseConfig = validPipelineConfig()
+    invalidMetadataLicenseConfig.metadata.license = 123
+    expect(validator.validate(invalidMetadataLicenseConfig)).toBeFalsy()
+
+    const invalidMetadataDescriptionConfig = validPipelineConfig()
+    invalidMetadataDescriptionConfig.metadata.description = 123
+    expect(validator.validate(invalidMetadataDescriptionConfig)).toBeFalsy()
+  })
+
+  test('should reject invalid transformation function', () => {
+    const missingTransformationFuncConfig = validPipelineConfig()
+    delete missingTransformationFuncConfig.transformation.func
+    expect(validator.validate(missingTransformationFuncConfig)).toBeFalsy()
+
+    const invalidTransformationConfig = validPipelineConfig()
+    invalidTransformationConfig.transformation = ''
+    expect(validator.validate(invalidTransformationConfig)).toBeFalsy()
+
+    const invalidTransformationFuncConfig = validPipelineConfig()
+    invalidTransformationFuncConfig.transformation.func = 123
+    expect(validator.validate(invalidTransformationFuncConfig)).toBeFalsy()
   })
 
   test('should add default identity transformation function', () => {
-    const validator = new PipelineConfigDTOValidator()
     const pipelineConfig = validPipelineConfig()
     delete pipelineConfig.transformation
-    if (validator.validate(pipelineConfig)) {
-      expect(pipelineConfig.transformation.func).toBe('return data;')
-    } else {
-      expect(true).toBeFalsy()
-    }
+
+    const validationResult = validator.validate(pipelineConfig)
+    expect(validationResult).toBeTruthy()
+    expect(pipelineConfig.transformation.func).toBe('return data;')
   })
 
   test('should accept valid pipeline config', () => {
-    const validator = new PipelineConfigDTOValidator()
     expect(validator.validate(validPipelineConfig())).toBeTruthy()
   })
 })

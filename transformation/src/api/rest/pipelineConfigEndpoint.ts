@@ -4,6 +4,7 @@ import axios from 'axios'
 import { PipelineConfigTriggerRequestValidator } from '../pipelineConfigTriggerRequest'
 import { PipelineConfigManager } from '@/pipeline-config/pipelineConfigManager'
 import { PipelineConfigDTOValidator } from '../../pipeline-config/model/pipelineConfig'
+import { isString } from '../../validators'
 
 export class PipelineConfigEndpoint {
   pipelineConfigManager: PipelineConfigManager
@@ -57,7 +58,6 @@ export class PipelineConfigEndpoint {
       return
     }
     await this.pipelineConfigManager.delete(configId)
-    res.setHeader('Content-Type', 'application/json') // Remove as there is no body/content
     res.status(204).send()
   }
 
@@ -84,7 +84,6 @@ export class PipelineConfigEndpoint {
       res.status(404).send(`Could not find config with id ${configId}: ${e}`)
       return
     }
-    res.setHeader('Content-Type', 'application/json') // Remove as there is no body/content
     res.status(204).send()
   }
 
@@ -96,7 +95,7 @@ export class PipelineConfigEndpoint {
     }
     const config = req.body
     const savedConfig = await this.pipelineConfigManager.create(config)
-    res.location(`/configs/${savedConfig.id}`).status(201).json(savedConfig)
+    res.status(201).location(`/configs/${savedConfig.id}`).json(savedConfig)
   }
 
   getOne = async (req: express.Request, res: express.Response): Promise<void> => {
@@ -108,27 +107,28 @@ export class PipelineConfigEndpoint {
     const config = await this.pipelineConfigManager.get(configId)
     if (!config) {
       res.status(404).send('Config not found')
-    } else {
-      res.status(200).json(config)
+      return
     }
+    res.status(200).json(config)
   }
 
   getAll = async (req: express.Request, res: express.Response): Promise<void> => {
     const datasourceId = parseInt(this.getQueryParameter(req, 'datasourceId'))
-    let configs
     if (Number.isNaN(datasourceId)) {
-      configs = await this.pipelineConfigManager.getAll()
-    } else {
-      configs = await this.pipelineConfigManager.getByDatasourceId(datasourceId)
+      const configs = await this.pipelineConfigManager.getAll()
+      res.status(200).json(configs)
+      return
     }
+    const configs = await this.pipelineConfigManager.getByDatasourceId(datasourceId)
     res.status(200).json(configs)
   }
 
   private getQueryParameter (req: express.Request, key: string): string {
     const value = req.query[key]
-    if (typeof value === 'string') {
+    if (isString(value)) {
       return value
-    } else if (Array.isArray(value) && typeof value[0] === 'string') {
+    }
+    if (Array.isArray(value) && isString(value[0])) {
       return value[0]
     }
     return ''
