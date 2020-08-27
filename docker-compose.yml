@@ -16,7 +16,7 @@ services:
         STORAGE_SERVICE_URL: /api/storage
         TRANSFORMATION_SERVICE_URL: /api/transformation
         NOTIFICATION_SERVICE_URL: /api/notification
-        API_ORCHESTRATION_URL: /api/apiorchestration
+#        API_ORCHESTRATION_URL: /api/apiorchestration
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-ui.rule=PathPrefix(`/`)"
