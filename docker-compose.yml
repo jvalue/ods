@@ -158,7 +158,7 @@ services:
     ports:
       - "7654:8080"
     depends_on:
-      - "storage"
+      - storage-db
     restart: always
     environment:
       HASURA_GRAPHQL_DATABASE_URL: postgres://ods_admin:ods_pw@storage-db:5432/ods
