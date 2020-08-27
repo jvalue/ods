@@ -1,4 +1,4 @@
-import { isObject, isNumber, isString } from '../validators'
+import { isObject, isNumber, isString, hasProperty } from '../validators'
 
 export interface PipelineConfigTriggerRequest {
   datasourceId: number;
@@ -10,25 +10,24 @@ export interface PipelineConfigTriggerRequest {
 export class PipelineConfigTriggerRequestValidator {
   private errors: string[] = []
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  validate (requestBody: any): requestBody is PipelineConfigTriggerRequest {
+  validate (requestBody: unknown): requestBody is PipelineConfigTriggerRequest {
     this.errors = []
     if (!isObject(requestBody)) {
       this.errors.push('\'PipelineConfigTriggerRequest\' must be an object')
       return false
     }
-    if (!('datasourceId' in requestBody)) {
+    if (!hasProperty(requestBody, 'datasourceId')) {
       this.errors.push('\'datasourceId\' property is missing')
     } else if (!isNumber(requestBody.datasourceId)) {
       this.errors.push('\'datasourceId\' must be a number')
     }
-    if ('data' in requestBody && !isObject(requestBody.data)) {
+    if (hasProperty(requestBody, 'data') && !isObject(requestBody.data)) {
       this.errors.push('\'data\' must be an object or array')
     }
-    if ('dataLocation' in requestBody && !isString(requestBody.dataLocation)) {
+    if (hasProperty(requestBody, 'dataLocation') && !isString(requestBody.dataLocation)) {
       this.errors.push('\'dataLocation\' must be a string')
     }
-    if (!('data' in requestBody) && !('dataLocation' in requestBody)) {
+    if (!hasProperty(requestBody, 'data') && !hasProperty(requestBody, 'dataLocation')) {
       this.errors.push('either \'data\' or \'dataLocation\' must be present')
     }
     return this.errors.length === 0
