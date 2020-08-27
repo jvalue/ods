@@ -1,4 +1,4 @@
-import { isObject, isString, isNumber } from '../../validators'
+import { isObject, isString, isNumber, hasProperty } from '../../validators'
 
 export interface PipelineConfig {
   id: number;
@@ -38,57 +38,57 @@ export interface MetadataDTO {
 export class PipelineConfigDTOValidator {
   private errors: string[] = []
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  validate (pipelineConfig: any): pipelineConfig is PipelineConfigDTO {
+  validate (pipelineConfig: unknown): pipelineConfig is PipelineConfigDTO {
     this.errors = []
     if (!isObject(pipelineConfig)) {
       this.errors.push('\'PipelineConfig\' must be an object')
       return false
     }
 
-    if (!('datasourceId' in pipelineConfig)) {
+    if (!hasProperty(pipelineConfig, 'datasourceId')) {
       this.errors.push('\'datasourceId\' property is missing')
     } else if (!isNumber(pipelineConfig.datasourceId)) {
       this.errors.push('\'datasourceId\' property must be a number')
     }
 
-    if (!('transformation' in pipelineConfig)) {
+    if (!hasProperty(pipelineConfig, 'transformation')) {
       // Missing transformation is not an error, assume identity transformation
-      pipelineConfig.transformation = { func: 'return data;' }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (pipelineConfig as any).transformation = { func: 'return data;' }
     } else if (!isObject(pipelineConfig.transformation)) {
       this.errors.push('\'transformation\' property must be an object')
     } else {
-      if (!('func' in pipelineConfig.transformation)) {
+      if (!hasProperty(pipelineConfig.transformation, 'func')) {
         this.errors.push('\'transformation.func\' property is missing')
       } else if (!isString(pipelineConfig.transformation.func)) {
         this.errors.push('\'transformation.func\' property must be a string')
       }
     }
 
-    if (!('metadata' in pipelineConfig)) {
+    if (!hasProperty(pipelineConfig, 'metadata')) {
       this.errors.push('\'metadata\' property is missing')
     } else if (!isObject(pipelineConfig.metadata)) {
       this.errors.push('\'metadata\' property must be an object')
     } else {
-      if (!('author' in pipelineConfig.metadata)) {
+      if (!hasProperty(pipelineConfig.metadata, 'author')) {
         this.errors.push('\'metadata.author\' property is missing')
       } else if (!isString(pipelineConfig.metadata.author)) {
         this.errors.push('\'metadata.author\' property must be a string')
       }
 
-      if (!('displayName' in pipelineConfig.metadata)) {
+      if (!hasProperty(pipelineConfig.metadata, 'displayName')) {
         this.errors.push('\'metadata.displayName\' property is missing')
       } else if (!isString(pipelineConfig.metadata.displayName)) {
         this.errors.push('\'metadata.displayName\' property must be a string')
       }
 
-      if (!('license' in pipelineConfig.metadata)) {
+      if (!hasProperty(pipelineConfig.metadata, 'license')) {
         this.errors.push('\'metadata.license\' property is missing')
       } else if (!isString(pipelineConfig.metadata.license)) {
         this.errors.push('\'metadata.license\' property must be a string')
       }
 
-      if (!('description' in pipelineConfig.metadata)) {
+      if (!hasProperty(pipelineConfig.metadata, 'description')) {
         this.errors.push('\'metadata.description\' property is missing')
       } else if (!isString(pipelineConfig.metadata.description)) {
         this.errors.push('\'metadata.description\' property must be a string')
