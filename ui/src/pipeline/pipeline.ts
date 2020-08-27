@@ -3,6 +3,7 @@ export default interface Pipeline {
   datasourceId: number;
   metadata: PipelineMetaData;
   transformation: TransformationConfig;
+  defaultAPI: boolean;
 }
 
 export interface PipelineMetaData {

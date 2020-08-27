@@ -26,6 +26,6 @@ ENV SPRING_PROFILES_ACTIVE prod
 # Pull the dist files from the builder container
 COPY --from=builder /builder/build/libs/* app.jar
 
-# Run app
+# Run app and expose port to other containers
 EXPOSE 6969
 ENTRYPOINT ["java", "-jar", "app.jar"]

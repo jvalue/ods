@@ -2,6 +2,15 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/api-configuration.iml" filepath="$PROJECT_DIR$/.idea/modules/api-configuration.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/api-configuration.main.iml" filepath="$PROJECT_DIR$/.idea/modules/api-configuration.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/api-configuration.test.iml" filepath="$PROJECT_DIR$/.idea/modules/api-configuration.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ods-adapter-service.iml" filepath="$PROJECT_DIR$/.idea/modules/ods-adapter-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ods-adapter-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ods-adapter-service.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ods-adapter-service.test.iml" filepath="$PROJECT_DIR$/.idea/modules/ods-adapter-service.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ods-core-service.iml" filepath="$PROJECT_DIR$/.idea/modules/ods-core-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ods-core-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ods-core-service.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ods-core-service.test.iml" filepath="$PROJECT_DIR$/.idea/modules/ods-core-service.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/open-data-service.iml" filepath="$PROJECT_DIR$/.idea/open-data-service.iml" />
     </modules>
   </component>

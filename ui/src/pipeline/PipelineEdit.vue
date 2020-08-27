@@ -78,6 +78,18 @@
               @validityChanged="validStep3 = $event"
             />
           </v-stepper-content>
+          <v-stepper-step
+            :complete="dialogStep > 4"
+            step="4"
+          >
+            API
+          </v-stepper-step>
+          <v-stepper-content step="4">
+            <pipeline-metadata-config
+              v-model="dialogPipeline.defaultAPI"
+              @validityChanged="validStep4 = $event"
+            />
+          </v-stepper-content>
         </v-stepper>
       </v-card-text>
       <v-card-actions>
@@ -142,11 +154,13 @@ export default class PipelineEdit extends Vue {
   private validStep1 = false
   private validStep2 = false // need to execute
   private validStep3 = true // starts with valid default values
+  private validStep4 = true
 
   private dialogPipeline: Pipeline = {
     id: -1,
     datasourceId: -1,
     transformation: { func: "data.test = 'abc';\nreturn data;" },
+    defaultAPI: true,
     metadata: {
       author: '',
       license: '',
@@ -202,7 +216,8 @@ export default class PipelineEdit extends Vue {
   private evaluateAllForms () {
     return this.validStep1 &&
         this.validStep2 &&
-        this.validStep3
+        this.validStep3 &&
+        this.validStep4
   }
 }
 </script>

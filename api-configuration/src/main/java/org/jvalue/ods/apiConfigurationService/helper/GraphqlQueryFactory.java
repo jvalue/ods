@@ -70,7 +70,7 @@ public class GraphqlQueryFactory {
 
     public final String query;
 
-    private GQLQuery(String query) {
+    GQLQuery(String query) {
       this.query = query;
     }
   }
@@ -88,5 +88,4 @@ public class GraphqlQueryFactory {
         ).toString();
     return exSqlQuery;
   }
-
 }

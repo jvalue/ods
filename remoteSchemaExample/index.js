@@ -6,22 +6,25 @@ import fetch from 'node-fetch';
 
 const { ApolloServer } = require('apollo-server');
 
+// defines the different new types of the server.
+// These types will be added to the schema.
 const typeDefs = gql`
 
+  # Example enriched data tyüe
   type ImprovedData {
     id: String
     agency: String
     newCustomField: String
   }
 
-  # The "Query" type is special: it lists all of the available queries that
-  # clients can execute, along with the return type for each. In this
-  # case, the "books" query returns an array of zero or more Books (defined above).
+  # Example Query type
   type Query {
     betterData: ImprovedData
   }
 `;
 
+// example function that firstly collects data from the server and then
+// enriches the data with custom business logic
 function collectBetterData() {
   const data = client.query({
     query: gql`
@@ -33,23 +36,25 @@ function collectBetterData() {
       }
     `,
   })
-.then(result => {
-  console.log(result.data.storage_viewz[0].id)
+  .then(result => {
+    console.log(result.data.storage_viewz[0].id)
     return {
       id: result.data.storage_viewz[0].id,
       agency: result.data.storage_viewz[0].agency,
       newCustomField: "custom1"
     }
   });
-return data;
+  return data;
 }
 
+// mapping of how the example type betterData is being resolved
 const resolvers = {
   Query: {
     betterData: () => collectBetterData(),
   },
 };
 
+// creates new server utilising the Apollo library
 const server = new ApolloServer({ typeDefs, resolvers });
 
 // The `listen` method launches a web server.
@@ -64,6 +69,8 @@ const link = new HttpLink({
   fetch: fetch
 });
 
+//initialies a new client.
+// this client can be used to fetch data froma  graph ql server endpoint
 const client = new ApolloClient({
   cache,
   link,
@@ -80,5 +87,4 @@ client
     }
   `
 })
-// .then(result => console.log(result));
 
