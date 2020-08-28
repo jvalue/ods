@@ -130,10 +130,10 @@ export default class PostgresPipelineConfigRepository implements PipelineConfigR
     }
   }
 
-  private toPipelineConfigs (resultSet: QueryResult): PipelineConfig[] {
+  private toPipelineConfigs (resultSet: QueryResult<DatabasePipeline>): PipelineConfig[] {
     const configs: PipelineConfig[] = []
     for (const row of resultSet.rows) {
-      const config = this.toPipelineConfig(row as DatabasePipeline)
+      const config = this.toPipelineConfig(row)
       configs.push(config)
     }
     return configs

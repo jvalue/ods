@@ -47,18 +47,18 @@ const pipelineConfigDTO = (): PipelineConfigDTO => {
   }
 }
 
-const WritesPublisherMock = jest.fn(() => ({
+const WritesPublisherMock: jest.Mock<ConfigWritesPublisher> = jest.fn(() => ({
   publishCreation: jest.fn().mockReturnValue(true),
   publishUpdate: jest.fn().mockReturnValue(true),
   publishDeletion: jest.fn().mockReturnValue(true)
-})) as jest.Mock<ConfigWritesPublisher>
+}))
 
-const ExecutionPublisherMock = jest.fn(() => ({
+const ExecutionPublisherMock: jest.Mock<ExecutionResultPublisher> = jest.fn(() => ({
   publishSuccess: jest.fn(),
   publishError: jest.fn()
-})) as jest.Mock<ExecutionResultPublisher>
+}))
 
-const RepositoryMock = jest.fn(() => ({
+const RepositoryMock: jest.Mock<PipelineConfigRepository> = jest.fn(() => ({
   create: jest.fn().mockImplementation((config) => Promise.resolve(config)),
   get: jest.fn(),
   getAll: jest.fn().mockResolvedValue([generateConfig(), generateConfig()]),
@@ -66,7 +66,7 @@ const RepositoryMock = jest.fn(() => ({
   update: jest.fn(),
   delete: jest.fn().mockResolvedValue(generateConfig()),
   deleteAll: jest.fn().mockResolvedValue([generateConfig(), generateConfig()])
-})) as jest.Mock<PipelineConfigRepository>
+}))
 
 afterEach(() => {
   jest.clearAllMocks()
