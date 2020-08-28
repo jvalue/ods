@@ -21,7 +21,7 @@ export default class VM2SandboxExecutor implements SandboxExecutor {
         JSON.stringify(data) +
       ');'
 
-    let result = false
+    let result: unknown
     try {
       result = this.vm.run(wrapper)
     } catch (err) {
