@@ -53,8 +53,8 @@ export class PipelineConfigDTOValidator {
 
     if (!hasProperty(pipelineConfig, 'transformation')) {
       // Missing transformation is not an error, assume identity transformation
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (pipelineConfig as any).transformation = { func: 'return data;' }
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      (pipelineConfig as PipelineConfigDTO).transformation = { func: 'return data;' }
     } else if (!isObject(pipelineConfig.transformation)) {
       this.errors.push('\'transformation\' property must be an object')
     } else {
