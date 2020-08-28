@@ -28,6 +28,7 @@
     "@typescript-eslint/indent": [2, 2],
     "@typescript-eslint/no-use-before-define": ["warn", { "functions": false, "classes": true }],
     "max-len": [2, 120, 4, { "ignoreUrls": true }],
-    "@typescript-eslint/explicit-function-return-type": [1, {"allowExpressions": true}]
+    "@typescript-eslint/explicit-function-return-type": [1, {"allowExpressions": true}],
+    "@typescript-eslint/consistent-type-assertions": [ "warn", { "assertionStyle": "never" }]
   }
 }
