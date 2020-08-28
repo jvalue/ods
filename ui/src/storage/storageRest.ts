@@ -1,7 +1,6 @@
 import axios from 'axios'
 import { StorageItem } from '@/storage/storage-item'
-
-const STORAGE_SERVICE_URL = process.env.VUE_APP_STORAGE_SERVICE_URL as string
+import { STORAGE_SERVICE_URL } from '@/env'
 
 const http = axios.create({
   baseURL: STORAGE_SERVICE_URL,

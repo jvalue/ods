@@ -88,7 +88,6 @@ import { Emit } from 'vue-property-decorator'
 import WebhookEdit from '@/notification/WebhookEdit.vue'
 import FirebaseEdit from '@/notification/FirebaseEdit.vue'
 import SlackEdit from '@/notification/SlackEdit.vue'
-import notificationRoutes from './router';
 
 @Component({
   components: { SlackEdit, WebhookEdit, FirebaseEdit }
@@ -103,7 +102,7 @@ export default class NotificationEdit extends Vue implements NotificationEditDia
 
   private dialogOpen = false
 
-  private notificationTypes = Object.values(CONFIG_TYPE)  // Convert CONFIG_TYPES to list
+  private notificationTypes = Object.values(CONFIG_TYPE) // Convert CONFIG_TYPES to list
 
   private defaultNotification: WebhookNotification = {
     id: -1,
@@ -116,7 +115,6 @@ export default class NotificationEdit extends Vue implements NotificationEditDia
   private editedNotification: NotificationConfig = Object.assign({}, this.defaultNotification)
 
   openDialog (notificationConfig?: NotificationConfig): void {
-
     if (notificationConfig) { // edit
       this.editedNotification = Object.assign({}, notificationConfig)
     } else { // create
