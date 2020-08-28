@@ -2,7 +2,7 @@ import { TransformationEvent } from './transformationEvent'
 import * as NotificationMessageFactory from './notificationMessageFactory'
 import { NotificationRepository } from '../notification-config/notificationRepository'
 import NotificationExecutor from '../notification-execution/notificationExecutor'
-import { CONFIG_TYPE } from '../notification-config/notificationConfig'
+import { hasProperty, isObject } from '../validators'
 
 const NOTIFICATION_DATA_LOCATION_URL = process.env.NOTIFICATION_DATA_LOCATION_URL || 'localhost:9000/storage'
 
@@ -22,8 +22,7 @@ export class TriggerEventHandler {
    * @returns true on success, else false
    */
   public async handleEvent (transformationEvent: TransformationEvent): Promise<void> {
-    const isValid = this.isValidTransformationEvent(transformationEvent)
-    if (!isValid) {
+    if (!this.isValidTransformationEvent(transformationEvent)) {
       return Promise.reject(new Error('Trigger event is not valid'))
     }
 
@@ -35,21 +34,15 @@ export class TriggerEventHandler {
 
     const notificationJobs: Promise<void>[] = []
     for (const webhookConfig of configs.webhook) {
-      notificationJobs.push(
-        this.notificationExecutor.handleNotification(webhookConfig, CONFIG_TYPE.WEBHOOK, dataLocation, message, data)
-      )
+      notificationJobs.push(this.notificationExecutor.handleWebhook(webhookConfig, dataLocation, message, data))
     }
 
     for (const slackConfig of configs.slack) {
-      notificationJobs.push(
-        this.notificationExecutor.handleNotification(slackConfig, CONFIG_TYPE.SLACK, dataLocation, message, data)
-      )
+      notificationJobs.push(this.notificationExecutor.handleSlack(slackConfig, dataLocation, message, data))
     }
 
     for (const firebaseConfig of configs.firebase) {
-      notificationJobs.push(
-        this.notificationExecutor.handleNotification(firebaseConfig, CONFIG_TYPE.FCM, dataLocation, message, data)
-      )
+      notificationJobs.push(this.notificationExecutor.handleFCM(firebaseConfig, dataLocation, message, data))
     }
 
     await Promise.all(notificationJobs)
@@ -62,7 +55,10 @@ export class TriggerEventHandler {
       *
       * @returns     true, if param event is a TransformationEvent, else false
       */
-  public isValidTransformationEvent (event: TransformationEvent): boolean {
-    return !!event.pipelineId && !!event.pipelineName && (!!event.data || !!event.error)
+  public isValidTransformationEvent (event: unknown): event is TransformationEvent {
+    return isObject(event) &&
+      hasProperty(event, 'pipelineId') &&
+      hasProperty(event, 'pipelineName') &&
+      (hasProperty(event, 'data') || hasProperty(event, 'error'))
   }
 }
