@@ -6,7 +6,7 @@ import * as RestService from './datasourceRest'
 export default class DatasourceModule extends VuexModule {
   private datasources: Datasource[] = []
 
-  private selectedDatasource: Datasource = {} as unknown as Datasource
+  private selectedDatasource?: Datasource
 
   private isLoadingDatasources = true
 
