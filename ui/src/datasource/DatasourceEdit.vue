@@ -194,7 +194,7 @@ export default class DatasourceEdit extends Vue {
     this.isEditMode = this.$route.meta.isEditMode
 
     if (this.isEditMode) {
-      const id = (this.$route.params.datasourceId as unknown) as number
+      const id = parseInt(this.$route.params.datasourceId)
       this.loadDatasourceByIdAction(id)
     }
   }

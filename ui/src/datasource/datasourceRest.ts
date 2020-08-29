@@ -1,7 +1,6 @@
 import axios, { AxiosResponse } from 'axios'
 import Datasource, { Data, DataLocation } from './datasource'
-
-const ADAPTER_SERVICE_URL = process.env.VUE_APP_ADAPTER_SERVICE_URL as string
+import { ADAPTER_SERVICE_URL } from '@/env'
 
 /**
  * Axios instance with default headers and base url.
@@ -18,7 +17,7 @@ const http = axios.create({
  * This reviver function replaces firstExecution attribute with a date object
  * if the current type is string.
  */
-const reviver = (key: string, value: object): object => {
+const reviver = (key: string, value: unknown): unknown => {
   if (key === 'firstExecution' && typeof value === 'string') {
     return new Date(value)
   }
@@ -51,9 +50,8 @@ export async function deleteDatasource (id: number): Promise<AxiosResponse> {
 
 export async function getDatasourceData (id: number): Promise<Data> {
   const importResponse = await http.post<string>(`/datasources/${id}/trigger`)
-  const jsonResponse = JSON.parse(importResponse.data) as DataLocation
+  const jsonResponse: DataLocation = JSON.parse(importResponse.data)
   const location = jsonResponse.location
   const dataResponse = await http.get<string>(location)
-  const data = JSON.parse(dataResponse.data) as Data
-  return data
+  return JSON.parse(dataResponse.data)
 }
