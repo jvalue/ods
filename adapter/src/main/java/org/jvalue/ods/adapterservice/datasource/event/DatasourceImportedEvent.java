@@ -26,7 +26,14 @@ public class DatasourceImportedEvent implements Serializable {
   public String toString() {
     return "DatasourceImportedEvent{" +
             "datasourceId=" + datasourceId +
-            ", dataLocation='" + dataLocation + '\'' +
+            ", data='" + shortDataRepresentation() + '\'' +
             '}';
+  }
+
+  private String shortDataRepresentation() {
+    if (data.length() > 20) {
+      return data.substring(0, 10) + "[...]" + data.substring(data.length() - 10);
+    }
+    return data;
   }
 }
