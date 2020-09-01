@@ -41,7 +41,7 @@ export class PipelineConfigEndpoint {
 
     // trigger is asynchronous! not waiting for finished execution...
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    this.pipelineConfigManager.triggerConfig(triggerRequest.datasourceId, triggerRequest.data)
+    this.pipelineConfigManager.triggerConfig(triggerRequest.datasourceId, JSON.parse(triggerRequest.data))
 
     const answer = `Triggered all pipelines for datasource ${triggerRequest.datasourceId}. Executing asynchronously...`
     res.setHeader('Content-Type', 'text/plain')

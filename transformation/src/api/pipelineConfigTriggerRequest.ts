@@ -1,6 +1,6 @@
 export default interface PipelineConfigTriggerRequest {
   datasourceId: number;
 
-  data: object;
+  data: string;
   dataLocation: string;
 }

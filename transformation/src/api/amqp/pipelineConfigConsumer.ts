@@ -71,7 +71,7 @@ export class PipelineConfigConsumer {
       console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
       if (msg.fields.routingKey === AMQP_DATASOURCE_EXECUTION_SUCCESS_TOPIC) {
         const triggerRequest: pipelineConfigTriggerRequest = JSON.parse(msg.content.toString())
-        await this.pipelineManager.triggerConfig(triggerRequest.datasourceId, triggerRequest.data)
+        await this.pipelineManager.triggerConfig(triggerRequest.datasourceId, JSON.parse(triggerRequest.data))
       } else {
         console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
       }
