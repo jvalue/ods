@@ -7,19 +7,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class DatasourceImportedEvent implements Serializable {
 
   private final Long datasourceId;
-  private final String dataLocation;
+  private final String data;
 
-  public DatasourceImportedEvent(@JsonProperty("datasourceId") final Long datasourceId, @JsonProperty("dataLocation") final String dataLocation) {
+  public DatasourceImportedEvent(@JsonProperty("datasourceId") final Long datasourceId, @JsonProperty("data") final String data) {
     this.datasourceId = datasourceId;
-    this.dataLocation = dataLocation;
+    this.data = data;
   }
 
   public Long getDatasourceId() {
     return this.datasourceId;
   }
 
-  public String getDataLocation() {
-    return this.dataLocation;
+  public String getData() {
+    return this.data;
   }
 
   @Override
