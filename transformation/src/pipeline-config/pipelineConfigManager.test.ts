@@ -6,7 +6,7 @@ import PipelineConfigRepository from './pipelineConfigRepository'
 import { PipelineConfigManager } from './pipelineConfigManager'
 import PipelineExecutor from '../pipeline-execution/pipelineExecutor'
 import { ExecutionResultPublisher } from './publisher/executionResultPublisher'
-import PipelineConfig from './model/pipelineConfig'
+import { PipelineConfig, PipelineConfigDTO } from './model/pipelineConfig'
 import VM2SandboxExecutor from '../pipeline-execution/sandbox/vm2SandboxExecutor'
 
 jest.mock('../pipeline-execution/pipelineExecutor')
@@ -28,6 +28,21 @@ const generateConfig = (): PipelineConfig => {
       license: 'Test License',
       description: 'A test pipeline.',
       creationTimestamp: new Date()
+    }
+  }
+}
+
+const pipelineConfigDTO = (): PipelineConfigDTO => {
+  return {
+    datasourceId: 456,
+    transformation: {
+      func: 'return data;'
+    },
+    metadata: {
+      author: 'author',
+      displayName: 'Pipeline Test',
+      license: 'Test License',
+      description: 'A test pipeline.'
     }
   }
 }
@@ -58,7 +73,7 @@ afterEach(() => {
 })
 
 test('Should call create and publish event', async () => {
-  const config = generateConfig()
+  const config = pipelineConfigDTO()
 
   const repositoryMock = new RepositoryMock()
   const writesPublisherMock = new WritesPublisherMock()
@@ -76,7 +91,7 @@ test('Should call create and publish event', async () => {
 })
 
 test('Should call update and publish event', async () => {
-  const config = generateConfig()
+  const config = pipelineConfigDTO()
 
   const repositoryMock = new RepositoryMock()
   const writesPublisherMock = new WritesPublisherMock()
@@ -87,15 +102,13 @@ test('Should call update and publish event', async () => {
     writesPublisherMock,
     new ExecutionPublisherMock()
   )
-  await manager.update(config.id, config)
+  await manager.update(123, config)
 
-  expect(repositoryMock.update).toHaveBeenCalledWith(config.id, config)
+  expect(repositoryMock.update).toHaveBeenCalledWith(123, config)
   expect(writesPublisherMock.publishUpdate).toHaveBeenCalledTimes(1)
 })
 
 test('Should call delete and publish event', async () => {
-  const config = generateConfig()
-
   const repositoryMock = new RepositoryMock()
   const writesPublisherMock = new WritesPublisherMock()
 
@@ -105,9 +118,9 @@ test('Should call delete and publish event', async () => {
     writesPublisherMock,
     new ExecutionPublisherMock()
   )
-  await manager.delete(config.id)
+  await manager.delete(1234)
 
-  expect(repositoryMock.delete).toHaveBeenCalledWith(config.id)
+  expect(repositoryMock.delete).toHaveBeenCalledWith(1234)
   expect(writesPublisherMock.publishDeletion).toHaveBeenCalledTimes(1)
 })
 
