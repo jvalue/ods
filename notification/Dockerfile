@@ -2,14 +2,20 @@
 FROM node:lts-alpine as builder
 
 WORKDIR /build
-COPY ./src ./src
-COPY ./package*.json ./
-COPY ./tsconfig.json ./
-COPY ./.eslint* ./
-COPY ./jest.config.js ./
 
-# Install dependencies and run build
+# Copy package*.json files first in order to make best use of docker layer caching
+COPY ./package*.json ./
+
+# npm clean slate install to get reproducible builds and quicker installs
 RUN npm ci
+
+# copy rest of the files
+COPY ./tsconfig.json ./
+COPY ./.eslintrc ./
+COPY ./jest.config.js ./
+COPY ./src ./src
+
+# build and test
 RUN npm run lint-ci
 RUN npm run transpile
 RUN npm run test

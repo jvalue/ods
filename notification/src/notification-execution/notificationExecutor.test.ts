@@ -2,7 +2,7 @@
 import axios from 'axios'
 
 import VM2SandboxExecutor from './condition-evaluation/vm2SandboxExecutor'
-import { WebhookConfig, CONFIG_TYPE, SlackConfig } from '../notification-config/notificationConfig'
+import { WebhookConfig, SlackConfig } from '../notification-config/notificationConfig'
 import NotificationExecutor from './notificationExecutor'
 import SlackCallback from '@/notification-execution/notificationCallbacks/slackCallback'
 
@@ -10,6 +10,8 @@ jest.mock('axios')
 
 describe('JSNotificationService', () => {
   describe('notification system', () => {
+    // Type assertion is ok here, because we have mocked the whole axios module
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const post = axios.post as jest.Mock
 
     let notificationService: NotificationExecutor
@@ -42,13 +44,7 @@ describe('JSNotificationService', () => {
 
       const message = 'message'
       const dataLocation = 'location'
-      await notificationService.handleNotification(
-        notificationConfig,
-        CONFIG_TYPE.WEBHOOK,
-        dataLocation,
-        message,
-        undefined
-      )
+      await notificationService.handleWebhook(notificationConfig, dataLocation, message, undefined)
 
       expect(post).toHaveBeenCalledTimes(1)
       // check arguments for axios post
@@ -69,13 +65,7 @@ describe('JSNotificationService', () => {
 
       const message = 'message'
       const dataLocation = 'location'
-      await notificationService.handleNotification(
-        notificationConfig,
-        CONFIG_TYPE.WEBHOOK,
-        dataLocation,
-        message,
-        undefined
-      )
+      await notificationService.handleWebhook(notificationConfig, dataLocation, message, undefined)
 
       expect(post).toHaveBeenCalledTimes(1)
       // check arguments for axios post
@@ -96,7 +86,7 @@ describe('JSNotificationService', () => {
 
       const message = 'message'
       const dataLocation = 'location'
-      await notificationService.handleNotification(notificationConfig, CONFIG_TYPE.WEBHOOK, dataLocation, message, data)
+      await notificationService.handleWebhook(notificationConfig, dataLocation, message, data)
 
       expect(post).toHaveBeenCalledTimes(1)
       // check arguments for axios post
@@ -116,13 +106,7 @@ describe('JSNotificationService', () => {
       try {
         const message = 'message'
         const dataLocation = 'location'
-        await notificationService.handleNotification(
-          notificationConfig,
-          CONFIG_TYPE.WEBHOOK,
-          dataLocation,
-          message,
-          data
-        )
+        await notificationService.handleWebhook(notificationConfig, dataLocation, message, data)
         throw new Error('Fail test')
       } catch (err) {
         expect(err.message).toEqual(
@@ -146,7 +130,7 @@ describe('JSNotificationService', () => {
 
       const message = 'message'
       const dataLocation = 'location'
-      await notificationService.handleNotification(request, CONFIG_TYPE.SLACK, dataLocation, message, data)
+      await notificationService.handleSlack(request, dataLocation, message, data)
 
       const expectedObject: SlackCallback = {
         text: message
