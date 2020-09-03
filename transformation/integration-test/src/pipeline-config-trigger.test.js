@@ -60,13 +60,12 @@ describe('Transformation Service Config Trigger', () => {
     expect(creationResponse.status).toEqual(201)
     const configId = creationResponse.body.id
 
-    const data = {
-      a: 'abc',
-      b: 123
-    }
     const trigger = {
       datasourceId: pipelineConfig.datasourceId,
-      data: JSON.stringify(data)
+      data: {
+        a: 'abc',
+        b: 123
+      }
     }
 
     const response = await request(URL)
@@ -103,13 +102,12 @@ describe('Transformation Service Config Trigger', () => {
     expect(creationResponse.status).toEqual(201)
     const configId = creationResponse.body.id
 
-    const data = {
-      a: 'abc',
-      b: 123
-    }
     const trigger = {
       datasourceId: pipelineConfig.datasourceId,
-      data: JSON.stringify(data)
+      data: {
+        a: 'abc',
+        b: 123
+      }
     }
     const response = await request(URL)
       .post('/trigger')
@@ -164,7 +162,7 @@ describe('Transformation Service Config Trigger', () => {
       {
         pipelineId: configId,
         pipelineName: pipelineConfig.metadata.displayName,
-        data: importSuccessEvent.data.a + importSuccessEvent.data.b
+        data: data.a + data.b
       })
   }, 12000)
 })
