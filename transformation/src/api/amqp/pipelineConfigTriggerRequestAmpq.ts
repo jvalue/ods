@@ -2,9 +2,7 @@ import { isObject, isNumber, isString, hasProperty } from '../../validators'
 
 export interface PipelineConfigTriggerRequestAmpq {
   datasourceId: number;
-
   data: string;
-  dataLocation: string;
 }
 
 export class PipelineConfigTriggerRequestAmqpValidator {
@@ -21,14 +19,10 @@ export class PipelineConfigTriggerRequestAmqpValidator {
     } else if (!isNumber(requestBody.datasourceId)) {
       this.errors.push('\'datasourceId\' must be a number')
     }
-    if (hasProperty(requestBody, 'data') && !isString(requestBody.data)) {
+    if (!hasProperty(requestBody, 'data')) {
+      this.errors.push('\'data\' property is missing')
+    } else if (!isString(requestBody.data)) {
       this.errors.push('\'data\' must be a string')
-    }
-    if (hasProperty(requestBody, 'dataLocation') && !isString(requestBody.dataLocation)) {
-      this.errors.push('\'dataLocation\' must be a string')
-    }
-    if (!hasProperty(requestBody, 'data') && !hasProperty(requestBody, 'dataLocation')) {
-      this.errors.push('either \'data\' or \'dataLocation\' must be present')
     }
     return this.errors.length === 0
   }

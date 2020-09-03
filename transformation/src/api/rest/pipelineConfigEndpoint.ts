@@ -1,5 +1,4 @@
 import * as express from 'express'
-import axios from 'axios'
 
 import { PipelineConfigTriggerRequestRestValidator } from './pipelineConfigTriggerRequestRest'
 import { PipelineConfigManager } from '@/pipeline-config/pipelineConfigManager'
@@ -30,17 +29,6 @@ export class PipelineConfigEndpoint {
       return
     }
     const triggerRequest = req.body
-
-    if (triggerRequest.dataLocation) {
-      if (triggerRequest.data) {
-        console.log(`Data and dataLocation fields both present.
-         Overwriting existing data with data from ${triggerRequest.dataLocation}`)
-      }
-      console.log(`Fetching data from adapter, location: ${triggerRequest.dataLocation}`)
-      const importResponse = await axios.get(triggerRequest.dataLocation)
-      console.log('Fetching successful.')
-      triggerRequest.data = importResponse.data
-    }
 
     // trigger is asynchronous! not waiting for finished execution...
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
