@@ -1,7 +1,7 @@
 import * as express from 'express'
 import axios from 'axios'
 
-import { PipelineConfigTriggerRequestValidator } from '../pipelineConfigTriggerRequest'
+import { PipelineConfigTriggerRequestRestValidator } from './pipelineConfigTriggerRequestRest'
 import { PipelineConfigManager } from '@/pipeline-config/pipelineConfigManager'
 import { PipelineConfigDTOValidator } from '../../pipeline-config/model/pipelineConfig'
 import { isString } from '../../validators'
@@ -24,7 +24,7 @@ export class PipelineConfigEndpoint {
   // The following methods need arrow syntax because of javascript 'this' shenanigans
 
   triggerConfigExecution = async (req: express.Request, res: express.Response): Promise<void> => {
-    const validator = new PipelineConfigTriggerRequestValidator()
+    const validator = new PipelineConfigTriggerRequestRestValidator()
     if (!validator.validate(req.body)) {
       res.status(400).json({ errors: validator.getErrors() })
       return
