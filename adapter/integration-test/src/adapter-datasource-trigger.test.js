@@ -75,7 +75,7 @@ describe('Adapter Sources Trigger', () => {
     // check for rabbitmq notification
     expect(publishedEvents.get(EXECUTION_SUCCESS_TOPIC)).toContainEqual({
       datasourceId: datasourceId,
-      dataLocation: `/data/${id}`
+      data: '{"id": "2"}'
     })
   })
 
@@ -109,7 +109,7 @@ describe('Adapter Sources Trigger', () => {
     // check for rabbitmq notification
     expect(publishedEvents.get(EXECUTION_SUCCESS_TOPIC)).toContainEqual({
       datasourceId: datasourceId,
-      dataLocation: `/data/${id}`
+      data: '{"id":"2"}'
     })
   })
 
@@ -142,7 +142,7 @@ describe('Adapter Sources Trigger', () => {
     // check for rabbitmq notification
     expect(publishedEvents.get(EXECUTION_SUCCESS_TOPIC)).toContainEqual({
       datasourceId: datasourceId,
-      dataLocation: `/data/${id}`
+      data: '{"id":"2"}'
     })
   })
 
