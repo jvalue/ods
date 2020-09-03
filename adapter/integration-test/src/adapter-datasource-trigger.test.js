@@ -142,7 +142,7 @@ describe('Adapter Sources Trigger', () => {
     // check for rabbitmq notification
     expect(publishedEvents.get(EXECUTION_SUCCESS_TOPIC)).toContainEqual({
       datasourceId: datasourceId,
-      data: '{"id":"2"}'
+      data: '{"id":"1"}'
     })
   })
 
