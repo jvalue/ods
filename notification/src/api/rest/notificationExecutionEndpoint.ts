@@ -13,12 +13,11 @@ export class NotificationExecutionEndpoint {
   }
 
   triggerNotification = async (req: express.Request, res: express.Response): Promise<void> => {
-    const triggerEvent = req.body as TransformationEvent
-    if (!this.triggerEventHandler.isValidTransformationEvent(triggerEvent)) {
+    if (!this.triggerEventHandler.isValidTransformationEvent(req.body)) {
       res.status(400).send('Malformed notification trigger request.')
       return
     }
-
+    const triggerEvent: TransformationEvent = req.body
     await this.triggerEventHandler.handleEvent(triggerEvent)
     res.status(200).send(`Successfully sent all notifications for pipeline ${triggerEvent.pipelineId}`)
   }
