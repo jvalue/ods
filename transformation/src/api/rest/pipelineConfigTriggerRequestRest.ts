@@ -3,7 +3,7 @@ import { isObject, isNumber, isString, hasProperty } from '../../validators'
 export interface PipelineConfigTriggerRequestRest {
   datasourceId: number;
 
-  data: string;
+  data: object;
   dataLocation: string;
 }
 
