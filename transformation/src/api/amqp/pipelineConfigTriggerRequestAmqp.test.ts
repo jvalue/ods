@@ -64,12 +64,4 @@ describe('PipelineConfigTriggerRequestValidator', () => {
     delete requestWithMissingDataLocation.dataLocation
     expect(validator.validate(requestWithMissingDataLocation)).toBeTruthy()
   })
-
-  test('bla', () => {
-    const data = { a: 1, b: 2}
-    const outer = {
-      data: JSON.stringify(data)
-    }
-    console.log(JSON.stringify(outer))
-  })
 })
