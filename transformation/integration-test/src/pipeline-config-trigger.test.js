@@ -60,12 +60,13 @@ describe('Transformation Service Config Trigger', () => {
     expect(creationResponse.status).toEqual(201)
     const configId = creationResponse.body.id
 
+    const data = {
+      a: 'abc',
+      b: 123
+    }
     const trigger = {
       datasourceId: pipelineConfig.datasourceId,
-      data: {
-        a: 'abc',
-        b: 123
-      }
+      data: JSON.stringify(data)
     }
 
     const response = await request(URL)
@@ -102,12 +103,13 @@ describe('Transformation Service Config Trigger', () => {
     expect(creationResponse.status).toEqual(201)
     const configId = creationResponse.body.id
 
+    const data = {
+      a: 'abc',
+      b: 123
+    }
     const trigger = {
       datasourceId: pipelineConfig.datasourceId,
-      data: {
-        a: 'abc',
-        b: 123
-      }
+      data: JSON.stringify(data)
     }
     const response = await request(URL)
       .post('/trigger')
@@ -145,12 +147,14 @@ describe('Transformation Service Config Trigger', () => {
     const channel = await amqpConnection.createChannel()
     await channel.assertExchange(AMQP_EXCHANGE, 'topic')
 
+    const data = {
+      a: 1,
+      b: 2
+    }
+
     const importSuccessEvent = {
       datasourceId: 54321,
-      data: {
-        a: 1,
-        b: 2
-      }
+      data: JSON.stringify(data)
     }
     channel.publish(AMQP_EXCHANGE, AMQP_IMPORT_SUCCESS_TOPIC, Buffer.from(JSON.stringify(importSuccessEvent)))
     console.log("Sent via AMQP: %s:'%s'", AMQP_IMPORT_SUCCESS_TOPIC, JSON.stringify(importSuccessEvent))
