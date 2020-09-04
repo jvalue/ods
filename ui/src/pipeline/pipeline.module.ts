@@ -5,7 +5,7 @@ import * as RestService from './pipelineRest'
 @Module({ namespaced: true })
 export default class PipelineModule extends VuexModule {
   private pipelines: Pipeline[] = []
-  private selectedPipeline?: Pipeline
+  private selectedPipeline?: Pipeline = undefined
   private isLoadingPipelines = true
 
   @Mutation

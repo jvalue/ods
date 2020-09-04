@@ -120,15 +120,14 @@ export default class PipelineNotifications extends Vue {
   private loadConfigbyPipelineIdAction!: (id: number) => void
 
   @Action('addNotification', notificationNameSpace)
-  private addNotificationAction!: (notification: NotificationConfig) => Promise<NotificationConfig[]>
+  private addNotificationAction!: (notification: NotificationConfig) => void
 
   @Action('removeNotification', notificationNameSpace)
-  private removeNotificationAction!: (notification: NotificationConfig) => Promise<NotificationConfig[]>
+  private removeNotificationAction!: (notification: NotificationConfig) => void
 
   @Action('updateNotification', notificationNameSpace)
-  private updateNotificationAction!: (notification: NotificationConfig) => Promise<NotificationConfig[]>
+  private updateNotificationAction!: (notification: NotificationConfig) => void
 
-  // @State('selectedPipeline', pipelineNameSpace) private selectedPipeline!: Pipeline
   @State('notifications', notificationNameSpace) private notifications!: NotificationConfig[]
   @State('isLoadingNotifications', notificationNameSpace) private isLoadingNotifications!: boolean;
 
@@ -145,7 +144,7 @@ export default class PipelineNotifications extends Vue {
   private isEdit = false
   private pipelineId = -1
 
-  private async created () {
+  created (): void {
     console.log('Notification Overview created!')
     this.pipelineId = parseInt(this.$route.params.pipelineId)
     this.loadConfigbyPipelineIdAction(this.pipelineId)
@@ -161,7 +160,7 @@ export default class PipelineNotifications extends Vue {
     this.notificationEdit.openDialog(notification)
   }
 
-  private async onDeleteNotification (notification: NotificationConfig) {
+  private onDeleteNotification (notification: NotificationConfig): void {
     this.removeNotificationAction(notification)
   }
 
@@ -173,7 +172,7 @@ export default class PipelineNotifications extends Vue {
     this.$router.push({ name: 'pipeline-overview' })
   }
 
-  private async onSave (editedNotification: NotificationConfig) {
+  private onSave (editedNotification: NotificationConfig): void {
     editedNotification.pipelineId = this.pipelineId
 
     if (this.isEdit) { // edit
