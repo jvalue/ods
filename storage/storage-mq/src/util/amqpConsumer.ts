@@ -28,7 +28,7 @@ export default class AmqpConsumer {
     try {
       const channel = await connection.createChannel()
       await channel.assertExchange(exchange, 'topic', {
-        durable: false
+        durable: true
       })
       console.log(`Exchange ${exchange} successfully initialized.`)
       return channel

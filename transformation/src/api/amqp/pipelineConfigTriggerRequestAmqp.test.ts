@@ -1,18 +1,17 @@
 /* eslint-env jest */
-import { PipelineConfigTriggerRequestValidator } from './pipelineConfigTriggerRequest'
+import { PipelineConfigTriggerRequestAmqpValidator } from './pipelineConfigTriggerRequestAmpq'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const validTriggerRequest = (): any => ({
   datasourceId: 123,
-  data: {},
-  dataLocation: 'foo'
+  data: '{}'
 })
 
 describe('PipelineConfigTriggerRequestValidator', () => {
-  let validator: PipelineConfigTriggerRequestValidator
+  let validator: PipelineConfigTriggerRequestAmqpValidator
 
   beforeAll(() => {
-    validator = new PipelineConfigTriggerRequestValidator()
+    validator = new PipelineConfigTriggerRequestAmqpValidator()
   })
 
   test('should reject undefined', () => {
@@ -40,28 +39,13 @@ describe('PipelineConfigTriggerRequestValidator', () => {
     expect(validator.validate(invalidDataRequest)).toBeFalsy()
   })
 
-  test('should reject invalid dataLocation', () => {
-    const invalidDataLocationRequest = validTriggerRequest()
-    invalidDataLocationRequest.dataLocation = 123
-    expect(validator.validate(invalidDataLocationRequest)).toBeFalsy()
-  })
-
-  test('should reject missing data and dataLocation', () => {
+  test('should reject missing data', () => {
     const invalidRequest = validTriggerRequest()
     delete invalidRequest.data
-    delete invalidRequest.dataLocation
     expect(validator.validate(invalidRequest)).toBeFalsy()
   })
 
   test('should accept valid trigger request', () => {
     expect(validator.validate(validTriggerRequest())).toBeTruthy()
-
-    const requestWithMissingData = validTriggerRequest()
-    delete requestWithMissingData.data
-    expect(validator.validate(requestWithMissingData)).toBeTruthy()
-
-    const requestWithMissingDataLocation = validTriggerRequest()
-    delete requestWithMissingDataLocation.dataLocation
-    expect(validator.validate(requestWithMissingDataLocation)).toBeTruthy()
   })
 })
