@@ -40,7 +40,7 @@ describe('Storage', () => {
 
     const channel = await amqpConnection.createChannel()
     channel.assertExchange(AMQP_EXCHANGE, 'topic', {
-      durable: false
+      durable: true
     })
 
     const pipelineCreatedEvent = {

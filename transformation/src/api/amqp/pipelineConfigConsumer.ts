@@ -1,6 +1,6 @@
 import * as AMQP from 'amqplib'
 import { PipelineConfigManager } from '../../pipeline-config/pipelineConfigManager'
-import { PipelineConfigTriggerRequest } from '../pipelineConfigTriggerRequest'
+import { PipelineConfigTriggerRequestAmpq } from './pipelineConfigTriggerRequestAmpq'
 import {
   AMQP_URL,
   AMQP_DATASOURCE_EXECUTION_EXCHANGE,
@@ -68,12 +68,16 @@ export class PipelineConfigConsumer {
     if (!msg) {
       console.debug('Received empty event when listening on transformation executions - doing nothing')
     } else {
-      console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
-      if (msg.fields.routingKey === AMQP_DATASOURCE_EXECUTION_SUCCESS_TOPIC) {
-        const triggerRequest: PipelineConfigTriggerRequest = JSON.parse(msg.content.toString())
-        await this.pipelineManager.triggerConfig(triggerRequest.datasourceId, triggerRequest.data)
-      } else {
-        console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
+      try {
+        console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
+        if (msg.fields.routingKey === AMQP_DATASOURCE_EXECUTION_SUCCESS_TOPIC) {
+          const triggerRequest: PipelineConfigTriggerRequestAmpq = JSON.parse(msg.content.toString())
+          await this.pipelineManager.triggerConfig(triggerRequest.datasourceId, JSON.parse(triggerRequest.data))
+        } else {
+          console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
+        }
+      } catch (e) {
+        console.error(`Error in amqp event consumption: ${e.message}`)
       }
     }
   }

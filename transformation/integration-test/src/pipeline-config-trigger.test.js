@@ -145,12 +145,14 @@ describe('Transformation Service Config Trigger', () => {
     const channel = await amqpConnection.createChannel()
     await channel.assertExchange(AMQP_EXCHANGE, 'topic')
 
+    const data = {
+      a: 1,
+      b: 2
+    }
+
     const importSuccessEvent = {
       datasourceId: 54321,
-      data: {
-        a: 1,
-        b: 2
-      }
+      data: JSON.stringify(data)
     }
     channel.publish(AMQP_EXCHANGE, AMQP_IMPORT_SUCCESS_TOPIC, Buffer.from(JSON.stringify(importSuccessEvent)))
     console.log("Sent via AMQP: %s:'%s'", AMQP_IMPORT_SUCCESS_TOPIC, JSON.stringify(importSuccessEvent))
@@ -160,7 +162,7 @@ describe('Transformation Service Config Trigger', () => {
       {
         pipelineId: configId,
         pipelineName: pipelineConfig.metadata.displayName,
-        data: importSuccessEvent.data.a + importSuccessEvent.data.b
+        data: data.a + data.b
       })
   }, 12000)
 })
