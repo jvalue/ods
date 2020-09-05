@@ -7,8 +7,7 @@ import * as Scheduling from './scheduling'
 import {
   CONNECTION_RETRIES,
   CONNECTION_BACKOFF_IN_MS
-}
-  from './env'
+} from './env'
 
 const app = express()
 const port = 8080
