@@ -10,11 +10,14 @@ import { EventType } from './interfaces/datasource-event'
 import DatasourceConfig from './interfaces/datasource-config'
 
 jest.mock('./clients/adapter-client')
+// Type assertion is ok here, because we have mocked the whole './clients/adapter-client' module
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
 const mockedGetLatestEventId = getLatestEventId as jest.Mock
 mockedGetLatestEventId.mockResolvedValue(321)
 const mockedGetAllDatasources = getAllDatasources as jest.Mock
 const mockedGetEventsAfter = getEventsAfter as jest.Mock
 const mockedGetDatasource = getDatasource as jest.Mock
+/* eslint-enable @typescript-eslint/consistent-type-assertions */
 
 jest.mock('./env', () => () => ({
   MAX_TRIGGER_RETRIES: 2
