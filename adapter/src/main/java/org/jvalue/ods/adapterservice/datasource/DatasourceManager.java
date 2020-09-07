@@ -98,10 +98,10 @@ public class DatasourceManager {
     AdapterConfig adapterConfig = getParametrizedDatasource(id, runtimeParameters);
    try {
       Adapter adapter = adapterFactory.getAdapter(adapterConfig);
-      DataBlob.MetaData executionResult = adapter.executeJob(adapterConfig);
-      DatasourceImportedEvent importedEvent = new DatasourceImportedEvent(id, executionResult.getLocation());
+      DataBlob executionResult = adapter.executeJob(adapterConfig);
+      DatasourceImportedEvent importedEvent = new DatasourceImportedEvent(id, executionResult.getData());
       this.rabbitTemplate.convertAndSend(RabbitConfiguration.AMPQ_EXCHANGE, RabbitConfiguration.AMQP_IMPORT_SUCCESS_TOPIC, importedEvent);
-      return executionResult;
+      return executionResult.getMetaData();
    } catch (Exception e) {
        ImportFailedEvent failedEvent = new ImportFailedEvent(id, e.getMessage());
        this.rabbitTemplate.convertAndSend(RabbitConfiguration.AMPQ_EXCHANGE, RabbitConfiguration.AMQP_IMPORT_FAILED_TOPIC, failedEvent);

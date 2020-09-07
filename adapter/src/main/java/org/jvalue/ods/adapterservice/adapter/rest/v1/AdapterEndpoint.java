@@ -30,7 +30,7 @@ public class AdapterEndpoint {
     public DataBlob.MetaData executeDataImport(@Valid @RequestBody AdapterConfig config) {
         try {
           Adapter adapter = adapterFactory.getAdapter(config);
-            return adapter.executeJob(config);
+            return adapter.executeJob(config).getMetaData();
         } catch (Exception e) {
             if(e instanceof HttpMessageNotReadableException) {
                 System.err.println("Data Import request failed. Malformed Request: " + e.getMessage());

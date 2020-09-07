@@ -14,10 +14,6 @@ export class NotificationConfig {
   condition!: string;
 }
 
-export class NotificationConfigRequest extends NotificationConfig {
-  type!: CONFIG_TYPE
-}
-
 @Entity()
 export class SlackConfig extends NotificationConfig {
   @PrimaryGeneratedColumn()

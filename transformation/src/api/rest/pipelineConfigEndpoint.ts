@@ -1,9 +1,9 @@
 import * as express from 'express'
-import axios from 'axios'
 
-import PipelineConfigTriggerRequest from '../pipelineConfigTriggerRequest'
-import { PipelineConfigManager } from '../../pipeline-config/pipelineConfigManager'
-import PipelineConfig from '@/pipeline-config/model/pipelineConfig'
+import { PipelineConfigTriggerRequestRestValidator } from './pipelineConfigTriggerRequestRest'
+import { PipelineConfigManager } from '@/pipeline-config/pipelineConfigManager'
+import { PipelineConfigDTOValidator } from '../../pipeline-config/model/pipelineConfig'
+import { isString } from '../../validators'
 
 export class PipelineConfigEndpoint {
   pipelineConfigManager: PipelineConfigManager
@@ -23,124 +23,101 @@ export class PipelineConfigEndpoint {
   // The following methods need arrow syntax because of javascript 'this' shenanigans
 
   triggerConfigExecution = async (req: express.Request, res: express.Response): Promise<void> => {
-    const triggerRequest: PipelineConfigTriggerRequest = req.body
-    if ((!triggerRequest.data && !triggerRequest.dataLocation) || !triggerRequest.datasourceId) {
-      res.writeHead(400)
-      res.end()
+    const validator = new PipelineConfigTriggerRequestRestValidator()
+    if (!validator.validate(req.body)) {
+      res.status(400).json({ errors: validator.getErrors() })
       return
-    } else if (triggerRequest.dataLocation) {
-      if (triggerRequest.data) {
-        console.log(`Data and dataLocation fields both present.
-         Overwriting existing data with data from ${triggerRequest.dataLocation}`)
-      }
-      console.log(`Fetching data from adapter, location: ${triggerRequest.dataLocation}`)
-      const importResponse = await axios.get(triggerRequest.dataLocation)
-      console.log('Fetching successful.')
-      triggerRequest.data = importResponse.data
     }
+    const triggerRequest = req.body
 
     // trigger is asynchronous! not waiting for finished execution...
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.pipelineConfigManager.triggerConfig(triggerRequest.datasourceId, triggerRequest.data)
-
     const answer = `Triggered all pipelines for datasource ${triggerRequest.datasourceId}. Executing asynchronously...`
     res.setHeader('Content-Type', 'text/plain')
-    res.writeHead(200)
-    res.write(JSON.stringify(answer))
-    res.end()
+    res.status(200).send(answer)
   }
 
   delete = async (req: express.Request, res: express.Response): Promise<void> => {
-    const configId = req.params.id
-    if (!configId) {
-      res.writeHead(400)
-      res.write('Path parameter id is missing or is incorrect')
-      res.end()
+    const configId = parseInt(req.params.id)
+    if (Number.isNaN(configId)) {
+      res.status(400).send('Path parameter id is missing or is incorrect')
       return
     }
-    await this.pipelineConfigManager.delete(+configId)
-    res.setHeader('Content-Type', 'application/json')
-    res.writeHead(204)
-    res.end()
+    await this.pipelineConfigManager.delete(configId)
+    res.status(204).send()
   }
 
   deleteAll = async (req: express.Request, res: express.Response): Promise<void> => {
     await this.pipelineConfigManager.deleteAll()
-    res.writeHead(204)
-    res.end()
+    res.status(204).send()
   }
 
   update = async (req: express.Request, res: express.Response): Promise<void> => {
-    const configId = req.params.id
-    if (!configId) {
-      res.writeHead(400)
-      res.write('Path parameter id is missing or is incorrect')
-      res.end()
+    const configId = parseInt(req.params.id)
+    if (Number.isNaN(configId)) {
+      res.status(400).send('Path parameter id is missing or is incorrect')
       return
     }
-    const config = req.body as PipelineConfig
-    if (!config.transformation) {
-      config.transformation = { func: 'return data;' }
+    const validator = new PipelineConfigDTOValidator()
+    if (!validator.validate(req.body)) {
+      res.status(400).json({ errors: validator.getErrors() })
+      return
     }
+    const config = req.body
     try {
-      await this.pipelineConfigManager.update(+configId, config)
+      await this.pipelineConfigManager.update(configId, config)
     } catch (e) {
       res.status(404).send(`Could not find config with id ${configId}: ${e}`)
+      return
     }
-    res.setHeader('Content-Type', 'application/json')
-    res.writeHead(204)
-    res.end()
+    res.status(204).send()
   }
 
   create = async (req: express.Request, res: express.Response): Promise<void> => {
-    const config = req.body as PipelineConfig
-    if (!config.transformation) {
-      config.transformation = { func: 'return data;' }
+    const validator = new PipelineConfigDTOValidator()
+    if (!validator.validate(req.body)) {
+      res.status(400).json({ errors: validator.getErrors() })
+      return
     }
+    const config = req.body
     const savedConfig = await this.pipelineConfigManager.create(config)
-    res.setHeader('Content-Type', 'application/json')
-    res.setHeader('location', `/configs/${savedConfig.id}`)
-    res.writeHead(201)
-    res.write(JSON.stringify(savedConfig))
-    res.end()
-  }
-
-  getByDatasourceId = async (datasourceId: number, req: express.Request, res: express.Response): Promise<void> => {
-    const configs = await this.pipelineConfigManager.getByDatasourceId(datasourceId)
-    res.setHeader('Content-Type', 'application/json')
-    res.writeHead(200)
-    res.write(JSON.stringify(configs))
-    res.end()
+    res.status(201).location(`/configs/${savedConfig.id}`).json(savedConfig)
   }
 
   getOne = async (req: express.Request, res: express.Response): Promise<void> => {
-    const configId = req.params.id
-    if (!configId) {
-      res.writeHead(400)
-      res.write('Path parameter id is missing or is incorrect')
-      res.end()
+    const configId = parseInt(req.params.id)
+    if (Number.isNaN(configId)) {
+      res.status(400).send('Path parameter id is missing or is incorrect')
       return
     }
-    const config = await this.pipelineConfigManager.get(+configId)
+    const config = await this.pipelineConfigManager.get(configId)
     if (!config) {
       res.status(404).send('Config not found')
+      return
     }
-    res.setHeader('Content-Type', 'application/json')
-    res.writeHead(200)
-    res.write(JSON.stringify(config))
-    res.end()
+    res.status(200).json(config)
   }
 
   getAll = async (req: express.Request, res: express.Response): Promise<void> => {
-    const datasourceId = req.query.datasourceId
-    if (datasourceId) {
-      return this.getByDatasourceId(+datasourceId, req, res)
+    const datasourceId = parseInt(this.getQueryParameter(req, 'datasourceId'))
+    if (Number.isNaN(datasourceId)) {
+      const configs = await this.pipelineConfigManager.getAll()
+      res.status(200).json(configs)
+      return
     }
+    const configs = await this.pipelineConfigManager.getByDatasourceId(datasourceId)
+    res.status(200).json(configs)
+  }
 
-    const configs = await this.pipelineConfigManager.getAll()
-    res.setHeader('Content-Type', 'application/json')
-    res.writeHead(200)
-    res.write(JSON.stringify(configs))
-    res.end()
+  private getQueryParameter (req: express.Request, key: string): string {
+    const value = req.query[key]
+    if (isString(value)) {
+      return value
+    }
+    if (Array.isArray(value) && isString(value[0])) {
+      return value[0]
+    }
+    return ''
   }
 }
