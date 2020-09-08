@@ -17,6 +17,8 @@ const EXECUTION_TOPIC = process.env.AMQP_IMPORT_TOPIC
 const EXECUTION_SUCCESS_TOPIC = process.env.AMQP_IMPORT_SUCCESS_TOPIC
 const EXECUTION_FAILED_TOPIC = process.env.AMQP_IMPORT_FAILED_TOPIC
 
+const STARTUP_DELAY = 2000
+
 let amqpConnection
 const publishedEvents = new Map() // routing key -> received msgs []
 
@@ -30,6 +32,8 @@ describe('Adapter Sources Trigger', () => {
 
     await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, EXECUTION_TOPIC, AMQP_IT_QUEUE)
     console.log('Amqp connection established')
+
+    await sleep(STARTUP_DELAY)
   }, 60000)
 
   afterAll(async () => {
@@ -259,4 +263,8 @@ const runtimeParameters = {
   parameters: {
     id: '2'
   }
+}
+
+function sleep (ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
