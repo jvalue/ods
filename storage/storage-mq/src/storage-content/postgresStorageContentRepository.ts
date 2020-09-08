@@ -21,7 +21,7 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
   /**
      * Initializes the connection to the database.
      * @param retries:  Number of retries to connect to the database
-     * @param backoff:  Time in seconds to backoff before next connection retry
+     * @param backoffMs:  Time in seconds to backoff before next connection retry
      */
   public async init (retries: number, backoffMs: number): Promise<void> {
     console.debug('Initializing PostgresStorageStructureRepository')
@@ -43,7 +43,8 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
   async existsTable (tableIdentifier: string): Promise<boolean> {
     const resultSet =
       await this.postgresRepository.executeQuery(EXISTS_TABLE_STATEMENT(POSTGRES_SCHEMA, tableIdentifier), [])
-    return !!resultSet.rows[0].to_regclass
+    const foundTableWithIdentifier = !!resultSet.rows[0].to_regclass
+    return foundTableWithIdentifier
   }
 
   async getAllContent (tableIdentifier: string): Promise<StorageContent[] | undefined> {
