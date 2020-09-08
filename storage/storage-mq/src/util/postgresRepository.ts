@@ -5,6 +5,7 @@ export default class PostgresRepository {
 
   /**
    * Initializes the connection to the database.
+   * @param poolConfig: configuration object for the connection pool
    * @param retries:  Number of retries to connect to the database
    * @param backoffMs:  Time in ms to backoff before next connection retry
    * @returns reject promise on failure to connect
@@ -27,18 +28,17 @@ export default class PostgresRepository {
       }
       await this.sleep(backoffMs)
     }
-
-    return Promise.reject(lastError)
+    throw lastError
   }
 
   private async connect (poolConfig: PoolConfig): Promise<Pool> {
-    let client
+    let client: PoolClient | undefined
     try {
       const connectionPool = new Pool(poolConfig)
       client = await connectionPool.connect()
       await client.query('SELECT 1')
       console.info('Successfully established database connection')
-      return Promise.resolve(connectionPool)
+      return connectionPool
     } finally {
       if (client) {
         client.release()
@@ -50,28 +50,21 @@ export default class PostgresRepository {
     return new Promise(resolve => setTimeout(resolve, ms))
   }
 
-  private assertInitialized (): Promise<void> {
-    if (!this.connectionPool) {
-      return Promise.reject(new Error('No connection pool available'))
-    } else {
-      return Promise.resolve()
-    }
-  }
-
   public async executeQuery (query: string, args: unknown[]): Promise<QueryResult> {
     console.debug(`Executing query "${query}" with values ${JSON.stringify(args)}`)
-    await this.assertInitialized()
+    if (!this.connectionPool) {
+      throw new Error('No connection pool available')
+    }
 
-    let client!: PoolClient
+    let client: PoolClient | undefined
     try {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      client = await this.connectionPool!.connect()
+      client = await this.connectionPool.connect()
       const resultSet = await client.query(query, args)
       console.debug(`Query led to ${resultSet.rowCount} results`)
       return resultSet
     } catch (error) {
       console.error(`Failed to execute query: ${error}`)
-      return Promise.reject(error)
+      throw error
     } finally {
       if (client) {
         client.release()
