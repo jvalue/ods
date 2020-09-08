@@ -35,12 +35,10 @@ export class StorageContentEndpoint {
 
     if (!bucketId || bucketId < 1) {
       res.status(400).send('Cannot request content: No valid bucket id provided')
-      res.end()
       return
     }
     if (!contentId || contentId < 1) {
       res.status(400).send('Cannot request content: No valid bucket id provided')
-      res.end()
       return
     }
 
@@ -48,17 +46,14 @@ export class StorageContentEndpoint {
       const content = await this.contentRepository.getContent(`${bucketId}`, `${contentId}`)
       if (content) {
         res.status(200).send(content)
-        res.end()
         return
       } else {
         res.status(404).send(`Content with id "${contentId}" not found in bucker "${bucketId}"`)
-        res.end()
         return
       }
     } catch (err) {
       console.error(`Could not get content on bucket "${bucketId}" with content id "${contentId}"\n${err}`)
       res.status(500).send(`Could not get content on bucket ${bucketId} with content id "${contentId}`)
-      res.end()
     }
   }
 
@@ -72,7 +67,6 @@ export class StorageContentEndpoint {
 
     if (!bucketId || bucketId < 1) {
       res.status(400).send('Cannot request content: No valid bucket id provided')
-      res.end()
       return
     }
 
@@ -80,18 +74,15 @@ export class StorageContentEndpoint {
       const content = await this.contentRepository.getAllContent(`${bucketId}`)
       if (content) {
         res.status(200).send(content)
-        res.end()
         return
       } else {
         res.status(404).send(`Bucket "${bucketId}" does not exist`)
-        res.end()
         return
       }
     } catch (err) {
       console.error(`Could not get content on bucket "${bucketId}"\n${err}`)
 
       res.status(500).send(`Could not get content on bucket ${bucketId}`)
-      res.end()
     }
   }
 }

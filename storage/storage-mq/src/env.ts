@@ -1,4 +1,4 @@
-const isEmpty = (value: string | undefined): boolean => !value || value === ''
+const isEmpty = (value: string | undefined): value is undefined => !value || value === ''
 
 const getEnv = (envName: string): string => {
   const env = process.env[envName]
@@ -9,7 +9,7 @@ const getEnv = (envName: string): string => {
   }
 
   console.log(`[Environment Variable] ${envName} = ${env}`)
-  return env as string
+  return env
 }
 
 export const CONNECTION_RETRIES = +getEnv('CONNECTION_RETRIES')
