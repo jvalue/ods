@@ -5,6 +5,7 @@ export interface PipelineConfig {
   datasourceId: number;
   transformation: TransformationConfig;
   metadata: Metadata;
+  defaultAPI: boolean;
 }
 
 export interface TransformationConfig {
@@ -26,6 +27,7 @@ export interface PipelineConfigDTO {
   datasourceId: number;
   transformation: TransformationConfig;
   metadata: MetadataDTO;
+  defaultAPI: boolean;
 }
 
 export interface MetadataDTO {

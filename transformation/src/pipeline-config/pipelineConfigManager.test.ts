@@ -28,7 +28,8 @@ const generateConfig = (): PipelineConfig => {
       license: 'Test License',
       description: 'A test pipeline.',
       creationTimestamp: new Date()
-    }
+    },
+    defaultAPI: false
   }
 }
 
@@ -43,7 +44,8 @@ const pipelineConfigDTO = (): PipelineConfigDTO => {
       displayName: 'Pipeline Test',
       license: 'Test License',
       description: 'A test pipeline.'
-    }
+    },
+    defaultAPI: false
   }
 }
 

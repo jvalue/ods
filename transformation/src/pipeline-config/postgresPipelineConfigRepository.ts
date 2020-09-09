@@ -16,16 +16,18 @@ const TABLE_CREATION_STATEMENT = `
   "license" varchar,
   "description" varchar,
   "createdAt" timestamp,
+  "defaultAPI" BOOLEAN,
+--   "remoteSchemata" object[]
   CONSTRAINT "Data_pk_${POSTGRES_SCHEMA}_${POSTGRES_TABLE}" PRIMARY KEY (id)
 )`
 const INSERT_STATEMENT = `
   INSERT INTO "${POSTGRES_SCHEMA}"."${POSTGRES_TABLE}"
-  ("datasourceId", "func", "author", "displayName", "license", "description", "createdAt")
-  VALUES ($1, $2, $3, $4, $5, $6, $7)
+  ("datasourceId", "func", "author", "displayName", "license", "description", "createdAt", "defaultAPI")
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
   RETURNING *`
 const UPDATE_STATEMENT = `
   UPDATE "${POSTGRES_SCHEMA}"."${POSTGRES_TABLE}"
-  SET "datasourceId"=$2, "func"=$3, "author"=$4, "displayName"=$5, "license"=$6, "description"=$7
+  SET "datasourceId"=$2, "func"=$3, "author"=$4, "displayName"=$5, "license"=$6, "description"=$7, "defaultAPI"=$8
   WHERE id=$1`
 const GET_STATEMENT = `
   SELECT * FROM "${POSTGRES_SCHEMA}"."${POSTGRES_TABLE}" WHERE "id" = $1`
@@ -47,6 +49,7 @@ interface DatabasePipeline {
   license: string;
   description: string;
   createdAt: Date;
+  defaultAPI: boolean;
 }
 
 export default class PostgresPipelineConfigRepository implements PipelineConfigRepository {
@@ -126,7 +129,8 @@ export default class PostgresPipelineConfigRepository implements PipelineConfigR
         license: dbResult.license,
         description: dbResult.description,
         creationTimestamp: dbResult.createdAt
-      }
+      },
+      defaultAPI: dbResult.defaultAPI
     }
   }
 
@@ -168,7 +172,8 @@ export default class PostgresPipelineConfigRepository implements PipelineConfigR
       config.metadata.displayName,
       config.metadata.license,
       config.metadata.description,
-      new Date()
+      new Date(),
+      config.defaultAPI
     ]
     const { rows } = await this.executeQuery(INSERT_STATEMENT, values)
     return Promise.resolve(this.toPipelineConfig(rows[0]))
@@ -203,7 +208,8 @@ export default class PostgresPipelineConfigRepository implements PipelineConfigR
       config.metadata.author,
       config.metadata.displayName,
       config.metadata.license,
-      config.metadata.description
+      config.metadata.description,
+      config.defaultAPI
     ]
     const result = await this.executeQuery(UPDATE_STATEMENT, values)
     if (result.rowCount === 0) {

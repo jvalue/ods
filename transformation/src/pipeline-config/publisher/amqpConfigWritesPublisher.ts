@@ -7,6 +7,7 @@ import {
   AMQP_PIPELINE_CONFIG_UPDATED_TOPIC,
   AMQP_PIPELINE_CONFIG_DELETED_TOPIC
 } from '../../env'
+import { PipelineConfigDTO } from '@/pipeline-config/model/pipelineConfig'
 
 export default class AmqpConfigWritesPublisher implements ConfigWritesPublisher {
   private publisher: AmqpPublisher
@@ -19,19 +20,24 @@ export default class AmqpConfigWritesPublisher implements ConfigWritesPublisher 
     return this.publisher.init(AMQP_URL, AMQP_EXCHANGE, retries, msBackoff)
   }
 
-  publishCreation (pipelineId: number, pipelineName: string): boolean {
+  publishCreation (pipelineId: number, config: PipelineConfigDTO): boolean {
     const content = {
       pipelineId: pipelineId,
-      pipelineName: pipelineName
+      pipelineName: config.metadata.displayName,
+      defaultAPI: config.defaultAPI
     }
+    this.publisher.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_UPDATED_TOPIC, content)
     return this.publisher.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_CREATED_TOPIC, content)
   }
 
-  publishUpdate (pipelineId: number, pipelineName: string): boolean {
+  publishUpdate (pipelineId: number, config: PipelineConfigDTO): boolean {
     const content = {
       pipelineId: pipelineId,
-      pipelineName: pipelineName
+      pipelineName: config.metadata.displayName,
+      defaultAPI: config.defaultAPI
     }
+    console.log('********** PUBLISH EVENT')
+    this.publisher.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_UPDATED_TOPIC, content)
     return this.publisher.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_UPDATED_TOPIC, content)
   }
 
