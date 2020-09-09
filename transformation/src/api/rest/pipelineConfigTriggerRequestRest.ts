@@ -21,7 +21,7 @@ export class PipelineConfigTriggerRequestRestValidator {
     }
     if (!hasProperty(requestBody, 'data')) {
       this.errors.push('\'data\' property is missing')
-    } else if (hasProperty(requestBody, 'data') && !isObject(requestBody.data)) {
+    } else if (!isObject(requestBody.data)) {
       this.errors.push('\'data\' must be an object or array')
     }
     return this.errors.length === 0
