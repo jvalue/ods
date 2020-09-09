@@ -27,14 +27,19 @@ TBD
 |---|---|---|---|---|
 | *base_url*/ | GET | - | text | Get health status |
 | *base_url*/version | GET | - | text | Get service version |
-| *base_url*/job | POST | transformationRequest | jobResult | Trigger execution |
+| *base_url*/job | POST | PipelineExecutionRequest | JobResult | Pipeline execution |
+| *base_url*/trigger | POST | PipelineConfigTriggerRequest | text | Pipeline trigger |
+| *base_url*/configs | GET | - | PipelineConfig[] | Get all pipeline configs |
+| *base_url*/configs/:id | GET | - | PipelineConfig | Get pipeline config by id |
+| *base_url*/configs | POST | PipelineConfigDTO | PipelineConfig | Create a pipeline config |
+| *base_url*/configs/:id | PUT | PipelineConfigDTO | text | Update a pipeline config |
+| *base_url*/configs/:id | DELETE | - | text | Delete a pipeline config by id |
+| *base_url*/configs | DELETE | - | text | Delete all pipeline configs |
 
-
-### TransformationRequest
+### PipelineExecutionRequest
 ```
 {
-  "data": object | undefined
-  "dataLocation": object | undefined
+  "data": object,
   "func": string [VALID JS CODE]
 }
 ```
@@ -45,6 +50,48 @@ TBD
   "data"?: object,
   "error"?: object,
   "stats": stats
+}
+```
+
+### PipelineConfigTriggerRequest
+```
+{
+  "datasourceId": number,
+  "data": object
+}
+```
+
+### PipelineConfig
+```
+{
+  "id": number,
+  "datasourceId": number,
+  "transformation": {
+    "func": string [VALID JS CODE]
+  },
+  "metadata": {
+    "author": string,
+    "displayName": string,
+    "license": string,
+    "description": string,
+    "creationTimestamp": Date
+  }
+}
+```
+
+### PipelineConfigDTO
+```
+{
+  "datasourceId": number,
+  "transformation": {
+    "func": string [VALID JS CODE]
+  },
+  "metadata": {
+    "author": string,
+    "displayName": string,
+    "license": string,
+    "description": string,
+  }
 }
 ```
 
