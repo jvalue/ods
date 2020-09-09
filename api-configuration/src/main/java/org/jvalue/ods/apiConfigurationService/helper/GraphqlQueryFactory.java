@@ -36,7 +36,7 @@ public class GraphqlQueryFactory {
         .put("table", new JSONObject()
           .put("schema", "%s")
           .put("name", "%s"))
-      .put("cascade", "true")
+      .put("cascade", true)
       ).toString()),
 
     ADD_REMOTE_SCHEMA(

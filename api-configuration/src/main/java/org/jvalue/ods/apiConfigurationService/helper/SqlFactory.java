@@ -9,7 +9,8 @@ import java.util.Set;
 
 public class SqlFactory {
 
-  public static final String STORAGE_URL= "http://localhost:9000/api/storage/%s?order=id.desc&limit=1";
+//  public static final String STORAGE_URL= "http://localhost:9000/api/storage/%s?order=id.desc&limit=1";
+  public static final String STORAGE_URL= "http://172.17.0.1:9000/api/storage/%s?order=id.desc&limit=1";
 
   //language=SQL
   private static final String SQL_SCHEMA_CREATION_HEADER =
@@ -22,8 +23,8 @@ public class SqlFactory {
   //language=SQL
   private static final String SQL_SCHEMA_CREATION_REST =
     "FROM (WITH a AS " +
-      "(SELECT \"3\".id, \"3\".timestamp, jsonb_array_elements(\"3\".data) AS datapoint " +
-      "FROM storage.\"3\")" +
+      "(SELECT \"%s\".id, \"%s\".timestamp, jsonb_array_elements(\"%s\".data) AS datapoint " +
+      "FROM storage.\"%s\")" +
       "SELECT a.id, a.timestamp,a.datapoint FROM a) x;";
 
   //language=SQL
@@ -48,7 +49,7 @@ public class SqlFactory {
       String fieldQuery = String.format(SQL_SCHEMA_CREATION_FIELD, field, field);
       query.append(fieldQuery);
     }
-    query.append(SQL_SCHEMA_CREATION_REST);
+    query.append(String.format(SQL_SCHEMA_CREATION_REST, tableName, tableName, tableName, tableName));
     return query.toString();
   }
 }

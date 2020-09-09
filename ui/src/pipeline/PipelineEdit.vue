@@ -55,11 +55,27 @@
             <small>Customize data transformation</small>
           </v-stepper-step>
           <v-stepper-content step="2">
-            <pipeline-transformation-config
-              v-model="dialogPipeline.transformation"
-              :datasource-id="dialogPipeline.datasourceId"
-              @validityChanged="validStep2 = $event"
-            />
+            <v-expansion-panels>
+              <v-expansion-panel
+                v-for="(item,i) in 1"
+                :key="i"
+              >
+                <v-expansion-panel-header>
+                  <div primary-title>
+                    <div class="headline">
+                      data
+                    </div>
+                  </div>
+                </v-expansion-panel-header>
+                <v-expansion-panel-content>
+                  <pipeline-transformation-config
+                    v-model="dialogPipeline.transformation"
+                    :datasource-id="dialogPipeline.datasourceId"
+                    @validityChanged="validStep2 = $event"
+                  />
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+            </v-expansion-panels>
             <stepper-button-group
               :step="2"
               :next-enabled="validStep2"
@@ -78,18 +94,28 @@
               v-model="dialogPipeline.metadata"
               @validityChanged="validStep3 = $event"
             />
+            <stepper-button-group
+              :step="3"
+              :next-enabled="validStep3"
+              @stepChanged="dialogStep = $event"
+            />
           </v-stepper-content>
           <v-stepper-step
             :complete="dialogStep > 4"
             step="4"
           >
             API
+            <small>Manage public GraphQL APIs</small>
           </v-stepper-step>
           <v-stepper-content step="4">
-            <pipeline-metadata-config
-              v-model="dialogPipeline.defaultAPI"
-              @validityChanged="validStep4 = $event"
-            />
+            <v-form
+              v-model="validForm"
+            >
+              <v-checkbox
+                v-model="dialogPipeline.defaultAPI"
+                label="Default API"
+              />
+            </v-form>
           </v-stepper-content>
         </v-stepper>
       </v-card-text>
@@ -161,13 +187,13 @@ export default class PipelineEdit extends Vue {
     id: -1,
     datasourceId: -1,
     transformation: { func: "data.test = 'abc';\nreturn data;" },
-    defaultAPI: true,
     metadata: {
       author: '',
       license: '',
       description: '',
       displayName: ''
-    }
+    },
+    defaultAPI: true
   }
 
   created (): void {
@@ -187,7 +213,7 @@ export default class PipelineEdit extends Vue {
 
   @Watch('selectedPipeline')
   onSelectedPipelineChange (value: Pipeline, oldValue: Pipeline): void {
-    if (value != oldValue) {
+    if (value !== oldValue) {
       this.dialogPipeline = value
     }
   }

@@ -34,8 +34,6 @@ public class ApiConfigurationService implements ApiConfigurationServiceI {
     try {
       String schemaName = buildSchemaName(tableName);
       untrackTable(schemaName);
-      String query = GraphqlQueryFactory.populateQuery(GraphqlQueryFactory.GQLQuery.UNTRACK_TABLE_QUERY, schemaName, tableName);
-      sendQuery(HASURA_ADMIN_ENDPOINT, query);
       return HttpStatus.OK;
     } catch (Exception e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
