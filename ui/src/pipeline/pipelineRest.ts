@@ -29,6 +29,8 @@ export async function getPipelineByDatasourceId (datasourceId: number): Promise<
 }
 
 export async function createPipeline (pipeline: Pipeline): Promise<Pipeline> {
+  console.log('send createPipeline' + pipeline.toString())
+  console.log('stringified pipeline' + JSON.stringify(pipeline).toString())
   const response = await httpPipelineConfigs.post('/', JSON.stringify(pipeline))
   delete pipeline.id
   return JSON.parse(response.data)

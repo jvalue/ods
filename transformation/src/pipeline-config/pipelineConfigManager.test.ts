@@ -29,7 +29,8 @@ const generateConfig = (): PipelineConfig => {
       description: 'A test pipeline.',
       creationTimestamp: new Date()
     },
-    defaultAPI: false
+    defaultAPI: false,
+    remoteSchemata: []
   }
 }
 
@@ -45,7 +46,8 @@ const pipelineConfigDTO = (): PipelineConfigDTO => {
       license: 'Test License',
       description: 'A test pipeline.'
     },
-    defaultAPI: false
+    defaultAPI: false,
+    remoteSchemata: []
   }
 }
 

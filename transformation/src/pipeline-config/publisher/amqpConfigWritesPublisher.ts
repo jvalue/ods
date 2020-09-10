@@ -24,7 +24,8 @@ export default class AmqpConfigWritesPublisher implements ConfigWritesPublisher 
     const content = {
       pipelineId: pipelineId,
       pipelineName: config.metadata.displayName,
-      defaultAPI: config.defaultAPI
+      defaultAPI: config.defaultAPI,
+      remoteSchemata: config.remoteSchemata
     }
     this.publisher.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_UPDATED_TOPIC, content)
     return this.publisher.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_CREATED_TOPIC, content)
@@ -34,7 +35,8 @@ export default class AmqpConfigWritesPublisher implements ConfigWritesPublisher 
     const content = {
       pipelineId: pipelineId,
       pipelineName: config.metadata.displayName,
-      defaultAPI: config.defaultAPI
+      defaultAPI: config.defaultAPI,
+      remoteSchemata: config.remoteSchemata
     }
     console.log('********** PUBLISH EVENT')
     this.publisher.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_UPDATED_TOPIC, content)

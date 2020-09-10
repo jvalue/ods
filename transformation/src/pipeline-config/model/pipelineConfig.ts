@@ -6,6 +6,13 @@ export interface PipelineConfig {
   transformation: TransformationConfig;
   metadata: Metadata;
   defaultAPI: boolean;
+  remoteSchemata: RemoteSchemaData[];
+}
+
+export interface RemoteSchemaData {
+  id: number;
+  endpoint: string;
+  author: string;
 }
 
 export interface TransformationConfig {
@@ -28,6 +35,7 @@ export interface PipelineConfigDTO {
   transformation: TransformationConfig;
   metadata: MetadataDTO;
   defaultAPI: boolean;
+  remoteSchemata: RemoteSchemaData[];
 }
 
 export interface MetadataDTO {

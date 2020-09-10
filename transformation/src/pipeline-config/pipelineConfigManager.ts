@@ -23,6 +23,7 @@ export class PipelineConfigManager {
   }
 
   async create (config: PipelineConfigDTO): Promise<PipelineConfig> {
+    console.log('****create config dto' + config.toString)
     const savedConfig = await this.pipelineConfigRepository.create(config)
     const success = this.configWritesPublisher.publishCreation(savedConfig.id, savedConfig)
     if (!success) {
@@ -47,9 +48,9 @@ export class PipelineConfigManager {
   }
 
   async update (id: number, config: PipelineConfigDTO): Promise<void> {
+    console.log(config)
     await this.pipelineConfigRepository.update(id, config)
     const success = this.configWritesPublisher.publishUpdate(id, config)
-    console.log(config)
     if (!success) {
       console.error(`Updated pipeline ${id} but was not able to publish success. Error handling not implemented!`)
     }

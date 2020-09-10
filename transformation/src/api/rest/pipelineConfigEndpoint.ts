@@ -65,6 +65,7 @@ export class PipelineConfigEndpoint {
       return
     }
     const config = req.body
+    console.log('*******' + config)
     try {
       await this.pipelineConfigManager.update(configId, config)
     } catch (e) {
@@ -81,6 +82,7 @@ export class PipelineConfigEndpoint {
       return
     }
     const config = req.body
+    console.log('****create config' + config.toString)
     const savedConfig = await this.pipelineConfigManager.create(config)
     res.status(201).location(`/configs/${savedConfig.id}`).json(savedConfig)
   }

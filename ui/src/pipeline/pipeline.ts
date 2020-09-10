@@ -4,7 +4,7 @@ export default interface Pipeline {
   metadata: PipelineMetaData;
   transformation: TransformationConfig;
   defaultAPI: boolean;
-  // remoteSchemata: RemoteSchemaData[];
+  remoteSchemata: RemoteSchemaData[];
 }
 
 export interface PipelineMetaData {
@@ -14,11 +14,11 @@ export interface PipelineMetaData {
   license: string;
 }
 
-// export interface RemoteSchemaData {
-//   id: number;
-//   endpoint: string;
-//   author: string;
-// }
+export interface RemoteSchemaData {
+  id: number;
+  endpoint: string;
+  author: string;
+}
 
 export interface TransformationConfig {
   func: string;

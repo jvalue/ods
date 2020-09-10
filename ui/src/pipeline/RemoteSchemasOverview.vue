@@ -1,11 +1,33 @@
 <template>
   <div class="pipeline">
+    <template>
+      <v-form
+        v-model="validForm"
+      >
+        <v-text-field
+          v-model="remoteSchemaInput.id"
+          type="number"
+          label="ID"
+          @keyup="formChanged"
+        />
+        <v-text-field
+          v-model="remoteSchemaInput.author"
+          label="Remote Schema Author"
+          @keyup="formChanged"
+        />
+        <v-text-field
+          v-model="remoteSchemaInput.endpoint"
+          label="Remote Schema endpoint"
+          @keyup="formChanged"
+        />
+      </v-form>
+    </template>
     <v-card>
       <v-card-title>
         <v-btn
           class="ma-2"
           color="success"
-          @click="onCreatePipeline()"
+          @click="onCreateEndpoint"
         >
           Add new Endpoint
           <v-icon
@@ -27,10 +49,7 @@
 
       <v-data-table
         :headers="headers"
-        :items="pipelines"
-        :search="search"
-        :custom-filter="filterOnlyDisplayName"
-        :loading="isLoadingPipelines"
+        :items="remoteSchemata"
         class="elevation-1"
       >
         <v-progress-linear
@@ -38,24 +57,12 @@
           indeterminate
         />
 
-        <template v-slot:item.trigger.interval="{ item }">
-          {{ getHoursFromMS(item.trigger.interval) }}h:{{ getMinutesFromMS(item.trigger.interval) }}m
-        </template>
-
-        <template v-slot:item.trigger.periodic="{ item }">
-          <v-switch
-            v-model="item.trigger.periodic"
-            class="ma-2"
-            disabled
-          />
-        </template>
-
         <template v-slot:item.action="{ item }">
           <v-btn
             depressed
             small
             class="ma-2"
-            @click="onEditPipeline(item)"
+            @click="onEditRemoteSchema(item)"
           >
             Edit
             <v-icon
@@ -69,7 +76,7 @@
             depressed
             small
             class="ma-2"
-            @click="onDeletePipeline(item)"
+            @click="onDeleteRemoteSchema(item)"
           >
             Delete
             <v-icon
@@ -89,9 +96,10 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { State, Action } from 'vuex-class'
-import Pipeline from './pipeline'
+import Pipeline, { PipelineMetaData, RemoteSchemaData } from './pipeline'
+import { Emit, PropSync } from 'vue-property-decorator'
 
-const namespace = { namespace: 'pipeline' }
+const namespace = { namespace: 'endpoints' }
 
 @Component({})
 export default class PipelineOverview extends Vue {
@@ -100,43 +108,93 @@ export default class PipelineOverview extends Vue {
 
   @State('isLoadingPipelines', namespace) private isLoadingPipelines!: boolean;
   @State('pipelines', namespace) private pipelines!: Pipeline[];
+  @State('endpoints', namespace) private endpoints!: RemoteSchemaData[];
+
+  private validForm = true;
+
+  @PropSync('value')
+  private metadataConfig!: PipelineMetaData;
+
+  @PropSync('value')
+  private remoteSchemata!: RemoteSchemaData[];
+
+  private remoteSchemaInput: RemoteSchemaData = {
+    // id: this.findFreeId(this.remoteSchemata),
+    id: 3,
+    endpoint: 'sdsdf',
+    author: 'maltsdfe'
+  };
+
+  @Emit('value')
+  emitValue (): RemoteSchemaData[] {
+    return this.remoteSchemata
+  }
+
+  @Emit('validityChanged')
+  emitValid (): boolean {
+    return this.validForm
+  }
+
+  formChanged (): void {
+    // this.remoteSchemata.push(this.remoteSchemaInput)
+    // this.emitValue()
+    // this.emitValid()
+  }
 
   private headers = [
     { text: 'Id', value: 'id' },
-    { text: 'Pipeline ID', value: 'pipelineId' },
-    { text: 'Schema Name', value: 'metadata.displayName', sortable: false }, // sorting to be implemented
-    { text: 'Endpoint', value: 'metadata.author', sortable: false },
-    { text: 'Author', value: 'metadata.author', sortable: false },
+    { text: 'Endpoint', value: 'endpoint', sortable: false },
+    { text: 'Author', value: 'author', sortable: false },
     { text: 'Action', value: 'action', sortable: false }
   ];
 
-  private search = '';
-
-  private mounted (): void {
-    this.loadPipelinesAction()
+  private onCreateEndpoint (): void {
+    const foundIndex = this.remoteSchemata.findIndex(x => x.id === this.remoteSchemaInput.id)
+    if (foundIndex !== -1) {
+      console.log('onCreate - id exists')
+      this.remoteSchemata[foundIndex] = JSON.parse(JSON.stringify(this.remoteSchemaInput))
+    } else {
+      console.log('onCreate - id doesnt exists')
+      this.remoteSchemata.push(JSON.parse(JSON.stringify(this.remoteSchemaInput)))
+    }
+    this.emitValue()
+    this.emitValid()
+    this.remoteSchemaInput = {
+      // id: this.findFreeId(this.remoteSchemata),
+      id: this.remoteSchemaInput.id += 1,
+      endpoint: 'new',
+      author: 'new'
+    }
   }
 
-  private onCreatePipeline (): void {
-    this.$router.push({ name: 'pipeline-new' })
+  private onEditRemoteSchema (remoteSchema: RemoteSchemaData): void {
+    // this.remoteSchemata.push(this.remoteSchemaInput)
+    // const foundIndex = this.remoteSchemata.findIndex(x => x.id === this.remoteSchemaInput.id)
+    // if (foundIndex !== -1) {
+    //   this.remoteSchemata[foundIndex] = this.remoteSchemaInput
+    //   this.emitValue()
+    //   this.emitValid()
+    // }
   }
 
-  private onEditPipeline (pipeline: Pipeline): void {
-    this.$router.push({ name: 'pipeline-edit', params: { pipelineId: `${pipeline.id}` } })
+  private onDeleteRemoteSchema (remoteSchema: RemoteSchemaData): void {
+    // this.deletePipelineAction(pipeline.id)
   }
 
-  private onDeletePipeline (pipeline: Pipeline): void {
-    this.deletePipelineAction(pipeline.id)
-  }
-
-  private onNotifications (pipeline: Pipeline): void {
-    this.$router.push({ name: 'notification-overview', params: { pipelineId: `${pipeline.id}` } })
-  }
-
-  private filterOnlyDisplayName (value: object, search: string, item: Pipeline): boolean {
-    return value != null &&
-        search != null &&
-        typeof value === 'string' &&
-        item.metadata.displayName.toLocaleLowerCase().indexOf(search.toLocaleLowerCase()) !== -1
+  private findFreeId (array: RemoteSchemaData[]) {
+    const sortedArray = array
+      .slice() // Make a copy of the array.
+      .sort(function (a, b) { return a.id - b.id }) // Sort it.
+    let previousId = 0
+    for (const element of sortedArray) {
+      if (element.id !== (previousId + 1)) {
+        // Found a gap.
+        return previousId + 1
+      }
+      previousId = element.id
+    }
+    // Found no gaps.
+    return previousId + 1
   }
 }
 </script>

@@ -6,6 +6,14 @@ import PipelineConfigRepository from './pipelineConfigRepository'
 
 const POSTGRES_TABLE = 'PipelineConfigs'
 
+const CREATE_TYPE_STATEMENT = `
+  CREATE TYPE remoteSchemaData AS (
+  id bigint,
+  endpoint varchar,
+  author varchar
+)
+`
+
 const TABLE_CREATION_STATEMENT = `
   CREATE TABLE IF NOT EXISTS "${POSTGRES_SCHEMA}"."${POSTGRES_TABLE}" (
   "id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
@@ -17,17 +25,19 @@ const TABLE_CREATION_STATEMENT = `
   "description" varchar,
   "createdAt" timestamp,
   "defaultAPI" BOOLEAN,
---   "remoteSchemata" object[]
+  "remoteSchemata" jsonb,
   CONSTRAINT "Data_pk_${POSTGRES_SCHEMA}_${POSTGRES_TABLE}" PRIMARY KEY (id)
 )`
 const INSERT_STATEMENT = `
   INSERT INTO "${POSTGRES_SCHEMA}"."${POSTGRES_TABLE}"
-  ("datasourceId", "func", "author", "displayName", "license", "description", "createdAt", "defaultAPI")
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+  ("datasourceId", "func", "author", "displayName", "license", "description", "createdAt",
+  "defaultAPI", "remoteSchemata")
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
   RETURNING *`
 const UPDATE_STATEMENT = `
   UPDATE "${POSTGRES_SCHEMA}"."${POSTGRES_TABLE}"
-  SET "datasourceId"=$2, "func"=$3, "author"=$4, "displayName"=$5, "license"=$6, "description"=$7, "defaultAPI"=$8
+  SET "datasourceId"=$2, "func"=$3, "author"=$4, "displayName"=$5, "license"=$6, "description"=$7,
+  "defaultAPI"=$8, "remoteSchemata"=$9
   WHERE id=$1`
 const GET_STATEMENT = `
   SELECT * FROM "${POSTGRES_SCHEMA}"."${POSTGRES_TABLE}" WHERE "id" = $1`
@@ -50,6 +60,13 @@ interface DatabasePipeline {
   description: string;
   createdAt: Date;
   defaultAPI: boolean;
+  remoteSchemata: RemoteSchemaData[];
+}
+
+export interface RemoteSchemaData {
+  id: number;
+  endpoint: string;
+  author: string;
 }
 
 export default class PostgresPipelineConfigRepository implements PipelineConfigRepository {
@@ -83,6 +100,11 @@ export default class PostgresPipelineConfigRepository implements PipelineConfigR
       try {
         const connectionPool = new Pool(poolConfig)
         client = await connectionPool.connect()
+        try {
+          await client.query(CREATE_TYPE_STATEMENT)
+        } catch {
+          console.log('already exists -- continue')
+        }
         await client.query(TABLE_CREATION_STATEMENT)
         this.connectionPool = connectionPool
         console.info('Successfully established database connection')
@@ -130,7 +152,8 @@ export default class PostgresPipelineConfigRepository implements PipelineConfigR
         description: dbResult.description,
         creationTimestamp: dbResult.createdAt
       },
-      defaultAPI: dbResult.defaultAPI
+      defaultAPI: dbResult.defaultAPI,
+      remoteSchemata: dbResult.remoteSchemata
     }
   }
 
@@ -173,7 +196,8 @@ export default class PostgresPipelineConfigRepository implements PipelineConfigR
       config.metadata.license,
       config.metadata.description,
       new Date(),
-      config.defaultAPI
+      config.defaultAPI,
+      JSON.stringify(config.remoteSchemata)
     ]
     const { rows } = await this.executeQuery(INSERT_STATEMENT, values)
     return Promise.resolve(this.toPipelineConfig(rows[0]))
@@ -209,7 +233,8 @@ export default class PostgresPipelineConfigRepository implements PipelineConfigR
       config.metadata.displayName,
       config.metadata.license,
       config.metadata.description,
-      config.defaultAPI
+      config.defaultAPI,
+      JSON.stringify(config.remoteSchemata)
     ]
     const result = await this.executeQuery(UPDATE_STATEMENT, values)
     if (result.rowCount === 0) {

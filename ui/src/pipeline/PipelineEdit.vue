@@ -116,6 +116,9 @@
                 label="Default API"
               />
             </v-form>
+            <remote-schemas-overview
+              v-model="dialogPipeline.remoteSchemata"
+              @validityChanged="validStep4 = $event"/>
           </v-stepper-content>
         </v-stepper>
       </v-card-text>
@@ -161,11 +164,12 @@ import Pipeline from '@/pipeline/pipeline'
 import StepperButtonGroup from '@/components/StepperButtonGroup.vue'
 import PipelineMetadataConfig from '@/pipeline/edit/PipelineMetadataConfig.vue'
 import PipelineTransformationConfig from '@/pipeline/edit/transformation/PipelineTransformationConfig.vue'
+import RemoteSchemasOverview from "@/pipeline/RemoteSchemasOverview.vue";
 
 const pipelineNamespace = { namespace: 'pipeline' }
 
 @Component({
-  components: { StepperButtonGroup, PipelineMetadataConfig, PipelineTransformationConfig }
+  components: {RemoteSchemasOverview, StepperButtonGroup, PipelineMetadataConfig, PipelineTransformationConfig }
 })
 export default class PipelineEdit extends Vue {
   @Action('loadPipelineById', pipelineNamespace) private loadPipelineByIdAction!: (id: number) => void
@@ -193,7 +197,19 @@ export default class PipelineEdit extends Vue {
       description: '',
       displayName: ''
     },
-    defaultAPI: true
+    defaultAPI: true,
+    remoteSchemata: [
+      {
+        id: 1,
+        endpoint: 'sdsdf',
+        author: 'maltsdfe'
+      },
+      {
+        id: 2,
+        endpoint: 'zweiter point',
+        author: 'me'
+      }
+    ]
   }
 
   created (): void {

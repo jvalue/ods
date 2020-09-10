@@ -43,6 +43,7 @@ export default class PipelineModule extends VuexModule {
 
   @Action({ commit: 'setPipelines', rawError: true })
   public async createPipeline (pipeline: Pipeline): Promise<Pipeline[]> {
+    console.log(pipeline)
     await RestService.createPipeline(pipeline)
     return await RestService.getAllPipelines()
   }
