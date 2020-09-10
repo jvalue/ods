@@ -125,6 +125,14 @@ export default class PipelineOverview extends Vue {
     author: 'maltsdfe'
   };
 
+  private mounted (): void {
+    this.remoteSchemaInput = {
+      id: this.findFreeId(this.remoteSchemata),
+      endpoint: 'mounted',
+      author: 'malte'
+    }
+  }
+
   @Emit('value')
   emitValue (): RemoteSchemaData[] {
     return this.remoteSchemata
@@ -136,9 +144,7 @@ export default class PipelineOverview extends Vue {
   }
 
   formChanged (): void {
-    // this.remoteSchemata.push(this.remoteSchemaInput)
-    // this.emitValue()
-    // this.emitValid()
+    this.emitValid()
   }
 
   private headers = [
@@ -168,17 +174,19 @@ export default class PipelineOverview extends Vue {
   }
 
   private onEditRemoteSchema (remoteSchema: RemoteSchemaData): void {
-    // this.remoteSchemata.push(this.remoteSchemaInput)
-    // const foundIndex = this.remoteSchemata.findIndex(x => x.id === this.remoteSchemaInput.id)
-    // if (foundIndex !== -1) {
-    //   this.remoteSchemata[foundIndex] = this.remoteSchemaInput
-    //   this.emitValue()
-    //   this.emitValid()
-    // }
+    const foundIndex = this.remoteSchemata.findIndex(x => x.id === remoteSchema.id)
+    if (foundIndex !== -1) {
+      console.log('onCreate - id exists')
+      this.remoteSchemata[foundIndex] = JSON.parse(JSON.stringify(remoteSchema))
+    } else {
+      console.log('error - entry not found')
+    }
+    this.emitValue()
+    this.emitValid()
   }
 
   private onDeleteRemoteSchema (remoteSchema: RemoteSchemaData): void {
-    // this.deletePipelineAction(pipeline.id)
+    this.remoteSchemata = this.remoteSchemata.filter(x => x.id !== remoteSchema.id)
   }
 
   private findFreeId (array: RemoteSchemaData[]) {
