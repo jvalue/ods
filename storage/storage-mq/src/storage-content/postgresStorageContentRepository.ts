@@ -21,7 +21,7 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
   /**
      * Initializes the connection to the database.
      * @param retries:  Number of retries to connect to the database
-     * @param backoff:  Time in seconds to backoff before next connection retry
+     * @param backoffMs:  Time in seconds to backoff before next connection retry
      */
   public async init (retries: number, backoffMs: number): Promise<void> {
     console.debug('Initializing PostgresStorageStructureRepository')
@@ -43,28 +43,27 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
   async existsTable (tableIdentifier: string): Promise<boolean> {
     const resultSet =
       await this.postgresRepository.executeQuery(EXISTS_TABLE_STATEMENT(POSTGRES_SCHEMA, tableIdentifier), [])
-    const tableExists = !!resultSet.rows[0].to_regclass
-    return Promise.resolve(tableExists)
+    const foundTableWithIdentifier = !!resultSet.rows[0].to_regclass
+    return foundTableWithIdentifier
   }
 
   async getAllContent (tableIdentifier: string): Promise<StorageContent[] | undefined> {
     const tableExists = await this.existsTable(tableIdentifier)
     if (!tableExists) {
       console.debug(`Table "${tableIdentifier}" does not exist - returning no data`)
-      return Promise.resolve(undefined)
+      return undefined
     }
 
     const resultSet =
       await this.postgresRepository.executeQuery(GET_ALL_CONTENT_STATEMENT(POSTGRES_SCHEMA, tableIdentifier), [])
-    const content = this.toContents(resultSet)
-    return Promise.resolve(content)
+    return this.toContents(resultSet)
   }
 
   async getContent (tableIdentifier: string, contentId: string): Promise<StorageContent | undefined> {
     const tableExists = await this.existsTable(tableIdentifier)
     if (!tableExists) {
       console.debug(`Table "${tableIdentifier}" does not exist - returning no data`)
-      return Promise.resolve(undefined)
+      return undefined
     }
 
     const resultSet = await this.postgresRepository.executeQuery(
@@ -79,7 +78,7 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
       `Fetched content for table "${tableIdentifier}", id ${contentId}: ` +
       `{ pipelineId: ${content[0].pipelineId}, timestamp: ${content[0].timestamp}, data: <omitted in log>}`
     )
-    return Promise.resolve(content[0])
+    return content[0]
   }
 
   async saveContent (tableIdentifier: string, content: StorageContent): Promise<number> {
@@ -91,13 +90,13 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
 
     const { rows } = await this.postgresRepository
       .executeQuery(INSERT_CONTENT_STATEMENT(POSTGRES_SCHEMA, tableIdentifier), values)
-    const id = rows[0].id as number
+    const id = +rows[0].id
     console.debug(`Content successfully persisted with id ${id}`)
-    return Promise.resolve(id)
+    return id
   }
 
-  private toContents (resultSet: QueryResult<object>): StorageContent[] {
-    const contents = resultSet.rows as StorageContent[]
+  private toContents (resultSet: QueryResult<StorageContent>): StorageContent[] {
+    const contents: StorageContent[] = resultSet.rows
     contents.forEach(x => this.contentIdAsNumber(x))
     return contents
   }
