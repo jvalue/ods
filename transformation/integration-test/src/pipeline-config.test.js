@@ -80,11 +80,15 @@ describe('Pipeline Config Test', () => {
     await sleep(1000)
     expect(publishedEvents.get(AMQP_PIPELINE_CONFIG_CREATED_TOPIC)).toContainEqual({
       pipelineId: configId,
-      pipelineName: pipelineConfig.metadata.displayName
+      pipelineName: pipelineConfig.metadata.displayName,
+      defaultAPI: null,
+      remoteSchemata: null,
     })
     expect(publishedEvents.get(AMQP_PIPELINE_CONFIG_DELETED_TOPIC)).toContainEqual({
       pipelineId: configId,
-      pipelineName: pipelineConfig.metadata.displayName
+      pipelineName: pipelineConfig.metadata.displayName,
+      defaultAPI: null,
+      remoteSchemata: null
     })
   })
 
@@ -123,15 +127,21 @@ describe('Pipeline Config Test', () => {
     await sleep(1000)
     expect(publishedEvents.get(AMQP_PIPELINE_CONFIG_CREATED_TOPIC)).toContainEqual({
       pipelineId: configId,
-      pipelineName: pipelineConfig.metadata.displayName
+      pipelineName: pipelineConfig.metadata.displayName,
+      defaultAPI: null,
+      remoteSchemata: null,
     })
     expect(publishedEvents.get(AMQP_PIPELINE_CONFIG_UPDATED_TOPIC)).toContainEqual({
       pipelineId: configId,
-      pipelineName: pipelineConfig.metadata.displayName
+      pipelineName: pipelineConfig.metadata.displayName,
+      defaultAPI: null,
+      remoteSchemata: null,
     })
     expect(publishedEvents.get(AMQP_PIPELINE_CONFIG_DELETED_TOPIC)).toContainEqual({
       pipelineId: configId,
-      pipelineName: pipelineConfig.metadata.displayName
+      pipelineName: pipelineConfig.metadata.displayName,
+      defaultAPI: null,
+      remoteSchemata: null,
     })
   })
 
