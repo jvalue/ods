@@ -1,5 +1,6 @@
 /* eslint-env jest */
 // @ts-check
+
 const request = require('supertest')
 const waitOn = require('wait-on')
 const amqp = require('amqplib')
@@ -13,6 +14,8 @@ const AMQP_PIPELINE_EXECUTION_TOPIC = process.env.AMQP_PIPELINE_EXECUTION_TOPIC
 const AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC = process.env.AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC
 const AMQP_PIPELINE_EXECUTION_ERROR_TOPIC = process.env.AMQP_PIPELINE_EXECUTION_ERROR_TOPIC
 const AMQP_IMPORT_SUCCESS_TOPIC = process.env.AMQP_IMPORT_SUCCESS_TOPIC
+const CONNECTION_RETRIES = +process.env.CONNECTION_RETRIES
+const CONNECTION_BACKOFF = +process.env.CONNECTION_BACKOFF
 
 let amqpConnection
 let channel
@@ -23,11 +26,12 @@ describe('Transformation Service Config Trigger', () => {
     console.log('Starting config trigger tests..')
     const pingUrl = URL + '/'
     await waitOn({ resources: [pingUrl], timeout: 50000, log: true })
-    await connectAmqp(AMQP_URL)
 
-    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_TOPIC, AMQP_IT_QUEUE)
-    channel = await amqpConnection.createChannel()
-    await channel.assertExchange(AMQP_EXCHANGE, 'topic')
+    try {
+      await initAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_TOPIC, AMQP_IT_QUEUE, CONNECTION_RETRIES, CONNECTION_BACKOFF)
+    } catch (e) {
+      console.log(`Could not initialize amqp connection: ${e.message}`)
+    }
   }, 60000)
 
   afterAll(async () => {
@@ -123,16 +127,38 @@ describe('Transformation Service Config Trigger', () => {
     expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].pipelineName).toEqual(pipelineConfig.metadata.displayName)
     expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].error).toBeDefined()
   }, 12000)
-
 })
 
-async function connectAmqp (url) {
-  amqpConnection = await amqp.connect(url)
-  console.log(`Connected to AMQP on host "${url}"`)
+async function initAmqp (url, exchange, topic, queue, retries, backoff) {
+  for (let i = 1; ; i++) {
+    try {
+      if (!amqpConnection) {
+        console.log('Connecting to amqp...')
+        amqpConnection = await amqp.connect(url)
+        console.log(`Connected to AMQP on host "${url}"`)
+      }
+      if (!channel) {
+        console.log('Creating channel...')
+        channel = await amqpConnection.createChannel()
+      }
+      await channel.assertExchange(AMQP_EXCHANGE, 'topic')
+
+      await receiveAmqp(url, exchange, topic, queue)
+      console.log('AMQP initialization successful')
+      return
+    } catch (e) {
+      console.info(`Error initializing RabbitMQ(${i}/${retries}: ${e}.`)
+      if( i <= retries ) {
+        console.info(`Retrying in ${backoff}`)
+        await this.sleep(backoff)
+      } else {
+        throw e
+      }
+    }
+  }
 }
 
 async function receiveAmqp (url, exchange, topic, queue) {
-  const channel = await amqpConnection.createChannel()
   const q = await channel.assertQueue(queue)
   await channel.bindQueue(q.queue, exchange, topic)
 
