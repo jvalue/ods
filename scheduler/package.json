@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "npm run transpile && npm run start:transpiled",
-    "start:transpiled": "node --max-http-header-size 10000000 dist/index.js",
+    "start:transpiled": "node --enable-source-maps --max-http-header-size 10000000 dist/index.js",
     "transpile": "tsc",
     "lint": "./node_modules/.bin/eslint src --ext .ts,.js --fix",
     "lint-ci": "./node_modules/.bin/eslint src --ext .ts,.js --max-warnings=0",
