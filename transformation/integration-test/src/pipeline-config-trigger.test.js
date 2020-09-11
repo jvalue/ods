@@ -157,7 +157,7 @@ describe('Transformation Service Config Trigger', () => {
     channel.publish(AMQP_EXCHANGE, AMQP_IMPORT_SUCCESS_TOPIC, Buffer.from(JSON.stringify(importSuccessEvent)))
     console.log("Sent via AMQP: %s:'%s'", AMQP_IMPORT_SUCCESS_TOPIC, JSON.stringify(importSuccessEvent))
 
-    await sleep(1000) // pipeline should have been executing until now!
+    await sleep(5000) // pipeline should have been executing until now!
     expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC)).toContainEqual(
       {
         pipelineId: configId,
