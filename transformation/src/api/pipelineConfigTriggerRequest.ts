@@ -1,14 +1,14 @@
-import { isObject, isNumber, isString, hasProperty } from '../../validators'
+import { isObject, isNumber, isString, hasProperty } from '../validators'
 
-export interface PipelineConfigTriggerRequestAmpq {
+export interface PipelineConfigTriggerRequest {
   datasourceId: number;
   data: string;
 }
 
-export class PipelineConfigTriggerRequestAmqpValidator {
+export class PipelineConfigTriggerRequestValidator {
   private errors: string[] = []
 
-  validate (requestBody: unknown): requestBody is PipelineConfigTriggerRequestAmpq {
+  validate (requestBody: unknown): requestBody is PipelineConfigTriggerRequest {
     this.errors = []
     if (!isObject(requestBody)) {
       this.errors.push('\'PipelineConfigTriggerRequest\' must be an object')

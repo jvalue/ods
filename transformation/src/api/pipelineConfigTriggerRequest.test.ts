@@ -1,5 +1,5 @@
 /* eslint-env jest */
-import { PipelineConfigTriggerRequestAmqpValidator } from './pipelineConfigTriggerRequestAmpq'
+import { PipelineConfigTriggerRequestValidator } from './pipelineConfigTriggerRequest'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const validTriggerRequest = (): any => ({
@@ -8,10 +8,10 @@ const validTriggerRequest = (): any => ({
 })
 
 describe('PipelineConfigTriggerRequestValidator', () => {
-  let validator: PipelineConfigTriggerRequestAmqpValidator
+  let validator: PipelineConfigTriggerRequestValidator
 
   beforeAll(() => {
-    validator = new PipelineConfigTriggerRequestAmqpValidator()
+    validator = new PipelineConfigTriggerRequestValidator()
   })
 
   test('should reject undefined', () => {
