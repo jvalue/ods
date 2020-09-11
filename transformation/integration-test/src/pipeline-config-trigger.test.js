@@ -31,6 +31,7 @@ describe('Transformation Service Config Trigger', () => {
       await initAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_TOPIC, AMQP_IT_QUEUE, CONNECTION_RETRIES, CONNECTION_BACKOFF)
     } catch (e) {
       console.log(`Could not initialize amqp connection: ${e.message}`)
+      process.exit(1)
     }
   }, 60000)
 
@@ -150,7 +151,7 @@ async function initAmqp (url, exchange, topic, queue, retries, backoff) {
       console.info(`Error initializing RabbitMQ(${i}/${retries}: ${e}.`)
       if( i <= retries ) {
         console.info(`Retrying in ${backoff}`)
-        await this.sleep(backoff)
+        await sleep(backoff)
       } else {
         throw e
       }
