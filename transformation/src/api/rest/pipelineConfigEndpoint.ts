@@ -1,6 +1,5 @@
 import * as express from 'express'
 
-import { PipelineConfigTriggerRequestRestValidator } from './pipelineConfigTriggerRequestRest'
 import { PipelineConfigManager } from '@/pipeline-config/pipelineConfigManager'
 import { PipelineConfigDTOValidator } from '../../pipeline-config/model/pipelineConfig'
 import { isString } from '../../validators'
@@ -11,7 +10,6 @@ export class PipelineConfigEndpoint {
   constructor (pipelineConfigManager: PipelineConfigManager, app: express.Application) {
     this.pipelineConfigManager = pipelineConfigManager
 
-    app.post('/trigger', this.triggerConfigExecution)
     app.get('/configs', this.getAll)
     app.get('/configs/:id', this.getOne)
     app.post('/configs', this.create)
@@ -21,22 +19,6 @@ export class PipelineConfigEndpoint {
   }
 
   // The following methods need arrow syntax because of javascript 'this' shenanigans
-
-  triggerConfigExecution = async (req: express.Request, res: express.Response): Promise<void> => {
-    const validator = new PipelineConfigTriggerRequestRestValidator()
-    if (!validator.validate(req.body)) {
-      res.status(400).json({ errors: validator.getErrors() })
-      return
-    }
-    const triggerRequest = req.body
-
-    // trigger is asynchronous! not waiting for finished execution...
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    this.pipelineConfigManager.triggerConfig(triggerRequest.datasourceId, triggerRequest.data)
-    const answer = `Triggered all pipelines for datasource ${triggerRequest.datasourceId}. Executing asynchronously...`
-    res.setHeader('Content-Type', 'text/plain')
-    res.status(200).send(answer)
-  }
 
   delete = async (req: express.Request, res: express.Response): Promise<void> => {
     const configId = parseInt(req.params.id)
