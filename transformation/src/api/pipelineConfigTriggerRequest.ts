@@ -1,14 +1,14 @@
-import { isObject, isNumber, hasProperty } from '../../validators'
+import { isObject, isNumber, isString, hasProperty } from '../validators'
 
-export interface PipelineConfigTriggerRequestRest {
+export interface PipelineConfigTriggerRequest {
   datasourceId: number;
-  data: object;
+  data: string;
 }
 
-export class PipelineConfigTriggerRequestRestValidator {
+export class PipelineConfigTriggerRequestValidator {
   private errors: string[] = []
 
-  validate (requestBody: unknown): requestBody is PipelineConfigTriggerRequestRest {
+  validate (requestBody: unknown): requestBody is PipelineConfigTriggerRequest {
     this.errors = []
     if (!isObject(requestBody)) {
       this.errors.push('\'PipelineConfigTriggerRequest\' must be an object')
@@ -21,8 +21,8 @@ export class PipelineConfigTriggerRequestRestValidator {
     }
     if (!hasProperty(requestBody, 'data')) {
       this.errors.push('\'data\' property is missing')
-    } else if (!isObject(requestBody.data)) {
-      this.errors.push('\'data\' must be an object or array')
+    } else if (!isString(requestBody.data)) {
+      this.errors.push('\'data\' must be a string')
     }
     return this.errors.length === 0
   }

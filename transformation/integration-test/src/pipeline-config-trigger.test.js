@@ -1,5 +1,6 @@
 /* eslint-env jest */
 // @ts-check
+
 const request = require('supertest')
 const waitOn = require('wait-on')
 const amqp = require('amqplib')
@@ -13,8 +14,11 @@ const AMQP_PIPELINE_EXECUTION_TOPIC = process.env.AMQP_PIPELINE_EXECUTION_TOPIC
 const AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC = process.env.AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC
 const AMQP_PIPELINE_EXECUTION_ERROR_TOPIC = process.env.AMQP_PIPELINE_EXECUTION_ERROR_TOPIC
 const AMQP_IMPORT_SUCCESS_TOPIC = process.env.AMQP_IMPORT_SUCCESS_TOPIC
+const CONNECTION_RETRIES = +process.env.CONNECTION_RETRIES
+const CONNECTION_BACKOFF = +process.env.CONNECTION_BACKOFF
 
 let amqpConnection
+let channel
 const publishedEvents = new Map() // routing key -> received msgs []
 
 describe('Transformation Service Config Trigger', () => {
@@ -22,9 +26,13 @@ describe('Transformation Service Config Trigger', () => {
     console.log('Starting config trigger tests..')
     const pingUrl = URL + '/'
     await waitOn({ resources: [pingUrl], timeout: 50000, log: true })
-    await connectAmqp(AMQP_URL)
 
-    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_TOPIC, AMQP_IT_QUEUE)
+    try {
+      await initAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_TOPIC, AMQP_IT_QUEUE, CONNECTION_RETRIES, CONNECTION_BACKOFF)
+    } catch (e) {
+      console.log(`Could not initialize amqp connection: ${e.message}`)
+      process.exit(1)
+    }
   }, 60000)
 
   afterAll(async () => {
@@ -60,25 +68,24 @@ describe('Transformation Service Config Trigger', () => {
     expect(creationResponse.status).toEqual(201)
     const configId = creationResponse.body.id
 
-    const trigger = {
-      datasourceId: pipelineConfig.datasourceId,
-      data: {
-        a: 'abc',
-        b: 123
-      }
+    const data = {
+      a: 'abc',
+      b: 123
     }
 
-    const response = await request(URL)
-      .post('/trigger')
-      .send(trigger)
-    expect(response.status).toEqual(200)
+    const importSuccessEvent = {
+      datasourceId: pipelineConfig.datasourceId,
+      data: JSON.stringify(data)
+    }
+
+    channel.publish(AMQP_EXCHANGE, AMQP_IMPORT_SUCCESS_TOPIC, Buffer.from(JSON.stringify(importSuccessEvent)))
 
     await sleep(10000) // pipeline should have been executing until now!
     expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC)).toContainEqual(
       {
         pipelineId: configId,
         pipelineName: pipelineConfig.metadata.displayName,
-        data: trigger.data.a + trigger.data.b
+        data: data.a + data.b
       })
   }, 12000)
 
@@ -102,17 +109,17 @@ describe('Transformation Service Config Trigger', () => {
     expect(creationResponse.status).toEqual(201)
     const configId = creationResponse.body.id
 
-    const trigger = {
-      datasourceId: pipelineConfig.datasourceId,
-      data: {
-        a: 'abc',
-        b: 123
-      }
+    const data = {
+      a: 'abc',
+      b: 123
     }
-    const response = await request(URL)
-      .post('/trigger')
-      .send(trigger)
-    expect(response.status).toEqual(200)
+
+    const importSuccessEvent = {
+      datasourceId: pipelineConfig.datasourceId,
+      data: JSON.stringify(data)
+    }
+
+    channel.publish(AMQP_EXCHANGE, AMQP_IMPORT_SUCCESS_TOPIC, Buffer.from(JSON.stringify(importSuccessEvent)))
 
     await sleep(10000) // pipeline should have been executing until now!
     expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)).toBeDefined()
@@ -121,59 +128,38 @@ describe('Transformation Service Config Trigger', () => {
     expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].pipelineName).toEqual(pipelineConfig.metadata.displayName)
     expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].error).toBeDefined()
   }, 12000)
-
-  test('Event Driven Trigger', async () => {
-    const pipelineConfig = {
-      datasourceId: 54321,
-      transformation: {
-        func: 'return data.a + data.b;'
-      },
-      metadata: {
-        author: 'icke',
-        license: 'none',
-        displayName: 'event triggered pipeline',
-        description: 'integration testing pipeline'
-      }
-    }
-    // create pipeline to persist
-    const creationResponse = await request(URL)
-      .post('/configs')
-      .send(pipelineConfig)
-    expect(creationResponse.status).toEqual(201)
-    const configId = creationResponse.body.id
-
-    const channel = await amqpConnection.createChannel()
-    await channel.assertExchange(AMQP_EXCHANGE, 'topic')
-
-    const data = {
-      a: 1,
-      b: 2
-    }
-
-    const importSuccessEvent = {
-      datasourceId: 54321,
-      data: JSON.stringify(data)
-    }
-    channel.publish(AMQP_EXCHANGE, AMQP_IMPORT_SUCCESS_TOPIC, Buffer.from(JSON.stringify(importSuccessEvent)))
-    console.log("Sent via AMQP: %s:'%s'", AMQP_IMPORT_SUCCESS_TOPIC, JSON.stringify(importSuccessEvent))
-
-    await sleep(5000) // pipeline should have been executing until now!
-    expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC)).toContainEqual(
-      {
-        pipelineId: configId,
-        pipelineName: pipelineConfig.metadata.displayName,
-        data: data.a + data.b
-      })
-  }, 12000)
 })
 
-async function connectAmqp (url) {
-  amqpConnection = await amqp.connect(url)
-  console.log(`Connected to AMQP on host "${url}"`)
+async function initAmqp (url, exchange, topic, queue, retries, backoff) {
+  for (let i = 1; ; i++) {
+    try {
+      if (!amqpConnection) {
+        console.log('Connecting to amqp...')
+        amqpConnection = await amqp.connect(url)
+        console.log(`Connected to AMQP on host "${url}"`)
+      }
+      if (!channel) {
+        console.log('Creating channel...')
+        channel = await amqpConnection.createChannel()
+      }
+      await channel.assertExchange(AMQP_EXCHANGE, 'topic')
+
+      await receiveAmqp(url, exchange, topic, queue)
+      console.log('AMQP initialization successful')
+      return
+    } catch (e) {
+      console.info(`Error initializing RabbitMQ(${i}/${retries}: ${e}.`)
+      if( i <= retries ) {
+        console.info(`Retrying in ${backoff}`)
+        await sleep(backoff)
+      } else {
+        throw e
+      }
+    }
+  }
 }
 
 async function receiveAmqp (url, exchange, topic, queue) {
-  const channel = await amqpConnection.createChannel()
   const q = await channel.assertQueue(queue)
   await channel.bindQueue(q.queue, exchange, topic)
 
