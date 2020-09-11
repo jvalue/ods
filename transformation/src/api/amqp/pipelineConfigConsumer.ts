@@ -1,6 +1,6 @@
 import * as AMQP from 'amqplib'
 import { PipelineConfigManager } from '../../pipeline-config/pipelineConfigManager'
-import { PipelineConfigTriggerRequestAmpq } from './pipelineConfigTriggerRequestAmpq'
+import { PipelineConfigTriggerRequest } from '../pipelineConfigTriggerRequest'
 import {
   AMQP_URL,
   AMQP_DATASOURCE_EXECUTION_EXCHANGE,
@@ -71,7 +71,7 @@ export class PipelineConfigConsumer {
       try {
         console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
         if (msg.fields.routingKey === AMQP_DATASOURCE_EXECUTION_SUCCESS_TOPIC) {
-          const triggerRequest: PipelineConfigTriggerRequestAmpq = JSON.parse(msg.content.toString())
+          const triggerRequest: PipelineConfigTriggerRequest = JSON.parse(msg.content.toString())
           await this.pipelineManager.triggerConfig(triggerRequest.datasourceId, JSON.parse(triggerRequest.data))
         } else {
           console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
