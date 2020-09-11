@@ -75,6 +75,9 @@ services:
       AMQP_PIPELINE_CONFIG_DELETED_TOPIC: 'pipeline.config.deleted'
       AMQP_IMPORT_SUCCESS_TOPIC: 'datasource.execution.success'
 
+      CONNECTION_RETRIES: 3
+      CONNECTION_BACKOFF: 2000
+
    # ----------------- NOTIFICATION SERVICE (PORTS #TODO) --------------------
   notification:
     environment:
