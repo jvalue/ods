@@ -5,10 +5,10 @@ const AMQP = require('amqplib')
 const URL = process.env.STORAGEMQ_API
 const AMQP_URL = process.env.AMQP_URL
 
-const amqp_exchange = 'ods_global'
-const amqp_pipeline_config_created_topic = 'pipeline.config.created'
-const amqp_pipeline_config_deleted_topic = 'pipeline.config.deleted'
-const amqp_pipeline_execution_success_topic = 'pipeline.execution.success'
+const AMQP_EXCHANGE = 'ods_global'
+const AMQP_PIPELINE_CONFIG_CREATED_TOPIC = 'pipeline.config.created'
+const AMQP_PIPELINE_CONFIG_DELETED_TOPIC = 'pipeline.config.deleted'
+const AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC = 'pipeline.execution.success'
 
 let amqpConnection
 
@@ -25,10 +25,8 @@ describe('Storage-MQ', () => {
   }, 90000)
 
   afterAll(async () => {
-    if(amqpConnection) {
-      console.log("Closing AMQP connection...")
+    if (amqpConnection) {
       await amqpConnection.close()
-      console.log("AMQP connection closed")
     }
   }, 10000)
 
@@ -56,8 +54,8 @@ describe('Storage-MQ', () => {
     const pipelineId = '333'
 
     const channel = await amqpConnection.createChannel()
-    channel.assertExchange(amqp_exchange, 'topic', {
-      durable: false
+    channel.assertExchange(AMQP_EXCHANGE, 'topic', {
+      durable: true
     })
 
     const pipelineCreatedEvent = {
@@ -65,8 +63,8 @@ describe('Storage-MQ', () => {
     }
     const event = JSON.stringify(pipelineCreatedEvent)
 
-    channel.publish(amqp_exchange, amqp_pipeline_config_created_topic, Buffer.from(event))
-    console.log("Sent via AMQP: %s:'%s'", amqp_pipeline_config_created_topic, event)
+    channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_CREATED_TOPIC, Buffer.from(event))
+    console.log("Sent via AMQP: %s:'%s'", AMQP_PIPELINE_CONFIG_CREATED_TOPIC, event)
 
     await sleep(2000) // time to process event
 
@@ -81,8 +79,8 @@ describe('Storage-MQ', () => {
     const pipelineId = '444'
 
     const channel = await amqpConnection.createChannel()
-    channel.assertExchange(amqp_exchange, 'topic', {
-      durable: false
+    channel.assertExchange(AMQP_EXCHANGE, 'topic', {
+      durable: true
     })
 
     const pipelineCreatedEvent = {
@@ -90,8 +88,8 @@ describe('Storage-MQ', () => {
     }
     const configEvent = JSON.stringify(pipelineCreatedEvent)
 
-    channel.publish(amqp_exchange, amqp_pipeline_config_created_topic, Buffer.from(configEvent))
-    console.log("Sent via AMQP: %s:'%s'", amqp_pipeline_config_created_topic, configEvent)
+    channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_CREATED_TOPIC, Buffer.from(configEvent))
+    console.log("Sent via AMQP: %s:'%s'", AMQP_PIPELINE_CONFIG_CREATED_TOPIC, configEvent)
 
     await sleep(1000) // time to process event
 
@@ -102,8 +100,8 @@ describe('Storage-MQ', () => {
     }
     const executionEvent = JSON.stringify(pipelineExecutedEvent)
 
-    channel.publish(amqp_exchange, amqp_pipeline_execution_success_topic, Buffer.from(executionEvent))
-    console.log("Sent via AMQP: %s:'%s'", amqp_pipeline_execution_success_topic, executionEvent)
+    channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC, Buffer.from(executionEvent))
+    console.log("Sent via AMQP: %s:'%s'", AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC, executionEvent)
 
     await sleep(1000) // time to process event
 
@@ -131,8 +129,8 @@ describe('Storage-MQ', () => {
     const pipelineId = '555'
 
     const channel = await amqpConnection.createChannel()
-    channel.assertExchange(amqp_exchange, 'topic', {
-      durable: false
+    channel.assertExchange(AMQP_EXCHANGE, 'topic', {
+      durable: true
     })
 
     // create
@@ -141,8 +139,8 @@ describe('Storage-MQ', () => {
     }
     const createdEvent = JSON.stringify(pipelineCreatedEvent)
 
-    channel.publish(amqp_exchange, amqp_pipeline_config_created_topic, Buffer.from(createdEvent))
-    console.log("Sent via AMQP: %s:'%s'", amqp_pipeline_config_created_topic, createdEvent)
+    channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_CREATED_TOPIC, Buffer.from(createdEvent))
+    console.log("Sent via AMQP: %s:'%s'", AMQP_PIPELINE_CONFIG_CREATED_TOPIC, createdEvent)
 
     await sleep(1000) // time to process event
 
@@ -152,8 +150,8 @@ describe('Storage-MQ', () => {
     }
     const deletedEvent = JSON.stringify(pipelineDeletedEvent)
 
-    channel.publish(amqp_exchange, amqp_pipeline_config_deleted_topic, Buffer.from(deletedEvent))
-    console.log("Sent via AMQP: %s:'%s'", amqp_pipeline_config_deleted_topic, deletedEvent)
+    channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_DELETED_TOPIC, Buffer.from(deletedEvent))
+    console.log("Sent via AMQP: %s:'%s'", AMQP_PIPELINE_CONFIG_DELETED_TOPIC, deletedEvent)
 
     await sleep(1000) // time to process event
 
@@ -161,7 +159,6 @@ describe('Storage-MQ', () => {
     const response = await request(URL).get(`/bucket/${pipelineId}/content/`)
     expect(response.status).toEqual(404)
   })
-
 }, 10000)
 
 const storageMqHealth = async (pingUrl, timeout) => {
@@ -183,7 +180,7 @@ const amqpConnect = async (amqpUrl, retries, backoff) => {
       continue
     }
   }
-  return Promise.reject(`Could not establish connection to AMQP broker (${amqpUrl})`)
+  return Promise.reject(new Error(`Could not establish connection to AMQP broker (${amqpUrl})`))
 }
 
 const sleep = (ms) => {

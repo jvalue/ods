@@ -1,4 +1,4 @@
-const isEmpty = (value: string | undefined): boolean => !value || value === ''
+const isEmpty = (value: string | undefined): value is undefined => !value || value === ''
 
 const getEnv = (envName: string): string => {
   const env = process.env[envName]
@@ -9,7 +9,7 @@ const getEnv = (envName: string): string => {
   }
 
   console.log(`[Environment Variable] ${envName} = ${env}`)
-  return env as string
+  return env
 }
 
 export const CONNECTION_RETRIES = +getEnv('CONNECTION_RETRIES')
@@ -27,3 +27,7 @@ export const AMQP_PIPELINE_EXECUTION_ERROR_TOPIC = getEnv('AMQP_PIPELINE_EXECUTI
 export const AMQP_PIPELINE_CONFIG_CREATED_TOPIC = getEnv('AMQP_PIPELINE_CONFIG_CREATED_TOPIC')
 export const AMQP_PIPELINE_CONFIG_UPDATED_TOPIC = getEnv('AMQP_PIPELINE_CONFIG_UPDATED_TOPIC')
 export const AMQP_PIPELINE_CONFIG_DELETED_TOPIC = getEnv('AMQP_PIPELINE_CONFIG_DELETED_TOPIC')
+export const AMQP_DATASOURCE_EXECUTION_EXCHANGE = getEnv('AMQP_DATASOURCE_EXECUTION_EXCHANGE')
+export const AMQP_DATASOURCE_EXECUTION_TOPIC = getEnv('AMQP_DATASOURCE_EXECUTION_TOPIC')
+export const AMQP_DATASOURCE_EXECUTION_SUCCESS_TOPIC = getEnv('AMQP_DATASOURCE_EXECUTION_SUCCESS_TOPIC')
+export const AMQP_TRANSFORMATION_EXECUTION_QUEUE = getEnv('AMQP_TRANSFORMATION_EXECUTION_QUEUE')

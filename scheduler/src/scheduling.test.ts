@@ -2,27 +2,26 @@
 
 import * as Scheduling from './scheduling'
 import {
-  executeAdapter,
   getLatestEventId,
   getAllDatasources,
   getEventsAfter, getDatasource
 } from './clients/adapter-client'
 import { EventType } from './interfaces/datasource-event'
 import DatasourceConfig from './interfaces/datasource-config'
-import * as WorkflowExecution from './workflow-execution'
 
 jest.mock('./clients/adapter-client')
-const mockedExecuteAdapter = executeAdapter as jest.Mock
-mockedExecuteAdapter.mockResolvedValue({ id: 1 })
+// Type assertion is ok here, because we have mocked the whole './clients/adapter-client' module
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
 const mockedGetLatestEventId = getLatestEventId as jest.Mock
 mockedGetLatestEventId.mockResolvedValue(321)
 const mockedGetAllDatasources = getAllDatasources as jest.Mock
 const mockedGetEventsAfter = getEventsAfter as jest.Mock
 const mockedGetDatasource = getDatasource as jest.Mock
+/* eslint-enable @typescript-eslint/consistent-type-assertions */
 
-jest.mock('./workflow-execution')
-const mockedWorkflowExecution = WorkflowExecution.execute as jest.Mock
-mockedWorkflowExecution.mockResolvedValue({})
+jest.mock('./env', () => () => ({
+  MAX_TRIGGER_RETRIES: 2
+}))
 
 describe('Scheduler', () => {
   test('should initialize jobs correctly', async () => {

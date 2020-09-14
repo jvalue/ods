@@ -3,11 +3,6 @@
 
 version: '3.7'
 
-
-volumes:
-  auth_postgres_data:
-    driver: local
-
 services:
 
   # ----------------- UI SERVICE (/ui) --------------------
@@ -17,7 +12,6 @@ services:
       context: ./ui/
       args:
         UI_BASE_URL: /
-        AUTH_SERVICE_URL: /auth
         ADAPTER_SERVICE_URL: /api/adapter
         STORAGE_SERVICE_URL: /api/storage
         TRANSFORMATION_SERVICE_URL: /api/transformation
@@ -26,36 +20,6 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.to-ui.rule=PathPrefix(`/`)"
       - "traefik.http.services.ui.loadbalancer.server.port=80"
-
-  # ----------------- AUTH SERVICE (/auth) --------------------
-  auth-db:
-    image: postgres
-    volumes:
-      - auth_postgres_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: keycloak
-      POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: password
-
-  auth:
-    image: ${DOCKER_REGISTRY}/auth
-    build:
-      context: ./auth/
-    environment:
-      DB_VENDOR: POSTGRES
-      DB_ADDR: auth-db
-      DB_DATABASE: keycloak
-      DB_USER: keycloak
-      DB_PASSWORD: password
-      KEYCLOAK_USER: admin
-      KEYCLOAK_PASSWORD: Pa55w0rd
-      KEYCLOAK_LOGLEVEL: INFO
-    depends_on:
-      - auth-db
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.to-auth.rule=PathPrefix(`/auth`)"
-      - "traefik.http.services.auth.loadbalancer.server.port=8080"
 
   # ----------------- ADAPTER SERVICE (/adapter) --------------------
   adapter:
@@ -70,6 +34,9 @@ services:
       RABBIT_USR: rabbit_adm
       RABBIT_PWD: R4bb!7_4DM_p4SS
       RABBIT_PORT: 5672
+      AMQP_EXCHANGE: 'ods_global'
+      AMQP_IMPORT_SUCCESS_TOPIC: 'datasource.execution.success'
+      AMQP_IMPORT_FAILED_TOPIC: 'datasource.execution.failed'
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-adapter.rule=PathPrefix(`/api/adapter`)"
@@ -86,13 +53,13 @@ services:
   # ----------------- SCHEDULER SERVICE (/scheduler) --------------------
   scheduler:
     image: ${DOCKER_REGISTRY}/scheduler
+    environment:
+      MAX_TRIGGER_RETRIES: 2
+      ADAPTER_SERVICE_URL: http://adapter:8080
+      CONNECTION_RETRIES: 20
+      CONNECTION_BACKOFF_IN_MS: 5000
     build:
       context: ./scheduler/
-    environment:
-      ADAPTER_SERVICE_URL: http://adapter:8080
-      TRANSFORMATION_SERVICE_URL: http://transformation:8080
-      INITIAL_CONNECTION_RETRIES: 20
-      INITIAL_CONNECTION_RETRY_BACKOFF: 5000
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-scheduler.rule=PathPrefix(`/api/scheduler`)"
@@ -106,12 +73,15 @@ services:
     image: ${DOCKER_REGISTRY}/storage-mq
     build: ./storage/storage-mq/
     environment:
-      DATABASE_HOST: storage-db
-      DATABASE_PORT: 5432
-      DATABASE_NAME: ods
-      DATABASE_USER: storagemq
-      DATABASE_PW: storagemq-pw
-      DATABASE_SCHEMA: 'storage'
+      CONNECTION_RETRIES: 30
+      CONNECTION_BACKOFF_IN_MS: 2000
+
+      POSTGRES_HOST: storage-db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ods
+      POSTGRES_USER: storagemq
+      POSTGRES_PW: storagemq-pw
+      POSTGRES_SCHEMA: 'storage'
 
       AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
 
@@ -181,6 +151,10 @@ services:
       DATABASE_NAME: ods
       DATABASE_USER: ods_admin
       DATABASE_PW: ods_pw
+      CONNECTION_RETRIES: 5
+      CONNECTION_BACKOFF_IN_SECONDS: 2
+    depends_on:
+      - storage-db
 
   storage-swagger: # API documentation for storage service
     image: swaggerapi/swagger-ui
@@ -213,6 +187,10 @@ services:
       AMQP_PIPELINE_CONFIG_CREATED_TOPIC: 'pipeline.config.created'
       AMQP_PIPELINE_CONFIG_UPDATED_TOPIC: 'pipeline.config.updated'
       AMQP_PIPELINE_CONFIG_DELETED_TOPIC: 'pipeline.config.deleted'
+      AMQP_DATASOURCE_EXECUTION_EXCHANGE: 'ods_global'
+      AMQP_DATASOURCE_EXECUTION_TOPIC: 'datasource.execution.*'
+      AMQP_DATASOURCE_EXECUTION_SUCCESS_TOPIC: 'datasource.execution.success'
+      AMQP_TRANSFORMATION_EXECUTION_QUEUE: 'transformation.transformation-execution'
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-transformation.rule=PathPrefix(`/api/transformation`)"
@@ -233,22 +211,21 @@ services:
     build:
       context: ./notification/
     environment:
-      AUTH_ENABLED: 'false' #TODO: turn to true as soon as it works!
-
       # Postgres connection vars
-      PGUSER: 'notification_usr'
-      PGHOST: 'notification-db'
-      PGPASSWORD: 'admin'
-      PGPORT: 5432,
+      POSTGRES_HOST: 'notification-db'
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: 'ods-notifications'
+      POSTGRES_USER: 'notification_usr'
+      POSTGRES_PW: 'admin'
 
-      # Rabbitmq connection details
+      CONNECTION_RETRIES: 30
+      CONNECTION_BACKOFF_IN_MS: 2000
+
       AMQP_URL: "amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672"
-
       AMQP_PIPELINE_EXECUTION_EXCHANGE: 'ods_global'
       AMQP_PIPELINE_EXECUTION_QUEUE: 'notification.pipeline-execution'
       AMQP_PIPELINE_EXECUTION_TOPIC: 'pipeline.execution.*'
       AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: 'pipeline.execution.success'
-
       AMQP_NOTIFICATION_QUEUE: 'NOTIF_QUEUE'
 
       NOTIFICATION_DATA_LOCATION_URL: 'http://localhost:9000/storage'
@@ -267,6 +244,7 @@ services:
     environment:
       POSTGRES_USER: 'notification_usr'
       POSTGRES_PASSWORD: 'admin'
+      POSTGRES_DB: 'ods-notifications'
 
 # -------------------- EDGE SERVER (PORT 9000) -----------------------------
   edge:

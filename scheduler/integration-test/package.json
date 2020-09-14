@@ -4,8 +4,7 @@
   "description": "Scheduler Integration-Tests",
   "scripts": {
     "mock:adapter": "node src/mock.adapter.js",
-    "mock:transformation": "node src/mock.transformation.js",
-    "pretest": "(npm run mock:adapter &) && (npm run mock:transformation &)",
+    "pretest": "npm run mock:adapter &",
     "test": "jest",
     "posttest": "killall node",
     "lint": "./node_modules/.bin/eslint src --ext .js --fix",

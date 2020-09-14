@@ -5,12 +5,12 @@ import router from './router'
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
 import '@mdi/font/css/materialdesignicons.css'
-import TransformationModule from '@/pipeline/edit/transformation/module'
+import TransformationModule from '@/pipeline/edit/transformation/transformation.module'
 import StorageModule from '@/storage/module'
 import AuthModule from '@/components/auth/module'
 import DatasourceModule from '@/datasource/datasource.module'
 import PipelineModule from '@/pipeline/pipeline.module'
-import NotificationModule from './notification/notification.module';
+import NotificationModule from './notification/notification.module'
 
 Vue.use(Vuetify)
 const vuetify = new Vuetify({

@@ -1,5 +1,6 @@
 /* eslint-env jest */
-//@ts-check
+// @ts-check
+
 const request = require('supertest')
 const waitOn = require('wait-on')
 const amqp = require('amqplib')
@@ -9,23 +10,29 @@ const URL = process.env.TRANSFORMATION_API || 'http://localhost:8080'
 const AMQP_URL = process.env.AMQP_URL
 const AMQP_EXCHANGE = process.env.AMQP_EXCHANGE
 const AMQP_IT_QUEUE = process.env.AMQP_IT_QUEUE
+const AMQP_PIPELINE_EXECUTION_TOPIC = process.env.AMQP_PIPELINE_EXECUTION_TOPIC
 const AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC = process.env.AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC
 const AMQP_PIPELINE_EXECUTION_ERROR_TOPIC = process.env.AMQP_PIPELINE_EXECUTION_ERROR_TOPIC
+const AMQP_IMPORT_SUCCESS_TOPIC = process.env.AMQP_IMPORT_SUCCESS_TOPIC
+const CONNECTION_RETRIES = +process.env.CONNECTION_RETRIES
+const CONNECTION_BACKOFF = +process.env.CONNECTION_BACKOFF
 
 let amqpConnection
+let channel
 const publishedEvents = new Map() // routing key -> received msgs []
 
-describe('Transformation Service', () => {
-  console.log('Transformation-Service URL= ' + URL)
-
+describe('Transformation Service Config Trigger', () => {
   beforeAll(async () => {
+    console.log('Starting config trigger tests..')
     const pingUrl = URL + '/'
-    console.log('Waiting for transformation-service with URL: ' + pingUrl)
-    await waitOn({ resources: [pingUrl], timeout: 50000 })
-    await connectAmqp(AMQP_URL)
+    await waitOn({ resources: [pingUrl], timeout: 50000, log: true })
 
-    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC, AMQP_IT_QUEUE)
-    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_ERROR_TOPIC, AMQP_IT_QUEUE)
+    try {
+      await initAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_TOPIC, AMQP_IT_QUEUE, CONNECTION_RETRIES, CONNECTION_BACKOFF)
+    } catch (e) {
+      console.log(`Could not initialize amqp connection: ${e.message}`)
+      process.exit(1)
+    }
   }, 60000)
 
   afterAll(async () => {
@@ -50,8 +57,8 @@ describe('Transformation Service', () => {
       metadata: {
         author: 'icke',
         license: 'none',
-        displayName: 'test pipeline 1',
-        description: 'integraiton testing pipeline'
+        displayName: 'success test pipeline',
+        description: 'integration testing pipeline'
       }
     }
     // create pipeline to persist
@@ -61,25 +68,24 @@ describe('Transformation Service', () => {
     expect(creationResponse.status).toEqual(201)
     const configId = creationResponse.body.id
 
-    const trigger = {
-      datasourceId: pipelineConfig.datasourceId,
-      data: {
-        a: 'abc',
-        b: 123
-      }
+    const data = {
+      a: 'abc',
+      b: 123
     }
 
-    const response = await request(URL)
-      .post('/trigger')
-      .send(trigger)
-    expect(response.status).toEqual(200)
+    const importSuccessEvent = {
+      datasourceId: pipelineConfig.datasourceId,
+      data: JSON.stringify(data)
+    }
+
+    channel.publish(AMQP_EXCHANGE, AMQP_IMPORT_SUCCESS_TOPIC, Buffer.from(JSON.stringify(importSuccessEvent)))
 
     await sleep(10000) // pipeline should have been executing until now!
     expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC)).toContainEqual(
       {
         pipelineId: configId,
         pipelineName: pipelineConfig.metadata.displayName,
-        data: trigger.data.a + trigger.data.b
+        data: data.a + data.b
       })
   }, 12000)
 
@@ -92,8 +98,8 @@ describe('Transformation Service', () => {
       metadata: {
         author: 'icke',
         license: 'none',
-        displayName: 'test pipeline 2',
-        description: 'integraiton testing pipeline'
+        displayName: 'error test pipeline',
+        description: 'integration testing pipeline'
       }
     }
     // create pipeline to persist
@@ -103,17 +109,17 @@ describe('Transformation Service', () => {
     expect(creationResponse.status).toEqual(201)
     const configId = creationResponse.body.id
 
-    const trigger = {
-      datasourceId: pipelineConfig.datasourceId,
-      data: {
-        a: 'abc',
-        b: 123
-      }
+    const data = {
+      a: 'abc',
+      b: 123
     }
-    const response = await request(URL)
-      .post('/trigger')
-      .send(trigger)
-    expect(response.status).toEqual(200)
+
+    const importSuccessEvent = {
+      datasourceId: pipelineConfig.datasourceId,
+      data: JSON.stringify(data)
+    }
+
+    channel.publish(AMQP_EXCHANGE, AMQP_IMPORT_SUCCESS_TOPIC, Buffer.from(JSON.stringify(importSuccessEvent)))
 
     await sleep(10000) // pipeline should have been executing until now!
     expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)).toBeDefined()
@@ -124,13 +130,36 @@ describe('Transformation Service', () => {
   }, 12000)
 })
 
-async function connectAmqp (url) {
-  amqpConnection = await amqp.connect(url)
-  console.log(`Connected to AMQP on host "${url}"`)
+async function initAmqp (url, exchange, topic, queue, retries, backoff) {
+  for (let i = 1; ; i++) {
+    try {
+      if (!amqpConnection) {
+        console.log('Connecting to amqp...')
+        amqpConnection = await amqp.connect(url)
+        console.log(`Connected to AMQP on host "${url}"`)
+      }
+      if (!channel) {
+        console.log('Creating channel...')
+        channel = await amqpConnection.createChannel()
+      }
+      await channel.assertExchange(AMQP_EXCHANGE, 'topic')
+
+      await receiveAmqp(url, exchange, topic, queue)
+      console.log('AMQP initialization successful')
+      return
+    } catch (e) {
+      console.info(`Error initializing RabbitMQ(${i}/${retries}: ${e}.`)
+      if( i <= retries ) {
+        console.info(`Retrying in ${backoff}`)
+        await sleep(backoff)
+      } else {
+        throw e
+      }
+    }
+  }
 }
 
 async function receiveAmqp (url, exchange, topic, queue) {
-  const channel = await amqpConnection.createChannel()
   const q = await channel.assertQueue(queue)
   await channel.bindQueue(q.queue, exchange, topic)
 
@@ -138,7 +167,7 @@ async function receiveAmqp (url, exchange, topic, queue) {
 
   await channel.consume(q.queue, async (msg) => {
     const event = JSON.parse(msg.content.toString())
-    console.log(`Event received via amqp: ${JSON.stringify(event)}`)
+    console.log(`Event received via amqp (${topic}): ${JSON.stringify(event)}`)
     const routingKey = msg.fields.routingKey
     if (!publishedEvents.get(routingKey)) {
       publishedEvents.set(routingKey, [])

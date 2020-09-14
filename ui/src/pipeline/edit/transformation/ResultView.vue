@@ -24,7 +24,7 @@
           end: {{ result.stats.endTimestamp | timestamp }}<br>
           job duration: {{ result.stats.durationInMilliSeconds | duration }}
         </p>
-      </v-card-text>/;0
+      </v-card-text>
     </div>
     <div v-if="!result">
       <v-card-text style="text-align:left">

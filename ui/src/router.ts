@@ -1,15 +1,16 @@
 import Vue from 'vue'
-import Router from 'vue-router'
+import Router, { RouteConfig } from 'vue-router'
 import Home from '@/views/Home.vue'
 import storageRoutes from '@/storage/router'
 import datasourceRoutes from '@/datasource/router'
 import pipelineRoutes from '@/pipeline/router'
 import notificationRoutes from '@/notification/router'
-import { isAuthenticated, keycloakLogin } from './keycloak'
+import { isAuthenticated, login } from './authentication'
+import { BASE_URL } from '@/env'
 
 Vue.use(Router)
 
-let routes = [
+const routes: RouteConfig[] = [
   {
     path: '/',
     name: 'home',
@@ -25,25 +26,22 @@ let routes = [
     // which is lazy-loaded when the route is visited.
     component: () =>
       import(/* webpackChunkName: "about" */ './views/About.vue')
-  }
+  },
+  ...pipelineRoutes,
+  ...datasourceRoutes,
+  ...notificationRoutes,
+  ...storageRoutes
 ]
-
-routes = routes.concat(pipelineRoutes)
-routes = routes.concat(datasourceRoutes)
-routes = routes.concat(notificationRoutes)
-routes = routes.concat(storageRoutes)
 
 const router = new Router({
   mode: 'history',
-  base: process.env.VUE_APP_BASE_URL,
+  base: BASE_URL,
   routes
 })
 
-const AUTH_DISABLED: boolean = process.env.VUE_APP_AUTH_DISABLED === 'true'
-
-router.beforeEach((to, from, next) => {
-  if (!AUTH_DISABLED && to.meta.requiresAuth && !isAuthenticated()) {
-    keycloakLogin()
+router.beforeEach(async (to, from, next) => {
+  if (to.meta.requiresAuth && !isAuthenticated()) {
+    await login()
   }
   next()
 })

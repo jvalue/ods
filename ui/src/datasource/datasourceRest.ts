@@ -1,7 +1,6 @@
 import axios, { AxiosResponse } from 'axios'
-import Datasource from './datasource'
-
-const ADAPTER_SERVICE_URL = process.env.VUE_APP_ADAPTER_SERVICE_URL as string
+import Datasource, { Data, DataLocation } from './datasource'
+import { ADAPTER_SERVICE_URL } from '@/env'
 
 /**
  * Axios instance with default headers and base url.
@@ -9,7 +8,7 @@ const ADAPTER_SERVICE_URL = process.env.VUE_APP_ADAPTER_SERVICE_URL as string
  * because of explicit JSON.parser call with custom reviver.
  */
 const http = axios.create({
-  baseURL: `${ADAPTER_SERVICE_URL}/datasources`,
+  baseURL: ADAPTER_SERVICE_URL,
   headers: { 'Content-Type': 'application/json' },
   transformResponse: []
 })
@@ -18,7 +17,7 @@ const http = axios.create({
  * This reviver function replaces firstExecution attribute with a date object
  * if the current type is string.
  */
-const reviver = (key: string, value: object): object => {
+const reviver = (key: string, value: unknown): unknown => {
   if (key === 'firstExecution' && typeof value === 'string') {
     return new Date(value)
   }
@@ -27,24 +26,32 @@ const reviver = (key: string, value: object): object => {
 }
 
 export async function getAllDatasources (): Promise<Datasource[]> {
-  const response = await http.get('/')
+  const response = await http.get('/datasources')
   return JSON.parse(response.data, reviver)
 }
 
 export async function getDatasourceById (id: number): Promise<Datasource> {
-  const response = await http.get(`/${id}`)
+  const response = await http.get(`/datasources/${id}`)
   return JSON.parse(response.data, reviver)
 }
 
 export async function createDatasource (datasource: Datasource): Promise<Datasource> {
-  const response = await http.post('/', JSON.stringify(datasource))
+  const response = await http.post('/datasources', JSON.stringify(datasource))
   return JSON.parse(response.data, reviver)
 }
 
 export async function updateDatasource (datasource: Datasource): Promise<AxiosResponse> {
-  return http.put(`/${datasource.id}`, JSON.stringify(datasource))
+  return http.put(`/datasources/${datasource.id}`, JSON.stringify(datasource))
 }
 
 export async function deleteDatasource (id: number): Promise<AxiosResponse> {
-  return http.delete(`/${id}`)
+  return http.delete(`/datasources/${id}`)
+}
+
+export async function getDatasourceData (id: number): Promise<Data> {
+  const importResponse = await http.post<string>(`/datasources/${id}/trigger`)
+  const jsonResponse: DataLocation = JSON.parse(importResponse.data)
+  const location = jsonResponse.location
+  const dataResponse = await http.get<string>(location)
+  return JSON.parse(dataResponse.data)
 }

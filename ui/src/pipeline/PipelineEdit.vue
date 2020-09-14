@@ -32,9 +32,11 @@
                 :rules="[required]"
               />
               <v-text-field
-                v-model="dialogPipeline.datasourceId"
+                v-model.number="dialogPipeline.datasourceId"
                 label="Referenced Datasource Id"
                 :rules="[required]"
+                :readonly="isDatasourcePreselected"
+                type="number"
               />
             </v-form>
             <stepper-button-group
@@ -55,6 +57,7 @@
           <v-stepper-content step="2">
             <pipeline-transformation-config
               v-model="dialogPipeline.transformation"
+              :datasource-id="dialogPipeline.datasourceId"
               @validityChanged="validStep2 = $event"
             />
             <stepper-button-group
@@ -133,6 +136,7 @@ export default class PipelineEdit extends Vue {
   @State('selectedPipeline', pipelineNamespace) private selectedPipeline!: Pipeline
 
   private isEditMode = false
+  private isDatasourcePreselected = false
 
   private dialogStep = 1
 
@@ -152,28 +156,34 @@ export default class PipelineEdit extends Vue {
     }
   }
 
-  created () {
+  created (): void {
     this.isEditMode = this.$route.meta.isEditMode
 
     if (this.isEditMode) {
-      const id = (this.$route.params.pipelineId as unknown) as number
+      const id = parseInt(this.$route.params.pipelineId)
       this.loadPipelineByIdAction(id)
+    } else {
+      const datasourceId = this.$route.params.datasourceId
+      if (datasourceId) {
+        this.isDatasourcePreselected = true
+        this.dialogPipeline.datasourceId = parseInt(datasourceId)
+      }
     }
   }
 
   @Watch('selectedPipeline')
-  onSelectedPipelineChange (value: Pipeline, oldValue: Pipeline) {
+  onSelectedPipelineChange (value: Pipeline, oldValue: Pipeline): void {
     if (value != oldValue) {
       this.dialogPipeline = value
     }
   }
 
-  private onSave () {
+  private onSave (): void {
     this.createPipelineAction(this.dialogPipeline)
     this.routeToOverview()
   }
 
-  private onUpdate () {
+  private onUpdate (): void {
     this.updatePipelineAction(this.dialogPipeline)
     this.routeToOverview()
   }
@@ -186,11 +196,11 @@ export default class PipelineEdit extends Vue {
     this.$router.push({ name: 'pipeline-overview' })
   }
 
-  private required (val: string) {
+  private required (val: string): boolean | string {
     return !!val || 'required.'
   }
 
-  private evaluateAllForms () {
+  private evaluateAllForms (): boolean {
     return this.validStep1 &&
         this.validStep2 &&
         this.validStep3

@@ -1,20 +1,22 @@
-import App = firebase.app.App;
 import axios from 'axios'
 import * as firebase from 'firebase-admin'
 
-import { CONFIG_TYPE, NotificationConfig, WebhookConfig, SlackConfig, FirebaseConfig } from '../notification-config/notificationConfig';
+import {
+  FirebaseConfig,
+  SlackConfig,
+  WebhookConfig
+} from '../notification-config/notificationConfig'
 
-import SlackCallback from './notificationCallbacks/slackCallback';
-import WebhookCallback from './notificationCallbacks/webhookCallback';
-import FcmCallback from './notificationCallbacks/fcmCallback';
+import SlackCallback from './notificationCallbacks/slackCallback'
+import WebhookCallback from './notificationCallbacks/webhookCallback'
+import FcmCallback from './notificationCallbacks/fcmCallback'
 
-import SandboxExecutor from './condition-evaluation/sandboxExecutor';
-
+import SandboxExecutor from './condition-evaluation/sandboxExecutor'
+import App = firebase.app.App;
 
 const VERSION = '0.0.1'
 
 export default class NotificationExecutor {
-
   executor: SandboxExecutor
 
   constructor (executor: SandboxExecutor) {
@@ -22,34 +24,17 @@ export default class NotificationExecutor {
   }
 
   getVersion (): string {
-      return VERSION
+    return VERSION
   }
 
-async handleNotification(notification: NotificationConfig, type: CONFIG_TYPE, dataLocation: string, message: string, data?: object): Promise<void> {
-  console.log(`NotificationRequest received for pipeline: ${notification.pipelineId}.`)
-
-  const conditionHolds = this.executor.evaluate(notification.condition, data)
-  console.log('Condition is ' + conditionHolds)
-  if (!conditionHolds) { // no need to trigger notification
-    return Promise.resolve()
-  }
-
-  switch (type) {
-    case CONFIG_TYPE.WEBHOOK:
-        await this.handleWebhook(notification as WebhookConfig, dataLocation, message)
-        break
-    case CONFIG_TYPE.FCM:
-        await this.handleFCM(notification as FirebaseConfig, dataLocation, message)
-        break
-    case CONFIG_TYPE.SLACK:
-        await this.handleSlack(notification as SlackConfig, dataLocation, message)
-        break
-    default:
-        throw new Error('Notification type not implemented.')
+  async handleWebhook (webhook: WebhookConfig, dataLocation: string, message: string, data?: object): Promise<void> {
+    console.log(`WebhookNotificationRequest received for pipeline: ${webhook.pipelineId}.`)
+    const conditionHolds = this.executor.evaluate(webhook.condition, data)
+    console.log('Condition is ' + conditionHolds)
+    if (!conditionHolds) { // no need to trigger notification
+      return Promise.resolve()
     }
-  }
 
-  private async handleWebhook (webhook: WebhookConfig, dataLocation: string, message: string): Promise<void> {
     const callbackObject: WebhookCallback = {
       location: dataLocation,
       message: message,
@@ -59,7 +44,14 @@ async handleNotification(notification: NotificationConfig, type: CONFIG_TYPE, da
     await axios.post(webhook.url, callbackObject)
   }
 
-  private async handleSlack (slack: SlackConfig, dataLocation: string, message: string): Promise<void> {
+  async handleSlack (slack: SlackConfig, dataLocation: string, message: string, data?: object): Promise<void> {
+    console.log(`SlackNotificationRequest received for pipeline: ${slack.pipelineId}.`)
+    const conditionHolds = this.executor.evaluate(slack.condition, data)
+    console.log('Condition is ' + conditionHolds)
+    if (!conditionHolds) { // no need to trigger notification
+      return Promise.resolve()
+    }
+
     let slackBaseUri = 'https://hooks.slack.com/services'
     if (process.env.MOCK_RECEIVER_HOST && process.env.MOCK_RECEIVER_PORT) {
       slackBaseUri = `http://${process.env.MOCK_RECEIVER_HOST}:${process.env.MOCK_RECEIVER_PORT}/slack`
@@ -72,20 +64,28 @@ async handleNotification(notification: NotificationConfig, type: CONFIG_TYPE, da
     await axios.post(url, callbackObject)
   }
 
-  private async handleFCM (firebaseRequest: FirebaseConfig, dataLocation: string, message: string): Promise<void> {
+  async handleFCM
+  (firebaseConfig: FirebaseConfig, dataLocation: string, message: string, data?: object): Promise<void> {
+    console.log(`FirebaseNotificationRequest received for pipeline: ${firebaseConfig.pipelineId}.`)
+    const conditionHolds = this.executor.evaluate(firebaseConfig.condition, data)
+    console.log('Condition is ' + conditionHolds)
+    if (!conditionHolds) { // no need to trigger notification
+      return Promise.resolve()
+    }
+
     let app: App
     try {
-      app = firebase.app(firebaseRequest.clientEmail)
+      app = firebase.app(firebaseConfig.clientEmail)
     } catch (e) { // app does not exist yet
       app = firebase.initializeApp({
         credential: firebase.credential.cert({
-          projectId: firebaseRequest.projectId,
-          clientEmail: firebaseRequest.clientEmail,
-          privateKey: firebaseRequest.privateKey.replace(/\\n/g, '\n')
+          projectId: firebaseConfig.projectId,
+          clientEmail: firebaseConfig.clientEmail,
+          privateKey: firebaseConfig.privateKey.replace(/\\n/g, '\n')
         }),
-        databaseURL: `https://${firebaseRequest.projectId}.firebaseio.com`
+        databaseURL: `https://${firebaseConfig.projectId}.firebaseio.com`
       },
-      firebaseRequest.clientEmail)
+      firebaseConfig.clientEmail)
     }
     const firebaseMessage: FcmCallback = {
       notification: {
@@ -95,7 +95,7 @@ async handleNotification(notification: NotificationConfig, type: CONFIG_TYPE, da
       data: {
         message: message
       },
-      topic: firebaseRequest.topic
+      topic: firebaseConfig.topic
     }
     console.log(`Sending firebase message, callback object: ${JSON.stringify(firebaseMessage)}.`)
     const firebaseResponse = await firebase.messaging(app).send(firebaseMessage)

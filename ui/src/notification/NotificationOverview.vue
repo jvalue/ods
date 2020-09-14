@@ -59,7 +59,7 @@
         <template v-slot:item.condition="{ item }">
           {{ item.condition }}
         </template>
-         <template v-slot:item.id="{ item }">
+        <template v-slot:item.id="{ item }">
           {{ item.id }}
         </template>
         <template v-slot:item.action="{ item }">
@@ -103,14 +103,12 @@ import Vue from 'vue'
 import { Action, State } from 'vuex-class'
 import { Ref } from 'vue-property-decorator'
 
-import Pipeline from '@/pipeline/pipeline'
 import NotificationConfig from '@/notification/notificationConfig'
 import NotificationEditDialog from '@/notification/notificationEditDialog'
 import NotificationEdit from '@/notification/NotificationEdit.vue'
-import * as RestClient from '@/notification/notificationRest'
 
 const pipelineNameSpace = { namespace: 'pipeline' }
-const notificationNameSpace = {namespace: 'notification'}
+const notificationNameSpace = { namespace: 'notification' }
 
 @Component({
   components: {
@@ -118,19 +116,18 @@ const notificationNameSpace = {namespace: 'notification'}
   }
 })
 export default class PipelineNotifications extends Vue {
-  @Action('loadConfigsbyPipelineId', notificationNameSpace) 
+  @Action('loadConfigsbyPipelineId', notificationNameSpace)
   private loadConfigbyPipelineIdAction!: (id: number) => void
 
   @Action('addNotification', notificationNameSpace)
-  private addNotificationAction!: (notification: NotificationConfig) => Promise<NotificationConfig[]>
+  private addNotificationAction!: (notification: NotificationConfig) => void
 
   @Action('removeNotification', notificationNameSpace)
-  private removeNotificationAction!: (notification: NotificationConfig) => Promise<NotificationConfig[]>
+  private removeNotificationAction!: (notification: NotificationConfig) => void
 
   @Action('updateNotification', notificationNameSpace)
-  private updateNotificationAction!: (notification: NotificationConfig) => Promise<NotificationConfig[]>
+  private updateNotificationAction!: (notification: NotificationConfig) => void
 
-  //@State('selectedPipeline', pipelineNameSpace) private selectedPipeline!: Pipeline
   @State('notifications', notificationNameSpace) private notifications!: NotificationConfig[]
   @State('isLoadingNotifications', notificationNameSpace) private isLoadingNotifications!: boolean;
 
@@ -147,37 +144,37 @@ export default class PipelineNotifications extends Vue {
   private isEdit = false
   private pipelineId = -1
 
-  private async created () {
+  created (): void {
     console.log('Notification Overview created!')
-    this.pipelineId = this.$route.params.pipelineId as unknown as number
+    this.pipelineId = parseInt(this.$route.params.pipelineId)
     this.loadConfigbyPipelineIdAction(this.pipelineId)
   }
 
-  private onCreateNotification () {
+  private onCreateNotification (): void {
     this.isEdit = false
     this.notificationEdit.openDialog()
   }
 
-  private async onEditNotification (notification: NotificationConfig) {
+  private onEditNotification (notification: NotificationConfig): void {
     this.isEdit = true
     this.notificationEdit.openDialog(notification)
   }
 
-  private async onDeleteNotification (notification: NotificationConfig) {
-     this.removeNotificationAction(notification)
+  private onDeleteNotification (notification: NotificationConfig): void {
+    this.removeNotificationAction(notification)
   }
 
-  private async onLoadNotifications () {
-    await this.loadConfigbyPipelineIdAction(this.pipelineId)
+  private onLoadNotifications (): void {
+    this.loadConfigbyPipelineIdAction(this.pipelineId)
   }
 
-  private onNavigateBack () {
+  private onNavigateBack (): void {
     this.$router.push({ name: 'pipeline-overview' })
-  }   
+  }
 
-  private async onSave (editedNotification: NotificationConfig) {
+  private onSave (editedNotification: NotificationConfig): void {
     editedNotification.pipelineId = this.pipelineId
-    
+
     if (this.isEdit) { // edit
       this.updateNotificationAction(editedNotification)
     } else { // create

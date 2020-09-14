@@ -1,193 +1,112 @@
-import { Pool, PoolConfig, PoolClient, QueryResult } from "pg"
-import { StorageContentRepository } from "./storageContentRepository"
-import { StorageContent } from "./storageContent"
+import { PoolConfig, QueryResult } from 'pg'
+import { StorageContentRepository } from './storageContentRepository'
+import PostgresRepository from '@/util/postgresRepository'
+import { StorageContent } from './storageContent'
+import { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB, POSTGRES_SCHEMA } from '../env'
 
+const EXISTS_TABLE_STATEMENT = (schema: string, table: string): string => `SELECT to_regclass('"${schema}"."${table}"')`
+const GET_ALL_CONTENT_STATEMENT = (schema: string, table: string): string => `SELECT * FROM "${schema}"."${table}"`
+const GET_CONTENT_STATEMENT =
+  (schema: string, table: string): string => `SELECT * FROM "${schema}"."${table}" WHERE id = $1`
+const INSERT_CONTENT_STATEMENT = (schema: string, table: string): string =>
+  `INSERT INTO "${schema}"."${table}" ("data", "pipelineId", "timestamp") VALUES ($1, $2, $3) RETURNING *`
 
 export class PostgresStorageContentRepository implements StorageContentRepository {
-    connectionPool?: Pool = undefined
-    schema = process.env.DATABASE_SCHEMA
+  postgresRepository: PostgresRepository
 
-    /**
+  constructor (postgresRepository: PostgresRepository) {
+    this.postgresRepository = postgresRepository
+  }
+
+  /**
      * Initializes the connection to the database.
      * @param retries:  Number of retries to connect to the database
-     * @param backoff:  Time in seconds to backoff before next connection retry
+     * @param backoffMs:  Time in seconds to backoff before next connection retry
      */
-    public async init(retries: number, backoff: number): Promise<void> {
-        console.debug('Initializing PostgresStorageStructureRepository')
-        await this.initConnectionPool(retries, backoff)
+  public async init (retries: number, backoffMs: number): Promise<void> {
+    console.debug('Initializing PostgresStorageStructureRepository')
+
+    const poolConfig: PoolConfig = {
+      host: POSTGRES_HOST,
+      port: POSTGRES_PORT,
+      user: POSTGRES_USER,
+      password: POSTGRES_PW,
+      database: POSTGRES_DB,
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: backoffMs
     }
 
-    /**
-     * Initializes a database connection to the storage-db service.
-     * @param retries:  Number of retries to connect to the database
-     * @param backoff:  Time in seconds to backoff before next connection retry
-     *
-     * @returns reject promise on failure to connect
-     */
-    private async initConnectionPool(retries: number, backoff: number): Promise<void> {
-        const poolConfig : PoolConfig = {
-            host: process.env.DATABASE_HOST!,
-            port: +process.env.DATABASE_PORT!,
-            user: process.env.DATABASE_USER!,
-            password: process.env.DATABASE_PW!,
-            database: process.env.DATABASE_NAME!,
-            max: 20,
-            idleTimeoutMillis: 30000,
-            connectionTimeoutMillis: 2000,
-        }
-        console.debug(`Connecting to database with config:\n${JSON.stringify(poolConfig)}`)
+    await this.postgresRepository.init(poolConfig, retries, backoffMs)
+  }
 
-        // try to establish connection
-        for (let i = 1; i <= retries; i++) {
-            console.info(`Initiliazing database connection (${i}/${retries})`)
-            let client
-            try {
-              const connectionPool = new Pool(poolConfig)
-              client = await connectionPool.connect()
-              this.connectionPool = connectionPool
-              console.info(`Successfully established database connection`)
-              break
-            } catch (error) {
-              await this.sleep(backoff);
-              continue
-            } finally {
-              if (client) {
-                client.release()
-              }
-            }
-        }
+  async existsTable (tableIdentifier: string): Promise<boolean> {
+    const resultSet =
+      await this.postgresRepository.executeQuery(EXISTS_TABLE_STATEMENT(POSTGRES_SCHEMA, tableIdentifier), [])
+    const foundTableWithIdentifier = !!resultSet.rows[0].to_regclass
+    return foundTableWithIdentifier
+  }
 
-        if (!this.connectionPool) {
-            return Promise.reject("Connection to databse could not be established.")
-        }
-
-        console.info('Sucessfully established connection to storage-db database.')
-        return Promise.resolve()
+  async getAllContent (tableIdentifier: string): Promise<StorageContent[] | undefined> {
+    const tableExists = await this.existsTable(tableIdentifier)
+    if (!tableExists) {
+      console.debug(`Table "${tableIdentifier}" does not exist - returning no data`)
+      return undefined
     }
 
-    private sleep(ms: number): Promise<void> {
-        return new Promise(resolve => setTimeout(resolve, ms));
+    const resultSet =
+      await this.postgresRepository.executeQuery(GET_ALL_CONTENT_STATEMENT(POSTGRES_SCHEMA, tableIdentifier), [])
+    return this.toContents(resultSet)
+  }
+
+  async getContent (tableIdentifier: string, contentId: string): Promise<StorageContent | undefined> {
+    const tableExists = await this.existsTable(tableIdentifier)
+    if (!tableExists) {
+      console.debug(`Table "${tableIdentifier}" does not exist - returning no data`)
+      return undefined
     }
 
-    async existsTable(tableIdentifier: string): Promise<boolean> {
-      console.debug(`Checking if table "${tableIdentifier}" exists`)
-      if (!this.connectionPool) {
-          return Promise.reject("No connnection pool available")
-      }
-
-      let client!: PoolClient
-      try {
-          client = await this.connectionPool.connect()
-          const resultSet = await client.query(`SELECT to_regclass('${this.schema}.${tableIdentifier}')`)
-          const tableExists = !!resultSet.rows[0].to_regclass
-          console.debug(`Table ${tableIdentifier} exists: ${tableExists}`)
-          return Promise.resolve(tableExists)
-        } catch (error) {
-            console.error(`Error when checking if table ${tableIdentifier} exists:\n${error}`)
-            return Promise.reject(error)
-        } finally {
-            if (client) {
-                client.release()
-            }
-        }
+    const resultSet = await this.postgresRepository.executeQuery(
+      GET_CONTENT_STATEMENT(POSTGRES_SCHEMA, tableIdentifier), [contentId]
+    )
+    const content = this.toContents(resultSet)
+    if (!content || !content[0]) {
+      console.debug(`No content found for table "${tableIdentifier}", id ${contentId}`)
+      return undefined
     }
+    console.debug(
+      `Fetched content for table "${tableIdentifier}", id ${contentId}: ` +
+      `{ pipelineId: ${content[0].pipelineId}, timestamp: ${content[0].timestamp}, data: <omitted in log>}`
+    )
+    return content[0]
+  }
 
-    async getAllContent(tableIdentifier: string): Promise<StorageContent[] | undefined> {
-      console.debug(`Fetching all content from database, table "${tableIdentifier}"`)
-      if (!this.connectionPool) {
-          return Promise.reject("No connnection pool available")
-      }
+  async saveContent (tableIdentifier: string, content: StorageContent): Promise<number> {
+    delete content.id // id not under control of client
 
-      const tableExists = await this.existsTable(tableIdentifier)
-      if(!tableExists) {
-        console.debug(`Table "${tableIdentifier}" does not exist - returning no data`)
-        return Promise.resolve(undefined)
-      }
+    // Generate Query-String
+    const data = this.escapeQuotes(content.data)
+    const values = [data, parseInt(content.pipelineId), content.timestamp]
 
-      let client!: PoolClient
-      try {
-          client = await this.connectionPool.connect()
-          const resultSet = await client.query(`SELECT * FROM "${this.schema}"."${tableIdentifier}"`)
-          const content = this.toContents(resultSet)
-          return Promise.resolve(content)
-      } catch (error) {
-          console.error(`Could not get content from table ${tableIdentifier}: ${error}`)
-          return Promise.reject(error)
-      } finally {
-          if (client) {
-              client.release()
-          }
-      }
-    }
+    const { rows } = await this.postgresRepository
+      .executeQuery(INSERT_CONTENT_STATEMENT(POSTGRES_SCHEMA, tableIdentifier), values)
+    const id = +rows[0].id
+    console.debug(`Content successfully persisted with id ${id}`)
+    return id
+  }
 
-    async getContent(tableIdentifier: string, contentId: string): Promise<StorageContent | undefined> {
-      console.debug(`Fetching content from database, table "${tableIdentifier}", id "${contentId}"`)
-      if (!this.connectionPool) {
-          return Promise.reject("No connnection pool available")
-      }
+  private toContents (resultSet: QueryResult<StorageContent>): StorageContent[] {
+    const contents: StorageContent[] = resultSet.rows
+    contents.forEach(x => this.contentIdAsNumber(x))
+    return contents
+  }
 
-      const tableExists = await this.existsTable(tableIdentifier)
-      if(!tableExists) {
-        console.debug(`Table "${tableIdentifier}" does not exist - returning no data`)
-        return Promise.resolve(undefined)
-      }
+  private escapeQuotes (data: object): string {
+    return JSON.stringify(data).replace("'", "''")
+  }
 
-      let client!: PoolClient
-      try {
-          client = await this.connectionPool.connect()
-          const resultSet = await client.query(`SELECT * FROM "${this.schema}"."${tableIdentifier}" WHERE id = $1`, [contentId])
-          const content = this.toContents(resultSet)
-          if(!content || !content[0]) {
-            console.debug(`No content found for table "${tableIdentifier}", id ${contentId}`)
-            return undefined
-          }
-          console.debug(`Fetched content for table "${tableIdentifier}", id ${contentId}: { pipelineId: ${content[0].pipelineId}, timestamp: ${content[0].timestamp}, data: <omitted in log>}`)
-          return Promise.resolve(content[0])
-      } catch (error) {
-          console.error(`Could not get content from table ${tableIdentifier} with id ${contentId}: ${error}`)
-          return Promise.reject(error)
-      } finally {
-          if (client) {
-              client.release()
-          }
-      }
-    }
-
-    async saveContent(tableIdentifier: string, content: StorageContent): Promise<number> {
-        console.debug(`Saving storage content data`)
-        if (!this.connectionPool) {
-            return Promise.reject("No connnection pool available")
-        }
-
-        delete content.id  // id not under control of client
-
-        // Generate Query-String
-        const data = JSON.stringify(content.data).replace("'", "''") // Escape single quotes
-        const insertStatement = `INSERT INTO "${this.schema}"."${tableIdentifier}" ("data", "pipelineId", "timestamp") VALUES ($1, $2, $3) RETURNING *`
-        const values = [data, parseInt(content.pipelineId), content.timestamp]
-
-        let client!: PoolClient  // Client to execute the query
-        try {
-            client = await this.connectionPool.connect()
-            const { rows } = await client.query(insertStatement, values)
-            console.debug("Content successfully persisted.")
-            return Promise.resolve(rows[0]["id"] as number)
-        } catch (err) {
-            const errMsg = `Could not save content data: ${err}`
-            console.error(errMsg)
-            return Promise.reject(err)
-        } finally {
-            if (client) {
-                client.release()
-            }
-        }
-    }
-
-    toContents(resultSet: QueryResult<any>): StorageContent[] {
-      const contents = resultSet.rows as StorageContent[]
-      contents.forEach((x) => {
-        x.id = x.id ? +x.id : undefined // convert to number
-      })
-      return contents
-    }
+  private contentIdAsNumber (x: StorageContent): StorageContent {
+    x.id = x.id ? +x.id : undefined
+    return x
+  }
 }

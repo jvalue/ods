@@ -1,13 +1,12 @@
-import { Entity,  Column,  PrimaryGeneratedColumn } from 'typeorm'
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm'
 
 export enum CONFIG_TYPE{
-  WEBHOOK = "webhook",
-  SLACK = "slack",
-  FCM = "fcm"
+  WEBHOOK = 'webhook',
+  SLACK = 'slack',
+  FCM = 'fcm'
 }
 
-
-export class NotificationConfig{
+export class NotificationConfig {
   @Column()
   pipelineId!: number;
 
@@ -15,13 +14,8 @@ export class NotificationConfig{
   condition!: string;
 }
 
-export class NotificationConfigRequest extends NotificationConfig{
-  type!: CONFIG_TYPE
-}
-
 @Entity()
-export class SlackConfig extends NotificationConfig{
-
+export class SlackConfig extends NotificationConfig {
   @PrimaryGeneratedColumn()
   id!: number
 
@@ -35,10 +29,8 @@ export class SlackConfig extends NotificationConfig{
   secret!: string;
 }
 
-
 @Entity()
-export class WebhookConfig extends NotificationConfig{
-
+export class WebhookConfig extends NotificationConfig {
   @PrimaryGeneratedColumn()
   id!: number
 

@@ -17,6 +17,13 @@ services:
       MOCK_SERVER_HOST: adapter-it
       MOCK_SERVER_PORT: 8081
       RABBIT_HOST: rabbitmq
+      AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
+      AMQP_EXCHANGE: 'ods_global'
+      AMQP_IMPORT_TOPIC: 'datasource.execution.*'
+      AMQP_IMPORT_SUCCESS_TOPIC: 'datasource.execution.success'
+      AMQP_IMPORT_FAILED_TOPIC: 'datasource.execution.failed'
+      AMQP_IT_QUEUE: adapter-it
+
     depends_on:
       - rabbitmq
       - edge
@@ -26,11 +33,7 @@ services:
     ports:
       - "9300:8080"
     environment:
-      CONFIG_SERVICE_URL: http://scheduler-it:8081
-      ADAPTER_SERVICE_URL: http://scheduler-it:8082
-      TRANSFORMATION_SERVICE_URL: http://scheduler-it:8083
-      NOTIFICATION_SERVICE_URL: http://scheduler-it:8084
-      STORAGE_SERVICE_URL: http://scheduler-it:8085
+      ADAPTER_SERVICE_URL: http://scheduler-it:8081
 
   scheduler-it:
     image: open-data-service/ods-main/scheduler-it
@@ -39,10 +42,7 @@ services:
     environment:
       SCHEDULER_API: http://scheduler:8080
       MOCK_ADAPTER_HOST: scheduler-it
-      MOCK_ADAPTER_PORT: 8082
-      MOCK_TRANSFORMATION_HOST: scheduler-it
-      MOCK_TRANSFORMATION_PORT: 8083
-      RABBIT_HEALTH_URL: http://rabbitmq:15672
+      MOCK_ADAPTER_PORT: 8081
     depends_on:
       - rabbitmq
 
@@ -57,10 +57,6 @@ services:
       AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
 
   # ----------------- TRANSFORMATION SERVICE (PORTS 9500 - 9599) --------------------
-  transformation:
-    environment:
-      AUTH_ENABLED: 'false'
-
   transformation-it:
     image: open-data-service/ods-main/transformation-it
     build:
@@ -71,16 +67,20 @@ services:
       AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
       AMQP_EXCHANGE: 'ods_global'
       AMQP_IT_QUEUE: 'transformation_it'
+      AMQP_PIPELINE_EXECUTION_TOPIC: 'pipeline.execution.*'
       AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: 'pipeline.execution.success'
       AMQP_PIPELINE_EXECUTION_ERROR_TOPIC: 'pipeline.execution.error'
       AMQP_PIPELINE_CONFIG_CREATED_TOPIC: 'pipeline.config.created'
       AMQP_PIPELINE_CONFIG_UPDATED_TOPIC: 'pipeline.config.updated'
       AMQP_PIPELINE_CONFIG_DELETED_TOPIC: 'pipeline.config.deleted'
+      AMQP_IMPORT_SUCCESS_TOPIC: 'datasource.execution.success'
+
+      CONNECTION_RETRIES: 3
+      CONNECTION_BACKOFF: 2000
 
    # ----------------- NOTIFICATION SERVICE (PORTS #TODO) --------------------
   notification:
     environment:
-      AUTH_ENABLED: 'false'
       MOCK_RECEIVER_HOST: notification-it
       MOCK_RECEIVER_PORT: 8081
 

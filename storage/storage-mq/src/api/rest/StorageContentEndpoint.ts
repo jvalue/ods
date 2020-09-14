@@ -1,14 +1,12 @@
 import * as express from 'express'
-import { StorageContentRepository } from "@/storage-content/storageContentRepository"
-
+import { StorageContentRepository } from '../../storage-content/storageContentRepository'
 
 export class StorageContentEndpoint {
-
   version = '0.0.1'
 
   contentRepository: StorageContentRepository
 
-  constructor(contentRepository: StorageContentRepository, app: express.Application) {
+  constructor (contentRepository: StorageContentRepository, app: express.Application) {
     this.contentRepository = contentRepository
 
     // Request contents
@@ -26,7 +24,6 @@ export class StorageContentEndpoint {
     return this.version
   }
 
-
   /**
    * Handles a request for getting content with contentId from bucket bucketId
    * @param req Request for data.
@@ -37,37 +34,28 @@ export class StorageContentEndpoint {
     const contentId = parseInt(req.params.contentId)
 
     if (!bucketId || bucketId < 1) {
-      res.status(400).send(`Cannot request content: No valid bucket id provided`)
-      res.end()
+      res.status(400).send('Cannot request content: No valid bucket id provided')
       return
     }
     if (!contentId || contentId < 1) {
-      res.status(400).send(`Cannot request content: No valid bucket id provided`)
-      res.end()
+      res.status(400).send('Cannot request content: No valid bucket id provided')
       return
     }
 
     try {
       const content = await this.contentRepository.getContent(`${bucketId}`, `${contentId}`)
-      if(!!content) {
+      if (content) {
         res.status(200).send(content)
-        res.end()
         return
       } else {
         res.status(404).send(`Content with id "${contentId}" not found in bucker "${bucketId}"`)
-        res.end()
         return
       }
-    } catch(err) {
+    } catch (err) {
       console.error(`Could not get content on bucket "${bucketId}" with content id "${contentId}"\n${err}`)
       res.status(500).send(`Could not get content on bucket ${bucketId} with content id "${contentId}`)
-      res.end()
-      return
     }
   }
-
-
-
 
   /**
    * Handles a request for getting all contents from bucket bucketId
@@ -78,28 +66,23 @@ export class StorageContentEndpoint {
     const bucketId = parseInt(req.params.bucketId)
 
     if (!bucketId || bucketId < 1) {
-      res.status(400).send(`Cannot request content: No valid bucket id provided`)
-      res.end()
+      res.status(400).send('Cannot request content: No valid bucket id provided')
       return
     }
 
     try {
       const content = await this.contentRepository.getAllContent(`${bucketId}`)
-      if(!!content) {
+      if (content) {
         res.status(200).send(content)
-        res.end()
         return
       } else {
         res.status(404).send(`Bucket "${bucketId}" does not exist`)
-        res.end()
         return
       }
-    } catch(err) {
+    } catch (err) {
       console.error(`Could not get content on bucket "${bucketId}"\n${err}`)
 
       res.status(500).send(`Could not get content on bucket ${bucketId}`)
-      res.end()
-      return
     }
   }
 }
