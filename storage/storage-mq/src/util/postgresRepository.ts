@@ -1,5 +1,7 @@
 import { Pool, PoolConfig, PoolClient, QueryResult } from 'pg'
 
+import { sleep } from '../sleep'
+
 export default class PostgresRepository {
   private connectionPool?: Pool = undefined
 
@@ -26,7 +28,7 @@ export default class PostgresRepository {
       } catch (err) {
         lastError = err
       }
-      await this.sleep(backoffMs)
+      await sleep(backoffMs)
     }
     throw lastError
   }
@@ -44,10 +46,6 @@ export default class PostgresRepository {
         client.release()
       }
     }
-  }
-
-  private sleep (ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms))
   }
 
   public async executeQuery (query: string, args: unknown[]): Promise<QueryResult> {

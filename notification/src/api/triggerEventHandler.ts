@@ -23,7 +23,7 @@ export class TriggerEventHandler {
    */
   public async handleEvent (transformationEvent: TransformationEvent): Promise<void> {
     if (!this.isValidTransformationEvent(transformationEvent)) {
-      return Promise.reject(new Error('Trigger event is not valid'))
+      throw new Error('Trigger event is not valid')
     }
 
     const dataLocation = `${NOTIFICATION_DATA_LOCATION_URL}/${transformationEvent.pipelineId}`
@@ -46,7 +46,6 @@ export class TriggerEventHandler {
     }
 
     await Promise.all(notificationJobs)
-    return Promise.resolve()
   }
 
   /**

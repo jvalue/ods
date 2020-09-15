@@ -14,7 +14,6 @@ export default class PipelineExecutionEventHandler {
       data: pipelineExecutedEvent.data,
       id: undefined
     })
-    return Promise.resolve()
   }
 }
 

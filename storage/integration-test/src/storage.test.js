@@ -84,15 +84,14 @@ const amqpConnect = async (amqpUrl, retries, backoff) => {
     try {
       const connection = await AMQP.connect(amqpUrl)
       console.log(`Successfully establish connection to AMQP broker (${amqpUrl})`)
-      return Promise.resolve(connection)
+      return connection
     } catch (error) {
       console.info(`Error connecting to RabbitMQ: ${error}. Retrying in ${backoff} seconds`)
       console.info(`Connecting to Amqp broker (${i}/${retries})`)
       await sleep(backoff)
-      continue
     }
   }
-  Promise.reject(new Error(`Could not establish connection to AMQP broker (${amqpUrl})`))
+  throw new Error(`Could not establish connection to AMQP broker (${amqpUrl})`)
 }
 
 const sleep = (ms) => {

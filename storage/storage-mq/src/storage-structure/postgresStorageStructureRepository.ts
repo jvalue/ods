@@ -48,7 +48,7 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
       await this.postgresRepo.executeQuery(EXISTS_TABLE_STATEMENT(POSTGRES_SCHEMA, tableIdentifier), [])
     const tableExists = !!resultSet.rows[0].to_regclass
     console.debug(`Table ${tableIdentifier} exists: ${tableExists}`)
-    return Promise.resolve(tableExists)
+    return tableExists
   }
 
   /**
