@@ -8,6 +8,7 @@ import {
   AMQP_DATASOURCE_EXECUTION_SUCCESS_TOPIC,
   AMQP_TRANSFORMATION_EXECUTION_QUEUE
 } from '../../env'
+import { sleep } from '../../sleep'
 
 export class PipelineConfigConsumer {
   pipelineManager: PipelineConfigManager
@@ -31,18 +32,13 @@ export class PipelineConfigConsumer {
       } catch (error) {
         if (i >= retries) {
           console.error(`Could not establish connection to AMQP Broker (${AMQP_URL})`)
-          return Promise.reject(error)
+          throw error
         }
         console.info(`Error connecting to RabbitMQ: ${error}. Retrying in ${backoff} seconds`)
         console.info(`Connecting to Amqp handler (${i}/${retries})`)
-        await this.sleep(backoff)
-        continue
+        await sleep(backoff)
       }
     }
-  }
-
-  private sleep (ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms))
   }
 
   private async initChannel (connection: AMQP.Connection): Promise<void> {
@@ -60,7 +56,6 @@ export class PipelineConfigConsumer {
 
     await channel.consume(q.queue, this.consumeEvent)
     console.info('Successfully initialized AMQP queue')
-    return Promise.resolve()
   }
 
   // use the f = () => {} syntax to access this

@@ -11,7 +11,7 @@ export default class StorageModule extends VuexModule {
     try {
       return await StorageRest.getStoredItems(pipelineId)
     } catch (e) {
-      return Promise.resolve([])
+      return []
     }
   }
 

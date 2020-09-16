@@ -8,6 +8,7 @@ import * as Scheduling from './scheduling'
 import DatasourceConfig from './interfaces/datasource-config'
 import DatasourceEvent, { EventType } from './interfaces/datasource-event'
 
+import { sleep } from './sleep'
 import { MAX_TRIGGER_RETRIES } from './env'
 
 const allJobs: Map<number, ExecutionJob> = new Map() // datasourceId -> job
@@ -31,7 +32,7 @@ export async function initializeJobs (retries = 30, retryBackoff = 3000): Promis
     }
   } catch (e) {
     if (retries === 0) {
-      return Promise.reject(new Error('Failed to initialize datasource/pipeline scheduler.'))
+      throw new Error('Failed to initialize datasource/pipeline scheduler.')
     }
     if (e.code === 'ECONNREFUSED' || e.code === 'ENOTFOUND') {
       console.error(`Failed to sync with Adapter Service on init (${retries}) . Retrying after ${retryBackoff}ms... `)
@@ -211,8 +212,4 @@ export function cancelJob (jobId: number): void {
   if (job) {
     job.scheduleJob.cancel()
   }
-}
-
-function sleep (ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms))
 }

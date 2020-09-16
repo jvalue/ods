@@ -1,5 +1,7 @@
 import * as AMQP from 'amqplib'
 
+import { sleep } from '../sleep'
+
 export default class AmqpConsumer {
   private connection?: AMQP.Connection
 
@@ -13,9 +15,9 @@ export default class AmqpConsumer {
         console.error(`Error connecting to AMQP (${i}/${retries})`)
         lastError = error
       }
-      await this.sleep(msBackoff)
+      await sleep(msBackoff)
     }
-    return Promise.reject(lastError)
+    throw lastError
   }
 
   private async connect (amqpUrl: string): Promise<AMQP.Connection> {
@@ -33,12 +35,8 @@ export default class AmqpConsumer {
       console.log(`Exchange ${exchange} successfully initialized.`)
       return channel
     } catch (error) {
-      return Promise.reject(new Error(`Error creating exchange ${exchange}: ${error}`))
+      throw new Error(`Error creating exchange ${exchange}: ${error}`)
     }
-  }
-
-  private sleep (ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms))
   }
 
   public async consume (
@@ -48,7 +46,7 @@ export default class AmqpConsumer {
     consumeEvent: (msg: AMQP.ConsumeMessage | null) => void
   ): Promise<void> {
     if (!this.connection) {
-      return Promise.reject(new Error('Consume not possible, AMQP client not initialized.'))
+      throw new Error('Consume not possible, AMQP client not initialized.')
     }
 
     try {
@@ -59,7 +57,7 @@ export default class AmqpConsumer {
       await channel.bindQueue(q.queue, exchange, topic)
       await channel.consume(q.queue, consumeEvent)
     } catch (error) {
-      return Promise.reject(new Error(`Error subscribing to exchange ${exchange} under key ${topic}: ${error}`))
+      throw new Error(`Error subscribing to exchange ${exchange} under key ${topic}: ${error}`)
     }
   }
 }

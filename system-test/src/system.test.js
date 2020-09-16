@@ -546,7 +546,7 @@ function generatePipelineConfig (datasourceId) {
 }
 
 function sleep (ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 async function checkWebhook (uri, pollingInterval, maxRetries = 10) {
@@ -558,18 +558,14 @@ async function checkWebhook (uri, pollingInterval, maxRetries = 10) {
       await sleep(pollingInterval)
     }
   }
-  await Promise.reject(new Error(`Webhook ${uri} was not triggered within ${maxRetries} retries.`))
+  throw new Error(`Webhook ${uri} was not triggered within ${maxRetries} retries.`)
 }
 
 async function webhookRemainsUnchanged (uri, ms) {
   const ref = await request(MOCK_SERVER_URL).get(`/notifications/${uri}`)
   await sleep(ms)
   const latest = await request(MOCK_SERVER_URL).get(`/notifications/${uri}`)
-  if (JSON.stringify(latest.body) === JSON.stringify(ref.body)) {
-    return Promise.resolve(true)
-  } else {
-    return Promise.resolve(false)
-  }
+  return JSON.stringify(latest.body) === JSON.stringify(ref.body)
 }
 
 async function waitForWebhookChange (uri, original, pollingInterval, maxRetries = 10) {
@@ -582,5 +578,5 @@ async function waitForWebhookChange (uri, original, pollingInterval, maxRetries 
       await sleep(pollingInterval)
     }
   }
-  await Promise.reject(new Error(`Webhook ${uri} was not triggered within ${maxRetries} retries.`))
+  throw new Error(`Webhook ${uri} was not triggered within ${maxRetries} retries.`)
 }
