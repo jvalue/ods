@@ -10,8 +10,8 @@ const currentUserProfile: UserProfile = {
   email: 'test.user@value-ods.com'
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function
 export async function initAuthentication (): Promise<void> {
-  return Promise.resolve()
 }
 
 export function isAuthenticated (): boolean {

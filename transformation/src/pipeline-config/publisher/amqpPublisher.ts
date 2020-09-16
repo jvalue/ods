@@ -1,5 +1,7 @@
 import * as AMQP from 'amqplib'
 
+import { sleep } from '../../sleep'
+
 export default class AmqpPublisher {
   private channel?: AMQP.Channel
 
@@ -12,10 +14,10 @@ export default class AmqpPublisher {
       } catch (error) {
         console.error(`Error initializing the AMQP Client (${i}/${retries}):
         ${error}. Retrying in ${msBackoff}...`)
-        await this.sleep(msBackoff)
+        await sleep(msBackoff)
       }
     }
-    return Promise.reject(new Error(`Could not connect to AMQP broker at ${amqpUrl}`))
+    throw new Error(`Could not connect to AMQP broker at ${amqpUrl}`)
   }
 
   private async connect (amqpUrl: string): Promise<AMQP.Connection> {
@@ -39,10 +41,6 @@ export default class AmqpPublisher {
       console.error(`Error creating exchange ${exchange}: ${error}`)
       throw error
     }
-  }
-
-  private sleep (ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms))
   }
 
   public publish (exchange: string, topic: string, content: object): boolean {

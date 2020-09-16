@@ -4,6 +4,7 @@ import { NotificationRepository } from './notificationRepository'
 import { NotificationSummary } from './notificationSummary'
 import { SlackConfig, WebhookConfig, FirebaseConfig } from './notificationConfig'
 import { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB } from '../env'
+import { sleep } from '../sleep'
 
 /**
  * This class handles Requests to the notification database
@@ -47,7 +48,7 @@ export class StorageHandler implements NotificationRepository {
 
     if (!this.dbConnection) {
       console.error('Could not initialize StorageHandler')
-      return Promise.reject(new Error('Could not initialize StorageHandler'))
+      throw new Error('Could not initialize StorageHandler')
     }
 
     this.slackRepository = this.dbConnection.getRepository(SlackConfig)
@@ -79,7 +80,7 @@ export class StorageHandler implements NotificationRepository {
       dbCon = await createConnection(this.connectionOptions).catch(() => { return null })
       if (!dbCon) {
         console.info(`Initializing database connection (${i}/${retries})`)
-        await this.backOff(ms)
+        await sleep(ms)
       } else {
         connected = true
         break
@@ -87,47 +88,38 @@ export class StorageHandler implements NotificationRepository {
     }
 
     if (!connected) {
-      return Promise.reject(new Error('Connection to database could not be established.'))
+      throw new Error('Connection to database could not be established.')
     }
 
     console.info('Connected to notification config database successful.')
-    return Promise.resolve(dbCon)
-  }
-
-  /**
-         * Waits for a specific time period (in seconds)
-         *
-         * @param ms   Period to wait in seconds
-        */
-  private backOff (ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms))
+    return dbCon
   }
 
   public async getSlackConfig (id: number): Promise<SlackConfig> {
     const config = await this.slackRepository.findOne(id)
     if (!config) {
-      return Promise.reject(new Error(`Could not find slack config with id ${id}`))
+      throw new Error(`Could not find slack config with id ${id}`)
     }
 
-    return Promise.resolve(config)
+    return config
   }
 
   public async getWebhookConfig (id: number): Promise<WebhookConfig> {
     const config = await this.webhookRepository.findOne(id)
     if (!config) {
-      return Promise.reject(new Error(`Could not find webhook config with id ${id}`))
+      throw new Error(`Could not find webhook config with id ${id}`)
     }
 
-    return Promise.resolve(config)
+    return config
   }
 
   public async getFirebaseConfig (id: number): Promise<FirebaseConfig> {
     const config = await this.firebaseRepository.findOne(id)
     if (!config) {
-      return Promise.reject(new Error(`Could not find firebase config with id ${id}`))
+      throw new Error(`Could not find firebase config with id ${id}`)
     }
 
-    return Promise.resolve(config)
+    return config
   }
 
   /**
@@ -175,10 +167,8 @@ export class StorageHandler implements NotificationRepository {
       await transactionalEntityManager.delete(FirebaseConfig, condition)
     }).catch(error => {
       console.error(`Could not delete configs with pipelineId ${pipelineId}: ${error}`)
-      return Promise.reject(error)
+      throw error
     })
-
-    return Promise.resolve()
   }
 
   /**
@@ -190,13 +180,8 @@ export class StorageHandler implements NotificationRepository {
   public async getSlackConfigs (pipelineId: number): Promise<SlackConfig[]> {
     console.debug(`Getting slack configs with pipelineId ${pipelineId} from database`)
     await this.checkClassInvariant()
-    let slackConfigList: SlackConfig[] = []
 
-    try {
-      slackConfigList = await this.slackRepository.find({ pipelineId: pipelineId })
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    const slackConfigList = await this.slackRepository.find({ pipelineId: pipelineId })
 
     console.debug(`Sucessfully got ${slackConfigList.length} Slack config(s) from Database`)
     return slackConfigList
@@ -212,13 +197,8 @@ export class StorageHandler implements NotificationRepository {
     console.debug(`Getting webhook configs with pipelineId ${pipelineId} from database`)
 
     await this.checkClassInvariant()
-    let webhookConfigs: WebhookConfig[] = []
 
-    try {
-      webhookConfigs = await this.webhookRepository.find({ pipelineId: pipelineId })
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    const webhookConfigs = await this.webhookRepository.find({ pipelineId: pipelineId })
 
     console.debug(`Successfully got ${webhookConfigs.length} webhookConfigs from Database`)
     return webhookConfigs
@@ -233,13 +213,8 @@ export class StorageHandler implements NotificationRepository {
   public async getFirebaseConfigs (pipelineId: number): Promise<FirebaseConfig[]> {
     console.debug(`Getting firebase configs with pipelineId ${pipelineId} from database`)
     await this.checkClassInvariant()
-    let firebaseConfigs: FirebaseConfig[] = []
 
-    try {
-      firebaseConfigs = await this.firebaseRepository.find({ pipelineId: pipelineId })
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    const firebaseConfigs = await this.firebaseRepository.find({ pipelineId: pipelineId })
 
     console.debug(`Successfully got ${firebaseConfigs.length} firebase configs from database`)
     return firebaseConfigs
@@ -362,10 +337,9 @@ export class StorageHandler implements NotificationRepository {
 
     const deleteResult = await this.slackRepository.delete(id)
     if (!deleteResult.affected) {
-      return Promise.reject(new Error(`Something went wrong deleting slack config with id ${id}`))
+      throw new Error(`Something went wrong deleting slack config with id ${id}`)
     }
     console.debug(`Successfully deleted slack config with id ${id}`)
-    return Promise.resolve()
   }
 
   /**
@@ -381,10 +355,9 @@ export class StorageHandler implements NotificationRepository {
 
     const deleteResult = await this.webhookRepository.delete(id)
     if (!deleteResult.affected) {
-      return Promise.reject(new Error(`Something went wrong deleting webhook config with id ${id}`))
+      throw new Error(`Something went wrong deleting webhook config with id ${id}`)
     }
     console.debug(`Successfully deleted webhook config with id ${id}`)
-    return Promise.resolve()
   }
 
   /**
@@ -400,10 +373,9 @@ export class StorageHandler implements NotificationRepository {
 
     const deleteResult = await this.firebaseRepository.delete(id)
     if (!deleteResult.affected) {
-      return Promise.reject(new Error(`Something went wrong deleting firebase config with id ${id}`))
+      throw new Error(`Something went wrong deleting firebase config with id ${id}`)
     }
     console.debug(`Successfully deleted firebase config with id ${id}`)
-    return Promise.resolve()
   }
 
   /**
@@ -412,7 +384,7 @@ export class StorageHandler implements NotificationRepository {
      *
      * @returns true, if invariant correct, else false
      */
-  private checkClassInvariant (): Promise<void> {
+  private async checkClassInvariant (): Promise<void> {
     let validState = true
     const msg: string[] = []
 
@@ -438,8 +410,7 @@ export class StorageHandler implements NotificationRepository {
 
     if (!validState) {
       console.error(`Error the following member variables are not set: ${msg}`)
-      return Promise.reject(new Error(msg.join()))
+      throw new Error(msg.join())
     }
-    return Promise.resolve()
   }
 }

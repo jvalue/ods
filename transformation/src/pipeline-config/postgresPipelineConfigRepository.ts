@@ -1,6 +1,7 @@
 import { Pool, PoolConfig, PoolClient, QueryResult } from 'pg'
 
 import { POSTGRES_SCHEMA, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB } from '../env'
+import { sleep } from '../sleep'
 import { PipelineConfig, PipelineConfigDTO } from './model/pipelineConfig'
 import PipelineConfigRepository from './pipelineConfigRepository'
 
@@ -85,7 +86,7 @@ export default class PostgresPipelineConfigRepository implements PipelineConfigR
         console.info('Successfully established database connection')
         break
       } catch (error) {
-        await this.sleep(backoffMs)
+        await sleep(backoffMs)
       } finally {
         if (client) {
           client.release()
@@ -94,23 +95,10 @@ export default class PostgresPipelineConfigRepository implements PipelineConfigR
     }
 
     if (!this.connectionPool) {
-      return Promise.reject(new Error('Connection to databse could not be established.'))
+      throw new Error('Connection to databse could not be established.')
     }
 
     console.info('Sucessfully established connection to database.')
-    return Promise.resolve()
-  }
-
-  private sleep (ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms))
-  }
-
-  private assertInitialized (): Promise<void> {
-    if (!this.connectionPool) {
-      return Promise.reject(new Error('No connnection pool available'))
-    } else {
-      return Promise.resolve()
-    }
   }
 
   private toPipelineConfig (dbResult: DatabasePipeline): PipelineConfig {
@@ -141,18 +129,19 @@ export default class PostgresPipelineConfigRepository implements PipelineConfigR
 
   private async executeQuery (query: string, args: unknown[]): Promise<QueryResult> {
     console.debug(`Executing query "${query}" with values ${JSON.stringify(args)}`)
-    await this.assertInitialized()
+    if (!this.connectionPool) {
+      throw new Error('No connnection pool available')
+    }
 
     let client!: PoolClient
     try {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      client = await this.connectionPool!.connect()
+      client = await this.connectionPool.connect()
       const resultSet = await client.query(query, args)
       console.debug(`Query led to ${resultSet.rowCount} results`)
       return resultSet
     } catch (error) {
       console.error(`Failed to execute query: ${error}`)
-      return Promise.reject(error)
+      throw error
     } finally {
       if (client) {
         client.release()
@@ -171,7 +160,7 @@ export default class PostgresPipelineConfigRepository implements PipelineConfigR
       new Date()
     ]
     const { rows } = await this.executeQuery(INSERT_STATEMENT, values)
-    return Promise.resolve(this.toPipelineConfig(rows[0]))
+    return this.toPipelineConfig(rows[0])
   }
 
   async get (id: number): Promise<PipelineConfig | undefined> {
@@ -180,19 +169,17 @@ export default class PostgresPipelineConfigRepository implements PipelineConfigR
     if (!content || !content[0]) {
       return undefined
     }
-    return Promise.resolve(content[0])
+    return content[0]
   }
 
   async getAll (): Promise<PipelineConfig[]> {
     const resultSet = await this.executeQuery(GET_ALL_STATEMENT, [])
-    const content = this.toPipelineConfigs(resultSet)
-    return Promise.resolve(content)
+    return this.toPipelineConfigs(resultSet)
   }
 
   async getByDatasourceId (datasourceId: number): Promise<PipelineConfig[]> {
     const resultSet = await this.executeQuery(GET_ALL_BY_DATASOURCEID_STATEMENT, [datasourceId])
-    const content = this.toPipelineConfigs(resultSet)
-    return Promise.resolve(content)
+    return this.toPipelineConfigs(resultSet)
   }
 
   async update (id: number, config: PipelineConfigDTO): Promise<void> {
@@ -207,23 +194,21 @@ export default class PostgresPipelineConfigRepository implements PipelineConfigR
     ]
     const result = await this.executeQuery(UPDATE_STATEMENT, values)
     if (result.rowCount === 0) {
-      return Promise.reject(new Error(`Could not find config with ${id} to update`))
+      throw new Error(`Could not find config with ${id} to update`)
     }
-    return Promise.resolve()
   }
 
   async delete (id: number): Promise<PipelineConfig> {
     const result = await this.executeQuery(DELETE_STATEMENT, [id])
     const content = this.toPipelineConfigs(result)
     if (result.rowCount === 0) {
-      return Promise.reject(new Error(`Could not find config with ${id} to delete`))
+      throw new Error(`Could not find config with ${id} to delete`)
     }
-    return Promise.resolve(content[0])
+    return content[0]
   }
 
   async deleteAll (): Promise<PipelineConfig[]> {
     const result = await this.executeQuery(DELETE_ALL_STATEMENT, [])
-    const content = this.toPipelineConfigs(result)
-    return Promise.resolve(content)
+    return this.toPipelineConfigs(result)
   }
 }
