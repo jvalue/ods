@@ -16,11 +16,24 @@
   },
   "plugins": ["@typescript-eslint"],
   "rules": {
-    "@typescript-eslint/indent": [2, 2],
-    "@typescript-eslint/no-use-before-define": ["warn", { "functions": false, "classes": true }],
-    "max-len": [2, 120, 4, { "ignoreUrls": true }],
-    "@typescript-eslint/explicit-function-return-type": [1, { "allowExpressions": true }],
+    "indent": "off",
+    "@typescript-eslint/indent": ["error", 2, {
+      "SwitchCase": 1,
+      "ignoredNodes": ["TemplateLiteral *"]
+    }],
+    "no-use-before-define": "off",
+    "@typescript-eslint/no-use-before-define": ["warn", { "functions": false, "classes": true}],
+    "max-len": ["error", 120, 4, { "ignoreUrls": true }],
+    "@typescript-eslint/explicit-function-return-type": ["warn", { "allowExpressions": true }],
     "@typescript-eslint/no-floating-promises": "warn",
-    "@typescript-eslint/consistent-type-assertions": [ "warn", { "assertionStyle": "never" }]
+    "@typescript-eslint/consistent-type-assertions": ["warn", { "assertionStyle": "never" }],
+    "@typescript-eslint/ban-types": ["error", {
+      "types": {
+        // Type `object` is banned by `@typescript-eslint/recommended` because of
+        // https://github.com/microsoft/TypeScript/issues/21732.
+        // This issue is not really effecting us and we use `object` heavily, therefore `object` is allowed.
+        "object": false
+      }
+    }]
   }
 }
