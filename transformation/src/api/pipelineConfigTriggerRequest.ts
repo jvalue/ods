@@ -1,8 +1,8 @@
 import { isObject, isNumber, isString, hasProperty } from '../validators'
 
 export interface PipelineConfigTriggerRequest {
-  datasourceId: number;
-  data: string;
+  datasourceId: number
+  data: string
 }
 
 export class PipelineConfigTriggerRequestValidator {

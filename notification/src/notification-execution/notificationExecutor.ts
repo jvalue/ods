@@ -12,7 +12,7 @@ import WebhookCallback from './notificationCallbacks/webhookCallback'
 import FcmCallback from './notificationCallbacks/fcmCallback'
 
 import SandboxExecutor from './condition-evaluation/sandboxExecutor'
-import App = firebase.app.App;
+import App = firebase.app.App
 
 const VERSION = '0.0.1'
 
