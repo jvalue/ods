@@ -10,10 +10,10 @@ import { WebhookConfig, SlackConfig, FirebaseConfig } from './notificationConfig
  */
 export interface NotificationSummary {
 
-  webhook: WebhookConfig[];
+  webhook: WebhookConfig[]
 
-  slack: SlackConfig[];
+  slack: SlackConfig[]
 
-  firebase: FirebaseConfig[];
+  firebase: FirebaseConfig[]
 
 }

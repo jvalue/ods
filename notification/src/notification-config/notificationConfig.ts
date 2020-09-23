@@ -8,10 +8,10 @@ export enum CONFIG_TYPE{
 
 export class NotificationConfig {
   @Column()
-  pipelineId!: number;
+  pipelineId!: number
 
   @Column()
-  condition!: string;
+  condition!: string
 }
 
 @Entity()
@@ -20,13 +20,13 @@ export class SlackConfig extends NotificationConfig {
   id!: number
 
   @Column()
-  workspaceId!: string;
+  workspaceId!: string
 
   @Column()
-  channelId!: string;
+  channelId!: string
 
   @Column()
-  secret!: string;
+  secret!: string
 }
 
 @Entity()
@@ -35,7 +35,7 @@ export class WebhookConfig extends NotificationConfig {
   id!: number
 
   @Column()
-  url!: string;
+  url!: string
 }
 
 @Entity()
@@ -44,14 +44,14 @@ export class FirebaseConfig extends NotificationConfig {
   id!: number
 
   @Column()
-  projectId!: string;
+  projectId!: string
 
   @Column()
-  clientEmail!: string;
+  clientEmail!: string
 
   @Column()
-  privateKey!: string;
+  privateKey!: string
 
   @Column()
-  topic!: string;
+  topic!: string
 }
