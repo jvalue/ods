@@ -18,7 +18,7 @@ export default class PipelineExecutionEventHandler {
 }
 
 export interface PipelineExecutedEvent {
-  pipelineId: string;
-  timestamp: Date;
-  data: object;
+  pipelineId: string
+  timestamp: Date
+  data: object
 }

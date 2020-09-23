@@ -34,6 +34,16 @@
         // This issue is not really effecting us and we use `object` heavily, therefore `object` is allowed.
         "object": false
       }
-    }]
+    }],
+    "@typescript-eslint/member-delimiter-style": [
+      "error",
+      {
+        "multiline": { "delimiter": "none" },
+        "singleline": { "delimiter": "comma", "requireLast": false }
+      }
+    ],
+    "semi": "off",
+    "@typescript-eslint/semi": ["error", "never"],
+    "@typescript-eslint/method-signature-style": "error"
   }
 }

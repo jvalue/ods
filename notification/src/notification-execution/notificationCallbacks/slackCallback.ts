@@ -1,3 +1,3 @@
 export default interface SlackCallback {
-  text: string;
+  text: string
 }

@@ -6,8 +6,8 @@ import ConfigWritesPublisher from './publisher/configWritesPublisher'
 
 export class PipelineConfigManager {
   private pipelineExecutor: PipelineExecutor
-  private pipelineConfigRepository: PipelineConfigRepository;
-  private configWritesPublisher: ConfigWritesPublisher;
+  private pipelineConfigRepository: PipelineConfigRepository
+  private configWritesPublisher: ConfigWritesPublisher
   private executionResultPublisher: ExecutionResultPublisher
 
   constructor (

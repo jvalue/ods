@@ -17,9 +17,9 @@ export default class PipelineConfigEventHandler {
 }
 
 export interface PipelineCreatedEvent {
-  pipelineId: string;
+  pipelineId: string
 }
 
 export interface PipelineDeletedEvent {
-  pipelineId: string;
+  pipelineId: string
 }

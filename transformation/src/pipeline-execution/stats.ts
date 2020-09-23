@@ -1,5 +1,5 @@
 export default interface Stats {
-  durationInMilliSeconds: number;
-  startTimestamp: number;
-  endTimestamp: number;
+  durationInMilliSeconds: number
+  startTimestamp: number
+  endTimestamp: number
 }
