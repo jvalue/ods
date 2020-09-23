@@ -40,14 +40,14 @@ const DELETE_ALL_STATEMENT = `
   DELETE FROM "${POSTGRES_SCHEMA}"."${POSTGRES_TABLE}" RETURNING *`
 
 interface DatabasePipeline {
-  id: string;
-  datasourceId: string;
-  func: string;
-  author: string;
-  displayName: string;
-  license: string;
-  description: string;
-  createdAt: Date;
+  id: string
+  datasourceId: string
+  func: string
+  author: string
+  displayName: string
+  license: string
+  description: string
+  createdAt: Date
 }
 
 export default class PostgresPipelineConfigRepository implements PipelineConfigRepository {

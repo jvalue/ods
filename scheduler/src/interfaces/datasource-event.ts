@@ -1,7 +1,7 @@
 export default interface DatasourceEvent {
-  eventId: number;
-  datasourceId: number;
-  eventType: EventType;
+  eventId: number
+  datasourceId: number
+  eventType: EventType
 }
 
 export enum EventType {
