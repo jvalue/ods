@@ -7,6 +7,7 @@ const {
   TRANSFORMATION_URL,
   NOTIFICATION_URL,
   MOCK_SERVER_URL,
+  MOCK_SERVER_WITHIN_DOCKER,
   RABBIT_URL
 } = require('./env')
 
@@ -22,8 +23,6 @@ const TIMEOUT = 60000
 const STARTUP_DELAY = 2000
 
 let dataSourceConfig = null
-
-const MOCK_SERVER_WITHIN_DOCKER = 'http://mock-server:8080'
 
 const notificationConfig = {
   condition: 'data.one === 1',
