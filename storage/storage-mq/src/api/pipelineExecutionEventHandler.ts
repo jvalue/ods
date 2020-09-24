@@ -14,12 +14,11 @@ export default class PipelineExecutionEventHandler {
       data: pipelineExecutedEvent.data,
       id: undefined
     })
-    return Promise.resolve()
   }
 }
 
 export interface PipelineExecutedEvent {
-  pipelineId: string;
-  timestamp: Date;
-  data: object;
+  pipelineId: string
+  timestamp: Date
+  data: object
 }

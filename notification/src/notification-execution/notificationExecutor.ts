@@ -12,7 +12,7 @@ import WebhookCallback from './notificationCallbacks/webhookCallback'
 import FcmCallback from './notificationCallbacks/fcmCallback'
 
 import SandboxExecutor from './condition-evaluation/sandboxExecutor'
-import App = firebase.app.App;
+import App = firebase.app.App
 
 const VERSION = '0.0.1'
 
@@ -32,7 +32,7 @@ export default class NotificationExecutor {
     const conditionHolds = this.executor.evaluate(webhook.condition, data)
     console.log('Condition is ' + conditionHolds)
     if (!conditionHolds) { // no need to trigger notification
-      return Promise.resolve()
+      return
     }
 
     const callbackObject: WebhookCallback = {
@@ -49,7 +49,7 @@ export default class NotificationExecutor {
     const conditionHolds = this.executor.evaluate(slack.condition, data)
     console.log('Condition is ' + conditionHolds)
     if (!conditionHolds) { // no need to trigger notification
-      return Promise.resolve()
+      return
     }
 
     let slackBaseUri = 'https://hooks.slack.com/services'
@@ -70,7 +70,7 @@ export default class NotificationExecutor {
     const conditionHolds = this.executor.evaluate(firebaseConfig.condition, data)
     console.log('Condition is ' + conditionHolds)
     if (!conditionHolds) { // no need to trigger notification
-      return Promise.resolve()
+      return
     }
 
     let app: App

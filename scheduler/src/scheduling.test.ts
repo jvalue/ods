@@ -8,6 +8,7 @@ import {
 } from './clients/adapter-client'
 import { EventType } from './interfaces/datasource-event'
 import DatasourceConfig from './interfaces/datasource-config'
+import { sleep } from './sleep'
 
 jest.mock('./clients/adapter-client')
 // Type assertion is ok here, because we have mocked the whole './clients/adapter-client' module
@@ -214,10 +215,6 @@ describe('Scheduler', () => {
     Scheduling.cancelAllJobs()
   })
 })
-
-function sleep (ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
 
 function generateConfig (periodic: boolean, firstExecution: Date, interval: number): DatasourceConfig {
   return {

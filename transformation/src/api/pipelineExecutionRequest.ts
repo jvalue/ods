@@ -1,8 +1,8 @@
 import { hasProperty, isObject, isString } from '../validators'
 
 export interface PipelineExecutionRequest {
-  func: string;
-  data: object;
+  func: string
+  data: object
 }
 
 export class PipelineExecutionRequestValidator {

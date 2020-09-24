@@ -7,6 +7,7 @@ import {
   AMQP_PIPELINE_EXECUTION_TOPIC,
   AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC
 } from '../../env'
+import { sleep } from '../../sleep'
 
 /**
  * This class handles the communication with the AMQP service (rabbitmq)
@@ -43,20 +44,11 @@ export class AmqpHandler {
         return await this.initChannel(connection)
       } catch (e) {
         retry++
-        await this.backOff(ms)
+        await sleep(ms)
       }
     }
     console.error('Could not connect to AMQP Broker')
-    return Promise.reject(new Error('Could not connect to AMQP Broker'))
-  }
-
-  /**
-     * Waits for a specific time period.
-     *
-     * @param ms   Period to wait in seconds
-     */
-  private backOff (ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms))
+    throw new Error('Could not connect to AMQP Broker')
   }
 
   private async initChannel (connection: AMQP.Connection): Promise<void> {
@@ -76,7 +68,6 @@ export class AmqpHandler {
       `Successfully initialized pipeline-executed queue "${AMQP_PIPELINE_EXECUTION_QUEUE}" ` +
       `on topic "${AMQP_PIPELINE_EXECUTION_TOPIC}"`
     )
-    return Promise.resolve()
   }
 
   private async handleEvent (msg: AMQP.ConsumeMessage | null): Promise<void> {

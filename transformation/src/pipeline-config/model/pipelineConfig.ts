@@ -1,38 +1,38 @@
 import { isObject, isString, isNumber, hasProperty } from '../../validators'
 
 export interface PipelineConfig {
-  id: number;
-  datasourceId: number;
-  transformation: TransformationConfig;
-  metadata: Metadata;
+  id: number
+  datasourceId: number
+  transformation: TransformationConfig
+  metadata: Metadata
 }
 
 export interface TransformationConfig {
-  func: string;
+  func: string
 }
 
 export interface Metadata {
-  author: string;
-  displayName: string;
-  license: string;
-  description: string;
-  creationTimestamp: Date;
+  author: string
+  displayName: string
+  license: string
+  description: string
+  creationTimestamp: Date
 }
 
 /**
  * PipelineConfig data transfer object that clients must use when creating or updating a PipelineConfig
  */
 export interface PipelineConfigDTO {
-  datasourceId: number;
-  transformation: TransformationConfig;
-  metadata: MetadataDTO;
+  datasourceId: number
+  transformation: TransformationConfig
+  metadata: MetadataDTO
 }
 
 export interface MetadataDTO {
-  author: string;
-  displayName: string;
-  license: string;
-  description: string;
+  author: string
+  displayName: string
+  license: string
+  description: string
 }
 
 export class PipelineConfigDTOValidator {

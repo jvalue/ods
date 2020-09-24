@@ -1,20 +1,20 @@
 export default interface DatasourceConfig {
-  id: number;
-  protocol: DatasourceProtocol;
-  format: object;
-  trigger: DatasourceTrigger;
-  metadata: object;
+  id: number
+  protocol: DatasourceProtocol
+  format: object
+  trigger: DatasourceTrigger
+  metadata: object
 }
 
 export interface DatasourceProtocol {
-  type: string;
+  type: string
   parameters: {
-    location?: string;
-  };
+    location?: string
+  }
 }
 
 export interface DatasourceTrigger {
-  periodic: boolean;
-  firstExecution: Date;
-  interval: number;
+  periodic: boolean
+  firstExecution: Date
+  interval: number
 }

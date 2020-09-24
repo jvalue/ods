@@ -48,7 +48,6 @@ export default class PipelineExecutor {
       startTimestamp,
       endTimestamp
     }
-    const jobResult: JobResult = { ...result, stats }
-    return jobResult
+    return { ...result, stats }
   }
 }

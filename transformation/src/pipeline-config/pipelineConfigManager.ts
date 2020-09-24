@@ -6,8 +6,8 @@ import ConfigWritesPublisher from './publisher/configWritesPublisher'
 
 export class PipelineConfigManager {
   private pipelineExecutor: PipelineExecutor
-  private pipelineConfigRepository: PipelineConfigRepository;
-  private configWritesPublisher: ConfigWritesPublisher;
+  private pipelineConfigRepository: PipelineConfigRepository
+  private configWritesPublisher: ConfigWritesPublisher
   private executionResultPublisher: ExecutionResultPublisher
 
   constructor (
@@ -52,7 +52,6 @@ export class PipelineConfigManager {
     if (!success) {
       console.error(`Updated pipeline ${id} but was not able to publish success. Error handling not implemented!`)
     }
-    return Promise.resolve()
   }
 
   async delete (id: number): Promise<void> {
@@ -61,7 +60,6 @@ export class PipelineConfigManager {
     if (!success) {
       console.error(`Deleted pipeline ${id} but was not able to publish success. Error handling not implemented!`)
     }
-    return Promise.resolve()
   }
 
   async deleteAll (): Promise<void> {
@@ -75,7 +73,6 @@ export class PipelineConfigManager {
         )
       }
     }
-    return Promise.resolve()
   }
 
   async triggerConfig (datasourceId: number, data: object): Promise<void> {
