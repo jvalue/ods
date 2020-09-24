@@ -23,9 +23,11 @@ const STARTUP_DELAY = 2000
 
 let dataSourceConfig = null
 
+const MOCK_SERVER_WITHIN_DOCKER = 'http://mock-server:8080'
+
 const notificationConfig = {
   condition: 'data.one === 1',
-  url: 'http://mock-server:8080/notifications/test1',
+  url: MOCK_SERVER_WITHIN_DOCKER + '/notifications/test1',
   pipelineId: -1
 }
 
@@ -68,7 +70,7 @@ describe('Test 1: Create non-periodic pipeline without transformation', () => {
   test('Prepare mock service', async () => {
     const response = await request(MOCK_SERVER_URL).post('/data/test1').send(generateSourceData())
     expect(response.status).toEqual(201)
-    dataSourceConfig = generateDataSourceConfig(MOCK_SERVER_URL + '/data/test1', false)
+    dataSourceConfig = generateDataSourceConfig(MOCK_SERVER_WITHIN_DOCKER + '/data/test1', false)
   }, TIMEOUT)
 
   test('Create DataSource at adapter service', async () => {
@@ -98,7 +100,7 @@ describe('Test 1: Create non-periodic pipeline without transformation', () => {
   }, TIMEOUT)
 
   test('Check notification web hook', async () => {
-    const webhookResponse = await checkWebhook(MOCK_SERVER_URL + '/data/test1')
+    const webhookResponse = await checkWebhook(MOCK_SERVER_URL + '/notifications/test1')
     expect(webhookResponse.body.location).toEqual(expect.stringContaining('/storage/' + pipelineId))
     expect(webhookResponse.body.timestamp).toBeDefined()
   }, TIMEOUT)
