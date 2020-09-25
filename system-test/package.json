@@ -1,10 +1,10 @@
 {
   "name": "system-test",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Open Data Service System Test",
   "scripts": {
     "mockServer": "node src/mock.server.js",
-    "test": "jest src/scenario1.test.js --runInBand --verbose",
+    "test": "jest src/*.test.js --runInBand --verbose",
     "posttest": "killall node",
     "lint": "./node_modules/.bin/eslint src --ext .js --fix",
     "lint-ci": "./node_modules/.bin/eslint src --ext .js --max-warnings=0"
@@ -18,7 +18,7 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "jest": "^26.4.2",
-    "supertest": "^4.0.2"
+    "supertest": "^5.0.0"
   },
   "jest": {
     "testEnvironment": "node"
