@@ -125,10 +125,10 @@ jobs:
           path: storage_mq.tar
 
 
-  # ----------------- TRANSFORMATION SERVICE --------------------
+  # ----------------- PIPELINE SERVICE --------------------
 
-  transformation-build:
-    name: Transformation Build & Test
+  pipeline-build:
+    name: PIPELINE Build & Test
     runs-on: ubuntu-latest
 
     steps:
@@ -136,26 +136,26 @@ jobs:
 
       - name: Build and Test
         run: |
-          docker-compose -f docker-compose.yml build transformation
+          docker-compose -f docker-compose.yml build pipeline
 
       - name: Integration-test
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml build transformation-it
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d transformation
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from transformation-it transformation-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml build pipeline-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d pipeline
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from pipeline-it pipeline-it
           docker-compose logs
           docker-compose -f docker-compose.yml -f docker-compose.it.yml down
 
       - name: Save Docker image as artifact
         run: |
-          IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/transformation
-          docker save $IMAGE_ID > transformation.tar
+          IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/pipeline
+          docker save $IMAGE_ID > pipeline.tar
 
       - name: Upload Docker image as artifact
         uses: actions/upload-artifact@v1
         with:
-          name: transformation-artifact
-          path: transformation.tar
+          name: pipeline-artifact
+          path: pipeline.tar
 
     # ----------------- NOTIFICATION SERVICE --------------------
 
@@ -220,7 +220,7 @@ jobs:
     name: Systemtest
     runs-on: ubuntu-latest
 
-    needs: [adapter-build, notification-build, scheduler-build, storage-build, transformation-build, ui-build]
+    needs: [adapter-build, notification-build, scheduler-build, storage-build, pipeline-build, ui-build]
 
     steps:
       - uses: actions/checkout@v2
@@ -245,10 +245,10 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: storagemq-artifact
-      - name: Download transformation artifact
+      - name: Download pipeline artifact
         uses: actions/download-artifact@v1
         with:
-          name: transformation-artifact
+          name: pipeline-artifact
       - name: Download notification artifact
         uses: actions/download-artifact@v1
         with:
@@ -260,10 +260,10 @@ jobs:
           docker load -i ./storage-artifact/storage_postgrest.tar &
           docker load -i ./liquibase-artifact/storage_liquibase.tar &
           docker load -i ./storagemq-artifact/storage_mq.tar &
-          docker load -i ./transformation-artifact/transformation.tar &
+          docker load -i ./pipeline-artifact/pipeline.tar &
           docker load -i ./notification-artifact/notification.tar &
           docker load -i ./adapter-artifact/adapter.tar
-          docker-compose -f docker-compose.yml -f docker-compose.st.yml up --exit-code-from system-test adapter transformation storage storage-mq notification scheduler system-test
+          docker-compose -f docker-compose.yml -f docker-compose.st.yml up --exit-code-from system-test adapter pipeline storage storage-mq notification scheduler system-test
           docker-compose logs
           docker-compose -f docker-compose.yml -f docker-compose.st.yml down
 
@@ -382,8 +382,8 @@ jobs:
           docker push $IMAGE_ID_LIQUIBASE:$STORAGE_VERSION
           docker push $IMAGE_ID_LIQUIBASE:latest
 
-  transformation_upload:
-    name: Transformation Publish
+  pipeline_upload:
+    name: PIPELINE Publish
     runs-on: ubuntu-latest
 
     needs: [systemtest]
@@ -392,27 +392,27 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Download transformation artifact
+      - name: Download pipeline artifact
         uses: actions/download-artifact@v1
         with:
-          name: transformation-artifact
+          name: pipeline-artifact
 
       - name: Load Docker Image from artifact
         run: |
-          docker load -i ./transformation-artifact/transformation.tar
+          docker load -i ./pipeline-artifact/pipeline.tar
 
-      - name: Transformation Push to registry
+      - name: PIPELINE Push to registry
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
 
-          IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/transformation
+          IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/pipeline
 
-          TRANSFORMATION_VERSION=$(grep "version" ./transformation/package.json | awk '{print $2}' | sed 's/[,"]//g')
+          PIPELINE_VERSION=$(grep "version" ./pipeline/package.json | awk '{print $2}' | sed 's/[,"]//g')
 
-          docker tag $IMAGE_ID $IMAGE_ID:$TRANSFORMATION_VERSION
+          docker tag $IMAGE_ID $IMAGE_ID:$PIPELINE_VERSION
           docker tag $IMAGE_ID $IMAGE_ID:latest
 
-          docker push $IMAGE_ID:$TRANSFORMATION_VERSION
+          docker push $IMAGE_ID:$PIPELINE_VERSION
           docker push $IMAGE_ID:latest
 
   notifcation_upload:

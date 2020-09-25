@@ -1,5 +1,5 @@
 @adapterUrl = http://localhost:9000/api/adapter/datasources
-@pipelineUrl = http://localhost:9000/api/transformation
+@pipelineUrl = http://localhost:9000/api/pipelines
 @notificationUrl = http://localhost:9000/api/notification
 
 ### Get List Of Countries

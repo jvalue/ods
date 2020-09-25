@@ -56,7 +56,7 @@ function rewriteStacktrace (oldLines: string[], prefixLength: number): string[] 
  *
  *   SyntaxError: Unexpected identifier
  *       at new Script (vm.js:84:7)
- *       at VMScript.compile (/home/ods-main/transformation/node_modules/vm2/lib/main.js:80:20)
+ *       at VMScript.compile (/home/ods-main/pipeline/node_modules/vm2/lib/main.js:80:20)
  *       ...
  * @param error The original javascript syntax error
  */
@@ -97,7 +97,7 @@ export function convertSyntaxError (error: Error, prefixLength: number): JobErro
  *       at main (main:6:8)
  *       at main:8:1
  *       at Script.runInContext (vm.js:127:20)
- *       at VM.run (/home/ods-main/transformation/node_modules/vm2/lib/main.js:219:62)
+ *       at VM.run (/home/ods-main/pipeline/node_modules/vm2/lib/main.js:219:62)
  *       ...
  * @param error the original javascript error
  */

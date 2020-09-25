@@ -4,7 +4,7 @@ const waitOn = require('wait-on')
 const STORAGE_URL = process.env.STORAGE_API || 'http://localhost:9000/api/storage'
 const SCHEDULER_URL = process.env.SCHEDULER_API || 'http://localhost:9000/api/scheduler'
 const ADAPTER_URL = process.env.ADAPTER_API || 'http://localhost:9000/api/adapter'
-const TRANSFORMATION_URL = process.env.TRANSFORMATION_API || 'http://localhost:9000/api/transformation'
+const PIPELINE_URL = process.env.PIPELINE_API || 'http://localhost:9000/api/pipelines'
 const NOTIFICATION_URL = process.env.NOTIFICATION_API || 'http://localhost:9000/api/notification'
 const MOCK_SERVER_URL = process.env.MOCK_SERVER_API || 'http://localhost:9000/api/system-tests/mock-server'
 const RABBIT_URL = process.env.RABBIT_API || 'http://localhost:15672'
@@ -32,7 +32,7 @@ describe('System-Test', () => {
       resources: [
         STORAGE_URL,
         SCHEDULER_URL,
-        TRANSFORMATION_URL,
+        PIPELINE_URL,
         NOTIFICATION_URL + '/',
         ADAPTER_URL + '/version',
         MOCK_SERVER_URL + '/',
@@ -52,12 +52,12 @@ describe('System-Test', () => {
     console.log('All tests done, removing adapter configs from ods...')
     await request(ADAPTER_URL).delete('/').send()
     console.log('All tests done, removing pipelines configs from ods...')
-    await request(TRANSFORMATION_URL).delete('/configs').send()
+    await request(PIPELINE_URL).delete('/configs').send()
     console.log('Cleaning up mock server...')
     await request(MOCK_SERVER_URL).delete('/').send()
   })
 
-  test('Test 1: Create non-periodic pipeline without transformation', async () => {
+  test('Test 1: Create non-periodic pipeline without pipeline', async () => {
     // Prepare datasource mock
     await request(MOCK_SERVER_URL).post('/data/test1').send(sourceData)
 
@@ -74,7 +74,7 @@ describe('System-Test', () => {
     const pipelineConfig = generatePipelineConfig(datasourceId)
 
     console.log(`[Test 1] Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
-    const pipelineResponse = await request(TRANSFORMATION_URL).post('/configs').send(pipelineConfig)
+    const pipelineResponse = await request(PIPELINE_URL).post('/configs').send(pipelineConfig)
     expect(pipelineResponse.status).toEqual(201)
     const pipelineId = pipelineResponse.body.id
     console.log(`[Test 1] Successfully created pipeline ${pipelineId} for datasource ${datasourceId}`)
@@ -107,14 +107,14 @@ describe('System-Test', () => {
 
     // CLEAN-UP
     console.log('[Test 1] Cleaning up...')
-    let deletionResponse = await request(TRANSFORMATION_URL).delete(`/configs/${pipelineId}`).send()
+    let deletionResponse = await request(PIPELINE_URL).delete(`/configs/${pipelineId}`).send()
     expect(deletionResponse.status).toEqual(204)
     deletionResponse = await request(ADAPTER_URL).delete(`/datasources/${datasourceId}`).send()
     expect(deletionResponse.status).toEqual(204)
     sleep(STARTUP_DELAY)
   }, TIMEOUT)
 
-  test('Test 2: Create periodic pipeline without transformation', async () => {
+  test('Test 2: Create periodic pipeline without pipeline', async () => {
     // Prepare datasource mock
     await request(MOCK_SERVER_URL).post('/sequences/test2').send(sourceData)
 
@@ -131,7 +131,7 @@ describe('System-Test', () => {
     const pipelineConfig = generatePipelineConfig(datasourceId)
 
     console.log(`[Test 2] Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
-    const pipelineResponse = await request(TRANSFORMATION_URL).post('/configs').send(pipelineConfig)
+    const pipelineResponse = await request(PIPELINE_URL).post('/configs').send(pipelineConfig)
     expect(pipelineResponse.status).toEqual(201)
     const pipelineId = pipelineResponse.body.id
     console.log(`[Test 2] Successfully created pipeline ${pipelineId} for datasource ${datasourceId}`)
@@ -173,14 +173,14 @@ describe('System-Test', () => {
 
     // CLEAN-UP
     console.log('[Test 2] Cleaning up...')
-    let deletionResponse = await request(TRANSFORMATION_URL).delete(`/configs/${pipelineId}`).send()
+    let deletionResponse = await request(PIPELINE_URL).delete(`/configs/${pipelineId}`).send()
     expect(deletionResponse.status).toEqual(204)
     deletionResponse = await request(ADAPTER_URL).delete(`/datasources/${datasourceId}`).send()
     expect(deletionResponse.status).toEqual(204)
     sleep(STARTUP_DELAY)
   }, TIMEOUT)
 
-  test('Test 3: Create non-periodic pipeline with transformation', async () => {
+  test('Test 3: Create non-periodic pipeline with pipeline', async () => {
     // Prepare datasource mock
     await request(MOCK_SERVER_URL).post('/data/test3').send(sourceData)
 
@@ -202,7 +202,7 @@ describe('System-Test', () => {
     pipelineConfig.transformation = { func: 'data.newField = 12;return data;' }
 
     console.log(`[Test 3] Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
-    const pipelineResponse = await request(TRANSFORMATION_URL).post('/configs').send(pipelineConfig)
+    const pipelineResponse = await request(PIPELINE_URL).post('/configs').send(pipelineConfig)
     expect(pipelineResponse.status).toEqual(201)
     const pipelineId = pipelineResponse.body.id
     console.log(`[Test 3] Successfully created pipeline ${pipelineId} for datasource ${datasourceId}`)
@@ -234,7 +234,7 @@ describe('System-Test', () => {
     expect(storageResponse.body[0].data).toEqual(expectedData)
 
     // CLEAN-UP
-    let deletionResponse = await request(TRANSFORMATION_URL).delete(`/configs/${pipelineId}`).send()
+    let deletionResponse = await request(PIPELINE_URL).delete(`/configs/${pipelineId}`).send()
     expect(deletionResponse.status).toEqual(204)
     deletionResponse = await request(ADAPTER_URL).delete(`/datasources/${datasourceId}`).send()
     expect(deletionResponse.status).toEqual(204)
@@ -262,7 +262,7 @@ describe('System-Test', () => {
     const pipelineConfig = generatePipelineConfig(datasourceId)
 
     console.log(`[Test 4] Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
-    const pipelineResponse = await request(TRANSFORMATION_URL).post('/configs').send(pipelineConfig)
+    const pipelineResponse = await request(PIPELINE_URL).post('/configs').send(pipelineConfig)
     expect(pipelineResponse.status).toEqual(201)
     const pipelineId = pipelineResponse.body.id
     console.log(`[Test 4] Successfully created pipeline ${pipelineId} for datasource ${datasourceId}`)
@@ -307,7 +307,7 @@ describe('System-Test', () => {
 
     console.log(`[Test 4] Pipeline ${pipelineId} update request triggered.`)
     // Update pipeline
-    updateResponse = await request(TRANSFORMATION_URL).put(`/configs/${pipelineId}`).send(pipelineConfig)
+    updateResponse = await request(PIPELINE_URL).put(`/configs/${pipelineId}`).send(pipelineConfig)
     expect(updateResponse.status).toEqual(204)
     console.log(`[Test 4] Successfully updated pipeline ${pipelineId}.`)
 
@@ -343,7 +343,7 @@ describe('System-Test', () => {
 
     // CLEAN-UP
     console.log('[Test 4] Cleaning up...')
-    let deletionResponse = await request(TRANSFORMATION_URL).delete(`/configs/${pipelineId}`).send()
+    let deletionResponse = await request(PIPELINE_URL).delete(`/configs/${pipelineId}`).send()
     expect(deletionResponse.status).toEqual(204)
     deletionResponse = await request(ADAPTER_URL).delete(`/datasources/${datasourceId}`).send()
     expect(deletionResponse.status).toEqual(204)
@@ -368,7 +368,7 @@ describe('System-Test', () => {
     const pipelineConfig = generatePipelineConfig(datasourceId)
 
     console.log(`[Test 5] Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
-    const pipelineResponse = await request(TRANSFORMATION_URL).post('/configs').send(pipelineConfig)
+    const pipelineResponse = await request(PIPELINE_URL).post('/configs').send(pipelineConfig)
     expect(pipelineResponse.status).toEqual(201)
     const pipelineId = pipelineResponse.body.id
     console.log(`[Test 5] Successfully created pipeline ${pipelineId} for datasource ${datasourceId}`)
@@ -432,7 +432,7 @@ describe('System-Test', () => {
 
     // CLEAN-UP
     console.log('[Test 5] Cleaning up...')
-    let deletionResponse = await request(TRANSFORMATION_URL).delete(`/configs/${pipelineId}`).send()
+    let deletionResponse = await request(PIPELINE_URL).delete(`/configs/${pipelineId}`).send()
     expect(deletionResponse.status).toEqual(204)
     deletionResponse = await request(ADAPTER_URL).delete(`/datasources/${datasourceId}`).send()
     expect(deletionResponse.status).toEqual(204)
@@ -456,7 +456,7 @@ describe('System-Test', () => {
     const pipelineConfig = generatePipelineConfig(datasourceId)
 
     console.log(`[Test 6] Trying to create pipeline: ${JSON.stringify(pipelineConfig)}`)
-    const pipelineResponse = await request(TRANSFORMATION_URL).post('/configs').send(pipelineConfig)
+    const pipelineResponse = await request(PIPELINE_URL).post('/configs').send(pipelineConfig)
     expect(pipelineResponse.status).toEqual(201)
     const pipelineId = pipelineResponse.body.id
     console.log(`[Test 6] Successfully created pipeline ${pipelineId} for datasource ${datasourceId}`)
@@ -480,7 +480,7 @@ describe('System-Test', () => {
     expect(webhookResponse1.body.timestamp).toBeDefined()
 
     // Delete pipeline
-    let deletionResponse = await request(TRANSFORMATION_URL).delete(`/configs/${pipelineId}`)
+    let deletionResponse = await request(PIPELINE_URL).delete(`/configs/${pipelineId}`)
     expect(deletionResponse.status).toEqual(204)
     console.log(`[Test 6] Pipeline ${pipelineId} deleted`)
     sleep(STARTUP_DELAY)

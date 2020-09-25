@@ -1,5 +1,5 @@
 {
-  "name": "open-data-service-transformation",
+  "name": "open-data-service-pipeline",
   "version": "1.0.0",
   "description": "TBD",
   "main": "dist/index.js",
