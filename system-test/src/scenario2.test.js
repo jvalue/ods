@@ -85,7 +85,6 @@ describe('Test 2: Create periodic pipeline without transformation', () => {
 
   test('Check stored data', async () => {
     const response = await request(STORAGE_URL).get('/' + pipelineId)
-    console.log('Storage URL: ' + STORAGE_URL + '/' + pipelineId)
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('application/json')
     expect(response.body.length).toBeGreaterThan(1)
