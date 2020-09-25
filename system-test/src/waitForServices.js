@@ -31,7 +31,7 @@ async function waitForServicesToBeReady () {
       RABBIT_URL
     ],
     timeout: TIMEOUT,
-    log: true
+    log: false
   }
 
   await waitOn(waitOptions)
