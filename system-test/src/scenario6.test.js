@@ -1,6 +1,5 @@
 const request = require('supertest')
 const {
-  STORAGE_URL,
   ADAPTER_URL,
   TRANSFORMATION_URL,
   NOTIFICATION_URL,
