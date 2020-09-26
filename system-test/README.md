@@ -1,19 +1,28 @@
 # Open-Data-Service System Tests
-End-to-end tests that test the integrated components of the ods as a complete system.
+End-to-end tests complete system using the services public API.
+The system tests are organized in different scenarios which run after each other.
 
-## Usage
-There are three ways of executing the system test:
+## Run system tests local
 
-### 1) Testing in the CI environment
-* Just commit to the gitlab repository. System-tests are executed automatically.
+To run the system tests local you should use the Docker setup that is also used in the CI.
 
-### 2) Testing locally in the docker environment
-* Build the latest version of the open-data-service via ```docker-compose build``` in the project root directory.
-* Start the open-data-service via ```docker-compose up -d``` in the projects root directory (Startup can be speeded up by appending ```--scale ui=0```). 
-* Run the system-test by ```docker-compose -f docker-compose.yml -f docker-compose.st.yml up system-test```. If you want your changes to be applied, you have to rebuild first. 
-  
-### 3) Testing locally outside of the docker environment
-* Build and start the ods as outlined above.
-* Start the mock-server by ```docker-compose -f docker-compose.yml -f docker-compose.st.yml up mock-server```.
-* Install necessary dependencies by executing ```npm i``` in the system-test directory.
-* Run the system test with your favourite IDE or by executing ```npm run test``` in the system-test directory.
+Step 1:
+In one terminal window you should start all services that are required for the ODS to run. 
+
+```
+docker-compose -f docker-compose.yml -f docker-compose.st.yml up  adapter transformation storage storage-mq notification scheduler edge mock-server
+```
+
+Step 2:
+In a second terminal window you can now create a clean build and than run the system tests as Docker container.
+
+```
+docker-compose -f docker-compose.yml -f docker-compose.st.yml build --no-cache system-test && docker-compose -f docker-compose.yml -f docker-compose.st.yml up system-test
+```
+
+If you face any problems during test development because of persisted data you can remove the persistence layer of the database containers. 
+This will result in a clean databases and therefore a clean start of the ODS.
+
+```
+docker rm -f open-data-service_notification-db_1 open-data-service_pipeline-db_1 open-data-service_adapter-db_1 open-data-service_storage-db_1
+```
