@@ -7,14 +7,12 @@
       :items="availableAdapterProtocols"
       label="Protocol"
       :rules="[required]"
-      @change="formChanged"
     />
     <v-text-field
       v-model="adapterConfig.protocol.parameters.location"
       label="URL"
       class="pl-7"
       :rules="[required]"
-      @keyup="formChanged"
     />
     <v-select
       v-model="adapterConfig.protocol.parameters.encoding"
@@ -22,21 +20,19 @@
       label="Encoding"
       class="pl-7"
       :rules="[required]"
-      @keyup="formChanged"
     />
     <v-select
       v-model="adapterConfig.format.type"
       :items="availableAdapterFormats"
       label="Format"
       :rules="[required]"
-      @change="formChanged"
+      @change="(val) => formatChanged(val)"
     />
     <csv-adapter-config
       v-if="adapterConfig.format.type === 'CSV'"
       v-model="adapterConfig.format.parameters"
       class="pl-7"
       @validityChanged="validFormatParameters = $event"
-      @change="formChanged"
     />
   </v-form>
 </template>
@@ -45,7 +41,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 
-import { Emit, Prop, PropSync, Watch } from 'vue-property-decorator'
+import { PropSync, Watch } from 'vue-property-decorator'
 
 import Datasource from '../../datasource'
 import CsvAdapterConfig from './CsvAdapterConfig.vue'
@@ -61,28 +57,21 @@ export default class AdapterConfig extends Vue {
   private validForm = true;
   private validFormatParameters = true;
 
-  @Prop(Boolean)
-  private isEditMode!: boolean
-
   @PropSync('value')
   private adapterConfig!: Datasource;
 
-  @Emit('value')
-  emitValue (): Datasource {
-    return this.adapterConfig
+  emitValue (): void {
+    this.$emit('value', this.adapterConfig)
   }
 
-  @Watch('adapterConfig.format.type')
   private formatChanged (val: string): void {
     switch (val) {
       case 'CSV': {
-        if (!this.isEditMode) { // otherwise csv params don't need reassignment of default values
-          this.adapterConfig.format.parameters = {
-            lineSeparator: '\n',
-            columnSeparator: ';',
-            firstRowAsHeader: true,
-            skipFirstDataRow: false
-          }
+        this.adapterConfig.format.parameters = {
+          lineSeparator: '\n',
+          columnSeparator: ';',
+          firstRowAsHeader: true,
+          skipFirstDataRow: false
         }
         break
       } case 'JSON' || 'XML': {
@@ -93,11 +82,12 @@ export default class AdapterConfig extends Vue {
     }
   }
 
-  @Emit('validityChanged')
-  emitValid (): boolean {
-    return this.validForm && this.validFormatParameters
+  emitValid (): void {
+    const isValid = this.validForm && this.validFormatParameters
+    this.$emit('validityChanged', isValid)
   }
 
+  @Watch('adapterConfig', { deep: true })
   formChanged (): void {
     this.emitValue()
     this.emitValid()

@@ -1,5 +1,6 @@
 import DatasourceOverview from './DatasourceOverview.vue'
 import DatasourceEdit from './DatasourceEdit.vue'
+import DatasourceCreate from './DatasourceCreate.vue'
 
 export default [
   {
@@ -11,13 +12,13 @@ export default [
   {
     path: '/datasources/new',
     name: 'datasource-new',
-    component: DatasourceEdit,
-    meta: { title: 'Create new Datasource', requiresAuth: true, isEditMode: false }
+    component: DatasourceCreate,
+    meta: { title: 'Create new Datasource', requiresAuth: true }
   },
   {
     path: '/datasources/:datasourceId',
     name: 'datasource-edit',
     component: DatasourceEdit,
-    meta: { title: 'Edit Datasource', requiresAuth: true, isEditMode: true }
+    meta: { title: 'Edit Datasource', requiresAuth: true }
   }
 ]
