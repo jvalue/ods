@@ -8,7 +8,6 @@ const getEnv = (envName) => {
     process.exit(-2)
   }
 
-  console.log(`[Environment Variable] ${envName} = ${env}`)
   return env
 }
 
