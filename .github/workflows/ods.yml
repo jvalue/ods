@@ -128,7 +128,7 @@ jobs:
   # ----------------- PIPELINE SERVICE --------------------
 
   pipeline-build:
-    name: PIPELINE Build & Test
+    name: Pipeline Build & Test
     runs-on: ubuntu-latest
 
     steps:
@@ -383,7 +383,7 @@ jobs:
           docker push $IMAGE_ID_LIQUIBASE:latest
 
   pipeline_upload:
-    name: PIPELINE Publish
+    name: Pipeline Publish
     runs-on: ubuntu-latest
 
     needs: [systemtest]
@@ -401,7 +401,7 @@ jobs:
         run: |
           docker load -i ./pipeline-artifact/pipeline.tar
 
-      - name: PIPELINE Push to registry
+      - name: Pipeline Push to registry
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
 
