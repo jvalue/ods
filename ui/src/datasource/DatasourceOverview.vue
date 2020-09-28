@@ -46,11 +46,11 @@
           indeterminate
         />
 
-        <template v-slot:item.trigger.interval="{ item }">
+        <template v-slot:[`item.trigger.interval`]="{ item }">
           {{ getHoursFromMS(item.trigger.interval) }}h:{{ getMinutesFromMS(item.trigger.interval) }}m
         </template>
 
-        <template v-slot:item.trigger.periodic="{ item }">
+        <template v-slot:[`item.trigger.periodic`]="{ item }">
           <v-switch
             v-model="item.trigger.periodic"
             class="ma-2"
@@ -58,7 +58,7 @@
           />
         </template>
 
-        <template v-slot:item.action="{ item }">
+        <template v-slot:[`item.action`]="{ item }">
           <v-btn
             depressed
             small
