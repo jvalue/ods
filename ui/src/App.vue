@@ -63,6 +63,7 @@ export default class App extends Vue {
     { title: 'Dashboard', route: '/' },
     { title: 'Datasources', route: '/datasources' },
     { title: 'Pipelines', route: '/pipelines' },
+    { title: 'API Configuration', route: '/apiConfig' },
     { title: 'About', route: '/about' }
   ];
 

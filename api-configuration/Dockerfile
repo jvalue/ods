@@ -27,5 +27,5 @@ ENV SPRING_PROFILES_ACTIVE prod
 COPY --from=builder /builder/build/libs/* app.jar
 
 # Run app and expose port to other containers
-EXPOSE 6969
+EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]

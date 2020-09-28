@@ -4,6 +4,7 @@ import Home from '@/views/Home.vue'
 import storageRoutes from '@/storage/router'
 import datasourceRoutes from '@/datasource/router'
 import pipelineRoutes from '@/pipeline/router'
+import apiRoutes from '@/api/router'
 import notificationRoutes from '@/notification/router'
 import { isAuthenticated, login } from './authentication'
 import { BASE_URL } from '@/env'
@@ -30,6 +31,7 @@ const routes: RouteConfig[] = [
   ...pipelineRoutes,
   ...datasourceRoutes,
   ...notificationRoutes,
+  ...apiRoutes,
   ...storageRoutes
 ]
 

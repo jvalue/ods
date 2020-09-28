@@ -29,7 +29,6 @@ export default class DatasourceModule extends VuexModule {
   @Action({ commit: 'setDatasources', rawError: true })
   public async loadDatasources (): Promise<Datasource[]> {
     this.context.commit('setIsLoadingDatasources', true)
-
     return await RestService.getAllDatasources()
   }
 

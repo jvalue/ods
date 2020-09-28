@@ -14,30 +14,34 @@ import java.util.concurrent.TimeUnit;
 public class RabbitMQConsumer {
 
   ObjectMapper mapper = new ObjectMapper();
-  ApiConfigurationService apiConfigurationService = new ApiConfigurationService();
+  ApiConfigurationService apiConfigurationService;
+
+  public RabbitMQConsumer(ApiConfigurationService configurationService){
+    this.apiConfigurationService = configurationService;
+  }
   @RabbitListener(queues = "storage-mq.pipeline-config")
   public void recievedMessage(String message) {
     System.out.println("Recieved Message From RabbitMQ: " + message);
-    try {
-      PipelineConfigDTO config = mapper.readValue(message, PipelineConfigDTO.class);
-      System.out.println(config.toString());
-      if(config.getDefaultAPI()){
-        try {
-          //wait for postgres db entry to be created
-          TimeUnit.SECONDS.sleep(5);
-          new ApiConfigurationService().createDefaultApiForTable(config.getPipelineId());
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
-      } else if (!config.getDefaultAPI()){
-        apiConfigurationService.deleteAPIForTable(config.getPipelineId());
-      }
-      for(RemoteSchemaData x: config.getRemoteSchemata()){
-        System.out.println("Create remote schemata " + x.toString());
-        apiConfigurationService.addRemoteSchema(config.getPipelineId(), x.getEndpoint());
-      }
-    } catch (JsonProcessingException e) {
-      e.printStackTrace();
-    }
+//    try {
+//      PipelineConfigDTO config = mapper.readValue(message, PipelineConfigDTO.class);
+//      System.out.println(config.toString());
+//      if(config.getDefaultAPI()){
+//        try {
+//          //wait for postgres db entry to be created
+//          TimeUnit.SECONDS.sleep(5);
+//          apiConfigurationService.createDefaultApiForTable(config.getPipelineId());
+//        } catch (InterruptedException e) {
+//          e.printStackTrace();
+//        }
+//      } else if (!config.getDefaultAPI()){
+//        apiConfigurationService.deleteAPIForTable(config.getPipelineId());
+//      }
+//      for(RemoteSchemaData x: config.getRemoteSchemata()){
+//        System.out.println("Create remote schemata " + x.toString());
+//        apiConfigurationService.addRemoteSchema(config.getPipelineId(), x.getEndpoint());
+//      }
+//    } catch (JsonProcessingException e) {
+//      e.printStackTrace();
+//    }
   }
 }

@@ -1,8 +1,10 @@
 package org.jvalue.ods.apiConfigurationService.endpoint;
 
+import org.jvalue.ods.apiConfigurationService.model.APIConfiguration;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 public interface ApiConfigurationServiceI {
 
@@ -61,4 +63,37 @@ public interface ApiConfigurationServiceI {
     @PostMapping("/removeRemoteSchema")
     HttpStatus removeRemoteSchema(@RequestParam(name = "schemaName", required = true) String schemaName);
 
+  @GetMapping("/apiconfig/all")
+  @ResponseBody
+  @ResponseStatus(HttpStatus.OK)
+  APIConfiguration[] getAllConfigs();
+
+  @DeleteMapping("/apiconfig/all")
+  HttpStatus deleteAllConfigs();
+
+
+  @GetMapping("/apiconfig/{id}")
+  @ResponseBody
+  @ResponseStatus(HttpStatus.OK)
+  Optional<APIConfiguration> getConfig(@PathVariable Long id);
+
+  @PostMapping("/apiconfig")
+  @ResponseBody
+  @ResponseStatus(HttpStatus.OK)
+  APIConfiguration createNewConfig(@RequestBody APIConfiguration config);
+
+  @PutMapping("/apiconfig/{id}")
+  @ResponseBody
+  @ResponseStatus(HttpStatus.OK)
+  APIConfiguration updateConfig(@PathVariable Long id, @RequestBody APIConfiguration config);
+
+  @DeleteMapping("/apiconfig/{id}")
+  @ResponseBody
+  @ResponseStatus(HttpStatus.OK)
+  APIConfiguration deleteConfig(@PathVariable Long id);
+
+  @PutMapping("/apiconfig/pipeline")
+  @ResponseBody
+  @ResponseStatus(HttpStatus.OK)
+  APIConfiguration getConfigByPipeline(@RequestParam(name = "configurationId", required = true) Long id);
 }

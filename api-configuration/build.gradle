@@ -26,8 +26,6 @@ repositories {
 
 test {
   testLogging {
-
-
     afterSuite { desc, result ->
       if (!desc.parent) {
         println "Tests run: ${result.testCount}, " +
@@ -40,13 +38,12 @@ test {
 
 dependencies {
   implementation 'org.springframework.boot:spring-boot-starter-web'
-  compile group: 'org.json', name: 'json', version: '20200518'
-//  implementation 'org.springframework.boot:spring-boot-starter-security'
-//  implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+  implementation group: 'org.json', name: 'json', version: '20200518'
   implementation 'org.springframework.amqp:spring-amqp'
   implementation 'org.springframework.amqp:spring-rabbit'
+  implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+  implementation 'org.postgresql:postgresql'
   implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
   implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv'
-
   testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

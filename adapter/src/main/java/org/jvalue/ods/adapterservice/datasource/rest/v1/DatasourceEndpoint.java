@@ -83,5 +83,4 @@ public class DatasourceEndpoint {
       } catch (IllegalArgumentException e) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No valid Datasource for id "+ id);
       }
-    }
-}
+    }}

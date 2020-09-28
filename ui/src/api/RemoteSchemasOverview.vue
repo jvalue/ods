@@ -8,19 +8,17 @@
           v-model="remoteSchemaInput.id"
           type="number"
           label="ID"
-          :rules="[required]"
+          disabled
           @keyup="formChanged"
         />
         <v-text-field
           v-model="remoteSchemaInput.author"
           label="Remote Schema Author"
-          :rules="[required]"
           @keyup="formChanged"
         />
         <v-text-field
           v-model="remoteSchemaInput.endpoint"
           label="Remote Schema endpoint"
-          :rules="[required]"
           @keyup="formChanged"
         />
       </v-form>
@@ -52,14 +50,13 @@
 
       <v-data-table
         :headers="headers"
-        :items="_remoteSchemata"
+        :items="remoteSchemata"
         class="elevation-1"
       >
         <v-progress-linear
           slot="progress"
           indeterminate
         />
-
         <template v-slot:item.action="{ item }">
           <v-btn
             depressed
@@ -96,30 +93,21 @@
 </template>
 
 <script lang="ts">
-
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { State, Action } from 'vuex-class'
-import Pipeline, { PipelineMetaData, RemoteSchemaData } from './pipeline'
 import { Emit, PropSync } from 'vue-property-decorator'
+import { RemoteSchemaData } from '@/api/api'
 
 const namespace = { namespace: 'endpoints' }
 
 @Component({})
 export default class RemoteSchemasOverview extends Vue {
-  get remoteSchemata (): RemoteSchemaData[] {
-    return this._remoteSchemata
-  }
-
-  set remoteSchemata (value: RemoteSchemaData[]) {
-    this._remoteSchemata = value
-  }
   // @Action('loadPipelines', namespace) private loadPipelinesAction!: () => void;
   // @Action('deletePipeline', namespace) private deletePipelineAction!: (id: number) => void;
 
   // @State('isLoadingPipelines', namespace) private isLoadingPipelines!: boolean;
   // @State('pipelines', namespace) private pipelines!: Pipeline[];
-  @State('endpoints', namespace) private endpoints!: RemoteSchemaData[];
 
   private validForm = true;
 
@@ -127,7 +115,7 @@ export default class RemoteSchemasOverview extends Vue {
   // private metadataConfig!: PipelineMetaData;
 
   @PropSync('value')
-  private _remoteSchemata!: RemoteSchemaData[];
+  private remoteSchemata!: RemoteSchemaData[];
 
   private remoteSchemaInput: RemoteSchemaData = {
     // id: this.findFreeId(this.remoteSchemata),
@@ -138,7 +126,7 @@ export default class RemoteSchemasOverview extends Vue {
 
   private mounted (): void {
     this.remoteSchemaInput = {
-      id: this.findFreeId(this._remoteSchemata),
+      id: this.findFreeId(this.remoteSchemata),
       endpoint: 'mounted',
       author: 'malte'
     }
@@ -146,7 +134,7 @@ export default class RemoteSchemasOverview extends Vue {
 
   @Emit('value')
   emitValue (): RemoteSchemaData[] {
-    return this._remoteSchemata
+    return this.remoteSchemata
   }
 
   @Emit('validityChanged')
@@ -166,13 +154,13 @@ export default class RemoteSchemasOverview extends Vue {
   ];
 
   private onCreateEndpoint (): void {
-    const foundIndex = this._remoteSchemata.findIndex(x => x.id === this.remoteSchemaInput.id)
+    const foundIndex = this.remoteSchemata.findIndex(x => x.id === this.remoteSchemaInput.id)
     if (foundIndex !== -1) {
       console.log('onCreate - id exists')
-      this._remoteSchemata[foundIndex] = JSON.parse(JSON.stringify(this.remoteSchemaInput))
+      this.remoteSchemata[foundIndex] = JSON.parse(JSON.stringify(this.remoteSchemaInput))
     } else {
       console.log('onCreate - id doesnt exists')
-      this._remoteSchemata.push(JSON.parse(JSON.stringify(this.remoteSchemaInput)))
+      this.remoteSchemata.push(JSON.parse(JSON.stringify(this.remoteSchemaInput)))
     }
     this.emitValue()
     this.emitValid()
@@ -185,10 +173,10 @@ export default class RemoteSchemasOverview extends Vue {
   }
 
   private onEditRemoteSchema (remoteSchema: RemoteSchemaData): void {
-    const foundIndex = this._remoteSchemata.findIndex(x => x.id === remoteSchema.id)
+    const foundIndex = this.remoteSchemata.findIndex(x => x.id === remoteSchema.id)
     if (foundIndex !== -1) {
       console.log('onCreate - id exists')
-      this._remoteSchemata[foundIndex] = JSON.parse(JSON.stringify(remoteSchema))
+      this.remoteSchemata[foundIndex] = JSON.parse(JSON.stringify(remoteSchema))
     } else {
       console.log('error - entry not found')
     }
@@ -200,7 +188,7 @@ export default class RemoteSchemasOverview extends Vue {
   private onDeleteRemoteSchema (remoteSchema: RemoteSchemaData): void {
     console.log('onDelete - ' + remoteSchema.id)
     // this._remoteSchemata.slice().filter(x => x.id !== remoteSchema.id)
-    this._remoteSchemata.splice(this._remoteSchemata.indexOf(remoteSchema, 1))
+    this.remoteSchemata.splice(this.remoteSchemata.indexOf(remoteSchema, 1))
     console.log(remoteSchema.toString())
     this.emitValue()
     this.emitValid()
@@ -210,10 +198,6 @@ export default class RemoteSchemasOverview extends Vue {
       endpoint: 'delete',
       author: 'new'
     }
-  }
-
-  private required (val: string): boolean | string {
-    return !!val || 'required.'
   }
 
   private findFreeId (array: RemoteSchemaData[]) {

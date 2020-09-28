@@ -6,11 +6,12 @@ import fetch from 'node-fetch';
 
 const { ApolloServer } = require('apollo-server');
 
+
 // defines the different new types of the server.
 // These types will be added to the schema.
 const typeDefs = gql`
 
-  # Example enriched data tyüe
+  # Example enriched data type
   type ImprovedData {
     id: String
     agency: String
@@ -25,11 +26,13 @@ const typeDefs = gql`
 
 // example function that firstly collects data from the server and then
 // enriches the data with custom business logic
+const API_NAME = "storage_publicapi5"
+
 function collectBetterData() {
   const data = client.query({
     query: gql`
       query MyQuery {
-        storage_viewz(limit: 1) {
+        ${API_NAME}(limit: 1) {
           id
           agency
         }
@@ -37,10 +40,11 @@ function collectBetterData() {
     `,
   })
   .then(result => {
-    console.log(result.data.storage_viewz[0].id)
+    console.log(result['data'][API_NAME][0].id)
     return {
-      id: result.data.storage_viewz[0].id,
-      agency: result.data.storage_viewz[0].agency,
+      // ...,
+      id: result['data'][API_NAME][0].id,
+      agency: result['data'][API_NAME][0].agency,
       newCustomField: "custom1"
     }
   });
@@ -80,7 +84,7 @@ client
 .query({
   query: gql`
     query MyQuery {
-      storage_viewz {
+      ${API_NAME} {
         id
         agency
       }

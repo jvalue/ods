@@ -11,6 +11,7 @@ services:
     build:
       context: ./ui/
       args:
+        API_CONFIGURATION_SERVICE_URL: /api/apis
         UI_BASE_URL: /
         ADAPTER_SERVICE_URL: /api/adapter
         STORAGE_SERVICE_URL: /api/storage
@@ -48,17 +49,28 @@ services:
   api-configuration:
     image: ${DOCKER_REGISTRY}/api-orchestration
     ports:
-      - 8090:8090
+      - 8090:8080
     build:
       context: ./api-configuration/
     depends_on:
       - graphql-engine
+      - api-configuration-db
+    environment:
+      DB_URL: jdbc:postgresql://api-configuration-db:5432/api-config-service
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.to-apiorchestration.rule=PathPrefix(`/api/apiorchestration`)"
-      - "traefik.http.routers.to-apiorchestration.middlewares=apiorchestration-stripprefix@docker"
-      - "traefik.http.middlewares.apiorchestration-stripprefix.stripprefix.prefixes=/api/apiorchestration"
-      - "traefik.http.services.apiorchestration.loadbalancer.server.port=8090"
+      - "traefik.http.routers.to-api-configuration.rule=PathPrefix(`/api/apis`)"
+      - "traefik.http.routers.to-api-configuration.middlewares=api-configuration-stripprefix@docker"
+      - "traefik.http.middlewares.api-configuration-stripprefix.stripprefix.prefixes=/api/apis"
+      - "traefik.http.services.api-configuration.loadbalancer.server.port=8080"
+
+
+  # ----------------- API Configuration SERVICE (/orchestrate-api) --------------------
+  api-configuration-db:
+    image: postgres
+    environment:
+      - POSTGRES_USER=api-config-service
+      - POSTGRES_PASSWORD=api-config-pw
 
   # ----------------- ADAPTER SERVICE (/adapter) --------------------
   adapter-db:

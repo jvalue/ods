@@ -1,18 +1,56 @@
 package org.jvalue.ods.apiConfigurationService.model;
 
-public class RemoteSchemaData{
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-  private int id;
+import javax.persistence.Embeddable;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.Objects;
+
+//@Embeddable
+
+public class RemoteSchemaData implements Serializable {
+
+  private Long id;
   private String endpoint;
   private String author;
 
+
   public RemoteSchemaData() { }
+
+  @JsonCreator
+  public RemoteSchemaData(
+    @JsonProperty("id") Long id,
+    @JsonProperty("endpoint") String endpoint,
+    @JsonProperty("author") String author)
+    {
+    this.id = id;
+    this.endpoint = endpoint;
+    this.author = author;
+  }
+
 
 //    public RemoteSchemaData(int id, String endpoint, String author) {
 //      this.id = id;
 //      this.endpoint = endpoint;
 //      this.author = author;
 //    }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    RemoteSchemaData that = (RemoteSchemaData) o;
+    return Objects.equals(id, that.id) &&
+      Objects.equals(endpoint, that.endpoint) &&
+      Objects.equals(author, that.author);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, endpoint, author);
+  }
 
   @Override
   public String toString() {
@@ -23,11 +61,11 @@ public class RemoteSchemaData{
       '}';
   }
 
-  public int getId() {
+  public Long getId() {
     return id;
   }
 
-  public void setId(int id) {
+  public void setId(Long id) {
     this.id = id;
   }
 
