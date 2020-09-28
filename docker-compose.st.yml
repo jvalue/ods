@@ -21,6 +21,7 @@ services:
       SCHEDULER_API: http://scheduler:8080
       ADAPTER_API: http://adapter:8080
       MOCK_SERVER_API: http://mock-server:8080
+      MOCK_SERVER_WITHIN_DOCKER_API: http://mock-server:8080
       NOTIFICATION_API: http://notification:8080
       RABBIT_API: http://rabbitmq:15672
 
