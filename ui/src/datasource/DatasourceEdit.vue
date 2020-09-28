@@ -134,26 +134,19 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { Watch } from 'vue-property-decorator'
-import { Action, State } from 'vuex-class'
 
-import AdapterConfig from './edit/adapter/AdapterConfig.vue'
 import StepperButtonGroup from '../components/StepperButtonGroup.vue'
+import AdapterConfig from './edit/adapter/AdapterConfig.vue'
 import DatasourceMetadataConfig from './edit/DatasourceMetadataConfig.vue'
 import TriggerConfig from './edit/TriggerConfig.vue'
-import Datasource from './datasource'
 
-const datasourceNamespace = { namespace: 'datasource' }
+import Datasource from './datasource'
+import * as DatasourceREST from './datasourceRest'
 
 @Component({
   components: { AdapterConfig, StepperButtonGroup, DatasourceMetadataConfig, TriggerConfig }
 })
 export default class DatasourceEdit extends Vue {
-  @Action('loadDatasourceById', datasourceNamespace) private loadDatasourceByIdAction!: (id: number) => void
-  @Action('createDatasource', datasourceNamespace) private createDatasourceAction!: (d: Datasource) => void
-  @Action('updateDatasource', datasourceNamespace) private updateDatsourceAction!: (d: Datasource) => void
-  @State('selectedDatasource', datasourceNamespace) private selectedDatasource!: Datasource
-
   private isEditMode = false
 
   private dialogStep = 1
@@ -195,24 +188,21 @@ export default class DatasourceEdit extends Vue {
 
     if (this.isEditMode) {
       const id = parseInt(this.$route.params.datasourceId)
-      this.loadDatasourceByIdAction(id)
+      this.loadDatasourceById(id)
     }
   }
 
-  @Watch('selectedDatasource')
-  onSelectedDatasourceChange (value: Datasource, oldValue: Datasource): void {
-    if (value !== oldValue) {
-      this.dialogDatasource = value
-    }
+  private async loadDatasourceById (id: number): Promise<void> {
+    this.dialogDatasource = await DatasourceREST.getDatasourceById(id)
   }
 
-  private onSave (): void {
-    this.createDatasourceAction(this.dialogDatasource)
+  private async onSave (): Promise<void> {
+    await DatasourceREST.createDatasource(this.dialogDatasource)
     this.routeToOverview()
   }
 
-  private onUpdate (): void {
-    this.updateDatsourceAction(this.dialogDatasource)
+  private async onUpdate (): Promise<void> {
+    await DatasourceREST.updateDatasource(this.dialogDatasource)
     this.routeToOverview()
   }
 

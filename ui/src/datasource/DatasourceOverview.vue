@@ -17,7 +17,7 @@
         </v-btn>
         <v-btn
           class="ma-2"
-          @click="loadDatasourcesAction()"
+          @click="loadDataSources()"
         >
           <v-icon dark>
             mdi mdi-sync
@@ -110,21 +110,17 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { State, Action } from 'vuex-class'
-import Datasource from './datasource'
 
-const namespace = { namespace: 'datasource' }
+import Datasource from './datasource'
+import * as DatasourceREST from './datasourceRest'
 
 const ONE_HOUR_IN_MS = 3600 * 1000
 const ONE_MINUTE_IN_MS = 60 * 1000
 
 @Component({})
 export default class DatsourceOverview extends Vue {
-  @Action('loadDatasources', namespace) private loadDatasourcesAction!: () => void;
-  @Action('deleteDatasource', namespace) private deleteDatasourceAction!: (id: number) => void;
-
-  @State('isLoadingDatasources', namespace) private isLoadingDatasources!: boolean;
-  @State('datasources', namespace) private datasources!: object[];
+  private isLoadingDatasources = false
+  private datasources: Datasource[] = []
 
   private headers = [
     { text: 'Id', value: 'id' },
@@ -138,7 +134,7 @@ export default class DatsourceOverview extends Vue {
   private search = '';
 
   private mounted (): void {
-    this.loadDatasourcesAction()
+    this.loadDataSources()
   }
 
   private onCreate (): void {
@@ -149,15 +145,15 @@ export default class DatsourceOverview extends Vue {
     this.$router.push({ name: 'datasource-edit', params: { datasourceId: `${datasource.id}` } })
   }
 
-  private onDelete (datasource: Datasource): void {
-    this.deleteDatasourceAction(datasource.id)
+  private async onDelete (datasource: Datasource): Promise<void> {
+    await DatasourceREST.deleteDatasource(datasource.id)
   }
 
   private onCreatePipeline (datasource: Datasource): void {
     this.$router.push({ name: 'pipeline-new', params: { datasourceId: `${datasource.id}` } })
   }
 
-  private filterOnlyDisplayName (value: object, search: string, item: Datasource): boolean {
+  private filterOnlyDisplayName (value: unknown, search: string, item: Datasource): boolean {
     return value != null &&
           search != null &&
           typeof value === 'string' &&
@@ -170,6 +166,12 @@ export default class DatsourceOverview extends Vue {
 
   private getMinutesFromMS (intervalInMS: number): number {
     return Math.floor((intervalInMS % ONE_HOUR_IN_MS) / ONE_MINUTE_IN_MS)
+  }
+
+  private async loadDataSources (): Promise<void> {
+    this.isLoadingDatasources = true
+    this.datasources = await DatasourceREST.getAllDatasources()
+    this.isLoadingDatasources = false
   }
 }
 </script>
