@@ -15,16 +15,22 @@ let amqpConnection
 
 const TIMEOUT = 10000
 const PROCESS_TIME = 1000
+const SECOND = 1000
 
 describe('IT against Storage-MQ service', () => {
   beforeAll(async () => {
-    logAMQPConfig()
-    const promiseResults = await Promise.all([
-      amqpConnect(AMQP_URL, 40, 2000),
-      waitOn({ resources: [STORAGEMQ_URL + '/'], timeout: TIMEOUT * 5, log: true })
-    ])
-    amqpConnection = promiseResults[0]
-  }, 90000)
+    logConfigs()
+
+    try {
+      const promiseResults = await Promise.all([
+        amqpConnect(AMQP_URL, 40, 2000),
+        waitOn({ resources: [STORAGEMQ_URL + '/'], timeout: 80 * SECOND, log: false })
+      ])
+      amqpConnection = promiseResults[0]
+    } catch (err) {
+      throw new Error('Error during setup of tests: ' + err)
+    }
+  }, 90 * SECOND)
 
   afterAll(async () => {
     if (amqpConnection) {
@@ -169,11 +175,14 @@ const sleep = (ms) => {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-const logAMQPConfig = () => {
+const logConfigs = () => {
   const msg = `
   AMQP_EXCHANGE: ${AMQP_EXCHANGE}
   AMQP_PIPELINE_CONFIG_CREATED_TOPIC: ${AMQP_PIPELINE_CONFIG_CREATED_TOPIC}
-  AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: ${AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC} 
+  AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: ${AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC}
+
+  [Environment Variable] STORAGEMQ_URL = ${STORAGEMQ_URL}
+  [Environment Variable] AMQP_URL = ${AMQP_URL}
   `
   console.log(msg)
 }

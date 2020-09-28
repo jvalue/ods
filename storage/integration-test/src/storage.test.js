@@ -13,6 +13,7 @@ const AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC = 'pipeline.execution.success'
 
 const TIMEOUT = 10000
 const PROCESS_TIME = 1000
+const SECOND = 1000
 
 let amqpConnection
 const pipelineId = '21398'
@@ -29,23 +30,23 @@ const pipelineExecutedEvent = {
 }
 const pipelineExecutedEventBuf = Buffer.from(JSON.stringify(pipelineExecutedEvent))
 
-describe('Storage', () => {
+describe('IT against Storage service', () => {
   beforeAll(async () => {
-    logAMQPConfig()
+    logConfigs()
+
     try {
       const promiseResults = await Promise.all([
         amqpConnect(AMQP_URL, 40, 2000),
-        waitOn({ resources: [STORAGE_URL, `${STORAGEMQ_URL}/`], timeout: 80000, log: true })
+        waitOn({ resources: [STORAGE_URL, `${STORAGEMQ_URL}/`], timeout: 80 * SECOND, log: false })
       ])
       amqpConnection = promiseResults[0]
     } catch (err) {
-      process.exit(1)
+      throw new Error('Error during setup of tests: ' + err)
     }
-  }, 90000)
+  }, 90 * SECOND)
 
   afterAll(async () => {
     if (amqpConnection) {
-      console.log('Closing AMQP connection...')
       await amqpConnection.close()
     }
   }, TIMEOUT)
@@ -75,10 +76,17 @@ describe('Storage', () => {
   }, TIMEOUT)
 })
 
-const logAMQPConfig = () => {
-  console.log('AMQP_EXCHANGE: ', AMQP_EXCHANGE)
-  console.log('AMQP_PIPELINE_CONFIG_CREATED_TOPIC: ', AMQP_PIPELINE_CONFIG_CREATED_TOPIC)
-  console.log('AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: ', AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC)
+const logConfigs = () => {
+  const msg = `
+  AMQP_EXCHANGE: ${AMQP_EXCHANGE}
+  AMQP_PIPELINE_CONFIG_CREATED_TOPIC: ${AMQP_PIPELINE_CONFIG_CREATED_TOPIC}
+  AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: ${AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC}
+
+  [Environment Variable] STORAGE_URL = ${STORAGE_URL}
+  [Environment Variable] STORAGEMQ_URL = ${STORAGEMQ_URL}
+  [Environment Variable] AMQP_URL = ${AMQP_URL}
+  `
+  console.log(msg)
 }
 
 const amqpConnect = async (amqpUrl, retries, backoff) => {
