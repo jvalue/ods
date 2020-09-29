@@ -1,5 +1,5 @@
 @adapterUrl = http://localhost:9000/api/adapter/datasources
-@pipelineUrl = http://localhost:9000/api/transformation
+@pipelineUrl = http://localhost:9000/api/pipelines
 
 
 ### Summary of new and total cases per country

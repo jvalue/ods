@@ -1,7 +1,7 @@
 const request = require('supertest')
 const {
   ADAPTER_URL,
-  TRANSFORMATION_URL,
+  PIPELINE_URL,
   NOTIFICATION_URL,
   MOCK_SERVER_URL,
   MOCK_SERVER_WITHIN_DOCKER
@@ -28,7 +28,7 @@ describe('Test 6: Delete periodic pipeline', () => {
   afterAll(async () => {
     await Promise.all([
       request(ADAPTER_URL).delete('/').send(),
-      request(TRANSFORMATION_URL).delete('/configs').send(),
+      request(PIPELINE_URL).delete('/configs').send(),
       request(MOCK_SERVER_URL).delete('/').send()
     ])
   }, TIMEOUT)
@@ -49,7 +49,7 @@ describe('Test 6: Delete periodic pipeline', () => {
 
   test('Add pipeline to DataSource', async () => {
     const pipelineConfig = generatePipelineConfig(dataSourceId)
-    const response = await request(TRANSFORMATION_URL).post('/configs').send(pipelineConfig)
+    const response = await request(PIPELINE_URL).post('/configs').send(pipelineConfig)
     expect(response.status).toEqual(201)
 
     pipelineId = response.body.id
@@ -74,8 +74,8 @@ describe('Test 6: Delete periodic pipeline', () => {
     expect(response.body.timestamp).toBeDefined()
   }, TIMEOUT)
 
-  test('Delete transformation config', async () => {
-    const response = await request(TRANSFORMATION_URL).delete(`/configs/${pipelineId}`).send()
+  test('Delete pipeline config', async () => {
+    const response = await request(PIPELINE_URL).delete(`/configs/${pipelineId}`).send()
     expect(response.status).toEqual(204)
   }, TIMEOUT)
 

@@ -5,7 +5,7 @@ const request = require('supertest')
 const waitOn = require('wait-on')
 const amqp = require('amqplib')
 
-const URL = process.env.TRANSFORMATION_API || 'http://localhost:8080'
+const URL = process.env.PIPELINE_API || 'http://localhost:8080'
 
 const AMQP_URL = process.env.AMQP_URL
 const AMQP_EXCHANGE = process.env.AMQP_EXCHANGE
@@ -21,7 +21,7 @@ let amqpConnection
 let channel
 const publishedEvents = new Map() // routing key -> received msgs []
 
-describe('Transformation Service Config Trigger', () => {
+describe('Pipeline Service Config Trigger', () => {
   beforeAll(async () => {
     console.log('Starting config trigger tests..')
     const pingUrl = URL + '/'

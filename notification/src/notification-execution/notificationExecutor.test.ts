@@ -22,7 +22,7 @@ describe('JSNotificationService', () => {
       notificationService = new NotificationExecutor(new VM2SandboxExecutor())
       console.log = jest.fn()
       /* =======================================================
-       * An Event sent by the Transformation Service
+       * An Event sent by the Pipeline Service
        * on successful transformation/pipeline
        * ===================================================== */
       data = { value1: 1, b: 2 }

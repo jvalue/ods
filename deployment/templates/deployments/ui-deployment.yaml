@@ -26,8 +26,8 @@ spec:
           value: "{{BASE_URL}}"
         - name: STORAGE_SERVICE_URL
           value: "{{BASE_URL}}api/storage"
-        - name: TRANSFORMATION_SERVICE_URL
-          value: "{{BASE_URL}}api/transformation"
+        - name: PIPELINE_SERVICE_URL
+          value: "{{BASE_URL}}api/pipelines"
         image: registry.gitlab.com/profoss/open-data-service/ods-main/ui:{{IMAGE_TAG}}
         imagePullPolicy: Always
         name: ui-service

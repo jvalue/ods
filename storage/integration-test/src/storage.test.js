@@ -1,82 +1,93 @@
 const waitOn = require('wait-on')
 const request = require('supertest')
 const AMQP = require('amqplib')
-
-const STORAGE_URL = process.env.STORAGE_API
-const STORAGEMQ_URL = process.env.STORAGEMQ_API
-const AMQP_URL = process.env.AMQP_URL
+const {
+  STORAGE_URL,
+  STORAGEMQ_URL,
+  AMQP_URL
+} = require('./env')
 
 const AMQP_EXCHANGE = 'ods_global'
 const AMQP_PIPELINE_CONFIG_CREATED_TOPIC = 'pipeline.config.created'
 const AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC = 'pipeline.execution.success'
 
+const TIMEOUT = 10000
+const PROCESS_TIME = 1000
+const SECOND = 1000
+
 let amqpConnection
+const pipelineId = '21398'
 
-describe('Storage', () => {
-  console.log('Storage-Service URL= ' + STORAGE_URL)
+const pipelineCreatedEvent = {
+  pipelineId: pipelineId
+}
+const pipelineCreatedEventBuf = Buffer.from(JSON.stringify(pipelineCreatedEvent))
 
+const pipelineExecutedEvent = {
+  pipelineId: pipelineId,
+  timestamp: new Date(Date.now()),
+  data: { exampleNumber: 123, exampleString: 'abc', exampleArray: [{ x: 'y' }, { t: 456 }] }
+}
+const pipelineExecutedEventBuf = Buffer.from(JSON.stringify(pipelineExecutedEvent))
+
+describe('IT against Storage service', () => {
   beforeAll(async () => {
+    logConfigs()
+
     try {
       const promiseResults = await Promise.all([
         amqpConnect(AMQP_URL, 40, 2000),
-        waitOn({ resources: [STORAGE_URL, `${STORAGEMQ_URL}/`], timeout: 80000, log: true })
+        waitOn({ resources: [STORAGE_URL, `${STORAGEMQ_URL}/`], timeout: 80 * SECOND, log: false })
       ])
       amqpConnection = promiseResults[0]
     } catch (err) {
-      process.exit(1)
+      throw new Error('Error during setup of tests: ' + err)
     }
-  }, 90000)
+  }, 90 * SECOND)
 
   afterAll(async () => {
     if (amqpConnection) {
-      console.log('Closing AMQP connection...')
       await amqpConnection.close()
-      console.log('AMQP connection closed')
     }
-  }, 10000)
+  }, TIMEOUT)
 
-  test('GET on arrived data', async () => {
-    const pipelineId = '21398'
-
+  test('Should provide transformed data after successful pipeline event', async () => {
     const channel = await amqpConnection.createChannel()
     channel.assertExchange(AMQP_EXCHANGE, 'topic', {
       durable: true
     })
 
-    const pipelineCreatedEvent = {
-      pipelineId: pipelineId
-    }
-    const configEvent = JSON.stringify(pipelineCreatedEvent)
+    channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_CREATED_TOPIC, pipelineCreatedEventBuf)
+    await sleep(PROCESS_TIME)
 
-    channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_CREATED_TOPIC, Buffer.from(configEvent))
-    console.log("Sent via AMQP: %s:'%s'", AMQP_PIPELINE_CONFIG_CREATED_TOPIC, configEvent)
+    channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC, pipelineExecutedEventBuf)
+    await sleep(PROCESS_TIME)
 
-    await sleep(1000) // time to process event
+    const response = await request(STORAGE_URL).get(`/${pipelineId}`)
 
-    const pipelineExecutedEvent = {
-      pipelineId: pipelineId,
-      timestamp: new Date(Date.now()),
-      data: { exampleNumber: 123, exampleString: 'abc', exampleArray: [{ x: 'y' }, { t: 456 }] }
-    }
-    const executionEvent = JSON.stringify(pipelineExecutedEvent)
-
-    channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC, Buffer.from(executionEvent))
-    console.log("Sent via AMQP: %s:'%s'", AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC, executionEvent)
-
-    await sleep(1000) // time to process event
-
-    const response = await request(STORAGE_URL)
-      .get(`/${pipelineId}`)
-    console.log(response.body)
     expect(response.status).toEqual(200)
-    expect(response.body).toHaveLength(1)
     expect(response.type).toEqual('application/json')
+
+    expect(response.body).toHaveLength(1)
     expect(response.body[0].id).toEqual(1)
-    expect(new Date(response.body[0].timestamp)).toEqual(new Date(pipelineExecutedEvent.timestamp)) // TODO: returned timestamp is not ISO String, but equal
     expect(response.body[0].pipelineId).toEqual(pipelineExecutedEvent.pipelineId)
     expect(response.body[0].data).toEqual(pipelineExecutedEvent.data)
-  }, 10000)
+    expect(new Date(response.body[0].timestamp)).toEqual(new Date(pipelineExecutedEvent.timestamp))
+  }, TIMEOUT)
 })
+
+const logConfigs = () => {
+  const msg = `
+  AMQP_EXCHANGE: ${AMQP_EXCHANGE}
+  AMQP_PIPELINE_CONFIG_CREATED_TOPIC: ${AMQP_PIPELINE_CONFIG_CREATED_TOPIC}
+  AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: ${AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC}
+
+  [Environment Variable] STORAGE_URL = ${STORAGE_URL}
+  [Environment Variable] STORAGEMQ_URL = ${STORAGEMQ_URL}
+  [Environment Variable] AMQP_URL = ${AMQP_URL}
+  `
+  console.log(msg)
+}
 
 const amqpConnect = async (amqpUrl, retries, backoff) => {
   console.log('AMQP URL: ' + amqpUrl)

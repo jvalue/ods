@@ -3,7 +3,7 @@ const {
   STORAGE_URL,
   SCHEDULER_URL,
   ADAPTER_URL,
-  TRANSFORMATION_URL,
+  PIPELINE_URL,
   NOTIFICATION_URL,
   MOCK_SERVER_URL,
   MOCK_SERVER_WITHIN_DOCKER,
@@ -23,7 +23,7 @@ async function waitForServicesToBeReady () {
     resources: [
       STORAGE_URL,
       SCHEDULER_URL,
-      TRANSFORMATION_URL,
+      PIPELINE_URL,
       NOTIFICATION_URL + '/',
       ADAPTER_URL + '/version',
       MOCK_SERVER_URL + '/',

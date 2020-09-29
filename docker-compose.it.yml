@@ -56,17 +56,17 @@ services:
       STORAGEMQ_API: http://storage-mq:8080
       AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
 
-  # ----------------- TRANSFORMATION SERVICE (PORTS 9500 - 9599) --------------------
-  transformation-it:
-    image: open-data-service/ods-main/transformation-it
+  # ----------------- PIPELINE SERVICE (PORTS 9500 - 9599) --------------------
+  pipeline-it:
+    image: open-data-service/ods-main/pipeline-it
     build:
-      context: ./transformation/integration-test/
+      context: ./pipeline/integration-test/
     environment:
-      TRANSFORMATION_API: http://transformation:8080
+      PIPELINE_API: http://pipeline:8080
 
       AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
       AMQP_EXCHANGE: 'ods_global'
-      AMQP_IT_QUEUE: 'transformation_it'
+      AMQP_IT_QUEUE: 'pipeline_it'
       AMQP_PIPELINE_EXECUTION_TOPIC: 'pipeline.execution.*'
       AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: 'pipeline.execution.success'
       AMQP_PIPELINE_EXECUTION_ERROR_TOPIC: 'pipeline.execution.error'

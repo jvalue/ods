@@ -17,7 +17,7 @@ services:
 
     environment:
       STORAGE_API: http://storage:3000
-      TRANSFORMATION_API: http://transformation:8080
+      PIPELINE_API: http://pipeline:8080
       SCHEDULER_API: http://scheduler:8080
       ADAPTER_API: http://adapter:8080
       MOCK_SERVER_API: http://mock-server:8080
