@@ -1,7 +1,6 @@
 /* eslint-env jest */
 // @ts-check
 const request = require('supertest')
-const amqp = require('amqplib')
 
 const {
   ADAPTER_URL,
@@ -14,8 +13,12 @@ const {
   EXECUTION_SUCCESS_TOPIC
 } = require('./env')
 const { waitForServicesToBeReady } = require('./waitForServices')
+const {
+  connectAmqp,
+  receiveAmqp,
+  closeAmqp
+} = require('./testHelper')
 
-let amqpConnection
 const publishedEvents = new Map() // routing key -> received msgs []
 
 describe('Adapter Sources Trigger', () => {
@@ -25,16 +28,12 @@ describe('Adapter Sources Trigger', () => {
     console.log(`Services available. Connecting to amqp at ${AMQP_URL} ...`)
     await connectAmqp(AMQP_URL)
 
-    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, EXECUTION_TOPIC, AMQP_IT_QUEUE)
+    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, EXECUTION_TOPIC, AMQP_IT_QUEUE, publishedEvents)
     console.log('Amqp connection established')
   }, 60000)
 
   afterAll(async () => {
-    if (amqpConnection) {
-      console.log('Closing AMQP Connection...')
-      await amqpConnection.close()
-      console.log('AMQP Connection closed')
-    }
+    await closeAmqp()
 
     // clear stored configs
     await request(ADAPTER_URL)
@@ -171,30 +170,6 @@ describe('Adapter Sources Trigger', () => {
     expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)[0].error).toBeDefined()
   })
 })
-
-async function connectAmqp (url) {
-  amqpConnection = await amqp.connect(url)
-  console.log(`Connected to AMQP on host "${url}"`)
-}
-
-async function receiveAmqp (url, exchange, topic, queue) {
-  const channel = await amqpConnection.createChannel()
-  await channel.assertExchange(exchange, 'topic')
-  const q = await channel.assertQueue(queue)
-  await channel.bindQueue(q.queue, exchange, topic)
-
-  console.log(`Listening on AMQP host "${url}" on exchange "${exchange}" for topic "${topic}"`)
-
-  await channel.consume(q.queue, async (msg) => {
-    const event = JSON.parse(msg.content.toString())
-    console.log(`Event received via amqp: ${JSON.stringify(event)}`)
-    const routingKey = msg.fields.routingKey
-    if (!publishedEvents.get(routingKey)) {
-      publishedEvents.set(routingKey, [])
-    }
-    publishedEvents.get(routingKey).push(event)
-  })
-}
 
 const dynamicDatasourceConfig = {
   id: 54321,
