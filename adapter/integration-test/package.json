@@ -5,7 +5,7 @@
   "scripts": {
     "mock": "node src/mock.server.js",
     "pretest": "npm run mock &",
-    "test": "jest --runInBand",
+    "test": "jest src/*.test.js --colors --verbose",
     "posttest": "killall node",
     "lint": "./node_modules/.bin/eslint src --ext .js --fix"
   },
