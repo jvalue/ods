@@ -1,9 +1,10 @@
 const waitOn = require('wait-on')
 const request = require('supertest')
 const AMQP = require('amqplib')
-
-const URL = process.env.STORAGEMQ_API
-const AMQP_URL = process.env.AMQP_URL
+const {
+  STORAGEMQ_URL,
+  AMQP_URL
+} = require('./env')
 
 const AMQP_EXCHANGE = 'ods_global'
 const AMQP_PIPELINE_CONFIG_CREATED_TOPIC = 'pipeline.config.created'
@@ -12,45 +13,52 @@ const AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC = 'pipeline.execution.success'
 
 let amqpConnection
 
-describe('Storage-MQ', () => {
-  beforeAll(async () => {
-    console.log('Waiting on all dependent services before starting to test')
-    const pingUrl = URL + '/'
+const TIMEOUT = 10000
+const PROCESS_TIME = 1000
+const SECOND = 1000
 
-    const promiseResults = await Promise.all([
-      amqpConnect(AMQP_URL, 40, 2000),
-      storageMqHealth(pingUrl, 80000)
-    ])
-    amqpConnection = promiseResults[0]
-  }, 90000)
+describe('IT against Storage-MQ service', () => {
+  beforeAll(async () => {
+    logConfigs()
+
+    try {
+      const promiseResults = await Promise.all([
+        amqpConnect(AMQP_URL, 40, 2000),
+        waitOn({ resources: [STORAGEMQ_URL + '/'], timeout: 80 * SECOND, log: false })
+      ])
+      amqpConnection = promiseResults[0]
+    } catch (err) {
+      throw new Error('Error during setup of tests: ' + err)
+    }
+  }, 90 * SECOND)
 
   afterAll(async () => {
     if (amqpConnection) {
       await amqpConnection.close()
     }
-  }, 10000)
+  }, TIMEOUT)
 
-  test('GET /version', async () => {
-    const response = await request(URL).get('/version')
+  test('Should respond with semantic version [GET /version]', async () => {
+    const response = await request(STORAGEMQ_URL).get('/version')
+
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('text/plain')
+
     const semanticVersionRegEx = '^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)'
     expect(response.text).toMatch(new RegExp(semanticVersionRegEx))
-  }, 5000)
+  }, TIMEOUT)
 
-  test('GET /bucket/3000/content on non-existing bucket should 404', async () => {
-    const response = await request(URL).get('/bucket/3000/content')
-    console.log(response.body)
+  test('Should respond with 404 for non-existing bucket [GET /bucket/3000/content]', async () => {
+    const response = await request(STORAGEMQ_URL).get('/bucket/3000/content')
     expect(response.status).toEqual(404)
-  }, 5000)
+  }, TIMEOUT)
 
-  test('GET /bucket/3000/content/5 on non-existing bucket should 404', async () => {
-    const response = await request(URL).get('/bucket/3000/content/5')
-    console.log(response.body)
+  test('Should respond with 404 for non-existing bucket content [GET /bucket/3000/content/5]', async () => {
+    const response = await request(STORAGEMQ_URL).get('/bucket/3000/content/5')
     expect(response.status).toEqual(404)
-  }, 5000)
+  }, TIMEOUT)
 
-  test('Event-driven storage structure creation and no content', async () => {
+  test('Should create bucket without content', async () => {
     const pipelineId = '333'
 
     const channel = await amqpConnection.createChannel()
@@ -61,21 +69,18 @@ describe('Storage-MQ', () => {
     const pipelineCreatedEvent = {
       pipelineId: pipelineId
     }
-    const event = JSON.stringify(pipelineCreatedEvent)
+    const eventAsBuffer = Buffer.from(JSON.stringify(pipelineCreatedEvent))
 
-    channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_CREATED_TOPIC, Buffer.from(event))
-    console.log("Sent via AMQP: %s:'%s'", AMQP_PIPELINE_CONFIG_CREATED_TOPIC, event)
+    channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_CREATED_TOPIC, eventAsBuffer)
+    await sleep(PROCESS_TIME * 2)
 
-    await sleep(2000) // time to process event
-
-    const response = await request(URL).get(`/bucket/${pipelineId}/content/`)
-    console.log(response.body)
+    const response = await request(STORAGEMQ_URL).get(`/bucket/${pipelineId}/content/`)
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('application/json')
     expect(response.body).toEqual([])
-  }, 10000)
+  }, TIMEOUT)
 
-  test('Event-driven storage structure creation and content arrival', async () => {
+  test('Should create bucket with content', async () => {
     const pipelineId = '444'
 
     const channel = await amqpConnection.createChannel()
@@ -86,26 +91,22 @@ describe('Storage-MQ', () => {
     const pipelineCreatedEvent = {
       pipelineId: pipelineId
     }
-    const configEvent = JSON.stringify(pipelineCreatedEvent)
+    const eventAsBuffer = Buffer.from(JSON.stringify(pipelineCreatedEvent))
 
-    channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_CREATED_TOPIC, Buffer.from(configEvent))
-    console.log("Sent via AMQP: %s:'%s'", AMQP_PIPELINE_CONFIG_CREATED_TOPIC, configEvent)
-
-    await sleep(1000) // time to process event
+    channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_CREATED_TOPIC, eventAsBuffer)
+    await sleep(PROCESS_TIME)
 
     const pipelineExecutedEvent = {
       pipelineId: pipelineId,
       timestamp: new Date(Date.now()),
       data: { exampleNumber: 123, exampleString: 'abc', exampleArray: [{ x: 'y' }, { t: 456 }] }
     }
-    const executionEvent = JSON.stringify(pipelineExecutedEvent)
+    const execEventAsBuffer = Buffer.from(JSON.stringify(pipelineExecutedEvent))
 
-    channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC, Buffer.from(executionEvent))
-    console.log("Sent via AMQP: %s:'%s'", AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC, executionEvent)
+    channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC, execEventAsBuffer)
+    await sleep(PROCESS_TIME)
 
-    await sleep(1000) // time to process event
-
-    const contentResponse = await request(URL).get(`/bucket/${pipelineId}/content/1`)
+    const contentResponse = await request(STORAGEMQ_URL).get(`/bucket/${pipelineId}/content/1`)
     expect(contentResponse.status).toEqual(200)
     expect(contentResponse.type).toEqual('application/json')
     expect(contentResponse.body.id).toEqual(1)
@@ -113,19 +114,19 @@ describe('Storage-MQ', () => {
     expect(contentResponse.body.pipelineId).toEqual(pipelineExecutedEvent.pipelineId)
     expect(contentResponse.body.data).toEqual(pipelineExecutedEvent.data)
 
-    const allContentResponse = await request(URL).get(`/bucket/${pipelineId}/content`)
+    const allContentResponse = await request(STORAGEMQ_URL).get(`/bucket/${pipelineId}/content`)
     expect(allContentResponse.status).toEqual(200)
     expect(allContentResponse.type).toEqual('application/json')
     expect(allContentResponse.body).toHaveLength(1)
     expect(allContentResponse.body[0]).toEqual(contentResponse.body)
-  }, 10000)
+  }, TIMEOUT)
 
-  test('GET /bucket/3000/content/5 on existing bucket but not existing content should 404', async () => {
-    const response = await request(URL).get('/bucket/3000/content/5')
+  test('Should respond with 404 for non-existing content of exiting bucket  [GET /bucket/3000/content/5]', async () => {
+    const response = await request(STORAGEMQ_URL).get('/bucket/3000/content/5')
     expect(response.status).toEqual(404)
-  }, 5000)
+  }, TIMEOUT)
 
-  test('Event-driven storage structure creation and deletion', async () => {
+  test('Should respond with 404 after creating a bucket and deleting this bucket immediately', async () => {
     const pipelineId = '555'
 
     const channel = await amqpConnection.createChannel()
@@ -133,38 +134,26 @@ describe('Storage-MQ', () => {
       durable: true
     })
 
-    // create
     const pipelineCreatedEvent = {
       pipelineId: pipelineId
     }
-    const createdEvent = JSON.stringify(pipelineCreatedEvent)
+    const createdEventAsBuffer = Buffer.from(JSON.stringify(pipelineCreatedEvent))
 
-    channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_CREATED_TOPIC, Buffer.from(createdEvent))
-    console.log("Sent via AMQP: %s:'%s'", AMQP_PIPELINE_CONFIG_CREATED_TOPIC, createdEvent)
+    channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_CREATED_TOPIC, createdEventAsBuffer)
+    await sleep(PROCESS_TIME)
 
-    await sleep(1000) // time to process event
-
-    // delete
     const pipelineDeletedEvent = {
       pipelineId: pipelineId
     }
-    const deletedEvent = JSON.stringify(pipelineDeletedEvent)
+    const deletedEventAsBuffer = Buffer.from(JSON.stringify(pipelineDeletedEvent))
 
-    channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_DELETED_TOPIC, Buffer.from(deletedEvent))
-    console.log("Sent via AMQP: %s:'%s'", AMQP_PIPELINE_CONFIG_DELETED_TOPIC, deletedEvent)
+    channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_DELETED_TOPIC, deletedEventAsBuffer)
+    await sleep(PROCESS_TIME)
 
-    await sleep(1000) // time to process event
-
-    // content gone again
-    const response = await request(URL).get(`/bucket/${pipelineId}/content/`)
+    const response = await request(STORAGEMQ_URL).get(`/bucket/${pipelineId}/content/`)
     expect(response.status).toEqual(404)
   })
-}, 10000)
-
-const storageMqHealth = async (pingUrl, timeout) => {
-  console.log('Storage-MQ URL= ' + URL)
-  return await waitOn({ resources: [pingUrl], timeout: timeout, log: true })
-}
+}, TIMEOUT)
 
 const amqpConnect = async (amqpUrl, retries, backoff) => {
   console.log('AMQP URL: ' + amqpUrl)
@@ -184,4 +173,16 @@ const amqpConnect = async (amqpUrl, retries, backoff) => {
 
 const sleep = (ms) => {
   return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+const logConfigs = () => {
+  const msg = `
+  AMQP_EXCHANGE: ${AMQP_EXCHANGE}
+  AMQP_PIPELINE_CONFIG_CREATED_TOPIC: ${AMQP_PIPELINE_CONFIG_CREATED_TOPIC}
+  AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: ${AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC}
+
+  [Environment Variable] STORAGEMQ_URL = ${STORAGEMQ_URL}
+  [Environment Variable] AMQP_URL = ${AMQP_URL}
+  `
+  console.log(msg)
 }
