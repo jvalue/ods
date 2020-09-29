@@ -20,7 +20,7 @@ async function waitForServicesToBeReady () {
       RABBIT_HEALTH
     ],
     timeout: TIMEOUT,
-    log: true
+    log: false
   }
 
   await waitOn(waitOptions)
