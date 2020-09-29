@@ -1,8 +1,9 @@
-export interface StorageItem {
-  id: number;
+export type StorageItem = StorageItemMetaData & {
   data: object;
+}
+
+export interface StorageItemMetaData {
+  id: number;
   timestamp: string;
-  origin: string;
-  license: string;
   pipelineId: string;
 }

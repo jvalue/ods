@@ -6,7 +6,6 @@ import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
 import '@mdi/font/css/materialdesignicons.css'
 import TransformationModule from '@/pipeline/edit/transformation/transformation.module'
-import StorageModule from '@/storage/module'
 import AuthModule from '@/components/auth/module'
 import PipelineModule from '@/pipeline/pipeline.module'
 import NotificationModule from './notification/notification.module'
@@ -26,7 +25,6 @@ export const store = new Vuex.Store({
   modules: {
     auth: AuthModule,
     transformation: TransformationModule,
-    storage: StorageModule,
     pipeline: PipelineModule,
     notification: NotificationModule
   }
