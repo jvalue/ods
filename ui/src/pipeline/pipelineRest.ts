@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios'
 import Pipeline from './pipeline'
-import { TRANSFORMATION_SERVICE_URL } from '@/env'
+import { PIPELINE_SERVICE_URL } from '@/env'
 
 /**
  * Axios instances with default headers and base url.
@@ -8,7 +8,7 @@ import { TRANSFORMATION_SERVICE_URL } from '@/env'
  * because of explicit JSON.parser call with custom reviver.
  */
 const httpPipelineConfigs = axios.create({
-  baseURL: `${TRANSFORMATION_SERVICE_URL}/configs`,
+  baseURL: `${PIPELINE_SERVICE_URL}/configs`,
   headers: { 'Content-Type': 'application/json' },
   transformResponse: []
 })

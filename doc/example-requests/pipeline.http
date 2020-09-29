@@ -1,4 +1,4 @@
-@baseURL = http://localhost:9000/api/transformation
+@baseURL = http://localhost:9000/api/pipelines
 
 ### Get all pipelines
 GET {{baseURL}}/configs  HTTP/1.1

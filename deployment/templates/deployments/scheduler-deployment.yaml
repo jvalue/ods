@@ -24,8 +24,8 @@ spec:
       - env:
         - name: ADAPTER_SERVICE_URL
           value: "http://adapter-service:8080"
-        - name: TRANSFORMATION_SERVICE_URL
-          value: "http://transformation-service:8080"
+        - name: PIPELINE_SERVICE_URL
+          value: "http://pipeline-service:8080"
         - name: STORAGE_SERVICE_URL
           value: "http://storage-db-service:3000"
         - name: INITIAL_CONNECTION_RETRIES

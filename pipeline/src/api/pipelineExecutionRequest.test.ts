@@ -2,7 +2,7 @@
 import { PipelineExecutionRequestValidator } from './pipelineExecutionRequest'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const validTransformationRequest = (): any => ({
+const validPipelineRequest = (): any => ({
   func: 'return data + data;',
   data: {}
 })
@@ -27,28 +27,28 @@ describe('PipelineExecutionRequestValidator', () => {
   })
 
   test('should reject invalid data', () => {
-    const invalidDataRequest = validTransformationRequest()
+    const invalidDataRequest = validPipelineRequest()
     invalidDataRequest.data = 123
     expect(validator.validate(invalidDataRequest)).toBeFalsy()
     expect(validator.getErrors().length).toBeGreaterThan(0)
   })
 
   test('should reject missing data', () => {
-    const invalidRequest = validTransformationRequest()
+    const invalidRequest = validPipelineRequest()
     delete invalidRequest.data
     expect(validator.validate(invalidRequest)).toBeFalsy()
     expect(validator.getErrors().length).toBeGreaterThan(0)
   })
 
   test('should reject invalid transformation function', () => {
-    const invalidFuncConfig = validTransformationRequest()
+    const invalidFuncConfig = validPipelineRequest()
     invalidFuncConfig.func = 123
     expect(validator.validate(invalidFuncConfig)).toBeFalsy()
     expect(validator.getErrors().length).toBeGreaterThan(0)
   })
 
   test('should add default identity transformation function', () => {
-    const request = validTransformationRequest()
+    const request = validPipelineRequest()
     delete request.func
 
     const validationResult = validator.validate(request)
@@ -58,7 +58,7 @@ describe('PipelineExecutionRequestValidator', () => {
   })
 
   test('should accept valid trigger request', () => {
-    expect(validator.validate(validTransformationRequest())).toBeTruthy()
+    expect(validator.validate(validPipelineRequest())).toBeTruthy()
     expect(validator.getErrors().length).toEqual(0)
   })
 })

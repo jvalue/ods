@@ -1,7 +1,7 @@
 {
-  "name": "transformation-it",
+  "name": "pipeline-it",
   "version": "1.0.0",
-  "description": "Transformation Service Integration-Tests",
+  "description": "Pipeline Service Integration-Tests",
   "scripts": {
     "test": "jest --runInBand",
     "lint": "./node_modules/.bin/eslint src --ext .js --fix",

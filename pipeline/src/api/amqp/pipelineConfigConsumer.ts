@@ -6,7 +6,7 @@ import {
   AMQP_DATASOURCE_EXECUTION_EXCHANGE,
   AMQP_DATASOURCE_EXECUTION_TOPIC,
   AMQP_DATASOURCE_EXECUTION_SUCCESS_TOPIC,
-  AMQP_TRANSFORMATION_EXECUTION_QUEUE
+  AMQP_PIPELINE_EXECUTION_QUEUE
 } from '../../env'
 import { sleep } from '../../sleep'
 
@@ -42,14 +42,14 @@ export class PipelineConfigConsumer {
   }
 
   private async initChannel (connection: AMQP.Connection): Promise<void> {
-    console.log(`Initializing queue "${AMQP_TRANSFORMATION_EXECUTION_QUEUE}"
+    console.log(`Initializing queue "${AMQP_PIPELINE_EXECUTION_QUEUE}"
       on exchange "${AMQP_DATASOURCE_EXECUTION_EXCHANGE}" with topic "${AMQP_DATASOURCE_EXECUTION_TOPIC}"`)
 
     const channel = await connection.createChannel()
 
     await channel.assertExchange(AMQP_DATASOURCE_EXECUTION_EXCHANGE, 'topic')
 
-    const q = await channel.assertQueue(AMQP_TRANSFORMATION_EXECUTION_QUEUE, {
+    const q = await channel.assertQueue(AMQP_PIPELINE_EXECUTION_QUEUE, {
       exclusive: false
     })
     await channel.bindQueue(q.queue, AMQP_DATASOURCE_EXECUTION_EXCHANGE, AMQP_DATASOURCE_EXECUTION_TOPIC)

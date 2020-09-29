@@ -2,7 +2,7 @@
 /**
  * Event sent by the transformation service upon transformation finish
  */
-export interface TransformationEvent {
+export interface PipelineEvent {
   pipelineId: number
   pipelineName: string
 

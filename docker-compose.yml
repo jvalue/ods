@@ -14,7 +14,7 @@ services:
         UI_BASE_URL: /
         ADAPTER_SERVICE_URL: /api/adapter
         STORAGE_SERVICE_URL: /api/storage
-        TRANSFORMATION_SERVICE_URL: /api/transformation
+        PIPELINE_SERVICE_URL: /api/pipelines
         NOTIFICATION_SERVICE_URL: /api/notification
     labels:
       - "traefik.enable=true"
@@ -161,11 +161,11 @@ services:
     environment:
       API_URL: http://localhost:9400/
 
-  # ----------------- TRANSFORMATION SERVICE (/transformation) --------------------
-  transformation:
-    image: ${DOCKER_REGISTRY}/transformation
+  # ----------------- PIPELINE SERVICE (/pipelines) --------------------
+  pipeline:
+    image: ${DOCKER_REGISTRY}/pipeline
     build:
-      context: ./transformation/
+      context: ./pipeline/
     depends_on:
       - rabbitmq
       - pipeline-db
@@ -190,13 +190,13 @@ services:
       AMQP_DATASOURCE_EXECUTION_EXCHANGE: 'ods_global'
       AMQP_DATASOURCE_EXECUTION_TOPIC: 'datasource.execution.*'
       AMQP_DATASOURCE_EXECUTION_SUCCESS_TOPIC: 'datasource.execution.success'
-      AMQP_TRANSFORMATION_EXECUTION_QUEUE: 'transformation.transformation-execution'
+      AMQP_PIPELINE_EXECUTION_QUEUE: 'pipeline.pipeline-execution'
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.to-transformation.rule=PathPrefix(`/api/transformation`)"
-      - "traefik.http.routers.to-transformation.middlewares=transformation-stripprefix@docker"
-      - "traefik.http.middlewares.transformation-stripprefix.stripprefix.prefixes=/api/transformation"
-      - "traefik.http.services.transformation.loadbalancer.server.port=8080"
+      - "traefik.http.routers.to-pipeline.rule=PathPrefix(`/api/pipelines`)"
+      - "traefik.http.routers.to-pipeline.middlewares=pipeline-stripprefix@docker"
+      - "traefik.http.middlewares.pipeline-stripprefix.stripprefix.prefixes=/api/pipelines"
+      - "traefik.http.services.pipeline.loadbalancer.server.port=8080"
 
   pipeline-db:
     image: postgres

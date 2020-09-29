@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: transformation-service
+  name: pipeline-service
   namespace: {{NAMESPACE}}
   labels:
     app: ods
 spec:
   selector:
-    service: transformation
+    service: pipeline
   ports:
     - protocol: TCP
       port: 8080
