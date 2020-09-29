@@ -46,6 +46,9 @@ import DatasourceForm from './DatasourceForm.vue'
 import Datasource from './datasource'
 import * as DatasourceREST from './datasourceRest'
 
+const MINUTE = 60000
+const HOUR = 3600000
+
 @Component({
   components: { DatasourceForm }
 })
@@ -72,8 +75,8 @@ export default class DatasourceCreate extends Vue {
     },
     trigger: {
       periodic: true,
-      firstExecution: new Date(Date.now() + 600000),
-      interval: 60000
+      firstExecution: new Date(Date.now() + (10 * MINUTE)),
+      interval: HOUR
     }
   }
 
