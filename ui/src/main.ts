@@ -8,7 +8,6 @@ import '@mdi/font/css/materialdesignicons.css'
 import TransformationModule from '@/pipeline/edit/transformation/transformation.module'
 import StorageModule from '@/storage/module'
 import AuthModule from '@/components/auth/module'
-import DatasourceModule from '@/datasource/datasource.module'
 import PipelineModule from '@/pipeline/pipeline.module'
 import NotificationModule from './notification/notification.module'
 
@@ -28,7 +27,6 @@ export const store = new Vuex.Store({
     auth: AuthModule,
     transformation: TransformationModule,
     storage: StorageModule,
-    datasource: DatasourceModule,
     pipeline: PipelineModule,
     notification: NotificationModule
   }
