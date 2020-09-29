@@ -92,7 +92,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { PropSync, Watch } from 'vue-property-decorator'
+import { Emit, PropSync, Watch } from 'vue-property-decorator'
 
 import StepperButtonGroup from '../components/StepperButtonGroup.vue'
 import AdapterConfig from './edit/adapter/AdapterConfig.vue'
@@ -126,8 +126,9 @@ export default class DatasourceForm extends Vue {
         this.validStep4
   }
 
-  private emitIsValid (): void {
-    this.$emit('validityChanged', this.isValid)
+  @Emit('validityChanged')
+  private emitIsValid (): boolean {
+    return this.isValid
   }
 
   @Watch('isValid')

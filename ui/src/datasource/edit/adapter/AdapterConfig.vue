@@ -41,7 +41,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 
-import { PropSync, Watch } from 'vue-property-decorator'
+import { Emit, PropSync, Watch } from 'vue-property-decorator'
 
 import Datasource from '../../datasource'
 import CsvAdapterConfig from './CsvAdapterConfig.vue'
@@ -60,8 +60,9 @@ export default class AdapterConfig extends Vue {
   @PropSync('value')
   private adapterConfig!: Datasource;
 
-  emitValue (): void {
-    this.$emit('value', this.adapterConfig)
+  @Emit('value')
+  emitValue (): Datasource {
+    return this.adapterConfig
   }
 
   private formatChanged (val: string): void {
@@ -82,14 +83,24 @@ export default class AdapterConfig extends Vue {
     }
   }
 
-  emitValid (): void {
+  @Emit('validityChanged')
+  emitValid (): boolean {
     const isValid = this.validForm && this.validFormatParameters
-    this.$emit('validityChanged', isValid)
+    return isValid
   }
 
   @Watch('adapterConfig', { deep: true })
   formChanged (): void {
     this.emitValue()
+  }
+
+  @Watch('validForm')
+  validFormChanged (): void {
+    this.emitValid()
+  }
+
+  @Watch('validFormatParameters')
+  validFormParametersChanged (): void {
     this.emitValid()
   }
 
