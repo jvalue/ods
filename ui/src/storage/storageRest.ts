@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { StorageItem } from '@/storage/storage-item'
+import { StorageItem, StorageItemMetaData } from '@/storage/storage-item'
 import { STORAGE_SERVICE_URL } from '@/env'
 
 const http = axios.create({
@@ -7,9 +7,15 @@ const http = axios.create({
   headers: { 'Content-Type': 'application/json' }
 })
 
-export async function getStoredItems (pipelineId: string): Promise<StorageItem[]> {
-  const response = await http.get(`/${pipelineId}`)
+export async function getStoredItems (pipelineId: string): Promise<StorageItemMetaData[]> {
+  const response = await http.get(`/${pipelineId}?select=id,timestamp,pipelineId`)
   return response.data
+}
+
+export async function getStoredItem (pipelineId: string, storageItemId: string): Promise<StorageItem> {
+  const response = await http.get(`/${pipelineId}?id=eq.${storageItemId}`)
+  const item = response.data[0]
+  return item
 }
 
 export function createUrlForItem (pipelineId: string, itemId: string): string {
