@@ -16,9 +16,9 @@ const {
 
 const AMQP_EXCHANGE = 'ods_global'
 const AMQP_IT_QUEUE = 'adapter-it'
-const EXECUTION_TOPIC = 'pipeline.execution.*'
-const EXECUTION_SUCCESS_TOPIC = 'pipeline.execution.success'
-const EXECUTION_FAILED_TOPIC = 'pipeline.execution.failed'
+const EXECUTION_TOPIC = 'datasource.execution.*'
+const EXECUTION_SUCCESS_TOPIC = 'datasource.execution.success'
+const EXECUTION_FAILED_TOPIC = 'datasource.execution.failed'
 
 const TIMEOUT = 10000
 
