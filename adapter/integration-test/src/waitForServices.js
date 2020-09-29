@@ -10,7 +10,7 @@ const {
   sleep
 } = require('./testHelper')
 
-const TIMEOUT = 500000
+const TIMEOUT = 50000
 
 async function waitForServicesToBeReady () {
   const waitOptions = {

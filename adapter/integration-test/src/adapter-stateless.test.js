@@ -6,6 +6,8 @@ const {
 } = require('./env')
 const { waitForServicesToBeReady } = require('./waitForServices')
 
+const TIMEOUT = 10000
+
 describe('Adapter Stateless', () => {
   beforeAll(async () => {
     await waitForServicesToBeReady()
@@ -18,7 +20,7 @@ describe('Adapter Stateless', () => {
 
     const semanticVersionRegEx = '^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)'
     expect(response.text).toMatch(new RegExp(semanticVersionRegEx))
-  })
+  }, TIMEOUT)
 
   test('GET /formats', async () => {
     const response = await request(ADAPTER_URL).get('/formats')
@@ -30,7 +32,7 @@ describe('Adapter Stateless', () => {
       expect(e.type).toBeDefined()
       expect(e.parameters).toBeDefined()
     })
-  })
+  }, TIMEOUT)
 
   test('GET /protocols', async () => {
     const response = await request(ADAPTER_URL).get('/protocols')
@@ -42,7 +44,7 @@ describe('Adapter Stateless', () => {
       expect(e.type).toBeDefined()
       expect(e.parameters).toBeDefined()
     })
-  })
+  }, TIMEOUT)
 
   test('POST /dataImport JSON-Adapter', async () => {
     const reqBody = {
@@ -68,7 +70,7 @@ describe('Adapter Stateless', () => {
       .send()
     expect(dataResponse.status).toEqual(200)
     expect(dataResponse.body).toEqual({ whateverwillbe: 'willbe', quesera: 'sera' })
-  })
+  }, TIMEOUT)
 
   test('POST /dataImport XML-Adapter', async () => {
     const reqBody = {
@@ -96,7 +98,7 @@ describe('Adapter Stateless', () => {
 
     expect(dataResponse.status).toEqual(200)
     expect(dataResponse.body).toEqual({ from: 'Rick', to: 'Morty' })
-  })
+  }, TIMEOUT)
 
   test('POST /dataImport CSV-Adapter', async () => {
     const reqBody = {
@@ -138,5 +140,5 @@ describe('Adapter Stateless', () => {
         col3: 'val23'
       }
     ])
-  })
+  }, TIMEOUT)
 })

@@ -5,6 +5,8 @@ const {
 } = require('./env')
 const { waitForServicesToBeReady } = require('./waitForServices')
 
+const TIMEOUT = 10000
+
 describe('Adapter Configuration', () => {
   beforeAll(async () => {
     await waitForServicesToBeReady()
@@ -16,7 +18,7 @@ describe('Adapter Configuration', () => {
     expect(response.type).toEqual('application/json')
 
     expect(response.body).toEqual([])
-  })
+  }, TIMEOUT)
 
   test('POST & DELETE /datasources', async () => {
     const response = await request(ADAPTER_URL)
@@ -35,7 +37,7 @@ describe('Adapter Configuration', () => {
       .send()
 
     expect(delResponse.status).toEqual(204)
-  })
+  }, TIMEOUT)
 
   test('PUT & DELETE /datasources/{id}', async () => {
     const postResponse = await request(ADAPTER_URL)
@@ -70,7 +72,7 @@ describe('Adapter Configuration', () => {
       .send()
 
     expect(delResponse.status).toEqual(204)
-  })
+  }, TIMEOUT)
 
   test('DELETE /datasources/', async () => {
     await request(ADAPTER_URL)
@@ -85,7 +87,7 @@ describe('Adapter Configuration', () => {
       .send()
 
     expect(delResponse.status).toEqual(204)
-  })
+  }, TIMEOUT)
 
   test('GET /datasources/events', async () => {
     const response = await request(ADAPTER_URL)
@@ -94,7 +96,7 @@ describe('Adapter Configuration', () => {
 
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('application/json')
-  })
+  }, TIMEOUT)
 
   test('GET /datasources/events?datasourceId={id}', async () => {
     const datasourceResponse = await request(ADAPTER_URL)
@@ -116,7 +118,7 @@ describe('Adapter Configuration', () => {
     expect(eventsResponse.body[0].eventType).toEqual('DATASOURCE_CREATE')
     expect(eventsResponse.body[1].datasourceId).toBe(datasourceId)
     expect(eventsResponse.body[1].eventType).toEqual('DATASOURCE_DELETE')
-  })
+  }, TIMEOUT)
 
   test('GET /events [with offset]', async () => {
     const datasourceResponse = await request(ADAPTER_URL)
@@ -142,7 +144,7 @@ describe('Adapter Configuration', () => {
     expect(eventsAfter.body[0].eventId).toBe(eventId + 1)
     expect(eventsAfter.body[0].datasourceId).toBe(datasourceId)
     expect(eventsAfter.body[0].eventType).toEqual('DATASOURCE_DELETE')
-  })
+  }, TIMEOUT)
 
   test('GET datasources/events/latest', async () => {
     const postResponse = await request(ADAPTER_URL)
@@ -164,7 +166,7 @@ describe('Adapter Configuration', () => {
     expect(response.body.eventId).toBeTruthy()
     expect(response.body.datasourceId).toBe(datasourceId)
     expect(response.body.eventType).toEqual('DATASOURCE_DELETE')
-  })
+  }, TIMEOUT)
 })
 
 const datasourceConfig = {

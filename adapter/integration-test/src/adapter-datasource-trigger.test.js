@@ -19,6 +19,8 @@ const {
   closeAmqp
 } = require('./testHelper')
 
+const TIMEOUT = 10000
+
 const publishedEvents = new Map() // routing key -> received msgs []
 
 describe('Adapter Sources Trigger', () => {
@@ -39,7 +41,7 @@ describe('Adapter Sources Trigger', () => {
     await request(ADAPTER_URL)
       .delete('/configs')
       .send()
-  })
+  }, TIMEOUT)
 
   test('POST datasources/{id}/trigger dynamic', async () => {
     const datasourceResponse = await request(ADAPTER_URL)
@@ -72,7 +74,7 @@ describe('Adapter Sources Trigger', () => {
     expect(publishedEvents.get(EXECUTION_SUCCESS_TOPIC)).toContainEqual({
       datasourceId: datasourceId,
       data: '{"id":"2"}'
-    })
+    }, TIMEOUT)
   })
 
   test('POST datasources/{id}/trigger dynamic defaultvalues', async () => {
