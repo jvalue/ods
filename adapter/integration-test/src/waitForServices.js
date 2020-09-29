@@ -22,9 +22,12 @@ async function waitForServicesToBeReady () {
     timeout: TIMEOUT,
     log: false
   }
-
-  await waitOn(waitOptions)
-  await sleep(STARTUP_DELAY)
+  try {
+    await waitOn(waitOptions)
+    await sleep(STARTUP_DELAY)
+  } catch (err) {
+    throw new Error('Error during setup of tests: ' + err)
+  }
 }
 
 module.exports = { waitForServicesToBeReady }
