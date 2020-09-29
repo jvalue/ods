@@ -10,16 +10,6 @@ describe('Adapter Configuration', () => {
     await waitForServicesToBeReady()
   }, 60000)
 
-  test('GET /version', async () => {
-    const response = await request(ADAPTER_URL).get('/version')
-    expect(response.status).toEqual(200)
-    expect(response.type).toEqual('text/plain')
-
-    //
-    const semanticVersionRegEx = '^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)'
-    expect(response.text).toMatch(new RegExp(semanticVersionRegEx))
-  })
-
   test('GET /datasources', async () => {
     const response = await request(ADAPTER_URL).get('/datasources')
     expect(response.status).toEqual(200)
