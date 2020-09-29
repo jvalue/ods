@@ -51,6 +51,7 @@ import * as DatasourceREST from './datasourceRest'
 })
 export default class DatasourceEdit extends Vue {
   private datasource: Datasource | null = null
+  private isValid = false
 
   mounted (): void {
     const id = parseInt(this.$route.params.datasourceId)
@@ -60,8 +61,6 @@ export default class DatasourceEdit extends Vue {
   private async loadDatasourceById (id: number): Promise<void> {
     this.datasource = await DatasourceREST.getDatasourceById(id)
   }
-
-  private isValid = false
 
   private async onEdit (): Promise<void> {
     if (!this.datasource) {
