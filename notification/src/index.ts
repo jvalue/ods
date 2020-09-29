@@ -8,35 +8,30 @@ import NotificationExecutor from './notification-execution/notificationExecutor'
 import VM2SandboxExecutor from './notification-execution/condition-evaluation/vm2SandboxExecutor'
 import { NotificationConfigEndpoint } from './api/rest/notificationConfigEndpoint'
 import { NotificationExecutionEndpoint } from './api/rest/notificationExecutionEndpoint'
-import { StorageHandler } from './notification-config/storageHandler'
+import { initStorageHandler } from './notification-config/storageHandler'
 import { AmqpHandler } from './api/amqp/amqpHandler'
 import { TriggerEventHandler } from './api/triggerEventHandler'
 import { CONNECTION_RETRIES, CONNECTION_BACKOFF } from './env'
 
 const port = 8080
 
-const sandboxExecutor = new VM2SandboxExecutor()
-const notificationExecutor = new NotificationExecutor(sandboxExecutor)
-const storageHandler = new StorageHandler()
-const triggerEventHandler = new TriggerEventHandler(storageHandler, notificationExecutor)
-const amqpHandler = new AmqpHandler(triggerEventHandler)
-
-const app = express()
-
-app.use(cors())
-app.use(bodyParser.json({ limit: '50mb' }))
-app.use(bodyParser.urlencoded({ extended: false }))
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const notificationConfigEndpoint = new NotificationConfigEndpoint(storageHandler, app)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const notificationExecutionEndpoint = new NotificationExecutionEndpoint(triggerEventHandler, app)
-
-app.listen(port, async () => {
+async function main (): Promise<void> {
+  const storageHandler = await initStorageHandler(CONNECTION_RETRIES, CONNECTION_RETRIES)
+  const sandboxExecutor = new VM2SandboxExecutor()
+  const notificationExecutor = new NotificationExecutor(sandboxExecutor)
+  const triggerEventHandler = new TriggerEventHandler(storageHandler, notificationExecutor)
+  const notificationConfigEndpoint = new NotificationConfigEndpoint(storageHandler)
+  const notificationExecutionEndpoint = new NotificationExecutionEndpoint(triggerEventHandler)
+  const amqpHandler = new AmqpHandler(triggerEventHandler)
   await amqpHandler.connect(CONNECTION_RETRIES, CONNECTION_BACKOFF)
-  await storageHandler.init(CONNECTION_RETRIES, CONNECTION_RETRIES)
 
-  console.log('listening on port ' + port)
+  const app = express()
+  app.use(cors())
+  app.use(bodyParser.json({ limit: '50mb' }))
+  app.use(bodyParser.urlencoded({ extended: false }))
+
+  notificationConfigEndpoint.registerRoutes(app)
+  notificationExecutionEndpoint.registerRoutes(app)
 
   app.get('/', (req: express.Request, res: express.Response): void => {
     res.send('I am alive!')
@@ -45,6 +40,14 @@ app.listen(port, async () => {
   app.get('/version', (req: express.Request, res: express.Response): void => {
     res.header('Content-Type', 'text/plain')
     res.send(notificationExecutor.getVersion())
-    res.end()
   })
-})
+
+  app.listen(port, () => {
+    console.log(`Listening on port ${port}`)
+  })
+}
+
+main()
+  .catch(error => {
+    console.error(`Failed to start notification service: ${error}`)
+  })

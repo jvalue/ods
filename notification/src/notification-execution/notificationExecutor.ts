@@ -16,6 +16,8 @@ import App = firebase.app.App
 
 const VERSION = '0.0.1'
 
+const SLACK_BASE_URL = process.env.SLACK_BASE_URL ?? 'https://hooks.slack.com/services'
+
 export default class NotificationExecutor {
   executor: SandboxExecutor
 
@@ -30,7 +32,7 @@ export default class NotificationExecutor {
   async handleWebhook (webhook: WebhookConfig, dataLocation: string, message: string, data?: object): Promise<void> {
     console.log(`WebhookNotificationRequest received for pipeline: ${webhook.pipelineId}.`)
     const conditionHolds = this.executor.evaluate(webhook.condition, data)
-    console.log('Condition is ' + conditionHolds)
+    console.log(`Condition is ${conditionHolds}`)
     if (!conditionHolds) { // no need to trigger notification
       return
     }
@@ -47,19 +49,15 @@ export default class NotificationExecutor {
   async handleSlack (slack: SlackConfig, dataLocation: string, message: string, data?: object): Promise<void> {
     console.log(`SlackNotificationRequest received for pipeline: ${slack.pipelineId}.`)
     const conditionHolds = this.executor.evaluate(slack.condition, data)
-    console.log('Condition is ' + conditionHolds)
+    console.log(`Condition is ${conditionHolds}`)
     if (!conditionHolds) { // no need to trigger notification
       return
     }
 
-    let slackBaseUri = 'https://hooks.slack.com/services'
-    if (process.env.MOCK_RECEIVER_HOST && process.env.MOCK_RECEIVER_PORT) {
-      slackBaseUri = `http://${process.env.MOCK_RECEIVER_HOST}:${process.env.MOCK_RECEIVER_PORT}/slack`
-    }
     const callbackObject: SlackCallback = {
       text: message
     }
-    const url = `${slackBaseUri}/${slack.workspaceId}/${slack.channelId}/${slack.secret}`
+    const url = `${SLACK_BASE_URL}/${slack.workspaceId}/${slack.channelId}/${slack.secret}`
     console.log(`Posting slack notification to ${url}, callbackObject: ${JSON.stringify(callbackObject)}`)
     await axios.post(url, callbackObject)
   }
@@ -68,7 +66,7 @@ export default class NotificationExecutor {
   (firebaseConfig: FirebaseConfig, dataLocation: string, message: string, data?: object): Promise<void> {
     console.log(`FirebaseNotificationRequest received for pipeline: ${firebaseConfig.pipelineId}.`)
     const conditionHolds = this.executor.evaluate(firebaseConfig.condition, data)
-    console.log('Condition is ' + conditionHolds)
+    console.log(`Condition is ${conditionHolds}`)
     if (!conditionHolds) { // no need to trigger notification
       return
     }

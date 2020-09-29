@@ -81,8 +81,7 @@ services:
    # ----------------- NOTIFICATION SERVICE (PORTS #TODO) --------------------
   notification:
     environment:
-      MOCK_RECEIVER_HOST: notification-it
-      MOCK_RECEIVER_PORT: 8081
+      SLACK_BASE_URL: http://notification-it:8081/slack
 
   notification-it:
     image: open-data-service/ods-main/notification-it
@@ -90,5 +89,4 @@ services:
       context: ./notification/integration-test/
     environment:
       NOTIFICATION_API: http://notification:8080
-      MOCK_RECEIVER_HOST: notification-it
-      MOCK_RECEIVER_PORT: 8081
+      MOCK_RECEIVER_URL: http://notification-it:8081
