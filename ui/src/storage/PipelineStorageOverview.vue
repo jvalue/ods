@@ -57,49 +57,10 @@
                   </div>
                 </v-expansion-panel-header>
                 <v-expansion-panel-content>
-                  <v-card class="grey lighten-3">
-                    <v-list class="grey lighten-3">
-                      <v-list-item>
-                        <v-list-item-content>
-                          <v-list-item-title>Origin</v-list-item-title>
-                          <v-list-item-subtitle>{{ entry.origin }}</v-list-item-subtitle>
-                        </v-list-item-content>
-                      </v-list-item>
-                      <v-list-item>
-                        <v-list-item-content>
-                          <v-list-item-title>License</v-list-item-title>
-                          <v-list-item-subtitle>{{ entry.license }}</v-list-item-subtitle>
-                        </v-list-item-content>
-                      </v-list-item>
-                    </v-list>
-
-                    <v-divider />
-
-                    <v-container fluid>
-                      <pre style="max-height: 400px; overflow:auto; text-align: left">{{ entry.data }}</pre>
-                    </v-container>
-
-                    <v-divider />
-
-                    <v-list class="grey lighten-3">
-                      <v-list-item>
-                        <v-list-item-content>
-                          <v-list-item-title>Static Link</v-list-item-title>
-                          <v-list-item-subtitle>{{ getStorageItemUrl(pipelineId, entry.id) }}</v-list-item-subtitle>
-                        </v-list-item-content>
-                        <v-list-item-action>
-                          <v-btn
-                            icon
-                            @click="clipUrl(getStorageItemUrl(pipelineId, entry.id))"
-                          >
-                            <v-icon color="grey lighten-1">
-                              mdi mdi-content-copy
-                            </v-icon>
-                          </v-btn>
-                        </v-list-item-action>
-                      </v-list-item>
-                    </v-list>
-                  </v-card>
+                  <storage-item-view
+                    :pipeline-id="pipelineId"
+                    :item-id="entry.id"
+                  />
                 </v-expansion-panel-content>
               </v-expansion-panel>
             </v-expansion-panels>
@@ -113,29 +74,26 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { Action, State } from 'vuex-class'
+
+import StorageItemView from './StorageItemView.vue'
+
+import { StorageItemMetaData } from './storage-item'
+import * as StorageREST from './storageRest'
 
 import clipboardCopy from 'clipboard-copy'
 
-import * as StorageClient from './storageRest'
-import { StorageItem } from './storage-item'
-
-const namespace = { namespace: 'storage' }
-
-@Component
+@Component({
+  components: { StorageItemView }
+})
 export default class PipelineStorageOverview extends Vue {
-  @State('data', namespace)
-  private data!: StorageItem[]
-
-  @Action('fetchData', namespace)
-  private fetchData!: (pipelineId: string) => void
+  private data: StorageItemMetaData[] = []
 
   private pipelineId = ''
 
   private clipUrl: (content: string) => Promise<void> = clipboardCopy
 
   private getStorageItemUrl (pipelineId: string, itemId: string): string {
-    let url = StorageClient.createUrlForItem(pipelineId, itemId)
+    let url = StorageREST.createUrlForItem(pipelineId, itemId)
     if (url.startsWith('/')) {
       url = window.location.origin + url
     }
@@ -143,7 +101,7 @@ export default class PipelineStorageOverview extends Vue {
   };
 
   private getLatestStorageItemUrl (pipelineId: string): string {
-    let url = StorageClient.createUrlForLatestItem(pipelineId)
+    let url = StorageREST.createUrlForLatestItem(pipelineId)
     if (url.startsWith('/')) {
       url = window.location.origin + url
     }
@@ -152,7 +110,11 @@ export default class PipelineStorageOverview extends Vue {
 
   private created (): void {
     this.pipelineId = this.$route.params.storageId
-    this.fetchData(this.pipelineId)
+    this.fetchMetaData(this.pipelineId)
+  }
+
+  private async fetchMetaData (pipelineId: string): Promise<void> {
+    this.data = await StorageREST.getStoredItems(pipelineId)
   }
 }
 </script>
