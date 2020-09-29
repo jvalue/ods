@@ -4,20 +4,18 @@ const request = require('supertest')
 const waitOn = require('wait-on')
 const amqp = require('amqplib')
 
-const URL = process.env.ADAPTER_API || 'http://localhost:9000/api/adapter'
-
-const RABBIT_HEALTH = `http://${process.env.RABBIT_HOST}:15672`
-const AMQP_URL = process.env.AMQP_URL
-const AMQP_EXCHANGE = process.env.AMQP_EXCHANGE
-const AMQP_IT_QUEUE = process.env.AMQP_IT_QUEUE
-const MOCK_SERVER_PORT = process.env.MOCK_SERVER_PORT || 8081
-const MOCK_SERVER_HOST = process.env.MOCK_SERVER_HOST || 'localhost'
-const MOCK_SERVER_URL = 'http://' + MOCK_SERVER_HOST + ':' + MOCK_SERVER_PORT
-const EXECUTION_TOPIC = process.env.AMQP_IMPORT_TOPIC
-const EXECUTION_SUCCESS_TOPIC = process.env.AMQP_IMPORT_SUCCESS_TOPIC
-const EXECUTION_FAILED_TOPIC = process.env.AMQP_IMPORT_FAILED_TOPIC
-
-const STARTUP_DELAY = 5000
+const {
+  ADAPTER_URL,
+  MOCK_SERVER_URL,
+  RABBIT_HEALTH,
+  AMQP_URL,
+  AMQP_EXCHANGE,
+  AMQP_IT_QUEUE,
+  EXECUTION_TOPIC,
+  EXECUTION_FAILED_TOPIC,
+  EXECUTION_SUCCESS_TOPIC,
+  STARTUP_DELAY
+} = require('./env')
 
 let amqpConnection
 const publishedEvents = new Map() // routing key -> received msgs []
@@ -25,7 +23,7 @@ const publishedEvents = new Map() // routing key -> received msgs []
 describe('Adapter Sources Trigger', () => {
   beforeAll(async () => {
     console.log('Starting adapter sources trigger test')
-    const pingUrl = URL + '/version'
+    const pingUrl = ADAPTER_URL + '/version'
     await waitOn({ resources: [MOCK_SERVER_URL, pingUrl, RABBIT_HEALTH], timeout: 50000, log: true })
 
     await sleep(STARTUP_DELAY)
@@ -45,27 +43,27 @@ describe('Adapter Sources Trigger', () => {
     }
 
     // clear stored configs
-    await request(URL)
+    await request(ADAPTER_URL)
       .delete('/configs')
       .send()
   })
 
   test('POST datasources/{id}/trigger dynamic', async () => {
-    const datasourceResponse = await request(URL)
+    const datasourceResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(dynamicDatasourceConfig)
     const datasourceId = datasourceResponse.body.id
 
-    const dataMetaData = await request(URL)
+    const dataMetaData = await request(ADAPTER_URL)
       .post(`/datasources/${datasourceId}/trigger`)
       .send(runtimeParameters)
 
     const id = dataMetaData.body.id
-    const data = await request(URL)
+    const data = await request(ADAPTER_URL)
       .get(`/data/${id}`)
       .send()
 
-    const delResponse = await request(URL)
+    const delResponse = await request(ADAPTER_URL)
       .delete(`/datasources/${datasourceId}`)
       .send()
 
@@ -85,21 +83,21 @@ describe('Adapter Sources Trigger', () => {
   })
 
   test('POST datasources/{id}/trigger dynamic defaultvalues', async () => {
-    const datasourceResponse = await request(URL)
+    const datasourceResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(dynamicDatasourceConfig)
     const datasourceId = datasourceResponse.body.id
 
-    const dataMetaData = await request(URL)
+    const dataMetaData = await request(ADAPTER_URL)
       .post(`/datasources/${datasourceId}/trigger`)
       .send(null)
 
     const id = dataMetaData.body.id
-    const data = await request(URL)
+    const data = await request(ADAPTER_URL)
       .get(`/data/${id}`)
       .send()
 
-    const delResponse = await request(URL)
+    const delResponse = await request(ADAPTER_URL)
       .delete(`/datasources/${datasourceId}`)
       .send()
 
@@ -119,21 +117,21 @@ describe('Adapter Sources Trigger', () => {
   })
 
   test('POST datasources/{id}/trigger static', async () => {
-    const datasourceResponse = await request(URL)
+    const datasourceResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(staticDatasourceConfig)
     const datasourceId = datasourceResponse.body.id
 
-    const dataMetaData = await request(URL)
+    const dataMetaData = await request(ADAPTER_URL)
       .post(`/datasources/${datasourceId}/trigger`)
       .send(null)
 
     const id = dataMetaData.body.id
-    const normalData = await request(URL)
+    const normalData = await request(ADAPTER_URL)
       .get(`/data/${id}`)
       .send()
 
-    const delResponse = await request(URL)
+    const delResponse = await request(ADAPTER_URL)
       .delete(`/datasources/${datasourceId}`)
       .send()
 
@@ -154,19 +152,19 @@ describe('Adapter Sources Trigger', () => {
   test('POST datasource/{id}/trigger FAIL', async () => {
     const brokenDatasourceConfig = Object.assign({}, staticDatasourceConfig)
     brokenDatasourceConfig.protocol.parameters.location = 'LOL'
-    const datasourceResponse = await request(URL)
+    const datasourceResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(brokenDatasourceConfig)
 
     const datasourceId = datasourceResponse.body.id
 
-    const triggerResponse = await request(URL)
+    const triggerResponse = await request(ADAPTER_URL)
       .post(`/datasources/${datasourceId}/trigger`)
       .send()
 
     expect(triggerResponse.status).toBeGreaterThan(300) // request should fail (no 2xx status)
 
-    const delResponse = await request(URL)
+    const delResponse = await request(ADAPTER_URL)
       .delete(`/datasources/${datasourceId}`)
       .send()
 

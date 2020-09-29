@@ -1,18 +1,18 @@
 const request = require('supertest')
 const waitOn = require('wait-on')
 
-const URL = process.env.ADAPTER_API || 'http://localhost:9000/api/adapter'
-const MOCK_SERVER_PORT = process.env.MOCK_SERVER_PORT || 8081
-const MOCK_SERVER_HOST = process.env.MOCK_SERVER_HOST || 'localhost'
-const MOCK_SERVER_URL = 'http://' + MOCK_SERVER_HOST + ':' + MOCK_SERVER_PORT
-const RABBIT_URL = `http://${process.env.RABBIT_HOST}:15672`
+const {
+  ADAPTER_URL,
+  MOCK_SERVER_URL,
+  RABBIT_HEALTH
+} = require('./env')
 
 describe('Adapter Stateless', () => {
   beforeAll(async () => {
     try {
-      const pingUrl = URL + '/version'
+      const pingUrl = ADAPTER_URL + '/version'
       console.log('Starting adapter stateless test')
-      await waitOn({ resources: [MOCK_SERVER_URL, RABBIT_URL, pingUrl], timeout: 50000, log: true })
+      await waitOn({ resources: [MOCK_SERVER_URL, RABBIT_HEALTH, pingUrl], timeout: 50000, log: true })
       console.log('Wait on complete')
     } catch (err) {
       process.exit(1)
@@ -20,7 +20,7 @@ describe('Adapter Stateless', () => {
   }, 60000)
 
   test('GET /version', async () => {
-    const response = await request(URL).get('/version')
+    const response = await request(ADAPTER_URL).get('/version')
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('text/plain')
 
@@ -29,7 +29,7 @@ describe('Adapter Stateless', () => {
   })
 
   test('GET /formats', async () => {
-    const response = await request(URL).get('/formats')
+    const response = await request(ADAPTER_URL).get('/formats')
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('application/json')
     expect(response.body.length).toBeGreaterThanOrEqual(2)
@@ -41,7 +41,7 @@ describe('Adapter Stateless', () => {
   })
 
   test('GET /protocols', async () => {
-    const response = await request(URL).get('/protocols')
+    const response = await request(ADAPTER_URL).get('/protocols')
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('application/json')
     expect(response.body.length).toBeGreaterThanOrEqual(1)
@@ -65,13 +65,13 @@ describe('Adapter Stateless', () => {
         type: 'JSON'
       }
     }
-    const response = await request(URL)
+    const response = await request(ADAPTER_URL)
       .post('/dataImport')
       .send(reqBody)
     expect(response.status).toEqual(200)
     const dataBlobId = response.body.id
 
-    const dataResponse = await request(URL)
+    const dataResponse = await request(ADAPTER_URL)
       .get(`/data/${dataBlobId}`)
       .send()
     expect(dataResponse.status).toEqual(200)
@@ -92,13 +92,13 @@ describe('Adapter Stateless', () => {
       }
     }
 
-    const response = await request(URL)
+    const response = await request(ADAPTER_URL)
       .post('/dataImport')
       .send(reqBody)
     expect(response.status).toEqual(200)
 
     const dataBlobId = response.body.id
-    const dataResponse = await request(URL)
+    const dataResponse = await request(ADAPTER_URL)
       .get(`/data/${dataBlobId}`)
       .send()
 
@@ -125,13 +125,13 @@ describe('Adapter Stateless', () => {
         }
       }
     }
-    const response = await request(URL)
+    const response = await request(ADAPTER_URL)
       .post('/dataImport')
       .send(reqBody)
     expect(response.status).toEqual(200)
 
     const dataBlobId = response.body.id
-    const dataResponse = await request(URL)
+    const dataResponse = await request(ADAPTER_URL)
       .get(`/data/${dataBlobId}`)
       .send()
     expect(dataResponse.status).toEqual(200)

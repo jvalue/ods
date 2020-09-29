@@ -1,25 +1,25 @@
 const request = require('supertest')
 const waitOn = require('wait-on')
 
-const URL = process.env.ADAPTER_API || 'http://localhost:9000/api/adapter'
-const MOCK_SERVER_PORT = process.env.MOCK_SERVER_PORT || 8081
-const MOCK_SERVER_HOST = process.env.MOCK_SERVER_HOST || 'localhost'
-const MOCK_SERVER_URL = 'http://' + MOCK_SERVER_HOST + ':' + MOCK_SERVER_PORT
-const RABBIT_URL = `http://${process.env.RABBIT_HOST}:15672`
+const {
+  ADAPTER_URL,
+  MOCK_SERVER_URL,
+  RABBIT_HEALTH
+} = require('./env')
 
 describe('Adapter Configuration', () => {
   beforeAll(async () => {
     try {
       console.log('Starting adapter configuration test')
-      const pingUrl = URL + '/version'
-      await waitOn({ resources: [pingUrl, MOCK_SERVER_URL, RABBIT_URL], timeout: 50000, log: true })
+      const pingUrl = ADAPTER_URL + '/version'
+      await waitOn({ resources: [pingUrl, MOCK_SERVER_URL, RABBIT_HEALTH], timeout: 50000, log: true })
     } catch (err) {
       process.exit(1)
     }
   }, 60000)
 
   test('GET /version', async () => {
-    const response = await request(URL).get('/version')
+    const response = await request(ADAPTER_URL).get('/version')
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('text/plain')
 
@@ -29,7 +29,7 @@ describe('Adapter Configuration', () => {
   })
 
   test('GET /datasources', async () => {
-    const response = await request(URL).get('/datasources')
+    const response = await request(ADAPTER_URL).get('/datasources')
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('application/json')
 
@@ -37,7 +37,7 @@ describe('Adapter Configuration', () => {
   })
 
   test('POST & DELETE /datasources', async () => {
-    const response = await request(URL)
+    const response = await request(ADAPTER_URL)
       .post('/datasources')
       .send(datasourceConfig)
 
@@ -48,7 +48,7 @@ describe('Adapter Configuration', () => {
     expect(response.body.id).toBeDefined()
     expect(response.body.id).not.toEqual(datasourceConfig.id) // id not under control of client
 
-    const delResponse = await request(URL)
+    const delResponse = await request(ADAPTER_URL)
       .delete('/datasources/' + response.body.id)
       .send()
 
@@ -56,25 +56,25 @@ describe('Adapter Configuration', () => {
   })
 
   test('PUT & DELETE /datasources/{id}', async () => {
-    const postResponse = await request(URL)
+    const postResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(datasourceConfig)
 
     const datasourceId = postResponse.body.id
 
-    const originalGetResponse = await request(URL)
+    const originalGetResponse = await request(ADAPTER_URL)
       .get('/datasources/' + datasourceId)
 
     const updatedConfig = Object.assign({}, datasourceConfig)
     updatedConfig.protocol.parameters.location = 'http://www.disrespect.com'
 
-    const putResponse = await request(URL)
+    const putResponse = await request(ADAPTER_URL)
       .put('/datasources/' + datasourceId)
       .send(updatedConfig)
 
     expect(putResponse.status).toEqual(204)
 
-    const updatedGetResponse = await request(URL)
+    const updatedGetResponse = await request(ADAPTER_URL)
       .get('/datasources/' + datasourceId)
 
     expect(originalGetResponse.body.metadata).toEqual(updatedGetResponse.body.metadata)
@@ -83,7 +83,7 @@ describe('Adapter Configuration', () => {
     // not sure if it should behave like that?!
     expect(originalGetResponse.body.adapter).toEqual(updatedGetResponse.body.adapter)
 
-    const delResponse = await request(URL)
+    const delResponse = await request(ADAPTER_URL)
       .delete('/datasources/' + datasourceId)
       .send()
 
@@ -91,14 +91,14 @@ describe('Adapter Configuration', () => {
   })
 
   test('DELETE /datasources/', async () => {
-    await request(URL)
+    await request(ADAPTER_URL)
       .post('/datasources')
       .send(datasourceConfig)
-    await request(URL)
+    await request(ADAPTER_URL)
       .post('/datasources')
       .send(datasourceConfig)
 
-    const delResponse = await request(URL)
+    const delResponse = await request(ADAPTER_URL)
       .delete('/datasources/')
       .send()
 
@@ -106,7 +106,7 @@ describe('Adapter Configuration', () => {
   })
 
   test('GET /datasources/events', async () => {
-    const response = await request(URL)
+    const response = await request(ADAPTER_URL)
       .get('/datasources/events')
       .send()
 
@@ -115,15 +115,15 @@ describe('Adapter Configuration', () => {
   })
 
   test('GET /datasources/events?datasourceId={id}', async () => {
-    const datasourceResponse = await request(URL)
+    const datasourceResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(datasourceConfig)
     const datasourceId = datasourceResponse.body.id
 
-    await request(URL)
+    await request(ADAPTER_URL)
       .delete('/datasources/' + datasourceId)
 
-    const eventsResponse = await request(URL)
+    const eventsResponse = await request(ADAPTER_URL)
       .get('/datasources/events?datasourceId=' + datasourceId)
       .send()
 
@@ -137,20 +137,20 @@ describe('Adapter Configuration', () => {
   })
 
   test('GET /events [with offset]', async () => {
-    const datasourceResponse = await request(URL)
+    const datasourceResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(datasourceConfig)
     const datasourceId = datasourceResponse.body.id
 
-    await request(URL)
+    await request(ADAPTER_URL)
       .delete('/datasources/' + datasourceId)
 
-    const eventsResponse = await request(URL)
+    const eventsResponse = await request(ADAPTER_URL)
       .get('/datasources/events?datasourceId=' + datasourceId)
       .send()
     const eventId = eventsResponse.body[0].eventId
 
-    const eventsAfter = await request(URL)
+    const eventsAfter = await request(ADAPTER_URL)
       .get('/datasources/events?after=' + eventId)
       .send()
 
@@ -163,16 +163,16 @@ describe('Adapter Configuration', () => {
   })
 
   test('GET datasources/events/latest', async () => {
-    const postResponse = await request(URL)
+    const postResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(datasourceConfig)
     const datasourceId = postResponse.body.id
 
-    await request(URL)
+    await request(ADAPTER_URL)
       .delete('/datasources/' + datasourceId)
       .send()
 
-    const response = await request(URL)
+    const response = await request(ADAPTER_URL)
       .get('/datasources/events/latest')
       .send()
 
