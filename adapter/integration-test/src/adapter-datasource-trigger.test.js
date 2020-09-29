@@ -16,6 +16,9 @@ const {
   EXECUTION_SUCCESS_TOPIC,
   STARTUP_DELAY
 } = require('./env')
+const {
+  sleep
+} = require('./testHelper')
 
 let amqpConnection
 const publishedEvents = new Map() // routing key -> received msgs []
@@ -262,8 +265,4 @@ const runtimeParameters = {
   parameters: {
     id: '2'
   }
-}
-
-function sleep (ms) {
-  return new Promise(resolve => setTimeout(resolve, ms))
 }
