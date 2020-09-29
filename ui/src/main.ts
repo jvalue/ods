@@ -25,7 +25,6 @@ export const store = new Vuex.Store({
   modules: {
     auth: AuthModule,
     transformation: TransformationModule,
-    datasource: DatasourceModule,
     pipeline: PipelineModule,
     notification: NotificationModule
   }
