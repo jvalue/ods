@@ -1,4 +1,4 @@
-import * as express from 'express'
+import express from 'express'
 
 import {
   SlackConfig,
@@ -11,11 +11,9 @@ import { NotificationRepository } from '../../notification-config/notificationRe
 import { hasProperty, isObject } from '../../validators'
 
 export class NotificationConfigEndpoint {
-  storageHandler: NotificationRepository
+  constructor (private readonly storageHandler: NotificationRepository) {}
 
-  constructor (storageHandler: NotificationRepository, app: express.Application) {
-    this.storageHandler = storageHandler
-
+  registerRoutes = (app: express.Application): void => {
     // Create Configs
     app.post('/config/:configType', this.handleConfigCreation)
 
@@ -38,9 +36,9 @@ export class NotificationConfigEndpoint {
    */
   handleConfigSummaryRequest = async (req: express.Request, res: express.Response): Promise<void> => {
     const pipelineId = parseInt(req.params.id)
-    console.log(`Received request for configs with pipeline id ${pipelineId} from Host ${req.connection.remoteAddress}`)
+    console.log(`Received request for configs with pipeline id ${pipelineId}`)
 
-    if (!pipelineId) {
+    if (isNaN(pipelineId)) {
       console.error('Request for config: ID not set')
       res.status(400).send('Pipeline ID is not set.')
       return
@@ -57,9 +55,9 @@ export class NotificationConfigEndpoint {
     */
   handleSlackRequest = async (req: express.Request, res: express.Response): Promise<void> => {
     const id = parseInt(req.params.id)
-    console.log(`Received request for slack config with id ${id} from Host ${req.connection.remoteAddress}`)
+    console.log(`Received request for slack config with id ${id}`)
 
-    if (!id) {
+    if (isNaN(id)) {
       console.error('Request for config: ID not set')
       res.status(400).send('Slack ID is not set.')
       return
@@ -80,9 +78,9 @@ export class NotificationConfigEndpoint {
    */
   handleWebhookRequest = async (req: express.Request, res: express.Response): Promise<void> => {
     const id = parseInt(req.params.id)
-    console.log(`Received request for webhook config with id ${id} from Host ${req.connection.remoteAddress}`)
+    console.log(`Received request for webhook config with id ${id}`)
 
-    if (!id) {
+    if (isNaN(id)) {
       console.error('Request for config: ID not set')
       res.status(400).send('webhook ID is not set.')
       return
@@ -103,9 +101,9 @@ export class NotificationConfigEndpoint {
    */
   handleFCMRequest = async (req: express.Request, res: express.Response): Promise<void> => {
     const id = parseInt(req.params.id)
-    console.log(`Received request for firebase config with id ${id} from Host ${req.connection.remoteAddress}`)
+    console.log(`Received request for firebase config with id ${id}`)
 
-    if (!id) {
+    if (isNaN(id)) {
       console.error('Request for config: ID not set')
       res.status(400).send('Firebase ID is not set.')
       return
@@ -126,14 +124,9 @@ export class NotificationConfigEndpoint {
    * it to the database on success
    */
   handleConfigCreation = async (req: express.Request, res: express.Response): Promise<void> => {
-    console.log(`Received request to create notification config from host ${req.connection.remoteAddress}`)
+    console.log('Received request to create notification config')
 
     const notificationType = req.params.configType
-    if (!notificationType) {
-      res.status(400).send('No notification type provided')
-      res.end()
-      return
-    }
 
     if (!NotificationConfigEndpoint.isValidNotificationConfig(req.body)) {
       res.status(400).send('Malformed notification request.')
@@ -253,12 +246,6 @@ export class NotificationConfigEndpoint {
   handleConfigDeletion = async (req: express.Request, res: express.Response): Promise<void> => {
     const configType = req.params.configType
 
-    if (!configType) {
-      console.warn('Cannot delete notification: Not valid config type provided')
-      res.status(400).send('Cannot delete notification: Not valid config type provided')
-      return
-    }
-
     try {
       switch (configType) {
         case CONFIG_TYPE.WEBHOOK:
@@ -292,12 +279,6 @@ export class NotificationConfigEndpoint {
   handleConfigRequest = async (req: express.Request, res: express.Response): Promise<void> => {
     const configType = req.params.configType
 
-    if (!configType) {
-      console.warn('Cannot request config(s): Not valid config type provided')
-      res.status(400).send('Cannot request config(s): Not valid config type provided')
-      return
-    }
-
     switch (configType) {
       case CONFIG_TYPE.WEBHOOK:
         await this.handleWebhookRequest(req, res)
@@ -323,7 +304,7 @@ export class NotificationConfigEndpoint {
   handlePipelineDelete = (req: express.Request, res: express.Response): void => {
     const pipelineId = parseInt(req.params.id)
 
-    if (!pipelineId) {
+    if (isNaN(pipelineId)) {
       console.warn('Cannot delete Pipeline: Not valid id provided')
       res.status(400).send('Cannot delete Pipeline: Not valid id provided')
       return
@@ -354,7 +335,7 @@ export class NotificationConfigEndpoint {
     const configId = parseInt(req.params.id)
     console.log(`Received deletion request for slack config with id ${configId}`)
 
-    if (!configId) {
+    if (isNaN(configId)) {
       console.error('Request for config: ID not set')
       res.status(400).send('Pipeline ID is not set.')
       return
@@ -375,7 +356,7 @@ export class NotificationConfigEndpoint {
     const configId = parseInt(req.params.id)
     console.log(`Received deletion request for firebase configs with id ${configId}`)
 
-    if (!configId) {
+    if (isNaN(configId)) {
       console.error('Request for config: ID not set')
       res.status(400).send('Pipeline ID is not set.')
       return
@@ -397,7 +378,7 @@ export class NotificationConfigEndpoint {
 
     console.log(`Received deletion request for webhook configs with id ${configId}`)
 
-    if (!configId) {
+    if (isNaN(configId)) {
       console.error('Request for config: ID not set')
       res.status(400).send('Pipeline ID is not set.')
       return
@@ -414,18 +395,12 @@ export class NotificationConfigEndpoint {
    * it to the database on success
    */
   handleConfigUpdate = async (req: express.Request, res: express.Response): Promise<void> => {
-    console.log(`Received notification config update request from Host ${req.connection.remoteAddress}`)
+    console.log('Received notification config update request')
     const configType = req.params.configType
     const id = parseInt(req.params.id)
 
-    if (!id) {
+    if (isNaN(id)) {
       console.warn('No valid id for notification update request provided')
-      res.send(400).send('No valid id for notification update request provided')
-      return
-    }
-
-    if (!configType) {
-      console.warn('No valid notification Type for notification update request provided')
       res.send(400).send('No valid id for notification update request provided')
       return
     }

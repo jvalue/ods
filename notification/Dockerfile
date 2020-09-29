@@ -11,7 +11,7 @@ RUN npm ci
 
 # copy rest of the files
 COPY ./tsconfig.json ./
-COPY ./.eslintrc ./
+COPY ./.eslintrc.js ./
 COPY ./jest.config.js ./
 COPY ./src ./src
 

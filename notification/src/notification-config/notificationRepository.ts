@@ -2,7 +2,6 @@ import { NotificationSummary } from './notificationSummary'
 import { FirebaseConfig, SlackConfig, WebhookConfig } from './notificationConfig'
 
 export interface NotificationRepository {
-  init: (retries: number, backoff: number) => void
   getConfigsForPipeline: (pipelineId: number) => Promise<NotificationSummary>
   deleteConfigsForPipelineID: (pipelineId: number) => void
 

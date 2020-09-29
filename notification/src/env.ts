@@ -1,4 +1,4 @@
-const isEmpty = (value: string | undefined): value is undefined => !value || value === ''
+const isEmpty = (value: string | undefined): value is undefined => value === undefined || value === ''
 
 const getEnv = (envName: string): string => {
   const env = process.env[envName]
@@ -24,5 +24,4 @@ export const POSTGRES_DB = getEnv('POSTGRES_DB')
 export const AMQP_URL = getEnv('AMQP_URL')
 export const AMQP_PIPELINE_EXECUTION_EXCHANGE = getEnv('AMQP_PIPELINE_EXECUTION_EXCHANGE')
 export const AMQP_PIPELINE_EXECUTION_QUEUE = getEnv('AMQP_PIPELINE_EXECUTION_QUEUE')
-export const AMQP_PIPELINE_EXECUTION_TOPIC = getEnv('AMQP_PIPELINE_EXECUTION_TOPIC')
 export const AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC = getEnv('AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC')
