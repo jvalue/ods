@@ -147,6 +147,7 @@ export default class DatsourceOverview extends Vue {
 
   private async onDelete (datasource: Datasource): Promise<void> {
     await DatasourceREST.deleteDatasource(datasource.id)
+    await this.loadDataSources()
   }
 
   private onCreatePipeline (datasource: Datasource): void {
