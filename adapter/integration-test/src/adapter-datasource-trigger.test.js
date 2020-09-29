@@ -5,12 +5,7 @@ const request = require('supertest')
 const {
   ADAPTER_URL,
   MOCK_SERVER_URL,
-  AMQP_URL,
-  AMQP_EXCHANGE,
-  AMQP_IT_QUEUE,
-  EXECUTION_TOPIC,
-  EXECUTION_FAILED_TOPIC,
-  EXECUTION_SUCCESS_TOPIC
+  AMQP_URL
 } = require('./env')
 const { waitForServicesToBeReady } = require('./waitForServices')
 const {
@@ -18,6 +13,12 @@ const {
   receiveAmqp,
   closeAmqp
 } = require('./testHelper')
+
+const AMQP_EXCHANGE = 'ods_global'
+const AMQP_IT_QUEUE = 'adapter-it'
+const EXECUTION_TOPIC = 'pipeline.execution.*'
+const EXECUTION_SUCCESS_TOPIC = 'pipeline.execution.success'
+const EXECUTION_FAILED_TOPIC = 'pipeline.execution.failed'
 
 const TIMEOUT = 10000
 

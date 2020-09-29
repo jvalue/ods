@@ -19,10 +19,6 @@ services:
       RABBIT_HEALTH: http://rabbitmq:15672
       AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
       AMQP_EXCHANGE: 'ods_global'
-      AMQP_EXECUTION_TOPIC: 'datasource.execution.*'
-      AMQP_EXECUTION_SUCCESS_TOPIC: 'datasource.execution.success'
-      AMQP_EXECUTION_FAILED_TOPIC: 'datasource.execution.failed'
-      AMQP_IT_QUEUE: adapter-it
       STARTUP_DELAY: 5000
 
     depends_on:
