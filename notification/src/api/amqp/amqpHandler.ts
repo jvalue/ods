@@ -4,7 +4,6 @@ import {
   AMQP_URL,
   AMQP_PIPELINE_EXECUTION_EXCHANGE,
   AMQP_PIPELINE_EXECUTION_QUEUE,
-  AMQP_PIPELINE_EXECUTION_TOPIC,
   AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC
 } from '../../env'
 import { sleep } from '../../sleep'
@@ -61,17 +60,17 @@ export class AmqpHandler {
       exclusive: false
     })
 
-    await channel.bindQueue(q.queue, AMQP_PIPELINE_EXECUTION_EXCHANGE, AMQP_PIPELINE_EXECUTION_TOPIC)
-    await channel.consume(q.queue, async (msg: AMQP.ConsumeMessage | null) => await this.handleEvent(msg))
+    await channel.bindQueue(q.queue, AMQP_PIPELINE_EXECUTION_EXCHANGE, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC)
+    await channel.consume(q.queue, async msg => await this.handleEvent(msg))
 
     console.info(
       `Successfully initialized pipeline-executed queue "${AMQP_PIPELINE_EXECUTION_QUEUE}" ` +
-      `on topic "${AMQP_PIPELINE_EXECUTION_TOPIC}"`
+      `on topic "${AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC}"`
     )
   }
 
   private async handleEvent (msg: AMQP.ConsumeMessage | null): Promise<void> {
-    if (!msg) {
+    if (msg === null) {
       console.debug('Received empty event when listening on pipeline executions - doing nothing')
       return
     }

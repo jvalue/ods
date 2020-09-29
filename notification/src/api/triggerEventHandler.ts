@@ -1,10 +1,9 @@
-import { PipelineEvent } from './transformationEvent'
+import { PipelineSuccessEvent, isValidPipelineSuccessEvent } from './pipelineEvent'
 import * as NotificationMessageFactory from './notificationMessageFactory'
 import { NotificationRepository } from '../notification-config/notificationRepository'
 import NotificationExecutor from '../notification-execution/notificationExecutor'
-import { hasProperty, isObject } from '../validators'
 
-const NOTIFICATION_DATA_LOCATION_URL = process.env.NOTIFICATION_DATA_LOCATION_URL || 'localhost:9000/storage'
+const NOTIFICATION_DATA_LOCATION_URL = process.env.NOTIFICATION_DATA_LOCATION_URL ?? 'localhost:9000/storage'
 
 export class TriggerEventHandler {
   notificationRepository: NotificationRepository
@@ -21,8 +20,8 @@ export class TriggerEventHandler {
    *
    * @returns true on success, else false
    */
-  public async handleEvent (transformationEvent: PipelineEvent): Promise<void> {
-    if (!this.isValidPipelineEvent(transformationEvent)) {
+  public async handleEvent (transformationEvent: PipelineSuccessEvent): Promise<void> {
+    if (!isValidPipelineSuccessEvent(transformationEvent)) {
       throw new Error('Trigger event is not valid')
     }
 
@@ -32,7 +31,7 @@ export class TriggerEventHandler {
     const data = transformationEvent.data
     const configs = await this.notificationRepository.getConfigsForPipeline(transformationEvent.pipelineId)
 
-    const notificationJobs: Promise<void>[] = []
+    const notificationJobs: Array<Promise<void>> = []
     for (const webhookConfig of configs.webhook) {
       notificationJobs.push(this.notificationExecutor.handleWebhook(webhookConfig, dataLocation, message, data))
     }
@@ -46,18 +45,5 @@ export class TriggerEventHandler {
     }
 
     await Promise.all(notificationJobs)
-  }
-
-  /**
-      * Checks if this event is a valid transformation event,
-      * by checking if all field variables exist and are set.
-      *
-      * @returns     true, if param event is a PipelineEvent, else false
-      */
-  public isValidPipelineEvent (event: unknown): event is PipelineEvent {
-    return isObject(event) &&
-      hasProperty(event, 'pipelineId') &&
-      hasProperty(event, 'pipelineName') &&
-      (hasProperty(event, 'data') || hasProperty(event, 'error'))
   }
 }
