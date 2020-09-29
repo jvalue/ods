@@ -4,7 +4,7 @@ const request = require('supertest')
 const waitOn = require('wait-on')
 const amqp = require('amqplib')
 
-const URL = process.env.TRANSFORMATION_API || 'http://localhost:8080'
+const URL = process.env.PIPELINE_API || 'http://localhost:8080'
 
 const AMQP_URL = process.env.AMQP_URL
 const AMQP_EXCHANGE = process.env.AMQP_EXCHANGE
@@ -164,10 +164,10 @@ describe('Pipeline Config Test', () => {
 
   test('Persist long transformation function', async () => {
     const configToPersist = Object.assign({}, pipelineConfig)
-    const crazyLongTransformation = {
+    const crazyLongPipeline = {
       func: 'a'.repeat(256)
     }
-    configToPersist.transformation = crazyLongTransformation
+    configToPersist.transformation = crazyLongPipeline
 
     // create pipeline to persist
     const creationResponse = await request(URL)
@@ -182,7 +182,7 @@ describe('Pipeline Config Test', () => {
       .get(`/configs/${pipelineId}`)
       .send()
 
-    expect(pipelineResponse.body.transformation).toEqual(crazyLongTransformation)
+    expect(pipelineResponse.body.transformation).toEqual(crazyLongPipeline)
 
     // clean up
     await request(URL)

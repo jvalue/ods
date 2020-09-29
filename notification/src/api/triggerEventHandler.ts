@@ -1,4 +1,4 @@
-import { TransformationEvent } from './transformationEvent'
+import { PipelineEvent } from './transformationEvent'
 import * as NotificationMessageFactory from './notificationMessageFactory'
 import { NotificationRepository } from '../notification-config/notificationRepository'
 import NotificationExecutor from '../notification-execution/notificationExecutor'
@@ -21,8 +21,8 @@ export class TriggerEventHandler {
    *
    * @returns true on success, else false
    */
-  public async handleEvent (transformationEvent: TransformationEvent): Promise<void> {
-    if (!this.isValidTransformationEvent(transformationEvent)) {
+  public async handleEvent (transformationEvent: PipelineEvent): Promise<void> {
+    if (!this.isValidPipelineEvent(transformationEvent)) {
       throw new Error('Trigger event is not valid')
     }
 
@@ -52,9 +52,9 @@ export class TriggerEventHandler {
       * Checks if this event is a valid transformation event,
       * by checking if all field variables exist and are set.
       *
-      * @returns     true, if param event is a TransformationEvent, else false
+      * @returns     true, if param event is a PipelineEvent, else false
       */
-  public isValidTransformationEvent (event: unknown): event is TransformationEvent {
+  public isValidPipelineEvent (event: unknown): event is PipelineEvent {
     return isObject(event) &&
       hasProperty(event, 'pipelineId') &&
       hasProperty(event, 'pipelineName') &&

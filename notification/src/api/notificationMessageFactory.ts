@@ -1,4 +1,4 @@
-import { TransformationEvent } from './transformationEvent'
+import { PipelineEvent } from './transformationEvent'
 
 /**
  * Builds the notification message to be sent,
@@ -8,7 +8,7 @@ import { TransformationEvent } from './transformationEvent'
  * @param event event to extract transformation results from
  * @returns message to be sent as notification
  */
-export const buildMessage = (event: TransformationEvent, dataLocation: string): string => {
+export const buildMessage = (event: PipelineEvent, dataLocation: string): string => {
   let message: string
   if (!event.error) {
     message = `Pipeline ${event.pipelineName} (Pipeline id:${event.pipelineId}) ` +

@@ -80,7 +80,7 @@ Step 1: Choose a name for the pipeline and fill in the datasource id of the data
 ![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/p02_name.jpg)
 
 Step 2: In this step, you can manipulate the raw data to fit your needs by writing JavaScript code. The data object represents the incoming raw data. In this example, the attribute test is added to the data object before returning it.
-![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/p03_transformation.jpg)
+![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/p03_pipeline.jpg)
 
 Step 3: Describe additional meta-data for the pipeline.
 ![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/p04_meta-data.jpg)
@@ -108,7 +108,7 @@ We use the microservice architectural style in this project. The microservices a
 | [Web-Client / UI](ui/README.md) | easy and seamless configuration of Sources, Pipelines | 
 | [Scheduler](scheduler/README.md) | orchestrates the executions of Pipelines |
 | [Adapter-Service](adapter/README.md) | fetches data from Sources and imports them into the system |
-| [Transformation-Service](transformation/README.md) | definition of pipelines, execution of data transformations |
+| [Pipeline-Service](pipeline/README.md) | definition of pipelines, execution of data pipelines |
 | [Notification-Service](notification/README.md) | execution of notifications |
 | [Storage-Service](storage/README.md) | stores data of Pipelines and offers an API for querying |
 | Reverse-Proxy | communication of UI with backend microservices independent from deployment environment |

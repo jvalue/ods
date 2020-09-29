@@ -12,9 +12,9 @@ spec:
   rules:
   - http:
       paths:
-      - path: {{BASE_URL}}api/transformation(/|$)(.*)
+      - path: {{BASE_URL}}api/pipelines(/|$)(.*)
         backend:
-          serviceName: transformation-service
+          serviceName: pipeline-service
           servicePort: 8080
       - path: {{BASE_URL}}api/storage(/|$)(.*)
         backend:

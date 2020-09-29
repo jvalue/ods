@@ -10,7 +10,7 @@ Step 1:
 In one terminal window you should start all services that are required for the ODS to run. 
 
 ```
-docker-compose -f docker-compose.yml -f docker-compose.st.yml up  adapter transformation storage storage-mq notification scheduler edge mock-server
+docker-compose -f docker-compose.yml -f docker-compose.st.yml up  adapter pipeline storage storage-mq notification scheduler edge mock-server
 ```
 
 Step 2:

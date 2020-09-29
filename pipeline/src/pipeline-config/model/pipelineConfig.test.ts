@@ -72,17 +72,17 @@ describe('PipelineConfigDTOValidator', () => {
   })
 
   test('should reject invalid transformation function', () => {
-    const missingTransformationFuncConfig = validPipelineConfig()
-    delete missingTransformationFuncConfig.transformation.func
-    expect(validator.validate(missingTransformationFuncConfig)).toBeFalsy()
+    const missingPipelineFuncConfig = validPipelineConfig()
+    delete missingPipelineFuncConfig.transformation.func
+    expect(validator.validate(missingPipelineFuncConfig)).toBeFalsy()
 
-    const invalidTransformationConfig = validPipelineConfig()
-    invalidTransformationConfig.transformation = ''
-    expect(validator.validate(invalidTransformationConfig)).toBeFalsy()
+    const invalidPipelineConfig = validPipelineConfig()
+    invalidPipelineConfig.transformation = ''
+    expect(validator.validate(invalidPipelineConfig)).toBeFalsy()
 
-    const invalidTransformationFuncConfig = validPipelineConfig()
-    invalidTransformationFuncConfig.transformation.func = 123
-    expect(validator.validate(invalidTransformationFuncConfig)).toBeFalsy()
+    const invalidPipelineFuncConfig = validPipelineConfig()
+    invalidPipelineFuncConfig.transformation.func = 123
+    expect(validator.validate(invalidPipelineFuncConfig)).toBeFalsy()
   })
 
   test('should add default identity transformation function', () => {
