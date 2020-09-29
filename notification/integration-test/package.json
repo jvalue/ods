@@ -1,7 +1,7 @@
 {
-  "name": "transformation-it",
+  "name": "notification-it",
   "version": "1.0.0",
-  "description": "Transformation Service Integration-Tests",
+  "description": "Notification Service Integration-Tests",
   "scripts": {
     "mock:receiver": "node src/mock.receiver.js",
     "pretest": "npm run mock:receiver &",

@@ -1,30 +1,30 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: transformation-deployment
+  name: pipeline-deployment
   namespace: {{NAMESPACE}}
   labels:
     app: ods
-    service: transformation
+    service: pipeline
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: ods
-      service: transformation
+      service: pipeline
   template:
     metadata:
       labels:
         app: ods
-        service: transformation
+        service: pipeline
     spec:
       imagePullSecrets:
       - name: ods-registry-secret
       containers:
       - env:
-        image: registry.gitlab.com/profoss/open-data-service/ods-main/transformation:{{IMAGE_TAG}}
+        image: registry.gitlab.com/profoss/open-data-service/ods-main/pipeline:{{IMAGE_TAG}}
         imagePullPolicy: Always
-        name: transformation-service
+        name: pipeline-service
         resources: {}
         ports:
         - containerPort: 8080

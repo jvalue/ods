@@ -16,7 +16,7 @@ import { sleep } from '../../sleep'
  *      * Notification Channel:
  *       ----------------------
  *       A channel to notify the notification service that a transformation is done.
- *       (see TransformationEvent for details of the event).
+ *       (see PipelineEvent for details of the event).
  *
  */
 export class AmqpHandler {

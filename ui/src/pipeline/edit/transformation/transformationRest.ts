@@ -1,10 +1,10 @@
 import axios from 'axios'
 
 import { TransformationRequest, JobResult } from './transformation'
-import { TRANSFORMATION_SERVICE_URL } from '@/env'
+import { PIPELINE_SERVICE_URL } from '@/env'
 
 const http = axios.create({
-  baseURL: TRANSFORMATION_SERVICE_URL,
+  baseURL: PIPELINE_SERVICE_URL,
   headers: {
     'Content-Type': 'application/json'
   }
