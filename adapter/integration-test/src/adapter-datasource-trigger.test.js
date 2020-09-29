@@ -28,11 +28,9 @@ describe('Adapter Sources Trigger', () => {
   beforeAll(async () => {
     await waitForServicesToBeReady()
 
-    console.log(`Services available. Connecting to amqp at ${AMQP_URL} ...`)
     await connectAmqp(AMQP_URL)
 
     await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, EXECUTION_TOPIC, AMQP_IT_QUEUE, publishedEvents)
-    console.log('Amqp connection established')
   }, 60000)
 
   afterAll(async () => {
