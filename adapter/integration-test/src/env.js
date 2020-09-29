@@ -21,6 +21,16 @@ const AMQP_URL = getEnv('AMQP_URL')
 
 const STARTUP_DELAY = +getEnv('STARTUP_DELAY')
 
+const envLog = `
+[Environment Variable] ADAPTER_URL = ${ADAPTER_URL}
+[Environment Variable] MOCK_SERVER_URL = ${MOCK_SERVER_URL}
+[Environment Variable] MOCK_SERVER_PORT = ${MOCK_SERVER_PORT}
+[Environment Variable] RABBIT_HEALTH = ${RABBIT_HEALTH}
+[Environment Variable] AMQP_URL = ${AMQP_URL}
+[Environment Variable] STARTUP_DELAY = ${STARTUP_DELAY}
+`
+console.log(envLog)
+
 module.exports = {
   ADAPTER_URL,
   MOCK_SERVER_URL,
