@@ -7,7 +7,6 @@ import 'vuetify/dist/vuetify.min.css'
 import '@mdi/font/css/materialdesignicons.css'
 import TransformationModule from '@/pipeline/edit/transformation/transformation.module'
 import AuthModule from '@/components/auth/module'
-import DatasourceModule from '@/datasource/datasource.module'
 import PipelineModule from '@/pipeline/pipeline.module'
 import NotificationModule from './notification/notification.module'
 

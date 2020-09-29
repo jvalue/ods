@@ -1,6 +1,6 @@
 <template>
   <v-form
-    v-model="validForm"
+    v-model="isValid"
   >
     <v-switch
       v-model="triggerConfig.periodic"
@@ -96,7 +96,7 @@ const ONE_MINUTE_IN_MS = 60 * 1000
 
 @Component({ components: { DateTimePicker } })
 export default class TriggerConfig extends Vue {
-  private validForm = true;
+  private isValid = true;
 
   private dialogIntervalHours = 1
   private dialogIntervalMinutes = 0
@@ -134,7 +134,7 @@ export default class TriggerConfig extends Vue {
 
   @Emit('validityChanged')
   emitValid (): boolean {
-    return this.validForm
+    return this.isValid
   }
 
   formChanged (): void {
