@@ -173,7 +173,7 @@ export default class PipelineEdit extends Vue {
 
   @Watch('selectedPipeline')
   onSelectedPipelineChange (value: Pipeline, oldValue: Pipeline): void {
-    if (value != oldValue) {
+    if (value !== oldValue) {
       this.dialogPipeline = value
     }
   }
