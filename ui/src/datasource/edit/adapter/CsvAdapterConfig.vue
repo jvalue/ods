@@ -1,6 +1,6 @@
 <template>
   <v-form
-    v-model="validForm"
+    v-model="isFormValid"
   >
     <v-switch
       v-model="csvConfig.firstRowAsHeader"
@@ -40,7 +40,7 @@ type CsvConfig = {
 
 @Component({ })
 export default class CsvAdapterConfig extends Vue {
-  private validForm = false
+  private isFormValid = false
   private availableLineSeparators = [
     { value: '\n', text: '\\n' },
     { value: '\r', text: '\\r' },
@@ -57,7 +57,7 @@ export default class CsvAdapterConfig extends Vue {
 
   @Emit('validityChanged')
   emitValid (): boolean {
-    return this.validForm
+    return this.isFormValid
   }
 
   @Watch('csvConfig', { deep: true })
@@ -65,7 +65,7 @@ export default class CsvAdapterConfig extends Vue {
     this.emitValue()
   }
 
-  @Watch('validForm')
+  @Watch('isFormValid')
   validityChanged (): void {
     this.emitValid()
   }

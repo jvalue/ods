@@ -1,6 +1,6 @@
 <template>
   <v-form
-    v-model="validForm"
+    v-model="isValid"
   >
     <v-text-field
       v-model="metadataConfig.description"
@@ -30,7 +30,7 @@ import { DatasourceMetaData } from '../datasource'
 
 @Component({ })
 export default class DatasourceMetadataConfig extends Vue {
-  private validForm = true;
+  private isValid = true;
 
   @PropSync('value')
   private metadataConfig!: DatasourceMetaData;
@@ -42,7 +42,7 @@ export default class DatasourceMetadataConfig extends Vue {
 
   @Emit('validityChanged')
   emitValid (): boolean {
-    return this.validForm
+    return this.isValid
   }
 
   formChanged (): void {

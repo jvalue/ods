@@ -1,6 +1,6 @@
 <template>
   <v-form
-    v-model="validForm"
+    v-model="isValid"
   >
     <v-select
       v-model="adapterConfig.protocol.type"
@@ -32,7 +32,7 @@
       v-if="adapterConfig.format.type === 'CSV'"
       v-model="adapterConfig.format.parameters"
       class="pl-7"
-      @validityChanged="validFormatParameters = $event"
+      @validityChanged="isFormatParametersValid = $event"
     />
   </v-form>
 </template>
@@ -54,8 +54,8 @@ export default class AdapterConfig extends Vue {
   private availableEncodings = ['UTF-8', 'ISO-8859-1', 'US-ASCII']
   private availableAdapterFormats = ['JSON', 'XML', 'CSV']
 
-  private validForm = true;
-  private validFormatParameters = true;
+  private isValid = true;
+  private isFormatParametersValid = true;
 
   @PropSync('value')
   private adapterConfig!: Datasource;
@@ -77,7 +77,7 @@ export default class AdapterConfig extends Vue {
         break
       } case 'JSON' || 'XML': {
         this.adapterConfig.format.parameters = {}
-        this.validFormatParameters = true
+        this.isFormatParametersValid = true
         break
       }
     }
@@ -85,7 +85,7 @@ export default class AdapterConfig extends Vue {
 
   @Emit('validityChanged')
   emitValid (): boolean {
-    const isValid = this.validForm && this.validFormatParameters
+    const isValid = this.isValid && this.isFormatParametersValid
     return isValid
   }
 
@@ -94,12 +94,12 @@ export default class AdapterConfig extends Vue {
     this.emitValue()
   }
 
-  @Watch('validForm')
-  validFormChanged (): void {
+  @Watch('isValid')
+  isValidChanged (): void {
     this.emitValid()
   }
 
-  @Watch('validFormatParameters')
+  @Watch('isFormatParametersValid')
   validFormParametersChanged (): void {
     this.emitValid()
   }
