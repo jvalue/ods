@@ -63,18 +63,22 @@ export default class PipelineStorageOverview extends Vue {
 
   private get storageItemUrl (): string {
     let url = StorageREST.createUrlForItem(this.pipelineId, this.itemId)
-    if (url.startsWith('/')) {
-      url = window.location.origin + url
-    }
+    url = this.ensureOriginUrlPrefix(url)
     return url
   };
 
   private get latestStorageItemUrl (): string {
     let url = StorageREST.createUrlForLatestItem(this.pipelineId)
-    if (url.startsWith('/')) {
-      url = window.location.origin + url
-    }
+    url = this.ensureOriginUrlPrefix(url)
     return url
+  }
+
+  private ensureOriginUrlPrefix (url: string): string {
+    if (!url.startsWith('/')) {
+      return url
+    }
+
+    return window.location.origin + url
   }
 
   private async fetchData (): Promise<void> {
