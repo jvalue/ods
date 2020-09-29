@@ -1,30 +1,26 @@
 <template>
   <v-form
-    v-model="validForm"
+    v-model="isFormValid"
   >
     <v-switch
       v-model="csvConfig.firstRowAsHeader"
       label="Use first row as header"
-      @change="formChanged"
     />
     <v-switch
       v-model="csvConfig.skipFirstDataRow"
       label="Skip the first data row (after header if selected)"
-      @change="formChanged"
     />
     <v-text-field
       v-model="csvConfig.columnSeparator"
       label="Column separator"
       :rules="[required]"
       :maxlength="1"
-      @keyup="formChanged"
     />
     <v-select
       v-model="csvConfig.lineSeparator"
       :items="availableLineSeparators"
       label="Line separator"
       :rules="[required]"
-      @change="formChanged"
     />
   </v-form>
 </template>
@@ -33,7 +29,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 
-import { Emit, PropSync } from 'vue-property-decorator'
+import { Emit, PropSync, Watch } from 'vue-property-decorator'
 
 type CsvConfig = {
   lineSeparator: string;
@@ -44,7 +40,7 @@ type CsvConfig = {
 
 @Component({ })
 export default class CsvAdapterConfig extends Vue {
-  private validForm = true;
+  private isFormValid = false
   private availableLineSeparators = [
     { value: '\n', text: '\\n' },
     { value: '\r', text: '\\r' },
@@ -61,12 +57,16 @@ export default class CsvAdapterConfig extends Vue {
 
   @Emit('validityChanged')
   emitValid (): boolean {
-    return this.validForm
+    return this.isFormValid
   }
 
-  @Emit('change')
+  @Watch('csvConfig', { deep: true })
   formChanged (): void {
     this.emitValue()
+  }
+
+  @Watch('isFormValid')
+  validityChanged (): void {
     this.emitValid()
   }
 

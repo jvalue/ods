@@ -6,7 +6,7 @@
         class="elevation-0"
       >
         <v-toolbar-title>
-          Edit Datasource
+          Create New Datasource
         </v-toolbar-title>
       </v-toolbar>
       <v-card-text>
@@ -28,9 +28,9 @@
           :disabled="!isValid"
           color="primary"
           class="ma-2"
-          @click="onEdit()"
+          @click="onSave()"
         >
-          Update
+          Save
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -46,28 +46,44 @@ import DatasourceForm from './DatasourceForm.vue'
 import Datasource from './datasource'
 import * as DatasourceREST from './datasourceRest'
 
+const MINUTE = 60000
+const HOUR = 3600000
+
 @Component({
   components: { DatasourceForm }
 })
-export default class DatasourceEdit extends Vue {
-  private datasource: Datasource | null = null
+export default class DatasourceCreate extends Vue {
+  private datasource: Datasource = {
+    id: -1,
+    protocol: {
+      type: 'HTTP',
+      parameters: {
+        location:
+          'https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json',
+        encoding: 'UTF-8'
+      }
+    },
+    format: {
+      type: 'JSON',
+      parameters: {}
+    },
+    metadata: {
+      author: '',
+      license: '',
+      description: '',
+      displayName: ''
+    },
+    trigger: {
+      periodic: true,
+      firstExecution: new Date(Date.now() + (10 * MINUTE)),
+      interval: HOUR
+    }
+  }
+
   private isValid = false
 
-  mounted (): void {
-    const id = parseInt(this.$route.params.datasourceId)
-    this.loadDatasourceById(id)
-  }
-
-  private async loadDatasourceById (id: number): Promise<void> {
-    this.datasource = await DatasourceREST.getDatasourceById(id)
-  }
-
-  private async onEdit (): Promise<void> {
-    if (!this.datasource) {
-      return
-    }
-
-    await DatasourceREST.updateDatasource(this.datasource)
+  private async onSave (): Promise<void> {
+    await DatasourceREST.createDatasource(this.datasource)
     this.routeToOverview()
   }
 
