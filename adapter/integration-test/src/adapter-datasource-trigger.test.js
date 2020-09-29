@@ -1,35 +1,26 @@
 /* eslint-env jest */
 // @ts-check
 const request = require('supertest')
-const waitOn = require('wait-on')
 const amqp = require('amqplib')
 
 const {
   ADAPTER_URL,
   MOCK_SERVER_URL,
-  RABBIT_HEALTH,
   AMQP_URL,
   AMQP_EXCHANGE,
   AMQP_IT_QUEUE,
   EXECUTION_TOPIC,
   EXECUTION_FAILED_TOPIC,
-  EXECUTION_SUCCESS_TOPIC,
-  STARTUP_DELAY
+  EXECUTION_SUCCESS_TOPIC
 } = require('./env')
-const {
-  sleep
-} = require('./testHelper')
+const { waitForServicesToBeReady } = require('./waitForServices')
 
 let amqpConnection
 const publishedEvents = new Map() // routing key -> received msgs []
 
 describe('Adapter Sources Trigger', () => {
   beforeAll(async () => {
-    console.log('Starting adapter sources trigger test')
-    const pingUrl = ADAPTER_URL + '/version'
-    await waitOn({ resources: [MOCK_SERVER_URL, pingUrl, RABBIT_HEALTH], timeout: 50000, log: true })
-
-    await sleep(STARTUP_DELAY)
+    await waitForServicesToBeReady()
 
     console.log(`Services available. Connecting to amqp at ${AMQP_URL} ...`)
     await connectAmqp(AMQP_URL)

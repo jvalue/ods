@@ -1,22 +1,14 @@
 const request = require('supertest')
-const waitOn = require('wait-on')
 
 const {
   ADAPTER_URL,
-  MOCK_SERVER_URL,
-  RABBIT_HEALTH
+  MOCK_SERVER_URL
 } = require('./env')
+const { waitForServicesToBeReady } = require('./waitForServices')
 
 describe('Adapter Stateless', () => {
   beforeAll(async () => {
-    try {
-      const pingUrl = ADAPTER_URL + '/version'
-      console.log('Starting adapter stateless test')
-      await waitOn({ resources: [MOCK_SERVER_URL, RABBIT_HEALTH, pingUrl], timeout: 50000, log: true })
-      console.log('Wait on complete')
-    } catch (err) {
-      process.exit(1)
-    }
+    await waitForServicesToBeReady()
   }, 60000)
 
   test('GET /version', async () => {

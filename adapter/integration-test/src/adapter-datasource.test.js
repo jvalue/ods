@@ -1,21 +1,13 @@
 const request = require('supertest')
-const waitOn = require('wait-on')
 
 const {
-  ADAPTER_URL,
-  MOCK_SERVER_URL,
-  RABBIT_HEALTH
+  ADAPTER_URL
 } = require('./env')
+const { waitForServicesToBeReady } = require('./waitForServices')
 
 describe('Adapter Configuration', () => {
   beforeAll(async () => {
-    try {
-      console.log('Starting adapter configuration test')
-      const pingUrl = ADAPTER_URL + '/version'
-      await waitOn({ resources: [pingUrl, MOCK_SERVER_URL, RABBIT_HEALTH], timeout: 50000, log: true })
-    } catch (err) {
-      process.exit(1)
-    }
+    await waitForServicesToBeReady()
   }, 60000)
 
   test('GET /version', async () => {
