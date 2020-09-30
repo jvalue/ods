@@ -87,6 +87,9 @@ describe('Datasource Configuration', () => {
       .send()
 
     expect(delResponse.status).toEqual(204)
+    const sourcesRequest = await request(ADAPTER_URL)
+      .get('/datasources/')
+    expect(sourcesRequest.body).toEqual([])
   }, TIMEOUT)
 
   test('GET /datasources/events', async () => {
