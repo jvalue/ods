@@ -7,12 +7,12 @@ const { waitForServicesToBeReady } = require('./waitForServices')
 
 const TIMEOUT = 10000
 
-describe('Adapter Configuration', () => {
+describe('Datasource Configuration', () => {
   beforeAll(async () => {
     await waitForServicesToBeReady()
   }, 60000)
 
-  test('GET /datasources', async () => {
+  test('Should respond with stored datasource configs', async () => {
     const response = await request(ADAPTER_URL).get('/datasources')
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('application/json')
@@ -20,7 +20,7 @@ describe('Adapter Configuration', () => {
     expect(response.body).toEqual([])
   }, TIMEOUT)
 
-  test('POST & DELETE /datasources', async () => {
+  test('Should create datasources [POST /datasources]', async () => {
     const response = await request(ADAPTER_URL)
       .post('/datasources')
       .send(datasourceConfig)
@@ -39,7 +39,7 @@ describe('Adapter Configuration', () => {
     expect(delResponse.status).toEqual(204)
   }, TIMEOUT)
 
-  test('PUT & DELETE /datasources/{id}', async () => {
+  test('Should update existing datasource [PUT /datasources/{id}]', async () => {
     const postResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(datasourceConfig)
@@ -74,7 +74,7 @@ describe('Adapter Configuration', () => {
     expect(delResponse.status).toEqual(204)
   }, TIMEOUT)
 
-  test('DELETE /datasources/', async () => {
+  test('Should delete all datasources [DELETE /datasources/]', async () => {
     await request(ADAPTER_URL)
       .post('/datasources')
       .send(datasourceConfig)

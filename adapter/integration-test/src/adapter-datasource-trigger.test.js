@@ -24,7 +24,7 @@ const TIMEOUT = 10000
 const publishedEvents = new Map() // routing key -> received msgs []
 let amqpConnection
 
-describe('Adapter Sources Trigger', () => {
+describe('Datasource triggering', () => {
   beforeAll(async () => {
     await waitForServicesToBeReady()
 
@@ -44,7 +44,7 @@ describe('Adapter Sources Trigger', () => {
     }
   }, TIMEOUT)
 
-  test('POST datasources/{id}/trigger dynamic', async () => {
+  test('Should trigger datasources with runtime parameters [POST /datasource/{id}/trigger]', async () => {
     const datasourceResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(dynamicDatasourceConfig)
@@ -78,7 +78,7 @@ describe('Adapter Sources Trigger', () => {
     }, TIMEOUT)
   })
 
-  test('POST datasources/{id}/trigger dynamic defaultvalues', async () => {
+  test('Should trigger datasources with default parameters [POST /datasources/{id}/trigger]', async () => {
     const datasourceResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(dynamicDatasourceConfig)
@@ -112,7 +112,7 @@ describe('Adapter Sources Trigger', () => {
     })
   })
 
-  test('POST datasources/{id}/trigger static', async () => {
+  test('Should trigger datasources without runtime parameters [POST /datasources/{id}/trigger]', async () => {
     const datasourceResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(staticDatasourceConfig)
@@ -145,7 +145,7 @@ describe('Adapter Sources Trigger', () => {
     })
   })
 
-  test('POST datasource/{id}/trigger FAIL', async () => {
+  test('Should publish results for failing datasources [POST /datasources/{id}/trigger]', async () => {
     const brokenDatasourceConfig = Object.assign({}, staticDatasourceConfig)
     brokenDatasourceConfig.protocol.parameters.location = 'LOL'
     const datasourceResponse = await request(ADAPTER_URL)

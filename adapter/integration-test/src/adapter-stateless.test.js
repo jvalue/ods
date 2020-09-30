@@ -8,7 +8,7 @@ const { waitForServicesToBeReady } = require('./waitForServices')
 
 const TIMEOUT = 10000
 
-describe('Adapter Stateless', () => {
+describe('Stateless data import', () => {
   beforeAll(async () => {
     await waitForServicesToBeReady()
   }, 60000)
