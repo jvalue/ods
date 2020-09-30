@@ -19,11 +19,7 @@ import { sleep } from '../../sleep'
  *
  */
 export class AmqpHandler {
-  triggerEventHandler: TriggerEventHandler
-
-  constructor (triggerEventHandler: TriggerEventHandler) {
-    this.triggerEventHandler = triggerEventHandler
-  }
+  constructor (private readonly triggerEventHandler: TriggerEventHandler) {}
 
   /**
      * Connects to Amqp Service and initializes a channel
