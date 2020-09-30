@@ -10,8 +10,7 @@ const {
 const { waitForServicesToBeReady } = require('./waitForServices')
 const {
   connectAmqp,
-  receiveAmqp,
-  closeAmqp
+  consumeAmqpMsg
 } = require('./testHelper')
 
 const AMQP_EXCHANGE = 'ods_global'
@@ -23,23 +22,26 @@ const EXECUTION_FAILED_TOPIC = 'datasource.execution.failed'
 const TIMEOUT = 10000
 
 const publishedEvents = new Map() // routing key -> received msgs []
+let amqpConnection
 
 describe('Adapter Sources Trigger', () => {
   beforeAll(async () => {
     await waitForServicesToBeReady()
 
-    await connectAmqp(AMQP_URL)
+    amqpConnection = await connectAmqp(AMQP_URL)
 
-    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, EXECUTION_TOPIC, AMQP_IT_QUEUE, publishedEvents)
+    await consumeAmqpMsg(amqpConnection, AMQP_EXCHANGE, EXECUTION_TOPIC, AMQP_IT_QUEUE, publishedEvents)
   }, 60000)
 
   afterAll(async () => {
-    await closeAmqp()
-
     // clear stored configs
     await request(ADAPTER_URL)
       .delete('/configs')
       .send()
+
+    if (amqpConnection) {
+      await amqpConnection.close()
+    }
   }, TIMEOUT)
 
   test('POST datasources/{id}/trigger dynamic', async () => {

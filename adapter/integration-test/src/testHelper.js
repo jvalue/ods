@@ -1,16 +1,15 @@
 const amqp = require('amqplib')
-let amqpConnection
 
 function sleep (ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 async function connectAmqp (url) {
-  amqpConnection = await amqp.connect(url)
+  return await amqp.connect(url)
 }
 
-async function receiveAmqp (url, exchange, topic, queue, publishedEvents) {
-  const channel = await amqpConnection.createChannel()
+async function consumeAmqpMsg (connection, exchange, topic, queue, publishedEvents) {
+  const channel = await connection.createChannel()
   await channel.assertExchange(exchange, 'topic')
   const q = await channel.assertQueue(queue)
   await channel.bindQueue(q.queue, exchange, topic)
@@ -25,15 +24,8 @@ async function receiveAmqp (url, exchange, topic, queue, publishedEvents) {
   })
 }
 
-async function closeAmqp () {
-  if (amqpConnection) {
-    await amqpConnection.close()
-  }
-}
-
 module.exports = {
   sleep,
   connectAmqp,
-  receiveAmqp,
-  closeAmqp
+  consumeAmqpMsg
 }
