@@ -34,7 +34,6 @@ describe('Datasource triggering', () => {
   }, 60000)
 
   afterAll(async () => {
-    // clear stored configs
     await request(ADAPTER_URL)
       .delete('/configs')
       .send()
@@ -158,7 +157,7 @@ describe('Datasource triggering', () => {
       .post(`/datasources/${datasourceId}/trigger`)
       .send()
 
-    expect(triggerResponse.status).toBeGreaterThan(300) // request should fail (no 2xx status)
+    expect(triggerResponse.status).toBeGreaterThan(300)
 
     const delResponse = await request(ADAPTER_URL)
       .delete(`/datasources/${datasourceId}`)
