@@ -1,8 +1,10 @@
 const Koa = require('koa')
 const Router = require('koa-router')
 const router = new Router()
+
 const app = new Koa()
-const PORT = process.env.MOCK_SERVER_PORT || 8081
+
+const { MOCK_SERVER_PORT } = require('./env')
 
 router.get('/', async ctx => {
   ctx.type = 'text/plain'
@@ -40,7 +42,7 @@ router.get('/csv', async ctx => {
 
 app.use(router.routes())
 
-const server = app.listen(PORT, () => console.log('Starting mock server on port ' + PORT))
+const server = app.listen(MOCK_SERVER_PORT, () => console.log('Starting mock server on port ' + MOCK_SERVER_PORT))
 
 process.on('SIGTERM', async () => {
   console.info('Mock-Server: SIGTERM signal received.')

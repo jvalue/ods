@@ -37,6 +37,8 @@ services:
       AMQP_EXCHANGE: 'ods_global'
       AMQP_IMPORT_SUCCESS_TOPIC: 'datasource.execution.success'
       AMQP_IMPORT_FAILED_TOPIC: 'datasource.execution.failed'
+      AMQP_PUBLISH_RETRIES: 5
+      AMQP_PUBLISH_BACKOFF: 1000
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-adapter.rule=PathPrefix(`/api/adapter`)"

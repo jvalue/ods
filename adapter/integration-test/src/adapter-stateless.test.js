@@ -1,35 +1,29 @@
 const request = require('supertest')
-const waitOn = require('wait-on')
 
-const URL = process.env.ADAPTER_API || 'http://localhost:9000/api/adapter'
-const MOCK_SERVER_PORT = process.env.MOCK_SERVER_PORT || 8081
-const MOCK_SERVER_HOST = process.env.MOCK_SERVER_HOST || 'localhost'
-const MOCK_SERVER_URL = 'http://' + MOCK_SERVER_HOST + ':' + MOCK_SERVER_PORT
-const RABBIT_URL = `http://${process.env.RABBIT_HOST}:15672`
+const {
+  ADAPTER_URL,
+  MOCK_SERVER_URL
+} = require('./env')
+const { waitForServicesToBeReady } = require('./waitForServices')
 
-describe('Adapter Stateless', () => {
+const TIMEOUT = 10000
+
+describe('Stateless data import', () => {
   beforeAll(async () => {
-    try {
-      const pingUrl = URL + '/version'
-      console.log('Starting adapter stateless test')
-      await waitOn({ resources: [MOCK_SERVER_URL, RABBIT_URL, pingUrl], timeout: 50000, log: true })
-      console.log('Wait on complete')
-    } catch (err) {
-      process.exit(1)
-    }
+    await waitForServicesToBeReady()
   }, 60000)
 
-  test('GET /version', async () => {
-    const response = await request(URL).get('/version')
+  test('Should respond with semantic version [GET /version]', async () => {
+    const response = await request(ADAPTER_URL).get('/version')
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('text/plain')
 
     const semanticVersionRegEx = '^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)'
     expect(response.text).toMatch(new RegExp(semanticVersionRegEx))
-  })
+  }, TIMEOUT)
 
-  test('GET /formats', async () => {
-    const response = await request(URL).get('/formats')
+  test('Should respond with all available formats [GET /formats]', async () => {
+    const response = await request(ADAPTER_URL).get('/formats')
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('application/json')
     expect(response.body.length).toBeGreaterThanOrEqual(2)
@@ -38,10 +32,10 @@ describe('Adapter Stateless', () => {
       expect(e.type).toBeDefined()
       expect(e.parameters).toBeDefined()
     })
-  })
+  }, TIMEOUT)
 
-  test('GET /protocols', async () => {
-    const response = await request(URL).get('/protocols')
+  test('Should respond with all available protocols [GET /protocols]', async () => {
+    const response = await request(ADAPTER_URL).get('/protocols')
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('application/json')
     expect(response.body.length).toBeGreaterThanOrEqual(1)
@@ -50,9 +44,9 @@ describe('Adapter Stateless', () => {
       expect(e.type).toBeDefined()
       expect(e.parameters).toBeDefined()
     })
-  })
+  }, TIMEOUT)
 
-  test('POST /dataImport JSON-Adapter', async () => {
+  test('Should create a JSON adapter as importer [POST /dataImport]', async () => {
     const reqBody = {
       protocol: {
         type: 'HTTP',
@@ -65,20 +59,21 @@ describe('Adapter Stateless', () => {
         type: 'JSON'
       }
     }
-    const response = await request(URL)
+
+    const response = await request(ADAPTER_URL)
       .post('/dataImport')
       .send(reqBody)
     expect(response.status).toEqual(200)
     const dataBlobId = response.body.id
 
-    const dataResponse = await request(URL)
+    const dataResponse = await request(ADAPTER_URL)
       .get(`/data/${dataBlobId}`)
       .send()
     expect(dataResponse.status).toEqual(200)
     expect(dataResponse.body).toEqual({ whateverwillbe: 'willbe', quesera: 'sera' })
-  })
+  }, TIMEOUT)
 
-  test('POST /dataImport XML-Adapter', async () => {
+  test('Should create a XML adapter as importer [POST /dataImport]', async () => {
     const reqBody = {
       protocol: {
         type: 'HTTP',
@@ -92,21 +87,21 @@ describe('Adapter Stateless', () => {
       }
     }
 
-    const response = await request(URL)
+    const response = await request(ADAPTER_URL)
       .post('/dataImport')
       .send(reqBody)
     expect(response.status).toEqual(200)
 
     const dataBlobId = response.body.id
-    const dataResponse = await request(URL)
+    const dataResponse = await request(ADAPTER_URL)
       .get(`/data/${dataBlobId}`)
       .send()
 
     expect(dataResponse.status).toEqual(200)
     expect(dataResponse.body).toEqual({ from: 'Rick', to: 'Morty' })
-  })
+  }, TIMEOUT)
 
-  test('POST /dataImport CSV-Adapter', async () => {
+  test('Should create a CSV adapter as importer [POST /dataImport]', async () => {
     const reqBody = {
       protocol: {
         type: 'HTTP',
@@ -125,13 +120,13 @@ describe('Adapter Stateless', () => {
         }
       }
     }
-    const response = await request(URL)
+    const response = await request(ADAPTER_URL)
       .post('/dataImport')
       .send(reqBody)
     expect(response.status).toEqual(200)
-
     const dataBlobId = response.body.id
-    const dataResponse = await request(URL)
+
+    const dataResponse = await request(ADAPTER_URL)
       .get(`/data/${dataBlobId}`)
       .send()
     expect(dataResponse.status).toEqual(200)
@@ -146,5 +141,5 @@ describe('Adapter Stateless', () => {
         col3: 'val23'
       }
     ])
-  })
+  }, TIMEOUT)
 })
