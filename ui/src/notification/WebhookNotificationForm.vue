@@ -1,12 +1,11 @@
 <template>
   <v-form
-    v-model="validForm"
+    v-model="isValid"
   >
     <v-text-field
-      v-model="webhookNotification.url"
+      v-model="parameters.url"
       label="URL to trigger the Webhook at"
       :rules="[ validURL ]"
-      @keyup="formChanged"
     />
   </v-form>
 </template>
@@ -14,29 +13,38 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { Emit, PropSync } from 'vue-property-decorator'
-import { WebhookNotification } from './notificationConfig'
+import { Emit, PropSync, Watch } from 'vue-property-decorator'
+import { WebhookNotificationParameters } from './notificationConfig'
 
 @Component({ })
-export default class WebhookEdit extends Vue {
-  private validForm = false
-
+export default class WebhookNotificationForm extends Vue {
   @PropSync('value')
-  private webhookNotification!: WebhookNotification
+  private parameters!: WebhookNotificationParameters
+
+  private isValid = false
+
+  private mounted (): void {
+    this.emitIsValid() // initial validity check on rendering
+  }
 
   @Emit('value')
-  emitValue (): WebhookNotification {
-    return this.webhookNotification
+  emitValue (): WebhookNotificationParameters {
+    return this.parameters
   }
 
   @Emit('validityChanged')
-  emitValid (): boolean {
-    return this.validForm
+  emitIsValid (): boolean {
+    return this.isValid
   }
 
+  @Watch('parameters', { deep: true })
   formChanged (): void {
     this.emitValue()
-    this.emitValid()
+  }
+
+  @Watch('isValid')
+  private validityChanged (): void {
+    this.emitIsValid()
   }
 
   private validURL (url: string): true | string {

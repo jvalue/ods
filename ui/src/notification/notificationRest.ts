@@ -37,11 +37,11 @@ export async function getById (id: number, notificationType: string): Promise<No
 
 export async function create (notificationConfig: NotificationConfig): Promise<NotificationConfig> {
   const notificationType = notificationConfig.type
-  // remove notificationId and type
-  delete notificationConfig.id
-  delete notificationConfig.type
 
-  const response = await http.post(`/config/${notificationType}`, JSON.stringify(notificationConfig))
+  const apiModel = toApiModel(notificationConfig)
+  delete apiModel.id
+
+  const response = await http.post(`/config/${notificationType}`, JSON.stringify(apiModel))
   const notificationApiModel = JSON.parse(response.data)
   return fromApiModel(notificationApiModel, notificationType)
 }
@@ -50,11 +50,9 @@ export async function update (notificationConfig: NotificationConfig): Promise<v
   const notificationType = notificationConfig.type
   const id = notificationConfig.id
 
-  // remove notificationId and type
-  delete notificationConfig.id
-  delete notificationConfig.type
+  const apiModel = toApiModel(notificationConfig)
 
-  return http.put(`/config/${notificationType}/${id}`, JSON.stringify(notificationConfig))
+  return http.put(`/config/${notificationType}/${id}`, JSON.stringify(apiModel))
 }
 
 export async function remove (notificationConfig: NotificationConfig): Promise<void> {
@@ -94,13 +92,21 @@ interface FirebaseNotificationApiConfig extends NotificationApiConfig {
 }
 
 function toApiModel (notification: NotificationConfig): NotificationApiConfig {
-  return {
+  const baseApiNotification: NotificationApiConfig = {
     id: notification.id,
     pipelineId: notification.pipelineId,
     condition: notification.condition
   }
+  const completeApiNotification = Object.assign(baseApiNotification, notification.parameters)
+  return completeApiNotification
 }
 
 function fromApiModel (notificationApiModel: NotificationApiConfig, notificationType: string): NotificationConfig {
-  return { ...notificationApiModel, type: notificationType }
+  return {
+    id: notificationApiModel.id,
+    pipelineId: notificationApiModel.pipelineId,
+    condition: notificationApiModel.condition,
+    type: notificationType,
+    parameters: { ...notificationApiModel }
+  }
 }
