@@ -157,7 +157,7 @@ describe('Datasource triggering', () => {
       .post(`/datasources/${datasourceId}/trigger`)
       .send()
 
-    expect(triggerResponse.status).toBeGreaterThan(300)
+    expect(triggerResponse.status).toEqual(404)
 
     const delResponse = await request(ADAPTER_URL)
       .delete(`/datasources/${datasourceId}`)
