@@ -1,71 +1,64 @@
 /* eslint-env jest */
 // @ts-check
 const request = require('supertest')
-const waitOn = require('wait-on')
-const amqp = require('amqplib')
 
-const URL = process.env.ADAPTER_API || 'http://localhost:9000/api/adapter'
+const {
+  ADAPTER_URL,
+  MOCK_SERVER_URL,
+  AMQP_URL
+} = require('./env')
+const { waitForServicesToBeReady } = require('./waitForServices')
+const {
+  connectAmqp,
+  consumeAmqpMsg
+} = require('./testHelper')
 
-const RABBIT_HEALTH = `http://${process.env.RABBIT_HOST}:15672`
-const AMQP_URL = process.env.AMQP_URL
-const AMQP_EXCHANGE = process.env.AMQP_EXCHANGE
-const AMQP_IT_QUEUE = process.env.AMQP_IT_QUEUE
-const MOCK_SERVER_PORT = process.env.MOCK_SERVER_PORT || 8081
-const MOCK_SERVER_HOST = process.env.MOCK_SERVER_HOST || 'localhost'
-const MOCK_SERVER_URL = 'http://' + MOCK_SERVER_HOST + ':' + MOCK_SERVER_PORT
-const EXECUTION_TOPIC = process.env.AMQP_IMPORT_TOPIC
-const EXECUTION_SUCCESS_TOPIC = process.env.AMQP_IMPORT_SUCCESS_TOPIC
-const EXECUTION_FAILED_TOPIC = process.env.AMQP_IMPORT_FAILED_TOPIC
+const AMQP_EXCHANGE = 'ods_global'
+const AMQP_IT_QUEUE = 'adapter-it'
+const EXECUTION_TOPIC = 'datasource.execution.*'
+const EXECUTION_SUCCESS_TOPIC = 'datasource.execution.success'
+const EXECUTION_FAILED_TOPIC = 'datasource.execution.failed'
 
-const STARTUP_DELAY = 5000
+const TIMEOUT = 10000
 
-let amqpConnection
 const publishedEvents = new Map() // routing key -> received msgs []
+let amqpConnection
 
-describe('Adapter Sources Trigger', () => {
+describe('Datasource triggering', () => {
   beforeAll(async () => {
-    console.log('Starting adapter sources trigger test')
-    const pingUrl = URL + '/version'
-    await waitOn({ resources: [MOCK_SERVER_URL, pingUrl, RABBIT_HEALTH], timeout: 50000, log: true })
+    await waitForServicesToBeReady()
 
-    await sleep(STARTUP_DELAY)
+    amqpConnection = await connectAmqp(AMQP_URL)
 
-    console.log(`Services available. Connecting to amqp at ${AMQP_URL} ...`)
-    await connectAmqp(AMQP_URL)
-
-    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, EXECUTION_TOPIC, AMQP_IT_QUEUE)
-    console.log('Amqp connection established')
+    await consumeAmqpMsg(amqpConnection, AMQP_EXCHANGE, EXECUTION_TOPIC, AMQP_IT_QUEUE, publishedEvents)
   }, 60000)
 
   afterAll(async () => {
-    if (amqpConnection) {
-      console.log('Closing AMQP Connection...')
-      await amqpConnection.close()
-      console.log('AMQP Connection closed')
-    }
-
-    // clear stored configs
-    await request(URL)
+    await request(ADAPTER_URL)
       .delete('/configs')
       .send()
-  })
 
-  test('POST datasources/{id}/trigger dynamic', async () => {
-    const datasourceResponse = await request(URL)
+    if (amqpConnection) {
+      await amqpConnection.close()
+    }
+  }, TIMEOUT)
+
+  test('Should trigger datasources with runtime parameters [POST /datasource/{id}/trigger]', async () => {
+    const datasourceResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(dynamicDatasourceConfig)
     const datasourceId = datasourceResponse.body.id
 
-    const dataMetaData = await request(URL)
+    const dataMetaData = await request(ADAPTER_URL)
       .post(`/datasources/${datasourceId}/trigger`)
       .send(runtimeParameters)
 
     const id = dataMetaData.body.id
-    const data = await request(URL)
+    const data = await request(ADAPTER_URL)
       .get(`/data/${id}`)
       .send()
 
-    const delResponse = await request(URL)
+    const delResponse = await request(ADAPTER_URL)
       .delete(`/datasources/${datasourceId}`)
       .send()
 
@@ -81,25 +74,25 @@ describe('Adapter Sources Trigger', () => {
     expect(publishedEvents.get(EXECUTION_SUCCESS_TOPIC)).toContainEqual({
       datasourceId: datasourceId,
       data: '{"id":"2"}'
-    })
+    }, TIMEOUT)
   })
 
-  test('POST datasources/{id}/trigger dynamic defaultvalues', async () => {
-    const datasourceResponse = await request(URL)
+  test('Should trigger datasources with default parameters [POST /datasources/{id}/trigger]', async () => {
+    const datasourceResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(dynamicDatasourceConfig)
     const datasourceId = datasourceResponse.body.id
 
-    const dataMetaData = await request(URL)
+    const dataMetaData = await request(ADAPTER_URL)
       .post(`/datasources/${datasourceId}/trigger`)
       .send(null)
 
     const id = dataMetaData.body.id
-    const data = await request(URL)
+    const data = await request(ADAPTER_URL)
       .get(`/data/${id}`)
       .send()
 
-    const delResponse = await request(URL)
+    const delResponse = await request(ADAPTER_URL)
       .delete(`/datasources/${datasourceId}`)
       .send()
 
@@ -118,22 +111,22 @@ describe('Adapter Sources Trigger', () => {
     })
   })
 
-  test('POST datasources/{id}/trigger static', async () => {
-    const datasourceResponse = await request(URL)
+  test('Should trigger datasources without runtime parameters [POST /datasources/{id}/trigger]', async () => {
+    const datasourceResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(staticDatasourceConfig)
     const datasourceId = datasourceResponse.body.id
 
-    const dataMetaData = await request(URL)
+    const dataMetaData = await request(ADAPTER_URL)
       .post(`/datasources/${datasourceId}/trigger`)
       .send(null)
 
     const id = dataMetaData.body.id
-    const normalData = await request(URL)
+    const normalData = await request(ADAPTER_URL)
       .get(`/data/${id}`)
       .send()
 
-    const delResponse = await request(URL)
+    const delResponse = await request(ADAPTER_URL)
       .delete(`/datasources/${datasourceId}`)
       .send()
 
@@ -151,22 +144,22 @@ describe('Adapter Sources Trigger', () => {
     })
   })
 
-  test('POST datasource/{id}/trigger FAIL', async () => {
+  test('Should publish results for failing datasources [POST /datasources/{id}/trigger]', async () => {
     const brokenDatasourceConfig = Object.assign({}, staticDatasourceConfig)
     brokenDatasourceConfig.protocol.parameters.location = 'LOL'
-    const datasourceResponse = await request(URL)
+    const datasourceResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(brokenDatasourceConfig)
 
     const datasourceId = datasourceResponse.body.id
 
-    const triggerResponse = await request(URL)
+    const triggerResponse = await request(ADAPTER_URL)
       .post(`/datasources/${datasourceId}/trigger`)
       .send()
 
-    expect(triggerResponse.status).toBeGreaterThan(300) // request should fail (no 2xx status)
+    expect(triggerResponse.status).toEqual(404)
 
-    const delResponse = await request(URL)
+    const delResponse = await request(ADAPTER_URL)
       .delete(`/datasources/${datasourceId}`)
       .send()
 
@@ -179,30 +172,6 @@ describe('Adapter Sources Trigger', () => {
     expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)[0].error).toBeDefined()
   })
 })
-
-async function connectAmqp (url) {
-  amqpConnection = await amqp.connect(url)
-  console.log(`Connected to AMQP on host "${url}"`)
-}
-
-async function receiveAmqp (url, exchange, topic, queue) {
-  const channel = await amqpConnection.createChannel()
-  await channel.assertExchange(exchange, 'topic')
-  const q = await channel.assertQueue(queue)
-  await channel.bindQueue(q.queue, exchange, topic)
-
-  console.log(`Listening on AMQP host "${url}" on exchange "${exchange}" for topic "${topic}"`)
-
-  await channel.consume(q.queue, async (msg) => {
-    const event = JSON.parse(msg.content.toString())
-    console.log(`Event received via amqp: ${JSON.stringify(event)}`)
-    const routingKey = msg.fields.routingKey
-    if (!publishedEvents.get(routingKey)) {
-      publishedEvents.set(routingKey, [])
-    }
-    publishedEvents.get(routingKey).push(event)
-  })
-}
 
 const dynamicDatasourceConfig = {
   id: 54321,
@@ -264,8 +233,4 @@ const runtimeParameters = {
   parameters: {
     id: '2'
   }
-}
-
-function sleep (ms) {
-  return new Promise(resolve => setTimeout(resolve, ms))
 }

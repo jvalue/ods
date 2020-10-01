@@ -14,11 +14,13 @@ import org.jvalue.ods.adapterservice.datasource.model.DatasourceMetadata;
 import org.jvalue.ods.adapterservice.datasource.model.RuntimeParameters;
 import org.jvalue.ods.adapterservice.datasource.repository.DatasourceRepository;
 import org.jvalue.ods.adapterservice.datasource.repository.DatasourceEventRepository;
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Optional;
 
@@ -94,17 +96,17 @@ public class DatasourceManager {
    return datasource.toAdapterConfig(runtimeParameters);
  }
 
- public DataBlob.MetaData trigger(Long id, RuntimeParameters runtimeParameters) {
+ public DataBlob.MetaData trigger(Long id, RuntimeParameters runtimeParameters) throws InterruptedException {
     AdapterConfig adapterConfig = getParametrizedDatasource(id, runtimeParameters);
    try {
       Adapter adapter = adapterFactory.getAdapter(adapterConfig);
       DataBlob executionResult = adapter.executeJob(adapterConfig);
       DatasourceImportedEvent importedEvent = new DatasourceImportedEvent(id, executionResult.getData());
-      this.rabbitTemplate.convertAndSend(RabbitConfiguration.AMPQ_EXCHANGE, RabbitConfiguration.AMQP_IMPORT_SUCCESS_TOPIC, importedEvent);
+      publishAmqp(RabbitConfiguration.AMQP_IMPORT_SUCCESS_TOPIC, importedEvent);
       return executionResult.getMetaData();
    } catch (Exception e) {
-       ImportFailedEvent failedEvent = new ImportFailedEvent(id, e.getMessage());
-       this.rabbitTemplate.convertAndSend(RabbitConfiguration.AMPQ_EXCHANGE, RabbitConfiguration.AMQP_IMPORT_FAILED_TOPIC, failedEvent);
+      ImportFailedEvent failedEvent = new ImportFailedEvent(id, e.getMessage());
+      publishAmqp(RabbitConfiguration.AMQP_IMPORT_FAILED_TOPIC, failedEvent);
      if(e instanceof IllegalArgumentException) {
        System.err.println("Data Import request failed. Malformed Request: " + e.getMessage());
        throw e;
@@ -113,6 +115,19 @@ public class DatasourceManager {
        throw e;
      }
    }
+ }
+
+ private void publishAmqp(String topic, Serializable message) throws InterruptedException {
+      for (int retries = RabbitConfiguration.AMQP_PUBLISH_RETRIES; retries >= 0; retries--) {
+          try {
+              this.rabbitTemplate.convertAndSend(RabbitConfiguration.AMPQ_EXCHANGE, topic, message);
+              return;
+          } catch (AmqpException e) {
+              Thread.sleep(RabbitConfiguration.AMQP_PUBLISH_BACKOFF);
+              System.out.println("Message publish failed ("+retries+"). Retrying in "+RabbitConfiguration.AMQP_PUBLISH_BACKOFF);
+          }
+      }
+      System.err.println("Sending message "+ message.toString() + " to topic: " + topic + " failed.");
  }
 
   /**
