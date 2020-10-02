@@ -29,7 +29,7 @@ describe('Scheduler', () => {
     const config = generateConfig(true, new Date(Date.now() + 5000), 6000)
     mockedGetAllDatasources.mockResolvedValue([config])
 
-    await Scheduling.initializeJobs()
+    await Scheduling.initializeJobsWithRetry()
 
     expect(Scheduling.getAllJobs()).toHaveLength(1)
     expect(Scheduling.getAllJobs()[0].datasourceConfig).toEqual(config)
@@ -44,7 +44,7 @@ describe('Scheduler', () => {
       datasourceId: 123
     }
 
-    await Scheduling.initializeJobs()
+    await Scheduling.initializeJobsWithRetry()
     expect(Scheduling.getAllJobs()).toHaveLength(0)
 
     mockedGetEventsAfter.mockResolvedValue([creationEvent])
@@ -70,7 +70,7 @@ describe('Scheduler', () => {
       datasourceId: 123
     }
 
-    await Scheduling.initializeJobs()
+    await Scheduling.initializeJobsWithRetry()
     expect(Scheduling.getAllJobs()).toHaveLength(1)
 
     mockedGetEventsAfter.mockResolvedValue([deletionEvent])
@@ -91,7 +91,7 @@ describe('Scheduler', () => {
       datasourceId: 123
     }
 
-    await Scheduling.initializeJobs()
+    await Scheduling.initializeJobsWithRetry()
     const allJobs = Scheduling.getAllJobs()
     expect(allJobs).toHaveLength(1)
     expect(allJobs[0].datasourceConfig).toEqual(toBeUpdated)

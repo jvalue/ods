@@ -1,12 +1,12 @@
+import type { AxiosError } from 'axios'
 import deepEqual from 'deep-equal'
-import ExecutionJob from './interfaces/scheduling-job'
 import schedule from 'node-schedule'
 
 import * as AdapterClient from './clients/adapter-client'
 import * as Scheduling from './scheduling'
-
-import DatasourceConfig from './interfaces/datasource-config'
-import DatasourceEvent, { EventType } from './interfaces/datasource-event'
+import type ExecutionJob from './interfaces/scheduling-job'
+import type DatasourceConfig from './interfaces/datasource-config'
+import { DatasourceEvent, EventType } from './interfaces/datasource-event'
 
 import { sleep } from './sleep'
 import { MAX_TRIGGER_RETRIES } from './env'
@@ -17,31 +17,35 @@ let currentEventId: number
 /**
  * Initially receive all datasources from adapter service and start them up.
  */
-export async function initializeJobs (retries = 30, retryBackoff = 3000): Promise<void> {
-  try {
-    console.log('Starting initialization scheduler')
-    currentEventId = await AdapterClient.getLatestEventId()
-
-    const datasources: DatasourceConfig[] = await AdapterClient.getAllDatasources()
-
-    console.log(`Received ${datasources.length} datasources from adapter-service`)
-
-    for (const datasource of datasources) {
-      datasource.trigger.firstExecution = new Date(datasource.trigger.firstExecution)
-      await Scheduling.upsertJob(datasource) // assuming adapter service checks for duplicates
+export async function initializeJobsWithRetry (retries = 30, retryBackoff = 3000): Promise<void> {
+  for (let i = 1; i <= retries; i++) {
+    try {
+      await initializeJobs()
+      return
+    } catch (e) {
+      if (e.code === 'ECONNREFUSED' || e.code === 'ENOTFOUND') {
+        console.error(`Failed to sync with Adapter Service on init (${retries}) . Retrying after ${retryBackoff}ms... `)
+      } else {
+        console.error(e)
+        console.error(`Retrying (${retries})...`)
+      }
+      await sleep(retryBackoff)
     }
-  } catch (e) {
-    if (retries === 0) {
-      throw new Error('Failed to initialize datasource/pipeline scheduler.')
-    }
-    if (e.code === 'ECONNREFUSED' || e.code === 'ENOTFOUND') {
-      console.error(`Failed to sync with Adapter Service on init (${retries}) . Retrying after ${retryBackoff}ms... `)
-    } else {
-      console.error(e)
-      console.error(`Retrying (${retries})...`)
-    }
-    await sleep(retryBackoff)
-    return initializeJobs(retries - 1, retryBackoff)
+  }
+  throw new Error('Failed to initialize datasource/pipeline scheduler.')
+}
+
+async function initializeJobs (): Promise<void> {
+  console.log('Starting initialization scheduler')
+  currentEventId = await AdapterClient.getLatestEventId()
+
+  const datasources: DatasourceConfig[] = await AdapterClient.getAllDatasources()
+
+  console.log(`Received ${datasources.length} datasources from adapter-service`)
+
+  for (const datasource of datasources) {
+    datasource.trigger.firstExecution = new Date(datasource.trigger.firstExecution)
+    await Scheduling.upsertJob(datasource) // assuming adapter service checks for duplicates
   }
 }
 
@@ -81,11 +85,6 @@ async function applyChanges (event: DatasourceEvent): Promise<void> {
     case EventType.DATASOURCE_CREATE:
     case EventType.DATASOURCE_UPDATE: {
       await applyCreateOrUpdateEvent(event)
-      break
-    }
-    default: {
-      console.error(`Received unknown event type: ${event.eventType}`)
-      console.error(event)
       break
     }
   }
@@ -139,9 +138,10 @@ export function scheduleDatasource (datasourceConfig: DatasourceConfig): Executi
 
   const datasourceId = datasourceConfig.id
 
-  const scheduledJob = schedule.scheduleJob(`Datasource ${datasourceId}`, executionDate, () =>
+  const scheduledJob = schedule.scheduleJob(`Datasource ${datasourceId}`, executionDate, () => {
     execute(datasourceConfig)
-  )
+      .catch(error => console.log('Failed to execute job:', error))
+  })
   const datasourceJob = { scheduleJob: scheduledJob, datasourceConfig: datasourceConfig }
   allJobs.set(datasourceId, datasourceJob)
 
@@ -165,22 +165,28 @@ async function execute (datasourceConfig: DatasourceConfig): Promise<void> {
       await AdapterClient.triggerDatasource(datasourceId)
       console.log(`Datasource ${datasourceId} triggered.`)
     } catch (httpError) {
-      if (httpError.response) {
-        console.debug(`Adapter was reachable but triggering datasource failed:
+      if (isAxiosError(httpError)) {
+        if (httpError.response !== undefined) {
+          console.debug(`Adapter was reachable but triggering datasource failed:
          ${httpError.response.status}: ${httpError.response.data}`)
-      } else if (httpError.request) {
-        console.debug(`Not able to reach adapter when triggering datasource ${datasourceId}: ${httpError.request}`)
+        } else if (httpError.request !== undefined) {
+          console.debug(`Not able to reach adapter when triggering datasource ${datasourceId}: ${httpError.request}`)
+        }
       } else {
-        console.debug(`Triggering datasource ${datasourceId} failed: ${httpError.message}`)
+        console.debug(`Triggering datasource ${datasourceId} failed:`, httpError.message)
       }
       if (i === MAX_TRIGGER_RETRIES - 1) { // last retry
-        console.error(`Could not trigger datasource ${datasourceId}: ${httpError}`)
+        console.error(`Could not trigger datasource ${datasourceId}:`, httpError)
         break
       }
       console.info(`Triggering datasource failed - retrying (${i}/${MAX_TRIGGER_RETRIES})`)
     }
   }
   reschedule(datasourceConfig)
+}
+
+function isAxiosError (error: any): error is AxiosError {
+  return error.isAxiosError
 }
 
 export async function upsertJob (datasourceConfig: DatasourceConfig): Promise<ExecutionJob> {
@@ -209,7 +215,5 @@ export function cancelAllJobs (): void {
 
 export function cancelJob (jobId: number): void {
   const job = allJobs.get(jobId)
-  if (job) {
-    job.scheduleJob.cancel()
-  }
+  job?.scheduleJob.cancel()
 }
