@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-import DatasourceConfig from '../interfaces/datasource-config'
-import DatasourceEvent from '@/interfaces/datasource-event'
+import type DatasourceConfig from '../interfaces/datasource-config'
+import type { DatasourceEvent } from '../interfaces/datasource-event'
 
 import { ADAPTER_SERVICE_URL } from '../env'
 
@@ -27,7 +27,7 @@ export async function getEventsAfter (eventId: number): Promise<DatasourceEvent[
 
 export async function getLatestEventId (): Promise<number> {
   const response = await http.get('datasources/events/latest')
-  return response.data.eventId || 0
+  return response.data.eventId ?? 0
 }
 
 export async function triggerDatasource (datasourceId: number): Promise<void> {
