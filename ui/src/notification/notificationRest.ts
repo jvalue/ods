@@ -69,7 +69,7 @@ interface NotificationApiSummary {
 }
 
 interface NotificationApiConfig {
-  id: number;
+  id?: number;
   pipelineId: number;
   condition: string;
 }
