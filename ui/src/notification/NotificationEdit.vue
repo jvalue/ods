@@ -7,7 +7,7 @@
       <notification-form
         v-if="notification"
         v-model="notification"
-        @onChangeValidity="isValid = $event"
+        @changeValidity="isValid = $event"
       />
       <v-progress-linear
         v-else
