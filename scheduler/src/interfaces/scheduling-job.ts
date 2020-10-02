@@ -1,5 +1,5 @@
-import schedule from 'node-schedule'
-import DatasourceConfig from './datasource-config'
+import type schedule from 'node-schedule'
+import type DatasourceConfig from './datasource-config'
 
 export default interface SchedulingJob {
   scheduleJob: schedule.Job

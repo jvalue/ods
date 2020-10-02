@@ -1,4 +1,4 @@
-export default interface DatasourceEvent {
+export interface DatasourceEvent {
   eventId: number
   datasourceId: number
   eventType: EventType
