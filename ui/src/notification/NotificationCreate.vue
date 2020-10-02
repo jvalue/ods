@@ -1,17 +1,12 @@
 <template>
   <v-card>
     <v-card-title>
-      <span class="headline">Update Notification</span>
+      <span class="headline">Create Notification</span>
     </v-card-title>
     <v-card-text>
       <notification-form
-        v-if="notification"
         v-model="notification"
         @changeValidity="isValid = $event"
-      />
-      <v-progress-linear
-        v-else
-        indeterminate
       />
     </v-card-text>
     <v-card-actions>
@@ -20,7 +15,7 @@
         color="primary"
         class="ma-2"
         :disabled="!isValid"
-        @click="onUpdate()"
+        @click="onCreate()"
       >
         Save
       </v-btn>
@@ -41,34 +36,30 @@ import Vue from 'vue'
 
 import NotificationForm from '@/notification/NotificationForm.vue'
 
-import NotificationConfig from '@/notification/notificationConfig'
+import NotificationConfig, { CONFIG_TYPE } from '@/notification/notificationConfig'
 import * as NotificationREST from '@/notification/notificationRest'
 
 @Component({
   components: { NotificationForm }
 })
-export default class NotificationEdit extends Vue {
+export default class NotificationCreate extends Vue {
   private isValid = false
 
-  private notification: NotificationConfig | null = null
+  private notification: NotificationConfig = {
+    id: -1,
+    pipelineId: -1,
+    condition: 'true',
+    type: CONFIG_TYPE.WEBHOOK,
+    parameters: {}
+  }
 
   private mounted (): void {
     const pipelineId = parseInt(this.$route.params.pipelineId)
-    const notificationId = parseInt(this.$route.params.notificationId)
-    this.loadNotification(pipelineId, notificationId)
+    this.notification.pipelineId = pipelineId
   }
 
-  private async loadNotification (pipelineId: number, notificationId: number): Promise<void> {
-    const notificationsOfPipeline = await NotificationREST.getAllByPipelineId(pipelineId)
-    this.notification = notificationsOfPipeline.find(x => x.id === notificationId) || null
-  }
-
-  private async onUpdate (): Promise<void> {
-    if (!this.notification) {
-      return
-    }
-
-    await NotificationREST.update(this.notification)
+  private async onCreate (): Promise<void> {
+    await NotificationREST.create(this.notification)
     this.$router.push({ name: 'notification-overview' })
   }
 
