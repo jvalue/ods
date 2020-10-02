@@ -1,27 +1,29 @@
 <template>
   <v-container>
-    <v-row
-      cols="30"
-      sm="6"
-      md="4"
-    >
-      <v-select
-        v-model="notification.type"
-        :items="notificationTypes"
-        label="Type"
-        @change="resetParameters()"
-      />
-    </v-row>
-    <v-row
-      cols="20"
-      sm="6"
-      md="4"
-    >
-      <v-text-field
-        v-model="notification.condition"
-        label="Condition"
-      />
-    </v-row>
+    <v-form v-model="isBaseValid">
+      <v-row
+        cols="30"
+        sm="6"
+        md="4"
+      >
+        <v-select
+          v-model="notification.type"
+          :items="notificationTypes"
+          label="Type"
+          @change="resetParameters()"
+        />
+      </v-row>
+      <v-row
+        cols="20"
+        sm="6"
+        md="4"
+      >
+        <v-text-field
+          v-model="notification.condition"
+          label="Condition"
+        />
+      </v-row>
+    </v-form>
     <v-row
       cols="10"
       sm="6"
@@ -31,19 +33,19 @@
         v-if="notification.type === 'webhook'"
         v-model="notification.parameters"
         style="flex: 1 1 auto"
-        @validityChanged="isValid = $event"
+        @validityChanged="isParametersValid = $event"
       />
       <firebase-notification-form
         v-if="notification.type === 'fcm'"
         v-model="notification.parameters"
         style="flex: 1 1 auto"
-        @validityChanged="isValid = $event"
+        @validityChanged="isParametersValid = $event"
       />
       <slack-notification-form
         v-if="notification.type === 'slack'"
         v-model="notification.parameters"
         style="flex: 1 1 auto"
-        @validityChanged="isValid = $event"
+        @validityChanged="isParametersValid = $event"
       />
     </v-row>
   </v-container>
@@ -69,7 +71,11 @@ export default class NotificationForm extends Vue {
   @PropSync('value')
   private notification!: NotificationConfig
 
-  private isValid = false
+  private isBaseValid = false
+  private isParametersValid = false
+  private get isValid (): boolean {
+    return this.isBaseValid && this.isParametersValid
+  }
 
   private mounted (): void {
     this.emitIsValid() // initial validity check on rendering
@@ -97,7 +103,7 @@ export default class NotificationForm extends Vue {
 
   private resetParameters (): void {
     this.notification.parameters = {}
-    this.isValid = false
+    this.isParametersValid = false
   }
 }
 
