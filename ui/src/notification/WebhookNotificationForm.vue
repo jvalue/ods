@@ -1,12 +1,11 @@
 <template>
   <v-form
-    v-model="validForm"
+    v-model="isValid"
   >
     <v-text-field
-      v-model="webhookNotification.url"
+      v-model="parameters.url"
       label="URL to trigger the Webhook at"
       :rules="[ validURL ]"
-      @keyup="formChanged"
     />
   </v-form>
 </template>
@@ -14,29 +13,42 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { Emit, PropSync } from 'vue-property-decorator'
-import { WebhookNotification } from './notificationConfig'
+import { Emit, PropSync, Watch } from 'vue-property-decorator'
+import { WebhookNotificationParameters } from './notificationConfig'
 
 @Component({ })
-export default class WebhookEdit extends Vue {
-  private validForm = false
-
+export default class WebhookNotificationForm extends Vue {
   @PropSync('value')
-  private webhookNotification!: WebhookNotification
+  private parameters!: WebhookNotificationParameters
+
+  private isValid = false
+
+  private mounted (): void {
+    this.initialValidityCheck()
+  }
+
+  private initialValidityCheck (): void {
+    this.emitIsValid()
+  }
 
   @Emit('value')
-  emitValue (): WebhookNotification {
-    return this.webhookNotification
+  emitValue (): WebhookNotificationParameters {
+    return this.parameters
   }
 
-  @Emit('validityChanged')
-  emitValid (): boolean {
-    return this.validForm
+  @Emit('changeValidity')
+  emitIsValid (): boolean {
+    return this.isValid
   }
 
-  formChanged (): void {
+  @Watch('parameters', { deep: true })
+  onChangeFormModel (): void {
     this.emitValue()
-    this.emitValid()
+  }
+
+  @Watch('isValid')
+  private onChangeValidity (): void {
+    this.emitIsValid()
   }
 
   private validURL (url: string): true | string {
@@ -46,9 +58,11 @@ export default class WebhookEdit extends Vue {
         '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
         '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
         '(\\#[-a-z\\d_]*)?$', 'i') // fragment locator
+
     if (!!url && !!url.match(urlRegex)) {
       return true
     }
+
     return 'URL invalid'
   }
 }

@@ -8,7 +8,6 @@ import '@mdi/font/css/materialdesignicons.css'
 import TransformationModule from '@/pipeline/edit/transformation/transformation.module'
 import AuthModule from '@/components/auth/module'
 import PipelineModule from '@/pipeline/pipeline.module'
-import NotificationModule from './notification/notification.module'
 
 Vue.use(Vuetify)
 const vuetify = new Vuetify({
@@ -25,8 +24,7 @@ export const store = new Vuex.Store({
   modules: {
     auth: AuthModule,
     transformation: TransformationModule,
-    pipeline: PipelineModule,
-    notification: NotificationModule
+    pipeline: PipelineModule
   }
 })
 
