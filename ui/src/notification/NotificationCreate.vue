@@ -6,7 +6,7 @@
     <v-card-text>
       <notification-form
         v-model="notification"
-        @validityChanged="isValid = $event"
+        @changeValidity="isValid = $event"
       />
     </v-card-text>
     <v-card-actions>

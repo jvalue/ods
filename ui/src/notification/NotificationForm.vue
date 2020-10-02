@@ -33,19 +33,19 @@
         v-if="notification.type === 'webhook'"
         v-model="notification.parameters"
         style="flex: 1 1 auto"
-        @validityChanged="isParametersValid = $event"
+        @changeValidity="isParametersValid = $event"
       />
       <firebase-notification-form
         v-if="notification.type === 'fcm'"
         v-model="notification.parameters"
         style="flex: 1 1 auto"
-        @validityChanged="isParametersValid = $event"
+        @changeValidity="isParametersValid = $event"
       />
       <slack-notification-form
         v-if="notification.type === 'slack'"
         v-model="notification.parameters"
         style="flex: 1 1 auto"
-        @validityChanged="isParametersValid = $event"
+        @changeValidity="isParametersValid = $event"
       />
     </v-row>
   </v-container>
@@ -78,11 +78,15 @@ export default class NotificationForm extends Vue {
   }
 
   private mounted (): void {
-    this.emitIsValid() // initial validity check on rendering
+    this.initialValidityCheck()
+  }
+
+  private initialValidityCheck (): void {
+    this.emitIsValid()
   }
 
   @Watch('notification', { deep: true })
-  private onNotificationChanged (): void {
+  private onChangeNotification (): void {
     this.emitNotification()
   }
 
@@ -92,11 +96,11 @@ export default class NotificationForm extends Vue {
   }
 
   @Watch('isValid')
-  private onIsValidChanged (): void {
+  private onChangeValidity (): void {
     this.emitIsValid()
   }
 
-  @Emit('validityChanged')
+  @Emit('changeValidity')
   private emitIsValid (): boolean {
     return this.isValid
   }

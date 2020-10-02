@@ -35,7 +35,11 @@ export default class SlackNotificationForm extends Vue {
   private isValid = false
 
   private mounted (): void {
-    this.emitIsValid() // initial validity check on rendering
+    this.initialValidityCheck()
+  }
+
+  private initialValidityCheck (): void {
+    this.emitIsValid()
   }
 
   @Emit('value')
@@ -43,18 +47,18 @@ export default class SlackNotificationForm extends Vue {
     return this.parameters
   }
 
-  @Emit('validityChanged')
+  @Emit('changeValidity')
   emitIsValid (): boolean {
     return this.isValid
   }
 
   @Watch('parameters', { deep: true })
-  formChanged (): void {
+  onChangeFormModel (): void {
     this.emitValue()
   }
 
   @Watch('isValid')
-  private validityChanged (): void {
+  private onChangeValidity (): void {
     this.emitIsValid()
   }
 
