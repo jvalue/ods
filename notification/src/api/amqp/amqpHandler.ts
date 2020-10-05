@@ -57,7 +57,7 @@ export class AmqpHandler {
     })
 
     await channel.bindQueue(q.queue, AMQP_PIPELINE_EXECUTION_EXCHANGE, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC)
-    await channel.consume(q.queue, async msg => await this.handleEvent(msg))
+    await channel.consume(q.queue, this.handleEvent)
 
     console.info(
       `Successfully initialized pipeline-executed queue "${AMQP_PIPELINE_EXECUTION_QUEUE}" ` +
@@ -65,14 +65,15 @@ export class AmqpHandler {
     )
   }
 
-  private async handleEvent (msg: AMQP.ConsumeMessage | null): Promise<void> {
+  private readonly handleEvent = (msg: AMQP.ConsumeMessage | null): void => {
     if (msg === null) {
       console.debug('Received empty event when listening on pipeline executions - doing nothing')
       return
     }
     console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
     if (msg.fields.routingKey === AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC) {
-      await this.triggerEventHandler.handleEvent(JSON.parse(msg.content.toString()))
+      this.triggerEventHandler.handleEvent(JSON.parse(msg.content.toString()))
+        .catch(error => console.log('Failed to handle pipeline execution success event', error))
     } else {
       console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
     }
