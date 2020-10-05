@@ -30,6 +30,15 @@ describe('Datasource Configuration', () => {
     await consumeAmqpMsg(amqpConnection, AMQP_EXCHANGE, CONFIG_TOPIC, AMQP_QUEUE, publishedEvents)
   }, 60000)
 
+  afterAll(async () => {
+    await request(ADAPTER_URL)
+      .delete('/configs')
+      .send()
+    if (amqpConnection) {
+      await amqpConnection.close()
+    }
+  }, TIMEOUT)
+
   test('Should respond with stored datasource configs', async () => {
     const response = await request(ADAPTER_URL).get('/datasources')
     expect(response.status).toEqual(200)
@@ -54,19 +63,12 @@ describe('Datasource Configuration', () => {
     expect(publishedEvents.get(CONFIG_CREATED_TOPIC)).toContainEqual({
       datasourceId
     })
-
-    const delResponse = await request(ADAPTER_URL)
-      .delete('/datasources/' + response.body.id)
-      .send()
-
-    expect(delResponse.status).toEqual(204)
   }, TIMEOUT)
 
   test('Should update existing datasource [PUT /datasources/{id}]', async () => {
     const postResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(datasourceConfig)
-
     const datasourceId = postResponse.body.id
 
     const originalGetResponse = await request(ADAPTER_URL)
@@ -91,14 +93,7 @@ describe('Datasource Configuration', () => {
     expect(originalGetResponse.body.metadata).toEqual(updatedGetResponse.body.metadata)
     expect(originalGetResponse.body.id).toEqual(updatedGetResponse.body.id)
 
-    // not sure if it should behave like that?!
     expect(originalGetResponse.body.adapter).toEqual(updatedGetResponse.body.adapter)
-
-    const delResponse = await request(ADAPTER_URL)
-      .delete('/datasources/' + datasourceId)
-      .send()
-
-    expect(delResponse.status).toEqual(204)
   }, TIMEOUT)
 
   test('Should delete specific datasource [DELETE /datasources/{id}]', async () => {
