@@ -28,7 +28,6 @@ describe('Datasource Configuration', () => {
     amqpConnection = await connectAmqp(AMQP_URL)
 
     await consumeAmqpMsg(amqpConnection, AMQP_EXCHANGE, CONFIG_TOPIC, AMQP_QUEUE, publishedEvents)
-
   }, 60000)
 
   test('Should respond with stored datasource configs', async () => {
@@ -135,85 +134,6 @@ describe('Datasource Configuration', () => {
     const sourcesRequest = await request(ADAPTER_URL)
       .get('/datasources/')
     expect(sourcesRequest.body).toEqual([])
-  }, TIMEOUT)
-
-  test('GET /datasources/events', async () => {
-    const response = await request(ADAPTER_URL)
-      .get('/datasources/events')
-      .send()
-
-    expect(response.status).toEqual(200)
-    expect(response.type).toEqual('application/json')
-  }, TIMEOUT)
-
-  test('GET /datasources/events?datasourceId={id}', async () => {
-    const datasourceResponse = await request(ADAPTER_URL)
-      .post('/datasources')
-      .send(datasourceConfig)
-    const datasourceId = datasourceResponse.body.id
-
-    await request(ADAPTER_URL)
-      .delete('/datasources/' + datasourceId)
-
-    const eventsResponse = await request(ADAPTER_URL)
-      .get('/datasources/events?datasourceId=' + datasourceId)
-      .send()
-
-    expect(eventsResponse.status).toEqual(200)
-    expect(eventsResponse.type).toEqual('application/json')
-    expect(eventsResponse.body).toHaveLength(2)
-    expect(eventsResponse.body[0].datasourceId).toBe(datasourceId)
-    expect(eventsResponse.body[0].eventType).toEqual('DATASOURCE_CREATE')
-    expect(eventsResponse.body[1].datasourceId).toBe(datasourceId)
-    expect(eventsResponse.body[1].eventType).toEqual('DATASOURCE_DELETE')
-  }, TIMEOUT)
-
-  test('GET /events [with offset]', async () => {
-    const datasourceResponse = await request(ADAPTER_URL)
-      .post('/datasources')
-      .send(datasourceConfig)
-    const datasourceId = datasourceResponse.body.id
-
-    await request(ADAPTER_URL)
-      .delete('/datasources/' + datasourceId)
-
-    const eventsResponse = await request(ADAPTER_URL)
-      .get('/datasources/events?datasourceId=' + datasourceId)
-      .send()
-    const eventId = eventsResponse.body[0].eventId
-
-    const eventsAfter = await request(ADAPTER_URL)
-      .get('/datasources/events?after=' + eventId)
-      .send()
-
-    expect(eventsAfter.status).toEqual(200)
-    expect(eventsAfter.type).toEqual('application/json')
-    expect(eventsAfter.body).toHaveLength(1)
-    expect(eventsAfter.body[0].eventId).toBe(eventId + 1)
-    expect(eventsAfter.body[0].datasourceId).toBe(datasourceId)
-    expect(eventsAfter.body[0].eventType).toEqual('DATASOURCE_DELETE')
-  }, TIMEOUT)
-
-  test('GET datasources/events/latest', async () => {
-    const postResponse = await request(ADAPTER_URL)
-      .post('/datasources')
-      .send(datasourceConfig)
-    const datasourceId = postResponse.body.id
-
-    await request(ADAPTER_URL)
-      .delete('/datasources/' + datasourceId)
-      .send()
-
-    const response = await request(ADAPTER_URL)
-      .get('/datasources/events/latest')
-      .send()
-
-    expect(response.status).toEqual(200)
-    expect(response.type).toEqual('application/json')
-    expect(Object.keys(response.body)).toHaveLength(3)
-    expect(response.body.eventId).toBeTruthy()
-    expect(response.body.datasourceId).toBe(datasourceId)
-    expect(response.body.eventType).toEqual('DATASOURCE_DELETE')
   }, TIMEOUT)
 })
 
