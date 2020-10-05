@@ -82,8 +82,6 @@ public class DatasourceEndpoint {
         return datasourceManager.trigger(id, runtimeParameters);
       } catch (IllegalArgumentException e) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No valid Datasource for id "+ id);
-      } catch (InterruptedException e) {
-          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
 }

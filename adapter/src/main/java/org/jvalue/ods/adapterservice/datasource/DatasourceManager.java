@@ -5,6 +5,7 @@ import org.jvalue.ods.adapterservice.adapter.AdapterFactory;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
 import org.jvalue.ods.adapterservice.config.RabbitConfiguration;
+import org.jvalue.ods.adapterservice.datasource.event.DatasourceConfigEvent;
 import org.jvalue.ods.adapterservice.datasource.event.DatasourceImportedEvent;
 import org.jvalue.ods.adapterservice.datasource.event.ImportFailedEvent;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
@@ -43,6 +44,7 @@ public class DatasourceManager {
 
     Datasource savedConfig = datasourceRepository.save(config);
 
+    publishAmqp(RabbitConfiguration.AMQP_DATASOURCE_CREATED_TOPIC, new DatasourceConfigEvent(savedConfig));
     return savedConfig;
   }
 
@@ -63,12 +65,14 @@ public class DatasourceManager {
       .orElseThrow(() -> new IllegalArgumentException("Datasource with id " + id + " not found."));
 
     datasourceRepository.save(applyUpdate(old, updated));
+    publishAmqp(RabbitConfiguration.AMQP_DATASOURCE_UPDATED_TOPIC, new DatasourceConfigEvent(old));
   }
 
 
   @Transactional
   public void deleteDatasource(Long id) {
     datasourceRepository.deleteById(id);
+    publishAmqp(RabbitConfiguration.AMQP_DATASOURCE_DELETED_TOPIC, new DatasourceConfigEvent(id));
   }
 
 
@@ -76,6 +80,9 @@ public class DatasourceManager {
   public void deleteAllDatasources() {
     Iterable<Datasource> allDatasourceConfigs = getAllDatasources();
     datasourceRepository.deleteAll();
+    for (Datasource ds: allDatasourceConfigs) {
+        publishAmqp(RabbitConfiguration.AMQP_DATASOURCE_DELETED_TOPIC, new DatasourceConfigEvent(ds));
+    }
   }
 
  private AdapterConfig getParametrizedDatasource(Long id, RuntimeParameters runtimeParameters) {

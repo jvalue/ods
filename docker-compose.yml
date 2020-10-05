@@ -37,6 +37,9 @@ services:
       AMQP_EXCHANGE: 'ods_global'
       AMQP_IMPORT_SUCCESS_TOPIC: 'datasource.execution.success'
       AMQP_IMPORT_FAILED_TOPIC: 'datasource.execution.failed'
+      AMQP_DATASOURCE_CREATED_TOPIC: 'datasource.config.created'
+      AMQP_DATASOURCE_UPDATED_TOPIC: 'datasource.config.updated'
+      AMQP_DATASOURCE_DELETED_TOPIC: 'datasource.config.deleted'
       AMQP_PUBLISH_RETRIES: 5
       AMQP_PUBLISH_BACKOFF: 1000
     labels:
