@@ -9,14 +9,14 @@ import {
 } from '../../env'
 
 export default class AmqpConfigWritesPublisher implements ConfigWritesPublisher {
-  private publisher: AmqpPublisher
+  private readonly publisher: AmqpPublisher
 
   constructor () {
     this.publisher = new AmqpPublisher()
   }
 
-  init (retries: number, msBackoff: number): Promise<void> {
-    return this.publisher.init(AMQP_URL, AMQP_EXCHANGE, retries, msBackoff)
+  async init (retries: number, msBackoff: number): Promise<void> {
+    return await this.publisher.init(AMQP_URL, AMQP_EXCHANGE, retries, msBackoff)
   }
 
   publishCreation (pipelineId: number, pipelineName: string): boolean {

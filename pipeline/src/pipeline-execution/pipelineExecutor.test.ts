@@ -11,8 +11,7 @@ describe('PipelineExecutor', () => {
 
     beforeEach(() => {
       const SandboxMock = jest.fn(() => ({
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        execute: jest.fn((func, data) => ({ data: {}, error: undefined }))
+        execute: jest.fn((func, data) => ({ data: {} }))
       }))
       sandboxExecutorMock = new SandboxMock()
       pipelineExecutor = new PipelineExecutor(sandboxExecutorMock)
@@ -31,24 +30,20 @@ describe('PipelineExecutor', () => {
   })
 
   describe('invalid execution', () => {
-    let pipelineExecutor: PipelineExecutor
-    let sandboxExecutorMock: jest.Mocked<SandboxExecutor>
+    let transformationService: PipelineExecutor
+    let sandboxExecutorMock: SandboxExecutor
 
     beforeEach(() => {
-      const SandboxMock = jest.fn(() => ({
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        execute: jest.fn((func, data) => ({ data: undefined, error: undefined })),
-        evaluate: jest.fn()
-      }))
-      sandboxExecutorMock = new SandboxMock()
-      pipelineExecutor = new PipelineExecutor(sandboxExecutorMock)
+      sandboxExecutorMock = { execute: (code, data) => ({ data: null }) }
+      transformationService = new PipelineExecutor(sandboxExecutorMock)
     })
 
     it('should return an error if no return clause is included', () => {
-      const jobResult = pipelineExecutor.executeJob('data.a = 1;', { a: 2 })
-      expect(jobResult.data).toBeUndefined()
-      if (jobResult.error === undefined) {
-        throw new Error('Fail test')
+      const jobResult = transformationService.executeJob('data.a = 1;', { a: 2 })
+      expect(jobResult).not.toHaveProperty('data')
+      expect(jobResult).toHaveProperty('error')
+      if ('data' in jobResult) {
+        return
       }
       expect(jobResult.error.name).toBe('MissingReturnError')
     })

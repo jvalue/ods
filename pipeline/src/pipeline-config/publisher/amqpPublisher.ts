@@ -31,7 +31,7 @@ export default class AmqpPublisher {
     }
   }
 
-  private initChannel = async (connection: AMQP.Connection, exchange: string): Promise<AMQP.Channel> => {
+  private async initChannel (connection: AMQP.Connection, exchange: string): Promise<AMQP.Channel> {
     try {
       const channel = await connection.createChannel()
       await channel.assertExchange(exchange, 'topic')
@@ -44,7 +44,7 @@ export default class AmqpPublisher {
   }
 
   public publish (exchange: string, topic: string, content: object): boolean {
-    if (!this.channel) {
+    if (this.channel === undefined) {
       console.error('Publish not possible, AMQP client not initialized.')
       return false
     } else {

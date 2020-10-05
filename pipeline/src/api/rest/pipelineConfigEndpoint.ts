@@ -5,11 +5,9 @@ import { PipelineConfigDTOValidator } from '../../pipeline-config/model/pipeline
 import { isString } from '../../validators'
 
 export class PipelineConfigEndpoint {
-  pipelineConfigManager: PipelineConfigManager
+  constructor (private readonly pipelineConfigManager: PipelineConfigManager) {}
 
-  constructor (pipelineConfigManager: PipelineConfigManager, app: express.Application) {
-    this.pipelineConfigManager = pipelineConfigManager
-
+  registerRoutes = (app: express.Application): void => {
     app.get('/configs', this.getAll)
     app.get('/configs/:id', this.getOne)
     app.post('/configs', this.create)
@@ -74,7 +72,7 @@ export class PipelineConfigEndpoint {
       return
     }
     const config = await this.pipelineConfigManager.get(configId)
-    if (!config) {
+    if (config === undefined) {
       res.status(404).send('Config not found')
       return
     }

@@ -1,6 +1,11 @@
 import JobError from './jobError'
 
-export default interface ExecutionResult {
-  error?: JobError
-  data?: object
+export type ExecutionResult = SuccessExecutionResult | ErrorExecutionResult
+
+export interface SuccessExecutionResult {
+  data: unknown
+}
+
+export interface ErrorExecutionResult {
+  error: JobError
 }
