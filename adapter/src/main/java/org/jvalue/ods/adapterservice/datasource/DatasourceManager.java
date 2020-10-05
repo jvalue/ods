@@ -84,7 +84,7 @@ public class DatasourceManager {
    return datasource.toAdapterConfig(runtimeParameters);
  }
 
- public DataBlob.MetaData trigger(Long id, RuntimeParameters runtimeParameters) throws InterruptedException {
+ public DataBlob.MetaData trigger(Long id, RuntimeParameters runtimeParameters) {
     AdapterConfig adapterConfig = getParametrizedDatasource(id, runtimeParameters);
    try {
       Adapter adapter = adapterFactory.getAdapter(adapterConfig);
@@ -105,13 +105,18 @@ public class DatasourceManager {
    }
  }
 
- private void publishAmqp(String topic, Serializable message) throws InterruptedException {
+ private void publishAmqp(String topic, Serializable message) {
       for (int retries = RabbitConfiguration.AMQP_PUBLISH_RETRIES; retries >= 0; retries--) {
           try {
               this.rabbitTemplate.convertAndSend(RabbitConfiguration.AMPQ_EXCHANGE, topic, message);
               return;
           } catch (AmqpException e) {
-              Thread.sleep(RabbitConfiguration.AMQP_PUBLISH_BACKOFF);
+              try {
+                  Thread.sleep(RabbitConfiguration.AMQP_PUBLISH_BACKOFF);
+              } catch (InterruptedException interruptedException) {
+                  Thread.currentThread().interrupt();
+                  throw new RuntimeException(interruptedException);
+              }
               System.out.println("Message publish failed ("+retries+"). Retrying in "+RabbitConfiguration.AMQP_PUBLISH_BACKOFF);
           }
       }
