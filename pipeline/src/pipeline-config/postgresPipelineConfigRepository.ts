@@ -50,55 +50,46 @@ interface DatabasePipeline {
   createdAt: Date
 }
 
+const POOL_CONFIG: PoolConfig = {
+  host: POSTGRES_HOST,
+  port: POSTGRES_PORT,
+  user: POSTGRES_USER,
+  password: POSTGRES_PW,
+  database: POSTGRES_DB,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000
+}
+
 export default class PostgresPipelineConfigRepository implements PipelineConfigRepository {
-  private connectionPool?: Pool = undefined
+  constructor (private readonly connectionPool: Pool) {}
 
   /**
-   * Initializes the connection to the database.
+   * Initializes the PostgresPipelineConfigRepository.
    * @param retries:  Number of retries to connect to the database
    * @param backoffMs:  Time in ms to backoff before next connection retry
-   * @returns reject promise on failure to connect
    */
-  public async init (retries: number, backoffMs: number): Promise<void> {
-    console.debug('Initializing databse connection')
-
-    const poolConfig: PoolConfig = {
-      host: POSTGRES_HOST,
-      port: POSTGRES_PORT,
-      user: POSTGRES_USER,
-      password: POSTGRES_PW,
-      database: POSTGRES_DB,
-      max: 20,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000
-    }
-    console.debug(`Connecting to database with config:\n${JSON.stringify(poolConfig)}`)
+  static async init (retries: number, backoffMs: number):
+  Promise<PostgresPipelineConfigRepository> {
+    console.debug('Initializing database connection')
 
     // try to establish connection
     for (let i = 1; i <= retries; i++) {
-      console.info(`Initiliazing database connection (${i}/${retries})`)
-      let client
+      console.info(`Initializing database connection (${i}/${retries})`)
+      let client: PoolClient | undefined
       try {
-        const connectionPool = new Pool(poolConfig)
+        const connectionPool = new Pool(POOL_CONFIG)
         client = await connectionPool.connect()
         await client.query(TABLE_CREATION_STATEMENT)
-        this.connectionPool = connectionPool
         console.info('Successfully established database connection')
-        break
+        return new PostgresPipelineConfigRepository(connectionPool)
       } catch (error) {
         await sleep(backoffMs)
       } finally {
-        if (client) {
-          client.release()
-        }
+        client?.release()
       }
     }
-
-    if (!this.connectionPool) {
-      throw new Error('Connection to databse could not be established.')
-    }
-
-    console.info('Sucessfully established connection to database.')
+    throw new Error('Connection to databse could not be established.')
   }
 
   private toPipelineConfig (dbResult: DatabasePipeline): PipelineConfig {
@@ -129,11 +120,8 @@ export default class PostgresPipelineConfigRepository implements PipelineConfigR
 
   private async executeQuery (query: string, args: unknown[]): Promise<QueryResult> {
     console.debug(`Executing query "${query}" with values ${JSON.stringify(args)}`)
-    if (!this.connectionPool) {
-      throw new Error('No connnection pool available')
-    }
 
-    let client!: PoolClient
+    let client: PoolClient | undefined
     try {
       client = await this.connectionPool.connect()
       const resultSet = await client.query(query, args)
@@ -143,9 +131,7 @@ export default class PostgresPipelineConfigRepository implements PipelineConfigR
       console.error(`Failed to execute query: ${error}`)
       throw error
     } finally {
-      if (client) {
-        client.release()
-      }
+      client?.release()
     }
   }
 
@@ -165,10 +151,10 @@ export default class PostgresPipelineConfigRepository implements PipelineConfigR
 
   async get (id: number): Promise<PipelineConfig | undefined> {
     const resultSet = await this.executeQuery(GET_STATEMENT, [id])
-    const content = this.toPipelineConfigs(resultSet)
-    if (!content || !content[0]) {
+    if (resultSet.rowCount === 0) {
       return undefined
     }
+    const content = this.toPipelineConfigs(resultSet)
     return content[0]
   }
 
@@ -200,10 +186,10 @@ export default class PostgresPipelineConfigRepository implements PipelineConfigR
 
   async delete (id: number): Promise<PipelineConfig> {
     const result = await this.executeQuery(DELETE_STATEMENT, [id])
-    const content = this.toPipelineConfigs(result)
     if (result.rowCount === 0) {
       throw new Error(`Could not find config with ${id} to delete`)
     }
+    const content = this.toPipelineConfigs(result)
     return content[0]
   }
 

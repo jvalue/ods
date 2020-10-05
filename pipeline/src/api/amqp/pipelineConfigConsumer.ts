@@ -11,11 +11,7 @@ import {
 import { sleep } from '../../sleep'
 
 export class PipelineConfigConsumer {
-  pipelineManager: PipelineConfigManager
-
-  constructor (pipelineManager: PipelineConfigManager) {
-    this.pipelineManager = pipelineManager
-  }
+  constructor (private readonly pipelineManager: PipelineConfigManager) {}
 
   /**
    * Connects to Amqp Service and initializes a channel
@@ -60,7 +56,7 @@ export class PipelineConfigConsumer {
 
   // use the f = () => {} syntax to access this
   consumeEvent = async (msg: AMQP.ConsumeMessage | null): Promise<void> => {
-    if (!msg) {
+    if (msg === null) {
       console.debug('Received empty event when listening on transformation executions - doing nothing')
     } else {
       try {

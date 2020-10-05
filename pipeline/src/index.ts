@@ -1,3 +1,5 @@
+import { Server } from 'http'
+
 import express from 'express'
 import cors from 'cors'
 import bodyParser from 'body-parser'
@@ -15,26 +17,20 @@ import AmqpConfigWritesPublisher from './pipeline-config/publisher/amqpConfigWri
 import { PipelineConfigConsumer } from './api/amqp/pipelineConfigConsumer'
 
 const port = 8080
-const app = express()
-app.use(cors())
-app.use(bodyParser.json({ limit: '50mb' }))
-app.use(bodyParser.urlencoded({ extended: false }))
+let server: Server | undefined
 
-const sandboxExecutor = new VM2SandboxExecutor()
-const pipelineExecutor = new PipelineExecutor(sandboxExecutor)
-const pipelineConfigRepository = new PostgresPipelineConfigRepository()
-const executionResultPublisher = new AmqpExecutionResultPublisher()
-const configWritesPublisher = new AmqpConfigWritesPublisher()
-
-// global promise-rejected handler
-process.on('unhandledRejection', function (reason, p) {
-  console.debug('Possibly Unhandled Rejection at: Promise ', p, ' reason: ', reason)
+process.on('SIGTERM', () => {
+  console.info('Tramsformation-Service: SIGTERM signal received.')
+  server?.close()
 })
 
-const server = app.listen(port, async () => {
-  console.log('Listening on port ' + port)
+async function main (): Promise<void> {
+  const sandboxExecutor = new VM2SandboxExecutor()
+  const pipelineExecutor = new PipelineExecutor(sandboxExecutor)
+  const executionResultPublisher = new AmqpExecutionResultPublisher()
+  const configWritesPublisher = new AmqpConfigWritesPublisher()
 
-  await pipelineConfigRepository.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
+  const pipelineConfigRepository = await PostgresPipelineConfigRepository.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
   await executionResultPublisher.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
   await configWritesPublisher.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
 
@@ -46,12 +42,18 @@ const server = app.listen(port, async () => {
   )
 
   const pipelineConfigConsumer = new PipelineConfigConsumer(pipelineConfigManager)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const pipelineExecutionEndpoint = new PipelineExecutionEndpoint(pipelineExecutor, app)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const pipelineConfigEndpoint = new PipelineConfigEndpoint(pipelineConfigManager, app)
-
   await pipelineConfigConsumer.connect(CONNECTION_RETRIES, CONNECTION_BACKOFF)
+
+  const pipelineExecutionEndpoint = new PipelineExecutionEndpoint(pipelineExecutor)
+  const pipelineConfigEndpoint = new PipelineConfigEndpoint(pipelineConfigManager)
+
+  const app = express()
+  app.use(cors())
+  app.use(bodyParser.json({ limit: '50mb' }))
+  app.use(bodyParser.urlencoded({ extended: false }))
+
+  pipelineExecutionEndpoint.registerRoutes(app)
+  pipelineConfigEndpoint.registerRoutes(app)
 
   app.get('/', (req: express.Request, res: express.Response): void => {
     res.status(200)
@@ -62,11 +64,14 @@ const server = app.listen(port, async () => {
     res.header('Content-Type', 'text/plain')
     res.status(200)
       .send(pipelineExecutor.getVersion())
-    res.end()
   })
-})
 
-process.on('SIGTERM', async () => {
-  console.info('Tramsformation-Service: SIGTERM signal received.')
-  await server.close()
-})
+  server = app.listen(port, () => {
+    console.log(`Listening on port ${port}`)
+  })
+}
+
+main()
+  .catch(error => {
+    console.error(`Failed to start notification service: ${error}`)
+  })

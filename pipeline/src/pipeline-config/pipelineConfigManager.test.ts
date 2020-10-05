@@ -59,7 +59,7 @@ const ExecutionPublisherMock: jest.Mock<ExecutionResultPublisher> = jest.fn(() =
 }))
 
 const RepositoryMock: jest.Mock<PipelineConfigRepository> = jest.fn(() => ({
-  create: jest.fn().mockImplementation((config) => Promise.resolve(config)),
+  create: jest.fn().mockImplementation(async (config) => config),
   get: jest.fn(),
   getAll: jest.fn().mockResolvedValue([generateConfig(), generateConfig()]),
   getByDatasourceId: jest.fn(),

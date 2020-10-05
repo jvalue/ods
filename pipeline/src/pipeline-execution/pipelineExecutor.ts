@@ -1,5 +1,5 @@
-import ExecutionResult from './sandbox/executionResult'
-import JobResult from './jobResult'
+import { ExecutionResult } from './sandbox/executionResult'
+import { JobResult } from './jobResult'
 import Stats from './stats'
 
 import SandboxExecutor from './sandbox/sandboxExecutor'
@@ -7,11 +7,7 @@ import SandboxExecutor from './sandbox/sandboxExecutor'
 const VERSION = '0.0.2'
 
 export default class PipelineExecutor {
-  private executor: SandboxExecutor
-
-  constructor (executor: SandboxExecutor) {
-    this.executor = executor
-  }
+  constructor (private readonly executor: SandboxExecutor) {}
 
   getVersion (): string {
     return VERSION
@@ -32,22 +28,29 @@ export default class PipelineExecutor {
 
     const endTimestamp = Date.now()
 
-    if (result.error === undefined && (result.data === undefined || result.data === null)) {
-      result.data = undefined
-      result.error = {
-        name: 'MissingReturnError',
-        message: 'Code snippet is not returning valid data',
-        lineNumber: 0,
-        position: 0,
-        stacktrace: []
-      }
-    }
-
     const stats: Stats = {
       durationInMilliSeconds: time,
       startTimestamp,
       endTimestamp
     }
-    return { ...result, stats }
+
+    if ('error' in result) {
+      return { error: result.error, stats }
+    }
+
+    if (result.data === undefined || result.data === null) {
+      return {
+        error: {
+          name: 'MissingReturnError',
+          message: 'Code snippet is not returning valid data',
+          lineNumber: 0,
+          position: 0,
+          stacktrace: []
+        },
+        stats
+      }
+    }
+
+    return { data: result.data, stats }
   }
 }
