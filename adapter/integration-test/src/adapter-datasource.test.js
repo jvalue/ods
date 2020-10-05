@@ -44,7 +44,7 @@ describe('Datasource Configuration', () => {
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('application/json')
 
-    expect(response.body).toEqual([])
+    expect(response.body).toBeInstanceOf(Array)
   }, TIMEOUT)
 
   test('Should create datasources [POST /datasources]', async () => {
