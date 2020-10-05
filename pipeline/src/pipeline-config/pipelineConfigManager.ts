@@ -5,22 +5,12 @@ import { PipelineConfig, PipelineConfigDTO } from './model/pipelineConfig'
 import ConfigWritesPublisher from './publisher/configWritesPublisher'
 
 export class PipelineConfigManager {
-  private pipelineExecutor: PipelineExecutor
-  private pipelineConfigRepository: PipelineConfigRepository
-  private configWritesPublisher: ConfigWritesPublisher
-  private executionResultPublisher: ExecutionResultPublisher
-
   constructor (
-    pipelineConfigRepository: PipelineConfigRepository,
-    pipelineExecutor: PipelineExecutor,
-    configWritesPublisher: ConfigWritesPublisher,
-    executionResultPublisher: ExecutionResultPublisher
-  ) {
-    this.pipelineConfigRepository = pipelineConfigRepository
-    this.pipelineExecutor = pipelineExecutor
-    this.configWritesPublisher = configWritesPublisher
-    this.executionResultPublisher = executionResultPublisher
-  }
+    private readonly pipelineConfigRepository: PipelineConfigRepository,
+    private readonly pipelineExecutor: PipelineExecutor,
+    private readonly configWritesPublisher: ConfigWritesPublisher,
+    private readonly executionResultPublisher: ExecutionResultPublisher
+  ) {}
 
   async create (config: PipelineConfigDTO): Promise<PipelineConfig> {
     const savedConfig = await this.pipelineConfigRepository.create(config)
@@ -34,16 +24,16 @@ export class PipelineConfigManager {
     return savedConfig
   }
 
-  get (id: number): Promise<PipelineConfig | undefined> {
-    return this.pipelineConfigRepository.get(id)
+  async get (id: number): Promise<PipelineConfig | undefined> {
+    return await this.pipelineConfigRepository.get(id)
   }
 
-  getAll (): Promise<PipelineConfig[]> {
-    return this.pipelineConfigRepository.getAll()
+  async getAll (): Promise<PipelineConfig[]> {
+    return await this.pipelineConfigRepository.getAll()
   }
 
-  getByDatasourceId (datasourceId: number): Promise<PipelineConfig[]> {
-    return this.pipelineConfigRepository.getByDatasourceId(datasourceId)
+  async getByDatasourceId (datasourceId: number): Promise<PipelineConfig[]> {
+    return await this.pipelineConfigRepository.getByDatasourceId(datasourceId)
   }
 
   async update (id: number, config: PipelineConfigDTO): Promise<void> {
@@ -79,9 +69,9 @@ export class PipelineConfigManager {
     const allConfigs = await this.getByDatasourceId(datasourceId)
     for (const config of allConfigs) {
       const result = this.pipelineExecutor.executeJob(config.transformation.func, data)
-      if (result.error) {
+      if ('error' in result) {
         this.executionResultPublisher.publishError(config.id, config.metadata.displayName, result.error.message)
-      } else if (result.data) {
+      } else if ('data' in result) {
         this.executionResultPublisher.publishSuccess(config.id, config.metadata.displayName, result.data)
       } else {
         console.error(`Pipeline ${config.id} executed with ambiguous result: no data and no error!`)

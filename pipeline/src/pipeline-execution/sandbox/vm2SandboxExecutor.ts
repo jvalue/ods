@@ -1,7 +1,7 @@
 import { VM, VMScript } from 'vm2'
 
 import SandboxExecutor from './sandboxExecutor'
-import ExecutionResult from './executionResult'
+import { ExecutionResult } from './executionResult'
 import { convertRuntimeError, convertSyntaxError } from './vm2StacktraceParser'
 
 const FUNCTION_WRAP_PREFIX_LENGTH = 1
@@ -32,14 +32,14 @@ export default class VM2SandboxExecutor implements SandboxExecutor {
     try {
       script.compile()
     } catch (err) {
-      return { data: undefined, error: convertSyntaxError(err, FUNCTION_WRAP_PREFIX_LENGTH) }
+      return { error: convertSyntaxError(err, FUNCTION_WRAP_PREFIX_LENGTH) }
     }
 
     try {
       const result = this.vm.run(script)
-      return { data: result, error: undefined }
+      return { data: result }
     } catch (err) {
-      return { data: undefined, error: convertRuntimeError(err, FUNCTION_WRAP_PREFIX_LENGTH) }
+      return { error: convertRuntimeError(err, FUNCTION_WRAP_PREFIX_LENGTH) }
     }
   }
 }

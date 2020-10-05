@@ -2,14 +2,12 @@ import * as express from 'express'
 
 import PipelineExecutor from '../../pipeline-execution/pipelineExecutor'
 import { PipelineExecutionRequestValidator } from '../pipelineExecutionRequest'
-import JobResult from '../../pipeline-execution/jobResult'
+import { JobResult } from '../../pipeline-execution/jobResult'
 
 export class PipelineExecutionEndpoint {
-  pipelineExecutor: PipelineExecutor
+  constructor (private readonly pipelineExecutor: PipelineExecutor) {}
 
-  constructor (pipelineExecutor: PipelineExecutor, app: express.Application) {
-    this.pipelineExecutor = pipelineExecutor
-
+  registerRoutes = (app: express.Application): void => {
     app.post('/job', this.postJob)
   }
 
@@ -22,10 +20,10 @@ export class PipelineExecutionEndpoint {
     }
 
     const result: JobResult = this.pipelineExecutor.executeJob(req.body.func, req.body.data)
-    if (result.data) {
-      res.status(200).json(result)
-    } else {
+    if ('error' in result) {
       res.status(400).json(result)
+      return
     }
+    res.status(200).json(result)
   }
 }
