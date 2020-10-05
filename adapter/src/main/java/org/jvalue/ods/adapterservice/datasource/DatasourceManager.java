@@ -5,15 +5,12 @@ import org.jvalue.ods.adapterservice.adapter.AdapterFactory;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
 import org.jvalue.ods.adapterservice.config.RabbitConfiguration;
-import org.jvalue.ods.adapterservice.datasource.event.DatasourceEvent;
 import org.jvalue.ods.adapterservice.datasource.event.DatasourceImportedEvent;
-import org.jvalue.ods.adapterservice.datasource.event.EventType;
 import org.jvalue.ods.adapterservice.datasource.event.ImportFailedEvent;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
 import org.jvalue.ods.adapterservice.datasource.model.DatasourceMetadata;
 import org.jvalue.ods.adapterservice.datasource.model.RuntimeParameters;
 import org.jvalue.ods.adapterservice.datasource.repository.DatasourceRepository;
-import org.jvalue.ods.adapterservice.datasource.repository.DatasourceEventRepository;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,15 +25,13 @@ import java.util.Optional;
 public class DatasourceManager {
 
   private final DatasourceRepository datasourceRepository;
-  private final DatasourceEventRepository eventRepository;
   private final AdapterFactory adapterFactory;
   private final RabbitTemplate rabbitTemplate;
 
 
   @Autowired
-  public DatasourceManager(DatasourceRepository datasourceRepository, DatasourceEventRepository eventRepository, AdapterFactory adapterFactory, RabbitTemplate rabbitTemplate) {
+  public DatasourceManager(DatasourceRepository datasourceRepository, AdapterFactory adapterFactory, RabbitTemplate rabbitTemplate) {
     this.datasourceRepository = datasourceRepository;
-    this.eventRepository = eventRepository;
     this.adapterFactory = adapterFactory;
     this.rabbitTemplate = rabbitTemplate;
   }
@@ -47,7 +42,6 @@ public class DatasourceManager {
     config.getMetadata().setCreationTimestamp(new Date()); // creation time documented by server
 
     Datasource savedConfig = datasourceRepository.save(config);
-    eventRepository.save(new DatasourceEvent(EventType.DATASOURCE_CREATE, savedConfig.getId()));
 
     return savedConfig;
   }
@@ -69,14 +63,12 @@ public class DatasourceManager {
       .orElseThrow(() -> new IllegalArgumentException("Datasource with id " + id + " not found."));
 
     datasourceRepository.save(applyUpdate(old, updated));
-    eventRepository.save(new DatasourceEvent(EventType.DATASOURCE_UPDATE, id));
   }
 
 
   @Transactional
   public void deleteDatasource(Long id) {
     datasourceRepository.deleteById(id);
-    eventRepository.save(new DatasourceEvent(EventType.DATASOURCE_DELETE, id));
   }
 
 
@@ -84,10 +76,6 @@ public class DatasourceManager {
   public void deleteAllDatasources() {
     Iterable<Datasource> allDatasourceConfigs = getAllDatasources();
     datasourceRepository.deleteAll();
-
-    allDatasourceConfigs.forEach(
-      pl -> eventRepository.save(new DatasourceEvent(EventType.DATASOURCE_DELETE, pl.getId()))
-    );
   }
 
  private AdapterConfig getParametrizedDatasource(Long id, RuntimeParameters runtimeParameters) {
@@ -152,21 +140,5 @@ public class DatasourceManager {
     updated.setId(existing.getId());
 
     return updated;
-  }
-
-  public Optional<DatasourceEvent> getEvent(Long id) {
-    return eventRepository.findById(id);
-  }
-
-  public Iterable<DatasourceEvent> getEventsAfter(Long id) {
-    return eventRepository.getAllByEventIdAfter(id);
-  }
-
-  public Iterable<DatasourceEvent> getEventsByDatasource(Long datasourceId, Long after) {
-    return eventRepository.getAllByDatasourceIdAndEventIdAfter(datasourceId, after);
-  }
-
-  public DatasourceEvent getLatestEvent() {
-    return eventRepository.findFirstByOrderByEventIdDesc();
   }
 }
