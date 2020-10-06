@@ -20,8 +20,6 @@
     "express-session": "^1.17.1",
     "firebase-admin": "^9.2.0",
     "pg": "^8.3.3",
-    "reflect-metadata": "^0.1.13",
-    "typeorm": "^0.2.26",
     "vm2": "^3.9.2"
   },
   "devDependencies": {

@@ -2,9 +2,11 @@
 import axios from 'axios'
 
 import VM2SandboxExecutor from './condition-evaluation/vm2SandboxExecutor'
-import { WebhookConfig, SlackConfig } from '../notification-config/notificationConfig'
 import NotificationExecutor from './notificationExecutor'
 import SlackCallback from '@/notification-execution/notificationCallbacks/slackCallback'
+import {
+  NotificationConfig, NotificationType, SlackParameter, WebhookParameter
+} from '@/notification-config/notificationConfig'
 
 jest.mock('axios')
 
@@ -35,20 +37,24 @@ describe('JSNotificationService', () => {
     it('should trigger notification when transformation failed and condition is "data == undefined', async () => {
       post.mockReturnValue(Promise.resolve())
 
-      const notificationConfig: WebhookConfig = {
+      const webhookParameter: WebhookParameter = {
+        url: 'callback'
+      }
+      const notificationConfig: NotificationConfig = {
         id: 1,
         pipelineId: 1,
         condition: 'data === undefined',
-        url: 'callback'
+        type: NotificationType.WEBHOOK,
+        parameter: webhookParameter
       }
 
       const message = 'message'
       const dataLocation = 'location'
-      await notificationService.handleWebhook(notificationConfig, dataLocation, message, undefined)
+      await notificationService.execute(notificationConfig, dataLocation, message, undefined)
 
       expect(post).toHaveBeenCalledTimes(1)
       // check arguments for axios post
-      expect(post.mock.calls[0][0]).toEqual(notificationConfig.url)
+      expect(post.mock.calls[0][0]).toEqual(webhookParameter.url)
       expect(post.mock.calls[0][1].location).toEqual(dataLocation)
       expect(post.mock.calls[0][1].message).toEqual(message)
     })
@@ -56,20 +62,24 @@ describe('JSNotificationService', () => {
     it('should trigger notification when transformation failed and condition is "!data', async () => {
       post.mockReturnValue(Promise.resolve())
 
-      const notificationConfig: WebhookConfig = {
+      const webhookParameter: WebhookParameter = {
+        url: 'callback'
+      }
+      const notificationConfig: NotificationConfig = {
         id: 1,
         pipelineId: 1,
         condition: '!data',
-        url: 'callback'
+        type: NotificationType.WEBHOOK,
+        parameter: webhookParameter
       }
 
       const message = 'message'
       const dataLocation = 'location'
-      await notificationService.handleWebhook(notificationConfig, dataLocation, message, undefined)
+      await notificationService.execute(notificationConfig, dataLocation, message, undefined)
 
       expect(post).toHaveBeenCalledTimes(1)
       // check arguments for axios post
-      expect(post.mock.calls[0][0]).toEqual(notificationConfig.url)
+      expect(post.mock.calls[0][0]).toEqual(webhookParameter.url)
       expect(post.mock.calls[0][1].location).toEqual(dataLocation)
       expect(post.mock.calls[0][1].message).toEqual(message)
     })
@@ -77,36 +87,44 @@ describe('JSNotificationService', () => {
     it('should trigger notification when condition is met', async () => {
       post.mockReturnValue(Promise.resolve())
 
-      const notificationConfig: WebhookConfig = {
+      const webhookParameter: WebhookParameter = {
+        url: 'callback'
+      }
+      const notificationConfig: NotificationConfig = {
         id: 1,
         pipelineId: 1,
         condition: 'data.value1 > 0',
-        url: 'callback'
+        type: NotificationType.WEBHOOK,
+        parameter: webhookParameter
       }
 
       const message = 'message'
       const dataLocation = 'location'
-      await notificationService.handleWebhook(notificationConfig, dataLocation, message, data)
+      await notificationService.execute(notificationConfig, dataLocation, message, data)
 
       expect(post).toHaveBeenCalledTimes(1)
       // check arguments for axios post
-      expect(post.mock.calls[0][0]).toEqual(notificationConfig.url)
+      expect(post.mock.calls[0][0]).toEqual(webhookParameter.url)
       expect(post.mock.calls[0][1].location).toEqual(dataLocation)
       expect(post.mock.calls[0][1].message).toEqual(message)
     })
 
-    test('Notification does not trigger when condition is malformed', async () => {
-      const notificationConfig: WebhookConfig = {
+    test('should not trigger when condition is malformed', async () => {
+      const webhookParameter: WebhookParameter = {
+        url: 'callback'
+      }
+      const notificationConfig: NotificationConfig = {
         id: 1,
         pipelineId: 3,
         condition: 'asdfa;',
-        url: 'callback'
+        type: NotificationType.WEBHOOK,
+        parameter: webhookParameter
       }
 
       try {
         const message = 'message'
         const dataLocation = 'location'
-        await notificationService.handleWebhook(notificationConfig, dataLocation, message, data)
+        await notificationService.execute(notificationConfig, dataLocation, message, data)
         throw new Error('Fail test')
       } catch (err) {
         expect(err.message).toEqual(
@@ -119,24 +137,28 @@ describe('JSNotificationService', () => {
     })
 
     test('SLACK request', async () => {
-      const request: SlackConfig = {
-        id: 1,
-        condition: 'data.value1 > 0',
-        pipelineId: 42,
+      const slackParameter: SlackParameter = {
         workspaceId: '012',
         channelId: '123',
         secret: '42'
       }
+      const request: NotificationConfig = {
+        id: 1,
+        condition: 'data.value1 > 0',
+        pipelineId: 42,
+        type: NotificationType.SLACK,
+        parameter: slackParameter
+      }
 
       const message = 'message'
       const dataLocation = 'location'
-      await notificationService.handleSlack(request, dataLocation, message, data)
+      await notificationService.execute(request, dataLocation, message, data)
 
       const expectedObject: SlackCallback = {
         text: message
       }
       expect(post).toHaveBeenCalledTimes(1)
-      const expectedUrl = `https://hooks.slack.com/services/${request.workspaceId}/${request.channelId}/${request.secret}`
+      const expectedUrl = `https://hooks.slack.com/services/${slackParameter.workspaceId}/${slackParameter.channelId}/${slackParameter.secret}`
 
       expect(post.mock.calls[0][0]).toEqual(expectedUrl)
       expect(post.mock.calls[0][1]).toEqual(expectedObject)

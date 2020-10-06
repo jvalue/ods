@@ -2,9 +2,7 @@ import axios from 'axios'
 import * as firebase from 'firebase-admin'
 
 import {
-  FirebaseConfig,
-  SlackConfig,
-  WebhookConfig
+  FirebaseParameter, NotificationConfig, NotificationType, SlackParameter, WebhookParameter
 } from '../notification-config/notificationConfig'
 
 import SlackCallback from './notificationCallbacks/slackCallback'
@@ -29,61 +27,61 @@ export default class NotificationExecutor {
     return VERSION
   }
 
-  async handleWebhook (webhook: WebhookConfig, dataLocation: string, message: string, data?: object): Promise<void> {
-    console.log(`WebhookNotificationRequest received for pipeline: ${webhook.pipelineId}.`)
-    const conditionHolds = this.executor.evaluate(webhook.condition, data)
-    console.log(`Condition is ${conditionHolds}`)
+  async execute (config: NotificationConfig, dataLocation: string, message: string, data?: object): Promise<void> {
+    const conditionHolds = this.executor.evaluate(config.condition, data)
     if (!conditionHolds) { // no need to trigger notification
+      console.debug(`Notification ${config.id} for pipeline ${config.pipelineId} not sent: Condition does not hold`)
       return
     }
 
-    const callbackObject: WebhookCallback = {
+    switch (config.type) {
+      case NotificationType.WEBHOOK:
+        await this.executeWebhook(config.parameter as WebhookParameter, dataLocation, message)
+        return
+      case NotificationType.SLACK:
+        await this.executeSlack(config.parameter as SlackParameter, dataLocation, message)
+        return
+      case NotificationType.FCM:
+        await this.executeFCM(config.parameter as FirebaseParameter, dataLocation, message)
+    }
+  }
+
+  private async executeWebhook (
+    configParameter: WebhookParameter, dataLocation: string, message: string
+  ): Promise<void> {
+    const payload: WebhookCallback = {
       location: dataLocation,
       message: message,
       timestamp: new Date(Date.now())
     }
-    console.log(`Posting webhook to ${webhook.url}, callback object: ${JSON.stringify(callbackObject)}.`)
-    await axios.post(webhook.url, callbackObject)
+    await axios.post(configParameter.url, payload)
+    console.debug(`Triggered webhook on ${configParameter.url}`)
   }
 
-  async handleSlack (slack: SlackConfig, dataLocation: string, message: string, data?: object): Promise<void> {
-    console.log(`SlackNotificationRequest received for pipeline: ${slack.pipelineId}.`)
-    const conditionHolds = this.executor.evaluate(slack.condition, data)
-    console.log(`Condition is ${conditionHolds}`)
-    if (!conditionHolds) { // no need to trigger notification
-      return
-    }
-
-    const callbackObject: SlackCallback = {
+  private async executeSlack (configParameter: SlackParameter, dataLocation: string, message: string): Promise<void> {
+    const payload: SlackCallback = {
       text: message
     }
-    const url = `${SLACK_BASE_URL}/${slack.workspaceId}/${slack.channelId}/${slack.secret}`
-    console.log(`Posting slack notification to ${url}, callbackObject: ${JSON.stringify(callbackObject)}`)
-    await axios.post(url, callbackObject)
+    const url =
+      `${SLACK_BASE_URL}/${configParameter.workspaceId}/${configParameter.channelId}/${configParameter.secret}`
+    await axios.post(url, payload)
+    console.log(`Triggered slack notification on ${url}`)
   }
 
-  async handleFCM
-  (firebaseConfig: FirebaseConfig, dataLocation: string, message: string, data?: object): Promise<void> {
-    console.log(`FirebaseNotificationRequest received for pipeline: ${firebaseConfig.pipelineId}.`)
-    const conditionHolds = this.executor.evaluate(firebaseConfig.condition, data)
-    console.log(`Condition is ${conditionHolds}`)
-    if (!conditionHolds) { // no need to trigger notification
-      return
-    }
-
+  private async executeFCM (configParameter: FirebaseParameter, dataLocation: string, message: string): Promise<void> {
     let app: App
     try {
-      app = firebase.app(firebaseConfig.clientEmail)
+      app = firebase.app(configParameter.clientEmail)
     } catch (e) { // app does not exist yet
       app = firebase.initializeApp({
         credential: firebase.credential.cert({
-          projectId: firebaseConfig.projectId,
-          clientEmail: firebaseConfig.clientEmail,
-          privateKey: firebaseConfig.privateKey.replace(/\\n/g, '\n')
+          projectId: configParameter.projectId,
+          clientEmail: configParameter.clientEmail,
+          privateKey: configParameter.privateKey.replace(/\\n/g, '\n')
         }),
-        databaseURL: `https://${firebaseConfig.projectId}.firebaseio.com`
+        databaseURL: `https://${configParameter.projectId}.firebaseio.com`
       },
-      firebaseConfig.clientEmail)
+      configParameter.clientEmail)
     }
     const firebaseMessage: FcmCallback = {
       notification: {
@@ -93,10 +91,9 @@ export default class NotificationExecutor {
       data: {
         message: message
       },
-      topic: firebaseConfig.topic
+      topic: configParameter.topic
     }
-    console.log(`Sending firebase message, callback object: ${JSON.stringify(firebaseMessage)}.`)
-    const firebaseResponse = await firebase.messaging(app).send(firebaseMessage)
-    console.log(`Firebase message sent to: ${firebaseResponse}`)
+    await firebase.messaging(app).send(firebaseMessage)
+    console.log(`Triggered firebase notification: ${JSON.stringify(firebaseMessage)}.`)
   }
 }

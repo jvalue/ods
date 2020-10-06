@@ -2,13 +2,10 @@ import express from 'express'
 import cors from 'cors'
 import bodyParser from 'body-parser'
 
-import 'reflect-metadata' // once required for orm
-
 import NotificationExecutor from './notification-execution/notificationExecutor'
 import VM2SandboxExecutor from './notification-execution/condition-evaluation/vm2SandboxExecutor'
 import { NotificationConfigEndpoint } from './api/rest/notificationConfigEndpoint'
 import { NotificationExecutionEndpoint } from './api/rest/notificationExecutionEndpoint'
-import { initStorageHandler } from './notification-config/storageHandler'
 import { AmqpHandler } from './api/amqp/amqpHandler'
 import { TriggerEventHandler } from './api/triggerEventHandler'
 import { CONNECTION_RETRIES, CONNECTION_BACKOFF } from './env'
