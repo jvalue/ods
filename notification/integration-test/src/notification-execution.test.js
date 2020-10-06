@@ -15,12 +15,15 @@ describe('Notification Service', () => {
   test('should trigger a configured webhook', async () => {
     // SETUP: store notification config
     const webhookConfig = {
+      type: 'WEBHOOK',
       pipelineId: 1,
       condition: 'data.value1 > 0',
-      url: MOCK_RECEIVER_URL + '/webhook1'
+      parameters: {
+        url: MOCK_RECEIVER_URL + '/webhook1'
+      }
     }
     const notificationResponse = await request(URL)
-      .post('/config/webhook')
+      .post('/configs')
       .send(webhookConfig)
     expect(notificationResponse.status).toEqual(201)
 
@@ -52,12 +55,15 @@ describe('Notification Service', () => {
   test('should not trigger webhook if given condition does not hold', async () => {
     // SETUP: store notification config
     const webhookConfig = {
+      type: 'WEBHOOK',
       pipelineId: 2,
       condition: 'data.value1 < 0',
-      url: MOCK_RECEIVER_URL + '/webhook2'
+      parameters: {
+        url: MOCK_RECEIVER_URL + '/webhook2'
+      }
     }
     let notificationResponse = await request(URL)
-      .post('/config/webhook')
+      .post('/configs')
       .send(webhookConfig)
     expect(notificationResponse.status).toEqual(201)
     const id = notificationResponse.body.id
@@ -87,7 +93,7 @@ describe('Notification Service', () => {
 
     // CLEANUP
     notificationResponse = await request(URL)
-      .delete(`/config/webhook/${id}`)
+      .delete(`/configs/${id}`)
       .send()
     expect(notificationResponse.status).toEqual(200)
   }, 10000)
@@ -95,14 +101,17 @@ describe('Notification Service', () => {
   test('should trigger configured slack notification', async () => {
     // SETUP: store notification config
     const slackConfig = {
+      type: 'SLACK',
       pipelineId: 3,
       condition: 'typeof data.niceString === "string"',
-      channelId: '12',
-      workspaceId: '34',
-      secret: '56'
+      parameters: {
+        channelId: '12',
+        workspaceId: '34',
+        secret: '56'
+      }
     }
     let notificationResponse = await request(URL)
-      .post('/config/slack')
+      .post('/configs')
       .send(slackConfig)
     expect(notificationResponse.status).toEqual(201)
     const id = notificationResponse.body.id
@@ -135,7 +144,7 @@ describe('Notification Service', () => {
 
     // CLEANUP
     notificationResponse = await request(URL)
-      .delete(`/config/slack/${id}`)
+      .delete(`/configs/${id}`)
       .send()
     expect(notificationResponse.status).toEqual(200)
   }, 10000)
