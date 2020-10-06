@@ -6,15 +6,13 @@ const URL = process.env.NOTIFICATION_API || 'http://localhost:8080'
 
 const MOCK_RECEIVER_URL = process.env.MOCK_RECEIVER_URL || 'http://localhost:8081'
 
-describe('Notification', () => {
-  console.log('Notification-Service URL= ' + URL)
-
+describe('Notification Service', () => {
   beforeAll(async () => {
     const pingUrl = URL + '/'
     await waitOn({ resources: [pingUrl, MOCK_RECEIVER_URL], timeout: 50000, log: true })
   }, 60000)
 
-  test('GET /version', async () => {
+  test('should have semantic version', async () => {
     const response = await request(URL).get('/version')
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('text/plain')
@@ -22,7 +20,7 @@ describe('Notification', () => {
     expect(response.text).toMatch(new RegExp(semanticVersionReExp))
   })
 
-  test('GET /config/pipeline/982323 requests notification configs for non-existing pipeline', async () => {
+  test('should return empty list for non-existing pipeline', async () => {
     const receiverResponse = await request(URL)
       .get('/config/pipeline/982323')
       .send()
@@ -37,7 +35,7 @@ describe('Notification', () => {
     })
   })
 
-  test('GET /config/slack/487749 request slack config that does not exist', async () => {
+  test('should return status 404 on non-existing notification config', async () => {
     const receiverResponse = await request(URL)
       .get('/config/slack/487749')
       .send()
@@ -45,7 +43,7 @@ describe('Notification', () => {
     expect(receiverResponse.status).toEqual(404)
   })
 
-  test('CRUD Webhook Config', async () => {
+  test('should create, retrieve, updated, and delete notification config', async () => {
     const webhookConfig = {
       pipelineId: 1,
       condition: 'true',
@@ -100,7 +98,7 @@ describe('Notification', () => {
     expect(notificationResponse.status).toEqual(404)
   })
 
-  test('Get All Notification Configs for Pipeline', async () => {
+  test('should aggregate different types notifications to a list for a pipeline', async () => {
     const webhookConfig = {
       pipelineId: 879428,
       condition: 'true',

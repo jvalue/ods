@@ -6,15 +6,13 @@ const URL = process.env.NOTIFICATION_API || 'http://localhost:8080'
 
 const MOCK_RECEIVER_URL = process.env.MOCK_RECEIVER_URL || 'http://localhost:8081'
 
-describe('Notification', () => {
-  console.log('Notification-Service URL= ' + URL)
-
+describe('Notification Service', () => {
   beforeAll(async () => {
     const pingUrl = URL + '/'
     await waitOn({ resources: [pingUrl, MOCK_RECEIVER_URL], timeout: 50000, log: true })
   }, 60000)
 
-  test('Trigger webhook', async () => {
+  test('should trigger a configured webhook', async () => {
     // SETUP: store notification config
     const webhookConfig = {
       pipelineId: 1,
@@ -51,7 +49,7 @@ describe('Notification', () => {
     expect(receiverResponse.body.location).toEqual(`http://localhost:9000/storage/${triggerEvent.pipelineId}`)
   }, 10000)
 
-  test('Trigger not notifying webhook when condition is false', async () => {
+  test('should not trigger webhook if given condition does not hold', async () => {
     // SETUP: store notification config
     const webhookConfig = {
       pipelineId: 2,
@@ -92,11 +90,9 @@ describe('Notification', () => {
       .delete(`/config/webhook/${id}`)
       .send()
     expect(notificationResponse.status).toEqual(200)
-
-    console.log('1')
   }, 10000)
 
-  test('POST /slack triggers slack notification', async () => {
+  test('should trigger configured slack notification', async () => {
     // SETUP: store notification config
     const slackConfig = {
       pipelineId: 3,
