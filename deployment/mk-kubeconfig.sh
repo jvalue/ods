@@ -19,3 +19,9 @@ users:
   user:
     token: ${K8S_SERVICEACCOUNT_TOKEN}
 EOF
+
+if [ -f "kube.config" ]; then
+    echo "kube.config generated"
+else
+    echo "kube.config not generated"
+fi
