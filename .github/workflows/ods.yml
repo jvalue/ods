@@ -586,13 +586,6 @@ jobs:
       - run: |
           ./deployment/mk-kubeconfig.sh
           curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
-          ./kustomize build deployment/kustomize > k8s-deployment.yaml
-
-      - uses: Azure/k8s-set-context@v1
-        with:
-          kubeconfig: ./deployment/kube.config
-
-      - uses: Azure/k8s-deploy@v1
-        with:
-          manifests: ./k8s-deployment.yaml
-          namespace: 'staging'
+          curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+          chmod +x ./kubectl
+          ./kustomize build deployment/kustomize | kubectl --kubeconfig ./deployment/kube.config apply -f -
