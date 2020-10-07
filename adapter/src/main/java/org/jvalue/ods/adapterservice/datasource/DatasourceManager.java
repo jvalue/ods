@@ -4,21 +4,15 @@ import org.jvalue.ods.adapterservice.adapter.Adapter;
 import org.jvalue.ods.adapterservice.adapter.AdapterFactory;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
-import org.jvalue.ods.adapterservice.config.RabbitConfiguration;
-import org.jvalue.ods.adapterservice.datasource.event.DatasourceConfigEvent;
-import org.jvalue.ods.adapterservice.datasource.event.DatasourceImportedEvent;
-import org.jvalue.ods.adapterservice.datasource.event.ImportFailedEvent;
+import org.jvalue.ods.adapterservice.datasource.api.amqp.AmqpHandler;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
 import org.jvalue.ods.adapterservice.datasource.model.DatasourceMetadata;
 import org.jvalue.ods.adapterservice.datasource.model.RuntimeParameters;
 import org.jvalue.ods.adapterservice.datasource.repository.DatasourceRepository;
-import org.springframework.amqp.AmqpException;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.Optional;
 
@@ -27,14 +21,13 @@ public class DatasourceManager {
 
   private final DatasourceRepository datasourceRepository;
   private final AdapterFactory adapterFactory;
-  private final RabbitTemplate rabbitTemplate;
-
+  private final AmqpHandler amqpHandler;
 
   @Autowired
-  public DatasourceManager(DatasourceRepository datasourceRepository, AdapterFactory adapterFactory, RabbitTemplate rabbitTemplate) {
+  public DatasourceManager(DatasourceRepository datasourceRepository, AdapterFactory adapterFactory, AmqpHandler amqpHandler) {
     this.datasourceRepository = datasourceRepository;
     this.adapterFactory = adapterFactory;
-    this.rabbitTemplate = rabbitTemplate;
+    this.amqpHandler = amqpHandler;
   }
 
 
@@ -44,7 +37,7 @@ public class DatasourceManager {
 
     Datasource savedConfig = datasourceRepository.save(config);
 
-    publishAmqp(RabbitConfiguration.AMQP_DATASOURCE_CREATED_TOPIC, new DatasourceConfigEvent(savedConfig));
+    amqpHandler.publishCreation(savedConfig);
     return savedConfig;
   }
 
@@ -60,19 +53,19 @@ public class DatasourceManager {
 
 
   @Transactional
-  public void updateDatasource(Long id, Datasource updated) throws IllegalArgumentException {
-    Datasource old = datasourceRepository.findById(id)
+  public void updateDatasource(Long id, Datasource update) throws IllegalArgumentException {
+    Datasource existing = datasourceRepository.findById(id)
       .orElseThrow(() -> new IllegalArgumentException("Datasource with id " + id + " not found."));
 
-    datasourceRepository.save(applyUpdate(old, updated));
-    publishAmqp(RabbitConfiguration.AMQP_DATASOURCE_UPDATED_TOPIC, new DatasourceConfigEvent(old));
+    datasourceRepository.save(applyUpdate(existing, update));
+    amqpHandler.publishUpdate(existing);
   }
 
 
   @Transactional
   public void deleteDatasource(Long id) {
     datasourceRepository.deleteById(id);
-    publishAmqp(RabbitConfiguration.AMQP_DATASOURCE_DELETED_TOPIC, new DatasourceConfigEvent(id));
+    amqpHandler.publishDeletion(id);
   }
 
 
@@ -81,7 +74,7 @@ public class DatasourceManager {
     Iterable<Datasource> allDatasourceConfigs = getAllDatasources();
     datasourceRepository.deleteAll();
     for (Datasource ds: allDatasourceConfigs) {
-        publishAmqp(RabbitConfiguration.AMQP_DATASOURCE_DELETED_TOPIC, new DatasourceConfigEvent(ds));
+        amqpHandler.publishDeletion(ds.getId());
     }
   }
 
@@ -96,38 +89,17 @@ public class DatasourceManager {
    try {
       Adapter adapter = adapterFactory.getAdapter(adapterConfig);
       DataBlob executionResult = adapter.executeJob(adapterConfig);
-      DatasourceImportedEvent importedEvent = new DatasourceImportedEvent(id, executionResult.getData());
-      publishAmqp(RabbitConfiguration.AMQP_IMPORT_SUCCESS_TOPIC, importedEvent);
+      amqpHandler.publishImportSuccess(id, executionResult.getData());
       return executionResult.getMetaData();
    } catch (Exception e) {
-      ImportFailedEvent failedEvent = new ImportFailedEvent(id, e.getMessage());
-      publishAmqp(RabbitConfiguration.AMQP_IMPORT_FAILED_TOPIC, failedEvent);
+      amqpHandler.publishImportFailure(id, e.getMessage());
      if(e instanceof IllegalArgumentException) {
        System.err.println("Data Import request failed. Malformed Request: " + e.getMessage());
-       throw e;
      } else {
        System.err.println("Exception in the Adapter: " + e.getMessage());
-       throw e;
      }
+       throw e;
    }
- }
-
- private void publishAmqp(String topic, Serializable message) {
-      for (int retries = RabbitConfiguration.AMQP_PUBLISH_RETRIES; retries >= 0; retries--) {
-          try {
-              this.rabbitTemplate.convertAndSend(RabbitConfiguration.AMPQ_EXCHANGE, topic, message);
-              return;
-          } catch (AmqpException e) {
-              try {
-                  Thread.sleep(RabbitConfiguration.AMQP_PUBLISH_BACKOFF);
-              } catch (InterruptedException interruptedException) {
-                  Thread.currentThread().interrupt();
-                  throw new RuntimeException(interruptedException);
-              }
-              System.out.println("Message publish failed ("+retries+"). Retrying in "+RabbitConfiguration.AMQP_PUBLISH_BACKOFF);
-          }
-      }
-      System.err.println("Sending message "+ message.toString() + " to topic: " + topic + " failed.");
  }
 
   /**

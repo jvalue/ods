@@ -3,14 +3,12 @@ package org.jvalue.ods.adapterservice.datasource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.jvalue.ods.adapterservice.config.RabbitConfiguration;
-import org.jvalue.ods.adapterservice.datasource.event.DatasourceConfigEvent;
+import org.jvalue.ods.adapterservice.datasource.api.amqp.AmqpHandler;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
 import org.jvalue.ods.adapterservice.datasource.repository.DatasourceRepository;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +28,7 @@ public class DatasourceManagerTest {
     DatasourceRepository datasourceRepository;
 
     @Mock
-    RabbitTemplate rabbitTemplate;
+    AmqpHandler amqpHandler;
 
     @InjectMocks
     private DatasourceManager manager;
@@ -48,9 +46,7 @@ public class DatasourceManagerTest {
 
         assertEquals(expectedConfig, result);
         verify(datasourceRepository).save(config);
-        verify(rabbitTemplate).convertAndSend(RabbitConfiguration.AMPQ_EXCHANGE,
-                RabbitConfiguration.AMQP_DATASOURCE_CREATED_TOPIC,
-                new DatasourceConfigEvent(123L));
+        verify(amqpHandler).publishCreation(result);
     }
 
     @Test
@@ -66,9 +62,7 @@ public class DatasourceManagerTest {
         manager.updateDatasource(123L, updated);
 
         verify(datasourceRepository).save(updated);
-        verify(rabbitTemplate).convertAndSend(RabbitConfiguration.AMPQ_EXCHANGE,
-                RabbitConfiguration.AMQP_DATASOURCE_UPDATED_TOPIC,
-                new DatasourceConfigEvent(123L));
+        verify(amqpHandler).publishUpdate(updated);
     }
 
     @Test
@@ -76,9 +70,7 @@ public class DatasourceManagerTest {
         manager.deleteDatasource(123L);
 
         verify(datasourceRepository).deleteById(123L);
-        verify(rabbitTemplate).convertAndSend(RabbitConfiguration.AMPQ_EXCHANGE,
-                RabbitConfiguration.AMQP_DATASOURCE_DELETED_TOPIC,
-                new DatasourceConfigEvent(123L));
+        verify(amqpHandler).publishDeletion(123L);
     }
 
     @Test
@@ -92,10 +84,8 @@ public class DatasourceManagerTest {
         manager.deleteAllDatasources();
 
         verify(datasourceRepository).deleteAll();
-        verify(rabbitTemplate, times(3)).convertAndSend(
-                RabbitConfiguration.AMPQ_EXCHANGE,
-                RabbitConfiguration.AMQP_DATASOURCE_DELETED_TOPIC,
-                any(DatasourceConfigEvent.class));
+        verify(amqpHandler, times(3))
+                .publishDeletion(anyLong());
     }
 
 }
