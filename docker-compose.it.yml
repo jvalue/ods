@@ -38,8 +38,6 @@ services:
       context: ./scheduler/integration-test/
     environment:
       SCHEDULER_API: http://scheduler:8080
-      MOCK_ADAPTER_HOST: scheduler-it
-      MOCK_ADAPTER_PORT: 8081
     depends_on:
       - rabbitmq
 

@@ -4,17 +4,13 @@ const waitOn = require('wait-on')
 
 const URL = process.env.SCHEDULER_API || 'http://localhost:8080'
 
-const MOCK_ADAPTER_PORT = process.env.MOCK_ADAPTER_PORT || 8082
-const MOCK_ADAPTER_HOST = process.env.MOCK_ADAPTER_HOST || 'localhost'
-const MOCK_ADAPTER_URL = 'http://' + MOCK_ADAPTER_HOST + ':' + MOCK_ADAPTER_PORT
-
 describe('Scheduler', () => {
   console.log('Scheduler-Service URL= ' + URL)
 
   beforeAll(async () => {
     const pingUrl = URL + '/'
     await waitOn(
-      { resources: [MOCK_ADAPTER_URL, pingUrl], timeout: 50000, log: true })
+      { resources: [pingUrl], timeout: 50000, log: true })
   }, 60000)
 
   test('GET /version', async () => {
