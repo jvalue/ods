@@ -592,4 +592,4 @@ jobs:
       - name: Deploy to k8s
         run: |
           ./deployment/mk-kubeconfig.sh
-          ./kustomize build ./deployment/kustomize | ./kubectl --kubeconfig ./deployment/kube.config apply -f -
+          ./kustomize build deployment/kustomize | ./kubectl --kubeconfig kube.config apply -f -
