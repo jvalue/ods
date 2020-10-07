@@ -2,19 +2,23 @@
 const request = require('supertest')
 const waitOn = require('wait-on')
 
-const URL = process.env.SCHEDULER_API || 'http://localhost:8080'
+const {
+  SCHEDULER_URL,
+  AMQP_URL
+} = require('./env')
+
 
 describe('Scheduler', () => {
   console.log('Scheduler-Service URL= ' + URL)
 
   beforeAll(async () => {
-    const pingUrl = URL + '/'
+    const pingUrl = SCHEDULER_URL + '/'
     await waitOn(
       { resources: [pingUrl], timeout: 50000, log: true })
   }, 60000)
 
   test('GET /version', async () => {
-    const response = await request(URL).get('/version')
+    const response = await request(SCHEDULER_URL).get('/version')
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('text/plain')
     const semanticVersionRegEx = '^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)'
@@ -23,7 +27,7 @@ describe('Scheduler', () => {
 
   test('GET /jobs', async () => {
     await sleep(4000) // wait until scheduler does sync
-    const response = await request(URL).get('/jobs')
+    const response = await request(SCHEDULER_URL).get('/jobs')
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('application/json')
     expect(response.body).toHaveLength(2)
@@ -34,7 +38,7 @@ describe('Scheduler', () => {
 
   test('Pipeline processes events', async () => {
     await sleep(3000)
-    const response = await request(URL).get('/jobs')
+    const response = await request(SCHEDULER_URL).get('/jobs')
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('application/json')
     expect(response.body).toHaveLength(2)
