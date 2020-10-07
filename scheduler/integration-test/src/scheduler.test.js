@@ -7,7 +7,6 @@ const {
   AMQP_URL
 } = require('./env')
 
-
 describe('Scheduler', () => {
   console.log('Scheduler-Service URL= ' + URL)
 

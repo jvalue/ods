@@ -8,6 +8,7 @@
     "lint-ci": "./node_modules/.bin/eslint src --ext .js --max-warnings=0"
   },
   "devDependencies": {
+    "amqplib": "^0.6.0",
     "eslint": "^7.6.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-plugin-import": "^2.22.0",
