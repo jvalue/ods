@@ -38,7 +38,9 @@ services:
       context: ./scheduler/integration-test/
     environment:
       SCHEDULER_API: http://scheduler:8080
-      AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
+      AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672',
+      AMQP_CONNECTION_RETRIES: 40,
+      AMQP_CONNECTION_BACKOFF: 3
     depends_on:
       - rabbitmq
 

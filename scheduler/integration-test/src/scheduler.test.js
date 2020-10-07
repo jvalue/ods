@@ -1,20 +1,44 @@
 /* eslint-env jest */
 const request = require('supertest')
 const waitOn = require('wait-on')
+const AMQP = require('amqplib')
+
+const AMQP_EXCHANGE = 'ods_global'
+const AMQP_DATASOURCE_CONFIG_TOPIC = 'datasource.config.*'
+const AMQP_DATASOURCE_CONFIG_CREATED_TOPIC = 'datasource.config.created'
+const AMQP_DATASOURCE_CONFIG_UPDATED_TOPIC = 'datasource.config.updated'
+const AMQP_DATASOURCE_CONFIG_DELETED_TOPIC = 'datasource.config.deleted'
+
+let amqpConnection
 
 const {
   SCHEDULER_URL,
-  AMQP_URL
+  AMQP_URL,
+  AMQP_CONNECTION_RETRIES,
+  AMQP_CONNECTION_BACKOFF
 } = require('./env')
 
-describe('Scheduler', () => {
-  console.log('Scheduler-Service URL= ' + URL)
+const TIMEOUT = 10000
+
+describe('Scheduler-IT', () => {
 
   beforeAll(async () => {
-    const pingUrl = SCHEDULER_URL + '/'
-    await waitOn(
-      { resources: [pingUrl], timeout: 50000, log: true })
+    try {
+      const promiseResults = await Promise.all([
+        amqpConnect(AMQP_URL, AMQP_CONNECTION_RETRIES, AMQP_CONNECTION_BACKOFF),
+        waitOn( { resources: [`${SCHEDULER_URL}/`], timeout: 50000, log: false })
+      ])
+      amqpConnection = promiseResults[0]
+    } catch (err) {
+      throw new Error(`Error during setup of tests: ${err}`)
+    }
   }, 60000)
+
+  afterAll(async () => {
+    if(amqpConnection) {
+      await amqpConnection.close()
+    }
+  }, TIMEOUT)
 
   test('GET /version', async () => {
     const response = await request(SCHEDULER_URL).get('/version')
@@ -48,4 +72,18 @@ function sleep (ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-afterAll(() => setTimeout(() => process.exit(), 1000))
+const amqpConnect = async (amqpUrl, retries, backoff) => {
+  for (let i = 1; i <= retries; i++) {
+    console.info(`Connecting to AMQP broker (${i}/${retries})`)
+    try {
+      const connection = await AMQP.connect(amqpUrl)
+      console.log(`Successfully established connection to AMQP broker.`)
+      return connection
+    } catch (error) {
+      console.info(`Error connecting to AMQP broker: ${error}. Retrying in ${backoff} seconds`)
+      await sleep(backoff)
+    }
+  }
+  throw new Error(`Could not establish connection to AMQP broker`)
+}
+
