@@ -585,19 +585,14 @@ jobs:
 
       - run: |
           ./deployment/mk-kubeconfig.sh
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
+          ./kustomize build deployment/kustomize > k8s-deployment.yaml
 
       - uses: Azure/k8s-set-context@v1
         with:
           kubeconfig: ./deployment/kube.config
 
-      - uses: azure/k8s-bake@v1
-        with:
-          renderEngine: 'kustomize'
-          kustomizationPath: './deployment/kustomize/'
-          kubectl-version: 'latest'
-        id: bake
-
       - uses: Azure/k8s-deploy@v1
         with:
-          manifests: ${{ steps.bake.outputs.manifestsBundle }}
+          manifests: ./k8s-deployment.yaml
           namespace: 'staging'
