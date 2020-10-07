@@ -42,7 +42,7 @@ public class APIConfigurationManager {
   }
 
   @Transactional
-  public void deleteDatasource(Long id) {
+  public void deleteAPIConfiguration(Long id) {
     configurationRepository.deleteById(id);
   }
 

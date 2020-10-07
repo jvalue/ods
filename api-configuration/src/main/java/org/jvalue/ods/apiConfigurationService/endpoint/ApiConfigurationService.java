@@ -114,7 +114,7 @@ public class ApiConfigurationService implements ApiConfigurationServiceI {
 
   @Override
   public APIConfiguration[] getAllConfigs() {
-    System.out.println("--- called getAllConfigs");
+    System.out.println("--- called getAllConfigs ");
     ArrayList<APIConfiguration> result = new ArrayList<APIConfiguration>();
     apiConfigurationManager.getAllAPIConfigurations().forEach(result::add);
     APIConfiguration[] array = new APIConfiguration[result.size()];
@@ -124,7 +124,7 @@ public class ApiConfigurationService implements ApiConfigurationServiceI {
 
   @Override
   public HttpStatus deleteAllConfigs() {
-    System.out.println("--- called deleteAllConfigs");
+    System.out.println("--- called deleteAllConfigs ");
     List<APIConfiguration> result = new ArrayList<APIConfiguration>();
     apiConfigurationManager.getAllAPIConfigurations().forEach(result::add);
     result.forEach(x -> this.deleteAPIForTable(String.valueOf(x.getPipelineId())));
@@ -140,7 +140,7 @@ public class ApiConfigurationService implements ApiConfigurationServiceI {
 
   @Override
   public APIConfiguration createNewConfig(APIConfiguration config) {
-    System.out.println("--- called createNewConfig" + config);
+    System.out.println("--- called createNewConfig " + config);
     config.setId(null);
     handleConfiguration(config);
     return apiConfigurationManager.createAPIConfiguration(config);
@@ -148,7 +148,7 @@ public class ApiConfigurationService implements ApiConfigurationServiceI {
 
   @Override
   public APIConfiguration updateConfig(Long id, APIConfiguration config) {
-    System.out.println("--- called updateConfig" + config);
+    System.out.println("--- called updateConfig " + config);
     handleConfiguration(config);
     apiConfigurationManager.updateAPIConfiguration(config.getId(), config);
     return config;
@@ -156,16 +156,17 @@ public class ApiConfigurationService implements ApiConfigurationServiceI {
 
   @Override
   public APIConfiguration deleteConfig(Long id) {
-    System.out.println("--- called updateConfig" + id);
+    System.out.println("--- called deleteConfig " + id);
     APIConfiguration config = apiConfigurationManager.getAPIConfiguration(id).get();
     config.setDefaultAPI(false);
     handleConfiguration(config);
+    apiConfigurationManager.deleteAPIConfiguration(id);
     return config;
   }
 
   @Override
   public APIConfiguration getConfigByPipeline(Long id) {
-    System.out.println("--- called getConfigByPipeline" + id);
+    System.out.println("--- called getConfigByPipeline " + id);
 //    NOOP
     return new APIConfiguration();
   }

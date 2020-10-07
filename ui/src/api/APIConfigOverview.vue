@@ -51,7 +51,8 @@
           <div>
 <!--            {{ JSON.stringify(item) }}-->
             <ul>
-              <li v-for="(x, index) in items" :key="`x-${index}`">{{x.endpoint}}</li>
+              <li v-for="item in items">{{ item.endpoint }}</li>
+<!--              <li v-for="(x, index) in items" :key="`x-${index}`">{{x.endpoint}}</li>-->
             </ul>
 <!--            <v-list>-->
 <!--              <v-list-item-->

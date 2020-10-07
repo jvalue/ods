@@ -28,7 +28,7 @@
             >
               <v-text-field
                 v-model="dialogAPIConfig.displayName"
-                label="APIConfig Name"
+                label="API Config Name"
                 :rules="[required]"
               />
               <v-text-field
