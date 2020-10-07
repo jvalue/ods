@@ -23,6 +23,7 @@ const TIMEOUT = 10000
 describe('Scheduler-IT', () => {
 
   beforeAll(async () => {
+    logConfigs()
     try {
       const promiseResults = await Promise.all([
         amqpConnect(AMQP_URL, AMQP_CONNECTION_RETRIES, AMQP_CONNECTION_BACKOFF),
@@ -87,3 +88,18 @@ const amqpConnect = async (amqpUrl, retries, backoff) => {
   throw new Error(`Could not establish connection to AMQP broker`)
 }
 
+const logConfigs = () => {
+  const msg = `
+  AMQP_EXCHANGE: ${AMQP_EXCHANGE}
+  AMQP_DATASOURCE_CONFIG_TOPIC: ${AMQP_DATASOURCE_CONFIG_TOPIC}
+  AMQP_DATASOURCE_CONFIG_CREATED_TOPIC: ${AMQP_DATASOURCE_CONFIG_CREATED_TOPIC}
+  AMQP_DATASOURCE_CONFIG_UPDATED_TOPIC: ${AMQP_DATASOURCE_CONFIG_UPDATED_TOPIC}
+  AMQP_DATASOURCE_CONFIG_DELETED_TOPIC: ${AMQP_DATASOURCE_CONFIG_DELETED_TOPIC}
+
+  [Environment Variable] SCHEDULER_URL = ${SCHEDULER_URL}
+  [Environment Variable] AMQP_URL = ${AMQP_URL}
+  [Environment Variable] AMQP_CONNECTION_RETRIES = ${AMQP_CONNECTION_RETRIES}
+  [Environment Variable] AMQP_CONNECTION_BACKOFF = ${AMQP_CONNECTION_BACKOFF}
+  `
+  console.log(msg)
+}
