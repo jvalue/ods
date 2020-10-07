@@ -583,9 +583,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - run: |
-          ./deployment/mk-kubeconfig.sh
+      - name: Setup kustomize and kubectl
+        run: |
           curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
           curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
           chmod +x ./kubectl
-          ./kustomize build deployment/kustomize | kubectl --kubeconfig ./deployment/kube.config apply -f -
+
+      - name: Deploy
+      - run: |
+          ./deployment/mk-kubeconfig.sh
+          ./kustomize build ./deployment/kustomize | ./kubectl --kubeconfig ./deployment/kube.config apply -f -
