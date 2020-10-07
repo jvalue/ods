@@ -6,7 +6,7 @@ bases:
   - ../../base/hpa
   - ../../base/scheduler
   - ../../base/storage
-  - ../../base/transformation
+  - ../../base/pipeline
   - ../../base/ui
 
 # 'adjust' the base deployments according to the yamls
