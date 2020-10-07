@@ -41,7 +41,7 @@ describe('Scheduler-IT', () => {
     }
   }, TIMEOUT)
 
-  test('GET /version', async () => {
+  test('Should respond with semantic version [GET /version]', async () => {
     const response = await request(SCHEDULER_URL).get('/version')
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('text/plain')
