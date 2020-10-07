@@ -7,19 +7,21 @@ export default class PipelineConfigEventHandler {
     this.structureRepository = structureRepository
   }
 
-  handleCreation (pipelineCreatedEvent: PipelineCreatedEvent): Promise<void> {
-    return this.structureRepository.create(pipelineCreatedEvent.pipelineId)
+  async handleCreation (pipelineCreatedEvent: PipelineCreatedEvent): Promise<void> {
+    await this.structureRepository.create(pipelineCreatedEvent.pipelineId.toString())
   }
 
-  handleDeletion (pipelineDeletedEvent: PipelineDeletedEvent): Promise<void> {
-    return this.structureRepository.delete(pipelineDeletedEvent.pipelineId)
+  async handleDeletion (pipelineDeletedEvent: PipelineDeletedEvent): Promise<void> {
+    await this.structureRepository.delete(pipelineDeletedEvent.pipelineId.toString())
   }
 }
 
 export interface PipelineCreatedEvent {
-  pipelineId: string
+  pipelineId: number
+  pipelineName: string
 }
 
 export interface PipelineDeletedEvent {
-  pipelineId: string
+  pipelineId: number
+  pipelineName: string
 }

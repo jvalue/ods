@@ -10,17 +10,13 @@ import {
 } from '../../env'
 
 export class PipelineExecutionConsumer {
-  private consumer: AmqpConsumer
-  private pipelineExecutionEventHandler: PipelineExecutionEventHandler
-
-  constructor (pipelineExecutionEventHandler: PipelineExecutionEventHandler, consumer: AmqpConsumer) {
-    this.pipelineExecutionEventHandler = pipelineExecutionEventHandler
-    this.consumer = consumer
-  }
+  constructor (
+    private readonly pipelineExecutionEventHandler: PipelineExecutionEventHandler,
+    private readonly consumer: AmqpConsumer) {}
 
   async init (retries: number, msBackoff: number): Promise<void> {
     await this.consumer.init(AMQP_URL, retries, msBackoff)
-    return this.consumer.consume(
+    await this.consumer.consume(
       AMQP_PIPELINE_EXECUTION_EXCHANGE,
       AMQP_PIPELINE_EXECUTION_TOPIC,
       AMQP_PIPELINE_EXECUTION_QUEUE,
@@ -29,14 +25,15 @@ export class PipelineExecutionConsumer {
   }
 
   // use the f = () => {} syntax to access 'this' scope
-  consumeEvent = async (msg: AMQP.ConsumeMessage | null): Promise<void> => {
-    if (!msg) {
+  consumeEvent = (msg: AMQP.ConsumeMessage | null): void => {
+    if (msg === null) {
       console.debug('Received empty event when listening on pipeline configs - doing nothing')
       return
     }
     console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
     if (msg.fields.routingKey === AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC) {
-      await this.pipelineExecutionEventHandler.handleSuccess(JSON.parse(msg.content.toString()))
+      this.pipelineExecutionEventHandler.handleSuccess(JSON.parse(msg.content.toString()))
+        .catch(error => console.log('Failed to handle pipeline execution success event', error))
     } else {
       console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
     }
