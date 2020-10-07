@@ -487,7 +487,7 @@ jobs:
           docker push "${DH_IMAGE_ID}":pipeline-"${PIPELINE_VERSION}"
           docker push "${DH_IMAGE_ID}":pipeline-latest
 
-  notifcation_upload:
+  notification_upload:
     name: Notifcation Publish
     runs-on: ubuntu-18.04
 
