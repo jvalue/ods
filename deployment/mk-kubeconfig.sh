@@ -1,5 +1,6 @@
 #!/bin/sh
-cat > kube.config <<EOF
+mkdir -p ${HOME}/.kube
+cat > ${HOME}/.kube/config <<EOF
 apiVersion: v1
 clusters:
 - cluster:
@@ -20,8 +21,8 @@ users:
     token: ${K8S_SERVICEACCOUNT_TOKEN}
 EOF
 
-if [ -f "kube.config" ]; then
-    echo "kube.config generated"
+if [ -f "${HOME}/.kube/config" ]; then
+    echo "kubeconfig generated"
 else
-    echo "kube.config not generated"
+    echo "kubeconfig not generated"
 fi
