@@ -20,6 +20,11 @@ interface ExistsTableResultRow {
   to_regclass: string | null
 }
 
+function extractTableExistenceFromResult (result: QueryResult<ExistsTableResultRow>): boolean {
+  // to_regclass contains the table name as string or null if it does not exists
+  return result.rows[0].to_regclass !== null
+}
+
 interface DatabaseStorageContent {
   id: string
   data: unknown
@@ -55,8 +60,7 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
   async existsTable (tableIdentifier: string): Promise<boolean> {
     const resultSet: QueryResult<ExistsTableResultRow> =
       await this.postgresRepository.executeQuery(EXISTS_TABLE_STATEMENT(POSTGRES_SCHEMA, tableIdentifier), [])
-    // to_regclass contains the table name as string or null if it does not exists
-    return resultSet.rows[0].to_regclass !== null
+    return extractTableExistenceFromResult(resultSet)
   }
 
   async getAllContent (tableIdentifier: string): Promise<StorageContent[] | undefined> {
