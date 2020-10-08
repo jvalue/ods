@@ -61,7 +61,8 @@ describe('Datasource Configuration', () => {
     expect(datasourceId).not.toEqual(datasourceConfig.id) // id not under control of client
 
     expect(publishedEvents.get(CONFIG_CREATED_TOPIC)).toContainEqual({
-      datasourceId
+      datasourceId,
+      trigger: datasourceConfig.trigger
     })
   }, TIMEOUT)
 
@@ -84,7 +85,8 @@ describe('Datasource Configuration', () => {
     expect(putResponse.status).toEqual(204)
 
     expect(publishedEvents.get(CONFIG_UPDATED_TOPIC)).toContainEqual({
-      datasourceId
+      datasourceId,
+      trigger: datasourceConfig.trigger
     })
 
     const updatedGetResponse = await request(ADAPTER_URL)
