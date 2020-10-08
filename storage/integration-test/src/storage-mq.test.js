@@ -81,7 +81,7 @@ describe('IT against Storage-MQ service', () => {
   }, TIMEOUT)
 
   test('Should create bucket with content', async () => {
-    const pipelineId = '444'
+    const pipelineId = 444
 
     const channel = await amqpConnection.createChannel()
     channel.assertExchange(AMQP_EXCHANGE, 'topic', {

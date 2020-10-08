@@ -13,10 +13,10 @@ COPY ./package*.json ./
 RUN npm ci
 
 # copy rest of the files
-COPY ./src ./src
 COPY ./tsconfig.json ./
-COPY ./.eslintrc* ./
+COPY ./.eslintrc.js ./
 COPY ./jest.config.js ./
+COPY ./src ./src
 
 # build and test
 RUN npm run transpile

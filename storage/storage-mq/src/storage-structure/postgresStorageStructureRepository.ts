@@ -3,28 +3,23 @@ import { PoolConfig } from 'pg'
 import { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB, POSTGRES_SCHEMA } from '../env'
 import PostgresRepository from '@/util/postgresRepository'
 
-const EXISTS_TABLE_STATEMENT = (schema: string, table: string): string => `SELECT to_regclass('${schema}.${table}')`
 const CREATE_BUCKET_STATEMENT =
 (schema: string, table: string): string => `CREATE TABLE IF NOT EXISTS "${schema}"."${table}" (
   "id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
   "data" jsonb NOT NULL,
   "timestamp" timestamp,
-  "pipelineId" varchar,
+  "pipelineId" bigint,
   CONSTRAINT "Data_pk_${schema}_${table}" PRIMARY KEY (id)
   )`
 const DELETE_BUCKET_STATEMENT = (schema: string, table: string): string => `DROP TABLE "${schema}"."${table}" CASCADE`
 
 export class PostgresStorageStructureRepository implements StorageStructureRepository {
-  private postgresRepo: PostgresRepository
-
-  constructor (postgresRepo: PostgresRepository) {
-    this.postgresRepo = postgresRepo
-  }
+  constructor (private readonly postgresRepo: PostgresRepository) {}
 
   /**
      * Initializes the connection to the database.
      * @param retries:  Number of retries to connect to the database
-     * @param backoff:  Time in milliseconds to backoff before next connection retry
+     * @param backoffMs:  Time in milliseconds to backoff before next connection retry
      */
   public async init (retries: number, backoffMs: number): Promise<void> {
     console.debug('Initializing PostgresStorageStructureRepository')
@@ -41,14 +36,6 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
     }
 
     await this.postgresRepo.init(poolConfig, retries, backoffMs)
-  }
-
-  async existsTable (tableIdentifier: string): Promise<boolean> {
-    const resultSet =
-      await this.postgresRepo.executeQuery(EXISTS_TABLE_STATEMENT(POSTGRES_SCHEMA, tableIdentifier), [])
-    const tableExists = !!resultSet.rows[0].to_regclass
-    console.debug(`Table ${tableIdentifier} exists: ${tableExists}`)
-    return tableExists
   }
 
   /**
