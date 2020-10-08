@@ -3,7 +3,7 @@ package org.jvalue.ods.adapterservice.datasource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.jvalue.ods.adapterservice.datasource.api.amqp.AmqpHandler;
+import org.jvalue.ods.adapterservice.datasource.api.amqp.AmqpPublisher;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
 import org.jvalue.ods.adapterservice.datasource.repository.DatasourceRepository;
 import org.mockito.InjectMocks;
@@ -28,7 +28,7 @@ public class DatasourceManagerTest {
     DatasourceRepository datasourceRepository;
 
     @Mock
-    AmqpHandler amqpHandler;
+    AmqpPublisher amqpPublisher;
 
     @InjectMocks
     private DatasourceManager manager;
@@ -46,7 +46,7 @@ public class DatasourceManagerTest {
 
         assertEquals(expectedConfig, result);
         verify(datasourceRepository).save(config);
-        verify(amqpHandler).publishCreation(result);
+        verify(amqpPublisher).publishCreation(result);
     }
 
     @Test
@@ -62,7 +62,7 @@ public class DatasourceManagerTest {
         manager.updateDatasource(123L, updated);
 
         verify(datasourceRepository).save(updated);
-        verify(amqpHandler).publishUpdate(updated);
+        verify(amqpPublisher).publishUpdate(updated);
     }
 
     @Test
@@ -70,7 +70,7 @@ public class DatasourceManagerTest {
         manager.deleteDatasource(123L);
 
         verify(datasourceRepository).deleteById(123L);
-        verify(amqpHandler).publishDeletion(123L);
+        verify(amqpPublisher).publishDeletion(123L);
     }
 
     @Test
@@ -84,7 +84,7 @@ public class DatasourceManagerTest {
         manager.deleteAllDatasources();
 
         verify(datasourceRepository).deleteAll();
-        verify(amqpHandler, times(3))
+        verify(amqpPublisher, times(3))
                 .publishDeletion(anyLong());
     }
 

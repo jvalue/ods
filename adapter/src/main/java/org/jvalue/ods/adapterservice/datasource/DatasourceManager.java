@@ -4,7 +4,7 @@ import org.jvalue.ods.adapterservice.adapter.Adapter;
 import org.jvalue.ods.adapterservice.adapter.AdapterFactory;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
-import org.jvalue.ods.adapterservice.datasource.api.amqp.AmqpHandler;
+import org.jvalue.ods.adapterservice.datasource.api.amqp.AmqpPublisher;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
 import org.jvalue.ods.adapterservice.datasource.model.DatasourceMetadata;
 import org.jvalue.ods.adapterservice.datasource.model.RuntimeParameters;
@@ -21,13 +21,13 @@ public class DatasourceManager {
 
   private final DatasourceRepository datasourceRepository;
   private final AdapterFactory adapterFactory;
-  private final AmqpHandler amqpHandler;
+  private final AmqpPublisher amqpPublisher;
 
   @Autowired
-  public DatasourceManager(DatasourceRepository datasourceRepository, AdapterFactory adapterFactory, AmqpHandler amqpHandler) {
+  public DatasourceManager(DatasourceRepository datasourceRepository, AdapterFactory adapterFactory, AmqpPublisher amqpPublisher) {
     this.datasourceRepository = datasourceRepository;
     this.adapterFactory = adapterFactory;
-    this.amqpHandler = amqpHandler;
+    this.amqpPublisher = amqpPublisher;
   }
 
 
@@ -37,7 +37,7 @@ public class DatasourceManager {
 
     Datasource savedConfig = datasourceRepository.save(config);
 
-    amqpHandler.publishCreation(savedConfig);
+    amqpPublisher.publishCreation(savedConfig);
     return savedConfig;
   }
 
@@ -58,14 +58,14 @@ public class DatasourceManager {
       .orElseThrow(() -> new IllegalArgumentException("Datasource with id " + id + " not found."));
 
     datasourceRepository.save(applyUpdate(existing, update));
-    amqpHandler.publishUpdate(existing);
+    amqpPublisher.publishUpdate(existing);
   }
 
 
   @Transactional
   public void deleteDatasource(Long id) {
     datasourceRepository.deleteById(id);
-    amqpHandler.publishDeletion(id);
+    amqpPublisher.publishDeletion(id);
   }
 
 
@@ -74,7 +74,7 @@ public class DatasourceManager {
     Iterable<Datasource> allDatasourceConfigs = getAllDatasources();
     datasourceRepository.deleteAll();
     for (Datasource ds: allDatasourceConfigs) {
-        amqpHandler.publishDeletion(ds.getId());
+        amqpPublisher.publishDeletion(ds.getId());
     }
   }
 
@@ -89,10 +89,10 @@ public class DatasourceManager {
    try {
       Adapter adapter = adapterFactory.getAdapter(adapterConfig);
       DataBlob executionResult = adapter.executeJob(adapterConfig);
-      amqpHandler.publishImportSuccess(id, executionResult.getData());
+      amqpPublisher.publishImportSuccess(id, executionResult.getData());
       return executionResult.getMetaData();
    } catch (Exception e) {
-      amqpHandler.publishImportFailure(id, e.getMessage());
+      amqpPublisher.publishImportFailure(id, e.getMessage());
      if(e instanceof IllegalArgumentException) {
        System.err.println("Data Import request failed. Malformed Request: " + e.getMessage());
      } else {

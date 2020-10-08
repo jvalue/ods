@@ -13,12 +13,12 @@ import org.springframework.stereotype.Service;
 import java.io.Serializable;
 
 @Service
-public class AmqpHandler {
+public class AmqpPublisher {
 
     private final RabbitTemplate rabbitTemplate;
 
     @Autowired
-    public AmqpHandler(RabbitTemplate rabbitTemplate) {
+    public AmqpPublisher(RabbitTemplate rabbitTemplate) {
         this.rabbitTemplate = rabbitTemplate;
     }
 
