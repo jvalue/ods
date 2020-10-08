@@ -1,9 +1,7 @@
 package org.jvalue.ods.adapterservice.datasource.api.amqp;
 
 import org.jvalue.ods.adapterservice.config.RabbitConfiguration;
-import org.jvalue.ods.adapterservice.datasource.event.DatasourceConfigEvent;
-import org.jvalue.ods.adapterservice.datasource.event.DatasourceImportedEvent;
-import org.jvalue.ods.adapterservice.datasource.event.ImportFailedEvent;
+import org.jvalue.ods.adapterservice.datasource.event.*;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -23,11 +21,11 @@ public class AmqpPublisher {
     }
 
     public void publishCreation(Datasource datasource) {
-        publish(RabbitConfiguration.AMQP_DATASOURCE_CREATED_TOPIC, new DatasourceConfigEvent(datasource));
+        publish(RabbitConfiguration.AMQP_DATASOURCE_CREATED_TOPIC, new DatasourceCreationEvent(datasource));
     }
 
     public void publishUpdate(Datasource datasource) {
-        publish(RabbitConfiguration.AMQP_DATASOURCE_UPDATED_TOPIC, new DatasourceConfigEvent(datasource));
+        publish(RabbitConfiguration.AMQP_DATASOURCE_UPDATED_TOPIC, new DatasourceUpdateEvent(datasource));
     }
 
     public void publishDeletion(Long datasourceId) {
