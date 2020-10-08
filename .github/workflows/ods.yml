@@ -591,7 +591,6 @@ jobs:
 
       - name: Deploy to k8s
         run: |
-          export KUBECONFIG=$KUBECONFIG:$HOME/.kube/config
-          ./kubectl cluster-info
           ./deployment/mk-kubeconfig.sh
-          ./kustomize build deployment/kustomize | ./kubectl apply -f -
+          ./kustomize build deployment/kustomize > deployment.yaml
+          ./kubectl --kubeconfig kube.config apply -f deployment.yaml
