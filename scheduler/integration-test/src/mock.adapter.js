@@ -5,57 +5,27 @@ const router = new Router()
 const app = new Koa()
 const { MOCK_SERVER_PORT } = require('./env')
 
-const DATASOURCES = [
-  {
-    id: 1,
-    protocol: {
-      type: 'HTTP',
-      parameters: {
-        location: 'testlocation.de/api'
-      }
-    },
-    format: {
-      type: 'XML'
-    },
-    metadata: {},
-    trigger: {
-      periodic: true,
-      firstExecution: '2018-10-07T01:32:00.123Z',
-      interval: 10000
-    }
-  },
-  {
-    id: 2,
-    protocol: {
-      type: 'HTTP',
-      parameters: {
-        location: 'testlocation.de/api'
-      }
-    },
-    format: {
-      type: 'XML'
-    },
-    metadata: {
-      displayName: 'nordstream'
-    },
-    trigger: {
-      periodic: true,
-      firstExecution: '2018-10-07T01:32:00.123Z',
-      interval: 10000
-    }
-  }
-]
+const triggerRequests = Map()
 
-router.get('/datasources/:datasourceId', async ctx => {
-  ctx.type = 'application/json'
-  const datasourceId = Number(ctx.params.datasourceId)
-  let idx = 0
-  for (let i = 0; i < DATASOURCES.length; i++) {
-    if (DATASOURCES[i].id === datasourceId) {
-      idx = i
-    }
+router.post('/datasources/:datasourceId/trigger', (req, res) => {
+  const id = Number(req.params.datasourceId)
+  const calls = triggerRequests.get(id)
+  if (calls === undefined) {
+    triggerRequests.set(id, 1)
+  } else {
+    triggerRequests.set(id, triggerRequests.get(id) + 1)
   }
-  ctx.body = DATASOURCES[idx]
+  res.sendStatus(200)
+})
+
+router.get('/triggerRequests/:datasourceId', (req, res) => {
+  const id = Number(req.params.datasourceId)
+  const calls = triggerRequests.get(id)
+  if (calls === undefined) {
+    res.send(0)
+  } else {
+    res.send(calls)
+  }
 })
 
 app.use(router.routes())
