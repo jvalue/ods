@@ -6,6 +6,28 @@ const app = new Koa()
 const { MOCK_SERVER_PORT } = require('./env')
 
 const triggerRequests = new Map()
+const initialSources = [
+  {
+    datasourceId: 100,
+    trigger: {
+      firstExecution: Date.now() + 4000,
+      periodic: false,
+      interval: 0
+    }
+  },
+  {
+    datasourceId: 101,
+    trigger: {
+      firstExecution: Date.now() + 1000,
+      periodic: true,
+      interval: 1000
+    }
+  }
+]
+
+router.get('/datasources/', (req, res) => {
+  res.send(initialSources)
+})
 
 router.post('/datasources/:datasourceId/trigger', (req, res) => {
   const id = Number(req.params.datasourceId)

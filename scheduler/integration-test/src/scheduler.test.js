@@ -49,6 +49,19 @@ describe('Scheduler-IT', () => {
     expect(response.text).toMatch(new RegExp(semanticVersionRegEx))
   })
 
+  test('Should initialize schedule jobs correctly', async () => {
+    await sleep(5000)
+
+    const singleTrigger = await request(MOCK_SERVER_URL)
+      .get('/triggerRequests/100')
+
+    const multipleTrigger = await request(MOCK_SERVER_URL)
+      .get('/triggerRequests/101')
+
+    expect(singleTrigger).toBe(1)
+    expect(multipleTrigger).toBeGreaterThan(1)
+  })
+
   test('Should trigger datasource after creation event', async () => {
     const channel = await createAmqpChannel()
 
