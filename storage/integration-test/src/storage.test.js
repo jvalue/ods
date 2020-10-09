@@ -16,7 +16,7 @@ const PROCESS_TIME = 1000
 const SECOND = 1000
 
 let amqpConnection
-const pipelineId = '21398'
+const pipelineId = 21398
 
 const pipelineCreatedEvent = {
   pipelineId: pipelineId
