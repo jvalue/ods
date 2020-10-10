@@ -4,49 +4,53 @@ const Router = require('koa-router')
 const router = new Router()
 const app = new Koa()
 const { MOCK_SERVER_PORT } = require('./env')
+const { jsonDateAfter } = require('./testHelper')
 
 const triggerRequests = new Map()
 const initialSources = [
   {
-    datasourceId: 100,
+    id: 100,
     trigger: {
-      firstExecution: Date.now() + 4000,
+      firstExecution: jsonDateAfter(4000),
       periodic: false,
       interval: 0
     }
   },
   {
-    datasourceId: 101,
+    id: 101,
     trigger: {
-      firstExecution: Date.now() + 1000,
+      firstExecution: jsonDateAfter(1000),
       periodic: true,
       interval: 1000
     }
   }
 ]
 
-router.get('/datasources/', (req, res) => {
-  res.send(initialSources)
+router.get('/datasources', async ctx => {
+  ctx.type = 'application/json'
+  ctx.body = initialSources
 })
 
-router.post('/datasources/:datasourceId/trigger', (req, res) => {
-  const id = Number(req.params.datasourceId)
+router.post('/datasources/:datasourceId/trigger', async ctx => {
+  const id = Number(ctx.params.datasourceId)
+  console.log(`Trigger pulled for datasource ${id}`)
   const calls = triggerRequests.get(id)
   if (calls === undefined) {
     triggerRequests.set(id, 1)
   } else {
     triggerRequests.set(id, triggerRequests.get(id) + 1)
   }
-  res.sendStatus(200)
+  ctx.status = 201
 })
 
-router.get('/triggerRequests/:datasourceId', (req, res) => {
-  const id = Number(req.params.datasourceId)
+router.get('/triggerRequests/:datasourceId', async ctx => {
+  const id = Number(ctx.params.datasourceId)
   const calls = triggerRequests.get(id)
+  ctx.type = 'text/plain'
   if (calls === undefined) {
-    res.send(0)
+    ctx.body = 0
   } else {
-    res.send(calls)
+    ctx.body = calls
   }
 })
 

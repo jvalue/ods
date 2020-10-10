@@ -2,6 +2,7 @@
 const request = require('supertest')
 const waitOn = require('wait-on')
 const AMQP = require('amqplib')
+const { jsonDateAfter } = require('./testHelper')
 
 const AMQP_EXCHANGE = 'ods_global'
 const AMQP_DATASOURCE_CONFIG_TOPIC = 'datasource.config.*'
@@ -47,10 +48,10 @@ describe('Scheduler-IT', () => {
     expect(response.type).toEqual('text/plain')
     const semanticVersionRegEx = '^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)'
     expect(response.text).toMatch(new RegExp(semanticVersionRegEx))
-  })
+  }, TIMEOUT)
 
   test('Should initialize schedule jobs correctly', async () => {
-    await sleep(5000)
+    await sleep(4000)
 
     const singleTrigger = await request(MOCK_SERVER_URL)
       .get('/triggerRequests/100')
@@ -58,9 +59,9 @@ describe('Scheduler-IT', () => {
     const multipleTrigger = await request(MOCK_SERVER_URL)
       .get('/triggerRequests/101')
 
-    expect(singleTrigger).toBe(1)
-    expect(multipleTrigger).toBeGreaterThan(1)
-  })
+    expect(singleTrigger.text).toBe(1)
+    expect(multipleTrigger.text).toBeGreaterThan(1)
+  }, TIMEOUT)
 
   test('Should trigger datasource after creation event', async () => {
     const channel = await createAmqpChannel()
@@ -75,7 +76,7 @@ describe('Scheduler-IT', () => {
       .get('/triggerRequests/1')
 
     expect(triggerRequests.body).toBe(1)
-  })
+  }, TIMEOUT)
 
   test('Should not trigger datasource after deletion event', async () => {
     const channel = await createAmqpChannel()
@@ -92,7 +93,7 @@ describe('Scheduler-IT', () => {
       .get('/triggerRequests/2')
 
     expect(triggerRequests.body).toBe(0)
-  })
+  }, TIMEOUT)
 
   test('Should update trigger after update event', async () => {
     const channel = await createAmqpChannel()
@@ -109,7 +110,7 @@ describe('Scheduler-IT', () => {
       .get('/trigger/requests/3')
 
     expect(triggerRequests.body).toBeGreaterThan(1)
-  })
+  }, TIMEOUT)
 })
 
 function createDeletionEvent (datasourceId) {
@@ -123,7 +124,7 @@ function createDatasourceEvent (datasourceId, delay, interval) {
   const event = {
     datasourceId,
     trigger: {
-      firstExecution: Date.now() + delay,
+      firstExecution: jsonDateAfter(delay),
       periodic,
       interval
     }
