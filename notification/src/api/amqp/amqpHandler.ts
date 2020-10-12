@@ -57,7 +57,10 @@ export class AmqpHandler {
     })
 
     await channel.bindQueue(q.queue, AMQP_PIPELINE_EXECUTION_EXCHANGE, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC)
-    await channel.consume(q.queue, this.handleEvent)
+    await channel.consume(q.queue, msg => {
+      this.handleEvent(msg)
+        .catch(error => console.error(`Failed to handle ${msg?.fields.routingKey ?? 'null'} event`, error))
+    })
 
     console.info(
       `Successfully initialized pipeline-executed queue "${AMQP_PIPELINE_EXECUTION_QUEUE}" ` +
@@ -65,15 +68,14 @@ export class AmqpHandler {
     )
   }
 
-  private readonly handleEvent = (msg: AMQP.ConsumeMessage | null): void => {
+  private readonly handleEvent = async (msg: AMQP.ConsumeMessage | null): Promise<void> => {
     if (msg === null) {
       console.debug('Received empty event when listening on pipeline executions - doing nothing')
       return
     }
     console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
     if (msg.fields.routingKey === AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC) {
-      this.triggerEventHandler.handleEvent(JSON.parse(msg.content.toString()))
-        .catch(error => console.log('Failed to handle pipeline execution success event', error))
+      await this.triggerEventHandler.handleEvent(JSON.parse(msg.content.toString()))
     } else {
       console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
     }

@@ -217,7 +217,7 @@ async function receiveAmqp (url, exchange, topic, queue) {
 
   console.log(`Listening on AMQP host "${url}" on exchange "${exchange}" for topic "${topic}"`)
 
-  await channel.consume(q.queue, async (msg) => {
+  await channel.consume(q.queue, msg => {
     const event = JSON.parse(msg.content.toString())
     const routingKey = msg.fields.routingKey
     console.log(`Event received on topic "${routingKey}": ${JSON.stringify(event)}`)

@@ -30,9 +30,7 @@ export default class PostgresRepository {
       }
       await sleep(backoffMs)
     }
-    // can be simplified in one line when https://github.com/typescript-eslint/typescript-eslint/issues/2642 is fixed
-    const error = lastError ?? new Error('Failed to connect to database')
-    throw error
+    throw lastError ?? new Error('Failed to connect to database')
   }
 
   private async connect (poolConfig: PoolConfig): Promise<Pool> {
