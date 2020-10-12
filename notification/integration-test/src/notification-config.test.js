@@ -59,7 +59,7 @@ describe('Notification Service', () => {
     // compare response with initial webhook config
     expect(notificationResponse.body.pipelineId).toEqual(webhookConfig.pipelineId)
     expect(notificationResponse.body.condition).toEqual(webhookConfig.condition)
-    expect(notificationResponse.body.parameters.url).toEqual(webhookConfig.parameter.url)
+    expect(notificationResponse.body.parameter.url).toEqual(webhookConfig.parameter.url)
 
     // PUT / UPDATE
     webhookConfig.pipelineId = 2
@@ -82,7 +82,7 @@ describe('Notification Service', () => {
     expect(notificationResponse.body.id).toEqual(id)
     expect(notificationResponse.body.pipelineId).toEqual(webhookConfig.pipelineId)
     expect(notificationResponse.body.condition).toEqual(webhookConfig.condition)
-    expect(notificationResponse.body.parameters.url).toEqual(webhookConfig.parameters.url)
+    expect(notificationResponse.body.parameter.url).toEqual(webhookConfig.parameter.url)
 
     // DELETE
     notificationResponse = await request(URL)
@@ -142,7 +142,7 @@ describe('Notification Service', () => {
       pipelineId: webhookConfig.pipelineId,
       condition: webhookConfig.condition,
       type: 'WEBHOOK',
-      parameters: {
+      parameter: {
         url: webhookConfig.parameter.url
       }
     })
@@ -151,10 +151,10 @@ describe('Notification Service', () => {
       pipelineId: slackConfig.pipelineId,
       condition: slackConfig.condition,
       type: 'SLACK',
-      parameters: {
-        workspaceId: slackConfig.workspaceId,
-        channelId: slackConfig.channelId,
-        secret: slackConfig.channelId
+      parameter: {
+        workspaceId: slackConfig.parameter.workspaceId,
+        channelId: slackConfig.parameter.channelId,
+        secret: slackConfig.parameter.secret
       }
     })
 
