@@ -1,31 +1,34 @@
-export enum CONFIG_TYPE {
-  WEBHOOK = 'webhook',
-  SLACK = 'slack',
-  FCM = 'fcm'
+export enum NotificationType {
+  WEBHOOK = 'WEBHOOK',
+  SLACK = 'SLACK',
+  FCM = 'FCM'
 }
 
 export default interface NotificationConfig {
   id: number;
   pipelineId: number;
   condition: string;
-  type: string;
+  type: NotificationType;
   parameters: object;
 }
 
 export interface WebhookNotification extends NotificationConfig {
-  type: 'webhook';
+  type: NotificationType.WEBHOOK;
   parameters: WebhookNotificationParameters;
 }
 
 export interface SlackNotification extends NotificationConfig {
-  type: 'slack';
+  type: NotificationType.SLACK;
   parameters: SlackNotificationParameters;
 }
 
 export interface FirebaseNotification extends NotificationConfig {
-  type: 'fcm';
+  type: NotificationType.FCM;
   parameters: FirebaseNotificationParameters;
 }
+
+export type NotificationParameters =
+  WebhookNotificationParameters | SlackNotificationParameters | FirebaseNotificationParameters
 
 export interface WebhookNotificationParameters {
   url: string;

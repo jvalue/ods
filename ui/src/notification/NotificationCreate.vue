@@ -36,7 +36,7 @@ import Vue from 'vue'
 
 import NotificationForm from '@/notification/NotificationForm.vue'
 
-import NotificationConfig, { CONFIG_TYPE } from '@/notification/notificationConfig'
+import NotificationConfig, { NotificationType } from '@/notification/notificationConfig'
 import * as NotificationREST from '@/notification/notificationRest'
 
 @Component({
@@ -49,7 +49,7 @@ export default class NotificationCreate extends Vue {
     id: -1,
     pipelineId: -1,
     condition: 'true',
-    type: CONFIG_TYPE.WEBHOOK,
+    type: NotificationType.WEBHOOK,
     parameters: {}
   }
 
