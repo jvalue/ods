@@ -4,38 +4,48 @@
 GET {{baseURL}}/version  HTTP/1.1
 
 
+### Get all notification configs
+GET {{baseURL}}/configs  HTTP/1.1
+Content-Type: application/json
+
 ### Get all notification configs for pipeline
-GET {{baseURL}}/config/pipeline/17  HTTP/1.1
+GET {{baseURL}}/configs?pipelineId=17  HTTP/1.1
 Content-Type: application/json
 
 ### Save notification webhook config
-POST {{baseURL}}/config/webhook  HTTP/1.1
+POST {{baseURL}}/configs  HTTP/1.1
 Content-Type: application/json
-
-{
-  "pipelineId": 15,
-  "condition": "true",
-  "url": "http://www.mocky.io/v2/5dc94f7a2f0000680073eb96"
-}
-
-### Get webhook config
-GET {{baseURL}}/config/webhook/1  HTTP/1.1
-Content-Type: application/json
-
-### Edit webhook config
-PUT {{baseURL}}/config/webhook/10  HTTP/1.1
-Content-Type: application/json
-
 
 {
   "pipelineId": 17,
   "condition": "true",
-  "url": "http://www.mocky.io/v2/5dc94f7a2f0000680073eb96"
+  "type": "WEBHOOK",
+  "parameter": {
+    "url": "http://www.mocky.io/v2/5dc94f7a2f0000680073eb96"
+  }
+}
+
+### Get notification config
+GET {{baseURL}}/configs/1  HTTP/1.1
+Content-Type: application/json
+
+### Edit notification config
+PUT {{baseURL}}/configs/1  HTTP/1.1
+Content-Type: application/json
+
+
+{
+  "pipelineId": 18,
+  "condition": "true",
+  "type": "WEBHOOK",
+  "parameter": {
+    "url": "http://www.mocky.io/v2/5dc94f7a2f0000680073eb96"
+  }
 }
 
 
-### Delete webhook config
-DELETE {{baseURL}}/config/webhook/1  HTTP/1.1
+### Delete notification config
+DELETE {{baseURL}}/configs/1  HTTP/1.1
 Content-Type: application/json
 
 ### Trigger all notifications of pipeline
@@ -45,15 +55,7 @@ Content-Type: application/json
 {
   "pipelineId": 17,
   "pipelineName": "Integration-Test Pipeline 2 (not triggering)",
-  "dataLocation": "http://www.ods.de/data/123",
-  "jobResult": {
-    "data": {
-      "value1": 1
-    },
-    "stats": {
-      "durationInMilliSeconds": 500,
-      "startTimestamp": 12345,
-      "endTimestamp": 12345
-    }
+  "data": {
+    "value1": 1
   }
 }
