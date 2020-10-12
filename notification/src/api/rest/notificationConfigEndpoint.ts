@@ -22,7 +22,7 @@ export class NotificationConfigEndpoint {
    * (identified by param id) as json list
    */
   handleConfigsByPipelineRetrieve = async (req: express.Request, res: express.Response): Promise<void> => {
-    const pipelineId = parseInt(req.params.id)
+    const pipelineId = parseInt(String(req.query.pipelineId))
     if (isNaN(pipelineId)) {
       res.status(400).send('Pipeline id is not set.')
       return
@@ -54,6 +54,10 @@ export class NotificationConfigEndpoint {
 
     try {
       const config = await this.storageHandler.getById(id)
+      if (config === undefined) {
+        res.status(404).send()
+        return
+      }
       res.status(200).send(config)
     } catch (e) {
       res.status(404).send(`Could not find config with id ${id}`)

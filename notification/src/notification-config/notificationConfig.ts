@@ -1,4 +1,4 @@
-import { hasProperty, isObject } from '@/validators'
+import { hasProperty, isObject } from '../validators'
 
 export enum NotificationType {
   WEBHOOK = 'WEBHOOK',

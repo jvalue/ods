@@ -3,10 +3,10 @@ import axios from 'axios'
 
 import VM2SandboxExecutor from './condition-evaluation/vm2SandboxExecutor'
 import NotificationExecutor from './notificationExecutor'
-import SlackCallback from '@/notification-execution/notificationCallbacks/slackCallback'
+import SlackCallback from './notificationCallbacks/slackCallback'
 import {
   NotificationConfig, NotificationType, SlackParameter, WebhookParameter
-} from '@/notification-config/notificationConfig'
+} from '../notification-config/notificationConfig'
 
 jest.mock('axios')
 
