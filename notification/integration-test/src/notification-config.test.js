@@ -44,7 +44,7 @@ describe('Notification Service', () => {
       type: 'WEBHOOK',
       pipelineId: 1,
       condition: 'true',
-      parameters: {
+      parameter: {
         url: MOCK_RECEIVER_URL + '/webhook1'
       }
     }
@@ -59,7 +59,7 @@ describe('Notification Service', () => {
     // compare response with initial webhook config
     expect(notificationResponse.body.pipelineId).toEqual(webhookConfig.pipelineId)
     expect(notificationResponse.body.condition).toEqual(webhookConfig.condition)
-    expect(notificationResponse.body.parameters.url).toEqual(webhookConfig.parameters.url)
+    expect(notificationResponse.body.parameters.url).toEqual(webhookConfig.parameter.url)
 
     // PUT / UPDATE
     webhookConfig.pipelineId = 2
@@ -102,7 +102,7 @@ describe('Notification Service', () => {
       type: 'WEBHOOK',
       pipelineId: 879428,
       condition: 'true',
-      parameters: {
+      parameter: {
         url: MOCK_RECEIVER_URL + '/webhook1'
       }
     }
@@ -110,7 +110,7 @@ describe('Notification Service', () => {
       type: 'SLACK',
       pipelineId: webhookConfig.pipelineId,
       condition: 'true',
-      parameters: {
+      parameter: {
         workspaceId: 'workspaceId',
         channelId: 'channelId',
         secret: 'secret'
@@ -143,7 +143,7 @@ describe('Notification Service', () => {
       condition: webhookConfig.condition,
       type: 'WEBHOOK',
       parameters: {
-        url: webhookConfig.url
+        url: webhookConfig.parameter.url
       }
     })
     expect(notificationResponse.body).toContainEqual({

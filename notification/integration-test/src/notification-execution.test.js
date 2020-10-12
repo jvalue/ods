@@ -18,7 +18,7 @@ describe('Notification Service', () => {
       type: 'WEBHOOK',
       pipelineId: 1,
       condition: 'data.value1 > 0',
-      parameters: {
+      parameter: {
         url: MOCK_RECEIVER_URL + '/webhook1'
       }
     }
@@ -58,7 +58,7 @@ describe('Notification Service', () => {
       type: 'WEBHOOK',
       pipelineId: 2,
       condition: 'data.value1 < 0',
-      parameters: {
+      parameter: {
         url: MOCK_RECEIVER_URL + '/webhook2'
       }
     }
@@ -104,7 +104,7 @@ describe('Notification Service', () => {
       type: 'SLACK',
       pipelineId: 3,
       condition: 'typeof data.niceString === "string"',
-      parameters: {
+      parameter: {
         channelId: '12',
         workspaceId: '34',
         secret: '56'
