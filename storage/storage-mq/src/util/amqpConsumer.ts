@@ -44,7 +44,7 @@ export default class AmqpConsumer {
     exchange: string,
     topic: string,
     queueName: string,
-    consumeEvent: (msg: AMQP.ConsumeMessage | null) => void
+    consumeEvent: (msg: AMQP.ConsumeMessage | null) => Promise<void>
   ): Promise<void> {
     if (this.connection === undefined) {
       throw new Error('Consume not possible, AMQP client not initialized.')
@@ -56,7 +56,10 @@ export default class AmqpConsumer {
         exclusive: false
       })
       await channel.bindQueue(q.queue, exchange, topic)
-      await channel.consume(q.queue, consumeEvent)
+      await channel.consume(q.queue, msg => {
+        consumeEvent(msg)
+          .catch(error => console.error(`Failed to handle ${msg?.fields.routingKey ?? 'null'} event`, error))
+      })
     } catch (error) {
       throw new Error(`Error subscribing to exchange ${exchange} under key ${topic}: ${error}`)
     }

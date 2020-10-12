@@ -26,18 +26,16 @@ export class PipelineConfigConsumer {
   }
 
   // use the f = () => {} syntax to access 'this' scope
-  consumeEvent = (msg: AMQP.ConsumeMessage | null): void => {
+  consumeEvent = async (msg: AMQP.ConsumeMessage | null): Promise<void> => {
     if (msg === null) {
       console.debug('Received empty event when listening on pipeline configs - doing nothing')
       return
     }
     console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
     if (msg.fields.routingKey === AMQP_PIPELINE_CONFIG_CREATED_TOPIC) {
-      this.pipelineConfigEventHandler.handleCreation(JSON.parse(msg.content.toString()))
-        .catch(error => console.log('Failed to handle pipeline config creation event', error))
+      await this.pipelineConfigEventHandler.handleCreation(JSON.parse(msg.content.toString()))
     } else if (msg.fields.routingKey === AMQP_PIPELINE_CONFIG_DELETED_TOPIC) {
-      this.pipelineConfigEventHandler.handleDeletion(JSON.parse(msg.content.toString()))
-        .catch(error => console.log('Failed to handle pipeline config deletion event', error))
+      await this.pipelineConfigEventHandler.handleDeletion(JSON.parse(msg.content.toString()))
     } else {
       console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
     }
