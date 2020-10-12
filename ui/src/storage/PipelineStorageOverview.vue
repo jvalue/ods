@@ -58,7 +58,7 @@
                 </v-expansion-panel-header>
                 <v-expansion-panel-content>
                   <storage-item-view
-                    :pipeline-id="pipelineId"
+                    :pipeline-id="entry.pipelineId"
                     :item-id="entry.id"
                   />
                 </v-expansion-panel-content>
@@ -74,13 +74,12 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
+import clipboardCopy from 'clipboard-copy'
 
 import StorageItemView from './StorageItemView.vue'
 
 import { StorageItemMetaData } from './storage-item'
 import * as StorageREST from './storageRest'
-
-import clipboardCopy from 'clipboard-copy'
 
 @Component({
   components: { StorageItemView }
@@ -88,11 +87,11 @@ import clipboardCopy from 'clipboard-copy'
 export default class PipelineStorageOverview extends Vue {
   private data: StorageItemMetaData[] = []
 
-  private pipelineId = ''
+  private pipelineId = 0
 
-  private clipUrl: (content: string) => Promise<void> = clipboardCopy
+  private clipUrl = clipboardCopy
 
-  private getStorageItemUrl (pipelineId: string, itemId: string): string {
+  private getStorageItemUrl (pipelineId: number, itemId: number): string {
     let url = StorageREST.createUrlForItem(pipelineId, itemId)
     if (url.startsWith('/')) {
       url = window.location.origin + url
@@ -100,7 +99,7 @@ export default class PipelineStorageOverview extends Vue {
     return url
   };
 
-  private getLatestStorageItemUrl (pipelineId: string): string {
+  private getLatestStorageItemUrl (pipelineId: number): string {
     let url = StorageREST.createUrlForLatestItem(pipelineId)
     if (url.startsWith('/')) {
       url = window.location.origin + url
@@ -109,11 +108,11 @@ export default class PipelineStorageOverview extends Vue {
   }
 
   private created (): void {
-    this.pipelineId = this.$route.params.storageId
+    this.pipelineId = parseInt(this.$route.params.storageId)
     this.fetchMetaData(this.pipelineId)
   }
 
-  private async fetchMetaData (pipelineId: string): Promise<void> {
+  private async fetchMetaData (pipelineId: number): Promise<void> {
     this.data = await StorageREST.getStoredItems(pipelineId)
   }
 }

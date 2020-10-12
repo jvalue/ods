@@ -29,7 +29,7 @@
       max="24"
       @change="formChanged"
     >
-      <template v-slot:prepend>
+      <template #prepend>
         <v-icon
           color="error"
           @click="dialogIntervalHours--; formChanged()"
@@ -38,7 +38,7 @@
         </v-icon>
       </template>
 
-      <template v-slot:append>
+      <template #append>
         <v-icon
           color="primary"
           @click="dialogIntervalHours++; formChanged()"
@@ -61,7 +61,7 @@
       max="60"
       @change="formChanged"
     >
-      <template v-slot:prepend>
+      <template #prepend>
         <v-icon
           color="error"
           @click="dialogIntervalMinutes--; formChanged()"
@@ -70,7 +70,7 @@
         </v-icon>
       </template>
 
-      <template v-slot:append>
+      <template #append>
         <v-icon
           color="primary"
           @click="dialogIntervalMinutes++; formChanged()"

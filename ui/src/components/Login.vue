@@ -20,7 +20,7 @@
       :nudge-width="200"
       offset-x
     >
-      <template v-slot:activator="{ on }">
+      <template #activator="{ on }">
         <v-btn
           v-show="isAuthenticated"
           text

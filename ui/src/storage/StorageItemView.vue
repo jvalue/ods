@@ -17,7 +17,7 @@
             <v-list-item-action>
               <v-btn
                 icon
-                @click="clipboardCopy(storageItemUrl)"
+                @click="clipUrl(storageItemUrl)"
               >
                 <v-icon color="grey lighten-1">
                   mdi mdi-content-copy
@@ -40,22 +40,22 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Prop } from 'vue-property-decorator'
+import clipboardCopy from 'clipboard-copy'
 
 import { StorageItem } from './storage-item'
 import * as StorageREST from './storageRest'
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import clipboardCopy from 'clipboard-copy'
 
 @Component({})
 export default class PipelineStorageOverview extends Vue {
   private item: StorageItem | null = null
 
-  @Prop()
-  private readonly pipelineId!: string
+  private clipUrl = clipboardCopy
 
   @Prop()
-  private readonly itemId!: string
+  private readonly pipelineId!: number
+
+  @Prop()
+  private readonly itemId!: number
 
   private mounted (): void {
     this.fetchData()

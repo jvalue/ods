@@ -1,58 +1,60 @@
 {
-    "name": "webclient",
-    "version": "0.1.0",
-    "scripts": {
-        "serve": "vue-cli-service serve",
-        "build": "vue-cli-service build",
-        "lint": "./node_modules/.bin/eslint src --ext .ts,.js,.vue --fix",
-        "test:unit": "vue-cli-service test:unit"
-    },
-    "dependencies": {
-        "axios": "^0.19.2",
-        "clipboard-copy": "^3.1.0",
-        "vue": "^2.6.11",
-        "vue-class-component": "^7.2.3",
-        "vue-monaco": "^1.2.1",
-        "vue-property-decorator": "^8.4.2",
-        "vue-router": "^3.3.2",
-        "vuetify": "^2.2.33",
-        "vuex": "^3.4.0",
-        "vuex-class": "^0.3.2"
-    },
-    "devDependencies": {
-        "@mdi/font": "^4.9.95",
-        "@types/jest": "^24.9.1",
-        "@types/node": "^12.12.47",
-        "@typescript-eslint/eslint-plugin": "^2.34.0",
-        "@typescript-eslint/parser": "^2.34.0",
-        "@vue/cli-plugin-babel": "^4.4.1",
-        "@vue/cli-plugin-typescript": "^4.4.1",
-        "@vue/cli-plugin-unit-jest": "^4.4.1",
-        "@vue/cli-service": "^4.4.1",
-        "@vue/eslint-config-typescript": "^5.0.2",
-        "@vue/test-utils": "1.0.0-beta.30",
-        "babel-core": "7.0.0-bridge.0",
-        "eslint": "^6.8.0",
-        "eslint-config-standard": "^14.1.1",
-        "eslint-plugin-import": "^2.21.2",
-        "eslint-plugin-node": "^10.0.0",
-        "eslint-plugin-promise": "^4.2.1",
-        "eslint-plugin-standard": "^4.0.1",
-        "eslint-plugin-vue": "^6.2.2",
-        "jest-html-reporter": "^2.8.2",
-        "monaco-editor-webpack-plugin": "^1.9.0",
-        "sass": "^1.26.8",
-        "ts-jest": "^24.3.0",
-        "typescript": "^3.9.5",
-        "vue-template-compiler": "^2.6.11",
-        "vuex-module-decorators": "^0.11.0"
-    },
-    "homepage": "https://github.com/jvalue/open-data-service",
-    "licenses": [
-        {
-            "type": "GNU Affero General Public License 3",
-            "url": "https://opensource.org/licenses/AGPL-3.0"
-        }
-    ],
-    "repository": "https://github.com/jvalue/open-data-service.git"
+  "name": "webclient",
+  "version": "0.1.0",
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "eslint src --ext .ts,.js,.vue --fix",
+    "lint-ci": "eslint src --ext .ts,.js,.vue --max-warnings=0",
+    "test:unit": "vue-cli-service test:unit"
+  },
+  "dependencies": {
+    "axios": "^0.19.2",
+    "clipboard-copy": "^3.1.0",
+    "vue": "^2.6.12",
+    "vue-class-component": "^7.2.3",
+    "vue-monaco": "^1.2.1",
+    "vue-property-decorator": "^8.4.2",
+    "vue-router": "^3.3.2",
+    "vuetify": "^2.2.33",
+    "vuex": "^3.4.0",
+    "vuex-class": "^0.3.2"
+  },
+  "devDependencies": {
+    "@mdi/font": "^4.9.95",
+    "@types/jest": "^24.9.1",
+    "@types/node": "^12.12.47",
+    "@typescript-eslint/eslint-plugin": "^4.4.1",
+    "@typescript-eslint/parser": "^4.4.1",
+    "@vue/cli-plugin-babel": "^4.5.7",
+    "@vue/cli-plugin-typescript": "^4.5.7",
+    "@vue/cli-plugin-unit-jest": "^4.5.7",
+    "@vue/cli-service": "^4.5.7",
+    "@vue/eslint-config-typescript": "^7.0.0",
+    "@vue/test-utils": "1.1.0",
+    "babel-core": "7.0.0-bridge.0",
+    "eslint": "^7.11.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-config-standard-with-typescript": "19.0.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "eslint-plugin-vue": "^7.0.1",
+    "jest-html-reporter": "^2.8.2",
+    "monaco-editor-webpack-plugin": "^1.9.0",
+    "sass": "^1.26.8",
+    "ts-jest": "^24.3.0",
+    "typescript": "^3.9.7",
+    "vue-template-compiler": "^2.6.12",
+    "vuex-module-decorators": "^0.11.0"
+  },
+  "homepage": "https://github.com/jvalue/open-data-service",
+  "licenses": [
+    {
+      "type": "GNU Affero General Public License 3",
+      "url": "https://opensource.org/licenses/AGPL-3.0"
+    }
+  ],
+  "repository": "https://github.com/jvalue/open-data-service.git"
 }

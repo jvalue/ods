@@ -1,7 +1,7 @@
 export interface UserProfile {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
+  firstName?: string
+  lastName?: string
+  email?: string
 }
 
 const currentUserProfile: UserProfile = {

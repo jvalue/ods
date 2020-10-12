@@ -46,16 +46,16 @@
           slot="progress"
           indeterminate
         />
-        <template v-slot:[`item.id`]="{ item }">
+        <template #[`item.id`]="{ item }">
           {{ item.id }}
         </template>
-        <template v-slot:[`item.type`]="{ item }">
+        <template #[`item.type`]="{ item }">
           {{ item.type }}
         </template>
-        <template v-slot:[`item.condition`]="{ item }">
+        <template #[`item.condition`]="{ item }">
           {{ item.condition }}
         </template>
-        <template v-slot:[`item.action`]="{ item }">
+        <template #[`item.action`]="{ item }">
           <v-btn
             depressed
             small

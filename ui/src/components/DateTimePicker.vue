@@ -7,7 +7,7 @@
     width="290px"
     persistant
   >
-    <template v-slot:activator="{ on }">
+    <template #activator="{ on }">
       <v-text-field
         v-model="dateTimeString"
         label="Time for First Execution"
