@@ -59,12 +59,15 @@ describe('Test 1: Create non-periodic pipeline without transformation', () => {
 
   test('Create notification', async () => {
     const notificationConfig = {
+      type: 'WEBHOOK',
+      pipelineId: pipelineId,
       condition: 'data.one === 1',
-      url: MOCK_SERVER_WITHIN_DOCKER + '/notifications/test1',
-      pipelineId: pipelineId
+      parameter: {
+        url: MOCK_SERVER_WITHIN_DOCKER + '/notifications/test1'
+      }
     }
 
-    const response = await request(NOTIFICATION_URL).post('/config/webhook').send(notificationConfig)
+    const response = await request(NOTIFICATION_URL).post('/configs').send(notificationConfig)
     expect(response.status).toEqual(201)
     expect(response.body.id).toBeGreaterThan(0)
   }, TIMEOUT)
