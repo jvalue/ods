@@ -36,13 +36,13 @@ export default class NotificationExecutor {
 
     switch (config.type) {
       case NotificationType.WEBHOOK:
-        await this.executeWebhook(config.parameter as WebhookParameter, dataLocation, message)
+        await this.executeWebhook(config.parameter, dataLocation, message)
         return
       case NotificationType.SLACK:
-        await this.executeSlack(config.parameter as SlackParameter, dataLocation, message)
+        await this.executeSlack(config.parameter, dataLocation, message)
         return
       case NotificationType.FCM:
-        await this.executeFCM(config.parameter as FirebaseParameter, dataLocation, message)
+        await this.executeFCM(config.parameter, dataLocation, message)
     }
   }
 

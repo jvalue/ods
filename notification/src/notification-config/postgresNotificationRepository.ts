@@ -2,7 +2,7 @@ import { PoolConfig, QueryResult } from 'pg'
 import PostgresRepository from '../postgresRepository'
 import { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB } from '../env'
 import { NotificationRepository } from './notificationRepository'
-import { NotificationConfig, NotificationParameter, NotificationType } from './notificationConfig'
+import { isValidNotificationConfig, NotificationConfig } from './notificationConfig'
 
 const TABLE_NAME = 'Notification'
 
@@ -28,24 +28,7 @@ interface DatabaseNotification {
   pipelineId: string
   condition: string
   type: string
-  parameter: DatabaseSlackParameter | DatabaseWebhookParameter | DatabaseFirebaseParameter
-}
-
-export interface DatabaseSlackParameter {
-  workspaceId: string
-  channelId: string
-  secret: string
-}
-
-export interface DatabaseWebhookParameter {
-  url: string
-}
-
-export interface DatabaseFirebaseParameter {
-  projectId: string
-  clientEmail: string
-  privateKey: string
-  topic: string
+  parameter: object
 }
 
 export class PostgresNotificationRepository implements NotificationRepository {
@@ -77,19 +60,19 @@ export class PostgresNotificationRepository implements NotificationRepository {
   async getForPipeline (pipelineId: number): Promise<NotificationConfig[]> {
     const resultSet: QueryResult<DatabaseNotification> =
       await this.postgresRepository.executeQuery(GET_NOTIFICATION_BY_PIPELINEID_STATEMENT, [pipelineId])
-    return this.toNotifications(resultSet)
+    return this.deserializeNotifications(resultSet)
   }
 
   async getById (id: number): Promise<NotificationConfig | undefined> {
     const resultSet: QueryResult<DatabaseNotification> =
       await this.postgresRepository.executeQuery(GET_NOTIFICATION_STATEMENT, [id])
-    return this.toNotifications(resultSet)[0]
+    return this.deserializeNotifications(resultSet)[0]
   }
 
   async getAll (): Promise<NotificationConfig[]> {
     const resultSet: QueryResult<DatabaseNotification> =
       await this.postgresRepository.executeQuery(GET_ALL_NOTIFICATIONS_STATEMENT, [])
-    return this.toNotifications(resultSet)
+    return this.deserializeNotifications(resultSet)
   }
 
   async create (config: NotificationConfig): Promise<NotificationConfig> {
@@ -99,7 +82,7 @@ export class PostgresNotificationRepository implements NotificationRepository {
     const resultSet: QueryResult<DatabaseNotification> =
       await this.postgresRepository
         .executeQuery(INSERT_NOTIFICATION_STATEMENT, values)
-    const notifications = this.toNotifications(resultSet)
+    const notifications = this.deserializeNotifications(resultSet)
     if (notifications.length === 0) {
       throw Error(`Could not create notification config: ${JSON.stringify(config)}`)
     }
@@ -114,7 +97,7 @@ export class PostgresNotificationRepository implements NotificationRepository {
     const resultSet: QueryResult<DatabaseNotification> =
       await this.postgresRepository
         .executeQuery(UPDATE_NOTIFICATION_STATEMENT, values)
-    const notifications = this.toNotifications(resultSet)
+    const notifications = this.deserializeNotifications(resultSet)
     if (notifications.length === 0) {
       throw Error(`Could not update notification config: ${JSON.stringify(config)}`)
     }
@@ -135,34 +118,21 @@ export class PostgresNotificationRepository implements NotificationRepository {
     return JSON.stringify(data).replace("'", "''")
   }
 
-  private toNotifications (resultSet: QueryResult<DatabaseNotification>): NotificationConfig[] {
+  private deserializeNotifications (resultSet: QueryResult<DatabaseNotification>): NotificationConfig[] {
     const contents: DatabaseNotification[] = resultSet.rows
-    return contents.map(x => {
-      const notificationType: NotificationType = NotificationType[x.type as keyof typeof NotificationType]
-      let parameter: NotificationParameter
-      switch (notificationType) {
-        case NotificationType.WEBHOOK:
-          parameter = { ...x.parameter as DatabaseWebhookParameter }
-          break
-        case NotificationType.SLACK:
-          parameter = { ...x.parameter as DatabaseSlackParameter }
-          break
-        case NotificationType.FCM:
-          parameter = { ...x.parameter as DatabaseFirebaseParameter }
-          break
-        default:
-          throw Error(
-            `Could not load notification type ${JSON.stringify(notificationType)} from database - type unknown!`
-          )
-      }
-
+    const notificationsUntyped = contents.map(x => {
       return {
         ...x,
         id: parseInt(x.id),
-        pipelineId: parseInt(x.pipelineId),
-        type: notificationType,
-        parameter: parameter
+        pipelineId: parseInt(x.pipelineId)
       }
+    })
+
+    return notificationsUntyped.map(x => {
+      if (!isValidNotificationConfig(x)) {
+        throw new Error(`Could not parse notification config from database: ${JSON.stringify(x)}`)
+      }
+      return x
     })
   }
 }

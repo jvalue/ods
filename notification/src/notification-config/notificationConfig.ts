@@ -6,15 +6,16 @@ export enum NotificationType {
   FCM = 'FCM'
 }
 
-export interface NotificationConfig {
+export interface NotificationBase {
   id: number
   pipelineId: number
   condition: string
-  type: NotificationType
-  parameter: NotificationParameter
 }
 
-export type NotificationParameter = SlackParameter | WebhookParameter | FirebaseParameter
+export interface SlackNotification extends NotificationBase {
+  type: NotificationType.SLACK
+  parameter: SlackParameter
+}
 
 export interface SlackParameter {
   workspaceId: string
@@ -22,8 +23,18 @@ export interface SlackParameter {
   secret: string
 }
 
+export interface WebhookNotification extends NotificationBase {
+  type: NotificationType.WEBHOOK
+  parameter: WebhookParameter
+}
+
 export interface WebhookParameter {
   url: string
+}
+
+export interface FirebaseNotification extends NotificationBase {
+  type: NotificationType.FCM
+  parameter: FirebaseParameter
 }
 
 export interface FirebaseParameter {
@@ -32,6 +43,8 @@ export interface FirebaseParameter {
   privateKey: string
   topic: string
 }
+export type NotificationParameter = SlackParameter | WebhookParameter | FirebaseParameter
+export type NotificationConfig = SlackNotification | WebhookNotification | FirebaseNotification
 
 /**
  * Evaluates the validity of the NotificationConfig (provided by argument),
