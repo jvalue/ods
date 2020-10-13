@@ -76,7 +76,7 @@ export const isValidNotificationConfig = (config: unknown): config is Notificati
 /**
  * Evaluates the validity of the WebhookParameter (provided by argument),
  * by checking for the field variables.
- * @param conf WebhookParameter to be validated
+ * @param parameters WebhookParameter to be validated
  * @returns true, if object is a valid, false else
  */
 export const isValidWebhookParameter = (parameters: unknown): parameters is WebhookParameter => {
@@ -86,7 +86,7 @@ export const isValidWebhookParameter = (parameters: unknown): parameters is Webh
 /**
  * Evaluates the validity of the SlackParameter (provided by argument),
  * by checking for the field variables.
- * @param conf SlackParameter to be validated
+ * @param parameters SlackParameter to be validated
  * @returns true, if object is a valid, false else
  */
 export const isValidSlackParameter = (parameters: unknown): parameters is SlackParameter => {
@@ -99,7 +99,7 @@ export const isValidSlackParameter = (parameters: unknown): parameters is SlackP
 /**
  * Evaluates the validity of the FirebaseParameter (provided by argument),
  * by checking for the field variables.
- * @param conf FirebaseParameter to be validated
+ * @param parameters FirebaseParameter to be validated
  * @returns true, if object is a valid, false else
  */
 export const isValidFirebaseParameter = (parameters: unknown): parameters is FirebaseParameter => {
