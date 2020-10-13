@@ -25,15 +25,14 @@ export class PipelineExecutionConsumer {
   }
 
   // use the f = () => {} syntax to access 'this' scope
-  consumeEvent = (msg: AMQP.ConsumeMessage | null): void => {
+  consumeEvent = async (msg: AMQP.ConsumeMessage | null): Promise<void> => {
     if (msg === null) {
       console.debug('Received empty event when listening on pipeline configs - doing nothing')
       return
     }
     console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
     if (msg.fields.routingKey === AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC) {
-      this.pipelineExecutionEventHandler.handleSuccess(JSON.parse(msg.content.toString()))
-        .catch(error => console.log('Failed to handle pipeline execution success event', error))
+      await this.pipelineExecutionEventHandler.handleSuccess(JSON.parse(msg.content.toString()))
     } else {
       console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
     }
