@@ -591,6 +591,7 @@ jobs:
       - name: Deploy to k8s
         run: |
           ./deployment/mk-kubeconfig.sh
-          ./kubectl --kubeconfig=kube.config version
-          ./kubectl config --kubeconfig=kube.config view
-          ./kubectl apply -k deployment/kustomize
+          cat kube.config
+          ./kubectl version --kubeconfig=./kube.config
+          ./kubectl config view --kubeconfig=./kube.config
+          ./kubectl apply -k deployment/kustomize --kubeconfig=kube.config
