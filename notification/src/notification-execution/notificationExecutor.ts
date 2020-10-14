@@ -54,8 +54,13 @@ export default class NotificationExecutor {
       message: message,
       timestamp: new Date(Date.now())
     }
-    await axios.post(configParameter.url, payload)
-    console.debug(`Triggered webhook on ${configParameter.url}`)
+
+    try {
+      const response = await axios.post(configParameter.url, payload)
+      console.debug(`Triggered notification (webhook) with status ${response.status} on ${configParameter.url}`)
+    } catch (e: unknown) {
+      console.info(`Notification (webhook) on ${configParameter.url} failed: ${JSON.stringify(e)}`)
+    }
   }
 
   private async executeSlack (configParameter: SlackParameter, dataLocation: string, message: string): Promise<void> {
@@ -64,8 +69,13 @@ export default class NotificationExecutor {
     }
     const url =
       `${SLACK_BASE_URL}/${configParameter.workspaceId}/${configParameter.channelId}/${configParameter.secret}`
-    await axios.post(url, payload)
-    console.log(`Triggered slack notification on ${url}`)
+
+    try {
+      const response = await axios.post(url, payload)
+      console.debug(`Triggered notification (slack) with status ${response.status} on ${url}`)
+    } catch (e: unknown) {
+      console.info(`Notification (slack) on ${url} failed: ${JSON.stringify(e)}`)
+    }
   }
 
   private async executeFCM (configParameter: FirebaseParameter, dataLocation: string, message: string): Promise<void> {
@@ -93,7 +103,12 @@ export default class NotificationExecutor {
       },
       topic: configParameter.topic
     }
-    await firebase.messaging(app).send(firebaseMessage)
-    console.log(`Triggered firebase notification: ${JSON.stringify(firebaseMessage)}.`)
+
+    try {
+      await firebase.messaging(app).send(firebaseMessage)
+      console.debug(`Triggered notification (firebase) successfully on project ${configParameter.projectId}`)
+    } catch (e: unknown) {
+      console.info(`Notification (firebase) on project ${configParameter.projectId} failed: ${JSON.stringify(e)}`)
+    }
   }
 }
