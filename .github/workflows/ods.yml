@@ -587,17 +587,11 @@ jobs:
         run: |
           curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
           chmod +x ./kubectl
-      - name: Setup k8s
+          
+      - name: Deploy to k8s
+        env:
+          KUBECONFIG: $HOME/.kube
         run: |
           ./deployment/mk-kubeconfig.sh
-
-      - uses: azure/k8s-set-context@v1
-        with:
-          method: kubeconfig
-          kubeconfig: ./kube.config
-        id: setcontext
-
-      - name: Deploy to k8s
-        run: |
           ./kubectl version
           ./kubectl apply -k deployment/kustomize
