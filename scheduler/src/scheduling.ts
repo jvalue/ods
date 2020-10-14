@@ -12,7 +12,6 @@ import { sleep } from './sleep'
 import { MAX_TRIGGER_RETRIES } from './env'
 
 const allJobs: Map<number, ExecutionJob> = new Map() // datasourceId -> job
-let currentEventId: number
 
 /**
  * Initially receive all datasources from adapter service and start them up.
@@ -37,7 +36,6 @@ export async function initializeJobsWithRetry (retries = 30, retryBackoff = 3000
 
 async function initializeJobs (): Promise<void> {
   console.log('Starting initialization scheduler')
-  currentEventId = await AdapterClient.getLatestEventId()
 
   const datasources: DatasourceConfig[] = await AdapterClient.getAllDatasources()
 
@@ -49,31 +47,6 @@ async function initializeJobs (): Promise<void> {
   }
 }
 
-/**
- * Regularly get deltas for pipeline configurations and apply changes.
- */
-export async function updateDatasources (): Promise<void> {
-  try {
-    const nextEventId: number = await AdapterClient.getLatestEventId()
-
-    const events: DatasourceEvent[] = await AdapterClient.getEventsAfter(currentEventId)
-    if (events.length > 0) {
-      console.log(`Applying ${events.length} updates from adapter service:`)
-    }
-
-    for (const event of events) {
-      await applyChanges(event)
-    }
-
-    currentEventId = nextEventId
-  } catch (e) {
-    if (e.code === 'ECONNREFUSED' || e.code === 'ENOTFOUND') {
-      console.error('Failed to sync with adapter service on update.')
-    } else {
-      console.error('update failed')
-    }
-  }
-}
 
 async function applyChanges (event: DatasourceEvent): Promise<void> {
   console.log(event)
