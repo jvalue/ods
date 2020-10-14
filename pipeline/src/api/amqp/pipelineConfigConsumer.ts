@@ -50,20 +50,22 @@ export class PipelineConfigConsumer {
     })
     await channel.bindQueue(q.queue, AMQP_DATASOURCE_EXECUTION_EXCHANGE, AMQP_DATASOURCE_EXECUTION_TOPIC)
 
-    await channel.consume(q.queue, this.consumeEvent)
+    await channel.consume(q.queue, msg => {
+      this.consumeEvent(msg)
+        .catch(error => console.error(`Failed to handle ${msg?.fields.routingKey ?? 'null'} event`, error))
+    })
     console.info('Successfully initialized AMQP queue')
   }
 
   // use the f = () => {} syntax to access this
-  consumeEvent = (msg: AMQP.ConsumeMessage | null): void => {
+  consumeEvent = async (msg: AMQP.ConsumeMessage | null): Promise<void> => {
     if (msg === null) {
       console.debug('Received empty event when listening on transformation executions - doing nothing')
     } else {
       console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
       if (msg.fields.routingKey === AMQP_DATASOURCE_EXECUTION_SUCCESS_TOPIC) {
         const triggerRequest: PipelineConfigTriggerRequest = JSON.parse(msg.content.toString())
-        this.pipelineManager.triggerConfig(triggerRequest.datasourceId, JSON.parse(triggerRequest.data))
-          .catch(error => console.log('Failed to handle datasource execution success event', error))
+        await this.pipelineManager.triggerConfig(triggerRequest.datasourceId, JSON.parse(triggerRequest.data))
       } else {
         console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
       }

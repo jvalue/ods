@@ -14,7 +14,7 @@ async function consumeAmqpMsg (connection, exchange, topic, queue, publishedEven
   const q = await channel.assertQueue(queue)
   await channel.bindQueue(q.queue, exchange, topic)
 
-  await channel.consume(q.queue, async (msg) => {
+  await channel.consume(q.queue, msg => {
     const event = JSON.parse(msg.content.toString())
     const routingKey = msg.fields.routingKey
     if (!publishedEvents.get(routingKey)) {

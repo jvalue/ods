@@ -22,15 +22,15 @@ export default class PostgresRepository {
 
     let lastError: Error | undefined
     for (let i = 1; i <= retries; i++) {
-      console.info(`Attempting to connect to database on URL ${poolConfig.host}:${poolConfig.port} (${i}/${retries})`)
       try {
         return await this.connect(poolConfig)
-      } catch (err) {
-        lastError = err
+      } catch (error) {
+        lastError = error
+        console.info(`Error connecting to database (${i}/${retries})`)
       }
       await sleep(backoffMs)
     }
-    throw lastError
+    throw lastError ?? new Error('Failed to connect to database')
   }
 
   private async connect (poolConfig: PoolConfig): Promise<Pool> {
@@ -42,15 +42,13 @@ export default class PostgresRepository {
       console.info('Successfully established database connection')
       return connectionPool
     } finally {
-      if (client) {
-        client.release()
-      }
+      client?.release()
     }
   }
 
   public async executeQuery (query: string, args: unknown[]): Promise<QueryResult> {
     console.debug(`Executing query "${query}" with values ${JSON.stringify(args)}`)
-    if (!this.connectionPool) {
+    if (this.connectionPool === undefined) {
       throw new Error('No connection pool available')
     }
 
@@ -64,9 +62,7 @@ export default class PostgresRepository {
       console.error(`Failed to execute query: ${error}`)
       throw error
     } finally {
-      if (client) {
-        client.release()
-      }
+      client?.release()
     }
   }
 }

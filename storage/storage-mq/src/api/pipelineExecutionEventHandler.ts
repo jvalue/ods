@@ -8,17 +8,17 @@ export default class PipelineExecutionEventHandler {
   }
 
   async handleSuccess (pipelineExecutedEvent: PipelineExecutedEvent): Promise<void> {
-    await this.contentRepository.saveContent(pipelineExecutedEvent.pipelineId, {
+    await this.contentRepository.saveContent(pipelineExecutedEvent.pipelineId.toString(), {
       pipelineId: pipelineExecutedEvent.pipelineId,
-      timestamp: pipelineExecutedEvent.timestamp,
-      data: pipelineExecutedEvent.data,
-      id: undefined
+      timestamp: pipelineExecutedEvent.timestamp ?? new Date(),
+      data: pipelineExecutedEvent.data
     })
   }
 }
 
 export interface PipelineExecutedEvent {
-  pipelineId: string
-  timestamp: Date
-  data: object
+  pipelineId: number
+  pipelineName: string
+  data: unknown
+  timestamp?: Date
 }

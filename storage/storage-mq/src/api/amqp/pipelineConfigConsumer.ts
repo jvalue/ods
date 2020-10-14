@@ -11,17 +11,13 @@ import {
 } from '../../env'
 
 export class PipelineConfigConsumer {
-  private consumer: AmqpConsumer
-  private pipelineConfigEventHandler: PipelineConfigEventHandler
-
-  constructor (pipelineConfigEventHandler: PipelineConfigEventHandler, consumer: AmqpConsumer) {
-    this.pipelineConfigEventHandler = pipelineConfigEventHandler
-    this.consumer = consumer
-  }
+  constructor (
+    private readonly pipelineConfigEventHandler: PipelineConfigEventHandler,
+    private readonly consumer: AmqpConsumer) {}
 
   async init (retries: number, msBackoff: number): Promise<void> {
     await this.consumer.init(AMQP_URL, retries, msBackoff)
-    return this.consumer.consume(
+    await this.consumer.consume(
       AMQP_PIPELINE_CONFIG_EXCHANGE,
       AMQP_PIPELINE_CONFIG_TOPIC,
       AMQP_PIPELINE_CONFIG_QUEUE,
@@ -31,7 +27,7 @@ export class PipelineConfigConsumer {
 
   // use the f = () => {} syntax to access 'this' scope
   consumeEvent = async (msg: AMQP.ConsumeMessage | null): Promise<void> => {
-    if (!msg) {
+    if (msg === null) {
       console.debug('Received empty event when listening on pipeline configs - doing nothing')
       return
     }

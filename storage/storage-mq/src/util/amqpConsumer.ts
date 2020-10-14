@@ -6,18 +6,19 @@ export default class AmqpConsumer {
   private connection?: AMQP.Connection
 
   public async init (amqpUrl: string, retries: number, msBackoff: number): Promise<void> {
-    let lastError: Error | undefined
-    for (let i = 0; i <= retries; i++) {
+    for (let i = 1; i <= retries; i++) {
       try {
         this.connection = await this.connect(amqpUrl)
         return
       } catch (error) {
+        if (i >= retries) {
+          console.error(`Could not establish connection to AMQP Broker (${amqpUrl})`)
+          throw error
+        }
         console.error(`Error connecting to AMQP (${i}/${retries})`)
-        lastError = error
       }
       await sleep(msBackoff)
     }
-    throw lastError
   }
 
   private async connect (amqpUrl: string): Promise<AMQP.Connection> {
@@ -26,7 +27,7 @@ export default class AmqpConsumer {
     return connection
   }
 
-  private initChannel = async (connection: AMQP.Connection, exchange: string): Promise<AMQP.Channel> => {
+  private async initChannel (connection: AMQP.Connection, exchange: string): Promise<AMQP.Channel> {
     try {
       const channel = await connection.createChannel()
       await channel.assertExchange(exchange, 'topic', {
@@ -43,9 +44,9 @@ export default class AmqpConsumer {
     exchange: string,
     topic: string,
     queueName: string,
-    consumeEvent: (msg: AMQP.ConsumeMessage | null) => void
+    consumeEvent: (msg: AMQP.ConsumeMessage | null) => Promise<void>
   ): Promise<void> {
-    if (!this.connection) {
+    if (this.connection === undefined) {
       throw new Error('Consume not possible, AMQP client not initialized.')
     }
 
@@ -55,7 +56,10 @@ export default class AmqpConsumer {
         exclusive: false
       })
       await channel.bindQueue(q.queue, exchange, topic)
-      await channel.consume(q.queue, consumeEvent)
+      await channel.consume(q.queue, msg => {
+        consumeEvent(msg)
+          .catch(error => console.error(`Failed to handle ${msg?.fields.routingKey ?? 'null'} event`, error))
+      })
     } catch (error) {
       throw new Error(`Error subscribing to exchange ${exchange} under key ${topic}: ${error}`)
     }
