@@ -589,9 +589,8 @@ jobs:
           chmod +x ./kubectl
           
       - name: Deploy to k8s
-        env:
-          KUBECONFIG: $HOME/.kube
         run: |
           ./deployment/mk-kubeconfig.sh
-          ./kubectl version
+          ./kubectl --kubeconfig=kube.config version
+          ./kubectl config --kubeconfig=kube.config view
           ./kubectl apply -k deployment/kustomize

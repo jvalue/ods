@@ -20,6 +20,8 @@ users:
     token: ${K8S_SERVICEACCOUNT_TOKEN}
 EOF
 
+chmod -R 600 kube.config
+
 if [ -f kube.config ]; then
     echo "kubctl config generated"
 else
