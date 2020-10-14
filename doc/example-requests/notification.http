@@ -25,6 +25,37 @@ Content-Type: application/json
   }
 }
 
+### Save notification firebase config
+POST {{baseURL}}/configs  HTTP/1.1
+Content-Type: application/json
+
+{
+  "pipelineId": 17,
+  "condition": "true",
+  "type": "FCM",
+  "parameter": {
+    "projectId": "projectId",
+    "clientEmail": "clientEmail",
+    "privateKey": "privateKey",
+    "topic": "topic"
+  }
+}
+
+### Save notification slack config
+POST {{baseURL}}/configs  HTTP/1.1
+Content-Type: application/json
+
+{
+  "pipelineId": 17,
+  "condition": "true",
+  "type": "SLACK",
+  "parameter": {
+    "workspaceId": "workspaceId",
+    "channelId": "channelId",
+    "secret": "secret"
+  }
+}
+
 ### Get notification config
 GET {{baseURL}}/configs/1  HTTP/1.1
 Content-Type: application/json
