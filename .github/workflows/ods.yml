@@ -601,5 +601,4 @@ jobs:
         run: |
           ./deployment/mk-kubeconfig.sh
           ./kubectl version --kubeconfig kube.config
-          ./kubectl config view --kubeconfig kube.config
           ./kubectl apply -k deployment/kustomize --kubeconfig kube.config
