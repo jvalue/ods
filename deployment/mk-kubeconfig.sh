@@ -3,7 +3,8 @@ cat > kube.config <<EOF
 apiVersion: v1
 clusters:
 - cluster:
-    certificate-authority-data: ${K8S_CLUSTER_CERTIFICATE_AUTHORITY_DATA}
+    certificate-authority-data: |-
+      ${K8S_CLUSTER_CERTIFICATE_AUTHORITY_DATA}
     server: ${K8S_CLUSTER_SERVER}
   name: ods-deployment-cluster
 contexts:
