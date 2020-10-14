@@ -587,10 +587,19 @@ jobs:
         run: |
           curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
           chmod +x ./kubectl
-          
+
+      - name: Setup k8s
+        env:
+          K8S_CLUSTER_CERTIFICATE_AUTHORITY_DATA: ${{ secrets.K8S_SERVICEACCOUNT_TOKEN }}
+          K8S_CLUSTER_SERVICE: ${{ secrets.K8S_CLUSTER_SERVICE }}
+          K8S_SERVICEACCOUNT_NAME: ${{ secrets.K8S_SERVICEACCOUNT_NAME }}
+          K8S_SERVICEACCOUNT_TOKEN: ${{ secrets.K8S_SERVICEACCOUNT_TOKEN }}
+        run: |
+          ./deployment/mk-kubeconfig.sh
+
       - name: Deploy to k8s
         run: |
           ./deployment/mk-kubeconfig.sh
-          ./kubectl version --kubeconfig kube.config --server $K8S_CLUSTER_SERVER
+          ./kubectl version --kubeconfig kube.config
           ./kubectl config view --kubeconfig kube.config
           ./kubectl apply -k deployment/kustomize --kubeconfig kube.config
