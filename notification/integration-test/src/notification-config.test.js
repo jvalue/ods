@@ -163,5 +163,10 @@ describe('Notification Service', () => {
       .delete(`/configs/${webhookId}`)
       .send()
     expect(notificationResponse.status).toEqual(200)
+
+    notificationResponse = await request(URL)
+      .delete(`/configs/${slackId}`)
+      .send()
+    expect(notificationResponse.status).toEqual(200)
   })
 })
