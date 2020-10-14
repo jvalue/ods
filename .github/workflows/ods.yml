@@ -591,6 +591,6 @@ jobs:
       - name: Deploy to k8s
         run: |
           ./deployment/mk-kubeconfig.sh
-          ./kubectl version --kubeconfig kube.config
+          ./kubectl version --kubeconfig kube.config --server $K8S_CLUSTER_SERVER
           ./kubectl config view --kubeconfig kube.config
           ./kubectl apply -k deployment/kustomize --kubeconfig kube.config
