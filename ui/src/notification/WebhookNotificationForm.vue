@@ -14,7 +14,10 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Emit, PropSync, Watch } from 'vue-property-decorator'
+import { InputValidationRule } from 'vuetify'
+
 import { WebhookNotificationParameters } from './notificationConfig'
+import { isNullOrUndefined } from '../validators'
 
 @Component({ })
 export default class WebhookNotificationForm extends Vue {
@@ -51,7 +54,7 @@ export default class WebhookNotificationForm extends Vue {
     this.emitIsValid()
   }
 
-  private validURL (url: string): true | string {
+  private validURL: InputValidationRule = url => {
     const urlRegex = new RegExp('^(https?:\\/\\/)?' + // protocol
         '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
         '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
@@ -59,7 +62,7 @@ export default class WebhookNotificationForm extends Vue {
         '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
         '(\\#[-a-z\\d_]*)?$', 'i') // fragment locator
 
-    if (!!url && !!url.match(urlRegex)) {
+    if (!isNullOrUndefined(url) && typeof url === 'string' && urlRegex.test(url)) {
       return true
     }
 

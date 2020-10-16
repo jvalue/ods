@@ -71,25 +71,25 @@ const namespace = { namespace: 'auth' }
 
 @Component
 export default class Login extends Vue {
-  private menu = false;
+  private menu = false
 
   @State('isAuth', namespace)
-  private isAuthenticated!: boolean;
+  private isAuthenticated!: boolean
 
   @State('userProfile', namespace)
-  private userProfile!: UserProfile;
+  private userProfile!: UserProfile
 
   @Action('login', namespace)
-  private login!: () => Promise<boolean>;
+  private login!: () => Promise<boolean>
 
   @Action('logout', namespace)
-  private logout!: () => boolean;
+  private logout!: () => boolean
 
   @Action('editProfile', namespace)
-  private editProfile!: () => Promise<boolean>;
+  private editProfile!: () => Promise<boolean>
 
   @Action('init', namespace)
-  private init!: () => Promise<boolean>;
+  private init!: () => Promise<boolean>
 
   private async mounted (): Promise<void> {
     await this.init()

@@ -4,8 +4,8 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "eslint src --ext .ts,.js,.vue --fix",
-    "lint-ci": "eslint src --ext .ts,.js,.vue --max-warnings=0",
+    "lint": "eslint src --fix",
+    "lint-ci": "eslint src --max-warnings=0",
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {

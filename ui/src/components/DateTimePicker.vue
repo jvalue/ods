@@ -71,16 +71,16 @@ import { Prop, Watch } from 'vue-property-decorator'
 @Component
 export default class DateTimePicker extends Vue {
   @Prop({ default: new Date() })
-  private value!: Date;
+  private value!: Date
 
-  private dateTimeString = '';
+  private dateTimeString = ''
 
-  private date = '';
-  private time = '';
+  private date = ''
+  private time = ''
 
-  private pickDateTimeModal = false;
-  private pickDateModal = true;
-  private pickTimeModal = false;
+  private pickDateTimeModal = false
+  private pickDateModal = true
+  private pickTimeModal = false
 
   created (): void {
     this.reset()

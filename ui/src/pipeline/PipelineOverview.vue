@@ -131,11 +131,11 @@ const namespace = { namespace: 'pipeline' }
 
 @Component({})
 export default class PipelineOverview extends Vue {
-  @Action('loadPipelines', namespace) private loadPipelinesAction!: () => void;
-  @Action('deletePipeline', namespace) private deletePipelineAction!: (id: number) => void;
+  @Action('loadPipelines', namespace) private loadPipelinesAction!: () => void
+  @Action('deletePipeline', namespace) private deletePipelineAction!: (id: number) => void
 
-  @State('isLoadingPipelines', namespace) private isLoadingPipelines!: boolean;
-  @State('pipelines', namespace) private pipelines!: Pipeline[];
+  @State('isLoadingPipelines', namespace) private isLoadingPipelines!: boolean
+  @State('pipelines', namespace) private pipelines!: Pipeline[]
 
   private headers = [
     { text: 'Id', value: 'id' },
@@ -143,9 +143,9 @@ export default class PipelineOverview extends Vue {
     { text: 'Pipeline Name', value: 'metadata.displayName', sortable: false }, // sorting to be implemented
     { text: 'Author', value: 'metadata.author', sortable: false },
     { text: 'Action', value: 'action', sortable: false }
-  ];
+  ]
 
-  private search = '';
+  private search = ''
 
   private mounted (): void {
     this.loadPipelinesAction()
@@ -153,14 +153,17 @@ export default class PipelineOverview extends Vue {
 
   private onShowPipelineData (pipeline: Pipeline): void {
     this.$router.push({ name: 'pipeline-storage-overview', params: { storageId: `${pipeline.id}` } })
+      .catch(error => console.log('Failed to route to pipeline-storage-overview', error))
   }
 
   private onCreatePipeline (): void {
     this.$router.push({ name: 'pipeline-new' })
+      .catch(error => console.log('Failed to route to pipeline-new', error))
   }
 
   private onEditPipeline (pipeline: Pipeline): void {
     this.$router.push({ name: 'pipeline-edit', params: { pipelineId: `${pipeline.id}` } })
+      .catch(error => console.log('Failed to route to pipeline-edit', error))
   }
 
   private onDeletePipeline (pipeline: Pipeline): void {
@@ -169,13 +172,14 @@ export default class PipelineOverview extends Vue {
 
   private onNotifications (pipeline: Pipeline): void {
     this.$router.push({ name: 'notification-overview', params: { pipelineId: `${pipeline.id}` } })
+      .catch(error => console.log('Failed to route to notification-overview', error))
   }
 
-  private filterOnlyDisplayName (value: object, search: string, item: Pipeline): boolean {
+  private filterOnlyDisplayName (value: unknown, search: string, item: Pipeline): boolean {
     return value != null &&
           search != null &&
           typeof value === 'string' &&
-          item.metadata.displayName.toLocaleLowerCase().indexOf(search.toLocaleLowerCase()) !== -1
+          item.metadata.displayName.toLocaleLowerCase().includes(search.toLocaleLowerCase())
   }
 }
 </script>

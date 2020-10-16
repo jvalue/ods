@@ -109,11 +109,9 @@ export default class PipelineStorageOverview extends Vue {
 
   private created (): void {
     this.pipelineId = parseInt(this.$route.params.storageId)
-    this.fetchMetaData(this.pipelineId)
-  }
-
-  private async fetchMetaData (pipelineId: number): Promise<void> {
-    this.data = await StorageREST.getStoredItems(pipelineId)
+    StorageREST.getStoredItems(this.pipelineId)
+      .then(items => this.data = items)
+      .catch(error => console.error('Failed to fetch stored items', error))
   }
 }
 </script>

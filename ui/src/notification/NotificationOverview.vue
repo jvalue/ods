@@ -113,10 +113,12 @@ export default class PipelineNotifications extends Vue {
   mounted (): void {
     this.pipelineId = parseInt(this.$route.params.pipelineId)
     this.loadNotifications()
+      .catch(error => console.error('Failed to load notification', error))
   }
 
   private onCreateNotification (): void {
     this.$router.push({ name: 'notification-create', params: { pipelineId: `${this.pipelineId}` } })
+      .catch(error => console.log('Failed to route to notification-create', error))
   }
 
   private onEditNotification (notificationId: string): void {
@@ -124,6 +126,7 @@ export default class PipelineNotifications extends Vue {
       name: 'notification-edit',
       params: { pipelineId: `${this.pipelineId}`, notificationId: `${notificationId}` }
     })
+      .catch(error => console.log('Failed to route to notification-edit', error))
   }
 
   private async onDeleteNotification (notification: NotificationConfig): Promise<void> {
@@ -139,6 +142,7 @@ export default class PipelineNotifications extends Vue {
 
   private onNavigateBack (): void {
     this.$router.push({ name: 'pipeline-overview' })
+      .catch(error => console.log('Failed to route to notification-overview', error))
   }
 }
 </script>

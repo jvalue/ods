@@ -58,12 +58,14 @@ export default class DatasourceEdit extends Vue {
     this.loadDatasourceById(id)
   }
 
-  private async loadDatasourceById (id: number): Promise<void> {
-    this.datasource = await DatasourceREST.getDatasourceById(id)
+  private loadDatasourceById (id: number): void {
+    DatasourceREST.getDatasourceById(id)
+      .then(datasource => this.datasource = datasource)
+      .catch(error => console.error('Failed to load datasource', error))
   }
 
   private async onEdit (): Promise<void> {
-    if (!this.datasource) {
+    if (this.datasource === null) {
       return
     }
 
@@ -77,6 +79,7 @@ export default class DatasourceEdit extends Vue {
 
   private routeToOverview (): void {
     this.$router.push({ name: 'datasource-overview' })
+      .catch(error => console.log('Failed to route to datasource-overview', error))
   }
 }
 </script>

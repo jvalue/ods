@@ -96,7 +96,7 @@ const ONE_MINUTE_IN_MS = 60 * 1000
 
 @Component({ components: { DateTimePicker } })
 export default class TriggerConfig extends Vue {
-  private isValid = true;
+  private isValid = true
 
   private dialogIntervalHours = 1
   private dialogIntervalMinutes = 0
@@ -120,7 +120,7 @@ export default class TriggerConfig extends Vue {
   }
 
   @PropSync('value')
-  private triggerConfig!: Trigger;
+  private triggerConfig!: Trigger
 
   @Watch('triggerConfig')
   private triggerConfigChanged (): void {

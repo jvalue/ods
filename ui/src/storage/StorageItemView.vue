@@ -58,7 +58,9 @@ export default class PipelineStorageOverview extends Vue {
   private readonly itemId!: number
 
   private mounted (): void {
-    this.fetchData()
+    StorageREST.getStoredItem(this.pipelineId, this.itemId)
+      .then(item => this.item = item)
+      .catch(error => console.error('Failed to fetch stored items', error))
   }
 
   private get storageItemUrl (): string {
@@ -79,10 +81,6 @@ export default class PipelineStorageOverview extends Vue {
     }
 
     return window.location.origin + url
-  }
-
-  private async fetchData (): Promise<void> {
-    this.item = await StorageREST.getStoredItem(this.pipelineId, this.itemId)
   }
 }
 </script>
