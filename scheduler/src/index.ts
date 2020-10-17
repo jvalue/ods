@@ -44,5 +44,3 @@ main()
   .catch(error => {
     console.error(`Failed to start notification service: ${error}`)
   })
-
-

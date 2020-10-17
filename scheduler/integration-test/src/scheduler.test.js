@@ -122,11 +122,13 @@ function createDeletionEvent (datasourceId) {
 function createDatasourceEvent (datasourceId, delay, interval) {
   const periodic = (delay === 0)
   const event = {
-    datasourceId,
-    trigger: {
-      firstExecution: jsonDateAfter(delay),
-      periodic,
-      interval
+    datasource: {
+      id: datasourceId,
+      trigger: {
+        firstExecution: jsonDateAfter(delay),
+        periodic,
+        interval
+      }
     }
   }
   return Buffer.from(JSON.stringify(event))
