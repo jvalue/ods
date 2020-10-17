@@ -52,7 +52,7 @@ public class AmqpPublisher {
                     Thread.currentThread().interrupt();
                     throw new RuntimeException(interruptedException);
                 }
-                System.out.println("Message publish failed ("+retries+"). Retrying in "+RabbitConfiguration.AMQP_PUBLISH_BACKOFF);
+                System.err.println("Message publish failed ("+retries+"). Retrying in "+RabbitConfiguration.AMQP_PUBLISH_BACKOFF);
             }
         }
         System.err.println("Sending message "+ message.toString() + " to topic: " + topic + " failed.");
