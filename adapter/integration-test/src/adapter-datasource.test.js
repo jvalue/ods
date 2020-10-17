@@ -47,6 +47,15 @@ describe('Datasource Configuration', () => {
     expect(response.body).toBeInstanceOf(Array)
   }, TIMEOUT)
 
+  test('Should reject datasources with specified id [POST /datasources]', async () => {
+    const configWithId = Object.assign({}, datasourceConfig)
+    configWithId.id = 1
+    const response = await request(ADAPTER_URL)
+      .post('/datasources')
+      .send(configWithId)
+    expect(response.status).toEqual(400)
+  })
+
   test('Should create datasources [POST /datasources]', async () => {
     const response = await request(ADAPTER_URL)
       .post('/datasources')
@@ -57,8 +66,7 @@ describe('Datasource Configuration', () => {
     expect(response.header.location).toContain(response.body.id)
     expect(response.body.adapter).toEqual(datasourceConfig.adapter)
     expect(response.body.trigger).toEqual(datasourceConfig.trigger)
-    expect(response.body.id).toBeDefined()
-    expect(datasourceId).not.toEqual(datasourceConfig.id) // id not under control of client
+    expect(response.body.id).toBeGreaterThan(0)
 
     expect(publishedEvents.get(CONFIG_CREATED_TOPIC)).toContainEqual({
       datasourceId,
@@ -135,7 +143,6 @@ describe('Datasource Configuration', () => {
 })
 
 const datasourceConfig = {
-  id: 12345,
   protocol: {
     type: 'HTTP',
     parameters: {
