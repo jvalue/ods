@@ -66,11 +66,13 @@ public class DatasourceManagerTest {
     }
 
     @Test
-    public void testDeleteDatasource() {
+    public void testDeleteDatasource() throws IOException {
+        Datasource config = mapper.readValue(configFile, Datasource.class);
+        when(datasourceRepository.findById(123L)).thenReturn(Optional.of(config));
         manager.deleteDatasource(123L);
 
         verify(datasourceRepository).deleteById(123L);
-        verify(amqpPublisher).publishDeletion(123L);
+        verify(amqpPublisher).publishDeletion(config);
     }
 
     @Test
@@ -85,7 +87,7 @@ public class DatasourceManagerTest {
 
         verify(datasourceRepository).deleteAll();
         verify(amqpPublisher, times(3))
-                .publishDeletion(anyLong());
+                .publishDeletion(config);
     }
 
 }

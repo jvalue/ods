@@ -8,25 +8,17 @@ import java.util.Objects;
 
 public class DatasourceConfigEvent implements Serializable {
 
-    private final Long datasourceId;
+    private final Datasource datasource;
 
-    public DatasourceConfigEvent(@JsonProperty("datasourceId") Long datasourceId) {
-        this.datasourceId = datasourceId;
-    }
-
-    public DatasourceConfigEvent(Datasource datasource) {
-        this.datasourceId = datasource.getId();
+    public DatasourceConfigEvent(@JsonProperty("datasource") Datasource datasource) {
+        this.datasource = datasource;
     }
 
     @Override
     public String toString() {
         return "DatasourceConfigEvent{" +
-                "datasourceId=" + datasourceId +
+                "datasource=" + datasource +
                 '}';
-    }
-
-    public Long getDatasourceId() {
-        return datasourceId;
     }
 
     @Override
@@ -34,11 +26,15 @@ public class DatasourceConfigEvent implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DatasourceConfigEvent that = (DatasourceConfigEvent) o;
-        return Objects.equals(datasourceId, that.datasourceId);
+        return Objects.equals(datasource, that.datasource);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(datasourceId);
+        return Objects.hash(datasource);
+    }
+
+    public Datasource getDatasource() {
+        return datasource;
     }
 }

@@ -55,7 +55,7 @@ public class DatasourceManager {
   @Transactional
   public void updateDatasource(Long id, Datasource update) throws IllegalArgumentException {
     Datasource existing = datasourceRepository.findById(id)
-      .orElseThrow(() -> new IllegalArgumentException("Datasource with id " + id + " not found."));
+      .orElseThrow(() -> new IllegalArgumentException("Datasource with id " + id + " not found"));
 
     datasourceRepository.save(applyUpdate(existing, update));
     amqpPublisher.publishUpdate(existing);
@@ -64,8 +64,10 @@ public class DatasourceManager {
 
   @Transactional
   public void deleteDatasource(Long id) {
+    Datasource datasource = datasourceRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Datasource with id " + id + " not found"));
     datasourceRepository.deleteById(id);
-    amqpPublisher.publishDeletion(id);
+    amqpPublisher.publishDeletion(datasource);
   }
 
 
@@ -74,7 +76,7 @@ public class DatasourceManager {
     Iterable<Datasource> allDatasourceConfigs = getAllDatasources();
     datasourceRepository.deleteAll();
     for (Datasource ds: allDatasourceConfigs) {
-        amqpPublisher.publishDeletion(ds.getId());
+        amqpPublisher.publishDeletion(ds);
     }
   }
 

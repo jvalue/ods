@@ -60,7 +60,7 @@ describe('Datasource Configuration', () => {
     const response = await request(ADAPTER_URL)
       .post('/datasources')
       .send(datasourceConfig)
-    const datasourceId = response.body.id
+    const datasource = response.body
 
     expect(response.status).toEqual(201)
     expect(response.header.location).toContain(response.body.id)
@@ -69,8 +69,7 @@ describe('Datasource Configuration', () => {
     expect(response.body.id).toBeGreaterThan(0)
 
     expect(publishedEvents.get(CONFIG_CREATED_TOPIC)).toContainEqual({
-      datasourceId,
-      trigger: datasourceConfig.trigger
+      datasource
     })
   }, TIMEOUT)
 
@@ -78,27 +77,27 @@ describe('Datasource Configuration', () => {
     const postResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(datasourceConfig)
-    const datasourceId = postResponse.body.id
+    const datasource = postResponse.body
 
     const originalGetResponse = await request(ADAPTER_URL)
-      .get('/datasources/' + datasourceId)
+      .get('/datasources/' + datasource.id)
 
     const updatedConfig = Object.assign({}, datasourceConfig)
     updatedConfig.protocol.parameters.location = 'http://www.disrespect.com'
 
     const putResponse = await request(ADAPTER_URL)
-      .put('/datasources/' + datasourceId)
+      .put('/datasources/' + datasource.id)
       .send(updatedConfig)
 
     expect(putResponse.status).toEqual(204)
-
+    updatedConfig.id = datasource.id
+    updatedConfig.metadata.creationTimestamp = datasource.metadata.creationTimestamp
     expect(publishedEvents.get(CONFIG_UPDATED_TOPIC)).toContainEqual({
-      datasourceId,
-      trigger: datasourceConfig.trigger
+      datasource: updatedConfig
     })
 
     const updatedGetResponse = await request(ADAPTER_URL)
-      .get('/datasources/' + datasourceId)
+      .get('/datasources/' + datasource.id)
 
     expect(originalGetResponse.body.metadata).toEqual(updatedGetResponse.body.metadata)
     expect(originalGetResponse.body.id).toEqual(updatedGetResponse.body.id)
@@ -110,16 +109,16 @@ describe('Datasource Configuration', () => {
     const response = await request(ADAPTER_URL)
       .post('/datasources')
       .send(datasourceConfig)
-    const datasourceId = response.body.id
+    const datasource = response.body
 
     const delResponse = await request(ADAPTER_URL)
-      .delete('/datasources/' + response.body.id)
+      .delete('/datasources/' + datasource.id)
       .send()
 
     expect(delResponse.status).toEqual(204)
 
     expect(publishedEvents.get(CONFIG_DELETED_TOPIC)).toContainEqual({
-      datasourceId
+      datasource
     })
   }, TIMEOUT)
 
@@ -162,6 +161,6 @@ const datasourceConfig = {
     author: 'icke',
     license: 'none',
     displayName: 'test datasource 1',
-    description: 'integraiton testing datasources'
+    description: 'integration testing datasources'
   }
 }

@@ -21,15 +21,15 @@ public class AmqpPublisher {
     }
 
     public void publishCreation(Datasource datasource) {
-        publish(RabbitConfiguration.AMQP_DATASOURCE_CREATED_TOPIC, new DatasourceCreationEvent(datasource));
+        publish(RabbitConfiguration.AMQP_DATASOURCE_CREATED_TOPIC, new DatasourceConfigEvent(datasource));
     }
 
     public void publishUpdate(Datasource datasource) {
-        publish(RabbitConfiguration.AMQP_DATASOURCE_UPDATED_TOPIC, new DatasourceUpdateEvent(datasource));
+        publish(RabbitConfiguration.AMQP_DATASOURCE_UPDATED_TOPIC, new DatasourceConfigEvent(datasource));
     }
 
-    public void publishDeletion(Long datasourceId) {
-        publish(RabbitConfiguration.AMQP_DATASOURCE_DELETED_TOPIC, new DatasourceConfigEvent(datasourceId));
+    public void publishDeletion(Datasource datasource) {
+        publish(RabbitConfiguration.AMQP_DATASOURCE_DELETED_TOPIC, new DatasourceConfigEvent(datasource));
     }
 
     public void publishImportSuccess(Long id, String data) {
