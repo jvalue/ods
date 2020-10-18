@@ -9,10 +9,11 @@ const http = axios.create({
 })
 
 export async function getPipeline (pipelineId: number): Promise<PipelineConfig> {
-  const response = await http.get(`/pipelines/${pipelineId}`)
-    .catch((e) => {
-      console.log(`Could not fetch pipeline with id ${pipelineId}. Reason ${e.message}`)
-      throw e
-    })
-  return response.data
+  try {
+    const response = await http.get(`/configs/${pipelineId}`)
+    return response.data
+  } catch (e: unknown) {
+    console.log(`Fetching pipelines failed. Reason ${JSON.stringify(e)}`)
+    throw e
+  }
 }

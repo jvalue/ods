@@ -14,11 +14,11 @@ export class DataImportEndpoint {
     // validate
 
     // check if pipeline exists?
-
-    await this.pipelineExecutor.execute(dataImportRequest)
-      .catch((e) => {
-        res.status(500).send('Failure in pipelineExecution')
-      })
-    res.status(204).send()
+    try {
+      await this.pipelineExecutor.execute(dataImportRequest)
+      res.status(204).send()
+    } catch (e) {
+      res.status(500).send('Failure in data import')
+    }
   }
 }
