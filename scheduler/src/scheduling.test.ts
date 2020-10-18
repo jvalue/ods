@@ -6,7 +6,6 @@ import {
 import DatasourceConfig from './interfaces/datasource-config'
 import { sleep } from './sleep'
 import Scheduler from './scheduling'
-import { CONNECTION_BACKOFF_IN_MS, CONNECTION_RETRIES } from '@/env'
 import DatasourceConfigEvent from '@/interfaces/datasource-config-event'
 
 jest.mock('./clients/adapter-client')
@@ -21,6 +20,8 @@ jest.mock('./env', () => () => ({
   CONNECTION_BACKOFF_IN_MS: 1000
 }))
 
+import { CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS } from './env'
+
 let scheduler: Scheduler
 
 describe('Scheduler', () => {
@@ -31,7 +32,6 @@ describe('Scheduler', () => {
   test('should initialize jobs correctly', async () => {
     const config = generateConfig(true, new Date(Date.now() + 5000), 6000)
     mockedGetAllDatasources.mockResolvedValue([config])
-
     await scheduler.initializeJobsWithRetry(CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS)
 
     expect(scheduler.getAllJobs()).toHaveLength(1)
