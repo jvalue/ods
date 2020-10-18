@@ -1,14 +1,16 @@
 import type { Server } from 'http'
 import express from 'express'
-import * as Scheduling from './scheduling'
+import Scheduler from './scheduling'
+
 import {
   CONNECTION_RETRIES,
   CONNECTION_BACKOFF_IN_MS
 } from './env'
+import {DatasourceConfigConsumer} from '@/api/amqp/datasourceConfigConsumer'
 
 process.on('SIGTERM', () => {
   console.info('Scheduler: SIGTERM signal received.')
-  Scheduling.cancelAllJobs()
+  scheduler.cancelAllJobs()
   server?.close()
 })
 
@@ -16,9 +18,12 @@ const port = 8080
 const API_VERSION = '0.0.1'
 
 let server: Server | undefined
+let scheduler: Scheduler
 
 async function main (): Promise<void> {
-  await Scheduling.initializeJobsWithRetry(CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS)
+  scheduler = new Scheduler()
+  await scheduler.initializeJobsWithRetry(CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS)
+  const datasourceConfigConsumer = new DatasourceConfigConsumer(scheduler)
 
   const app = express()
   app.get('/', (req, res) => {
@@ -32,7 +37,7 @@ async function main (): Promise<void> {
 
   app.get('/jobs', (req, res) => {
     res.header('Content-Type', 'application/json')
-    res.json(Scheduling.getAllJobs())
+    res.json(scheduler.getAllJobs())
   })
 
   server = app.listen(port, () => {

@@ -11,182 +11,168 @@ import { DatasourceEvent, EventType } from './interfaces/datasource-event'
 import { sleep } from './sleep'
 import { MAX_TRIGGER_RETRIES } from './env'
 
-const allJobs: Map<number, ExecutionJob> = new Map() // datasourceId -> job
 
-/**
- * Initially receive all datasources from adapter service and start them up.
- */
-export async function initializeJobsWithRetry (retries = 30, retryBackoff = 3000): Promise<void> {
-  for (let i = 1; i <= retries; i++) {
-    try {
-      await initializeJobs()
-      return
-    } catch (e) {
-      if (e.code === 'ECONNREFUSED' || e.code === 'ENOTFOUND') {
-        console.error(`Failed to sync with Adapter Service on init (${retries}) . Retrying after ${retryBackoff}ms... `)
-      } else {
-        console.error(e)
-        console.error(`Retrying (${retries})...`)
-      }
-      await sleep(retryBackoff)
-    }
-  }
-  throw new Error('Failed to initialize datasource/pipeline scheduler.')
-}
+export default class Scheduler {
+  private readonly allJobs: Map<number, ExecutionJob> = new Map() // datasourceId -> job
 
-async function initializeJobs (): Promise<void> {
-  console.log('Starting initialization scheduler')
-
-  const datasources: DatasourceConfig[] = await AdapterClient.getAllDatasources()
-
-  console.log(`Received ${datasources.length} datasources from adapter-service`)
-
-  for (const datasource of datasources) {
-    datasource.trigger.firstExecution = new Date(datasource.trigger.firstExecution)
-    await Scheduling.upsertJob(datasource) // assuming adapter service checks for duplicates
-  }
-}
-
-
-async function applyChanges (event: DatasourceEvent): Promise<void> {
-  console.log(event)
-  switch (event.eventType) {
-    case EventType.DATASOURCE_DELETE: {
-      applyDeleteEvent(event)
-      break
-    }
-    case EventType.DATASOURCE_CREATE:
-    case EventType.DATASOURCE_UPDATE: {
-      await applyCreateOrUpdateEvent(event)
-      break
-    }
-  }
-}
-
-function applyDeleteEvent (event: DatasourceEvent): void {
-  cancelJob(event.datasourceId)
-  allJobs.delete(event.datasourceId)
-}
-
-async function applyCreateOrUpdateEvent (event: DatasourceEvent): Promise<void> {
-  const datasource = await AdapterClient.getDatasource(event.datasourceId)
-  datasource.trigger.firstExecution = new Date(datasource.trigger.firstExecution)
-  await Scheduling.upsertJob(datasource)
-}
-
-export function getJob (datasourceId: number): ExecutionJob | undefined {
-  return allJobs.get(datasourceId)
-}
-
-export function removeJob (datasourceId: number): void {
-  allJobs.delete(datasourceId)
-}
-
-export function existsJob (datasourceId: number): boolean {
-  return allJobs.has(datasourceId)
-}
-
-export function existsEqualJob (datasourceConfig: DatasourceConfig): boolean {
-  const job = getJob(datasourceConfig.id)
-  return job !== undefined && deepEqual(job.datasourceConfig, datasourceConfig)
-}
-
-export function determineExecutionDate (datasourceConfig: DatasourceConfig): Date {
-  let executionDate = datasourceConfig.trigger.firstExecution.getTime()
-  const now = Date.now()
-
-  if (executionDate > now) {
-    return datasourceConfig.trigger.firstExecution
-  }
-
-  const offset = (now - executionDate) % datasourceConfig.trigger.interval
-  executionDate = now + datasourceConfig.trigger.interval - offset
-  return new Date(executionDate)
-}
-
-export function scheduleDatasource (datasourceConfig: DatasourceConfig): ExecutionJob {
-  const executionDate: Date = determineExecutionDate(datasourceConfig)
-  console.log(`Datasource ${datasourceConfig.id} with consecutive pipelines scheduled
-  for next execution at ${executionDate.toLocaleString()}.`)
-
-  const datasourceId = datasourceConfig.id
-
-  const scheduledJob = schedule.scheduleJob(`Datasource ${datasourceId}`, executionDate, () => {
-    execute(datasourceConfig)
-      .catch(error => console.log('Failed to execute job:', error))
-  })
-  const datasourceJob = { scheduleJob: scheduledJob, datasourceConfig: datasourceConfig }
-  allJobs.set(datasourceId, datasourceJob)
-
-  return datasourceJob
-}
-
-const reschedule = (datasourceConfig: DatasourceConfig): void => {
-  if (datasourceConfig.trigger.periodic) {
-    scheduleDatasource(datasourceConfig)
-  } else {
-    console.log(`Datasource ${datasourceConfig.id} is not periodic. Removing it from scheduling.`)
-    removeJob(datasourceConfig.id)
-    console.log(`Successfully removed datasource ${datasourceConfig.id} from scheduling.`)
-  }
-}
-
-async function execute (datasourceConfig: DatasourceConfig): Promise<void> {
-  const datasourceId = datasourceConfig.id
-  for (let i = 0; i < MAX_TRIGGER_RETRIES; i++) {
-    try {
-      await AdapterClient.triggerDatasource(datasourceId)
-      console.log(`Datasource ${datasourceId} triggered.`)
-    } catch (httpError) {
-      if (isAxiosError(httpError)) {
-        if (httpError.response !== undefined) {
-          console.debug(`Adapter was reachable but triggering datasource failed:
-         ${httpError.response.status}: ${httpError.response.data}`)
-        } else if (httpError.request !== undefined) {
-          console.debug(`Not able to reach adapter when triggering datasource ${datasourceId}: ${httpError.request}`)
+  async initializeJobsWithRetry (retries: number, backoff: number): Promise<void> {
+    for (let i = 1; i <= retries; i++) {
+      try {
+        await this.initializeJobs()
+        return
+      } catch (e) {
+        if (e.code === 'ECONNREFUSED' || e.code === 'ENOTFOUND') {
+          console.error(`Failed to sync with Adapter Service on init (${retries}) . Retrying after ${backoff}ms... `)
+        } else {
+          console.error(e)
+          console.error(`Retrying (${retries})...`)
         }
-      } else {
-        console.debug(`Triggering datasource ${datasourceId} failed:`, httpError.message)
+        await sleep(backoff)
       }
-      if (i === MAX_TRIGGER_RETRIES - 1) { // last retry
-        console.error(`Could not trigger datasource ${datasourceId}:`, httpError)
-        break
-      }
-      console.info(`Triggering datasource failed - retrying (${i}/${MAX_TRIGGER_RETRIES})`)
+    }
+    throw new Error('Failed to initialize datasource/pipeline scheduler.')
+  }
+
+  async initializeJobs (): Promise<void> {
+    console.log('Starting scheduler initialization')
+    const datasources: DatasourceConfig[] = await AdapterClient.getAllDatasources()
+    console.log(`Received ${datasources.length} datasources from adapter-service`)
+    for (const datasource of datasources) {
+      datasource.trigger.firstExecution = new Date(datasource.trigger.firstExecution)
+      await this.upsertJob(datasource) // assuming adapter service checks for duplicates
     }
   }
-  reschedule(datasourceConfig)
-}
 
-function isAxiosError (error: any): error is AxiosError {
-  return error.isAxiosError
-}
-
-export async function upsertJob (datasourceConfig: DatasourceConfig): Promise<ExecutionJob> {
-  const isNewDatasource = !existsJob(datasourceConfig.id)
-  const datasourceState = isNewDatasource ? 'New' : 'Updated'
-
-  console.log(`[${datasourceState}] datasource detected with id ${datasourceConfig.id}.`)
-
-  if (!isNewDatasource) {
-    cancelJob(datasourceConfig.id)
+  applyDeleteEvent (event: DatasourceEvent): void {
+    cancelJob(event.datasourceId)
+    allJobs.delete(event.datasourceId)
   }
 
-  return scheduleDatasource(datasourceConfig)
+  applyCreateOrUpdateEvent (event: DatasourceEvent): Promise<void> {
+    const datasource = await AdapterClient.getDatasource(event.datasourceId)
+    datasource.trigger.firstExecution = new Date(datasource.trigger.firstExecution)
+    await Scheduling.upsertJob(datasource)
+  }
+  getJob (datasourceId: number): ExecutionJob | undefined {
+    return this.allJobs.get(datasourceId)
+  }
+
+  removeJob (datasourceId: number): void {
+    this.allJobs.delete(datasourceId)
+  }
+
+  existsJob (datasourceId: number): boolean {
+    return this.allJobs.has(datasourceId)
+  }
+
+  existsEqualJob (datasourceConfig: DatasourceConfig): boolean {
+    const job = this.getJob(datasourceConfig.id)
+    return job !== undefined && deepEqual(job.datasourceConfig, datasourceConfig)
+  }
+
+  determineExecutionDate (datasourceConfig: DatasourceConfig): Date {
+    let executionDate = datasourceConfig.trigger.firstExecution.getTime()
+    const now = Date.now()
+
+    if (executionDate > now) {
+      return datasourceConfig.trigger.firstExecution
+    }
+
+    const offset = (now - executionDate) % datasourceConfig.trigger.interval
+    executionDate = now + datasourceConfig.trigger.interval - offset
+    return new Date(executionDate)
+  }
+
+  scheduleDatasource (datasourceConfig: DatasourceConfig): ExecutionJob {
+    const executionDate: date = this.determineExecutionDate(datasourceConfig)
+    console.log(`datasource ${datasourceConfig.id} with consecutive pipelines scheduled
+      for next execution at ${executionDate.toLocaleString()}.`)
+
+    const datasourceId = datasourceConfig.id
+
+    const scheduledJob = schedule.scheduleJob(`Datasource ${datasourceId}`, executionDate, () => {
+      this.execute(datasourceConfig)
+        .catch(error => console.log('Failed to execute job:', error))
+    })
+    const datasourceJob = { scheduleJob: scheduledJob, datasourceConfig: datasourceConfig }
+    this.allJobs.set(datasourceId, datasourceJob)
+
+    return datasourceJob
+  }
+
+  reschedule (datasourceConfig: DatasourceConfig): void {
+    if (datasourceConfig.trigger.periodic) {
+      this.scheduleDatasource(datasourceConfig)
+    } else {
+      console.log(`Datasource ${datasourceConfig.id} is not periodic. Removing it from scheduling.`)
+      this.removeJob(datasourceConfig.id)
+      console.log(`Successfully removed datasource ${datasourceConfig.id} from scheduling.`)
+    }
+  }
+
+  async execute (datasourceConfig: DatasourceConfig): Promise<void> {
+    const datasourceId = datasourceConfig.id
+    for (let i = 0; i < MAX_TRIGGER_RETRIES; i++) {
+      try {
+        await AdapterClient.triggerDatasource(datasourceId)
+        console.log(`Datasource ${datasourceId} triggered.`)
+      } catch (httpError) {
+        if (this.isAxiosError(httpError)) {
+          if (httpError.response !== undefined) {
+            console.debug(`Adapter was reachable but triggering datasource failed:
+         ${httpError.response.status}: ${httpError.response.data}`)
+          } else if (httpError.request !== undefined) {
+            console.debug(`Not able to reach adapter when triggering datasource ${datasourceId}: ${httpError.request}`)
+          }
+        } else {
+          console.debug(`Triggering datasource ${datasourceId} failed:`, httpError.message)
+        }
+        if (i === MAX_TRIGGER_RETRIES - 1) { // last retry
+          console.error(`Could not trigger datasource ${datasourceId}:`, httpError)
+          break
+        }
+        console.info(`Triggering datasource failed - retrying (${i}/${MAX_TRIGGER_RETRIES})`)
+      }
+    }
+    this.reschedule(datasourceConfig)
+  }
+
+  isAxiosError (error: any): error is AxiosError {
+    return error.isAxiosError
+  }
+
+  async upsertJob (datasourceConfig: DatasourceConfig): Promise<ExecutionJob> {
+    const isNewDatasource = !this.existsJob(datasourceConfig.id)
+    const datasourceState = isNewDatasource ? 'New' : 'Updated'
+
+    console.log(`[${datasourceState}] datasource detected with id ${datasourceConfig.id}.`)
+
+    if (!isNewDatasource) {
+      cancelJob(datasourceConfig.id)
+    }
+
+    return this.scheduleDatasource(datasourceConfig)
+  }
+
+  getAllJobs (): ExecutionJob[] {
+    return Array.from(this.allJobs.values())
+  }
+
+  cancelAllJobs (): void {
+    this.allJobs.forEach(job => {
+      schedule.cancelJob(job.scheduleJob)
+    })
+    this.allJobs.clear()
+  }
+
+  cancelJob (jobId: number): void {
+    const job = this.allJobs.get(jobId)
+    job?.scheduleJob.cancel()
+  }
 }
 
-export function getAllJobs (): ExecutionJob[] {
-  return Array.from(allJobs.values())
-}
 
-export function cancelAllJobs (): void {
-  allJobs.forEach(job => {
-    schedule.cancelJob(job.scheduleJob)
-  })
-  allJobs.clear()
-}
 
-export function cancelJob (jobId: number): void {
-  const job = allJobs.get(jobId)
-  job?.scheduleJob.cancel()
-}
+
+
+
