@@ -15,12 +15,11 @@ const mockedGetAllDatasources = getAllDatasources as jest.Mock
 /* eslint-enable @typescript-eslint/consistent-type-assertions */
 
 jest.mock('./env', () => () => ({
-  MAX_TRIGGER_RETRIES: 2,
-  CONNECTION_RETRIES: 2,
-  CONNECTION_BACKOFF_IN_MS: 1000
+  MAX_TRIGGER_RETRIES: 2
 }))
 
-import { CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS } from './env'
+const CONNECTION_RETRIES = 2
+const CONNECTION_BACKOFF_IN_MS = 1000
 
 let scheduler: Scheduler
 
@@ -35,7 +34,7 @@ describe('Scheduler', () => {
     await scheduler.initializeJobsWithRetry(CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS)
 
     expect(scheduler.getAllJobs()).toHaveLength(1)
-    expect(scheduler.getAllJobs()[0].datasourceConfig).toContainEqual(config)
+    expect(scheduler.getAllJobs()[0].datasourceConfig).toEqual(config)
   })
 
   test('should apply creation event', async () => {
@@ -51,7 +50,7 @@ describe('Scheduler', () => {
     const job123 = scheduler.getJob(123)
     expect(job123).toBeDefined()
     if (job123 !== undefined) {
-      expect(job123.datasourceConfig).toContainEqual(toBeAdded)
+      expect(job123.datasourceConfig).toEqual(toBeAdded)
     }
   })
 
