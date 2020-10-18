@@ -247,6 +247,26 @@ services:
       POSTGRES_PASSWORD: 'admin'
       POSTGRES_DB: 'ods-notifications'
 
+# -------------------- PIPELINE TRIGGER SERVICE -----------------------------
+  pipeline-trigger:
+    image: ${DOCKER_REGISTRY}/pipeline-trigger
+    build:
+      context: ./pipeline-trigger
+    environment:
+      ADAPTER_API: /api/adapter
+      PIPELINE_API: /api/pipeline
+    depends_on:
+      - adapter
+      - rabbitmq
+      - pipeline
+      - edge
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.to-pipeline-trigger.rule=PathPrefix(`/api/pipeline-trigger`)"
+      - "traefik.http.routers.to-pipeline-trigger.middlewares=pipeline-trigger-stripprefix@docker"
+      - "traefik.http.middlewares.pipeline-trigger-stripprefix.stripprefix.prefixes=/api/pipeline-trigger"
+      - "traefik.http.services.notification.loadbalancer.server.port=8080"
+
 # -------------------- EDGE SERVER (PORT 9000) -----------------------------
   edge:
     image: traefik:latest
