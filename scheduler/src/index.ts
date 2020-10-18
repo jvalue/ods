@@ -6,7 +6,7 @@ import {
   CONNECTION_RETRIES,
   CONNECTION_BACKOFF_IN_MS
 } from './env'
-import { DatasourceConfigConsumer } from '@/api/amqp/datasourceConfigConsumer'
+import { DatasourceConfigConsumer } from './api/amqp/datasourceConfigConsumer'
 
 process.on('SIGTERM', () => {
   console.info('Scheduler: SIGTERM signal received.')
