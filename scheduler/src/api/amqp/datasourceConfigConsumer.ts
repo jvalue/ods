@@ -1,5 +1,6 @@
 import * as AMQP from 'amqplib'
 import { sleep } from '../../sleep'
+import Scheduler from '../../scheduling'
 
 import {
   AMQP_URL,
@@ -61,9 +62,9 @@ export class DatasourceConfigConsumer {
       console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
       if (msg.fields.routingKey === AMQP_DATASOURCE_CONFIG_UPDATED_TOPIC
         || msg.fields.routingKey === AMQP_DATASOURCE_CONFIG_CREATED_TOPIC) {
-        //handle creation or update
+        await this.scheduler.applyCreateOrUpdateEvent(JSON.parse(msg.content.toString()))
       } else if (msg.fields.routingKey === AMQP_DATASOURCE_CONFIG_DELETED_TOPIC) {
-        //handle deletion
+        this.scheduler.applyDeleteEvent(JSON.parse(msg.content.toString()))
       } else {
         console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
       }

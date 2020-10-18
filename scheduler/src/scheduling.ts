@@ -3,13 +3,12 @@ import deepEqual from 'deep-equal'
 import schedule from 'node-schedule'
 
 import * as AdapterClient from './clients/adapter-client'
-import * as Scheduling from './scheduling'
 import type ExecutionJob from './interfaces/scheduling-job'
 import type DatasourceConfig from './interfaces/datasource-config'
-import { DatasourceEvent, EventType } from './interfaces/datasource-event'
 
 import { sleep } from './sleep'
 import { MAX_TRIGGER_RETRIES } from './env'
+import DatasourceConfigEvent from '@/interfaces/datasource-config-event'
 
 
 export default class Scheduler {
@@ -43,16 +42,16 @@ export default class Scheduler {
     }
   }
 
-  applyDeleteEvent (event: DatasourceEvent): void {
-    cancelJob(event.datasourceId)
-    allJobs.delete(event.datasourceId)
+  applyDeleteEvent (event: DatasourceConfigEvent): void {
+    this.cancelJob(event.datasource.id)
+    this.allJobs.delete(event.datasource.id)
   }
 
-  applyCreateOrUpdateEvent (event: DatasourceEvent): Promise<void> {
-    const datasource = await AdapterClient.getDatasource(event.datasourceId)
-    datasource.trigger.firstExecution = new Date(datasource.trigger.firstExecution)
-    await Scheduling.upsertJob(datasource)
+  async applyCreateOrUpdateEvent (event: DatasourceConfigEvent): Promise<void> {
+    datasource.trigger.firstExecution = new Date(event.datasource.trigger.firstExecution)
+    await this.upsertJob(datasource)
   }
+
   getJob (datasourceId: number): ExecutionJob | undefined {
     return this.allJobs.get(datasourceId)
   }
@@ -84,7 +83,7 @@ export default class Scheduler {
   }
 
   scheduleDatasource (datasourceConfig: DatasourceConfig): ExecutionJob {
-    const executionDate: date = this.determineExecutionDate(datasourceConfig)
+    const executionDate: Date = this.determineExecutionDate(datasourceConfig)
     console.log(`datasource ${datasourceConfig.id} with consecutive pipelines scheduled
       for next execution at ${executionDate.toLocaleString()}.`)
 
@@ -148,7 +147,7 @@ export default class Scheduler {
     console.log(`[${datasourceState}] datasource detected with id ${datasourceConfig.id}.`)
 
     if (!isNewDatasource) {
-      cancelJob(datasourceConfig.id)
+      this.cancelJob(datasourceConfig.id)
     }
 
     return this.scheduleDatasource(datasourceConfig)
