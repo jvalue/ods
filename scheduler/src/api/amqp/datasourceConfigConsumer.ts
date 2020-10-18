@@ -13,10 +13,10 @@ import {
 } from '../../env'
 
 export class DatasourceConfigConsumer {
-  constructor(private readonly scheduler: Scheduler) {
+  constructor (private readonly scheduler: Scheduler) {
   }
 
-  public async connect(retries: number, backoff: number): Promise<void> {
+  public async initialize (retries: number, backoff: number): Promise<void> {
     console.log('AMQP URL: ' + AMQP_URL)
     for (let i = 1; i <= retries; i++) {
       try {
@@ -35,7 +35,7 @@ export class DatasourceConfigConsumer {
     }
   }
 
-  private async initChannel(connection: AMQP.Connection): Promise<void> {
+  private async initChannel (connection: AMQP.Connection): Promise<void> {
     console.log(`Initializing queue "${AMQP_SCHEDULER_QUEUE}"
       on exchange "${AMQP_SCHEDULER_EXCHANGE}" with topic "${AMQP_DATASOURCE_CONFIG_TOPIC}"`)
 
@@ -60,8 +60,8 @@ export class DatasourceConfigConsumer {
       console.debug('Received empty event when listening on datsource config events - doing nothing')
     } else {
       console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
-      if (msg.fields.routingKey === AMQP_DATASOURCE_CONFIG_UPDATED_TOPIC
-        || msg.fields.routingKey === AMQP_DATASOURCE_CONFIG_CREATED_TOPIC) {
+      if (msg.fields.routingKey === AMQP_DATASOURCE_CONFIG_UPDATED_TOPIC ||
+        msg.fields.routingKey === AMQP_DATASOURCE_CONFIG_CREATED_TOPIC) {
         await this.scheduler.applyCreateOrUpdateEvent(JSON.parse(msg.content.toString()))
       } else if (msg.fields.routingKey === AMQP_DATASOURCE_CONFIG_DELETED_TOPIC) {
         this.scheduler.applyDeleteEvent(JSON.parse(msg.content.toString()))
@@ -71,4 +71,3 @@ export class DatasourceConfigConsumer {
     }
   }
 }
-

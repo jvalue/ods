@@ -6,7 +6,7 @@ import {
   CONNECTION_RETRIES,
   CONNECTION_BACKOFF_IN_MS
 } from './env'
-import {DatasourceConfigConsumer} from '@/api/amqp/datasourceConfigConsumer'
+import { DatasourceConfigConsumer } from '@/api/amqp/datasourceConfigConsumer'
 
 process.on('SIGTERM', () => {
   console.info('Scheduler: SIGTERM signal received.')
@@ -22,8 +22,10 @@ let scheduler: Scheduler
 
 async function main (): Promise<void> {
   scheduler = new Scheduler()
-  await scheduler.initializeJobsWithRetry(CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS)
   const datasourceConfigConsumer = new DatasourceConfigConsumer(scheduler)
+
+  await datasourceConfigConsumer.initialize(CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS)
+  await scheduler.initializeJobsWithRetry(CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS)
 
   const app = express()
   app.get('/', (req, res) => {

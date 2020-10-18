@@ -10,7 +10,6 @@ import { sleep } from './sleep'
 import { MAX_TRIGGER_RETRIES } from './env'
 import DatasourceConfigEvent from '@/interfaces/datasource-config-event'
 
-
 export default class Scheduler {
   private readonly allJobs: Map<number, ExecutionJob> = new Map() // datasourceId -> job
 
@@ -169,9 +168,3 @@ export default class Scheduler {
     job?.scheduleJob.cancel()
   }
 }
-
-
-
-
-
-
