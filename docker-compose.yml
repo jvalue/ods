@@ -253,8 +253,8 @@ services:
     build:
       context: ./pipeline-trigger
     environment:
-      ADAPTER_API: /api/adapter
-      PIPELINE_API: /api/pipeline
+      ADAPTER_API: http://adapter:8080
+      PIPELINE_API: http://pipeline:8080
     depends_on:
       - adapter
       - rabbitmq
@@ -265,7 +265,7 @@ services:
       - "traefik.http.routers.to-pipeline-trigger.rule=PathPrefix(`/api/pipeline-trigger`)"
       - "traefik.http.routers.to-pipeline-trigger.middlewares=pipeline-trigger-stripprefix@docker"
       - "traefik.http.middlewares.pipeline-trigger-stripprefix.stripprefix.prefixes=/api/pipeline-trigger"
-      - "traefik.http.services.notification.loadbalancer.server.port=8080"
+      - "traefik.http.services.pipeline-trigger.loadbalancer.server.port=8080"
 
 # -------------------- EDGE SERVER (PORT 9000) -----------------------------
   edge:

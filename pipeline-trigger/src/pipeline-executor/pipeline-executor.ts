@@ -12,7 +12,7 @@ export class PipelineExecutor {
   async execute (dataImportRequest: DataImportRequest): Promise<void> {
     const pipeline = await PipelineClient.getPipeline(dataImportRequest.pipelineId)
 
-    DatasourceClient.triggerDatasource(pipeline.datasourceId)
+    await DatasourceClient.triggerDatasource(pipeline.datasourceId)
       .catch(e => {
         throw e // handle in endpoint
       })
