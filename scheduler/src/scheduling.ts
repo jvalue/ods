@@ -47,6 +47,7 @@ export default class Scheduler {
   }
 
   async applyCreateOrUpdateEvent (event: DatasourceConfigEvent): Promise<void> {
+    const datasource = event.datasource
     datasource.trigger.firstExecution = new Date(event.datasource.trigger.firstExecution)
     await this.upsertJob(datasource)
   }
