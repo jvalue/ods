@@ -4,7 +4,7 @@ import { ADAPTER_API } from '../env'
 
 const http = axios.create({
   baseURL: ADAPTER_API,
-  headers: { 'Content-Type': 'application/json'}
+  headers: { 'Content-Type': 'application/json' }
 })
 
 export async function triggerDatasource (datasourceId: number): Promise<void> {
