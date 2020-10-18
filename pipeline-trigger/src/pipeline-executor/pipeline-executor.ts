@@ -13,6 +13,9 @@ export class PipelineExecutor {
     const pipeline = await PipelineClient.getPipeline(dataImportRequest.pipelineId)
 
     DatasourceClient.triggerDatasource(pipeline.datasourceId)
+      .catch(e => {
+        throw e // handle in endpoint
+      })
 
     console.log('triggered!')
     console.log(pipeline.datasourceId)
