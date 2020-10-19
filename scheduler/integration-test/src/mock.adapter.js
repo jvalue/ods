@@ -21,7 +21,7 @@ const initialSources = [
     trigger: {
       firstExecution: jsonDateAfter(1000),
       periodic: true,
-      interval: 1000
+      interval: 3000
     }
   }
 ]
