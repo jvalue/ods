@@ -4,7 +4,7 @@
       <div v-if="result.data">
         <v-subheader>Transformed Data</v-subheader>
         <v-card-text class="text-left">
-          <pre>{{ result.data }}</pre>
+          <pre style="max-height: 400px; overflow:auto; text-align: left">{{ result.data }}</pre>
         </v-card-text>
       </div>
 
@@ -13,7 +13,7 @@
           Error
         </v-subheader>
         <v-card-text class="text-left">
-          <pre>{{ result.error }}</pre>
+          <pre style="max-height: 400px; overflow:auto; text-align: left">{{ result.error }}</pre>
         </v-card-text>
       </div>
 
