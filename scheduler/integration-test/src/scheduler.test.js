@@ -59,8 +59,8 @@ describe('Scheduler-IT', () => {
     const multipleTrigger = await request(MOCK_SERVER_URL)
       .get('/triggerRequests/101')
 
-    expect(singleTrigger.text).toBe(1)
-    expect(multipleTrigger.text).toBeGreaterThan(1)
+    expect(singleTrigger.body).toBe(1)
+    expect(multipleTrigger.body).toBeGreaterThan(1)
   }, TIMEOUT)
 
   test('Should trigger datasource after creation event', async () => {
@@ -107,20 +107,23 @@ describe('Scheduler-IT', () => {
     await sleep(4000)
 
     const triggerRequests = await request(MOCK_SERVER_URL)
-      .get('/trigger/requests/3')
+      .get('/triggerRequests/3')
 
     expect(triggerRequests.body).toBeGreaterThan(1)
   }, TIMEOUT)
 })
 
 function createDeletionEvent (datasourceId) {
-  return Buffer.from(JSON.stringify({
-    datasourceId
-  }))
+  const event = {
+    datasource: {
+      id: datasourceId
+    }
+  }
+  return Buffer.from(JSON.stringify(event))
 }
 
 function createDatasourceEvent (datasourceId, delay, interval) {
-  const periodic = (delay === 0)
+  const periodic = (interval === 0)
   const event = {
     datasource: {
       id: datasourceId,
