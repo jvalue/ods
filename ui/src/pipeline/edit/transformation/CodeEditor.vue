@@ -54,7 +54,7 @@ export default class CodeEditor extends Vue {
   }
 
   public $refs!: Vue['$refs'] & {
-    editor: MonacoEditorConstructor;
+    editor: MonacoEditorConstructor
   }
 
   private editorOptions = {

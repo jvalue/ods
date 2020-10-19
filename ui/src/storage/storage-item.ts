@@ -1,9 +1,9 @@
 export type StorageItem = StorageItemMetaData & {
-  data: object;
+  data: object
 }
 
 export interface StorageItemMetaData {
-  id: number;
-  timestamp: string;
-  pipelineId: string;
+  id: number
+  timestamp: string
+  pipelineId: number
 }

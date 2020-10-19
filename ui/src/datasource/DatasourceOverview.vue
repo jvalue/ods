@@ -46,11 +46,11 @@
           indeterminate
         />
 
-        <template v-slot:[`item.trigger.interval`]="{ item }">
+        <template #[`item.trigger.interval`]="{ item }">
           {{ getHoursFromMS(item.trigger.interval) }}h:{{ getMinutesFromMS(item.trigger.interval) }}m
         </template>
 
-        <template v-slot:[`item.trigger.periodic`]="{ item }">
+        <template #[`item.trigger.periodic`]="{ item }">
           <v-switch
             v-model="item.trigger.periodic"
             class="ma-2"
@@ -58,7 +58,7 @@
           />
         </template>
 
-        <template v-slot:[`item.action`]="{ item }">
+        <template #[`item.action`]="{ item }">
           <v-btn
             depressed
             small
@@ -129,20 +129,23 @@ export default class DatsourceOverview extends Vue {
     { text: 'Interval', value: 'trigger.interval', sortable: false },
     { text: 'Periodic', value: 'trigger.periodic', sortable: false },
     { text: 'Action', value: 'action', sortable: false }
-  ];
+  ]
 
-  private search = '';
+  private search = ''
 
   private mounted (): void {
     this.loadDataSources()
+      .catch(error => console.error('Failed to load datasource', error))
   }
 
   private onCreate (): void {
     this.$router.push({ name: 'datasource-new' })
+      .catch(error => console.log('Failed to route to datasource-new', error))
   }
 
   private onEdit (datasource: Datasource): void {
     this.$router.push({ name: 'datasource-edit', params: { datasourceId: `${datasource.id}` } })
+      .catch(error => console.log('Failed to route to datasource-edit', error))
   }
 
   private async onDelete (datasource: Datasource): Promise<void> {
@@ -152,13 +155,14 @@ export default class DatsourceOverview extends Vue {
 
   private onCreatePipeline (datasource: Datasource): void {
     this.$router.push({ name: 'pipeline-new', params: { datasourceId: `${datasource.id}` } })
+      .catch(error => console.log('Failed to route to pipeline-new', error))
   }
 
   private filterOnlyDisplayName (value: unknown, search: string, item: Datasource): boolean {
     return value != null &&
           search != null &&
           typeof value === 'string' &&
-          item.metadata.displayName.toLocaleLowerCase().indexOf(search.toLocaleLowerCase()) !== -1
+          item.metadata.displayName.toLocaleLowerCase().includes(search.toLocaleLowerCase())
   }
 
   private getHoursFromMS (intervalInMS: number): number {

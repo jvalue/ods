@@ -52,43 +52,43 @@ export async function update (notificationConfig: NotificationConfig): Promise<v
 
   const apiModel = toApiModel(notificationConfig)
 
-  return http.put(`/config/${notificationType}/${id}`, JSON.stringify(apiModel))
+  return await http.put(`/config/${notificationType}/${id}`, JSON.stringify(apiModel))
 }
 
 export async function remove (notificationConfig: NotificationConfig): Promise<void> {
   const notificationType = notificationConfig.type
   const id = notificationConfig.id
 
-  return http.delete(`/config/${notificationType}/${id}`)
+  return await http.delete(`/config/${notificationType}/${id}`)
 }
 
 interface NotificationApiSummary {
-  webhook: WebhookNotificationApiConfig[];
-  slack: SlackNotificationApiConfig[];
-  firebase: FirebaseNotificationApiConfig[];
+  webhook: WebhookNotificationApiConfig[]
+  slack: SlackNotificationApiConfig[]
+  firebase: FirebaseNotificationApiConfig[]
 }
 
 interface NotificationApiConfig {
-  id: number;
-  pipelineId: number;
-  condition: string;
+  id: number
+  pipelineId: number
+  condition: string
 }
 
 interface WebhookNotificationApiConfig extends NotificationApiConfig {
-  url: string;
+  url: string
 }
 
 interface SlackNotificationApiConfig extends NotificationApiConfig {
-  workspaceId: string;
-  channelId: string;
-  secret: string;
+  workspaceId: string
+  channelId: string
+  secret: string
 }
 
 interface FirebaseNotificationApiConfig extends NotificationApiConfig {
-  projectId: string;
-  clientEmail: string;
-  privateKey: string;
-  topic: string;
+  projectId: string
+  clientEmail: string
+  privateKey: string
+  topic: string
 }
 
 function toApiModel (notification: NotificationConfig): NotificationApiConfig {

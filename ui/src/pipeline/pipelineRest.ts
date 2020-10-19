@@ -30,13 +30,12 @@ export async function getPipelineByDatasourceId (datasourceId: number): Promise<
 
 export async function createPipeline (pipeline: Pipeline): Promise<Pipeline> {
   const response = await httpPipelineConfigs.post('/', JSON.stringify(pipeline))
-  delete pipeline.id
   return JSON.parse(response.data)
 }
 
 export async function updatePipeline (pipeline: Pipeline): Promise<AxiosResponse> {
-  return httpPipelineConfigs.put(`/${pipeline.id}`, JSON.stringify(pipeline))
+  return await httpPipelineConfigs.put(`/${pipeline.id}`, JSON.stringify(pipeline))
 }
 export async function deletePipeline (id: number): Promise<AxiosResponse> {
-  return httpPipelineConfigs.delete(`/${id}`)
+  return await httpPipelineConfigs.delete(`/${id}`)
 }
