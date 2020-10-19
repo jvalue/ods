@@ -37,24 +37,24 @@ export async function update (notificationConfig: NotificationConfig): Promise<v
   const id = notificationConfig.id
   const apiModel = toApiWriteModel(notificationConfig)
 
-  return http.put(`/configs/${id}`, JSON.stringify(apiModel))
+  return await http.put(`/configs/${id}`, JSON.stringify(apiModel))
 }
 
 export async function remove (notificationConfig: NotificationConfig): Promise<void> {
   const id = notificationConfig.id
 
-  return http.delete(`/configs/${id}`)
+  return await http.delete(`/configs/${id}`)
 }
 
 interface NotificationApiReadModel extends NotificationApiWriteModel {
-  id: number;
+  id: number
 }
 
 interface NotificationApiWriteModel {
-  pipelineId: number;
-  condition: string;
-  type: ApiNotificationType;
-  parameter: object;
+  pipelineId: number
+  condition: string
+  type: ApiNotificationType
+  parameter: object
 }
 
 type ApiNotificationType = 'WEBHOOK' | 'SLACK' | 'FCM'

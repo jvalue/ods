@@ -28,16 +28,16 @@ import { Emit, Prop } from 'vue-property-decorator'
 @Component({ })
 export default class StepperButtonGroup extends Vue {
   @Prop(Number)
-  private readonly step!: number;
+  private readonly step!: number
 
   @Prop({ default: 'true' })
-  private readonly nextEnabled!: boolean;
+  private readonly nextEnabled!: boolean
 
   @Prop({ default: 'true' })
-  private readonly nextVisible!: boolean;
+  private readonly nextVisible!: boolean
 
   @Prop({ default: 'true' })
-  private readonly previousVisible!: boolean;
+  private readonly previousVisible!: boolean
 
   @Emit('stepChanged')
   private nextStep (): number {

@@ -2,12 +2,10 @@
   <v-dialog
     ref="dateDialog"
     v-model="pickDateTimeModal"
-    persistent
-    full-width
     width="290px"
     persistant
   >
-    <template v-slot:activator="{ on }">
+    <template #activator="{ on }">
       <v-text-field
         v-model="dateTimeString"
         label="Time for First Execution"
@@ -67,26 +65,22 @@ import { Prop, Watch } from 'vue-property-decorator'
 
 /**
  * DateTimePicker takes a Date via v-model as input and lets the user select it.
- * The selected date is always in the local time zone of the browser.
- *
- * Overwrite the formatDateTimePresentation method to change the string representation.
+ * The selected date is always in the local time zone of the browser, but the returned
+ * Date object can be easily converted in an ISO formatted string.
  */
 @Component
 export default class DateTimePicker extends Vue {
-  @Prop({ default: null })
-  private value!: Date;
+  @Prop({ default: new Date() })
+  private value!: Date
 
-  private dateTimeString = '';
+  private dateTimeString = ''
 
-  private date = '';
+  private date = ''
+  private time = ''
 
-  private time = '';
-
-  private pickDateTimeModal = false;
-
-  private pickDateModal = true;
-
-  private pickTimeModal = false;
+  private pickDateTimeModal = false
+  private pickDateModal = true
+  private pickTimeModal = false
 
   created (): void {
     this.reset()
@@ -94,15 +88,12 @@ export default class DateTimePicker extends Vue {
 
   @Watch('value')
   onPropertyChanged (value: Date): void {
-    if (value == null) {
+    if (value === null) {
       return
     }
 
     if (!(value instanceof Date)) {
-      console.error(
-        '[DateTimePicker] Expected type of argument "value" to be Date, but got: ',
-        value
-      )
+      console.error('[DateTimePicker] Expected type of argument "value" to be Date, but got: ', value)
     } else {
       this.reset()
     }
@@ -114,16 +105,9 @@ export default class DateTimePicker extends Vue {
   }
 
   private resetValues (): void {
-    const dateString = this.value.toISOString()
-    this.dateTimeString = this.formatDateTimePresentation(this.value)
-    this.date = this.sliceDateFromString(dateString)
-    this.time = this.sliceTimeFromString(dateString)
-  }
-
-  private formatDateTimePresentation (date: Date): string {
-    const dateString = date.toISOString()
-    // timezone: UTC (because offset is cut)
-    return `${this.sliceDateFromString(dateString)} ${this.sliceTimeFromString(dateString)} UTC`
+    this.date = this.getISODateString(this.value)
+    this.time = this.getISOTimeString(this.value)
+    this.dateTimeString = `${this.date} ${this.time}`
   }
 
   private resetDialogs (): void {
@@ -145,9 +129,15 @@ export default class DateTimePicker extends Vue {
     this.$emit('input', selectedDate) // update parent
   }
 
-  private sliceDateFromString = (v: string): string => v.slice(0, 10)
+  /**
+   * Get the date part of the given date using the browser's local time in ISO format: `YYYY-MM-DD`
+   */
+  private getISODateString = (date: Date): string => `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
 
-  private sliceTimeFromString = (v: string): string => v.slice(11, 16)
+  /**
+   * Get the time part of the given date using the browser's local time in ISO format: `hh:mm`
+   */
+  private getISOTimeString = (date: Date): string => `${date.getHours()}:${date.getMinutes()}`
 
   private sliceYearFromDateString = (v: string): number => Number(v.slice(0, 4))
 

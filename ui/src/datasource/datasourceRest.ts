@@ -41,11 +41,11 @@ export async function createDatasource (datasource: Datasource): Promise<Datasou
 }
 
 export async function updateDatasource (datasource: Datasource): Promise<AxiosResponse> {
-  return http.put(`/datasources/${datasource.id}`, JSON.stringify(datasource))
+  return await http.put(`/datasources/${datasource.id}`, JSON.stringify(datasource))
 }
 
 export async function deleteDatasource (id: number): Promise<AxiosResponse> {
-  return http.delete(`/datasources/${id}`)
+  return await http.delete(`/datasources/${id}`)
 }
 
 export async function getDatasourceData (id: number): Promise<Data> {

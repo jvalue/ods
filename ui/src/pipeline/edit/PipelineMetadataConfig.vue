@@ -30,10 +30,10 @@ import { PipelineMetaData } from '../pipeline'
 
 @Component({ })
 export default class PipelineMetadataConfig extends Vue {
-  private validForm = true;
+  private validForm = true
 
   @PropSync('value')
-  private metadataConfig!: PipelineMetaData;
+  private metadataConfig!: PipelineMetaData
 
   @Emit('value')
   emitValue (): PipelineMetaData {

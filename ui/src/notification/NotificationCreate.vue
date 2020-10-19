@@ -54,13 +54,13 @@ export default class NotificationCreate extends Vue {
   }
 
   private mounted (): void {
-    const pipelineId = parseInt(this.$route.params.pipelineId)
-    this.notification.pipelineId = pipelineId
+    this.notification.pipelineId = parseInt(this.$route.params.pipelineId)
   }
 
   private async onCreate (): Promise<void> {
     await NotificationREST.create(this.notification)
     this.$router.push({ name: 'notification-overview' })
+      .catch(error => console.log('Failed to route to notification-overview', error))
   }
 
   private onCancel (): void {
