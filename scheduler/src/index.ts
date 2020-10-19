@@ -49,5 +49,5 @@ async function main (): Promise<void> {
 
 main()
   .catch(error => {
-    console.error(`Failed to start notification service: ${error}`)
+    console.error(`Failed to start scheduler: ${error}`)
   })
