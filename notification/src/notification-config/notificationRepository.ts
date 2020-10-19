@@ -1,23 +1,11 @@
-import { NotificationSummary } from './notificationSummary'
-import { FirebaseConfig, SlackConfig, WebhookConfig } from './notificationConfig'
+import { NotificationConfig } from './notificationConfig'
 
 export interface NotificationRepository {
-  getConfigsForPipeline: (pipelineId: number) => Promise<NotificationSummary>
-  deleteConfigsForPipelineID: (pipelineId: number) => void
+  getForPipeline: (pipelineId: number) => Promise<NotificationConfig[]>
 
-  getSlackConfig: (id: number) => Promise<SlackConfig>
-  getWebhookConfig: (id: number) => Promise<WebhookConfig>
-  getFirebaseConfig: (id: number) => Promise<FirebaseConfig>
-
-  saveWebhookConfig: (webhookConfig: WebhookConfig) => Promise<WebhookConfig>
-  saveSlackConfig: (slackConfig: SlackConfig) => Promise<SlackConfig>
-  saveFirebaseConfig: (firebaseConfig: FirebaseConfig) => Promise<FirebaseConfig>
-
-  updateSlackConfig: (id: number, slackConfig: SlackConfig) => Promise<SlackConfig>
-  updateWebhookConfig: (id: number, webhookConfig: WebhookConfig) => Promise<WebhookConfig>
-  updateFirebaseConfig: (id: number, firebaseConfig: FirebaseConfig) => Promise<FirebaseConfig>
-
-  deleteSlackConfig: (id: number) => Promise<void>
-  deleteWebhookConfig: (id: number) => Promise<void>
-  deleteFirebaseConfig: (id: number) => Promise<void>
+  getById: (id: number) => Promise<NotificationConfig | undefined>
+  getAll: () => Promise<NotificationConfig[]>
+  create: (config: NotificationConfig) => Promise<NotificationConfig>
+  update: (id: number, config: NotificationConfig) => Promise<NotificationConfig>
+  delete: (id: number) => Promise<void>
 }

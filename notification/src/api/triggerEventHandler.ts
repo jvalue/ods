@@ -29,19 +29,11 @@ export class TriggerEventHandler {
 
     const message = NotificationMessageFactory.buildMessage(transformationEvent, dataLocation)
     const data = transformationEvent.data
-    const configs = await this.notificationRepository.getConfigsForPipeline(transformationEvent.pipelineId)
+    const configs = await this.notificationRepository.getForPipeline(transformationEvent.pipelineId)
 
     const notificationJobs: Array<Promise<void>> = []
-    for (const webhookConfig of configs.webhook) {
-      notificationJobs.push(this.notificationExecutor.handleWebhook(webhookConfig, dataLocation, message, data))
-    }
-
-    for (const slackConfig of configs.slack) {
-      notificationJobs.push(this.notificationExecutor.handleSlack(slackConfig, dataLocation, message, data))
-    }
-
-    for (const firebaseConfig of configs.firebase) {
-      notificationJobs.push(this.notificationExecutor.handleFCM(firebaseConfig, dataLocation, message, data))
+    for (const config of configs) {
+      notificationJobs.push(this.notificationExecutor.execute(config, dataLocation, message, data))
     }
 
     await Promise.all(notificationJobs)

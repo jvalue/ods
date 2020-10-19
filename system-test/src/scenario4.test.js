@@ -65,12 +65,15 @@ describe('Test 4: Update periodic datasource with pipeline', () => {
 
   test('Create notification', async () => {
     const notificationConfig = {
+      type: 'WEBHOOK',
+      pipelineId: pipelineId,
       condition: 'data.one === 1',
-      url: MOCK_SERVER_WITHIN_DOCKER + '/notifications/test4_1',
-      pipelineId: pipelineId
+      parameter: {
+        url: MOCK_SERVER_WITHIN_DOCKER + '/notifications/test4_1'
+      }
     }
 
-    const response = await request(NOTIFICATION_URL).post('/config/webhook').send(notificationConfig)
+    const response = await request(NOTIFICATION_URL).post('/configs').send(notificationConfig)
     expect(response.status).toEqual(201)
 
     expect(response.body.id).toBeGreaterThan(0)
@@ -107,12 +110,15 @@ describe('Test 4: Update periodic datasource with pipeline', () => {
 
   test('Add second notification', async () => {
     const secondNotificationCfg = {
+      type: 'WEBHOOK',
       pipelineId: pipelineId,
       condition: 'data.two === "two"',
-      url: MOCK_SERVER_WITHIN_DOCKER + '/notifications/test4_2'
+      parameter: {
+        url: MOCK_SERVER_WITHIN_DOCKER + '/notifications/test4_2'
+      }
     }
 
-    const response = await request(NOTIFICATION_URL).post('/config/webhook').send(secondNotificationCfg)
+    const response = await request(NOTIFICATION_URL).post('/configs').send(secondNotificationCfg)
     expect(response.status).toEqual(201)
     expect(response.body.id).toBeGreaterThan(0)
   })

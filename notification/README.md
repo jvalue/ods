@@ -4,75 +4,86 @@
 
 `npm install`
 
-`npm run tsc`
+`npm run transpile`
 
 ## Run
 
 `npm start`
 
-## Running in watch mode
-
-Use `npm run watch` to concurrently start the `tsc` compiler as well as run the service. It automatically reloads after file changes.
-
 ## Running unit tests
 
-Use `npm test` to run the unit tests. There is also `nrm run watch-test` available to start `jest` in "watch mode".
+Use `npm test` to run the unit tests.
 
 ## Running end-to-end tests
 
-TBD
+Run integration tests in docker via the following command:
+
+```docker-compose -f docker-compose.yml -f docker-compose.it.yml build notification notification-it && docker-compose -f docker-compose.yml -f docker-compose.it.yml up notification notification-it edge```
+
 
 ## API
 | Endpoint  | Method  | Request Body  | Response Body | Description |
 |---|---|---|---|---|
 | *base_url*/ | GET | - | text | Get health status |
 | *base_url*/version | GET | - | text | Get service version |
-| *base_url*/webhook | POST | webhookRequest | - | Trigger webhook |
-| *base_url*/slack | POST | slackRequest | - | Trigger slack notification |
-| *base_url*/fcm | POST | firebaseRequest | - | Trigger firebase notification |
+| *base_url*/configs | POST | NotificationWriteModel | - | Create a notification config |
+| *base_url*/configs?pipelineId={pipelineId} | GET | - | NotificationReadModel[] | Get all notifications, filter by pipelineId if provided |
+| *base_url*/configs/{id} | GET | - | NotificationReadModel | Get notification by id |
+| *base_url*/configs/{id} | PUT | NotificationWriteModel | - | Update notification |
+| *base_url*/configs/{id} | DELETE | - | - | Delete notification |
+| *base_url*/trigger | POST | TriggerConfig | - | Trigger all notifications related to pipeline |
 
 
-### WebhookRequest
+### NotificationWriteModel
+Base model:
 ```
 {
-  "pipelineName": string,
-  "pipelineId": string,
-  "data": object,
-  "dataLocation": string,
+  "pipelineId": number,
   "condition": string,
-  "type": "WEBHOOK"
-  "url": string
+  "type": "WEBHOOK" | "SLACK" | "FCM",
+  "parameter": {
+    ... see below
+  }
 }
 ```
 
-### SlackRequest
+Parameter for a webhook notification: 
 ```
-{
-  "pipelineName": string,
-  "pipelineId": string,
-  "data": object,
-  "dataLocation": string,
-  "condition": string,
-  "notificationType": "SLACK",
-  "workspaceId": string,
-  "channelId": string,
-  "secret": string
+"parameter": {
+    "url": string
 }
 ```
 
-### FirebaseRequest
+
+Parameter for a slack notification: 
+```
+"parameter": {
+    "workspaceId": string
+    "channelId": string
+    "secret": string
+}
+```
+
+
+Parameter for a firebase notification: 
+```
+"parameter": {
+    "projectId": string
+    "clientEmail": string
+    "privateKey": string
+    "topic": string
+}
+```
+
+### NotificationReadModel
+Equal to `NotificationWriteModel`, but has an additional `id: number` field.
+
+### TriggerConfig
 ```
 {
+  "pipelineId": number,
   "pipelineName": string,
-  "pipelineId": string,
-  "data": object,
-  "dataLocation": string,
-  "condition": string,
-  "notificationType": "FCM",
-  "projectId": string,
-  "clientEmail": string,
-  "privateKey": string,
-  "topic": string
+  "data": object
 }
 ```
 
@@ -80,7 +91,7 @@ TBD
 ### Slack notification walkthrough
 * Create a slack app for your slack channel and enable activations as discribed [here](https://api.slack.com/messaging/webhooks).
 * Determine your apps' incoming webhook url at the slack [dashboard](https://api.slack.com/apps).
-* POST a slackRequest under the endpoint ```/notification/slack```. The workspaceId, channelId and secret fields can be taken from the parts of the incoming webhook url (separated by '/', in the given order).
+* POST a slackRequest under the endpoint ```/configs```. The workspaceId, channelId and secret fields can be taken from the parts of the incoming webhook url (separated by '/', in the given order).
 * Go to your configured channel and be stunned by the magic. 
 
 ## License

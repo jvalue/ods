@@ -1,5 +1,5 @@
 import axios from 'axios'
-import NotificationConfig from '@/notification/notificationConfig'
+import NotificationConfig, { NotificationType } from '@/notification/notificationConfig'
 import { NOTIFICATION_SERVICE_URL } from '@/env'
 
 /**
@@ -14,99 +14,70 @@ const http = axios.create({
 })
 
 export async function getAllByPipelineId (pipelineId: number): Promise<NotificationConfig[]> {
-  const response = await http.get(`/config/pipeline/${pipelineId}`)
-  const notificationSummary: NotificationApiSummary = JSON.parse(response.data)
-  const notifications: NotificationConfig[] = []
-  for (const notification of notificationSummary.webhook) {
-    notifications.push(fromApiModel(notification, 'webhook'))
-  }
-  for (const notification of notificationSummary.slack) {
-    notifications.push(fromApiModel(notification, 'slack'))
-  }
-  for (const notification of notificationSummary.firebase) {
-    notifications.push(fromApiModel(notification, 'fcm'))
-  }
-  return notifications
+  const response = await http.get(`/configs?pipelineId=${pipelineId}`)
+  const notifications: NotificationApiReadModel[] = JSON.parse(response.data)
+  return fromApiReadModels(notifications)
 }
 
-export async function getById (id: number, notificationType: string): Promise<NotificationConfig> {
-  const response = await http.get(`/config/${notificationType}/${id}`)
+export async function getById (id: number): Promise<NotificationConfig> {
+  const response = await http.get(`/configs/${id}`)
   const notificationApiModel = JSON.parse(response.data)
-  return fromApiModel(notificationApiModel, notificationType)
+  return fromApiReadModel(notificationApiModel)
 }
 
 export async function create (notificationConfig: NotificationConfig): Promise<NotificationConfig> {
-  const notificationType = notificationConfig.type
+  const apiModel = toApiWriteModel(notificationConfig)
 
-  const apiModel = toApiModel(notificationConfig)
-  delete apiModel.id
-
-  const response = await http.post(`/config/${notificationType}`, JSON.stringify(apiModel))
+  const response = await http.post('/configs', JSON.stringify(apiModel))
   const notificationApiModel = JSON.parse(response.data)
-  return fromApiModel(notificationApiModel, notificationType)
+  return fromApiReadModel(notificationApiModel)
 }
 
 export async function update (notificationConfig: NotificationConfig): Promise<void> {
-  const notificationType = notificationConfig.type
   const id = notificationConfig.id
+  const apiModel = toApiWriteModel(notificationConfig)
 
-  const apiModel = toApiModel(notificationConfig)
-
-  return await http.put(`/config/${notificationType}/${id}`, JSON.stringify(apiModel))
+  return await http.put(`/configs/${id}`, JSON.stringify(apiModel))
 }
 
 export async function remove (notificationConfig: NotificationConfig): Promise<void> {
-  const notificationType = notificationConfig.type
   const id = notificationConfig.id
 
-  return await http.delete(`/config/${notificationType}/${id}`)
+  return await http.delete(`/configs/${id}`)
 }
 
-interface NotificationApiSummary {
-  webhook: WebhookNotificationApiConfig[]
-  slack: SlackNotificationApiConfig[]
-  firebase: FirebaseNotificationApiConfig[]
-}
-
-interface NotificationApiConfig {
+interface NotificationApiReadModel extends NotificationApiWriteModel {
   id: number
+}
+
+interface NotificationApiWriteModel {
   pipelineId: number
   condition: string
+  type: ApiNotificationType
+  parameter: object
 }
 
-interface WebhookNotificationApiConfig extends NotificationApiConfig {
-  url: string
-}
+type ApiNotificationType = 'WEBHOOK' | 'SLACK' | 'FCM'
 
-interface SlackNotificationApiConfig extends NotificationApiConfig {
-  workspaceId: string
-  channelId: string
-  secret: string
-}
-
-interface FirebaseNotificationApiConfig extends NotificationApiConfig {
-  projectId: string
-  clientEmail: string
-  privateKey: string
-  topic: string
-}
-
-function toApiModel (notification: NotificationConfig): NotificationApiConfig {
-  const baseApiNotification: NotificationApiConfig = {
-    id: notification.id,
+function toApiWriteModel (notification: NotificationConfig): NotificationApiWriteModel {
+  return {
     pipelineId: notification.pipelineId,
-    condition: notification.condition
+    condition: notification.condition,
+    type: notification.type,
+    parameter: notification.parameters
   }
-  const completeApiNotification = Object.assign(baseApiNotification, notification.parameters)
-  return completeApiNotification
 }
 
-function fromApiModel (notificationApiModel: NotificationApiConfig, notificationType: string): NotificationConfig {
+function fromApiReadModel (notificationApiModel: NotificationApiReadModel): NotificationConfig {
   return {
     id: notificationApiModel.id,
     pipelineId: notificationApiModel.pipelineId,
     condition: notificationApiModel.condition,
-    type: notificationType,
-    parameters: { ...notificationApiModel }
+    type: NotificationType[notificationApiModel.type],
+    parameters: notificationApiModel.parameter
   }
+}
+
+function fromApiReadModels (notificationApiModels: NotificationApiReadModel[]): NotificationConfig[] {
+  return notificationApiModels.map(x => fromApiReadModel(x))
 }
