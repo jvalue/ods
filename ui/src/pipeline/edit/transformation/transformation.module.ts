@@ -26,6 +26,7 @@ export default class TransformationModule extends VuexModule {
   @Action public setDataAndSubmit (value: Data): void {
     this.context.commit('setData', value)
     this.context.dispatch('scheduleSubmit')
+      .catch(() => {})
   }
 
   @Mutation public setFunction (value: string): void {
@@ -36,6 +37,7 @@ export default class TransformationModule extends VuexModule {
   @Action public setFunctionAndSubmit (value: string): void {
     this.context.commit('setFunction', value)
     this.context.dispatch('scheduleSubmit')
+      .catch(() => {})
   }
 
   @Mutation public setResult (value: JobResult): void {
@@ -60,6 +62,7 @@ export default class TransformationModule extends VuexModule {
     this.context.commit('setIsLoadingData', true)
     const data = await DatasourceRest.getDatasourceData(datasourceId)
     this.context.dispatch('setDataAndSubmit', data)
+      .catch(() => {})
   }
 
   @Action
@@ -69,7 +72,9 @@ export default class TransformationModule extends VuexModule {
       window.clearTimeout(this.timeoutHandle)
     }
     // schedule the dispatch and get the handle
-    const handle = window.setTimeout(() => this.context.dispatch('transformData'), 1500)
+    const handle = window.setTimeout(() => {
+      this.context.dispatch('transformData').catch(() => {})
+    }, 1500)
     // save the handle in the module state
     this.context.commit('setTimeoutHandle', handle)
   }

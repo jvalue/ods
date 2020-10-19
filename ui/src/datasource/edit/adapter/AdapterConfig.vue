@@ -45,6 +45,7 @@ import { Emit, PropSync, Watch } from 'vue-property-decorator'
 
 import Datasource from '../../datasource'
 import CsvAdapterConfig from './CsvAdapterConfig.vue'
+import { requiredRule } from '../../../validators'
 
 @Component({
   components: { CsvAdapterConfig }
@@ -54,11 +55,13 @@ export default class AdapterConfig extends Vue {
   private availableEncodings = ['UTF-8', 'ISO-8859-1', 'US-ASCII']
   private availableAdapterFormats = ['JSON', 'XML', 'CSV']
 
-  private isValid = true;
-  private isFormatParametersValid = true;
+  private isValid = true
+  private isFormatParametersValid = true
 
   @PropSync('value')
-  private adapterConfig!: Datasource;
+  private adapterConfig!: Datasource
+
+  private required = requiredRule
 
   @Emit('value')
   emitValue (): Datasource {
@@ -75,7 +78,9 @@ export default class AdapterConfig extends Vue {
           skipFirstDataRow: false
         }
         break
-      } case 'JSON' || 'XML': {
+      }
+      case 'JSON':
+      case 'XML': {
         this.adapterConfig.format.parameters = {}
         this.isFormatParametersValid = true
         break
@@ -85,8 +90,7 @@ export default class AdapterConfig extends Vue {
 
   @Emit('validityChanged')
   emitValid (): boolean {
-    const isValid = this.isValid && this.isFormatParametersValid
-    return isValid
+    return this.isValid && this.isFormatParametersValid
   }
 
   @Watch('adapterConfig', { deep: true })
@@ -102,10 +106,6 @@ export default class AdapterConfig extends Vue {
   @Watch('isFormatParametersValid')
   validFormParametersChanged (): void {
     this.emitValid()
-  }
-
-  private required (val: string): true | string {
-    return !!val || 'required.'
   }
 }
 </script>

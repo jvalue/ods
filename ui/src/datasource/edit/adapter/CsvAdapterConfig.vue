@@ -30,12 +30,13 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 
 import { Emit, PropSync, Watch } from 'vue-property-decorator'
+import { requiredRule } from '../../../validators'
 
-type CsvConfig = {
-  lineSeparator: string;
-  columnSeparator: string;
-  firstRowAsHeader: boolean;
-  skipFirstDataRow: boolean;
+interface CsvConfig {
+  lineSeparator: string
+  columnSeparator: string
+  firstRowAsHeader: boolean
+  skipFirstDataRow: boolean
 }
 
 @Component({ })
@@ -48,7 +49,9 @@ export default class CsvAdapterConfig extends Vue {
   ]
 
   @PropSync('value')
-  private csvConfig!: CsvConfig;
+  private csvConfig!: CsvConfig
+
+  private required = requiredRule
 
   @Emit('value')
   emitValue (): CsvConfig {
@@ -68,10 +71,6 @@ export default class CsvAdapterConfig extends Vue {
   @Watch('isFormValid')
   validityChanged (): void {
     this.emitValid()
-  }
-
-  private required (val: string): true | string {
-    return !!val || 'required.'
   }
 }
 </script>

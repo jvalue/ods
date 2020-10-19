@@ -53,24 +53,24 @@ import Router from '@/router'
   }
 })
 export default class App extends Vue {
-  private title = 'Open-Data-Service';
+  private title = 'Open-Data-Service'
 
-  private routerTitle = '';
+  private routerTitle = ''
 
-  private drawer = null;
+  private drawer = null
 
   private items = [
     { title: 'Dashboard', route: '/' },
     { title: 'Datasources', route: '/datasources' },
     { title: 'Pipelines', route: '/pipelines' },
     { title: 'About', route: '/about' }
-  ];
+  ]
 
   private created (): void {
-    this.routerTitle = Router.currentRoute.meta.title || ''
+    this.routerTitle = Router.currentRoute.meta.title ?? ''
 
     Router.afterEach((to) => {
-      this.routerTitle = to.meta.title || ''
+      this.routerTitle = to.meta.title ?? ''
     })
   }
 }

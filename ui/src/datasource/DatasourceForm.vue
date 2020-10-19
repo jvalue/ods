@@ -98,8 +98,8 @@ import StepperButtonGroup from '../components/StepperButtonGroup.vue'
 import AdapterConfig from './edit/adapter/AdapterConfig.vue'
 import DatasourceMetadataConfig from './edit/DatasourceMetadataConfig.vue'
 import TriggerConfig from './edit/TriggerConfig.vue'
-
 import Datasource from './datasource'
+import { requiredRule } from '../validators'
 
 @Component({
   components: { AdapterConfig, StepperButtonGroup, DatasourceMetadataConfig, TriggerConfig }
@@ -115,8 +115,10 @@ export default class DatasourceForm extends Vue {
   @PropSync('value')
   private datasource: Datasource | undefined
 
+  private required = requiredRule
+
   get isLoading (): boolean {
-    return !this.datasource
+    return this.datasource === undefined
   }
 
   get isValid (): boolean {
@@ -134,10 +136,6 @@ export default class DatasourceForm extends Vue {
   @Watch('isValid')
   private onIsValidChanged (): void {
     this.emitIsValid()
-  }
-
-  private required (val: string): true | string {
-    return !!val || 'required.'
   }
 }
 </script>
