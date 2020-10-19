@@ -57,17 +57,29 @@ export class DatasourceConfigConsumer {
 
   consumeEvent = async (msg: AMQP.ConsumeMessage | null): Promise<void> => {
     if (msg === null) {
-      console.debug('Received empty event when listening on datsource config events - doing nothing')
+      console.debug('Received empty event when listening on datasource config events - doing nothing')
     } else {
-      console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
-      if (msg.fields.routingKey === AMQP_DATASOURCE_CONFIG_UPDATED_TOPIC ||
-        msg.fields.routingKey === AMQP_DATASOURCE_CONFIG_CREATED_TOPIC) {
-        await this.scheduler.applyCreateOrUpdateEvent(JSON.parse(msg.content.toString()))
-      } else if (msg.fields.routingKey === AMQP_DATASOURCE_CONFIG_DELETED_TOPIC) {
-        this.scheduler.applyDeleteEvent(JSON.parse(msg.content.toString()))
-      } else {
-        console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
-      }
+      await this.handleMsg(msg)
     }
   }
+
+  handleMsg = async (msg: AMQP.ConsumeMessage): Promise<void> => {
+    console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
+    if (isUpdateOrCreate(msg)) {
+      await this.scheduler.applyCreateOrUpdateEvent(JSON.parse(msg.content.toString()))
+    } else if (isDelete(msg)) {
+      this.scheduler.applyDeleteEvent(JSON.parse(msg.content.toString()))
+    } else {
+      console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
+    }
+  }
+}
+
+const isUpdateOrCreate = (msg: AMQP.ConsumeMessage): boolean => {
+  return msg.fields.routingKey === AMQP_DATASOURCE_CONFIG_UPDATED_TOPIC ||
+      msg.fields.routingKey === AMQP_DATASOURCE_CONFIG_CREATED_TOPIC
+}
+
+const isDelete = (msg: AMQP.ConsumeMessage): boolean => {
+  return msg.fields.routingKey === AMQP_DATASOURCE_CONFIG_DELETED_TOPIC
 }
