@@ -124,7 +124,7 @@ export default class Scheduler {
             console.debug(`Not able to reach adapter when triggering datasource ${datasourceId}: ${httpError.request}`)
           }
         } else {
-          console.debug(`Triggering datasource ${datasourceId} failed:`, httpError.message)
+          console.debug(`Triggering datasource ${datasourceId} failed`)
         }
         if (i === MAX_TRIGGER_RETRIES - 1) { // last retry
           console.error(`Could not trigger datasource ${datasourceId}:`, httpError)
