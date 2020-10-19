@@ -30,19 +30,19 @@
       md="4"
     >
       <webhook-notification-form
-        v-if="notification.type === 'webhook'"
+        v-if="notification.type === 'WEBHOOK'"
         v-model="notification.parameters"
         style="flex: 1 1 auto"
         @changeValidity="isParametersValid = $event"
       />
       <firebase-notification-form
-        v-if="notification.type === 'fcm'"
+        v-if="notification.type === 'FCM'"
         v-model="notification.parameters"
         style="flex: 1 1 auto"
         @changeValidity="isParametersValid = $event"
       />
       <slack-notification-form
-        v-if="notification.type === 'slack'"
+        v-if="notification.type === 'SLACK'"
         v-model="notification.parameters"
         style="flex: 1 1 auto"
         @changeValidity="isParametersValid = $event"
@@ -59,14 +59,14 @@ import WebhookNotificationForm from '@/notification/WebhookNotificationForm.vue'
 import FirebaseNotificationForm from '@/notification/FirebaseNotificationForm.vue'
 import SlackNotificationForm from '@/notification/SlackNotificationForm.vue'
 
-import NotificationConfig, { CONFIG_TYPE } from '@/notification/notificationConfig'
+import NotificationConfig, { NotificationType } from '@/notification/notificationConfig'
 import { Emit, PropSync, Watch } from 'vue-property-decorator'
 
 @Component({
   components: { WebhookNotificationForm, FirebaseNotificationForm, SlackNotificationForm }
 })
 export default class NotificationForm extends Vue {
-  private notificationTypes = Object.values(CONFIG_TYPE) // Convert CONFIG_TYPES to list
+  private notificationTypes = Object.values(NotificationType) // Convert NotificationTypeS to list
 
   @PropSync('value')
   private notification!: NotificationConfig

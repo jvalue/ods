@@ -59,36 +59,45 @@ describe('Test 5: Create pipeline with multiple notifications', () => {
 
   test('Create first notification', async () => {
     const notificationConfig = {
+      type: 'WEBHOOK',
+      pipelineId: pipelineId,
       condition: 'data.one === 1',
-      url: MOCK_SERVER_WITHIN_DOCKER + '/notifications/test5_1',
-      pipelineId: pipelineId
+      parameter: {
+        url: MOCK_SERVER_WITHIN_DOCKER + '/notifications/test5_1'
+      }
     }
 
-    const response = await request(NOTIFICATION_URL).post('/config/webhook').send(notificationConfig)
+    const response = await request(NOTIFICATION_URL).post('/configs').send(notificationConfig)
     expect(response.status).toEqual(201)
     expect(response.body.id).toBeGreaterThan(0)
   }, TIMEOUT)
 
   test('Create second notification', async () => {
     const notificationConfig = {
+      type: 'WEBHOOK',
+      pipelineId: pipelineId,
       condition: 'data.one === 1',
-      url: MOCK_SERVER_WITHIN_DOCKER + '/notifications/test5_2',
-      pipelineId: pipelineId
+      parameter: {
+        url: MOCK_SERVER_WITHIN_DOCKER + '/notifications/test5_2'
+      }
     }
 
-    const response = await request(NOTIFICATION_URL).post('/config/webhook').send(notificationConfig)
+    const response = await request(NOTIFICATION_URL).post('/configs').send(notificationConfig)
     expect(response.status).toEqual(201)
     expect(response.body.id).toBeGreaterThan(0)
   }, TIMEOUT)
 
   test('Create third notification', async () => {
     const notificationConfig = {
+      type: 'WEBHOOK',
+      pipelineId: pipelineId,
       condition: 'data.one < 1',
-      url: MOCK_SERVER_WITHIN_DOCKER + '/notifications/test5_3',
-      pipelineId: pipelineId
+      parameter: {
+        url: MOCK_SERVER_WITHIN_DOCKER + '/notifications/test5_3'
+      }
     }
 
-    const response = await request(NOTIFICATION_URL).post('/config/webhook').send(notificationConfig)
+    const response = await request(NOTIFICATION_URL).post('/configs').send(notificationConfig)
     expect(response.status).toEqual(201)
     expect(response.body.id).toBeGreaterThan(0)
   }, TIMEOUT)

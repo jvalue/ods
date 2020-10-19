@@ -58,12 +58,15 @@ describe('Test 6: Delete periodic pipeline', () => {
 
   test('Create notification', async () => {
     const notificationConfig = {
+      type: 'WEBHOOK',
+      pipelineId: pipelineId,
       condition: 'data.one === 1',
-      url: MOCK_SERVER_WITHIN_DOCKER + '/notifications/test6',
-      pipelineId: pipelineId
+      parameter: {
+        url: MOCK_SERVER_WITHIN_DOCKER + '/notifications/test6'
+      }
     }
 
-    const response = await request(NOTIFICATION_URL).post('/config/webhook').send(notificationConfig)
+    const response = await request(NOTIFICATION_URL).post('/configs').send(notificationConfig)
     expect(response.status).toEqual(201)
     expect(response.body.id).toBeGreaterThan(0)
   }, TIMEOUT)
