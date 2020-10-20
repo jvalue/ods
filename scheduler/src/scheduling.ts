@@ -7,8 +7,7 @@ import type ExecutionJob from './interfaces/scheduling-job'
 import type DatasourceConfig from './interfaces/datasource-config'
 
 import { sleep } from './sleep'
-import './env'
-import DatasourceConfigEvent from '@/interfaces/datasource-config-event'
+import DatasourceConfigEvent from './interfaces/datasource-config-event'
 
 export default class Scheduler {
 
@@ -121,6 +120,7 @@ export default class Scheduler {
       try {
         await AdapterClient.triggerDatasource(datasourceId)
         console.log(`Datasource ${datasourceId} triggered.`)
+        break
       } catch (httpError) {
         if (this.isAxiosError(httpError)) {
           if (httpError.response !== undefined) {
