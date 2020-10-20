@@ -7,10 +7,16 @@ import type ExecutionJob from './interfaces/scheduling-job'
 import type DatasourceConfig from './interfaces/datasource-config'
 
 import { sleep } from './sleep'
-import { MAX_TRIGGER_RETRIES } from './env'
+import './env'
 import DatasourceConfigEvent from '@/interfaces/datasource-config-event'
 
 export default class Scheduler {
+
+  constructor(triggerRetries: number) {
+    this.triggerRetries = triggerRetries
+  }
+
+  private readonly triggerRetries
   private readonly allJobs: Map<number, ExecutionJob> = new Map() // datasourceId -> job
 
   async initializeJobsWithRetry (retries: number, backoff: number): Promise<void> {
@@ -111,7 +117,7 @@ export default class Scheduler {
 
   async execute (datasourceConfig: DatasourceConfig): Promise<void> {
     const datasourceId = datasourceConfig.id
-    for (let i = 0; i < MAX_TRIGGER_RETRIES; i++) {
+    for (let i = 0; i < this.triggerRetries; i++) {
       try {
         await AdapterClient.triggerDatasource(datasourceId)
         console.log(`Datasource ${datasourceId} triggered.`)
@@ -126,11 +132,11 @@ export default class Scheduler {
         } else {
           console.debug(`Triggering datasource ${datasourceId} failed`)
         }
-        if (i === MAX_TRIGGER_RETRIES - 1) { // last retry
+        if (i === this.triggerRetries - 1) { // last retry
           console.error(`Could not trigger datasource ${datasourceId}:`, httpError)
           break
         }
-        console.info(`Triggering datasource failed - retrying (${i}/${MAX_TRIGGER_RETRIES})`)
+        console.info(`Triggering datasource failed - retrying (${i}/${this.triggerRetries})`)
       }
     }
     this.reschedule(datasourceConfig)

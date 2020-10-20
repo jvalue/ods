@@ -4,7 +4,8 @@ import Scheduler from './scheduling'
 
 import {
   CONNECTION_RETRIES,
-  CONNECTION_BACKOFF_IN_MS
+  CONNECTION_BACKOFF_IN_MS,
+  MAX_TRIGGER_RETRIES
 } from './env'
 import { DatasourceConfigConsumer } from './api/amqp/datasourceConfigConsumer'
 
@@ -21,7 +22,7 @@ let server: Server | undefined
 let scheduler: Scheduler
 
 async function main (): Promise<void> {
-  scheduler = new Scheduler()
+  scheduler = new Scheduler(MAX_TRIGGER_RETRIES)
   const datasourceConfigConsumer = new DatasourceConfigConsumer(scheduler)
 
   await datasourceConfigConsumer.initialize(CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS)
