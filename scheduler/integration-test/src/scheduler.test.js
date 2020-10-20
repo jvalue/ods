@@ -53,20 +53,16 @@ describe('Scheduler-IT', () => {
   test('Should initialize schedule jobs correctly', async () => {
     await sleep(4000)
 
-    const singleTrigger = await request(MOCK_SERVER_URL)
-      .get('/triggerRequests/100')
-
     const multipleTrigger = await request(MOCK_SERVER_URL)
       .get('/triggerRequests/101')
 
-    expect(singleTrigger.body).toBe(1)
     expect(multipleTrigger.body).toBeGreaterThan(1)
   }, TIMEOUT)
 
   test('Should trigger datasource after creation event', async () => {
     const channel = await createAmqpChannel()
 
-    const creationEvent = createDatasourceEvent(1, 2000, 0)
+    const creationEvent = createDatasourceEvent(1, 2000, 10000, false)
 
     channel.publish(AMQP_EXCHANGE, AMQP_DATASOURCE_CONFIG_CREATED_TOPIC, creationEvent)
 
@@ -81,7 +77,7 @@ describe('Scheduler-IT', () => {
   test('Should not trigger datasource after deletion event', async () => {
     const channel = await createAmqpChannel()
 
-    const creationEvent = createDatasourceEvent(2, 2000, 1000)
+    const creationEvent = createDatasourceEvent(2, 2000, 1000, true)
     const deletionEvent = createDeletionEvent(2)
 
     channel.publish(AMQP_EXCHANGE, AMQP_DATASOURCE_CONFIG_CREATED_TOPIC, creationEvent)
@@ -98,13 +94,15 @@ describe('Scheduler-IT', () => {
   test('Should update trigger after update event', async () => {
     const channel = await createAmqpChannel()
 
-    const creationEvent = createDatasourceEvent(3, 2000, 0)
-    const updateEvent = createDatasourceEvent(3, 1000, 1000)
+    const creationEvent = createDatasourceEvent(3, 500, 10000, true)
+    const updateEvent = createDatasourceEvent(3, 500, 500, true)
+    console.log(updateEvent.toString())
 
     channel.publish(AMQP_EXCHANGE, AMQP_DATASOURCE_CONFIG_CREATED_TOPIC, creationEvent)
+    await sleep(200)
     channel.publish(AMQP_EXCHANGE, AMQP_DATASOURCE_CONFIG_UPDATED_TOPIC, updateEvent)
 
-    await sleep(4000)
+    await sleep(4500)
 
     const triggerRequests = await request(MOCK_SERVER_URL)
       .get('/triggerRequests/3')
@@ -122,8 +120,7 @@ function createDeletionEvent (datasourceId) {
   return Buffer.from(JSON.stringify(event))
 }
 
-function createDatasourceEvent (datasourceId, delay, interval) {
-  const periodic = (interval === 0)
+function createDatasourceEvent (datasourceId, delay, interval, periodic) {
   const event = {
     datasource: {
       id: datasourceId,

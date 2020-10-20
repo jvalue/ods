@@ -9,19 +9,11 @@ const { jsonDateAfter } = require('./testHelper')
 const triggerRequests = new Map()
 const initialSources = [
   {
-    id: 100,
-    trigger: {
-      firstExecution: jsonDateAfter(1000),
-      periodic: false,
-      interval: 0
-    }
-  },
-  {
     id: 101,
     trigger: {
       firstExecution: jsonDateAfter(1000),
       periodic: true,
-      interval: 2000
+      interval: 3000
     }
   }
 ]
