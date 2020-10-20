@@ -149,7 +149,7 @@ async function initAmqp (url, exchange, topic, queue, retries, backoff) {
       return
     } catch (e) {
       console.info(`Error initializing RabbitMQ(${i}/${retries}: ${e}.`)
-      if( i <= retries ) {
+      if (i <= retries) {
         console.info(`Retrying in ${backoff}`)
         await sleep(backoff)
       } else {
