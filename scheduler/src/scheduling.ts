@@ -10,8 +10,7 @@ import { sleep } from './sleep'
 import DatasourceConfigEvent from './interfaces/datasource-config-event'
 
 export default class Scheduler {
-
-  constructor(triggerRetries: number) {
+  constructor (triggerRetries: number) {
     this.triggerRetries = triggerRetries
   }
 

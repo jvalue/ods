@@ -6,6 +6,7 @@ import {
 import DatasourceConfig from './interfaces/datasource-config'
 import { sleep } from './sleep'
 import DatasourceConfigEvent from '@/interfaces/datasource-config-event'
+import Scheduler from './scheduling'
 
 jest.mock('./clients/adapter-client')
 // Type assertion is ok here, because we have mocked the whole './clients/adapter-client' module
@@ -13,8 +14,6 @@ jest.mock('./clients/adapter-client')
 const mockedGetAllDatasources = getAllDatasources as jest.Mock
 const mockedTriggerDatasource = triggerDatasource as jest.Mock
 /* eslint-enable @typescript-eslint/consistent-type-assertions */
-
-import Scheduler from './scheduling'
 
 const CONNECTION_RETRIES = 2
 const CONNECTION_BACKOFF_IN_MS = 1000
