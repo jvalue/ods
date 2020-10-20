@@ -32,6 +32,10 @@ describe('Scheduler', () => {
     scheduler = new Scheduler(TRIGGER_RETRIES)
   })
 
+  afterEach(async () => {
+    mockedTriggerDatasource.mockClear()
+  })
+
   test('should initialize jobs correctly', async () => {
     const config = generateConfig(true, new Date(Date.now() + 500), 6000)
     mockedGetAllDatasources.mockResolvedValue([config])
@@ -201,6 +205,7 @@ describe('Scheduler', () => {
     if (datasourceJob2 !== undefined) {
       expect(datasourceJob1.datasourceConfig).toEqual(datasourceJob2.datasourceConfig)
     }
+    await sleep(250)
     expect(mockedTriggerDatasource.mock.calls.length).toBeGreaterThan(1)
   })
 })
