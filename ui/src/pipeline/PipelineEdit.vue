@@ -123,6 +123,7 @@ import Pipeline from '@/pipeline/pipeline'
 import StepperButtonGroup from '@/components/StepperButtonGroup.vue'
 import PipelineMetadataConfig from '@/pipeline/edit/PipelineMetadataConfig.vue'
 import PipelineTransformationConfig from '@/pipeline/edit/transformation/PipelineTransformationConfig.vue'
+import { requiredRule } from '@/validators'
 
 const pipelineNamespace = { namespace: 'pipeline' }
 
@@ -156,6 +157,8 @@ export default class PipelineEdit extends Vue {
     }
   }
 
+  private required = requiredRule
+
   created (): void {
     this.isEditMode = this.$route.meta.isEditMode
 
@@ -164,7 +167,7 @@ export default class PipelineEdit extends Vue {
       this.loadPipelineByIdAction(id)
     } else {
       const datasourceId = this.$route.params.datasourceId
-      if (datasourceId) {
+      if (datasourceId !== undefined) {
         this.isDatasourcePreselected = true
         this.dialogPipeline.datasourceId = parseInt(datasourceId)
       }
@@ -194,10 +197,7 @@ export default class PipelineEdit extends Vue {
 
   private routeToOverview (): void {
     this.$router.push({ name: 'pipeline-overview' })
-  }
-
-  private required (val: string): boolean | string {
-    return !!val || 'required.'
+      .catch(error => console.log('Failed to route to pipeline-overview', error))
   }
 
   private evaluateAllForms (): boolean {

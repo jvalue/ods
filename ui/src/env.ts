@@ -1,4 +1,4 @@
-const isEmpty = (value: string | undefined): value is undefined => !value || value === ''
+const isEmpty = (value: string | undefined): value is undefined => value === undefined || value === ''
 
 const getEnv = (envName: string): string => {
   const env = process.env[envName]

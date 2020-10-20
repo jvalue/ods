@@ -24,8 +24,8 @@ const routes: RouteConfig[] = [
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "about" */ './views/About.vue')
+    component: async () =>
+      await import(/* webpackChunkName: "about" */ './views/About.vue')
   },
   ...pipelineRoutes,
   ...datasourceRoutes,
@@ -40,7 +40,7 @@ const router = new Router({
 })
 
 router.beforeEach(async (to, from, next) => {
-  if (to.meta.requiresAuth && !isAuthenticated()) {
+  if (to.meta.requiresAuth === true && !isAuthenticated()) {
     await login()
   }
   next()

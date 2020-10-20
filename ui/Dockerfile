@@ -31,6 +31,9 @@ RUN echo "VUE_APP_BASE_URL=$UI_BASE_URL" > .env \
     && echo "VUE_APP_NOTIFICATION_SERVICE_URL=$NOTIFICATION_SERVICE_URL" >> .env \
     && cat .env
 
+# lint project
+RUN npm run lint-ci
+
 # build vue.js production bundle to ./dist
 RUN npm run build
 
