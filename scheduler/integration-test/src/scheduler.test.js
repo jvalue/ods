@@ -51,7 +51,7 @@ describe('Scheduler-IT', () => {
   }, TIMEOUT)
 
   test('Should initialize schedule jobs correctly', async () => {
-    await sleep(4000)
+    await sleep(5000)
 
     const multipleTrigger = await request(MOCK_SERVER_URL)
       .get('/triggerRequests/101')
