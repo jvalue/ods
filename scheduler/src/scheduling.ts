@@ -120,29 +120,18 @@ export default class Scheduler {
         await AdapterClient.triggerDatasource(datasourceId)
         console.log(`Datasource ${datasourceId} triggered.`)
         break
-      } catch (httpError) {
-        if (this.isAxiosError(httpError)) {
-          if (httpError.response !== undefined) {
-            console.debug(`Adapter was reachable but triggering datasource failed:
-         ${httpError.response.status}: ${httpError.response.data}`)
-          } else if (httpError.request !== undefined) {
-            console.debug(`Not able to reach adapter when triggering datasource ${datasourceId}: ${httpError.request}`)
-          }
-        } else {
-          console.debug(`Triggering datasource ${datasourceId} failed`)
+      } catch (error) {
+        if (isAxiosError(error)) {
+          handleAxiosError(error)
         }
         if (i === this.triggerRetries - 1) { // last retry
-          console.error(`Could not trigger datasource ${datasourceId}:`, httpError)
+          console.error(`Could not trigger datasource ${datasourceId}`)
           break
         }
         console.info(`Triggering datasource failed - retrying (${i}/${this.triggerRetries})`)
       }
     }
     this.reschedule(datasourceConfig)
-  }
-
-  isAxiosError (error: any): error is AxiosError {
-    return error.isAxiosError
   }
 
   async upsertJob (datasourceConfig: DatasourceConfig): Promise<ExecutionJob> {
@@ -173,4 +162,20 @@ export default class Scheduler {
     const job = this.allJobs.get(jobId)
     job?.scheduleJob.cancel()
   }
+}
+
+const isAxiosError = function (error: any): error is AxiosError {
+  return error.isAxiosError
+}
+
+const handleAxiosError = function (error: AxiosError): void {
+  let reason
+  if (error.response !== undefined) {
+    reason = `${error.response.status}: ${error.response.data}`
+  } else if (error.request !== undefined) {
+    reason = `Request failed: ${JSON.stringify(error.request)}`
+  } else {
+    reason = 'unknown'
+  }
+  console.error(`Triggering datasource failed, reason: ${reason}`)
 }
