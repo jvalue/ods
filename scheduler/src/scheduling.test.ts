@@ -1,50 +1,60 @@
 /* eslint-env jest */
 
 import {
-  getAllDatasources
+  getAllDatasources, triggerDatasource
 } from './clients/adapter-client'
 import DatasourceConfig from './interfaces/datasource-config'
 import { sleep } from './sleep'
-import Scheduler from './scheduling'
 import DatasourceConfigEvent from '@/interfaces/datasource-config-event'
 
 jest.mock('./clients/adapter-client')
 // Type assertion is ok here, because we have mocked the whole './clients/adapter-client' module
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
 const mockedGetAllDatasources = getAllDatasources as jest.Mock
+const mockedTriggerDatasource = triggerDatasource as jest.Mock
 /* eslint-enable @typescript-eslint/consistent-type-assertions */
+
+import Scheduler from './scheduling'
+
+const CONNECTION_RETRIES = 2
+const CONNECTION_BACKOFF_IN_MS = 1000
+const TRIGGER_RETRIES = 3
 
 jest.mock('./env', () => () => ({
   MAX_TRIGGER_RETRIES: 2
 }))
-
-const CONNECTION_RETRIES = 2
-const CONNECTION_BACKOFF_IN_MS = 1000
+mockedTriggerDatasource.mockReturnValue(Promise.resolve())
 
 let scheduler: Scheduler
 
 describe('Scheduler', () => {
   beforeEach(async () => {
-    scheduler = new Scheduler()
+    scheduler = new Scheduler(TRIGGER_RETRIES)
   })
 
   test('should initialize jobs correctly', async () => {
-    const config = generateConfig(true, new Date(Date.now() + 5000), 6000)
+    const config = generateConfig(true, new Date(Date.now() + 500), 6000)
     mockedGetAllDatasources.mockResolvedValue([config])
     await scheduler.initializeJobsWithRetry(CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS)
 
+    await sleep(1000)
+
     expect(scheduler.getAllJobs()).toHaveLength(1)
     expect(scheduler.getAllJobs()[0].datasourceConfig).toEqual(config)
+    expect(mockedGetAllDatasources).toHaveBeenCalledTimes(1)
+    expect(mockedTriggerDatasource).toHaveBeenCalledTimes(1)
   })
 
   test('should apply creation event', async () => {
     mockedGetAllDatasources.mockResolvedValue([])
-    const toBeAdded = generateConfig(true, new Date(Date.now() + 5000), 6000)
+    const toBeAdded = generateConfig(true, new Date(Date.now() + 500), 6000)
     const creationEvent: DatasourceConfigEvent = {
       datasource: toBeAdded
     }
 
     await scheduler.applyCreateOrUpdateEvent(creationEvent)
+
+    await sleep(500)
 
     expect(scheduler.getAllJobs()).toHaveLength(1)
     const job123 = scheduler.getJob(123)
@@ -52,10 +62,11 @@ describe('Scheduler', () => {
     if (job123 !== undefined) {
       expect(job123.datasourceConfig).toEqual(toBeAdded)
     }
+    expect(mockedTriggerDatasource).toHaveBeenCalledTimes(1)
   })
 
   test('should apply deletion event', async () => {
-    const toBeDeleted = generateConfig(true, new Date(Date.now() + 5000), 6000)
+    const toBeDeleted = generateConfig(true, new Date(Date.now() + 500), 1000)
     mockedGetAllDatasources.mockResolvedValue([toBeDeleted])
     await scheduler.initializeJobsWithRetry(CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS)
 
@@ -64,7 +75,10 @@ describe('Scheduler', () => {
     }
     await scheduler.applyDeleteEvent(deletionEvent)
 
+    await sleep(1000)
+
     expect(scheduler.getAllJobs()).toHaveLength(0)
+    expect(mockedTriggerDatasource).toHaveBeenCalledTimes(0)
   })
 
   test('should apply update event', async () => {
@@ -166,6 +180,7 @@ describe('Scheduler', () => {
     await sleep(250)
 
     expect(scheduler.getJob(datasourceConfig.id)).toBeUndefined() // executed once and not rescheduled
+    expect(mockedTriggerDatasource).toHaveBeenCalledTimes(1)
   })
 
   afterEach(() => {
@@ -174,7 +189,7 @@ describe('Scheduler', () => {
 
   test('should execute datasource periodic', async () => {
     const timestampInFuture = Date.now() + 200
-    const datasourceConfig = generateConfig(true, new Date(timestampInFuture), 500)
+    const datasourceConfig = generateConfig(true, new Date(timestampInFuture), 100)
     const datasourceJob1 = await scheduler.upsertJob(datasourceConfig)
     const nextInvocation1: Date = datasourceJob1.scheduleJob.nextInvocation()
     await sleep(250)
@@ -186,6 +201,7 @@ describe('Scheduler', () => {
     if (datasourceJob2 !== undefined) {
       expect(datasourceJob1.datasourceConfig).toEqual(datasourceJob2.datasourceConfig)
     }
+    expect(mockedTriggerDatasource.mock.calls.length).toBeGreaterThan(1)
   })
 })
 
