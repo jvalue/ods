@@ -65,13 +65,18 @@ export class DatasourceConfigConsumer {
 
   handleMsg = async (msg: AMQP.ConsumeMessage): Promise<void> => {
     console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
+
     if (isUpdateOrCreate(msg)) {
       await this.scheduler.applyCreateOrUpdateEvent(JSON.parse(msg.content.toString()))
-    } else if (isDelete(msg)) {
-      this.scheduler.applyDeleteEvent(JSON.parse(msg.content.toString()))
-    } else {
-      console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
+      return
     }
+
+    if (isDelete(msg)) {
+      this.scheduler.applyDeleteEvent(JSON.parse(msg.content.toString()))
+      return
+    }
+
+    console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
   }
 }
 

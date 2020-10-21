@@ -169,13 +169,17 @@ const isAxiosError = function (error: any): error is AxiosError {
 }
 
 const handleAxiosError = function (error: AxiosError): void {
-  let reason
+  const baseMsg = 'Error during datasource triggering:'
+
   if (error.response !== undefined) {
-    reason = `${error.response.status}: ${error.response.data}`
-  } else if (error.request !== undefined) {
-    reason = `Request failed: ${JSON.stringify(error.request)}`
-  } else {
-    reason = 'unknown'
+    console.error(`${baseMsg} ${error.response.status}: ${error.response.data}`)
+    return
   }
-  console.error(`Triggering datasource failed, reason: ${reason}`)
+
+  if (error.request !== undefined) {
+    console.error(`${baseMsg} ${JSON.stringify(error.request)}`)
+    return
+  }
+
+  console.error(`${baseMsg} unknown reason.`)
 }
