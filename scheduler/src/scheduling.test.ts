@@ -62,9 +62,8 @@ describe('Scheduler', () => {
     expect(scheduler.getAllJobs()).toHaveLength(1)
     const job123 = scheduler.getJob(123)
     expect(job123).toBeDefined()
-    if (job123 !== undefined) {
-      expect(job123.datasourceConfig).toEqual(toBeAdded)
-    }
+    // @ts-ignore
+    expect(job123.datasourceConfig).toEqual(toBeAdded)
     expect(mockedTriggerDatasource).toHaveBeenCalledTimes(1)
   })
 
@@ -101,9 +100,8 @@ describe('Scheduler', () => {
     expect(scheduler.getAllJobs()).toHaveLength(1)
     const job123 = scheduler.getJob(123)
     expect(job123).toBeDefined()
-    if (job123 !== undefined) {
-      expect(job123.datasourceConfig).toEqual(updated)
-    }
+    // @ts-ignore
+    expect(job123.datasourceConfig).toEqual(updated)
   })
 
   test('should determine correct execution date from timestamp in the future ', () => {
@@ -201,9 +199,8 @@ describe('Scheduler', () => {
 
     expect(nextInvocation1).not.toEqual(nextInvocation2)
     expect(datasourceJob2).toBeDefined()
-    if (datasourceJob2 !== undefined) {
-      expect(datasourceJob1.datasourceConfig).toEqual(datasourceJob2.datasourceConfig)
-    }
+    // @ts-ignore
+    expect(datasourceJob1.datasourceConfig).toEqual(datasourceJob2.datasourceConfig)
     await sleep(250)
     expect(mockedTriggerDatasource.mock.calls.length).toBeGreaterThan(1)
   })
