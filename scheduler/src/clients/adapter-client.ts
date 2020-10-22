@@ -2,7 +2,6 @@ import axios from 'axios'
 
 import type DatasourceConfig from '../interfaces/datasource-config'
 import type { DatasourceEvent } from '../interfaces/datasource-event'
-
 import { ADAPTER_SERVICE_URL } from '../env'
 
 const http = axios.create({
