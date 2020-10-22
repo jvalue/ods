@@ -11,15 +11,15 @@ import java.util.Collection;
 @RestController
 public class ProtocolEndpoint {
 
-    private final AdapterFactory adapterFactory;
+  private final AdapterFactory adapterFactory;
 
-    @Autowired
-    public ProtocolEndpoint(AdapterFactory adapterFactory) {
-        this.adapterFactory = adapterFactory;
-    }
+  @Autowired
+  public ProtocolEndpoint(AdapterFactory adapterFactory) {
+    this.adapterFactory = adapterFactory;
+  }
 
-    @GetMapping(Mappings.PROTOCOL_PATH)
-    public Collection<Importer> getProtocols() {
-        return adapterFactory.getAllImporters();
-    }
+  @GetMapping(Mappings.PROTOCOL_PATH)
+  public Collection<Importer> getProtocols() {
+    return adapterFactory.getAllProtocols();
+  }
 }
