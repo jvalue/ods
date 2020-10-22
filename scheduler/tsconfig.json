@@ -3,22 +3,15 @@
     "target": "es2018",
     "module": "commonjs",
     "strict": true,
-    "jsx": "preserve",
-    "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "allowJs": true,
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    },
-    "lib": ["es2018"],
+    "lib": ["es2020"],
     "outDir": "dist"
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx"
-  ],
-  "exclude": ["node_modules"]
+    "src/**/*.ts"
+  ]
 }
