@@ -80,15 +80,15 @@ public class DatasourceManager {
             .forEach(amqpPublisher::publishDeletion);
   }
 
- private AdapterConfig getParametrizedDatasource(Long id, RuntimeParameters runtimeParameters) {
-   Datasource datasource = getDatasource(id)
-     .orElseThrow(() -> new IllegalArgumentException("No datasource found with id " + id));
-   return datasource.toAdapterConfig(runtimeParameters);
- }
+  private AdapterConfig getParametrizedDatasource(Long id, RuntimeParameters runtimeParameters) {
+    Datasource datasource = getDatasource(id)
+      .orElseThrow(() -> new IllegalArgumentException("No datasource found with id " + id));
+    return datasource.toAdapterConfig(runtimeParameters);
+  }
 
- public DataBlob.MetaData trigger(Long id, RuntimeParameters runtimeParameters) {
+  public DataBlob.MetaData trigger(Long id, RuntimeParameters runtimeParameters) {
     AdapterConfig adapterConfig = getParametrizedDatasource(id, runtimeParameters);
-   try {
+    try {
       Adapter adapter = adapterFactory.getAdapter(adapterConfig);
       DataBlob executionResult = adapter.executeJob(adapterConfig);
       amqpPublisher.publishImportSuccess(id, executionResult.getData());
@@ -105,7 +105,8 @@ public class DatasourceManager {
  }
 
   /**
-   * Create an updated DatasourceConfig using the full representation of an update. This method ensures that id and creation time remain stable.
+   * Create an updated DatasourceConfig using the full representation of an update. This method ensures that id and
+   * creation time remain stable.
    *
    * @param updateConfig the representation of the updated config
    * @return an updated DatasourceConfig that has the same id and creationTimestamp as the original one.

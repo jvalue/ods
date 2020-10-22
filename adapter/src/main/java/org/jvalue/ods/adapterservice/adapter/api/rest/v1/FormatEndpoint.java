@@ -11,15 +11,15 @@ import java.util.Collection;
 @RestController
 public class FormatEndpoint {
 
-    private final AdapterFactory adapterFactory;
+  private final AdapterFactory adapterFactory;
 
-    @Autowired
-    public FormatEndpoint(AdapterFactory adapterFactory) {
-        this.adapterFactory = adapterFactory;
-    }
+  @Autowired
+  public FormatEndpoint(AdapterFactory adapterFactory) {
+    this.adapterFactory = adapterFactory;
+  }
 
-    @GetMapping(Mappings.FORMAT_PATH)
-    public Collection<Interpreter> getFormats() {
-        return adapterFactory.getAllInterpreters();
-    }
+  @GetMapping(Mappings.FORMAT_PATH)
+  public Collection<Interpreter> getFormats() {
+    return adapterFactory.getAllFormats();
+  }
 }
