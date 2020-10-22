@@ -1,5 +1,6 @@
 import * as express from 'express'
-import { StorageContentRepository } from '../../storage-content/storageContentRepository'
+
+import { StorageContentRepository } from '@ods/storage-content/storageContentRepository'
 
 export class StorageContentEndpoint {
   private readonly version = '0.0.1'

@@ -1,5 +1,5 @@
-/* eslint-env jest */import
-{ mocked } from 'ts-jest/utils'
+/* eslint-env jest */
+import { mocked } from 'ts-jest/utils'
 
 import ConfigWritesPublisher from './publisher/configWritesPublisher'
 import PipelineConfigRepository from './pipelineConfigRepository'

@@ -3,8 +3,8 @@ import express from 'express'
 import {
   isValidNotificationConfig,
   NotificationConfig
-} from '../../notification-config/notificationConfig'
-import { NotificationRepository } from '../../notification-config/notificationRepository'
+} from '@ods/notification-config/notificationConfig'
+import { NotificationRepository } from '@ods/notification-config/notificationRepository'
 
 export class NotificationConfigEndpoint {
   constructor (private readonly storageHandler: NotificationRepository) {}

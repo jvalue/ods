@@ -1,13 +1,15 @@
 import * as AMQP from 'amqplib'
-import AmqpConsumer from '../../util/amqpConsumer'
-import PipelineExecutionEventHandler from '../pipelineExecutionEventHandler'
+
+import AmqpConsumer from '@ods/util/amqpConsumer'
 import {
   AMQP_URL,
   AMQP_PIPELINE_EXECUTION_EXCHANGE,
   AMQP_PIPELINE_EXECUTION_TOPIC,
   AMQP_PIPELINE_EXECUTION_QUEUE,
   AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC
-} from '../../env'
+} from '@ods/env'
+
+import PipelineExecutionEventHandler from '../pipelineExecutionEventHandler'
 
 export class PipelineExecutionConsumer {
   constructor (

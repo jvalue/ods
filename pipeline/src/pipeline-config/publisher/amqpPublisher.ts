@@ -1,6 +1,6 @@
 import * as AMQP from 'amqplib'
 
-import { sleep } from '../../sleep'
+import { sleep } from '@ods/sleep'
 
 export default class AmqpPublisher {
   private channel?: AMQP.Channel

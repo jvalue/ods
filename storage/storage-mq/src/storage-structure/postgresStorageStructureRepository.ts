@@ -1,7 +1,9 @@
-import { StorageStructureRepository } from './storageStructureRepository'
 import { PoolConfig } from 'pg'
-import { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB, POSTGRES_SCHEMA } from '../env'
-import PostgresRepository from '@/util/postgresRepository'
+
+import { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB, POSTGRES_SCHEMA } from '@ods/env'
+import PostgresRepository from '@ods/util/postgresRepository'
+
+import { StorageStructureRepository } from './storageStructureRepository'
 
 const CREATE_BUCKET_STATEMENT =
 (schema: string, table: string): string => `CREATE TABLE IF NOT EXISTS "${schema}"."${table}" (

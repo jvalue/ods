@@ -1,8 +1,8 @@
 import * as express from 'express'
 
-import { PipelineConfigManager } from '@/pipeline-config/pipelineConfigManager'
-import { PipelineConfigDTOValidator } from '../../pipeline-config/model/pipelineConfig'
-import { isString } from '../../validators'
+import { PipelineConfigManager } from '@ods/pipeline-config/pipelineConfigManager'
+import { PipelineConfigDTOValidator } from '@ods/pipeline-config/model/pipelineConfig'
+import { isString } from '@ods/validators'
 
 export class PipelineConfigEndpoint {
   constructor (private readonly pipelineConfigManager: PipelineConfigManager) {}

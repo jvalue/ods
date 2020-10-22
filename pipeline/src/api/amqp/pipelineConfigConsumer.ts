@@ -1,14 +1,16 @@
 import * as AMQP from 'amqplib'
-import { PipelineConfigManager } from '../../pipeline-config/pipelineConfigManager'
-import { PipelineConfigTriggerRequest } from '../pipelineConfigTriggerRequest'
+
+import { PipelineConfigManager } from '@ods/pipeline-config/pipelineConfigManager'
 import {
   AMQP_URL,
   AMQP_DATASOURCE_EXECUTION_EXCHANGE,
   AMQP_DATASOURCE_EXECUTION_TOPIC,
   AMQP_DATASOURCE_EXECUTION_SUCCESS_TOPIC,
   AMQP_PIPELINE_EXECUTION_QUEUE
-} from '../../env'
-import { sleep } from '../../sleep'
+} from '@ods/env'
+import { sleep } from '@ods/sleep'
+
+import { PipelineConfigTriggerRequest } from '../pipelineConfigTriggerRequest'
 
 export class PipelineConfigConsumer {
   constructor (private readonly pipelineManager: PipelineConfigManager) {}

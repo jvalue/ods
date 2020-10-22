@@ -1,12 +1,13 @@
-import ConfigWritesPublisher from './configWritesPublisher'
-import AmqpPublisher from './amqpPublisher'
 import {
   AMQP_EXCHANGE,
   AMQP_URL,
   AMQP_PIPELINE_CONFIG_CREATED_TOPIC,
   AMQP_PIPELINE_CONFIG_UPDATED_TOPIC,
   AMQP_PIPELINE_CONFIG_DELETED_TOPIC
-} from '../../env'
+} from '@ods/env'
+
+import ConfigWritesPublisher from './configWritesPublisher'
+import AmqpPublisher from './amqpPublisher'
 
 export default class AmqpConfigWritesPublisher implements ConfigWritesPublisher {
   private readonly publisher: AmqpPublisher

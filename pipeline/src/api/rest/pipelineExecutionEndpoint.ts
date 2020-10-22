@@ -1,8 +1,9 @@
 import * as express from 'express'
 
-import PipelineExecutor from '../../pipeline-execution/pipelineExecutor'
+import PipelineExecutor from '@ods/pipeline-execution/pipelineExecutor'
+import { JobResult } from '@ods/pipeline-execution/jobResult'
+
 import { PipelineExecutionRequestValidator } from '../pipelineExecutionRequest'
-import { JobResult } from '../../pipeline-execution/jobResult'
 
 export class PipelineExecutionEndpoint {
   constructor (private readonly pipelineExecutor: PipelineExecutor) {}

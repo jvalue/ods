@@ -5,8 +5,8 @@ import {
   AMQP_PIPELINE_EXECUTION_EXCHANGE,
   AMQP_PIPELINE_EXECUTION_QUEUE,
   AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC
-} from '../../env'
-import { sleep } from '../../sleep'
+} from '@ods/env'
+import { sleep } from '@ods/sleep'
 
 /**
  * This class handles the communication with the AMQP service (rabbitmq)

@@ -1,4 +1,4 @@
-import { isObject, isString, isNumber, hasProperty } from '../../validators'
+import { isObject, isString, isNumber, hasProperty } from '@ods/validators'
 
 export interface PipelineConfig {
   id: number
