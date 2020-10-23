@@ -30,7 +30,6 @@ export class PipelineExecutionConsumer {
       console.debug('Received empty event when listening on pipeline configs - doing nothing')
       return
     }
-    console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
     if (msg.fields.routingKey === AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC) {
       await this.pipelineExecutionEventHandler.handleSuccess(JSON.parse(msg.content.toString()))
     } else {
