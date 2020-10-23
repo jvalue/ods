@@ -7,6 +7,7 @@ import {
   AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC
 } from '../../env'
 import { sleep } from '../../sleep'
+import { stringify } from '../../logging'
 
 /**
  * This class handles the communication with the AMQP service (rabbitmq)
@@ -73,7 +74,7 @@ export class AmqpHandler {
       console.debug('Received empty event when listening on pipeline executions - doing nothing')
       return
     }
-    console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
+    console.debug("[EventConsume] %s:'%s'", msg?.fields.routingKey, stringify(msg?.content.toString()))
     if (msg.fields.routingKey === AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC) {
       await this.triggerEventHandler.handleEvent(JSON.parse(msg.content.toString()))
     } else {
