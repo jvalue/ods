@@ -1,4 +1,5 @@
 import * as AMQP from 'amqplib'
+
 import { PipelineConfigManager } from '../../pipeline-config/pipelineConfigManager'
 import { PipelineConfigTriggerRequest } from '../pipelineConfigTriggerRequest'
 import {

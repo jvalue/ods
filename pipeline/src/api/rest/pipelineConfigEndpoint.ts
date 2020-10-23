@@ -1,6 +1,6 @@
 import * as express from 'express'
 
-import { PipelineConfigManager } from '@/pipeline-config/pipelineConfigManager'
+import { PipelineConfigManager } from '../../pipeline-config/pipelineConfigManager'
 import { PipelineConfigDTOValidator } from '../../pipeline-config/model/pipelineConfig'
 import { isString } from '../../validators'
 

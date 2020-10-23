@@ -1,4 +1,3 @@
-
 export interface StorageStructureRepository {
   init: (retries: number, backoff: number) => Promise<void>
 
