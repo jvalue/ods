@@ -12,6 +12,7 @@ import {
   AMQP_DATASOURCE_CONFIG_DELETED_TOPIC,
   AMQP_DATASOURCE_CONFIG_UPDATED_TOPIC
 } from '../../env'
+import {stringify} from '../../logging'
 
 export class DatasourceConfigConsumer {
   constructor (private readonly scheduler: Scheduler) {
@@ -65,7 +66,7 @@ export class DatasourceConfigConsumer {
   }
 
   handleMsg = async (msg: AMQP.ConsumeMessage): Promise<void> => {
-    console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
+    console.debug("[EventConsume] %s:'%s'", msg?.fields.routingKey, stringify(msg?.content))
 
     if (isUpdateOrCreate(msg)) {
       await this.scheduler.applyCreateOrUpdateEvent(JSON.parse(msg.content.toString()))
