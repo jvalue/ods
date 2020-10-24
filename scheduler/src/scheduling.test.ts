@@ -8,7 +8,7 @@ import { sleep } from './sleep'
 import Scheduler from './scheduling'
 import { DatasourceConfigEvent } from './api/amqp/datasourceConfigConsumer'
 
-jest.mock('./clients/adapter-client')
+jest.mock('./api/http/adapter-client')
 // Type assertion is ok here, because we have mocked the whole './clients/adapter-client' module
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
 const mockedGetAllDatasources = getAllDatasources as jest.Mock
