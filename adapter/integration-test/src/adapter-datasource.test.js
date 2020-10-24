@@ -77,27 +77,27 @@ describe('Datasource Configuration', () => {
     const postResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(datasourceConfig)
-    const datasource = postResponse.body
+    const createdDatasource = postResponse.body
 
     const originalGetResponse = await request(ADAPTER_URL)
-      .get('/datasources/' + datasource.id)
+      .get('/datasources/' + createdDatasource.id)
 
     const updatedConfig = Object.assign({}, datasourceConfig)
     updatedConfig.protocol.parameters.location = 'http://www.disrespect.com'
 
     const putResponse = await request(ADAPTER_URL)
-      .put('/datasources/' + datasource.id)
+      .put('/datasources/' + createdDatasource.id)
       .send(updatedConfig)
 
     expect(putResponse.status).toEqual(204)
-    updatedConfig.id = datasource.id
-    updatedConfig.metadata.creationTimestamp = datasource.metadata.creationTimestamp
+    updatedConfig.id = createdDatasource.id
+    updatedConfig.metadata.creationTimestamp = createdDatasource.metadata.creationTimestamp
     expect(publishedEvents.get(CONFIG_UPDATED_TOPIC)).toContainEqual({
       datasource: updatedConfig
     })
 
     const updatedGetResponse = await request(ADAPTER_URL)
-      .get('/datasources/' + datasource.id)
+      .get('/datasources/' + createdDatasource.id)
 
     expect(originalGetResponse.body.metadata).toEqual(updatedGetResponse.body.metadata)
     expect(originalGetResponse.body.id).toEqual(updatedGetResponse.body.id)
