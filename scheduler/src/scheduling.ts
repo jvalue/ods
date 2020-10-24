@@ -2,18 +2,17 @@ import type { AxiosError } from 'axios'
 import deepEqual from 'deep-equal'
 import schedule from 'node-schedule'
 
-import * as AdapterClient from './clients/adapter-client'
-import type ExecutionJob from './interfaces/scheduling-job'
-import type DatasourceConfig from './interfaces/datasource-config'
+import * as AdapterClient from './api/http/adapter-client'
+import type DatasourceConfig from './api/datasource-config'
 
 import { sleep } from './sleep'
-import DatasourceConfigEvent from './interfaces/datasource-config-event'
+import { DatasourceConfigEvent } from './api/amqp/datasourceConfigConsumer'
 
 export default class Scheduler {
   constructor (private readonly triggerRetries: number) {
   }
 
-  private readonly allJobs: Map<number, ExecutionJob> = new Map() // datasourceId -> job
+  private readonly allJobs: Map<number, SchedulingJob> = new Map() // datasourceId -> job
 
   async initializeJobsWithRetry (retries: number, backoff: number): Promise<void> {
     for (let i = 1; i <= retries; i++) {
@@ -54,7 +53,7 @@ export default class Scheduler {
     await this.upsertJob(datasource)
   }
 
-  getJob (datasourceId: number): ExecutionJob | undefined {
+  getJob (datasourceId: number): SchedulingJob | undefined {
     return this.allJobs.get(datasourceId)
   }
 
@@ -84,7 +83,7 @@ export default class Scheduler {
     return new Date(executionDate)
   }
 
-  scheduleDatasource (datasourceConfig: DatasourceConfig): ExecutionJob {
+  scheduleDatasource (datasourceConfig: DatasourceConfig): SchedulingJob {
     const executionDate: Date = this.determineExecutionDate(datasourceConfig)
     console.log(`datasource ${datasourceConfig.id} with consecutive pipelines scheduled
       for next execution at ${executionDate.toLocaleString()}.`)
@@ -132,7 +131,7 @@ export default class Scheduler {
     this.reschedule(datasourceConfig)
   }
 
-  async upsertJob (datasourceConfig: DatasourceConfig): Promise<ExecutionJob> {
+  async upsertJob (datasourceConfig: DatasourceConfig): Promise<SchedulingJob> {
     const isNewDatasource = !this.existsJob(datasourceConfig.id)
     const datasourceState = isNewDatasource ? 'New' : 'Updated'
 
@@ -145,7 +144,7 @@ export default class Scheduler {
     return this.scheduleDatasource(datasourceConfig)
   }
 
-  getAllJobs (): ExecutionJob[] {
+  getAllJobs (): SchedulingJob[] {
     return Array.from(this.allJobs.values())
   }
 
@@ -180,4 +179,9 @@ const handleAxiosError = function (error: AxiosError): void {
   }
 
   console.error(`${baseMsg} unknown reason.`)
+}
+
+interface SchedulingJob {
+  scheduleJob: schedule.Job
+  datasourceConfig: DatasourceConfig
 }

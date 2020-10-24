@@ -1,8 +1,8 @@
 import axios from 'axios'
 
-import type DatasourceConfig from '../interfaces/datasource-config'
+import type DatasourceConfig from '../datasource-config'
 
-import { ADAPTER_SERVICE_URL } from '../env'
+import { ADAPTER_SERVICE_URL } from '../../env'
 
 const http = axios.create({
   baseURL: ADAPTER_SERVICE_URL,

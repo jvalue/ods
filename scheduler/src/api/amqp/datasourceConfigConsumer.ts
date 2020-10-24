@@ -1,6 +1,7 @@
 import * as AMQP from 'amqplib'
 import { sleep } from '../../sleep'
 import Scheduler from '../../scheduling'
+import DatasourceConfig from '../datasource-config'
 
 import {
   AMQP_URL,
@@ -87,4 +88,8 @@ const isUpdateOrCreate = (msg: AMQP.ConsumeMessage): boolean => {
 
 const isDelete = (msg: AMQP.ConsumeMessage): boolean => {
   return msg.fields.routingKey === AMQP_DATASOURCE_CONFIG_DELETED_TOPIC
+}
+
+export interface DatasourceConfigEvent {
+  datasource: DatasourceConfig
 }

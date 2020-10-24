@@ -2,11 +2,11 @@
 
 import {
   getAllDatasources, triggerDatasource
-} from './clients/adapter-client'
-import DatasourceConfig from './interfaces/datasource-config'
+} from './api/http/adapter-client'
+import DatasourceConfig from './api/datasource-config'
 import { sleep } from './sleep'
-import DatasourceConfigEvent from '@/interfaces/datasource-config-event'
 import Scheduler from './scheduling'
+import { DatasourceConfigEvent } from './api/amqp/datasourceConfigConsumer'
 
 jest.mock('./clients/adapter-client')
 // Type assertion is ok here, because we have mocked the whole './clients/adapter-client' module
