@@ -3,6 +3,8 @@ package org.jvalue.ods.adapterservice.datasource.api.amqp;
 import org.jvalue.ods.adapterservice.config.RabbitConfiguration;
 import org.jvalue.ods.adapterservice.datasource.event.*;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import java.io.Serializable;
 @Service
 public class AmqpPublisher {
 
+    Logger logger = LoggerFactory.getLogger(AmqpPublisher.class);
     private final RabbitTemplate rabbitTemplate;
 
     @Autowired
@@ -52,7 +55,7 @@ public class AmqpPublisher {
                     Thread.currentThread().interrupt();
                     throw new RuntimeException(interruptedException);
                 }
-                System.err.println("Message publish failed ("+retries+"). Retrying in "+RabbitConfiguration.AMQP_PUBLISH_BACKOFF);
+                logger.warn("Message publish failed ("+retries+"). Retrying in "+RabbitConfiguration.AMQP_PUBLISH_BACKOFF);
             }
         }
         System.err.println("Sending message "+ message.toString() + " to topic: " + topic + " failed.");
