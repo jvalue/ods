@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 @Service
 public class DatasourceManager {
@@ -75,9 +76,8 @@ public class DatasourceManager {
   public void deleteAllDatasources() {
     Iterable<Datasource> allDatasourceConfigs = getAllDatasources();
     datasourceRepository.deleteAll();
-    for (Datasource ds: allDatasourceConfigs) {
-        amqpPublisher.publishDeletion(ds);
-    }
+    StreamSupport.stream(allDatasourceConfigs.spliterator(), true)
+            .forEach(amqpPublisher::publishDeletion);
   }
 
  private AdapterConfig getParametrizedDatasource(Long id, RuntimeParameters runtimeParameters) {
