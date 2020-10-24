@@ -112,7 +112,7 @@ describe('Datasource Configuration', () => {
     const datasource = response.body
 
     const delResponse = await request(ADAPTER_URL)
-      .delete('/datasources/' + datasource.id)
+      .delete(`/datasources/${datasource.id}`)
       .send()
 
     expect(delResponse.status).toEqual(204)
@@ -120,6 +120,12 @@ describe('Datasource Configuration', () => {
     expect(publishedEvents.get(CONFIG_DELETED_TOPIC)).toContainEqual({
       datasource
     })
+
+    const getDeletedRequest = await request(ADAPTER_URL)
+      .get(`/datasource/${datasource.id}`)
+      .send()
+
+    expect(getDeletedRequest.status).toEqual(404)
   }, TIMEOUT)
 
   test('Should delete all datasources [DELETE /datasources/]', async () => {
