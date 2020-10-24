@@ -39,7 +39,7 @@ public class DatasourceEndpoint {
 
     @PostMapping
     public ResponseEntity<Datasource> addDatasource(@Valid @RequestBody Datasource config) {
-        if (config.getId() != null && config.getId() > 0) {
+        if (config.getId() != null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id is defined by the server. Id field must not be set");
         }
 
