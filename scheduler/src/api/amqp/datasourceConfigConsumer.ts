@@ -12,7 +12,7 @@ import {
   AMQP_DATASOURCE_CONFIG_DELETED_TOPIC,
   AMQP_DATASOURCE_CONFIG_UPDATED_TOPIC
 } from '../../env'
-import {stringify} from '../../logging'
+import { stringify } from '../../logging'
 
 export class DatasourceConfigConsumer {
   constructor (private readonly scheduler: Scheduler) {
