@@ -47,7 +47,7 @@ describe('Datasource Configuration', () => {
     expect(response.body).toBeInstanceOf(Array)
   }, TIMEOUT)
 
-  test('Should reject datasources with specified id [POST /datasources]', async () => {
+  test('Should reject datasources with specified id', async () => {
     const configWithId = Object.assign({}, datasourceConfig)
     configWithId.id = 1
     const response = await request(ADAPTER_URL)
