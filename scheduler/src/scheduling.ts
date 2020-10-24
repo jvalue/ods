@@ -10,11 +10,9 @@ import { sleep } from './sleep'
 import DatasourceConfigEvent from './interfaces/datasource-config-event'
 
 export default class Scheduler {
-  constructor (triggerRetries: number) {
-    this.triggerRetries = triggerRetries
+  constructor (private triggerRetries: number) {
   }
 
-  private readonly triggerRetries
   private readonly allJobs: Map<number, ExecutionJob> = new Map() // datasourceId -> job
 
   async initializeJobsWithRetry (retries: number, backoff: number): Promise<void> {
