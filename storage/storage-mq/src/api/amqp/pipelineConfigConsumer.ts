@@ -1,6 +1,6 @@
 import * as AMQP from 'amqplib'
+
 import AmqpConsumer from '../../util/amqpConsumer'
-import PipelineConfigEventHandler from '../pipelineConfigEventHandler'
 import {
   AMQP_URL,
   AMQP_PIPELINE_CONFIG_EXCHANGE,
@@ -9,6 +9,7 @@ import {
   AMQP_PIPELINE_CONFIG_CREATED_TOPIC,
   AMQP_PIPELINE_CONFIG_DELETED_TOPIC
 } from '../../env'
+import PipelineConfigEventHandler from '../pipelineConfigEventHandler'
 
 export class PipelineConfigConsumer {
   constructor (

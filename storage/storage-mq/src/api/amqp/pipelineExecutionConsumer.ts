@@ -1,6 +1,6 @@
 import * as AMQP from 'amqplib'
+
 import AmqpConsumer from '../../util/amqpConsumer'
-import PipelineExecutionEventHandler from '../pipelineExecutionEventHandler'
 import {
   AMQP_URL,
   AMQP_PIPELINE_EXECUTION_EXCHANGE,
@@ -8,6 +8,7 @@ import {
   AMQP_PIPELINE_EXECUTION_QUEUE,
   AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC
 } from '../../env'
+import PipelineExecutionEventHandler from '../pipelineExecutionEventHandler'
 
 export class PipelineExecutionConsumer {
   constructor (
