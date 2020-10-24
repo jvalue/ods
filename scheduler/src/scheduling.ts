@@ -10,7 +10,7 @@ import { sleep } from './sleep'
 import DatasourceConfigEvent from './interfaces/datasource-config-event'
 
 export default class Scheduler {
-  constructor (private triggerRetries: number) {
+  constructor (private readonly triggerRetries: number) {
   }
 
   private readonly allJobs: Map<number, ExecutionJob> = new Map() // datasourceId -> job
