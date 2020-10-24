@@ -22,10 +22,10 @@ export default class Scheduler {
         return
       } catch (e) {
         if (e.code === 'ECONNREFUSED' || e.code === 'ENOTFOUND') {
-          console.error(`Failed to sync with Adapter Service on init (${retries}) . Retrying after ${backoff}ms... `)
+          console.warn(`Failed to sync with Adapter Service on init (${retries}) . Retrying after ${backoff}ms... `)
         } else {
-          console.error(e)
-          console.error(`Retrying (${retries})...`)
+          console.warn(e)
+          console.warn(`Retrying (${retries})...`)
         }
         await sleep(backoff)
       }
