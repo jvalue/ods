@@ -21,8 +21,7 @@ export class PipelineExecutor {
     this.triggerRequests.set(pipelineId, undefined)
 
     await DatasourceClient.triggerDatasource(datasourceId)
-    console.log('triggered!')
-    console.log(pipeline.datasourceId)
+    console.log(`Triggered pipeline for datasource with id ${datasourceId}`)
     try {
       const data = await this.waitForImportFinish(pipelineId)
       return await Promise.resolve(data)
@@ -41,7 +40,7 @@ export class PipelineExecutor {
       }
       await sleep(this.backoff)
     }
-    return await Promise.reject(new Error(`Data import was not signalled after ${this.backoff*this.retries} ms`))
+    return await Promise.reject(new Error(`Data import was not signalled after ${this.backoff * this.retries} ms`))
   }
 
   signalImportSuccesful (pipelineId: number, data: unknown): void {
