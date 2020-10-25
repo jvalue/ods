@@ -27,13 +27,14 @@ describe('PipelineExecutor', () => {
     })
 
     const dataImportRequest: DataImportRequest = {
-      pipelineId: 1
+      pipelineId: 1,
+      runtimeParameters: {}
     }
 
     const data = await pipelineExecutor.execute(dataImportRequest)
 
     expect(getPipeline).toBeCalledWith(1)
-    expect(triggerDatasource).toBeCalledWith(2)
+    expect(triggerDatasource).toBeCalledWith(2, {})
     expect(data).toEqual({ test: 'test' })
   }, 11000)
 })
