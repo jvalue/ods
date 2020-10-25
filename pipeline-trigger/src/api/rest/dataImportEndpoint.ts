@@ -15,8 +15,10 @@ export class DataImportEndpoint {
 
     // check if pipeline exists?
     try {
-      await this.pipelineExecutor.execute(dataImportRequest)
-      res.status(204).send()
+      // global map erase pipeline key
+      const data = await this.pipelineExecutor.execute(dataImportRequest)
+      res.status(204).send(data)
+      // erase value
     } catch (e) {
       res.status(500).send('Failure in data import')
     }

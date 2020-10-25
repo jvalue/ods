@@ -14,3 +14,7 @@ const getEnv = (envName: string): string => {
 
 export const PIPELINE_API = getEnv('PIPELINE_API')
 export const ADAPTER_API = getEnv('ADAPTER_API')
+export const AMQP_URL = getEnv('AMQP_URL')
+export const AMQP_EXCHANGE = getEnv('AMQP_EXCHANGE')
+export const AMQP_PIPELINE_TRIGGER_QUEUE = getEnv('pipeline-trigger.data')
+export const AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC = getEnv('pipeline.execution.success')
