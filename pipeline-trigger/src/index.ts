@@ -1,20 +1,24 @@
 import express from 'express'
-// import cors from 'cors'
 import bodyParser from 'body-parser'
-// import { AmqpHandler } from '@/api/amqp/amqpHandler'
+import { AmqpHandler } from './api/amqp/amqpHandler'
 import { PipelineExecutor } from './pipeline-executor/pipeline-executor'
 import { DataImportEndpoint } from './api/rest/dataImportEndpoint'
+
+import {
+  CONNECTION_RETRIES,
+  CONNECTION_BACKOFF
+} from './env'
 
 const port = 8080
 
 async function main (): Promise<void> {
-  // const amqpHandler = new AmqpHandler(triggerEventHandler)
-  // await amqpHandler.connect(CONNECTION_RETRIES, CONNECTION_BACKOFF)
+  const pipelineExecutor = new PipelineExecutor()
+
+  const amqpHandler = new AmqpHandler(pipelineExecutor)
+  await amqpHandler.connect(CONNECTION_RETRIES, CONNECTION_BACKOFF)
   const app = express()
   app.use(bodyParser.json({ limit: '50mb' }))
   app.use(bodyParser.urlencoded({ extended: false }))
-
-  const pipelineExecutor = new PipelineExecutor()
 
   const dataImportEndpoint = new DataImportEndpoint(pipelineExecutor)
   dataImportEndpoint.registerRoutes(app)

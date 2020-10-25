@@ -12,9 +12,11 @@ const getEnv = (envName: string): string => {
   return env
 }
 
+export const CONNECTION_RETRIES = +getEnv('CONNECTION_RETRIES')
+export const CONNECTION_BACKOFF = +getEnv('CONNECTION_BACKOFF_IN_MS')
 export const PIPELINE_API = getEnv('PIPELINE_API')
 export const ADAPTER_API = getEnv('ADAPTER_API')
 export const AMQP_URL = getEnv('AMQP_URL')
 export const AMQP_EXCHANGE = getEnv('AMQP_EXCHANGE')
-export const AMQP_PIPELINE_TRIGGER_QUEUE = getEnv('pipeline-trigger.data')
-export const AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC = getEnv('pipeline.execution.success')
+export const AMQP_PIPELINE_TRIGGER_QUEUE = getEnv('AMQP_PIPELINE_TRIGGER_QUEUE')
+export const AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC = getEnv('AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC')
