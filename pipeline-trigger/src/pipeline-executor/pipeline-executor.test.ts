@@ -3,6 +3,7 @@ import * as DatasourceClient from '../clients/datasource-client'
 import * as PipelineClient from '../clients/pipeline-client'
 import { PipelineExecutor } from './pipeline-executor'
 import { DataImportRequest } from '../api/dataImportRequest'
+import { sleep } from '../sleep'
 
 jest.mock('../clients/datasource-client')
 jest.mock('../clients/pipeline-client')
@@ -20,15 +21,19 @@ describe('PipelineExecutor', () => {
     getPipeline.mockReturnValue(
       { datasourceId: 2 }
     )
-    triggerDatasource.mockReturnValue(Promise.resolve())
+    triggerDatasource.mockImplementation(async dsid => {
+      await sleep(1000)
+      pipelineExecutor.signalImportSuccesful(1, { test: 'test' })
+    })
 
     const dataImportRequest: DataImportRequest = {
       pipelineId: 1
     }
 
-    await pipelineExecutor.execute(dataImportRequest)
+    const data = await pipelineExecutor.execute(dataImportRequest)
 
-    expect(getPipeline.mock.calls[0][0]).toEqual(1)
-    expect(triggerDatasource.mock.calls[0][0]).toEqual(2)
-  })
+    expect(getPipeline).toBeCalledWith(1)
+    expect(triggerDatasource).toBeCalledWith(2)
+    expect(data).toEqual({ test: 'test' })
+  }, 11000)
 })
