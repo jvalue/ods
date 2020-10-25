@@ -7,9 +7,9 @@ const http = axios.create({
   headers: { 'Content-Type': 'application/json' }
 })
 
-export async function triggerDatasource (datasourceId: number): Promise<void> {
+export async function triggerDatasource (datasourceId: number, runtimeParameters: object): Promise<void> {
   try {
-    await http.post(`/datasources/${datasourceId}/trigger`)
+    await http.post(`/datasources/${datasourceId}/trigger`, runtimeParameters)
   } catch (e: unknown) {
     console.log(`Triggering datasource failed. Reason ${JSON.stringify(e)}`)
     throw e

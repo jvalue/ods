@@ -20,7 +20,7 @@ export class PipelineExecutor {
 
     this.triggerRequests.set(pipelineId, undefined)
 
-    await DatasourceClient.triggerDatasource(datasourceId)
+    await DatasourceClient.triggerDatasource(datasourceId, dataImportRequest.runtimeParameters)
     console.log(`Triggered pipeline for datasource with id ${datasourceId}`)
     try {
       const data = await this.waitForImportFinish(pipelineId)
