@@ -20,7 +20,7 @@ export default class AuthModule extends VuexModule {
     const isAuth = isAuthenticated()
 
     if (isAuth) {
-      this.context.dispatch('loadUserProfile')
+      await this.context.dispatch('loadUserProfile')
     }
     return isAuth
   }
@@ -30,7 +30,7 @@ export default class AuthModule extends VuexModule {
     const isSuccessful: boolean = await login()
 
     if (isSuccessful) {
-      this.context.dispatch('loadUserProfile')
+      await this.context.dispatch('loadUserProfile')
     }
 
     return isSuccessful

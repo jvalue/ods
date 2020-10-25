@@ -60,12 +60,15 @@ describe('Test 2: Create periodic pipeline without transformation', () => {
 
   test('Create notification', async () => {
     const notificationConfig = {
+      type: 'WEBHOOK',
+      pipelineId: pipelineId,
       condition: 'data.count <= 2',
-      url: MOCK_SERVER_WITHIN_DOCKER + '/notifications/test2',
-      pipelineId: pipelineId
+      parameter: {
+        url: MOCK_SERVER_WITHIN_DOCKER + '/notifications/test2'
+      }
     }
 
-    const response = await request(NOTIFICATION_URL).post('/config/webhook').send(notificationConfig)
+    const response = await request(NOTIFICATION_URL).post('/configs').send(notificationConfig)
     expect(response.status).toEqual(201)
     expect(response.body.id).toBeGreaterThan(0)
   }, TIMEOUT)

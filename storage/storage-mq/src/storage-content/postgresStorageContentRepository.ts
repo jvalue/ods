@@ -1,7 +1,9 @@
 import { PoolConfig, QueryResult } from 'pg'
-import { StorageContentRepository, StorageContent, InsertStorageContent } from './storageContentRepository'
-import PostgresRepository from '@/util/postgresRepository'
+
+import PostgresRepository from '../util/postgresRepository'
 import { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB, POSTGRES_SCHEMA } from '../env'
+
+import { StorageContentRepository, StorageContent, InsertStorageContent } from './storageContentRepository'
 
 const EXISTS_TABLE_STATEMENT = (schema: string, table: string): string => `SELECT to_regclass('"${schema}"."${table}"')`
 const GET_ALL_CONTENT_STATEMENT = (schema: string, table: string): string => `SELECT * FROM "${schema}"."${table}"`

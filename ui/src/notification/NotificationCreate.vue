@@ -36,7 +36,7 @@ import Vue from 'vue'
 
 import NotificationForm from '@/notification/NotificationForm.vue'
 
-import NotificationConfig, { CONFIG_TYPE } from '@/notification/notificationConfig'
+import NotificationConfig, { NotificationType } from '@/notification/notificationConfig'
 import * as NotificationREST from '@/notification/notificationRest'
 
 @Component({
@@ -49,18 +49,18 @@ export default class NotificationCreate extends Vue {
     id: -1,
     pipelineId: -1,
     condition: 'true',
-    type: CONFIG_TYPE.WEBHOOK,
+    type: NotificationType.WEBHOOK,
     parameters: {}
   }
 
   private mounted (): void {
-    const pipelineId = parseInt(this.$route.params.pipelineId)
-    this.notification.pipelineId = pipelineId
+    this.notification.pipelineId = parseInt(this.$route.params.pipelineId)
   }
 
   private async onCreate (): Promise<void> {
     await NotificationREST.create(this.notification)
     this.$router.push({ name: 'notification-overview' })
+      .catch(error => console.log('Failed to route to notification-overview', error))
   }
 
   private onCancel (): void {

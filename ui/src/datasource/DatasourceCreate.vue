@@ -82,17 +82,20 @@ export default class DatasourceCreate extends Vue {
 
   private isValid = false
 
-  private async onSave (): Promise<void> {
-    await DatasourceREST.createDatasource(this.datasource)
-    this.routeToOverview()
+  private onSave (): void {
+    DatasourceREST.createDatasource(this.datasource)
+      .then(this.routeToOverview)
+      .catch(error => console.error('Failed to create datasource', error))
   }
 
   private onCancel (): void {
     this.routeToOverview()
+
   }
 
   private routeToOverview (): void {
     this.$router.push({ name: 'datasource-overview' })
+      .catch(error => console.log('Failed to route to datasource-overview', error))
   }
 }
 </script>

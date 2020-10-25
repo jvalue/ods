@@ -2,27 +2,26 @@ import express from 'express'
 import cors from 'cors'
 import bodyParser from 'body-parser'
 
-import 'reflect-metadata' // once required for orm
-
 import NotificationExecutor from './notification-execution/notificationExecutor'
 import VM2SandboxExecutor from './notification-execution/condition-evaluation/vm2SandboxExecutor'
 import { NotificationConfigEndpoint } from './api/rest/notificationConfigEndpoint'
 import { NotificationExecutionEndpoint } from './api/rest/notificationExecutionEndpoint'
-import { initStorageHandler } from './notification-config/storageHandler'
 import { AmqpHandler } from './api/amqp/amqpHandler'
 import { TriggerEventHandler } from './api/triggerEventHandler'
 import { CONNECTION_RETRIES, CONNECTION_BACKOFF } from './env'
+import { initNotificationRepository } from './notification-config/postgresNotificationRepository'
 
 const port = 8080
 
 async function main (): Promise<void> {
-  const storageHandler = await initStorageHandler(CONNECTION_RETRIES, CONNECTION_RETRIES)
+  const notificationRepository = await initNotificationRepository(CONNECTION_RETRIES, CONNECTION_RETRIES)
   const sandboxExecutor = new VM2SandboxExecutor()
   const notificationExecutor = new NotificationExecutor(sandboxExecutor)
-  const triggerEventHandler = new TriggerEventHandler(storageHandler, notificationExecutor)
-  const notificationConfigEndpoint = new NotificationConfigEndpoint(storageHandler)
+  const triggerEventHandler = new TriggerEventHandler(notificationRepository, notificationExecutor)
+  const notificationConfigEndpoint = new NotificationConfigEndpoint(notificationRepository)
   const notificationExecutionEndpoint = new NotificationExecutionEndpoint(triggerEventHandler)
   const amqpHandler = new AmqpHandler(triggerEventHandler)
+
   await amqpHandler.connect(CONNECTION_RETRIES, CONNECTION_BACKOFF)
 
   const app = express()

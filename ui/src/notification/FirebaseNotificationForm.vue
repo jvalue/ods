@@ -31,6 +31,7 @@ import Component from 'vue-class-component'
 import { Emit, PropSync, Watch } from 'vue-property-decorator'
 
 import { FirebaseNotificationParameters } from '@/notification/notificationConfig'
+import { requiredRule } from '../validators'
 
 @Component({ })
 export default class FirebaseNotificationForm extends Vue {
@@ -38,6 +39,8 @@ export default class FirebaseNotificationForm extends Vue {
   private parameters!: FirebaseNotificationParameters
 
   private isValid = false
+
+  private required = requiredRule
 
   private mounted (): void {
     this.initialValidityCheck()
@@ -65,10 +68,6 @@ export default class FirebaseNotificationForm extends Vue {
   @Watch('isValid')
   private onChangeValidity (): void {
     this.emitIsValid()
-  }
-
-  private required (val: string): true | string {
-    return !!val || 'required.'
   }
 }
 </script>

@@ -30,10 +30,10 @@ import { DatasourceMetaData } from '../datasource'
 
 @Component({ })
 export default class DatasourceMetadataConfig extends Vue {
-  private isValid = true;
+  private isValid = true
 
   @PropSync('value')
-  private metadataConfig!: DatasourceMetaData;
+  private metadataConfig!: DatasourceMetaData
 
   @Emit('value')
   emitValue (): DatasourceMetaData {

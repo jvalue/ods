@@ -7,21 +7,20 @@ const http = axios.create({
   headers: { 'Content-Type': 'application/json' }
 })
 
-export async function getStoredItems (pipelineId: string): Promise<StorageItemMetaData[]> {
+export async function getStoredItems (pipelineId: number): Promise<StorageItemMetaData[]> {
   const response = await http.get(`/${pipelineId}?select=id,timestamp,pipelineId`)
   return response.data
 }
 
-export async function getStoredItem (pipelineId: string, storageItemId: string): Promise<StorageItem> {
+export async function getStoredItem (pipelineId: number, storageItemId: number): Promise<StorageItem> {
   const response = await http.get(`/${pipelineId}?id=eq.${storageItemId}`)
-  const item = response.data[0]
-  return item
+  return response.data[0]
 }
 
-export function createUrlForItem (pipelineId: string, itemId: string): string {
+export function createUrlForItem (pipelineId: number, itemId: number): string {
   return `${STORAGE_SERVICE_URL}/${pipelineId}?id=eq.${itemId}`
 }
 
-export function createUrlForLatestItem (pipelineId: string): string {
+export function createUrlForLatestItem (pipelineId: number): string {
   return `${STORAGE_SERVICE_URL}/${pipelineId}?order=id.desc&limit=1`
 }

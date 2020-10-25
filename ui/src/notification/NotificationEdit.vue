@@ -56,20 +56,22 @@ export default class NotificationEdit extends Vue {
     const pipelineId = parseInt(this.$route.params.pipelineId)
     const notificationId = parseInt(this.$route.params.notificationId)
     this.loadNotification(pipelineId, notificationId)
+      .catch(error => console.error('Failed to load notification', error))
   }
 
   private async loadNotification (pipelineId: number, notificationId: number): Promise<void> {
     const notificationsOfPipeline = await NotificationREST.getAllByPipelineId(pipelineId)
-    this.notification = notificationsOfPipeline.find(x => x.id === notificationId) || null
+    this.notification = notificationsOfPipeline.find(x => x.id === notificationId) ?? null
   }
 
   private async onUpdate (): Promise<void> {
-    if (!this.notification) {
+    if (this.notification === null) {
       return
     }
 
     await NotificationREST.update(this.notification)
     this.$router.push({ name: 'notification-overview' })
+      .catch(error => console.log('Failed to route to notification-overview', error))
   }
 
   private onCancel (): void {

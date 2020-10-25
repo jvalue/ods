@@ -29,7 +29,7 @@
       max="24"
       @change="formChanged"
     >
-      <template v-slot:prepend>
+      <template #prepend>
         <v-icon
           color="error"
           @click="dialogIntervalHours--; formChanged()"
@@ -38,7 +38,7 @@
         </v-icon>
       </template>
 
-      <template v-slot:append>
+      <template #append>
         <v-icon
           color="primary"
           @click="dialogIntervalHours++; formChanged()"
@@ -61,7 +61,7 @@
       max="60"
       @change="formChanged"
     >
-      <template v-slot:prepend>
+      <template #prepend>
         <v-icon
           color="error"
           @click="dialogIntervalMinutes--; formChanged()"
@@ -70,7 +70,7 @@
         </v-icon>
       </template>
 
-      <template v-slot:append>
+      <template #append>
         <v-icon
           color="primary"
           @click="dialogIntervalMinutes++; formChanged()"
@@ -96,7 +96,7 @@ const ONE_MINUTE_IN_MS = 60 * 1000
 
 @Component({ components: { DateTimePicker } })
 export default class TriggerConfig extends Vue {
-  private isValid = true;
+  private isValid = true
 
   private dialogIntervalHours = 1
   private dialogIntervalMinutes = 0
@@ -120,7 +120,7 @@ export default class TriggerConfig extends Vue {
   }
 
   @PropSync('value')
-  private triggerConfig!: Trigger;
+  private triggerConfig!: Trigger
 
   @Watch('triggerConfig')
   private triggerConfigChanged (): void {
