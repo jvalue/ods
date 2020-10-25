@@ -16,7 +16,7 @@ describe('PipelineExecutor', () => {
   const triggerDatasource = DatasourceClient.triggerDatasource as jest.Mock
   const pipelineExecutor = new PipelineExecutor()
 
-  it('should execyte dataImportRequests correctly', async () => {
+  it('should execute dataImportRequests correctly', async () => {
     getPipeline.mockReturnValue(
       { datasourceId: 2 }
     )
