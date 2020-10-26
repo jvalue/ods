@@ -70,17 +70,22 @@ public class DatasourceTest {
   }
 
   @Test
-  public void testFillQueryParameters() throws ParseException {
+  public void testFillQueryParametersWithRuntimeParameters() throws ParseException {
     Datasource datasource = generateParameterizableDatasource(HTTP, JSON, "http://www.the-inder.net/{userId}/{dataId}", Map.of("userId", "1", "dataId", "123"));
-    Map<String, String> parameters = new HashMap<>();
-    parameters.put("userId", "1");
-    parameters.put("dataId", "123");
-    parameters.put("notAKey", "notAValue");
-    RuntimeParameters runtimeParameters = new RuntimeParameters(parameters);
-    DatasourceProtocol datasourceProtocol = datasource.fillQueryParameters(runtimeParameters);
-    assertEquals("http://www.the-inder.net/1/123", datasourceProtocol.getParameters().get("location"));
-    datasourceProtocol = datasource.fillQueryParameters(null);
-    assertEquals("http://www.the-inder.net/1/123", datasourceProtocol.getParameters().get("location"));
+
+    RuntimeParameters runtimeParameters = new RuntimeParameters(Map.of(
+      "userId", "42",
+      "dataId", "4242",
+      "notAKey", "notAValue"
+    ));
+    assertEquals("http://www.the-inder.net/42/4242", datasource.fillQueryParameters(runtimeParameters).get("location"));
+  }
+
+  @Test
+  public void testFillQueryParametersWithoutRuntimeParameters() throws ParseException {
+    Datasource datasource = generateParameterizableDatasource(HTTP, JSON, "http://www.the-inder.net/{userId}/{dataId}", Map.of("userId", "1", "dataId", "123"));
+
+    assertEquals("http://www.the-inder.net/1/123", datasource.fillQueryParameters(null).get("location"));
   }
 
   @Test

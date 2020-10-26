@@ -87,16 +87,16 @@ public class Datasource {
   }
 
   public AdapterConfig toAdapterConfig(RuntimeParameters runtimeParameters) {
-    DatasourceProtocol datasourceProtocol = fillQueryParameters(runtimeParameters);
+    var parameters = fillQueryParameters(runtimeParameters);
     return new AdapterConfig(
-      new ProtocolConfig(this.getProtocol().getType(), datasourceProtocol.getParameters()),
+      new ProtocolConfig(this.getProtocol().getType(), parameters),
       new FormatConfig(this.getFormat().getType(), this.getFormat().getParameters())
     );
   }
 
-  protected DatasourceProtocol fillQueryParameters(RuntimeParameters runtimeParameters) {
+  protected Map<String, Object> fillQueryParameters(RuntimeParameters runtimeParameters) {
     if (!this.getProtocol().getType().equals(Protocol.HTTP)) {
-      return this.getProtocol();
+      return this.getProtocol().getParameters();
     }
     String url = (String) this.getProtocol().getParameters().get("location");
     Map<String, String> defaultParameters = new HashMap<>();
@@ -113,7 +113,7 @@ public class Datasource {
     }
     HashMap<String, Object> parameters = new HashMap<>(this.getProtocol().getParameters());
     parameters.put("location", url);
-    return new DatasourceProtocol(this.getProtocol().getType(), parameters);
+    return parameters;
   }
 
   @Override

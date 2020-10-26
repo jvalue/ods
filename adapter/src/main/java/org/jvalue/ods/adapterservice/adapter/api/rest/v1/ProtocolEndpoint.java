@@ -1,6 +1,6 @@
 package org.jvalue.ods.adapterservice.adapter.api.rest.v1;
 
-import org.jvalue.ods.adapterservice.adapter.AdapterFactory;
+import org.jvalue.ods.adapterservice.adapter.Adapter;
 import org.jvalue.ods.adapterservice.adapter.importer.Importer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,15 +11,15 @@ import java.util.Collection;
 @RestController
 public class ProtocolEndpoint {
 
-  private final AdapterFactory adapterFactory;
+  private final Adapter adapter;
 
   @Autowired
-  public ProtocolEndpoint(AdapterFactory adapterFactory) {
-    this.adapterFactory = adapterFactory;
+  public ProtocolEndpoint(Adapter adapter) {
+    this.adapter = adapter;
   }
 
   @GetMapping(Mappings.PROTOCOL_PATH)
   public Collection<Importer> getProtocols() {
-    return adapterFactory.getAllProtocols();
+    return adapter.getAllProtocols();
   }
 }
