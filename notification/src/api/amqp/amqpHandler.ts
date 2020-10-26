@@ -74,7 +74,7 @@ export class AmqpHandler {
       console.debug('Received empty event when listening on pipeline executions - doing nothing')
       return
     }
-    console.debug("[EventConsume] %s:'%s'", msg?.fields.routingKey, stringify(msg?.content.toString()))
+    console.debug("[EventConsume] %s:'%s'", msg?.fields.routingKey, stringify(msg?.content))
     if (msg.fields.routingKey === AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC) {
       await this.triggerEventHandler.handleEvent(JSON.parse(msg.content.toString()))
     } else {
