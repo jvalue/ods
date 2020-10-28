@@ -71,6 +71,10 @@ describe('Datasource Configuration', () => {
     expect(publishedEvents.get(CONFIG_CREATED_TOPIC)).toContainEqual({
       datasource
     })
+
+    const allDatasourceResponse = await request(ADAPTER_URL)
+      .get('/datasources')
+    expect(allDatasourceResponse.body).toContainEqual(datasource)
   }, TIMEOUT)
 
   test('Should update existing datasource [PUT /datasources/{id}]', async () => {
