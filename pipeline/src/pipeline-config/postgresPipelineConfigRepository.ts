@@ -4,6 +4,7 @@ import { POSTGRES_SCHEMA, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_
 import { sleep } from '../sleep'
 import { PipelineConfig, PipelineConfigDTO } from './model/pipelineConfig'
 import PipelineConfigRepository from './pipelineConfigRepository'
+import { stringifyArray } from '../logging'
 
 const POSTGRES_TABLE = 'PipelineConfigs'
 
@@ -119,7 +120,7 @@ export default class PostgresPipelineConfigRepository implements PipelineConfigR
   }
 
   private async executeQuery (query: string, args: unknown[]): Promise<QueryResult> {
-    console.debug(`Executing query "${query}" with values ${JSON.stringify(args)}`)
+    console.debug(`Executing query "${query}" with values ${stringifyArray(args)}`)
 
     let client: PoolClient | undefined
     try {

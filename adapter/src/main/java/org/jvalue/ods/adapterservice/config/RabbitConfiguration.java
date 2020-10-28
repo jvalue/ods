@@ -31,7 +31,7 @@ public class RabbitConfiguration {
             @Override
             public void convertAndSend(String exchange, String routingKey, Object object) throws AmqpException {
                 super.convertAndSend(exchange, routingKey, object);
-                System.out.println("Published event " + object.toString() + " on exchange " + exchange + " under topic: " + routingKey);
+                System.out.println("[EventPublish] " + routingKey + ": " + object.toString());
             }
         };
         rabbitTemplate.setMessageConverter(jackson2JsonConverter());
