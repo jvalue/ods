@@ -4,41 +4,31 @@ import org.jvalue.ods.adapterservice.adapter.Adapter;
 import org.jvalue.ods.adapterservice.adapter.AdapterFactory;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
-import org.jvalue.ods.adapterservice.config.RabbitConfiguration;
-import org.jvalue.ods.adapterservice.datasource.event.DatasourceEvent;
-import org.jvalue.ods.adapterservice.datasource.event.DatasourceImportedEvent;
-import org.jvalue.ods.adapterservice.datasource.event.EventType;
-import org.jvalue.ods.adapterservice.datasource.event.ImportFailedEvent;
+import org.jvalue.ods.adapterservice.datasource.api.amqp.AmqpPublisher;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
 import org.jvalue.ods.adapterservice.datasource.model.DatasourceMetadata;
 import org.jvalue.ods.adapterservice.datasource.model.RuntimeParameters;
 import org.jvalue.ods.adapterservice.datasource.repository.DatasourceRepository;
-import org.jvalue.ods.adapterservice.datasource.repository.DatasourceEventRepository;
-import org.springframework.amqp.AmqpException;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 @Service
 public class DatasourceManager {
 
   private final DatasourceRepository datasourceRepository;
-  private final DatasourceEventRepository eventRepository;
   private final AdapterFactory adapterFactory;
-  private final RabbitTemplate rabbitTemplate;
-
+  private final AmqpPublisher amqpPublisher;
 
   @Autowired
-  public DatasourceManager(DatasourceRepository datasourceRepository, DatasourceEventRepository eventRepository, AdapterFactory adapterFactory, RabbitTemplate rabbitTemplate) {
+  public DatasourceManager(DatasourceRepository datasourceRepository, AdapterFactory adapterFactory, AmqpPublisher amqpPublisher) {
     this.datasourceRepository = datasourceRepository;
-    this.eventRepository = eventRepository;
     this.adapterFactory = adapterFactory;
-    this.rabbitTemplate = rabbitTemplate;
+    this.amqpPublisher = amqpPublisher;
   }
 
 
@@ -47,8 +37,8 @@ public class DatasourceManager {
     config.getMetadata().setCreationTimestamp(new Date()); // creation time documented by server
 
     Datasource savedConfig = datasourceRepository.save(config);
-    eventRepository.save(new DatasourceEvent(EventType.DATASOURCE_CREATE, savedConfig.getId()));
 
+    amqpPublisher.publishCreation(savedConfig);
     return savedConfig;
   }
 
@@ -64,19 +54,21 @@ public class DatasourceManager {
 
 
   @Transactional
-  public void updateDatasource(Long id, Datasource updated) throws IllegalArgumentException {
-    Datasource old = datasourceRepository.findById(id)
-      .orElseThrow(() -> new IllegalArgumentException("Datasource with id " + id + " not found."));
+  public void updateDatasource(Long id, Datasource update) throws IllegalArgumentException {
+    Datasource existing = datasourceRepository.findById(id)
+      .orElseThrow(() -> new IllegalArgumentException("Datasource with id " + id + " not found"));
 
-    datasourceRepository.save(applyUpdate(old, updated));
-    eventRepository.save(new DatasourceEvent(EventType.DATASOURCE_UPDATE, id));
+    datasourceRepository.save(applyUpdate(existing, update));
+    amqpPublisher.publishUpdate(existing);
   }
 
 
   @Transactional
   public void deleteDatasource(Long id) {
+    Datasource datasource = datasourceRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Datasource with id " + id + " not found"));
     datasourceRepository.deleteById(id);
-    eventRepository.save(new DatasourceEvent(EventType.DATASOURCE_DELETE, id));
+    amqpPublisher.publishDeletion(datasource);
   }
 
 
@@ -84,10 +76,8 @@ public class DatasourceManager {
   public void deleteAllDatasources() {
     Iterable<Datasource> allDatasourceConfigs = getAllDatasources();
     datasourceRepository.deleteAll();
-
-    allDatasourceConfigs.forEach(
-      pl -> eventRepository.save(new DatasourceEvent(EventType.DATASOURCE_DELETE, pl.getId()))
-    );
+    StreamSupport.stream(allDatasourceConfigs.spliterator(), true)
+            .forEach(amqpPublisher::publishDeletion);
   }
 
  private AdapterConfig getParametrizedDatasource(Long id, RuntimeParameters runtimeParameters) {
@@ -96,38 +86,22 @@ public class DatasourceManager {
    return datasource.toAdapterConfig(runtimeParameters);
  }
 
- public DataBlob.MetaData trigger(Long id, RuntimeParameters runtimeParameters) throws InterruptedException {
+ public DataBlob.MetaData trigger(Long id, RuntimeParameters runtimeParameters) {
     AdapterConfig adapterConfig = getParametrizedDatasource(id, runtimeParameters);
    try {
       Adapter adapter = adapterFactory.getAdapter(adapterConfig);
       DataBlob executionResult = adapter.executeJob(adapterConfig);
-      DatasourceImportedEvent importedEvent = new DatasourceImportedEvent(id, executionResult.getData());
-      publishAmqp(RabbitConfiguration.AMQP_IMPORT_SUCCESS_TOPIC, importedEvent);
+      amqpPublisher.publishImportSuccess(id, executionResult.getData());
       return executionResult.getMetaData();
    } catch (Exception e) {
-      ImportFailedEvent failedEvent = new ImportFailedEvent(id, e.getMessage());
-      publishAmqp(RabbitConfiguration.AMQP_IMPORT_FAILED_TOPIC, failedEvent);
+      amqpPublisher.publishImportFailure(id, e.getMessage());
      if(e instanceof IllegalArgumentException) {
        System.err.println("Data Import request failed. Malformed Request: " + e.getMessage());
-       throw e;
      } else {
        System.err.println("Exception in the Adapter: " + e.getMessage());
-       throw e;
      }
+       throw e;
    }
- }
-
- private void publishAmqp(String topic, Serializable message) throws InterruptedException {
-      for (int retries = RabbitConfiguration.AMQP_PUBLISH_RETRIES; retries >= 0; retries--) {
-          try {
-              this.rabbitTemplate.convertAndSend(RabbitConfiguration.AMPQ_EXCHANGE, topic, message);
-              return;
-          } catch (AmqpException e) {
-              Thread.sleep(RabbitConfiguration.AMQP_PUBLISH_BACKOFF);
-              System.out.println("Message publish failed ("+retries+"). Retrying in "+RabbitConfiguration.AMQP_PUBLISH_BACKOFF);
-          }
-      }
-      System.err.println("Sending message "+ message.toString() + " to topic: " + topic + " failed.");
  }
 
   /**
@@ -152,21 +126,5 @@ public class DatasourceManager {
     updated.setId(existing.getId());
 
     return updated;
-  }
-
-  public Optional<DatasourceEvent> getEvent(Long id) {
-    return eventRepository.findById(id);
-  }
-
-  public Iterable<DatasourceEvent> getEventsAfter(Long id) {
-    return eventRepository.getAllByEventIdAfter(id);
-  }
-
-  public Iterable<DatasourceEvent> getEventsByDatasource(Long datasourceId, Long after) {
-    return eventRepository.getAllByDatasourceIdAndEventIdAfter(datasourceId, after);
-  }
-
-  public DatasourceEvent getLatestEvent() {
-    return eventRepository.findFirstByOrderByEventIdDesc();
   }
 }

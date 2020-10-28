@@ -1,4 +1,4 @@
-package org.jvalue.ods.adapterservice.datasource.rest.v1;
+package org.jvalue.ods.adapterservice.datasource.api.rest.v1;
 
 import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
 import org.jvalue.ods.adapterservice.datasource.DatasourceManager;
@@ -39,7 +39,9 @@ public class DatasourceEndpoint {
 
     @PostMapping
     public ResponseEntity<Datasource> addDatasource(@Valid @RequestBody Datasource config) {
-          config.setId(null); // id not under control of client
+        if (config.getId() != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id is defined by the server. Id field must not be set");
+        }
 
           Datasource savedConfig = datasourceManager.createDatasource(config);
 
@@ -82,8 +84,6 @@ public class DatasourceEndpoint {
         return datasourceManager.trigger(id, runtimeParameters);
       } catch (IllegalArgumentException e) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No valid Datasource for id "+ id);
-      } catch (InterruptedException e) {
-          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
 }

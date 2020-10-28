@@ -90,10 +90,6 @@ When started via docker-compose *base_url* is `http://localhost:9000/api/adapter
 | *base_url*/datasources/{id}  | PUT  | Datasource Config  | Updated datasource with {id}  |
 | *base_url*/datasources  | DELETE  | -  | Delete all datasources  |
 | *base_url*/datasources/{id}  | DELETE  | -  | Delete datasource with {id} |
-| *base_url*/datasources/events  | GET  | -  | All DatasourceEvents |
-| *base_url*/datasources/events/${id}  | GET  | -  | DatasourceEvent with {{id}}
-| *base_url*/datasources/events?datasourceId={datasourceId}&after={eventId}  | GET  | -  | Array of DatasourceEvents after {{eventId}}; {{datasourceId}} optional, limits to specific datasource |
-| *base_url*/datasources/events/latest  | GET  | -  | The latest DatasourceEvent |
 | *base_url*/datasources/${id}/trigger  | POST  | Parameters  | Adapter ImportResponse |
 
 When started via docker-compose *base_url* is `http://localhost:9000/api/adapter`
@@ -159,12 +155,10 @@ When started via docker-compose *base_url* is `http://localhost:9000/api/adapter
 }
 ```
 
-### Datasource Event
+### Datasource Config Event (AMQP)
 ```
 {
-  "eventId": number,
-  "eventType": "DATASOURCE UPDATE" | "DATASOURCE_CREATE" | "DATASOURCE_DELETE",
-  "datasourceId": number
+  "datasource": DatasourceConfig
 }
 ```
 

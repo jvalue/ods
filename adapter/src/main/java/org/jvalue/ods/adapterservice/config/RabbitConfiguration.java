@@ -14,6 +14,9 @@ public class RabbitConfiguration {
     public static final String AMPQ_EXCHANGE = System.getenv("AMQP_EXCHANGE");
     public static final String AMQP_IMPORT_SUCCESS_TOPIC = System.getenv("AMQP_IMPORT_SUCCESS_TOPIC");
     public static final String AMQP_IMPORT_FAILED_TOPIC = System.getenv("AMQP_IMPORT_FAILED_TOPIC");
+    public static final String AMQP_DATASOURCE_CREATED_TOPIC = System.getenv("AMQP_DATASOURCE_CREATED_TOPIC");
+    public static final String AMQP_DATASOURCE_UPDATED_TOPIC = System.getenv("AMQP_DATASOURCE_UPDATED_TOPIC");
+    public static final String AMQP_DATASOURCE_DELETED_TOPIC = System.getenv("AMQP_DATASOURCE_DELETED_TOPIC");
     public static final int AMQP_PUBLISH_RETRIES = Integer.parseInt(System.getenv("AMQP_PUBLISH_RETRIES"));
     public static final long AMQP_PUBLISH_BACKOFF = Long.parseLong(System.getenv("AMQP_PUBLISH_BACKOFF"));
 

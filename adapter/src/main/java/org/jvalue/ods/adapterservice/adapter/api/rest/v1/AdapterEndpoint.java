@@ -1,4 +1,4 @@
-package org.jvalue.ods.adapterservice.adapter.rest.v1;
+package org.jvalue.ods.adapterservice.adapter.api.rest.v1;
 
 import org.jvalue.ods.adapterservice.adapter.Adapter;
 import org.jvalue.ods.adapterservice.adapter.AdapterFactory;

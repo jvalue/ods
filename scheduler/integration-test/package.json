@@ -5,7 +5,7 @@
   "scripts": {
     "mock:adapter": "node src/mock.adapter.js",
     "pretest": "npm run mock:adapter &",
-    "test": "jest",
+    "test": "jest --runInBand",
     "posttest": "killall node",
     "lint": "eslint src --fix",
     "lint-ci": "eslint src --max-warnings=0"
@@ -28,7 +28,8 @@
     "axios": "^0.19.2",
     "koa": "^2.13.0",
     "koa-bodyparser": "^4.3.0",
-    "koa-router": "^9.1.0",
+    "koa-router": "^9.4.0",
+    "amqplib": "^0.6.0",
     "wait-on": "^5.1.0"
   }
 }

@@ -174,7 +174,6 @@ describe('Datasource triggering', () => {
 })
 
 const dynamicDatasourceConfig = {
-  id: 54321,
   protocol: {
     type: 'HTTP',
     parameters: {
@@ -204,7 +203,6 @@ const dynamicDatasourceConfig = {
 }
 
 const staticDatasourceConfig = {
-  id: -1,
   protocol: {
     type: 'HTTP',
     parameters: {

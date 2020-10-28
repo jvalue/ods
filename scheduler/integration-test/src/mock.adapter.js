@@ -1,147 +1,54 @@
+
 const Koa = require('koa')
 const Router = require('koa-router')
 const router = new Router()
 const app = new Koa()
-const PORT = process.env.MOCK_ADAPTER_PORT || 8082
+const { MOCK_SERVER_PORT } = require('./env')
+const { jsonDateAfter } = require('./testHelper')
 
-/** DATA IMPORT SECTION **/
-
-const dataImportResponse = {
-  id: 1,
-  location: '/data/1'
-}
-
-const importedData = {
-  field1: 'abc',
-  field2: 123,
-  field3: {
-    name: 'simpleObject'
-  },
-  field4: [3, 5, 'a', 'z']
-}
-
-router.get('/', async ctx => {
-  ctx.type = 'text/plain'
-  ctx.body = 'ok'
-})
-
-router.post('/dataImport', async ctx => {
-  ctx.type = 'text/json'
-  ctx.body = dataImportResponse
-})
-
-router.get('/data/1', async ctx => {
-  ctx.type = 'text/json'
-  ctx.body = importedData
-})
-
-/** DATASOURCE + EVENTS SECTION **/
-
-const DATASOURCES = [
+const triggerRequests = new Map()
+const initialSources = [
   {
-    id: 1,
-    protocol: {
-      type: 'HTTP',
-      parameters: {
-        location: 'testlocation.de/api'
-      }
-    },
-    format: {
-      type: 'XML'
-    },
-    metadata: {},
+    id: 101,
     trigger: {
+      firstExecution: jsonDateAfter(1000),
       periodic: true,
-      firstExecution: '2018-10-07T01:32:00.123Z',
-      interval: 10000
+      interval: 3000
     }
-  },
-  {
-    id: 2,
-    protocol: {
-      type: 'HTTP',
-      parameters: {
-        location: 'testlocation.de/api'
-      }
-    },
-    format: {
-      type: 'XML'
-    },
-    metadata: {
-      displayName: 'nordstream'
-    },
-    trigger: {
-      periodic: true,
-      firstExecution: '2018-10-07T01:32:00.123Z',
-      interval: 10000
-    }
-  }
-]
-
-const EVENTS = [
-  {
-    eventId: 347,
-    eventType: 'DATASOURCE_CREATE',
-    datasourceId: 1
-  },
-  {
-    eventId: 348,
-    eventType: 'DATASOURCE_CREATE',
-    datasourceId: 2
-  },
-  {
-    eventId: 349,
-    eventType: 'DATASOURCE_CREATE',
-    datasourceId: 3
-  },
-  {
-    eventId: 350,
-    eventType: 'DATASOURCE_DELETE',
-    datasourceId: 3
   }
 ]
 
 router.get('/datasources', async ctx => {
   ctx.type = 'application/json'
-  ctx.body = DATASOURCES
+  ctx.body = initialSources
 })
 
-router.get('/datasources/:datasourceId', async ctx => {
-  ctx.type = 'application/json'
-  const datasourceId = Number(ctx.params.datasourceId)
-  let idx = 0
-  for (let i = 0; i < DATASOURCES.length; i++) {
-    if (DATASOURCES[i].id === datasourceId) {
-      idx = i
-    }
-  }
-  ctx.body = DATASOURCES[idx]
-})
-
-router.get('/datasources/events/latest', async ctx => {
-  ctx.type = 'application/json'
-  ctx.body = EVENTS[EVENTS.length - 1]
-})
-
-router.get('/datasources/events', async ctx => {
-  ctx.type = 'application/json'
-  const eventsAfter = Number(ctx.query.after) + 1
-  let idx = 0
-  for (let i = 0; i < EVENTS.length; i++) {
-    if (EVENTS[i].eventId === eventsAfter) {
-      idx = i
-    }
-  }
-  if (eventsAfter > EVENTS[EVENTS.length - 1].eventId) {
-    ctx.body = []
+router.post('/datasources/:datasourceId/trigger', async ctx => {
+  const id = Number(ctx.params.datasourceId)
+  console.log(`Trigger pulled for datasource ${id}`)
+  const calls = triggerRequests.get(id)
+  if (calls === undefined) {
+    triggerRequests.set(id, 1)
   } else {
-    ctx.body = EVENTS.slice(idx)
+    triggerRequests.set(id, triggerRequests.get(id) + 1)
+  }
+  ctx.status = 201
+})
+
+router.get('/triggerRequests/:datasourceId', async ctx => {
+  const id = Number(ctx.params.datasourceId)
+  const calls = triggerRequests.get(id)
+  ctx.type = 'text/plain'
+  if (calls === undefined) {
+    ctx.body = 0
+  } else {
+    ctx.body = calls
   }
 })
 
 app.use(router.routes())
 
-const server = app.listen(PORT, () => console.log('Starting mock adapter server on port ' + PORT))
+const server = app.listen(MOCK_SERVER_PORT, () => console.log('Starting mock adapter server on port ' + MOCK_SERVER_PORT))
 
 process.on('SIGTERM', async () => {
   console.info('Mock-Adapter-Server: SIGTERM signal received.')
