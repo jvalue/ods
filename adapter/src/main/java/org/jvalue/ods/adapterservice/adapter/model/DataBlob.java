@@ -1,7 +1,7 @@
 package org.jvalue.ods.adapterservice.adapter.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.jvalue.ods.adapterservice.adapter.rest.v1.Mappings;
+import org.jvalue.ods.adapterservice.adapter.api.rest.v1.Mappings;
 
 import javax.persistence.*;
 import java.nio.charset.StandardCharsets;

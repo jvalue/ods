@@ -3,10 +3,8 @@ package org.jvalue.ods.adapterservice.datasource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.jvalue.ods.adapterservice.datasource.event.DatasourceEvent;
-import org.jvalue.ods.adapterservice.datasource.event.EventType;
+import org.jvalue.ods.adapterservice.datasource.api.amqp.AmqpPublisher;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
-import org.jvalue.ods.adapterservice.datasource.repository.DatasourceEventRepository;
 import org.jvalue.ods.adapterservice.datasource.repository.DatasourceRepository;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -14,12 +12,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -32,7 +28,7 @@ public class DatasourceManagerTest {
     DatasourceRepository datasourceRepository;
 
     @Mock
-    DatasourceEventRepository eventRepository;
+    AmqpPublisher amqpPublisher;
 
     @InjectMocks
     private DatasourceManager manager;
@@ -50,14 +46,13 @@ public class DatasourceManagerTest {
 
         assertEquals(expectedConfig, result);
         verify(datasourceRepository).save(config);
-        verify(eventRepository).save(argThat(event -> event.getEventType().equals("DATASOURCE_CREATE")));
+        verify(amqpPublisher).publishCreation(result);
     }
 
     @Test
     public void testUpdateDatasource() throws IOException {
         Datasource config = mapper.readValue(configFile, Datasource.class);
         config.setId(123L);
-
 
         Datasource updated = new Datasource(config.getProtocol(), config.getFormat(), config.getMetadata(), config.getTrigger());
         updated.setId(123L);
@@ -67,15 +62,17 @@ public class DatasourceManagerTest {
         manager.updateDatasource(123L, updated);
 
         verify(datasourceRepository).save(updated);
-        verify(eventRepository).save(argThat(event -> event.getEventType().equals("DATASOURCE_UPDATE")));
+        verify(amqpPublisher).publishUpdate(updated);
     }
 
     @Test
-    public void testDeleteDatasource() {
+    public void testDeleteDatasource() throws IOException {
+        Datasource config = mapper.readValue(configFile, Datasource.class);
+        when(datasourceRepository.findById(123L)).thenReturn(Optional.of(config));
         manager.deleteDatasource(123L);
 
         verify(datasourceRepository).deleteById(123L);
-        verify(eventRepository).save(argThat(event -> event.getEventType().equals("DATASOURCE_DELETE")));
+        verify(amqpPublisher).publishDeletion(config);
     }
 
     @Test
@@ -89,43 +86,8 @@ public class DatasourceManagerTest {
         manager.deleteAllDatasources();
 
         verify(datasourceRepository).deleteAll();
-        verify(eventRepository, times(3)).save(argThat(event -> event.getEventType().equals("DATASOURCE_DELETE")));
+        verify(amqpPublisher, times(3))
+                .publishDeletion(config);
     }
 
-    @Test
-    public void testGetEvent() {
-        DatasourceEvent event = new DatasourceEvent(EventType.DATASOURCE_CREATE, 123L);
-
-        when(eventRepository.findById(123L)).thenReturn(Optional.of(event));
-
-        Optional<DatasourceEvent> result =  manager.getEvent(123L);
-
-        assertEquals(event, result.get());
-        verify(eventRepository).findById(123L);
-    }
-
-    @Test
-    public void testGetEventsAfter() {
-        DatasourceEvent first = new DatasourceEvent(EventType.DATASOURCE_CREATE, 1L);
-        DatasourceEvent snd = new DatasourceEvent(EventType.DATASOURCE_UPDATE, 1L);
-        DatasourceEvent thrd = new DatasourceEvent(EventType.DATASOURCE_CREATE, 2L);
-        DatasourceEvent frth = new DatasourceEvent(EventType.DATASOURCE_DELETE, 1L);
-        List<DatasourceEvent> events = List.of(first, snd, thrd, frth);
-
-        when(eventRepository.getAllByEventIdAfter(2L)).thenReturn(events.subList(2, events.size()));
-
-        Iterable<DatasourceEvent> result = manager.getEventsAfter(2L);
-
-        assertEquals(List.of(thrd, frth), result);
-        verify(eventRepository).getAllByEventIdAfter(2L);
-    }
-
-    @Test
-    public void testGetLatestEvent() {
-        when(eventRepository.findFirstByOrderByEventIdDesc()).thenReturn(null);
-
-        manager.getLatestEvent();
-
-        verify(eventRepository).findFirstByOrderByEventIdDesc();
-    }
 }

@@ -1,4 +1,4 @@
-package org.jvalue.ods.adapterservice.adapter.rest.v1;
+package org.jvalue.ods.adapterservice.adapter.api.rest.v1;
 
 public class Mappings {
     public static final String DATA_PATH = "/data";

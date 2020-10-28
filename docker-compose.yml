@@ -37,6 +37,9 @@ services:
       AMQP_EXCHANGE: 'ods_global'
       AMQP_IMPORT_SUCCESS_TOPIC: 'datasource.execution.success'
       AMQP_IMPORT_FAILED_TOPIC: 'datasource.execution.failed'
+      AMQP_DATASOURCE_CREATED_TOPIC: 'datasource.config.created'
+      AMQP_DATASOURCE_UPDATED_TOPIC: 'datasource.config.updated'
+      AMQP_DATASOURCE_DELETED_TOPIC: 'datasource.config.deleted'
       AMQP_PUBLISH_RETRIES: 5
       AMQP_PUBLISH_BACKOFF: 1000
     labels:
@@ -60,6 +63,14 @@ services:
       ADAPTER_SERVICE_URL: http://adapter:8080
       CONNECTION_RETRIES: 20
       CONNECTION_BACKOFF_IN_MS: 5000
+
+      AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
+      AMQP_SCHEDULER_EXCHANGE: 'ods_global'
+      AMQP_SCHEDULER_QUEUE: 'scheduler.datasource-config'
+      AMQP_DATASOURCE_CONFIG_TOPIC: 'datasource.config.*'
+      AMQP_DATASOURCE_CONFIG_CREATED_TOPIC: 'datasource.config.created'
+      AMQP_DATASOURCE_CONFIG_UPDATED_TOPIC: 'datasource.config.updated'
+      AMQP_DATASOURCE_CONFIG_DELETED_TOPIC: 'datasource.config.deleted'
     build:
       context: ./scheduler/
     labels:

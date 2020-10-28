@@ -38,7 +38,7 @@ describe('Test 2: Create periodic pipeline without transformation', () => {
   test('Prepare Mock', async () => {
     const response = await request(MOCK_SERVER_URL).post('/sequences/test2').send(generateSourceData())
     expect(response.status).toEqual(201)
-    dataSourceConfig = generateDataSourceConfig(MOCK_SERVER_WITHIN_DOCKER + '/sequences/test2', false, 5000)
+    dataSourceConfig = generateDataSourceConfig(MOCK_SERVER_WITHIN_DOCKER + '/sequences/test2', true, 5000)
   }, TIMEOUT)
 
   test('Create DataSource at adapter service', async () => {

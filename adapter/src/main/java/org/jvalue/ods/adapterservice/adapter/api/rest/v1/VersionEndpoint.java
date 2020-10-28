@@ -1,4 +1,4 @@
-package org.jvalue.ods.adapterservice.adapter.rest.v1;
+package org.jvalue.ods.adapterservice.adapter.api.rest.v1;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
