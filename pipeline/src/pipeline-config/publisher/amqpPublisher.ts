@@ -1,6 +1,7 @@
 import * as AMQP from 'amqplib'
 
 import { sleep } from '../../sleep'
+import { stringify } from '../../logging'
 
 export default class AmqpPublisher {
   private channel?: AMQP.Channel
@@ -50,7 +51,7 @@ export default class AmqpPublisher {
     } else {
       try {
         const success = this.channel.publish(exchange, topic, Buffer.from(JSON.stringify(content)))
-        console.log(`Sent: ${JSON.stringify(content)} to topic ${topic} in exchange ${exchange}`)
+        console.debug(`[EventProduce] ${topic}: ${stringify(content)}`)
         return success
       } catch (error) {
         console.error(`Error publishing to exchange ${exchange} under key ${topic}: ${error}`)

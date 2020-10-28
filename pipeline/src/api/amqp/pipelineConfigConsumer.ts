@@ -10,6 +10,7 @@ import {
   AMQP_PIPELINE_EXECUTION_QUEUE
 } from '../../env'
 import { sleep } from '../../sleep'
+import { stringify } from '../../logging'
 
 export class PipelineConfigConsumer {
   constructor (private readonly pipelineManager: PipelineConfigManager) {}
@@ -63,7 +64,7 @@ export class PipelineConfigConsumer {
     if (msg === null) {
       console.debug('Received empty event when listening on transformation executions - doing nothing')
     } else {
-      console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
+      console.debug(`[EventProduce] ${msg.fields.routingKey}: ${stringify(msg.content)}`)
       if (msg.fields.routingKey === AMQP_DATASOURCE_EXECUTION_SUCCESS_TOPIC) {
         const triggerRequest: PipelineConfigTriggerRequest = JSON.parse(msg.content.toString())
         await this.pipelineManager.triggerConfig(triggerRequest.datasourceId, JSON.parse(triggerRequest.data))

@@ -9,7 +9,7 @@ import {
   AMQP_PIPELINE_CONFIG_CREATED_TOPIC,
   AMQP_PIPELINE_CONFIG_DELETED_TOPIC
 } from '../../env'
-import PipelineConfigEventHandler from '../pipelineConfigEventHandler'
+import PipelineConfigEventHandler, { PipelineCreatedEvent, PipelineDeletedEvent } from '../pipelineConfigEventHandler'
 
 export class PipelineConfigConsumer {
   constructor (
@@ -32,11 +32,13 @@ export class PipelineConfigConsumer {
       console.debug('Received empty event when listening on pipeline configs - doing nothing')
       return
     }
-    console.debug("[ConsumingEvent] %s:'%s'", msg.fields.routingKey, msg.content.toString())
     if (msg.fields.routingKey === AMQP_PIPELINE_CONFIG_CREATED_TOPIC) {
-      await this.pipelineConfigEventHandler.handleCreation(JSON.parse(msg.content.toString()))
+      const event: PipelineCreatedEvent = JSON.parse(msg.content.toString())
+      await this.pipelineConfigEventHandler.handleCreation(event)
     } else if (msg.fields.routingKey === AMQP_PIPELINE_CONFIG_DELETED_TOPIC) {
-      await this.pipelineConfigEventHandler.handleDeletion(JSON.parse(msg.content.toString()))
+      const event: PipelineDeletedEvent = JSON.parse(msg.content.toString())
+      console.debug()
+      await this.pipelineConfigEventHandler.handleDeletion(event)
     } else {
       console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
     }

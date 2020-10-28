@@ -1,6 +1,7 @@
 import { Pool, PoolConfig, PoolClient, QueryResult } from 'pg'
 
 import { sleep } from '../sleep'
+import { stringifyArray } from '../logging'
 
 export default class PostgresRepository {
   private connectionPool?: Pool = undefined
@@ -47,7 +48,7 @@ export default class PostgresRepository {
   }
 
   public async executeQuery (query: string, args: unknown[]): Promise<QueryResult> {
-    console.debug(`Executing query "${query}" with values ${JSON.stringify(args)}`)
+    console.debug(`[Query] "${query}" with values ${stringifyArray(args)}`)
     if (this.connectionPool === undefined) {
       throw new Error('No connection pool available')
     }
