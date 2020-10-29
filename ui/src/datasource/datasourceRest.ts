@@ -36,6 +36,7 @@ export async function getDatasourceById (id: number): Promise<Datasource> {
 }
 
 export async function createDatasource (datasource: Datasource): Promise<Datasource> {
+  delete datasource.id
   const response = await http.post('/datasources', JSON.stringify(datasource))
   return JSON.parse(response.data, reviver)
 }
