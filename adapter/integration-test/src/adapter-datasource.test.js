@@ -48,15 +48,16 @@ describe('Datasource Configuration', () => {
   }, TIMEOUT)
 
   test('Should reject datasources with specified id', async () => {
-    const configWithId = Object.assign({}, datasourceConfig)
-    configWithId.id = 1
+    const datasourceConfig = getDatasourceConfig()
+    datasourceConfig.id = 1
     const response = await request(ADAPTER_URL)
       .post('/datasources')
-      .send(configWithId)
+      .send(datasourceConfig)
     expect(response.status).toEqual(400)
   })
 
   test('Should create datasources [POST /datasources]', async () => {
+    const datasourceConfig = getDatasourceConfig()
     const response = await request(ADAPTER_URL)
       .post('/datasources')
       .send(datasourceConfig)
@@ -77,16 +78,36 @@ describe('Datasource Configuration', () => {
     expect(allDatasourceResponse.body).toContainEqual(datasource)
   }, TIMEOUT)
 
+  test('Should not create datasource with unsupported protocol [POST /datasources]', async () => {
+    const invalidDatasourceConfig = getDatasourceConfig()
+    invalidDatasourceConfig.protocol.type = 'LOL'
+    const datasourceResponse = await request(ADAPTER_URL)
+      .post('/datasources')
+      .send(invalidDatasourceConfig)
+
+    expect(datasourceResponse.status).toEqual(400)
+  }, TIMEOUT)
+
+  test('Should not create datasource with unsupported format [POST /datasources]', async () => {
+    const invalidDatasourceConfig = getDatasourceConfig()
+    invalidDatasourceConfig.format.type = 'LOL'
+    const datasourceResponse = await request(ADAPTER_URL)
+      .post('/datasources')
+      .send(invalidDatasourceConfig)
+
+    expect(datasourceResponse.status).toEqual(400)
+  }, TIMEOUT)
+
   test('Should update existing datasource [PUT /datasources/{id}]', async () => {
     const postResponse = await request(ADAPTER_URL)
       .post('/datasources')
-      .send(datasourceConfig)
+      .send(getDatasourceConfig())
     const createdDatasource = postResponse.body
 
     const originalGetResponse = await request(ADAPTER_URL)
       .get('/datasources/' + createdDatasource.id)
 
-    const updatedConfig = Object.assign({}, datasourceConfig)
+    const updatedConfig = getDatasourceConfig()
     updatedConfig.protocol.parameters.location = 'http://www.disrespect.com'
 
     const putResponse = await request(ADAPTER_URL)
@@ -109,10 +130,70 @@ describe('Datasource Configuration', () => {
     expect(originalGetResponse.body.adapter).toEqual(updatedGetResponse.body.adapter)
   }, TIMEOUT)
 
+  test('Should not update datasource with unsupported protocol [PUT /datasources/{id}]', async () => {
+    const postResponse = await request(ADAPTER_URL)
+      .post('/datasources')
+      .send(getDatasourceConfig())
+    expect(postResponse.status).toEqual(201)
+    const datasourceId = postResponse.body.id
+
+    const originalGetResponse = await request(ADAPTER_URL)
+      .get('/datasources/' + datasourceId)
+    expect(originalGetResponse.status).toEqual(200)
+
+    const invalidDatasourceConfig = getDatasourceConfig()
+    invalidDatasourceConfig.protocol.type = 'LOL'
+    const datasourceResponse = await request(ADAPTER_URL)
+      .put('/datasources/' + datasourceId)
+      .send(invalidDatasourceConfig)
+    expect(datasourceResponse.status).toEqual(400)
+
+    const updatedGetResponse = await request(ADAPTER_URL)
+      .get('/datasources/' + datasourceId)
+    expect(updatedGetResponse.status).toEqual(200)
+
+    expect(originalGetResponse.body).toEqual(updatedGetResponse.body)
+
+    const delResponse = await request(ADAPTER_URL)
+      .delete('/datasources/' + datasourceId)
+      .send()
+    expect(delResponse.status).toEqual(204)
+  }, TIMEOUT)
+
+  test('Should not update datasource with unsupported format [PUT /datasources/{id}]', async () => {
+    const postResponse = await request(ADAPTER_URL)
+      .post('/datasources')
+      .send(getDatasourceConfig())
+    expect(postResponse.status).toEqual(201)
+    const datasourceId = postResponse.body.id
+
+    const originalGetResponse = await request(ADAPTER_URL)
+      .get('/datasources/' + datasourceId)
+    expect(originalGetResponse.status).toEqual(200)
+
+    const invalidDatasourceConfig = getDatasourceConfig()
+    invalidDatasourceConfig.format.type = 'LOL'
+    const datasourceResponse = await request(ADAPTER_URL)
+      .put('/datasources/' + datasourceId)
+      .send(invalidDatasourceConfig)
+    expect(datasourceResponse.status).toEqual(400)
+
+    const updatedGetResponse = await request(ADAPTER_URL)
+      .get('/datasources/' + datasourceId)
+    expect(updatedGetResponse.status).toEqual(200)
+
+    expect(originalGetResponse.body).toEqual(updatedGetResponse.body)
+
+    const delResponse = await request(ADAPTER_URL)
+      .delete('/datasources/' + datasourceId)
+      .send()
+    expect(delResponse.status).toEqual(204)
+  }, TIMEOUT)
+
   test('Should delete specific datasource [DELETE /datasources/{id}]', async () => {
     const response = await request(ADAPTER_URL)
       .post('/datasources')
-      .send(datasourceConfig)
+      .send(getDatasourceConfig())
     const datasource = response.body
 
     const delResponse = await request(ADAPTER_URL)
@@ -135,10 +216,10 @@ describe('Datasource Configuration', () => {
   test('Should delete all datasources [DELETE /datasources/]', async () => {
     await request(ADAPTER_URL)
       .post('/datasources')
-      .send(datasourceConfig)
+      .send(getDatasourceConfig())
     await request(ADAPTER_URL)
       .post('/datasources')
-      .send(datasourceConfig)
+      .send(getDatasourceConfig())
 
     const delResponse = await request(ADAPTER_URL)
       .delete('/datasources/')
@@ -151,7 +232,7 @@ describe('Datasource Configuration', () => {
   }, TIMEOUT)
 })
 
-const datasourceConfig = {
+const getDatasourceConfig = () => ({
   protocol: {
     type: 'HTTP',
     parameters: {
@@ -173,4 +254,4 @@ const datasourceConfig = {
     displayName: 'test datasource 1',
     description: 'integration testing datasources'
   }
-}
+})

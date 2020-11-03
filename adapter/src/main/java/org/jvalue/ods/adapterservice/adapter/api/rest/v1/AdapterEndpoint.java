@@ -1,7 +1,6 @@
 package org.jvalue.ods.adapterservice.adapter.api.rest.v1;
 
 import org.jvalue.ods.adapterservice.adapter.Adapter;
-import org.jvalue.ods.adapterservice.adapter.AdapterFactory;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,31 +18,30 @@ import javax.validation.Valid;
 @RequestMapping("/")
 public class AdapterEndpoint {
 
-    private final AdapterFactory adapterFactory;
+  private final Adapter adapter;
 
-    @Autowired
-    public AdapterEndpoint(AdapterFactory adapterFactory) {
-        this.adapterFactory = adapterFactory;
-    }
+  @Autowired
+  public AdapterEndpoint(Adapter adapter) {
+    this.adapter = adapter;
+  }
 
-    @PostMapping(Mappings.IMPORT_PATH)
-    public DataBlob.MetaData executeDataImport(@Valid @RequestBody AdapterConfig config) {
-        try {
-          Adapter adapter = adapterFactory.getAdapter(config);
-            return adapter.executeJob(config).getMetaData();
-        } catch (Exception e) {
-            if(e instanceof HttpMessageNotReadableException) {
-                System.err.println("Data Import request failed. Malformed Request: " + e.getMessage());
-                throw e;
-            }
-            String location = config.protocolConfig.parameters.get("location").toString();
-            if(location != null) {
-                System.err.println("Importing data from " + location + " failed.\n" +
-                        "Reason: " + e.getClass().getName() + ": " + e.getMessage());
-            } else {
-                System.err.println("Data Import failed. Reason: " + e.getClass() + ": " +e.getMessage());
-            }
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+  @PostMapping(Mappings.IMPORT_PATH)
+  public DataBlob.MetaData executeDataImport(@Valid @RequestBody AdapterConfig config) {
+    try {
+      return adapter.executeJob(config).getMetaData();
+    } catch (Exception e) {
+      if (e instanceof HttpMessageNotReadableException) {
+        System.err.println("Data Import request failed. Malformed Request: " + e.getMessage());
+        throw e;
+      }
+      String location = config.protocolConfig.parameters.get("location").toString();
+      if (location != null) {
+        System.err.println("Importing data from " + location + " failed.\n" +
+          "Reason: " + e.getClass().getName() + ": " + e.getMessage());
+      } else {
+        System.err.println("Data Import failed. Reason: " + e.getClass() + ": " + e.getMessage());
+      }
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
 }

@@ -1,7 +1,6 @@
 package org.jvalue.ods.adapterservice.datasource;
 
 import org.jvalue.ods.adapterservice.adapter.Adapter;
-import org.jvalue.ods.adapterservice.adapter.AdapterFactory;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
 import org.jvalue.ods.adapterservice.datasource.api.amqp.AmqpPublisher;
@@ -21,13 +20,13 @@ import java.util.stream.StreamSupport;
 public class DatasourceManager {
 
   private final DatasourceRepository datasourceRepository;
-  private final AdapterFactory adapterFactory;
+  private final Adapter adapter;
   private final AmqpPublisher amqpPublisher;
 
   @Autowired
-  public DatasourceManager(DatasourceRepository datasourceRepository, AdapterFactory adapterFactory, AmqpPublisher amqpPublisher) {
+  public DatasourceManager(DatasourceRepository datasourceRepository, Adapter adapter, AmqpPublisher amqpPublisher) {
     this.datasourceRepository = datasourceRepository;
-    this.adapterFactory = adapterFactory;
+    this.adapter = adapter;
     this.amqpPublisher = amqpPublisher;
   }
 
@@ -66,7 +65,7 @@ public class DatasourceManager {
   @Transactional
   public void deleteDatasource(Long id) {
     Datasource datasource = datasourceRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Datasource with id " + id + " not found"));
+      .orElseThrow(() -> new IllegalArgumentException("Datasource with id " + id + " not found"));
     datasourceRepository.deleteById(id);
     amqpPublisher.publishDeletion(datasource);
   }
@@ -77,35 +76,35 @@ public class DatasourceManager {
     Iterable<Datasource> allDatasourceConfigs = getAllDatasources();
     datasourceRepository.deleteAll();
     StreamSupport.stream(allDatasourceConfigs.spliterator(), true)
-            .forEach(amqpPublisher::publishDeletion);
+      .forEach(amqpPublisher::publishDeletion);
   }
 
- private AdapterConfig getParametrizedDatasource(Long id, RuntimeParameters runtimeParameters) {
-   Datasource datasource = getDatasource(id)
-     .orElseThrow(() -> new IllegalArgumentException("No datasource found with id " + id));
-   return datasource.toAdapterConfig(runtimeParameters);
- }
+  private AdapterConfig getParametrizedDatasource(Long id, RuntimeParameters runtimeParameters) {
+    Datasource datasource = getDatasource(id)
+      .orElseThrow(() -> new IllegalArgumentException("No datasource found with id " + id));
+    return datasource.toAdapterConfig(runtimeParameters);
+  }
 
- public DataBlob.MetaData trigger(Long id, RuntimeParameters runtimeParameters) {
+  public DataBlob.MetaData trigger(Long id, RuntimeParameters runtimeParameters) {
     AdapterConfig adapterConfig = getParametrizedDatasource(id, runtimeParameters);
-   try {
-      Adapter adapter = adapterFactory.getAdapter(adapterConfig);
+    try {
       DataBlob executionResult = adapter.executeJob(adapterConfig);
       amqpPublisher.publishImportSuccess(id, executionResult.getData());
       return executionResult.getMetaData();
-   } catch (Exception e) {
+    } catch (Exception e) {
       amqpPublisher.publishImportFailure(id, e.getMessage());
-     if(e instanceof IllegalArgumentException) {
-       System.err.println("Data Import request failed. Malformed Request: " + e.getMessage());
-     } else {
-       System.err.println("Exception in the Adapter: " + e.getMessage());
-     }
-       throw e;
-   }
- }
+      if (e instanceof IllegalArgumentException) {
+        System.err.println("Data Import request failed. Malformed Request: " + e.getMessage());
+      } else {
+        System.err.println("Exception in the Adapter: " + e.getMessage());
+      }
+      throw e;
+    }
+  }
 
   /**
-   * Create an updated DatasourceConfig using the full representation of an update. This method ensures that id and creation time remain stable.
+   * Create an updated DatasourceConfig using the full representation of an update. This method ensures that id and
+   * creation time remain stable.
    *
    * @param updateConfig the representation of the updated config
    * @return an updated DatasourceConfig that has the same id and creationTimestamp as the original one.
