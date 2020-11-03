@@ -12,8 +12,6 @@ import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Entity
 public class Datasource {
@@ -98,20 +96,26 @@ public class Datasource {
     if (!this.getProtocol().getType().equals(Protocol.HTTP)) {
       return this.getProtocol().getParameters();
     }
-    String url = (String) this.getProtocol().getParameters().get("location");
-    Map<String, String> defaultParameters = new HashMap<>();
+
+    Map<String, String> replacementParameters = new HashMap<>();
+
+    //Add all default parameters to the replacement parameters map
     if (this.getProtocol().getParameters().containsKey("defaultParameters")) {
-      defaultParameters = (Map<String, String>) this.getProtocol().getParameters().get("defaultParameters");
+      var defaultParams = (Map<String, String>) this.getProtocol().getParameters().get("defaultParameters");
+      defaultParams.forEach(replacementParameters::put);
     }
-    Map<String, String> triggerParameters = new HashMap<>();
+
+    //Add all runtime parameters to the replacement parameters map
     if (runtimeParameters != null && runtimeParameters.parameters != null) {
-      triggerParameters = runtimeParameters.parameters;
+      runtimeParameters.parameters.forEach(replacementParameters::put);
     }
-    Map<String, String> replacementParameters = Stream.of(defaultParameters, triggerParameters).flatMap(map -> map.entrySet().stream()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (v1, v2) -> v2));
+
+    String url = (String) this.getProtocol().getParameters().get("location");
     for (Map.Entry<String, String> parameter : replacementParameters.entrySet()) {
       url = url.replace("{" + parameter.getKey() + "}", parameter.getValue());
     }
-    HashMap<String, Object> parameters = new HashMap<>(this.getProtocol().getParameters());
+
+    Map<String, Object> parameters = new HashMap<>(this.getProtocol().getParameters());
     parameters.put("location", url);
     return parameters;
   }
