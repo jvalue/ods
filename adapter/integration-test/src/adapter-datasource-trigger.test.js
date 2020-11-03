@@ -144,7 +144,15 @@ describe('Datasource triggering', () => {
     })
   })
 
-  test('Should publish results for failing datasources [POST /datasources/{id}/trigger]', async () => {
+  test('Should return 404 NOT_FOUND when trigger unknown datasources [POST /datasources/0/trigger]', async () => {
+    const triggerResponse = await request(ADAPTER_URL)
+      .post('/datasources/0/trigger')
+      .send()
+
+    expect(triggerResponse.status).toEqual(404)
+  })
+
+  test('Should publish results for datasources with invalid location [POST /datasources/{id}/trigger]', async () => {
     const brokenDatasourceConfig = Object.assign({}, staticDatasourceConfig)
     brokenDatasourceConfig.protocol.parameters.location = 'LOL'
     const datasourceResponse = await request(ADAPTER_URL)
@@ -157,7 +165,7 @@ describe('Datasource triggering', () => {
       .post(`/datasources/${datasourceId}/trigger`)
       .send()
 
-    expect(triggerResponse.status).toEqual(404)
+    expect(triggerResponse.status).toEqual(400)
 
     const delResponse = await request(ADAPTER_URL)
       .delete(`/datasources/${datasourceId}`)
@@ -166,10 +174,38 @@ describe('Datasource triggering', () => {
     expect(delResponse.status).toEqual(204)
 
     // check for rabbitmq notification
-    expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)).toBeDefined()
-    expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)).toHaveLength(1)
-    expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)[0].datasourceId).toEqual(datasourceId)
-    expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)[0].error).toBeDefined()
+    expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)).toContainEqual({
+      datasourceId: datasourceId,
+      error: 'URI is not absolute'
+    })
+  })
+
+  test('Should publish results for datasources with failing import [POST /datasources/{id}/trigger]', async () => {
+    const brokenDatasourceConfig = Object.assign({}, staticDatasourceConfig)
+    brokenDatasourceConfig.protocol.parameters.location = MOCK_SERVER_URL + '/not-found'
+    const datasourceResponse = await request(ADAPTER_URL)
+      .post('/datasources')
+      .send(brokenDatasourceConfig)
+
+    const datasourceId = datasourceResponse.body.id
+
+    const triggerResponse = await request(ADAPTER_URL)
+      .post(`/datasources/${datasourceId}/trigger`)
+      .send()
+
+    expect(triggerResponse.status).toEqual(400)
+
+    const delResponse = await request(ADAPTER_URL)
+      .delete(`/datasources/${datasourceId}`)
+      .send()
+
+    expect(delResponse.status).toEqual(204)
+
+    // check for rabbitmq notification
+    expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)).toContainEqual({
+      datasourceId: datasourceId,
+      error: '404 Not Found: [404 NOT FOUND Error]'
+    })
   })
 })
 

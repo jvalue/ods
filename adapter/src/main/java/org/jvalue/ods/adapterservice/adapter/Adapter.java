@@ -6,6 +6,7 @@ import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -21,7 +22,15 @@ public class Adapter {
     this.dataBlobRepository = dataBlobRepository;
   }
 
-  public DataBlob executeJob(AdapterConfig config) {
+  /**
+   * Executes an adapter configuration
+   *
+   * @param config the adapter configuration
+   * @return the imported and interpreted data
+   * @throws IllegalArgumentException on errors in the adapter config (e.g. missing parameters, ...)
+   * @throws RestClientException      on response errors when importing the data
+   */
+  public DataBlob executeJob(AdapterConfig config) throws IllegalArgumentException, RestClientException {
     var importer = config.protocolConfig.protocol.getImporter();
     var interpreter = config.formatConfig.format.getInterpreter();
 

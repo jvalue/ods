@@ -213,6 +213,13 @@ describe('Datasource Configuration', () => {
     expect(getDeletedRequest.status).toEqual(404)
   }, TIMEOUT)
 
+  test('Should return 404 NOT FOUND when deleting unknown datasource [DELETE /datasources/0]', async () => {
+    const delResponse = await request(ADAPTER_URL)
+      .delete('/datasources/0')
+      .send()
+    expect(delResponse.status).toEqual(404)
+  }, TIMEOUT)
+
   test('Should delete all datasources [DELETE /datasources/]', async () => {
     await request(ADAPTER_URL)
       .post('/datasources')

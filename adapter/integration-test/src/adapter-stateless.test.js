@@ -142,4 +142,80 @@ describe('Stateless data import', () => {
       }
     ])
   }, TIMEOUT)
+
+  test('Should return 400 BAD_REQUEST for invalid protocol [POST /dataImport]', async () => {
+    const reqBody = {
+      protocol: {
+        type: 'LOL',
+        parameters: {
+          location: MOCK_SERVER_URL + '/json',
+          encoding: 'UTF-8'
+        }
+      },
+      format: {
+        type: 'JSON'
+      }
+    }
+    const response = await request(ADAPTER_URL)
+      .post('/dataImport')
+      .send(reqBody)
+    expect(response.status).toEqual(400)
+  }, TIMEOUT)
+
+  test('Should return 400 BAD_REQUEST for invalid format [POST /dataImport]', async () => {
+    const reqBody = {
+      protocol: {
+        type: 'HTTP',
+        parameters: {
+          location: MOCK_SERVER_URL + '/json',
+          encoding: 'UTF-8'
+        }
+      },
+      format: {
+        type: 'LOL'
+      }
+    }
+    const response = await request(ADAPTER_URL)
+      .post('/dataImport')
+      .send(reqBody)
+    expect(response.status).toEqual(400)
+  }, TIMEOUT)
+
+  test('Should return 400 BAD_REQUEST for invalid location [POST /dataImport]', async () => {
+    const reqBody = {
+      protocol: {
+        type: 'HTTP',
+        parameters: {
+          location: 'LOL',
+          encoding: 'UTF-8'
+        }
+      },
+      format: {
+        type: 'LOL'
+      }
+    }
+    const response = await request(ADAPTER_URL)
+      .post('/dataImport')
+      .send(reqBody)
+    expect(response.status).toEqual(400)
+  }, TIMEOUT)
+
+  test('Should return 400 BAD_REQUEST for data not found [POST /dataImport]', async () => {
+    const reqBody = {
+      protocol: {
+        type: 'HTTP',
+        parameters: {
+          location: MOCK_SERVER_URL + '/not-found',
+          encoding: 'UTF-8'
+        }
+      },
+      format: {
+        type: 'LOL'
+      }
+    }
+    const response = await request(ADAPTER_URL)
+      .post('/dataImport')
+      .send(reqBody)
+    expect(response.status).toEqual(400)
+  }, TIMEOUT)
 })
