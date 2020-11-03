@@ -2,11 +2,10 @@ package org.jvalue.ods.adapterservice.datasource.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jvalue.ods.adapterservice.adapter.Format;
 import org.jvalue.ods.adapterservice.datasource.repository.GenericParameterConverter;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Embeddable;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Map;
 import java.util.Objects;
@@ -16,7 +15,8 @@ public class DatasourceFormat {
 
   @NotNull
   @Column(name = "format_type")
-  private String type;
+  @Enumerated(EnumType.STRING)
+  private Format type;
 
   @NotNull
   @Column(name = "format_parameters")
@@ -24,16 +24,17 @@ public class DatasourceFormat {
   private Map<String, Object> parameters;
 
   // Constructor for JPA
-  private DatasourceFormat() {  }
+  private DatasourceFormat() {
+  }
 
   @JsonCreator
-  public DatasourceFormat(@JsonProperty("type") String type,
+  public DatasourceFormat(@JsonProperty("type") Format type,
                           @JsonProperty("parameters") Map<String, Object> parameters) {
     this.type = type;
     this.parameters = parameters;
   }
 
-  public String getType() {
+  public Format getType() {
     return type;
   }
 

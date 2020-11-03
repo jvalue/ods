@@ -3,6 +3,8 @@ package org.jvalue.ods.adapterservice.datasource.model;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
+import org.jvalue.ods.adapterservice.adapter.Format;
+import org.jvalue.ods.adapterservice.adapter.Protocol;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.FormatConfig;
 import org.jvalue.ods.adapterservice.adapter.model.ProtocolConfig;
@@ -16,6 +18,9 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.Assert.*;
+import static org.jvalue.ods.adapterservice.adapter.Format.JSON;
+import static org.jvalue.ods.adapterservice.adapter.Format.XML;
+import static org.jvalue.ods.adapterservice.adapter.Protocol.HTTP;
 
 public class DatasourceTest {
   private final ObjectMapper mapper = new ObjectMapper();
@@ -25,7 +30,7 @@ public class DatasourceTest {
     File datasourceConfig = new File("src/test/java/org/jvalue/ods/adapterservice/datasource/model/DatasourceConfig.json");
     Datasource result = mapper.readValue(datasourceConfig, Datasource.class);
 
-    Datasource expectedDatasource = generateDatasource("HTTP", "XML", "http://www.the-inder.net");
+    Datasource expectedDatasource = generateDatasource(HTTP, XML, "http://www.the-inder.net");
     expectedDatasource.setId(123L);
 
     assertEquals(expectedDatasource, result);
@@ -35,7 +40,7 @@ public class DatasourceTest {
     DateFormatter dateFormatter = new DateFormatter("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
     dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
     assertEquals("1905-12-01T02:30:00.123Z",
-        dateFormatter.print(result.getTrigger().getFirstExecution(), Locale.getDefault()));
+      dateFormatter.print(result.getTrigger().getFirstExecution(), Locale.getDefault()));
 
     assertEquals(50000, result.getTrigger().getInterval().longValue());
     assertEquals("icke", result.getMetadata().getAuthor());
@@ -49,7 +54,7 @@ public class DatasourceTest {
 
   @Test
   public void testSerialization() throws ParseException {
-    Datasource datasource = generateDatasource("HTTP", "JSON", "http://www.the-inder.net");
+    Datasource datasource = generateDatasource(HTTP, JSON, "http://www.the-inder.net");
     DatasourceTrigger trigger = new DatasourceTrigger(false, new Date(), 10L);
     DatasourceMetadata metadata = new DatasourceMetadata("icke", "none", "Display", "description");
     Datasource config = new Datasource(datasource.getProtocol(), datasource.getFormat(), metadata, trigger);
@@ -61,26 +66,31 @@ public class DatasourceTest {
     assertEquals("HTTP", result.get("protocol").get("type").textValue());
     assertEquals("JSON", result.get("format").get("type").textValue());
     assertEquals("http://www.the-inder.net",
-        result.get("protocol").get("parameters").get("location").textValue());
+      result.get("protocol").get("parameters").get("location").textValue());
   }
 
   @Test
-  public void testFillQueryParameters() throws ParseException {
-    Datasource datasource = generateParameterizableDatasource("HTTP", "JSON", "http://www.the-inder.net/{userId}/{dataId}", Map.of("userId", "1", "dataId", "123"));
-    Map<String, String> parameters = new HashMap<>();
-    parameters.put("userId", "1");
-    parameters.put("dataId", "123");
-    parameters.put("notAKey", "notAValue");
-    RuntimeParameters runtimeParameters = new RuntimeParameters(parameters);
-    DatasourceProtocol datasourceProtocol = datasource.fillQueryParameters(runtimeParameters);
-    assertEquals("http://www.the-inder.net/1/123", datasourceProtocol.getParameters().get("location"));
-    datasourceProtocol = datasource.fillQueryParameters(null);
-    assertEquals("http://www.the-inder.net/1/123", datasourceProtocol.getParameters().get("location"));
+  public void testFillQueryParametersWithRuntimeParameters() throws ParseException {
+    Datasource datasource = generateParameterizableDatasource(HTTP, JSON, "http://www.the-inder.net/{userId}/{dataId}", Map.of("userId", "1", "dataId", "123"));
+
+    RuntimeParameters runtimeParameters = new RuntimeParameters(Map.of(
+      "userId", "42",
+      "dataId", "4242",
+      "notAKey", "notAValue"
+    ));
+    assertEquals("http://www.the-inder.net/42/4242", datasource.fillQueryParameters(runtimeParameters).get("location"));
+  }
+
+  @Test
+  public void testFillQueryParametersWithoutRuntimeParameters() throws ParseException {
+    Datasource datasource = generateParameterizableDatasource(HTTP, JSON, "http://www.the-inder.net/{userId}/{dataId}", Map.of("userId", "1", "dataId", "123"));
+
+    assertEquals("http://www.the-inder.net/1/123", datasource.fillQueryParameters(null).get("location"));
   }
 
   @Test
   public void testToAdapterConfig() throws ParseException {
-    Datasource datasource = generateDatasource("HTTP", "JSON", "http://www.the-inder.net/{userId}/{dataId}");
+    Datasource datasource = generateDatasource(HTTP, JSON, "http://www.the-inder.net/{userId}/{dataId}");
     Map<String, String> parameters = new HashMap<>();
     parameters.put("userId", "1");
     parameters.put("dataId", "123");
@@ -88,13 +98,13 @@ public class DatasourceTest {
     RuntimeParameters runtimeParameters = new RuntimeParameters(parameters);
     AdapterConfig adapterConfig = datasource.toAdapterConfig(runtimeParameters);
     AdapterConfig testAgainst = new AdapterConfig(
-      new ProtocolConfig("HTTP", Map.of("location", "http://www.the-inder.net/1/123")),
-      new FormatConfig("JSON", Map.of())
-      );
+      new ProtocolConfig(HTTP, Map.of("location", "http://www.the-inder.net/1/123")),
+      new FormatConfig(JSON, Map.of())
+    );
     assertEquals(testAgainst, adapterConfig);
   }
 
-  private Datasource generateDatasource(String protocol, String format, String location) throws ParseException {
+  private Datasource generateDatasource(Protocol protocol, Format format, String location) throws ParseException {
     DatasourceProtocol protocolConfig = new DatasourceProtocol(protocol, Map.of("location", location));
     DatasourceFormat formatConfig = new DatasourceFormat(format, Map.of());
     DatasourceMetadata metadata = new DatasourceMetadata("icke", "none", "TestName", "Describing...");
@@ -102,7 +112,7 @@ public class DatasourceTest {
     return new Datasource(protocolConfig, formatConfig, metadata, trigger);
   }
 
-  private Datasource generateParameterizableDatasource(String protocol, String format, String location, Map<String, String> defaultParameters) throws ParseException {
+  private Datasource generateParameterizableDatasource(Protocol protocol, Format format, String location, Map<String, String> defaultParameters) throws ParseException {
     DatasourceProtocol protocolConfig = new DatasourceProtocol(protocol, Map.of("location", location, "defaultParameters", defaultParameters));
     DatasourceFormat formatConfig = new DatasourceFormat(format, Map.of());
     DatasourceMetadata metadata = new DatasourceMetadata("icke", "none", "TestName", "Describing...");

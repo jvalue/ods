@@ -2,11 +2,10 @@ package org.jvalue.ods.adapterservice.datasource.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jvalue.ods.adapterservice.adapter.Protocol;
 import org.jvalue.ods.adapterservice.datasource.repository.GenericParameterConverter;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Embeddable;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Map;
 import java.util.Objects;
@@ -16,7 +15,8 @@ public class DatasourceProtocol {
 
   @NotNull
   @Column(name = "protocol_type")
-  private String type;
+  @Enumerated(EnumType.STRING)
+  private Protocol type;
 
   @NotNull
   @Column(name = "protocol_parameters")
@@ -24,16 +24,17 @@ public class DatasourceProtocol {
   private Map<String, Object> parameters;
 
   // Constructor for JPA
-  private DatasourceProtocol() {  }
+  private DatasourceProtocol() {
+  }
 
   @JsonCreator
-  public DatasourceProtocol(@JsonProperty("type") String type,
+  public DatasourceProtocol(@JsonProperty("type") Protocol type,
                             @JsonProperty("parameters") Map<String, Object> parameters) {
     this.type = type;
     this.parameters = parameters;
   }
 
-  public String getType() {
+  public Protocol getType() {
     return type;
   }
 
