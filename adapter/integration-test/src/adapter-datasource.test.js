@@ -80,7 +80,7 @@ describe('Datasource Configuration', () => {
 
   test('Should not create datasource with unsupported protocol [POST /datasources]', async () => {
     const invalidDatasourceConfig = getDatasourceConfig()
-    invalidDatasourceConfig.protocol.type = 'LOL'
+    invalidDatasourceConfig.protocol.type = 'UNSUPPORTED'
     const datasourceResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(invalidDatasourceConfig)
@@ -90,7 +90,7 @@ describe('Datasource Configuration', () => {
 
   test('Should not create datasource with unsupported format [POST /datasources]', async () => {
     const invalidDatasourceConfig = getDatasourceConfig()
-    invalidDatasourceConfig.format.type = 'LOL'
+    invalidDatasourceConfig.format.type = 'UNSUPPORTED'
     const datasourceResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(invalidDatasourceConfig)
@@ -142,7 +142,7 @@ describe('Datasource Configuration', () => {
     expect(originalGetResponse.status).toEqual(200)
 
     const invalidDatasourceConfig = getDatasourceConfig()
-    invalidDatasourceConfig.protocol.type = 'LOL'
+    invalidDatasourceConfig.protocol.type = 'UNSUPPORTED'
     const datasourceResponse = await request(ADAPTER_URL)
       .put('/datasources/' + datasourceId)
       .send(invalidDatasourceConfig)
@@ -172,7 +172,7 @@ describe('Datasource Configuration', () => {
     expect(originalGetResponse.status).toEqual(200)
 
     const invalidDatasourceConfig = getDatasourceConfig()
-    invalidDatasourceConfig.format.type = 'LOL'
+    invalidDatasourceConfig.format.type = 'UNSUPPORTED'
     const datasourceResponse = await request(ADAPTER_URL)
       .put('/datasources/' + datasourceId)
       .send(invalidDatasourceConfig)
@@ -211,6 +211,13 @@ describe('Datasource Configuration', () => {
       .send()
 
     expect(getDeletedRequest.status).toEqual(404)
+  }, TIMEOUT)
+
+  test('Should return 404 NOT FOUND when deleting unknown datasource [DELETE /datasources/0]', async () => {
+    const delResponse = await request(ADAPTER_URL)
+      .delete('/datasources/0')
+      .send()
+    expect(delResponse.status).toEqual(404)
   }, TIMEOUT)
 
   test('Should delete all datasources [DELETE /datasources/]', async () => {
