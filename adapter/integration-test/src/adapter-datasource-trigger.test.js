@@ -154,7 +154,7 @@ describe('Datasource triggering', () => {
 
   test('Should publish results for datasources with invalid location [POST /datasources/{id}/trigger]', async () => {
     const brokenDatasourceConfig = Object.assign({}, staticDatasourceConfig)
-    brokenDatasourceConfig.protocol.parameters.location = 'LOL'
+    brokenDatasourceConfig.protocol.parameters.location = 'invalid-location'
     const datasourceResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(brokenDatasourceConfig)

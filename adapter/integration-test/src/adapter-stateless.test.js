@@ -143,10 +143,10 @@ describe('Stateless data import', () => {
     ])
   }, TIMEOUT)
 
-  test('Should return 400 BAD_REQUEST for invalid protocol [POST /dataImport]', async () => {
+  test('Should return 400 BAD_REQUEST for unsupported protocol [POST /dataImport]', async () => {
     const reqBody = {
       protocol: {
-        type: 'LOL',
+        type: 'UNSUPPORTED',
         parameters: {
           location: MOCK_SERVER_URL + '/json',
           encoding: 'UTF-8'
@@ -162,7 +162,7 @@ describe('Stateless data import', () => {
     expect(response.status).toEqual(400)
   }, TIMEOUT)
 
-  test('Should return 400 BAD_REQUEST for invalid format [POST /dataImport]', async () => {
+  test('Should return 400 BAD_REQUEST for unsupported format [POST /dataImport]', async () => {
     const reqBody = {
       protocol: {
         type: 'HTTP',
@@ -172,7 +172,7 @@ describe('Stateless data import', () => {
         }
       },
       format: {
-        type: 'LOL'
+        type: 'UNSUPPORTED'
       }
     }
     const response = await request(ADAPTER_URL)
@@ -186,12 +186,12 @@ describe('Stateless data import', () => {
       protocol: {
         type: 'HTTP',
         parameters: {
-          location: 'LOL',
+          location: 'invalid-location',
           encoding: 'UTF-8'
         }
       },
       format: {
-        type: 'LOL'
+        type: 'JSON'
       }
     }
     const response = await request(ADAPTER_URL)
@@ -210,7 +210,7 @@ describe('Stateless data import', () => {
         }
       },
       format: {
-        type: 'LOL'
+        type: 'JSON'
       }
     }
     const response = await request(ADAPTER_URL)
