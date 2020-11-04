@@ -11,6 +11,12 @@ router.get('/', async ctx => {
   ctx.body = 'ok'
 })
 
+router.get('/not-found', async ctx => {
+  ctx.type = 'text/plain'
+  ctx.status = 404
+  ctx.body = '404 NOT FOUND Error'
+})
+
 router.get('/json', async ctx => {
   console.log('GET /json')
   ctx.body = { whateverwillbe: 'willbe', quesera: 'sera' }
