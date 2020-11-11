@@ -44,7 +44,7 @@ public class Adapter {
   }
 
   public Collection<Importer> getAllProtocols() {
-    return Arrays.stream(Protocol.values()).map(Protocol::getImporter).collect(Collectors.toList());
+    return Arrays.stream(ProtocolEnum.values()).map(ProtocolEnum::getImporter).collect(Collectors.toList());
   }
 
   public Collection<Interpreter> getAllFormats() {

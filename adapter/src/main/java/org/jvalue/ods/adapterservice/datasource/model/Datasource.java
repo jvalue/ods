@@ -2,7 +2,7 @@ package org.jvalue.ods.adapterservice.datasource.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.jvalue.ods.adapterservice.adapter.Protocol;
+import org.jvalue.ods.adapterservice.adapter.ProtocolEnum;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.FormatConfig;
 import org.jvalue.ods.adapterservice.adapter.model.ProtocolConfig;
@@ -93,7 +93,7 @@ public class Datasource {
   }
 
   protected Map<String, Object> fillQueryParameters(RuntimeParameters runtimeParameters) {
-    if (!this.getProtocol().getType().equals(Protocol.HTTP)) {
+    if (!this.getProtocol().getType().equals(ProtocolEnum.HTTP)) {
       return this.getProtocol().getParameters();
     }
 

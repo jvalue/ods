@@ -2,7 +2,7 @@ package org.jvalue.ods.adapterservice.datasource.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.jvalue.ods.adapterservice.adapter.Protocol;
+import org.jvalue.ods.adapterservice.adapter.ProtocolEnum;
 import org.jvalue.ods.adapterservice.datasource.repository.GenericParameterConverter;
 
 import javax.persistence.*;
@@ -16,7 +16,7 @@ public class DatasourceProtocol {
   @NotNull
   @Column(name = "protocol_type")
   @Enumerated(EnumType.STRING)
-  private Protocol type;
+  private ProtocolEnum type;
 
   @NotNull
   @Column(name = "protocol_parameters")
@@ -28,13 +28,13 @@ public class DatasourceProtocol {
   }
 
   @JsonCreator
-  public DatasourceProtocol(@JsonProperty("type") Protocol type,
+  public DatasourceProtocol(@JsonProperty("type") ProtocolEnum type,
                             @JsonProperty("parameters") Map<String, Object> parameters) {
     this.type = type;
     this.parameters = parameters;
   }
 
-  public Protocol getType() {
+  public ProtocolEnum getType() {
     return type;
   }
 
