@@ -3,8 +3,6 @@ package org.jvalue.ods.adapterservice.datasource.model;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import org.jvalue.ods.adapterservice.adapter.Format;
-import org.jvalue.ods.adapterservice.adapter.Protocol;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.FormatConfig;
 import org.jvalue.ods.adapterservice.adapter.model.ProtocolConfig;
@@ -13,7 +11,6 @@ import org.springframework.format.datetime.DateFormatter;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -21,6 +18,8 @@ import static org.junit.Assert.*;
 import static org.jvalue.ods.adapterservice.adapter.Format.JSON;
 import static org.jvalue.ods.adapterservice.adapter.Format.XML;
 import static org.jvalue.ods.adapterservice.adapter.Protocol.HTTP;
+import static org.jvalue.ods.adapterservice.datasource.TestHelper.generateDatasource;
+import static org.jvalue.ods.adapterservice.datasource.TestHelper.generateParameterizableDatasource;
 
 public class DatasourceTest {
   private final ObjectMapper mapper = new ObjectMapper();
@@ -102,21 +101,5 @@ public class DatasourceTest {
       new FormatConfig(JSON, Map.of())
     );
     assertEquals(testAgainst, adapterConfig);
-  }
-
-  private Datasource generateDatasource(Protocol protocol, Format format, String location) throws ParseException {
-    DatasourceProtocol protocolConfig = new DatasourceProtocol(protocol, Map.of("location", location));
-    DatasourceFormat formatConfig = new DatasourceFormat(format, Map.of());
-    DatasourceMetadata metadata = new DatasourceMetadata("icke", "none", "TestName", "Describing...");
-    DatasourceTrigger trigger = new DatasourceTrigger(true, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse("1905-12-01T02:30:00.123Z"), 50000L);
-    return new Datasource(protocolConfig, formatConfig, metadata, trigger);
-  }
-
-  private Datasource generateParameterizableDatasource(Protocol protocol, Format format, String location, Map<String, String> defaultParameters) throws ParseException {
-    DatasourceProtocol protocolConfig = new DatasourceProtocol(protocol, Map.of("location", location, "defaultParameters", defaultParameters));
-    DatasourceFormat formatConfig = new DatasourceFormat(format, Map.of());
-    DatasourceMetadata metadata = new DatasourceMetadata("icke", "none", "TestName", "Describing...");
-    DatasourceTrigger trigger = new DatasourceTrigger(true, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse("1905-12-01T02:30:00.123Z"), 50000L);
-    return new Datasource(protocolConfig, formatConfig, metadata, trigger);
   }
 }
