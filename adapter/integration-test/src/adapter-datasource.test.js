@@ -101,7 +101,7 @@ describe('Datasource Configuration', () => {
   test('Should create datasource with long URL [POST /datasources]', async () => {
     const longUrlDatasourceConfig = getDatasourceConfig()
     const queryParameter = '&parameter=longParameter'
-    const longUrl = 'http://www.disresprect.com?first=test' + queryParameter.repeat(20)
+    const longUrl = 'http://www.verylongdomain.com?first=test' + queryParameter.repeat(20)
     longUrlDatasourceConfig.protocol.parameters.location = longUrl
     const response = await request(ADAPTER_URL)
       .post('/datasources')
