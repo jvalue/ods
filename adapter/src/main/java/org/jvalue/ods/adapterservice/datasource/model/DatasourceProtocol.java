@@ -19,7 +19,7 @@ public class DatasourceProtocol {
   private Protocol type;
 
   @NotNull
-  @Column(name = "protocol_parameters")
+  @Column(name = "protocol_parameters", length = 2000)
   @Convert(converter = GenericParameterConverter.class)
   private Map<String, Object> parameters;
 
