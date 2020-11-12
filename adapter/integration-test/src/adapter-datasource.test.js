@@ -98,6 +98,18 @@ describe('Datasource Configuration', () => {
     expect(datasourceResponse.status).toEqual(400)
   }, TIMEOUT)
 
+  test('Should create datasource with long URL [POST /datasources]', async () => {
+    const longUrlDatasourceConfig = getDatasourceConfig()
+    const queryParameter = '&parameter=longParameter'
+    const longUrl = 'http://www.disresprect.com?first=test' + queryParameter.repeat(20)
+    longUrlDatasourceConfig.protocol.parameters.location = longUrl
+    const response = await request(ADAPTER_URL)
+      .post('/datasources')
+      .send(longUrlDatasourceConfig)
+
+    expect(response.status).toEqual(201)
+  })
+
   test('Should update existing datasource [PUT /datasources/{id}]', async () => {
     const postResponse = await request(ADAPTER_URL)
       .post('/datasources')
