@@ -132,7 +132,7 @@ public class DatasourceManagerTest {
         Datasource datasource = generateParameterizableDatasource(
                 HTTP,
                 JSON,
-                "http://www.the-inder.net/{userId}/{dataId}",
+                "http://www.professional-test-url.com/{userId}/{dataId}",
                 Map.of("userId", "1", "dataId", "123"));
 
 
