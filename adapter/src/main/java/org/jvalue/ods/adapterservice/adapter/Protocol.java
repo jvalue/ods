@@ -12,7 +12,7 @@ public enum Protocol {
     this.importer = importer;
   }
 
-  public Importer getImporter() {
+  Importer getImporter() {
     return importer;
   }
 }
