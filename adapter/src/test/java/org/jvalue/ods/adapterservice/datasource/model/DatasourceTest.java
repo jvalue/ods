@@ -42,7 +42,7 @@ public class DatasourceTest {
       dateFormatter.print(result.getTrigger().getFirstExecution(), Locale.getDefault()));
 
     assertEquals(50000, result.getTrigger().getInterval().longValue());
-    assertEquals("icke", result.getMetadata().getAuthor());
+    assertEquals("professional-person", result.getMetadata().getAuthor());
     assertEquals("none", result.getMetadata().getLicense());
     assertEquals("TestName", result.getMetadata().getDisplayName());
     assertEquals("Describing...", result.getMetadata().getDescription());
