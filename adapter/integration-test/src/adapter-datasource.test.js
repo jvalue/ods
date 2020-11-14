@@ -108,7 +108,7 @@ describe('Datasource Configuration', () => {
       .get('/datasources/' + createdDatasource.id)
 
     const updatedConfig = getDatasourceConfig()
-    updatedConfig.protocol.parameters.location = 'http://www.disrespect.com'
+    updatedConfig.protocol.parameters.location = 'http://www.professional-location.com'
 
     const putResponse = await request(ADAPTER_URL)
       .put('/datasources/' + createdDatasource.id)
@@ -243,7 +243,7 @@ const getDatasourceConfig = () => ({
   protocol: {
     type: 'HTTP',
     parameters: {
-      location: 'http://www.nodisrespect.org'
+      location: 'http://www.professional-location.org'
     }
   },
   format: {
@@ -256,7 +256,7 @@ const getDatasourceConfig = () => ({
     interval: 50000
   },
   metadata: {
-    author: 'icke',
+    author: 'professional-author',
     license: 'none',
     displayName: 'test datasource 1',
     description: 'integration testing datasources'

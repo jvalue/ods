@@ -231,7 +231,7 @@ const dynamicDatasourceConfig = {
     interval: 50000
   },
   metadata: {
-    author: 'icke',
+    author: 'professional-author',
     license: 'none',
     displayName: 'test datasource 2',
     description: 'integration testing dynamic datasources'
@@ -256,7 +256,7 @@ const staticDatasourceConfig = {
     interval: 50000
   },
   metadata: {
-    author: 'icke',
+    author: 'professional-author',
     license: 'none',
     displayName: 'test datasource 2',
     description: 'integration testing dynamic datasources'
