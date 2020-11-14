@@ -16,9 +16,9 @@ Use `npm test` to run the unit tests.
 
 ## Running end-to-end tests
 
-Run integration tests in docker via the following command:
+Run integration tests in docker via the following command in the project root directory (open-data-service):
 
-```docker-compose -f docker-compose.yml -f docker-compose.it.yml build notification notification-it && docker-compose -f docker-compose.yml -f docker-compose.it.yml up notification notification-it edge```
+```docker-compose -f docker-compose.yml -f docker-compose.it.yml up --build notification notification-it edge```
 
 
 ## API

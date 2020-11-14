@@ -10,10 +10,10 @@ The current implementation consists of the following parts:
 
 ## Getting Started
 
-* Build all containers with `docker-compose -f ../docker-compose.yml -f ../docker-compose.ci.yml build storage-service-db-liquibase storage-service`
-* Run all containers with `docker-compose -f ../docker-compose.yml -f ../docker-compose.ci.yml up storage-service-db storage-service-db-liquibase storage-service-db-ui storage-service storage-service-swagger` (includes Adminer on port 8081 as UI for db, Swagger-UI as UI on port 8080 for REST API, Integration Tests)
+* Build all containers with `docker-compose -f ../docker-compose.yml -f ../docker-compose.it.yml --env-file ../.env build storage-db-liquibase storage`
+* Run all containers with `docker-compose -f ../docker-compose.yml -f ../docker-compose.it.yml --env-file ../.env up storage-db storage-db-liquibase storage-db-ui storage storage-swagger` (includes Adminer on port 8081 as UI for db, Swagger-UI as UI on port 8080 for REST API, Integration Tests)
 Note that you need to delete existing docker images from your local docker daemon to have recent changes integrated: `docker system prune -f && docker volume prune -f`
-* For integration testing run `docker-compose -f ../docker-compose.yml -f ../docker-compose.ci.yml up storage-service-db storage-service-db-liquibase storage-service storage-service-it`.
+* For integration testing run `docker-compose -f ../docker-compose.yml -f ../docker-compose.it.yml --env-file ../.env up storage-db storage-db-liquibase storage storage-it`.
 
 ## API
 | Endpoint  | Method  | Request Body  | Response Body |

@@ -11,7 +11,7 @@ Run `docker-compose -f ../docker-compose.yml up scheduler adapter`.
 
 Run the unit tests with `npm test`. Jest is used as unit testing framework.
 
-For integration testing run `docker-compose -f ../docker-compose.yml -f ../docker-compose.ci.yml up scheduler-service scheduler-service-it`.
+For integration testing run `docker-compose -f ../docker-compose.yml -f ../docker-compose.it.yml --env-file ../.env up scheduler scheduler-it`.
 To run integration tests outside of the docker environment run the `it_local.sh` script.
 
 ### Build docker container manually
