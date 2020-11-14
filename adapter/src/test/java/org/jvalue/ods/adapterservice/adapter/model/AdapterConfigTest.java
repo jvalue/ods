@@ -3,7 +3,7 @@ package org.jvalue.ods.adapterservice.adapter.model;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.jvalue.ods.adapterservice.adapter.Format;
-import org.jvalue.ods.adapterservice.adapter.ProtocolEnum;
+import org.jvalue.ods.adapterservice.adapter.Protocol;
 
 import java.io.IOException;
 
@@ -28,7 +28,7 @@ public class AdapterConfigTest {
       "}";
     AdapterConfig result = mapper.readValue(adapterJson, AdapterConfig.class);
 
-    assertEquals(ProtocolEnum.HTTP, result.protocolConfig.protocol);
+    assertEquals(Protocol.HTTP, result.protocolConfig.protocol);
     assertEquals(Format.JSON, result.formatConfig.format);
     assertEquals("URL", result.protocolConfig.parameters.get("location"));
   }

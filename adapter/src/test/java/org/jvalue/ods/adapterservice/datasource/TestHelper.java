@@ -1,7 +1,7 @@
 package org.jvalue.ods.adapterservice.datasource;
 
 import org.jvalue.ods.adapterservice.adapter.Format;
-import org.jvalue.ods.adapterservice.adapter.ProtocolEnum;
+import org.jvalue.ods.adapterservice.adapter.Protocol;
 import org.jvalue.ods.adapterservice.datasource.model.*;
 
 import java.text.ParseException;
@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class TestHelper {
 
-  public static Datasource generateDatasource(ProtocolEnum protocol, Format format, String location) throws ParseException {
+  public static Datasource generateDatasource(Protocol protocol, Format format, String location) throws ParseException {
     DatasourceProtocol protocolConfig = new DatasourceProtocol(protocol, Map.of("location", location));
     DatasourceFormat formatConfig = new DatasourceFormat(format, Map.of());
     DatasourceMetadata metadata = new DatasourceMetadata("professional-person", "none", "TestName", "Describing...");
@@ -22,7 +22,7 @@ public class TestHelper {
   }
 
   public static Datasource generateParameterizableDatasource(
-          ProtocolEnum protocol,
+          Protocol protocol,
           Format format,
           String location,
           Map<String, String> defaultParameters) throws ParseException {

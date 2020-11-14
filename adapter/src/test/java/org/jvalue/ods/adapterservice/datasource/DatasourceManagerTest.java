@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.jvalue.ods.adapterservice.adapter.Adapter;
 import org.jvalue.ods.adapterservice.adapter.Format;
-import org.jvalue.ods.adapterservice.adapter.ProtocolEnum;
+import org.jvalue.ods.adapterservice.adapter.Protocol;
 import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
 import org.jvalue.ods.adapterservice.datasource.api.amqp.AmqpPublisher;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
@@ -26,7 +26,7 @@ import java.util.Optional;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.jvalue.ods.adapterservice.adapter.Format.JSON;
-import static org.jvalue.ods.adapterservice.adapter.ProtocolEnum.HTTP;
+import static org.jvalue.ods.adapterservice.adapter.Protocol.HTTP;
 import static org.jvalue.ods.adapterservice.datasource.TestHelper.generateDatasource;
 import static org.jvalue.ods.adapterservice.datasource.TestHelper.generateParameterizableDatasource;
 import static org.mockito.Mockito.*;
@@ -115,7 +115,7 @@ public class DatasourceManagerTest {
 
     @Test
     public void testTriggerWithoutRuntimeParameters() throws ParseException {
-        Datasource datasource = generateDatasource(ProtocolEnum.HTTP, Format.JSON, "location");
+        Datasource datasource = generateDatasource(Protocol.HTTP, Format.JSON, "location");
         when(datasourceRepository.findById(1L)).thenReturn(Optional.of(datasource));
         when(adapter.executeJob(datasource.toAdapterConfig(null))).thenReturn(
                 new DataBlob("{\"hallo\":\"hello\"}"));
@@ -154,7 +154,7 @@ public class DatasourceManagerTest {
 
     @Test(expected = RestClientException.class)
     public void testTriggerPublishesFailingImport() throws ParseException {
-        Datasource datasource = generateDatasource(ProtocolEnum.HTTP, Format.JSON, "location");
+        Datasource datasource = generateDatasource(Protocol.HTTP, Format.JSON, "location");
 
         when(datasourceRepository.findById(3L)).thenReturn(Optional.of(datasource));
 

@@ -17,7 +17,7 @@ import java.util.*;
 import static org.junit.Assert.*;
 import static org.jvalue.ods.adapterservice.adapter.Format.JSON;
 import static org.jvalue.ods.adapterservice.adapter.Format.XML;
-import static org.jvalue.ods.adapterservice.adapter.ProtocolEnum.HTTP;
+import static org.jvalue.ods.adapterservice.adapter.Protocol.HTTP;
 import static org.jvalue.ods.adapterservice.datasource.TestHelper.generateDatasource;
 import static org.jvalue.ods.adapterservice.datasource.TestHelper.generateParameterizableDatasource;
 
