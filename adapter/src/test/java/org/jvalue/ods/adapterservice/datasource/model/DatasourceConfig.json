@@ -3,7 +3,7 @@
   "protocol": {
     "type": "HTTP",
     "parameters": {
-      "location": "http://www.professional-test-url.com"
+      "location": "http://www.test-url.com"
     }
   },
   "format": {
@@ -17,7 +17,7 @@
     "interval": 50000
   },
   "metadata": {
-    "author": "professional-person",
+    "author": "person",
     "license": "none",
     "displayName": "TestName",
     "description": "Describing..."

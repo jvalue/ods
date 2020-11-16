@@ -108,7 +108,7 @@ describe('Datasource Configuration', () => {
       .get('/datasources/' + createdDatasource.id)
 
     const updatedConfig = getDatasourceConfig()
-    updatedConfig.protocol.parameters.location = 'http://www.professional-location.com'
+    updatedConfig.protocol.parameters.location = 'http://www.location.com'
 
     const putResponse = await request(ADAPTER_URL)
       .put('/datasources/' + createdDatasource.id)
@@ -243,7 +243,7 @@ const getDatasourceConfig = () => ({
   protocol: {
     type: 'HTTP',
     parameters: {
-      location: 'http://www.professional-location.org'
+      location: 'http://www.location.org'
     }
   },
   format: {
@@ -256,7 +256,7 @@ const getDatasourceConfig = () => ({
     interval: 50000
   },
   metadata: {
-    author: 'professional-author',
+    author: 'author',
     license: 'none',
     displayName: 'test datasource 1',
     description: 'integration testing datasources'

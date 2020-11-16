@@ -29,7 +29,7 @@ public class DatasourceTest {
     File datasourceConfig = new File("src/test/java/org/jvalue/ods/adapterservice/datasource/model/DatasourceConfig.json");
     Datasource result = mapper.readValue(datasourceConfig, Datasource.class);
 
-    Datasource expectedDatasource = generateDatasource(HTTP, XML, "http://www.professional-test-url.com");
+    Datasource expectedDatasource = generateDatasource(HTTP, XML, "http://www.test-url.com");
     expectedDatasource.setId(123L);
 
     assertEquals(expectedDatasource, result);
@@ -42,7 +42,7 @@ public class DatasourceTest {
       dateFormatter.print(result.getTrigger().getFirstExecution(), Locale.getDefault()));
 
     assertEquals(50000, result.getTrigger().getInterval().longValue());
-    assertEquals("professional-person", result.getMetadata().getAuthor());
+    assertEquals("person", result.getMetadata().getAuthor());
     assertEquals("none", result.getMetadata().getLicense());
     assertEquals("TestName", result.getMetadata().getDisplayName());
     assertEquals("Describing...", result.getMetadata().getDescription());
@@ -53,9 +53,9 @@ public class DatasourceTest {
 
   @Test
   public void testSerialization() throws ParseException {
-    Datasource datasource = generateDatasource(HTTP, JSON, "http://www.professional-test-url.com");
+    Datasource datasource = generateDatasource(HTTP, JSON, "http://www.test-url.com");
     DatasourceTrigger trigger = new DatasourceTrigger(false, new Date(), 10L);
-    DatasourceMetadata metadata = new DatasourceMetadata("professional-person", "none", "Display", "description");
+    DatasourceMetadata metadata = new DatasourceMetadata("person", "none", "Display", "description");
     Datasource config = new Datasource(datasource.getProtocol(), datasource.getFormat(), metadata, trigger);
 
     JsonNode result = mapper.valueToTree(config);
@@ -64,32 +64,32 @@ public class DatasourceTest {
     assertEquals(5, result.size());
     assertEquals("HTTP", result.get("protocol").get("type").textValue());
     assertEquals("JSON", result.get("format").get("type").textValue());
-    assertEquals("http://www.professional-test-url.com",
+    assertEquals("http://www.test-url.com",
       result.get("protocol").get("parameters").get("location").textValue());
   }
 
   @Test
   public void testFillQueryParametersWithRuntimeParameters() throws ParseException {
-    Datasource datasource = generateParameterizableDatasource(HTTP, JSON, "http://www.professional-test-url.com/{userId}/{dataId}", Map.of("userId", "1", "dataId", "123"));
+    Datasource datasource = generateParameterizableDatasource(HTTP, JSON, "http://www.test-url.com/{userId}/{dataId}", Map.of("userId", "1", "dataId", "123"));
 
     RuntimeParameters runtimeParameters = new RuntimeParameters(Map.of(
       "userId", "42",
       "dataId", "4242",
       "notAKey", "notAValue"
     ));
-    assertEquals("http://www.professional-test-url.com/42/4242", datasource.fillQueryParameters(runtimeParameters).get("location"));
+    assertEquals("http://www.test-url.com/42/4242", datasource.fillQueryParameters(runtimeParameters).get("location"));
   }
 
   @Test
   public void testFillQueryParametersWithoutRuntimeParameters() throws ParseException {
-    Datasource datasource = generateParameterizableDatasource(HTTP, JSON, "http://www.professional-test-url.com/{userId}/{dataId}", Map.of("userId", "1", "dataId", "123"));
+    Datasource datasource = generateParameterizableDatasource(HTTP, JSON, "http://www.test-url.com/{userId}/{dataId}", Map.of("userId", "1", "dataId", "123"));
 
-    assertEquals("http://www.professional-test-url.com/1/123", datasource.fillQueryParameters(null).get("location"));
+    assertEquals("http://www.test-url.com/1/123", datasource.fillQueryParameters(null).get("location"));
   }
 
   @Test
   public void testToAdapterConfig() throws ParseException {
-    Datasource datasource = generateDatasource(HTTP, JSON, "http://www.professional-test-url.com/{userId}/{dataId}");
+    Datasource datasource = generateDatasource(HTTP, JSON, "http://www.test-url.com/{userId}/{dataId}");
     Map<String, String> parameters = new HashMap<>();
     parameters.put("userId", "1");
     parameters.put("dataId", "123");
@@ -97,7 +97,7 @@ public class DatasourceTest {
     RuntimeParameters runtimeParameters = new RuntimeParameters(parameters);
     AdapterConfig adapterConfig = datasource.toAdapterConfig(runtimeParameters);
     AdapterConfig testAgainst = new AdapterConfig(
-      new ProtocolConfig(HTTP, Map.of("location", "http://www.professional-test-url.com/1/123")),
+      new ProtocolConfig(HTTP, Map.of("location", "http://www.test-url.com/1/123")),
       new FormatConfig(JSON, Map.of())
     );
     assertEquals(testAgainst, adapterConfig);

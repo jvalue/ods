@@ -13,7 +13,7 @@ public class TestHelper {
   public static Datasource generateDatasource(Protocol protocol, Format format, String location) throws ParseException {
     DatasourceProtocol protocolConfig = new DatasourceProtocol(protocol, Map.of("location", location));
     DatasourceFormat formatConfig = new DatasourceFormat(format, Map.of());
-    DatasourceMetadata metadata = new DatasourceMetadata("professional-person", "none", "TestName", "Describing...");
+    DatasourceMetadata metadata = new DatasourceMetadata("person", "none", "TestName", "Describing...");
     DatasourceTrigger trigger = new DatasourceTrigger(
             true,
             new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse("1905-12-01T02:30:00.123Z"),
@@ -31,7 +31,7 @@ public class TestHelper {
             Map.of("location", location, "defaultParameters", defaultParameters));
     DatasourceFormat formatConfig = new DatasourceFormat(format, Map.of());
     DatasourceMetadata metadata = new DatasourceMetadata(
-            "professional-person",
+            "person",
             "none",
             "TestName",
             "Describing...");
