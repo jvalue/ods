@@ -20,7 +20,10 @@ Use `npm test` to run the unit tests. There is also `nrm run watch-test` availab
 
 ## Running end-to-end tests
 
-TBD
+* For integration testing run `docker-compose -f ../docker-compose.yml -f ../docker-compose.it.yml --env-file ../.env up pipeline pipeline-it`.
+  
+* After running integration tests dependant services (e.g. rabbit-mq) keep running. In order to stop all services and return to a clean, initial state run `docker-compose -f ../docker-compose.yml -f ../docker-compose.it.yml down`. 
+
 
 ## API
 | Endpoint  | Method  | Request Body  | Response Body | Description |
