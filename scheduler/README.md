@@ -11,7 +11,9 @@ Run `docker-compose -f ../docker-compose.yml up scheduler adapter`.
 
 Run the unit tests with `npm test`. Jest is used as unit testing framework.
 
-* For integration testing run `docker-compose -f ../docker-compose.yml -f ../docker-compose.it.yml --env-file ../.env up scheduler scheduler-it`.
+* For integration testing run `docker-compose -f ../docker-compose.yml -f ../docker-compose.it.yml --env-file ../.env up scheduler-it`.
+
+* To analyze the logs of the service under test we recommend using lazydocker. Alternatively, you can attach manually to the scheduler container using the docker cli. 
   
 * After running integration tests dependant services (e.g. rabbit-mq) keep running. In order to stop all services and return to a clean, initial state run `docker-compose -f ../docker-compose.yml -f ../docker-compose.it.yml down`. 
 
