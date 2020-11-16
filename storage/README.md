@@ -14,6 +14,8 @@ The current implementation consists of the following parts:
 * Run all containers with `docker-compose -f ../docker-compose.yml -f ../docker-compose.it.yml --env-file ../.env up storage-db storage-db-liquibase storage-db-ui storage storage-swagger` (includes Adminer on port 8081 as UI for db, Swagger-UI as UI on port 8080 for REST API, Integration Tests)
 Note that you need to delete existing docker images from your local docker daemon to have recent changes integrated: `docker system prune -f && docker volume prune -f`
 * For integration testing run `docker-compose -f ../docker-compose.yml -f ../docker-compose.it.yml --env-file ../.env up storage-db storage-db-liquibase storage storage-it`.
+* After running integration tests dependant services (e.g. rabbit-mq) keep running. In order to stop all services and return to a clean, initial state run `docker-compose -f ../docker-compose.yml -f ../docker-compose.it.yml down`. 
+
 
 ## API
 | Endpoint  | Method  | Request Body  | Response Body |
