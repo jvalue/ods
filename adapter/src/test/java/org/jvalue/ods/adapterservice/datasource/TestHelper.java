@@ -31,7 +31,7 @@ public class TestHelper {
             Map.of("location", location, "defaultParameters", defaultParameters));
     DatasourceFormat formatConfig = new DatasourceFormat(format, Map.of());
     DatasourceMetadata metadata = new DatasourceMetadata(
-            "icke",
+            "professional-person",
             "none",
             "TestName",
             "Describing...");
