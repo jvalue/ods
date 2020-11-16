@@ -100,8 +100,8 @@ describe('Datasource Configuration', () => {
 
   test('Should create datasource with long URL [POST /datasources]', async () => {
     const longUrlDatasourceConfig = getDatasourceConfig()
-    const queryParameter = '&veryLongProfessionalParameter=verylongProfessionalParameterValue'
-    const longUrl = 'http://www.very-long-professional-location-that-might-not-fit-in-the-database.com?first=test' + queryParameter.repeat(40)
+    const queryParameter = '&veryLongParameter=verylongParameterValue'
+    const longUrl = 'http://www.very-long-location-that-might-not-fit-in-the-database.com?first=test' + queryParameter.repeat(40)
     longUrlDatasourceConfig.protocol.parameters.location = longUrl
     const response = await request(ADAPTER_URL)
       .post('/datasources')
@@ -120,7 +120,7 @@ describe('Datasource Configuration', () => {
       .get('/datasources/' + createdDatasource.id)
 
     const updatedConfig = getDatasourceConfig()
-    updatedConfig.protocol.parameters.location = 'http://www.professional-location.com'
+    updatedConfig.protocol.parameters.location = 'http://www.location.com'
 
     const putResponse = await request(ADAPTER_URL)
       .put('/datasources/' + createdDatasource.id)
@@ -255,7 +255,7 @@ const getDatasourceConfig = () => ({
   protocol: {
     type: 'HTTP',
     parameters: {
-      location: 'http://www.professional-location.com'
+      location: 'http://www.location.com'
     }
   },
   format: {
@@ -268,7 +268,7 @@ const getDatasourceConfig = () => ({
     interval: 50000
   },
   metadata: {
-    author: 'professional-author',
+    author: 'author',
     license: 'none',
     displayName: 'test datasource 1',
     description: 'integration testing datasources'
