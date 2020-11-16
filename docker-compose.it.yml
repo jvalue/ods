@@ -2,10 +2,9 @@
 # for INTEGRATION TESTING, including MOCKS and INTEGRATION TEST SERVICES.
 # can be used locally or in the CI ENVIRONMENT.
 
-version: '3.7'
+version: "3.7"
 
 services:
-
   # ----------------- ADAPTER SERVICE   (PORTS 9000 - 9099) --------------------
   adapter-it:
     image: open-data-service/ods-main/adapter-it
@@ -17,11 +16,12 @@ services:
       MOCK_SERVER_API: http://adapter-it:8081
       MOCK_SERVER_PORT: 8081
       RABBIT_HEALTH: http://rabbitmq:15672
-      AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
-      AMQP_EXCHANGE: 'ods_global'
+      AMQP_URL: "amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672"
+      AMQP_EXCHANGE: "ods_global"
       STARTUP_DELAY: 5000
 
     depends_on:
+      - adapter
       - rabbitmq
       - edge
 
@@ -38,12 +38,13 @@ services:
       context: ./scheduler/integration-test/
     environment:
       SCHEDULER_API: http://scheduler:8080
-      AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
+      AMQP_URL: "amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672"
       AMQP_CONNECTION_RETRIES: 40
       AMQP_CONNECTION_BACKOFF: 2000
       MOCK_SERVER_PORT: 8081
       MOCK_SERVER_API: http://scheduler-it:8081
     depends_on:
+      - scheduler
       - rabbitmq
 
   # ----------------- STORAGE SERVICE (PORTS 9400 - 9499) --------------------
@@ -54,7 +55,10 @@ services:
     environment:
       STORAGE_API: http://storage:3000
       STORAGEMQ_API: http://storage-mq:8080
-      AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
+      AMQP_URL: "amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672"
+    depends-on:
+      - storage
+      - storage-mq
 
   # ----------------- PIPELINE SERVICE (PORTS 9500 - 9599) --------------------
   pipeline-it:
@@ -64,21 +68,24 @@ services:
     environment:
       PIPELINE_API: http://pipeline:8080
 
-      AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
-      AMQP_EXCHANGE: 'ods_global'
-      AMQP_IT_QUEUE: 'pipeline_it'
-      AMQP_PIPELINE_EXECUTION_TOPIC: 'pipeline.execution.*'
-      AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: 'pipeline.execution.success'
-      AMQP_PIPELINE_EXECUTION_ERROR_TOPIC: 'pipeline.execution.error'
-      AMQP_PIPELINE_CONFIG_CREATED_TOPIC: 'pipeline.config.created'
-      AMQP_PIPELINE_CONFIG_UPDATED_TOPIC: 'pipeline.config.updated'
-      AMQP_PIPELINE_CONFIG_DELETED_TOPIC: 'pipeline.config.deleted'
-      AMQP_IMPORT_SUCCESS_TOPIC: 'datasource.execution.success'
+      AMQP_URL: "amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672"
+      AMQP_EXCHANGE: "ods_global"
+      AMQP_IT_QUEUE: "pipeline_it"
+      AMQP_PIPELINE_EXECUTION_TOPIC: "pipeline.execution.*"
+      AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: "pipeline.execution.success"
+      AMQP_PIPELINE_EXECUTION_ERROR_TOPIC: "pipeline.execution.error"
+      AMQP_PIPELINE_CONFIG_CREATED_TOPIC: "pipeline.config.created"
+      AMQP_PIPELINE_CONFIG_UPDATED_TOPIC: "pipeline.config.updated"
+      AMQP_PIPELINE_CONFIG_DELETED_TOPIC: "pipeline.config.deleted"
+      AMQP_IMPORT_SUCCESS_TOPIC: "datasource.execution.success"
 
       CONNECTION_RETRIES: 3
       CONNECTION_BACKOFF: 2000
 
-   # ----------------- NOTIFICATION SERVICE (PORTS #TODO) --------------------
+    depends-on:
+      - pipeline
+
+    # ----------------- NOTIFICATION SERVICE (PORTS #TODO) --------------------
   notification:
     environment:
       SLACK_BASE_URL: http://notification-it:8081/slack
@@ -90,3 +97,5 @@ services:
     environment:
       NOTIFICATION_API: http://notification:8080
       MOCK_RECEIVER_URL: http://notification-it:8081
+    depends-on:
+      - notification
