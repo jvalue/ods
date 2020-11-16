@@ -19,7 +19,8 @@ public class DatasourceProtocol {
   private Protocol type;
 
   @NotNull
-  @Column(name = "protocol_parameters", length = 2000)
+  @Column(name = "protocol_parameters")
+  @Lob // tells JPA to make the field a BLOB, which results in using the TEXT column type in PostgreSQL
   @Convert(converter = GenericParameterConverter.class)
   private Map<String, Object> parameters;
 
