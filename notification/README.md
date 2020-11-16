@@ -16,9 +16,15 @@ Use `npm test` to run the unit tests.
 
 ## Running end-to-end tests
 
-Run integration tests in docker via the following command:
+* For integration testing run 
+  
+  ```docker-compose -f ../docker-compose.yml -f ../docker-compose.it.yml --env-file ../.env up notification-it```
 
-```docker-compose -f docker-compose.yml -f docker-compose.it.yml build notification notification-it && docker-compose -f docker-compose.yml -f docker-compose.it.yml up notification notification-it edge```
+* To analyze the logs of the service under test we recommend using lazydocker. Alternatively, you can attach manually to the notification container using the docker cli. 
+
+* After running integration tests dependant services (e.g. rabbit-mq) keep running. In order to stop all services and return to a clean, initial state run 
+  
+  ```docker-compose -f ../docker-compose.yml -f ../docker-compose.it.yml down```. 
 
 
 ## API
