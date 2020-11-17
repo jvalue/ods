@@ -1,4 +1,4 @@
-import { hasProperty, isObject } from '../validators'
+import { validators } from '@jvalue/node-dry-basics'
 
 export enum NotificationType {
   WEBHOOK = 'WEBHOOK',
@@ -53,10 +53,10 @@ export type NotificationConfig = SlackNotification | WebhookNotification | Fireb
  * @returns true, if conf is a valid, false else
  */
 export const isValidNotificationConfig = (config: unknown): config is NotificationConfig => {
-  const baseIsValid = isObject(config) &&
-    hasProperty(config, 'pipelineId') &&
-    hasProperty(config, 'condition') &&
-    hasProperty(config, 'type')
+  const baseIsValid = validators.isObject(config) &&
+    validators.hasProperty(config, 'pipelineId') &&
+    validators.hasProperty(config, 'condition') &&
+    validators.hasProperty(config, 'type')
   if (!baseIsValid) {
     return false
   }
@@ -80,7 +80,7 @@ export const isValidNotificationConfig = (config: unknown): config is Notificati
  * @returns true, if object is a valid, false else
  */
 export const isValidWebhookParameter = (parameters: unknown): parameters is WebhookParameter => {
-  return isObject(parameters) && hasProperty(parameters, 'url')
+  return validators.isObject(parameters) && validators.hasProperty(parameters, 'url')
 }
 
 /**
@@ -90,10 +90,10 @@ export const isValidWebhookParameter = (parameters: unknown): parameters is Webh
  * @returns true, if object is a valid, false else
  */
 export const isValidSlackParameter = (parameters: unknown): parameters is SlackParameter => {
-  return isObject(parameters) &&
-    hasProperty(parameters, 'channelId') &&
-    hasProperty(parameters, 'secret') &&
-    hasProperty(parameters, 'workspaceId')
+  return validators.isObject(parameters) &&
+    validators.hasProperty(parameters, 'channelId') &&
+    validators.hasProperty(parameters, 'secret') &&
+    validators.hasProperty(parameters, 'workspaceId')
 }
 
 /**
@@ -103,9 +103,9 @@ export const isValidSlackParameter = (parameters: unknown): parameters is SlackP
  * @returns true, if object is a valid, false else
  */
 export const isValidFirebaseParameter = (parameters: unknown): parameters is FirebaseParameter => {
-  return isObject(parameters) &&
-    hasProperty(parameters, 'clientEmail') &&
-    hasProperty(parameters, 'privateKey') &&
-    hasProperty(parameters, 'projectId') &&
-    hasProperty(parameters, 'topic')
+  return validators.isObject(parameters) &&
+    validators.hasProperty(parameters, 'clientEmail') &&
+    validators.hasProperty(parameters, 'privateKey') &&
+    validators.hasProperty(parameters, 'projectId') &&
+    validators.hasProperty(parameters, 'topic')
 }

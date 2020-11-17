@@ -1,27 +1,15 @@
-const isEmpty = (value: string | undefined): value is undefined => value === undefined || value === ''
+import { readEnvOrDie } from '@jvalue/node-dry-basics'
 
-const getEnv = (envName: string): string => {
-  const env = process.env[envName]
-  if (isEmpty(env)) {
-    console.error(`Required environment variable ${envName} is not defined or empty`)
-    console.error('Unable to proceed with service')
-    process.exit(-2)
-  }
+export const CONNECTION_RETRIES = +readEnvOrDie('CONNECTION_RETRIES')
+export const CONNECTION_BACKOFF = +readEnvOrDie('CONNECTION_BACKOFF_IN_MS')
 
-  console.log(`[Environment Variable] ${envName} = ${env}`)
-  return env
-}
+export const POSTGRES_HOST = readEnvOrDie('POSTGRES_HOST')
+export const POSTGRES_PORT = +readEnvOrDie('POSTGRES_PORT')
+export const POSTGRES_USER = readEnvOrDie('POSTGRES_USER')
+export const POSTGRES_PW = readEnvOrDie('POSTGRES_PW')
+export const POSTGRES_DB = readEnvOrDie('POSTGRES_DB')
 
-export const CONNECTION_RETRIES = +getEnv('CONNECTION_RETRIES')
-export const CONNECTION_BACKOFF = +getEnv('CONNECTION_BACKOFF_IN_MS')
-
-export const POSTGRES_HOST = getEnv('POSTGRES_HOST')
-export const POSTGRES_PORT = +getEnv('POSTGRES_PORT')
-export const POSTGRES_USER = getEnv('POSTGRES_USER')
-export const POSTGRES_PW = getEnv('POSTGRES_PW')
-export const POSTGRES_DB = getEnv('POSTGRES_DB')
-
-export const AMQP_URL = getEnv('AMQP_URL')
-export const AMQP_PIPELINE_EXECUTION_EXCHANGE = getEnv('AMQP_PIPELINE_EXECUTION_EXCHANGE')
-export const AMQP_PIPELINE_EXECUTION_QUEUE = getEnv('AMQP_PIPELINE_EXECUTION_QUEUE')
-export const AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC = getEnv('AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC')
+export const AMQP_URL = readEnvOrDie('AMQP_URL')
+export const AMQP_PIPELINE_EXECUTION_EXCHANGE = readEnvOrDie('AMQP_PIPELINE_EXECUTION_EXCHANGE')
+export const AMQP_PIPELINE_EXECUTION_QUEUE = readEnvOrDie('AMQP_PIPELINE_EXECUTION_QUEUE')
+export const AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC = readEnvOrDie('AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC')
