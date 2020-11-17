@@ -3,7 +3,7 @@
   "protocol": {
     "type": "HTTP",
     "parameters": {
-      "location": "http://www.the-inder.net"
+      "location": "http://www.test-url.com"
     }
   },
   "format": {
@@ -17,7 +17,7 @@
     "interval": 50000
   },
   "metadata": {
-    "author": "icke",
+    "author": "person",
     "license": "none",
     "displayName": "TestName",
     "description": "Describing..."
