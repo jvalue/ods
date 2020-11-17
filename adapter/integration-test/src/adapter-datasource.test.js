@@ -98,6 +98,18 @@ describe('Datasource Configuration', () => {
     expect(datasourceResponse.status).toEqual(400)
   }, TIMEOUT)
 
+  test('Should create datasource with long URL [POST /datasources]', async () => {
+    const longUrlDatasourceConfig = getDatasourceConfig()
+    const queryParameter = '&veryLongParameter=verylongParameterValue'
+    const longUrl = 'http://www.very-long-location-that-might-not-fit-in-the-database.com?first=test' + queryParameter.repeat(40)
+    longUrlDatasourceConfig.protocol.parameters.location = longUrl
+    const response = await request(ADAPTER_URL)
+      .post('/datasources')
+      .send(longUrlDatasourceConfig)
+
+    expect(response.status).toEqual(201)
+  })
+
   test('Should update existing datasource [PUT /datasources/{id}]', async () => {
     const postResponse = await request(ADAPTER_URL)
       .post('/datasources')
@@ -108,7 +120,7 @@ describe('Datasource Configuration', () => {
       .get('/datasources/' + createdDatasource.id)
 
     const updatedConfig = getDatasourceConfig()
-    updatedConfig.protocol.parameters.location = 'http://www.disrespect.com'
+    updatedConfig.protocol.parameters.location = 'http://www.location.com'
 
     const putResponse = await request(ADAPTER_URL)
       .put('/datasources/' + createdDatasource.id)
@@ -243,7 +255,7 @@ const getDatasourceConfig = () => ({
   protocol: {
     type: 'HTTP',
     parameters: {
-      location: 'http://www.nodisrespect.org'
+      location: 'http://www.location.com'
     }
   },
   format: {
@@ -256,7 +268,7 @@ const getDatasourceConfig = () => ({
     interval: 50000
   },
   metadata: {
-    author: 'icke',
+    author: 'author',
     license: 'none',
     displayName: 'test datasource 1',
     description: 'integration testing datasources'
