@@ -98,6 +98,18 @@ describe('Datasource Configuration', () => {
     expect(datasourceResponse.status).toEqual(400)
   }, TIMEOUT)
 
+  test('Should create datasource with long URL [POST /datasources]', async () => {
+    const longUrlDatasourceConfig = getDatasourceConfig()
+    const queryParameter = '&veryLongParameter=verylongParameterValue'
+    const longUrl = 'http://www.very-long-location-that-might-not-fit-in-the-database.com?first=test' + queryParameter.repeat(40)
+    longUrlDatasourceConfig.protocol.parameters.location = longUrl
+    const response = await request(ADAPTER_URL)
+      .post('/datasources')
+      .send(longUrlDatasourceConfig)
+
+    expect(response.status).toEqual(201)
+  })
+
   test('Should update existing datasource [PUT /datasources/{id}]', async () => {
     const postResponse = await request(ADAPTER_URL)
       .post('/datasources')
@@ -243,7 +255,7 @@ const getDatasourceConfig = () => ({
   protocol: {
     type: 'HTTP',
     parameters: {
-      location: 'http://www.location.org'
+      location: 'http://www.location.com'
     }
   },
   format: {
