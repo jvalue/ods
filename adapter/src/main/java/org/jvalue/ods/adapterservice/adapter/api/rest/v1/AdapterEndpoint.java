@@ -5,10 +5,8 @@ import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -26,9 +24,18 @@ public class AdapterEndpoint {
   }
 
   @PostMapping(Mappings.IMPORT_PATH)
-  public DataBlob.MetaData executeDataImport(@Valid @RequestBody AdapterConfig config) {
+  public ResponseEntity<?> executeDataImport(
+          @Valid @RequestBody AdapterConfig config,
+          @RequestParam(required = false) boolean includeData) {
     try {
-      return adapter.executeJob(config).getMetaData();
+      DataBlob imported = adapter.executeJob(config);
+
+      if(includeData) {
+        return ResponseEntity.ok(imported.getData());
+      }
+
+      return ResponseEntity.ok(imported.getMetaData());
+
     } catch (IllegalArgumentException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid config: " + e.getMessage());
     } catch (RestClientException e) {
