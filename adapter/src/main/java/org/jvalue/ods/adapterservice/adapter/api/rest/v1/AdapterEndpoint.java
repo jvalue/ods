@@ -23,7 +23,7 @@ public class AdapterEndpoint {
     this.adapter = adapter;
   }
 
-  @PostMapping(Mappings.IMPORT_PATH)
+  @PostMapping(value = Mappings.IMPORT_PATH, produces = "application/json")
   public ResponseEntity<?> executeDataImport(
           @Valid @RequestBody AdapterConfig config,
           @RequestParam(required = false) boolean includeData) {
