@@ -1,0 +1,35 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.19.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: storage-db
+  name: storage-db
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.19.0 (HEAD)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: storage-db
+    spec:
+      containers:
+      - env:
+        - name: POSTGRES_DB
+          value: ods
+        - name: POSTGRES_PASSWORD
+          value: ods_pw
+        - name: POSTGRES_USER
+          value: ods_admin
+        image: postgres:12-alpine
+        name: storage-db
+        resources: {}
+      restartPolicy: Always
+status: {}

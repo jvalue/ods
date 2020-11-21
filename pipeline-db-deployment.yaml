@@ -1,0 +1,35 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.19.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: pipeline-db
+  name: pipeline-db
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.19.0 (HEAD)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: pipeline-db
+    spec:
+      containers:
+      - env:
+        - name: POSTGRES_DB
+          value: ods-pipelines
+        - name: POSTGRES_PASSWORD
+          value: pw
+        - name: POSTGRES_USER
+          value: pipeline-service
+        image: postgres
+        name: pipeline-db
+        resources: {}
+      restartPolicy: Always
+status: {}

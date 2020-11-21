@@ -1,0 +1,53 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.19.0 (HEAD)
+    traefik.enable: "true"
+    traefik.http.middlewares.storage-addaccept.headers.customrequestheaders.Accept: application/json
+    traefik.http.middlewares.storage-stripprefix.stripprefix.prefixes: /api/storage
+    traefik.http.routers.to-storage.middlewares: storage-stripprefix@docker,storage-addaccept@docker
+    traefik.http.routers.to-storage.rule: PathPrefix(`/api/storage`)
+    traefik.http.services.storage.loadbalancer.server.port: "3000"
+  creationTimestamp: null
+  labels:
+    io.kompose.service: storage
+  name: storage
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.19.0 (HEAD)
+        traefik.enable: "true"
+        traefik.http.middlewares.storage-addaccept.headers.customrequestheaders.Accept: application/json
+        traefik.http.middlewares.storage-stripprefix.stripprefix.prefixes: /api/storage
+        traefik.http.routers.to-storage.middlewares: storage-stripprefix@docker,storage-addaccept@docker
+        traefik.http.routers.to-storage.rule: PathPrefix(`/api/storage`)
+        traefik.http.services.storage.loadbalancer.server.port: "3000"
+      creationTimestamp: null
+      labels:
+        io.kompose.service: storage
+    spec:
+      containers:
+      - env:
+        - name: DATABASE_ANON
+          value: web_anon
+        - name: DATABASE_HOST
+          value: storage-db
+        - name: DATABASE_NAME
+          value: ods
+        - name: DATABASE_PORT
+          value: "5432"
+        - name: DATABASE_PW
+          value: postgres-wrapper-pw
+        - name: DATABASE_USER
+          value: postgrest
+        image: /storage
+        name: storage
+        resources: {}
+      restartPolicy: Always
+status: {}

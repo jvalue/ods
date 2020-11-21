@@ -1,0 +1,48 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.19.0 (HEAD)
+    traefik.enable: "true"
+    traefik.http.middlewares.amqp-stripprefix.stripprefix.prefixes: /api/amqp
+    traefik.http.routers.to-amqp.middlewares: amqp-stripprefix@docker
+    traefik.http.routers.to-amqp.rule: PathPrefix(`/api/amqp`)
+    traefik.http.services.amqp.loadbalancer.server.port: "8080"
+  creationTimestamp: null
+  labels:
+    io.kompose.service: rabbitmq
+  name: rabbitmq
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.19.0 (HEAD)
+        traefik.enable: "true"
+        traefik.http.middlewares.amqp-stripprefix.stripprefix.prefixes: /api/amqp
+        traefik.http.routers.to-amqp.middlewares: amqp-stripprefix@docker
+        traefik.http.routers.to-amqp.rule: PathPrefix(`/api/amqp`)
+        traefik.http.services.amqp.loadbalancer.server.port: "8080"
+      creationTimestamp: null
+      labels:
+        io.kompose.service: rabbitmq
+    spec:
+      containers:
+      - env:
+        - name: RABBITMQ_DEFAULT_PASS
+          value: R4bb!7_4DM_p4SS
+        - name: RABBITMQ_DEFAULT_USER
+          value: rabbit_adm
+        - name: RABBITMQ_ERLANG_COOKIE
+          value: S0m3_R4bBi7_C0ok13
+        image: rabbitmq:management
+        name: rabbitmq
+        ports:
+        - containerPort: 15672
+        - containerPort: 5672
+        resources: {}
+      restartPolicy: Always
+status: {}

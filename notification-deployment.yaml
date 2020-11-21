@@ -1,0 +1,65 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.19.0 (HEAD)
+    traefik.enable: "true"
+    traefik.http.middlewares.notification-stripprefix.stripprefix.prefixes: /api/notification
+    traefik.http.routers.to-notification.middlewares: notification-stripprefix@docker
+    traefik.http.routers.to-notification.rule: PathPrefix(`/api/notification`)
+    traefik.http.services.notification.loadbalancer.server.port: "8080"
+  creationTimestamp: null
+  labels:
+    io.kompose.service: notification
+  name: notification
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.19.0 (HEAD)
+        traefik.enable: "true"
+        traefik.http.middlewares.notification-stripprefix.stripprefix.prefixes: /api/notification
+        traefik.http.routers.to-notification.middlewares: notification-stripprefix@docker
+        traefik.http.routers.to-notification.rule: PathPrefix(`/api/notification`)
+        traefik.http.services.notification.loadbalancer.server.port: "8080"
+      creationTimestamp: null
+      labels:
+        io.kompose.service: notification
+    spec:
+      containers:
+      - env:
+        - name: AMQP_NOTIFICATION_QUEUE
+          value: NOTIF_QUEUE
+        - name: AMQP_PIPELINE_EXECUTION_EXCHANGE
+          value: ods_global
+        - name: AMQP_PIPELINE_EXECUTION_QUEUE
+          value: notification.pipeline-execution
+        - name: AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC
+          value: pipeline.execution.success
+        - name: AMQP_URL
+          value: amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672
+        - name: CONNECTION_BACKOFF_IN_MS
+          value: "2000"
+        - name: CONNECTION_RETRIES
+          value: "30"
+        - name: NOTIFICATION_DATA_LOCATION_URL
+          value: http://localhost:9000/storage
+        - name: POSTGRES_DB
+          value: ods-notifications
+        - name: POSTGRES_HOST
+          value: notification-db
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: POSTGRES_PW
+          value: admin
+        - name: POSTGRES_USER
+          value: notification_usr
+        image: /notification
+        name: notification
+        resources: {}
+      restartPolicy: Always
+status: {}
