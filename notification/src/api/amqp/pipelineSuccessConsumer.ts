@@ -19,7 +19,7 @@ import {
  *       (see PipelineEvent for details of the event).
  *
  */
-export class AmqpHandler {
+export class PipelineSuccessConsumer {
   amqpConsumer: AmqpConsumer = new AmqpConsumer()
 
   constructor (private readonly triggerEventHandler: TriggerEventHandler) { }
