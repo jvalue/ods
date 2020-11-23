@@ -12,9 +12,9 @@
     "test": "jest"
   },
   "dependencies": {
+    "@jvalue/node-dry-amqp": "0.0.1",
     "@jvalue/node-dry-basics": "0.0.3",
     "@jvalue/node-dry-pg": "0.0.3",
-    "amqplib": "^0.6.0",
     "axios": "^0.20.0",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
@@ -24,7 +24,6 @@
     "vm2": "^3.9.2"
   },
   "devDependencies": {
-    "@types/amqplib": "^0.5.14",
     "@types/cors": "^2.8.7",
     "@types/express": "^4.17.8",
     "@types/express-session": "^1.17.0",

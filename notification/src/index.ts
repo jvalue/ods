@@ -22,7 +22,7 @@ async function main (): Promise<void> {
   const notificationExecutionEndpoint = new NotificationExecutionEndpoint(triggerEventHandler)
   const amqpHandler = new AmqpHandler(triggerEventHandler)
 
-  await amqpHandler.connect(CONNECTION_RETRIES, CONNECTION_BACKOFF)
+  await amqpHandler.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
 
   const app = express()
   app.use(cors())
