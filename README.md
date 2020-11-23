@@ -45,19 +45,19 @@ To demonstrate the ODS we will create a new pipeline to fetch water level data f
 First, go to the Datasources page and click on `Create new Datasource`. 
 The configuration workflow for creating a new Datasource is divided into the following four steps.
 
-![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/ds01_overview.jpg)
+![alt](doc/configuration-example/ds01_overview.jpg)
 
 Step 1: Name the datasource.
 
-![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/ds02_name.jpg)
+![alt](doc/configuration-example/ds02_name.jpg)
 
 Step 2: Configure an adapter to crawl the data. You can use the prefilled example settings.
 
-![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/ds03_adapter.jpg)
+![alt](doc/configuration-example/ds03_adapter.jpg)
 
 Step 3: Describe additional meta-data for the data source.
 
-![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/ds04_meta-data.jpg)
+![alt](doc/configuration-example/ds04_meta-data.jpg)
 
 Step 4: Configure the interval of how often the data should be fetched.
 If `Periodic execution` is disabled the data will be fetched only once.
@@ -65,32 +65,32 @@ With the two sliders, you can choose the interval duration.
 The first execution of the pipeline will be after the `Time of First Execution` plus the interval time.
 Please choose 1 minute, so that you don't have to wait too long for the first data to arrive.
 
-![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/ds05_trigger.jpg)
+![alt](doc/configuration-example/ds05_trigger.jpg)
 
 The configuration of the data source is now finished. In the overview, you see the recently created data source.
 Remember the id on the left to the Datasource name, we will need it in the next step.
-![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/ds06_overview.jpg)
+![alt](doc/configuration-example/ds06_overview.jpg)
 
 
 To obtain the data fetched by this data source, you need to create a pipeline operating on the data source we just created.
 Go to the Pipelines page and click on `Create new Pipeline`. The creation process consists of three steps.
-![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/p01_overview.jpg)
+![alt](doc/configuration-example/p01_overview.jpg)
 
 Step 1: Choose a name for the pipeline and fill in the datasource id of the datasource we just created.
-![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/p02_name.jpg)
+![alt](doc/configuration-example/p02_name.jpg)
 
 Step 2: In this step, you can manipulate the raw data to fit your needs by writing JavaScript code. The data object represents the incoming raw data. In this example, the attribute test is added to the data object before returning it.
-![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/p03_pipeline.jpg)
+![alt](doc/configuration-example/p03_pipeline.jpg)
 
 Step 3: Describe additional meta-data for the pipeline.
-![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/p04_meta-data.jpg)
+![alt](doc/configuration-example/p04_meta-data.jpg)
 
 After clicking on the save button, you should see the recently created pipeline. 
-![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/p05_overview.jpg)
+![alt](doc/configuration-example/p05_overview.jpg)
 
 By clicking on the `Data` button inside the table you see the collected data by the pipeline.
 
-![alt](https://github.com/jvalue/open-data-service/blob/master/doc/configuration-example/08_storage.jpg)
+![alt](doc/configuration-example/08_storage.jpg)
 
 In this storage view, you see all data sets for the related pipeline. On top of this list, a static link shows the URL to fetch the data with a REST client.
 Each data entry in the list can be expanded to see the fetched data and additional meta-data.
@@ -101,7 +101,7 @@ Each data entry in the list can be expanded to see the fetched data and addition
 
 We use the microservice architectural style in this project. The microservices are located in the sub-directories and communicate at runtime over network with each other. Each Microservice has its own defined interface that has to be used by other services, direct access to the database of other microservices is strictly prohibited. In production, each microservice can be multiplied in order to scale the system (except the scheduler at the moment).
 
-![Microservice Architecture](https://github.com/jvalue/open-data-service/blob/master/doc/service_arch.png)
+![Microservice Architecture](doc/service_arch.png)
 
 | Microservice | Description |
 |----|----|
@@ -115,6 +115,8 @@ We use the microservice architectural style in this project. The microservices a
 
 Further information about a specific microservice can be found in the respective README file. 
 Examples showing the API of each microservice are in the [example request](doc/example-requests) directory.
+
+Instructions on how to analyse the microservice architecture with a service dependency graph in Neo4j, can be found [here](doc/service-dependency-graph.md).
 
 # Deployment
 Docker images of the microservices the ods consists of are deployed via our continous deployment pipeline. 
