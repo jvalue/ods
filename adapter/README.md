@@ -36,7 +36,7 @@ Support for new protocols or data formats can easily be achieved by adding class
 ## API Docs
 
 ## Adapter API (data import)
-| Endpoint  | Method  | Request Body  | Response Body | Request Parameters
+| Endpoint  | Method  | Request Body  | Response Body | Query Parameters
 |---|---|---|---|---|
 | *base_url*/version  | GET  | -  | String containing the application version  |
 | *base_url*/formats  | GET  | -  | JsonArray of data formats available for parsing and possible parameters |
