@@ -73,6 +73,31 @@ describe('Stateless data import', () => {
     expect(dataResponse.body).toEqual({ whateverwillbe: 'willbe', quesera: 'sera' })
   }, TIMEOUT)
 
+  test('Should handle includeData parameter appropriately when requesting a dataImport', async () => {
+    const reqBody = {
+      protocol: {
+        type: 'HTTP',
+        parameters: {
+          location: MOCK_SERVER_URL + '/json',
+          encoding: 'UTF-8'
+        }
+      },
+      format: {
+        type: 'JSON'
+      }
+    }
+
+    const response = await request(ADAPTER_URL)
+      .post('/dataImport')
+      .query('includeData=true')
+      .send(reqBody)
+
+    expect(response.status).toEqual(200)
+    expect(response.body).toEqual({
+      whateverwillbe: 'willbe', quesera: 'sera'
+    })
+  }, TIMEOUT)
+
   test('Should create a XML adapter as importer [POST /dataImport]', async () => {
     const reqBody = {
       protocol: {
