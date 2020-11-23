@@ -1,5 +1,5 @@
 import { PoolConfig, QueryResult } from 'pg'
-import PostgresRepository from '../postgresRepository'
+import { PostgresRepository } from '@jvalue/node-dry-pg'
 import { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB } from '../env'
 import { NotificationRepository } from './notificationRepository'
 import { isValidNotificationConfig, NotificationConfig } from './notificationConfig'
