@@ -68,7 +68,7 @@ Please choose 1 minute, so that you don't have to wait too long for the first da
 ![alt](doc/configuration-example/ds05_trigger.jpg)
 
 The configuration of the data source is now finished. In the overview, you see the recently created data source.
-Rembember the id on the left to the Datasource name, we will need it in the next step.
+Remember the id on the left to the Datasource name, we will need it in the next step.
 ![alt](doc/configuration-example/ds06_overview.jpg)
 
 
