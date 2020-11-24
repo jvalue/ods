@@ -15,17 +15,13 @@
     "@jvalue/node-dry-amqp": "0.0.1",
     "@jvalue/node-dry-basics": "0.0.3",
     "@jvalue/node-dry-pg": "0.0.3",
-    "@types/pg": "^7.14.4",
-    "amqplib": "^0.6.0",
     "axios": "^0.19.2",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
-    "pg": "^8.3.0",
     "vm2": "^3.8.3"
   },
   "devDependencies": {
-    "@types/amqplib": "^0.5.14",
     "@types/cors": "^2.8.6",
     "@types/express": "^4.17.9",
     "@types/jest": "^25.2.3",
