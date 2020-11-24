@@ -13,7 +13,7 @@ import {
 } from '../../env'
 
 export class PipelineConfigConsumer {
-  private readonly amqpConsumer = new AmqpConsumer()
+  private readonly consumer = new AmqpConsumer()
 
   constructor (private readonly pipelineManager: PipelineConfigManager) {}
 
@@ -23,7 +23,7 @@ export class PipelineConfigConsumer {
    * @param backoff   Time to wait until the next retry
    */
   public async init (retries: number, backoff: number): Promise<void> {
-    await this.amqpConsumer.init(AMQP_URL, retries, backoff)
+    await this.consumer.init(AMQP_URL, retries, backoff)
 
     const exchange = { name: AMQP_DATASOURCE_EXECUTION_EXCHANGE, type: 'topic' }
     const exchangeOptions = {}
@@ -31,7 +31,7 @@ export class PipelineConfigConsumer {
     const queueOptions = {
       exclusive: false
     }
-    await this.amqpConsumer.registerConsumer(exchange, exchangeOptions, queue, queueOptions, this.consumeEvent)
+    await this.consumer.registerConsumer(exchange, exchangeOptions, queue, queueOptions, this.consumeEvent)
   }
 
   // use the f = () => {} syntax to access this

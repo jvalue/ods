@@ -4,8 +4,6 @@ import express from 'express'
 import cors from 'cors'
 import bodyParser from 'body-parser'
 
-import { PostgresRepository } from '@jvalue/node-dry-pg'
-
 import { CONNECTION_RETRIES, CONNECTION_BACKOFF } from './env'
 
 import { PipelineExecutionEndpoint } from './api/rest/pipelineExecutionEndpoint'
@@ -32,8 +30,7 @@ async function main (): Promise<void> {
   const executionResultPublisher = new AmqpExecutionResultPublisher()
   const configWritesPublisher = new AmqpConfigWritesPublisher()
 
-  const postgresRepository = new PostgresRepository()
-  const pipelineConfigRepository = new PostgresPipelineConfigRepository(postgresRepository)
+  const pipelineConfigRepository = new PostgresPipelineConfigRepository()
   await pipelineConfigRepository.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
 
   await executionResultPublisher.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
@@ -47,7 +44,7 @@ async function main (): Promise<void> {
   )
 
   const pipelineConfigConsumer = new PipelineConfigConsumer(pipelineConfigManager)
-  await pipelineConfigConsumer.connect(CONNECTION_RETRIES, CONNECTION_BACKOFF)
+  await pipelineConfigConsumer.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
 
   const pipelineExecutionEndpoint = new PipelineExecutionEndpoint(pipelineExecutor)
   const pipelineConfigEndpoint = new PipelineConfigEndpoint(pipelineConfigManager)
