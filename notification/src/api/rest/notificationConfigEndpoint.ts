@@ -5,16 +5,17 @@ import {
   NotificationConfig
 } from '../../notification-config/notificationConfig'
 import { NotificationRepository } from '../../notification-config/notificationRepository'
+import { asyncHandler } from './utils'
 
 export class NotificationConfigEndpoint {
   constructor (private readonly storageHandler: NotificationRepository) {}
 
   registerRoutes = (app: express.Application): void => {
-    app.post('/configs', this.handleConfigCreation)
-    app.put('/configs/:id', this.handleConfigUpdate)
-    app.delete('/configs/:id', this.handleConfigDeletion)
-    app.get('/configs/:id', this.handleConfigRetrieve)
-    app.get('/configs', this.handleAllConfigRetrieve)
+    app.post('/configs', asyncHandler(this.handleConfigCreation))
+    app.put('/configs/:id', asyncHandler(this.handleConfigUpdate))
+    app.delete('/configs/:id', asyncHandler(this.handleConfigDeletion))
+    app.get('/configs/:id', asyncHandler(this.handleConfigRetrieve))
+    app.get('/configs', asyncHandler(this.handleAllConfigRetrieve))
   }
 
   /**

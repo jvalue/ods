@@ -2,12 +2,13 @@ import express from 'express'
 
 import { PipelineSuccessEvent, isValidPipelineSuccessEvent } from '../pipelineEvent'
 import { TriggerEventHandler } from '../triggerEventHandler'
+import { asyncHandler } from './utils'
 
 export class NotificationExecutionEndpoint {
   constructor (private readonly triggerEventHandler: TriggerEventHandler) {}
 
   registerRoutes = (app: express.Application): void => {
-    app.post('/trigger', this.triggerNotification)
+    app.post('/trigger', asyncHandler(this.triggerNotification))
   }
 
   triggerNotification = async (req: express.Request, res: express.Response): Promise<void> => {
