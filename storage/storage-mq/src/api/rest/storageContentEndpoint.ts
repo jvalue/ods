@@ -1,5 +1,7 @@
-import * as express from 'express'
+import express from 'express'
+
 import { StorageContentRepository } from '../../storage-content/storageContentRepository'
+import { asyncHandler } from './utils'
 
 export class StorageContentEndpoint {
   private readonly version = '0.0.1'
@@ -9,8 +11,8 @@ export class StorageContentEndpoint {
   // The following methods need arrow syntax because of javascript 'this' shenanigans
 
   registerRoutes = (app: express.Application): void => {
-    app.get('/bucket/:bucketId/content/:contentId', this.handleContentRequest)
-    app.get('/bucket/:bucketId/content', this.handleAllContentRequest)
+    app.get('/bucket/:bucketId/content/:contentId', asyncHandler(this.handleContentRequest))
+    app.get('/bucket/:bucketId/content', asyncHandler(this.handleAllContentRequest))
   }
 
   getVersion = (): string => {
