@@ -1,5 +1,6 @@
+import { AmqpPublisher } from '@jvalue/node-dry-amqp'
+
 import ConfigWritesPublisher from './configWritesPublisher'
-import AmqpPublisher from './amqpPublisher'
 import {
   AMQP_EXCHANGE,
   AMQP_URL,
@@ -16,7 +17,12 @@ export default class AmqpConfigWritesPublisher implements ConfigWritesPublisher 
   }
 
   async init (retries: number, msBackoff: number): Promise<void> {
-    return await this.publisher.init(AMQP_URL, AMQP_EXCHANGE, retries, msBackoff)
+    const exchange = {
+      name: AMQP_EXCHANGE,
+      type: 'topic'
+    }
+    const exchangeConfig = {}
+    return await this.publisher.init(AMQP_URL, retries, msBackoff, exchange, exchangeConfig)
   }
 
   publishCreation (pipelineId: number, pipelineName: string): boolean {
