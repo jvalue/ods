@@ -1,10 +1,9 @@
 import { Pool, PoolConfig, PoolClient, QueryResult } from 'pg'
+import { stringifiers, sleep } from '@jvalue/node-dry-basics'
 
 import { POSTGRES_SCHEMA, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB } from '../env'
-import { sleep } from '../sleep'
 import { PipelineConfig, PipelineConfigDTO } from './model/pipelineConfig'
 import PipelineConfigRepository from './pipelineConfigRepository'
-import { stringifyArray } from '../logging'
 
 const POSTGRES_TABLE = 'PipelineConfigs'
 
@@ -120,7 +119,7 @@ export default class PostgresPipelineConfigRepository implements PipelineConfigR
   }
 
   private async executeQuery (query: string, args: unknown[]): Promise<QueryResult> {
-    console.debug(`Executing query "${query}" with values ${stringifyArray(args)}`)
+    console.debug(`Executing query "${query}" with values ${stringifiers.stringifyArray(args)}`)
 
     let client: PoolClient | undefined
     try {

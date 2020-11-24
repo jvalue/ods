@@ -1,4 +1,4 @@
-import { hasProperty, isObject, isString } from '../validators'
+import { validators } from '@jvalue/node-dry-basics'
 
 export interface PipelineExecutionRequest {
   func: string
@@ -10,20 +10,20 @@ export class PipelineExecutionRequestValidator {
 
   validate (request: unknown): request is PipelineExecutionRequest {
     this.errors = []
-    if (!isObject(request)) {
+    if (!validators.isObject(request)) {
       this.errors.push('\'PipelineExecutionRequest\' must be an object')
       return false
     }
-    if (!hasProperty(request, 'func')) {
+    if (!validators.hasProperty(request, 'func')) {
       // Missing transformation func is not an error, assume identity transformation
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       (request as PipelineExecutionRequest).func = 'return data;'
-    } else if (!isString(request.func)) {
+    } else if (!validators.isString(request.func)) {
       this.errors.push('\'func\' must be a string')
     }
-    if (!hasProperty(request, 'data')) {
+    if (!validators.hasProperty(request, 'data')) {
       this.errors.push('\'data\' property is missing')
-    } else if (!isObject(request.data)) {
+    } else if (!validators.isObject(request.data)) {
       this.errors.push('\'data\' must be an object or array')
     }
     return this.errors.length === 0
