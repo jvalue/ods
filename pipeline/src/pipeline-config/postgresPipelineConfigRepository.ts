@@ -62,7 +62,7 @@ const POOL_CONFIG: PoolConfig = {
 }
 
 export default class PostgresPipelineConfigRepository implements PipelineConfigRepository {
-  constructor (private readonly postgresRepository: PostgresRepository) {}
+  private readonly postgresRepository: PostgresRepository = new PostgresRepository()
 
   /**
    * Initializes the PostgresPipelineConfigRepository.
