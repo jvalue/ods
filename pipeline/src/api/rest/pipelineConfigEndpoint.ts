@@ -1,19 +1,20 @@
-import * as express from 'express'
+import express from 'express'
 
 import { PipelineConfigManager } from '../../pipeline-config/pipelineConfigManager'
 import { PipelineConfigDTOValidator } from '../../pipeline-config/model/pipelineConfig'
 import { isString } from '../../validators'
+import { asyncHandler } from './utils'
 
 export class PipelineConfigEndpoint {
   constructor (private readonly pipelineConfigManager: PipelineConfigManager) {}
 
   registerRoutes = (app: express.Application): void => {
-    app.get('/configs', this.getAll)
-    app.get('/configs/:id', this.getOne)
-    app.post('/configs', this.create)
-    app.put('/configs/:id', this.update)
-    app.delete('/configs/:id', this.delete)
-    app.delete('/configs', this.deleteAll)
+    app.get('/configs', asyncHandler(this.getAll))
+    app.get('/configs/:id', asyncHandler(this.getOne))
+    app.post('/configs', asyncHandler(this.create))
+    app.put('/configs/:id', asyncHandler(this.update))
+    app.delete('/configs/:id', asyncHandler(this.delete))
+    app.delete('/configs', asyncHandler(this.deleteAll))
   }
 
   // The following methods need arrow syntax because of javascript 'this' shenanigans

@@ -1,14 +1,15 @@
-import * as express from 'express'
+import express from 'express'
 
 import PipelineExecutor from '../../pipeline-execution/pipelineExecutor'
 import { PipelineExecutionRequestValidator } from '../pipelineExecutionRequest'
 import { JobResult } from '../../pipeline-execution/jobResult'
+import { asyncHandler } from './utils'
 
 export class PipelineExecutionEndpoint {
   constructor (private readonly pipelineExecutor: PipelineExecutor) {}
 
   registerRoutes = (app: express.Application): void => {
-    app.post('/job', this.postJob)
+    app.post('/job', asyncHandler(this.postJob))
   }
 
   // The following methods need arrow syntax because of javascript 'this' shenanigans
