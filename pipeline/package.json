@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@jvalue/node-dry-basics": "0.0.3",
+    "@jvalue/node-dry-pg": "0.0.3",
     "@types/pg": "^7.14.4",
     "amqplib": "^0.6.0",
     "axios": "^0.19.2",
