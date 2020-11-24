@@ -20,7 +20,7 @@
   "devDependencies": {
     "@types/amqplib": "^0.5.14",
     "@types/cors": "^2.8.6",
-    "@types/express": "^4.17.6",
+    "@types/express": "^4.17.9",
     "@types/jest": "^25.2.3",
     "@types/node": "^14.0.23",
     "@types/pg": "^7.14.3",
