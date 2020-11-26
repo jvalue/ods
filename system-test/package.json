@@ -4,7 +4,7 @@
   "description": "Open Data Service System Test",
   "scripts": {
     "mockServer": "node src/mock.server.js",
-    "test": "jest src/*.test.js --runInBand --verbose",
+    "test": "jest src/*.test.js --colors --verbose --runInBand",
     "posttest": "killall node",
     "lint": "eslint src --fix",
     "lint-ci": "eslint src --max-warnings=0"
