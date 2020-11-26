@@ -32,13 +32,16 @@ export class PipelineSuccessConsumer {
      */
   public async init (retries: number, ms: number): Promise<void> {
     await this.amqpConsumer.init(AMQP_URL, retries, ms)
+
+    const exchange = { name: AMQP_PIPELINE_EXECUTION_EXCHANGE, type: 'topic' }
+    const exchangeOptions = {}
+    const queue = { name: AMQP_PIPELINE_EXECUTION_QUEUE, routingKey: AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC }
+    const queueOptions = { exclusive: false }
     await this.amqpConsumer.registerConsumer(
-      { name: AMQP_PIPELINE_EXECUTION_EXCHANGE, type: 'topic' },
-      {},
-      { name: AMQP_PIPELINE_EXECUTION_QUEUE, routingKey: AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC },
-      {
-        exclusive: false
-      },
+      exchange,
+      exchangeOptions,
+      queue,
+      queueOptions,
       this.handleEvent
     )
   }
