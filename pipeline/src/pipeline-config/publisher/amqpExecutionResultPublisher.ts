@@ -1,10 +1,11 @@
+import { AmqpPublisher } from '@jvalue/node-dry-amqp'
+
 import {
   AMQP_URL,
   AMQP_EXCHANGE,
   AMQP_PIPELINE_EXECUTION_ERROR_TOPIC,
   AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC
 } from '../../env'
-import AmqpPublisher from './amqpPublisher'
 import { ExecutionResultPublisher } from './executionResultPublisher'
 
 export default class AmqpExecutionResultPublisher implements ExecutionResultPublisher {
@@ -15,7 +16,12 @@ export default class AmqpExecutionResultPublisher implements ExecutionResultPubl
   }
 
   async init (retries: number, msBackoff: number): Promise<void> {
-    return await this.publisher.init(AMQP_URL, AMQP_EXCHANGE, retries, msBackoff)
+    const exchange = {
+      name: AMQP_EXCHANGE,
+      type: 'topic'
+    }
+    const exchangeConfig = {}
+    return await this.publisher.init(AMQP_URL, retries, msBackoff, exchange, exchangeConfig)
   }
 
   publishError (pipelineId: number, pipelineName: string, errorMsg: string): boolean {

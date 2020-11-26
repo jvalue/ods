@@ -1,8 +1,8 @@
 import express from 'express'
+import { validators } from '@jvalue/node-dry-basics'
 
 import { PipelineConfigManager } from '../../pipeline-config/pipelineConfigManager'
 import { PipelineConfigDTOValidator } from '../../pipeline-config/model/pipelineConfig'
-import { isString } from '../../validators'
 import { asyncHandler } from './utils'
 
 export class PipelineConfigEndpoint {
@@ -93,10 +93,10 @@ export class PipelineConfigEndpoint {
 
   private getQueryParameter (req: express.Request, key: string): string {
     const value = req.query[key]
-    if (isString(value)) {
+    if (validators.isString(value)) {
       return value
     }
-    if (Array.isArray(value) && isString(value[0])) {
+    if (Array.isArray(value) && validators.isString(value[0])) {
       return value[0]
     }
     return ''

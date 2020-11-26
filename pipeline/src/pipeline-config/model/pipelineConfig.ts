@@ -1,4 +1,4 @@
-import { isObject, isString, isNumber, hasProperty } from '../../validators'
+import { validators } from '@jvalue/node-dry-basics'
 
 export interface PipelineConfig {
   id: number
@@ -40,57 +40,57 @@ export class PipelineConfigDTOValidator {
 
   validate (pipelineConfig: unknown): pipelineConfig is PipelineConfigDTO {
     this.errors = []
-    if (!isObject(pipelineConfig)) {
+    if (!validators.isObject(pipelineConfig)) {
       this.errors.push('\'PipelineConfig\' must be an object')
       return false
     }
 
-    if (!hasProperty(pipelineConfig, 'datasourceId')) {
+    if (!validators.hasProperty(pipelineConfig, 'datasourceId')) {
       this.errors.push('\'datasourceId\' property is missing')
-    } else if (!isNumber(pipelineConfig.datasourceId)) {
+    } else if (!validators.isNumber(pipelineConfig.datasourceId)) {
       this.errors.push('\'datasourceId\' property must be a number')
     }
 
-    if (!hasProperty(pipelineConfig, 'transformation')) {
+    if (!validators.hasProperty(pipelineConfig, 'transformation')) {
       // Missing transformation is not an error, assume identity transformation
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       (pipelineConfig as PipelineConfigDTO).transformation = { func: 'return data;' }
-    } else if (!isObject(pipelineConfig.transformation)) {
+    } else if (!validators.isObject(pipelineConfig.transformation)) {
       this.errors.push('\'transformation\' property must be an object')
     } else {
-      if (!hasProperty(pipelineConfig.transformation, 'func')) {
+      if (!validators.hasProperty(pipelineConfig.transformation, 'func')) {
         this.errors.push('\'transformation.func\' property is missing')
-      } else if (!isString(pipelineConfig.transformation.func)) {
+      } else if (!validators.isString(pipelineConfig.transformation.func)) {
         this.errors.push('\'transformation.func\' property must be a string')
       }
     }
 
-    if (!hasProperty(pipelineConfig, 'metadata')) {
+    if (!validators.hasProperty(pipelineConfig, 'metadata')) {
       this.errors.push('\'metadata\' property is missing')
-    } else if (!isObject(pipelineConfig.metadata)) {
+    } else if (!validators.isObject(pipelineConfig.metadata)) {
       this.errors.push('\'metadata\' property must be an object')
     } else {
-      if (!hasProperty(pipelineConfig.metadata, 'author')) {
+      if (!validators.hasProperty(pipelineConfig.metadata, 'author')) {
         this.errors.push('\'metadata.author\' property is missing')
-      } else if (!isString(pipelineConfig.metadata.author)) {
+      } else if (!validators.isString(pipelineConfig.metadata.author)) {
         this.errors.push('\'metadata.author\' property must be a string')
       }
 
-      if (!hasProperty(pipelineConfig.metadata, 'displayName')) {
+      if (!validators.hasProperty(pipelineConfig.metadata, 'displayName')) {
         this.errors.push('\'metadata.displayName\' property is missing')
-      } else if (!isString(pipelineConfig.metadata.displayName)) {
+      } else if (!validators.isString(pipelineConfig.metadata.displayName)) {
         this.errors.push('\'metadata.displayName\' property must be a string')
       }
 
-      if (!hasProperty(pipelineConfig.metadata, 'license')) {
+      if (!validators.hasProperty(pipelineConfig.metadata, 'license')) {
         this.errors.push('\'metadata.license\' property is missing')
-      } else if (!isString(pipelineConfig.metadata.license)) {
+      } else if (!validators.isString(pipelineConfig.metadata.license)) {
         this.errors.push('\'metadata.license\' property must be a string')
       }
 
-      if (!hasProperty(pipelineConfig.metadata, 'description')) {
+      if (!validators.hasProperty(pipelineConfig.metadata, 'description')) {
         this.errors.push('\'metadata.description\' property is missing')
-      } else if (!isString(pipelineConfig.metadata.description)) {
+      } else if (!validators.isString(pipelineConfig.metadata.description)) {
         this.errors.push('\'metadata.description\' property must be a string')
       }
     }

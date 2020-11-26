@@ -1,4 +1,4 @@
-import { isObject, isNumber, isString, hasProperty } from '../validators'
+import { validators } from '@jvalue/node-dry-basics'
 
 export interface PipelineConfigTriggerRequest {
   datasourceId: number
@@ -10,18 +10,18 @@ export class PipelineConfigTriggerRequestValidator {
 
   validate (requestBody: unknown): requestBody is PipelineConfigTriggerRequest {
     this.errors = []
-    if (!isObject(requestBody)) {
+    if (!validators.isObject(requestBody)) {
       this.errors.push('\'PipelineConfigTriggerRequest\' must be an object')
       return false
     }
-    if (!hasProperty(requestBody, 'datasourceId')) {
+    if (!validators.hasProperty(requestBody, 'datasourceId')) {
       this.errors.push('\'datasourceId\' property is missing')
-    } else if (!isNumber(requestBody.datasourceId)) {
+    } else if (!validators.isNumber(requestBody.datasourceId)) {
       this.errors.push('\'datasourceId\' must be a number')
     }
-    if (!hasProperty(requestBody, 'data')) {
+    if (!validators.hasProperty(requestBody, 'data')) {
       this.errors.push('\'data\' property is missing')
-    } else if (!isString(requestBody.data)) {
+    } else if (!validators.isString(requestBody.data)) {
       this.errors.push('\'data\' must be a string')
     }
     return this.errors.length === 0
