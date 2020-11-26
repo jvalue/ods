@@ -30,7 +30,9 @@ async function main (): Promise<void> {
   const executionResultPublisher = new AmqpExecutionResultPublisher()
   const configWritesPublisher = new AmqpConfigWritesPublisher()
 
-  const pipelineConfigRepository = await PostgresPipelineConfigRepository.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
+  const pipelineConfigRepository = new PostgresPipelineConfigRepository()
+  await pipelineConfigRepository.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
+
   await executionResultPublisher.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
   await configWritesPublisher.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
 
@@ -42,7 +44,7 @@ async function main (): Promise<void> {
   )
 
   const pipelineConfigConsumer = new PipelineConfigConsumer(pipelineConfigManager)
-  await pipelineConfigConsumer.connect(CONNECTION_RETRIES, CONNECTION_BACKOFF)
+  await pipelineConfigConsumer.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
 
   const pipelineExecutionEndpoint = new PipelineExecutionEndpoint(pipelineExecutor)
   const pipelineConfigEndpoint = new PipelineConfigEndpoint(pipelineConfigManager)
