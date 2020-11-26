@@ -6,7 +6,7 @@ import NotificationExecutor from './notification-execution/notificationExecutor'
 import VM2SandboxExecutor from './notification-execution/condition-evaluation/vm2SandboxExecutor'
 import { NotificationConfigEndpoint } from './api/rest/notificationConfigEndpoint'
 import { NotificationExecutionEndpoint } from './api/rest/notificationExecutionEndpoint'
-import { AmqpHandler } from './api/amqp/amqpHandler'
+import { PipelineSuccessConsumer } from './api/amqp/pipelineSuccessConsumer'
 import { TriggerEventHandler } from './api/triggerEventHandler'
 import { CONNECTION_RETRIES, CONNECTION_BACKOFF } from './env'
 import { initNotificationRepository } from './notification-config/postgresNotificationRepository'
@@ -20,9 +20,9 @@ async function main (): Promise<void> {
   const triggerEventHandler = new TriggerEventHandler(notificationRepository, notificationExecutor)
   const notificationConfigEndpoint = new NotificationConfigEndpoint(notificationRepository)
   const notificationExecutionEndpoint = new NotificationExecutionEndpoint(triggerEventHandler)
-  const amqpHandler = new AmqpHandler(triggerEventHandler)
+  const pipelineSuccessConsumer = new PipelineSuccessConsumer(triggerEventHandler)
 
-  await amqpHandler.connect(CONNECTION_RETRIES, CONNECTION_BACKOFF)
+  await pipelineSuccessConsumer.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
 
   const app = express()
   app.use(cors())
