@@ -9,7 +9,7 @@ file("src/main/resources/application.properties").withInputStream { props.load(i
 
 group = 'org.jvalue.ods'
 version = props.getProperty("app.version")
-sourceCompatibility = '14'
+sourceCompatibility = '15'
 
 task testProps {
 	doFirst {
