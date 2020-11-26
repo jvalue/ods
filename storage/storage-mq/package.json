@@ -9,7 +9,7 @@
     "transpile": "tsc",
     "lint": "eslint src --fix",
     "lint-ci": "eslint src --max-warnings=0",
-    "test": "jest --passWithNoTests"
+    "test": "jest --colors --verbose --passWithNoTests"
   },
   "dependencies": {
     "amqplib": "^0.6.0",
