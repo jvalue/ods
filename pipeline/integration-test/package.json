@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Pipeline Service Integration-Tests",
   "scripts": {
-    "test": "jest --runInBand",
+    "test": "jest --colors --verbose --runInBand",
     "lint": "eslint src --fix",
     "lint-ci": "eslint src --max-warnings=0"
   },

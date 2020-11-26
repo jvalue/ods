@@ -5,7 +5,7 @@
   "scripts": {
     "mock:adapter": "node src/mock.adapter.js",
     "pretest": "npm run mock:adapter &",
-    "test": "jest --runInBand",
+    "test": "jest --colors --verbose --runInBand",
     "posttest": "killall node",
     "lint": "eslint src --fix",
     "lint-ci": "eslint src --max-warnings=0"
