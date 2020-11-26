@@ -26,9 +26,9 @@ All services and their integration tests written in JavaScript and the system te
 
 ### Java
 
-For Java the `OpenJDK` images provided by `AdoptOpenJDK` are used, as `AdoptOpenJDK` provides `alpine` images.
+For Java the OpenJDK [OpenJ9](https://www.eclipse.org/openj9) images provided by `AdoptOpenJDK` are used, in the `alpine-slim` version.
 See [here](https://github.com/AdoptOpenJDK/openjdk-docker) for background information.
-We use version 15 of OpenJDK as it is the latest version, as seen [here](https://www.oracle.com/java/technologies/java-se-support-roadmap.html)
+We currenly use version 14 of OpenJDK. See [here](https://www.oracle.com/java/technologies/java-se-support-roadmap.html) for the version roadmap of Java.
 
 ### PostgreSQL
 
