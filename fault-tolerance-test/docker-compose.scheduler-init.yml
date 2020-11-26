@@ -1,0 +1,15 @@
+# Custom docker-compose file to overwrite the ADAPTER_SERVICE_URL for the scheduler init test
+
+version: "3.7"
+
+services:
+  scheduler:
+    environment:
+      ADAPTER_SERVICE_URL: 'http://fake-adapter:8080'
+  fake-adapter:
+    image: ${DOCKER_REGISTRY}/fake-adapter
+    build:
+      context: ./fault-tolerance-test/
+      dockerfile: fake-adapter.Dockerfile
+    environment:
+      AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
