@@ -33,9 +33,6 @@ This configuration can be done programmatically via the API or browser based wit
 ## Using the API
 There is a collection of examples for entire configurations in our [example request collection](doc/example-requests/).
 
-Additionally, there is is swagger API documentation available under `localhost:9400`. 
-The swagger integration is currently in progress, so there is only documentation for the storage service available.
-
 ## Using the UI
 
 The easiest way to use the ODS is via the UI. If you started the ODS with docker-compose you can access the UI under `http://localhost:9000/`.
