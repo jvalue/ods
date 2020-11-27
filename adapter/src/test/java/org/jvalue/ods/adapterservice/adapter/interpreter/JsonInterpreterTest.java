@@ -17,9 +17,9 @@ public class JsonInterpreterTest {
 
     @Test
     public void interpretJsonData() throws IOException {
-        JsonNode result = interpreter.interpret(MINIMAL_JSON, Map.of());
+        String result = interpreter.interpret(MINIMAL_JSON, Map.of());
 
-        assertEquals(MINIMAL_JSON, result.toString());
+        assertEquals(MINIMAL_JSON, result);
     }
 
     @Test(expected = IOException.class)
