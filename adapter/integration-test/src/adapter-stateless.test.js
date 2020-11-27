@@ -93,9 +93,8 @@ describe('Stateless data import', () => {
       .send(reqBody)
 
     expect(response.status).toEqual(200)
-    expect(response.body).toEqual({
-      whateverwillbe: 'willbe', quesera: 'sera'
-    })
+    expect(response.body.id).toBeGreaterThan(0)
+    expect(JSON.parse(response.body.data)).toEqual({ whateverwillbe: 'willbe', quesera: 'sera' })
   }, TIMEOUT)
 
   test('Should create a RAW adapter as import [POST /dataImport]', async () => {
@@ -118,7 +117,8 @@ describe('Stateless data import', () => {
       .send(reqBody)
 
     expect(response.status).toEqual(200)
-    expect(response.body).toEqual(
+    expect(response.body.id).toBeGreaterThan(0)
+    expect(response.body.data).toEqual(
       '<?xml version="1.0" encoding="UTF-8"?>' +
     '<root><from>Rick</from><to>Morty</to></root>'
     )
