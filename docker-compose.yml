@@ -19,7 +19,6 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-ui.rule=PathPrefix(`/`)"
-      - "traefik.http.services.ui.loadbalancer.server.port=80"
 
   # ----------------- ADAPTER SERVICE (/adapter) --------------------
   adapter:
@@ -47,7 +46,6 @@ services:
       - "traefik.http.routers.to-adapter.rule=PathPrefix(`/api/adapter`)"
       - "traefik.http.routers.to-adapter.middlewares=adapter-stripprefix@docker"
       - "traefik.http.middlewares.adapter-stripprefix.stripprefix.prefixes=/api/adapter"
-      - "traefik.http.services.adapter.loadbalancer.server.port=8080"
 
   adapter-db:
     image: postgres
@@ -117,7 +115,6 @@ services:
       - "traefik.http.routers.to-storage-mq.rule=PathPrefix(`/api/storage-mq`)"
       - "traefik.http.routers.to-storage-mq.middlewares=storage-mq-stripprefix@docker"
       - "traefik.http.middlewares.storage-mq-stripprefix.stripprefix.prefixes=/api/storage-mq"
-      - "traefik.http.services.storage-mq.loadbalancer.server.port=8080"
 
   storage: # Wraps postgres database with API
     image: ${DOCKER_REGISTRY}/storage
@@ -138,7 +135,6 @@ services:
       - "traefik.http.routers.to-storage.middlewares=storage-stripprefix@docker,storage-addaccept@docker"
       - "traefik.http.middlewares.storage-stripprefix.stripprefix.prefixes=/api/storage"
       - "traefik.http.middlewares.storage-addaccept.headers.customrequestheaders.Accept=application/json" # Firefox Browser Support
-      - "traefik.http.services.storage.loadbalancer.server.port=3000"
 
   storage-db:
     image: postgres:12-alpine
@@ -150,10 +146,11 @@ services:
   # volumes:
   #   - "./pgdata:/var/lib/postgresql/data"
 
-  storage-db-ui: # management UI for Postgres
-    image: adminer
-    ports:
-      - 8080:8080
+  # Uncomment this if you want to manage the Postgres databases with adminer
+  # adminer: # management UI for Postgres
+  #   image: adminer
+  #   ports:
+  #     - 8080:8080
 
   storage-db-liquibase: # perform database migration on start up
     image: ${DOCKER_REGISTRY}/storage-db-liquibase
@@ -168,11 +165,6 @@ services:
       CONNECTION_BACKOFF_IN_SECONDS: 2
     depends_on:
       - storage-db
-
-  storage-swagger: # API documentation for storage service
-    image: swaggerapi/swagger-ui
-    environment:
-      API_URL: http://localhost:9400/
 
   # ----------------- PIPELINE SERVICE (/pipelines) --------------------
   pipeline:
@@ -209,7 +201,6 @@ services:
       - "traefik.http.routers.to-pipeline.rule=PathPrefix(`/api/pipelines`)"
       - "traefik.http.routers.to-pipeline.middlewares=pipeline-stripprefix@docker"
       - "traefik.http.middlewares.pipeline-stripprefix.stripprefix.prefixes=/api/pipelines"
-      - "traefik.http.services.pipeline.loadbalancer.server.port=8080"
 
   pipeline-db:
     image: postgres
@@ -249,7 +240,6 @@ services:
       - "traefik.http.routers.to-notification.rule=PathPrefix(`/api/notification`)"
       - "traefik.http.routers.to-notification.middlewares=notification-stripprefix@docker"
       - "traefik.http.middlewares.notification-stripprefix.stripprefix.prefixes=/api/notification"
-      - "traefik.http.services.notification.loadbalancer.server.port=8080"
 
   notification-db:
     image: postgres
@@ -280,12 +270,6 @@ services:
       RABBITMQ_ERLANG_COOKIE: 'S0m3_R4bBi7_C0ok13'
       RABBITMQ_DEFAULT_USER: 'rabbit_adm'
       RABBITMQ_DEFAULT_PASS: 'R4bb!7_4DM_p4SS'
-    labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.to-amqp.rule=PathPrefix(`/api/amqp`)"
-        - "traefik.http.routers.to-amqp.middlewares=amqp-stripprefix@docker"
-        - "traefik.http.middlewares.amqp-stripprefix.stripprefix.prefixes=/api/amqp"
-        - "traefik.http.services.amqp.loadbalancer.server.port=8080"
     ports:
       - "15672:15672"
       - "5672:5672"
