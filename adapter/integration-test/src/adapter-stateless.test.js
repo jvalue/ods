@@ -98,6 +98,32 @@ describe('Stateless data import', () => {
     })
   }, TIMEOUT)
 
+  test('Should create a RAW adapter as import [POST /dataImport]', async () => {
+    const reqBody = {
+      protocol: {
+        type: 'HTTP',
+        parameters: {
+          location: MOCK_SERVER_URL + '/xml',
+          encoding: 'UTF-8'
+        }
+      },
+      format: {
+        type: 'RAW'
+      }
+    }
+
+    const response = await request(ADAPTER_URL)
+      .post('/dataImport')
+      .query('includeData=true')
+      .send(reqBody)
+
+    expect(response.status).toEqual(200)
+    expect(response.body).toEqual(
+      '<?xml version="1.0" encoding="UTF-8"?>' +
+    '<root><from>Rick</from><to>Morty</to></root>'
+    )
+  })
+
   test('Should create a XML adapter as importer [POST /dataImport]', async () => {
     const reqBody = {
       protocol: {
