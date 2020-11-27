@@ -17,12 +17,9 @@ public class XmlInterpreterTest {
 
     @Test
     public void interpretXmlData() throws IOException {
-        JsonNode result = interpreter.interpret(XML_STRING, Map.of());
+        String result = interpreter.interpret(XML_STRING, Map.of());
 
-      System.out.println(result);
-        assertEquals(2, result.size());
-        assertEquals("Walter Frosch", result.get("to").textValue());
-        assertEquals("Nice game!", result.get("body").textValue());
+        assertEquals("{\"to\":\"Walter Frosch\",\"body\":\"Nice game!\"}", result);
     }
 
     @Test
@@ -39,16 +36,13 @@ public class XmlInterpreterTest {
           "</pizza>" +
         "</menuItems>";
 
-      JsonNode result = interpreter.interpret(collectionString, Map.of());
+      String result = interpreter.interpret(collectionString, Map.of());
 
-      System.out.println(result);
-      assertEquals(1, result.size());
-      assertEquals(2, result.get("pizza").size());
-      assertEquals(2, result.get("pizza").get(0).get("price").asInt());
-      assertEquals("good", result.get("pizza").get(0).get("taste").asText());
-      assertEquals(2, result.get("pizza").get(1).size());
-      assertEquals(12, result.get("pizza").get(1).get("price").asInt());
-      assertEquals("disgusting", result.get("pizza").get(1).get("taste").asText());
+      assertEquals(
+              "{\"pizza\":" +
+                        "[{\"price\":\"2\",\"taste\":\"good\"}," +
+                        "{\"price\":\"12\",\"taste\":\"disgusting\"}]}",
+              result);
     }
 
   @Test
@@ -67,16 +61,15 @@ public class XmlInterpreterTest {
         "</menu>" +
         "</menuItems>";
 
-    JsonNode result = interpreter.interpret(collectionString, Map.of());
+    String result = interpreter.interpret(collectionString, Map.of());
 
-    System.out.println(result);
-    assertEquals(1, result.size());
-    assertEquals(1, result.get("menu").size());
-    assertEquals(2, result.get("menu").get("pizza").get(0).get("price").asInt());
-    assertEquals("good", result.get("menu").get("pizza").get(0).get("taste").asText());
-    assertEquals(2, result.get("menu").get("pizza").get(1).size());
-    assertEquals(12, result.get("menu").get("pizza").get(1).get("price").asInt());
-    assertEquals("disgusting", result.get("menu").get("pizza").get(1).get("taste").asText());
+    assertEquals(
+            "{\"menu\":" +
+                        "{\"pizza\":[" +
+                            "{\"price\":\"2\",\"taste\":\"good\"}," +
+                            "{\"price\":\"12\",\"taste\":\"disgusting\"}]}}",
+            result
+    );
   }
 
     @Test
@@ -92,15 +85,11 @@ public class XmlInterpreterTest {
           "</pizza>" +
         "</menuItems>";
 
-      JsonNode result = interpreter.interpret(collectionString, Map.of());
+      String result = interpreter.interpret(collectionString, Map.of());
 
-      System.out.println(result);
-      assertEquals(1, result.size());
-      assertEquals(2, result.get("pizza").size());
-      assertEquals("funghi", result.get("pizza").get(0).get("type").asText());
-      assertEquals("good", result.get("pizza").get(0).get("taste").asText());
-      assertEquals(1, result.get("pizza").get(1).size());
-      assertEquals(12, result.get("pizza").get(1).get("price").asInt());
+      assertEquals(
+              "{\"pizza\":[{\"type\":\"funghi\",\"taste\":\"good\"},{\"price\":\"12\"}]}",
+              result);
     }
 
     @Test(expected = IOException.class)
