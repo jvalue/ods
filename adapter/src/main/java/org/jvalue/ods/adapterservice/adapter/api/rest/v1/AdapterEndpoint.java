@@ -31,7 +31,7 @@ public class AdapterEndpoint {
       DataBlob imported = adapter.executeJob(config);
 
       if(includeData) {
-        return ResponseEntity.ok(imported.getData());
+        return ResponseEntity.ok(imported);
       }
 
       return ResponseEntity.ok(imported.getMetaData());
