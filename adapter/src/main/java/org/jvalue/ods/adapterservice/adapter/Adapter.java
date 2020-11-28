@@ -37,7 +37,7 @@ public class Adapter {
     try {
       var rawData = importer.fetch(config.protocolConfig.parameters);
       var result = interpreter.interpret(rawData, config.formatConfig.parameters);
-      return dataBlobRepository.save(new DataBlob(result.toString()));
+      return dataBlobRepository.save(new DataBlob(result));
     } catch (IOException e) {
       throw new IllegalArgumentException("Not able to parse data as format: " + config.formatConfig.format, e);
     }
