@@ -1,0 +1,6 @@
+replicaCount: 1
+
+image:
+  repository: jvalue/open-data-service
+  pullPolicy: Always
+  tag: ui-latest

@@ -1,0 +1,7 @@
+apiVersion: v2
+name: storage
+description: ODS Storage Service
+
+version: 0.0.1
+
+type: application

@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      tier: {{ .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        tier: {{ .Chart.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+          env:
+            - name: AMQP_DATASOURCE_CREATED_TOPIC
+              value: "datasource.config.created"
+            - name: AMQP_DATASOURCE_DELETED_TOPIC
+              value: "datasource.config.deleted"
+            - name: AMQP_DATASOURCE_UPDATED_TOPIC
+              value: "datasource.config.updated"
+            - name: AMQP_EXCHANGE
+              value: "ods_global"
+            - name: AMQP_IMPORT_FAILED_TOPIC
+              value: "datasource.execution.failed"
+            - name: AMQP_IMPORT_SUCCESS_TOPIC
+              value: "datasource.execution.success"
+            - name: AMQP_PUBLISH_BACKOFF
+              value: 1000
+            - name: AMQP_PUBLISH_RETRIES
+              value: 5
+            - name: DB_URL
+              value: "jdbc:postgresql://{{ .Chart.Name }}-db:5432/adapterservice"
+            - name: RABBIT_HOST
+              value: rabbitmq
+            - name: RABBIT_PORT
+              value: "5672"
+            - name: RABBIT_PWD
+              value: "{{ .Values.global.rabbitmq.password }}"
+            - name: RABBIT_USR
+              value: "{{ .Values.global.rabbitmq.username }}"
+
+          ports:
+            - containerPort: 8080
+
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 10
+
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 10

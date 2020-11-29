@@ -1,0 +1,7 @@
+apiVersion: v2
+name: rabbitmq
+description: ODS RabbitMQ Service
+
+version: 0.0.1
+
+type: application

@@ -1,0 +1,7 @@
+apiVersion: v2
+name: adapter
+description: ODS Adapter Service
+
+version: 0.0.1
+
+type: application

@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      tier: {{ .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        tier: {{ .Chart.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-db
+          image: postgresql
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+          ports:
+            - containerPort: 5432
+
+          env:
+            - name: POSTGRES_USER
+              value: "{{ .Values.global.adapterDB.username }}"
+            - name: POSTGRES_PASSWORD
+              value: "{{ .Values.global.adapterDB.password }}"
+
+          livenessProbe:
+            failureThreshold: 3
+            tcpSocket:
+              port: 5432
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 10
+
+          readinessProbe:
+            failureThreshold: 3
+            tcpSocket:
+              port: 5432
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 10

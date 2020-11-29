@@ -1,0 +1,7 @@
+apiVersion: v2
+name: pipeline
+description: ODS Pipeline Service
+
+version: 0.0.1
+
+type: application

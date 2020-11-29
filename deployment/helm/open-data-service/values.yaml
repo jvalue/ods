@@ -1,0 +1,29 @@
+global:
+  adapterDB:
+    username: "adapter"
+    password: "admin"
+
+  notificationDB:
+    username: "notification"
+    password: "admin"
+    database: "ods-notifications"
+
+  storageDB:
+    username: "storage"
+    password: "admin"
+    database: "ods"
+
+  postgrest:
+    username:
+    password:
+    
+
+  pipelineDB:
+    username: "pipeline"
+    password: "admin"
+    database: "ods-pipelines"
+
+  rabbitmq:
+    username: "rabbit_adm"
+    password: "R4bb!7_4DM_p4SS"
+    coockie: "S0m3_R4bBi7_C0ok13"

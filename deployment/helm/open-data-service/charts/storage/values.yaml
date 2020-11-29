@@ -1,0 +1,16 @@
+replicaCount: 1
+
+image:
+  repository: jvalue/open-data-service
+  pullPolicy: Always
+
+
+global:
+  storageDB:
+    username: "storage"
+    password: "admin"
+    database: "ods"
+
+  rabbitmq:
+    username: ""
+    password: ""

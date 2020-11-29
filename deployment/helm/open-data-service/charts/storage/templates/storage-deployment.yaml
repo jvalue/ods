@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      tier: {{ .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        tier: {{ .Chart.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+          env:
+            - name: POSTGRES_HOST
+              value: "{{ .Chart.Name }}-db"
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              value: "{{ .Values.global.notificationDB.database }}"
+            - name: POSTGRES_USER
+              value: "{{ .Values.global.notificationDB.username }}"
+            - name: POSTGRES_PW
+              value: "{{ .Values.global.notificationDB.password }}"
+            - name: CONNECTION_RETRIES
+              value: 30
+            - name: CONNECTION_BACKOFF_IN_MS
+              value: 2000
+            - name: AMQP_URL
+              value: "amqp://{{ .Values.global.rabbitmq.username }}:{{ .Values.global.rabbitmq.password }}@rabbitmq:5672"
+            - name: AMQP_PIPELINE_EXECUTION_EXCHANGE
+              value: "ods_global"
+            - name: AMQP_PIPELINE_EXECUTION_QUEUE
+              value: "notification.pipeline-execution"
+            - name: AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC
+              value: "pipeline.execution.success"
+            - name: AMQP_NOTIFICATION_QUEUE
+              value: "NOTIF_QUEUE"
+            - name: NOTIFICATION_DATA_LOCATION_URL
+              value: "http://storage:8080"
+
+          ports:
+            - containerPort: 8080
+
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 10
+
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 10

@@ -1,0 +1,16 @@
+replicaCount: 1
+
+image:
+  repository: jvalue/open-data-service
+  pullPolicy: Always
+  tag: notification-latest
+
+
+global:
+  notificationDB:
+    username: "notification"
+    password: "admin"
+
+  rabbitmq:
+    username: ""
+    password: ""

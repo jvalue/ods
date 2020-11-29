@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      tier: {{ .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        tier: {{ .Chart.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+          env:
+            - name: POSTGRES_HOST
+              value: "{{ .Chart.Name }}-db"
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              value: "{{ .Values.global.pipelineDB.database }}"
+            - name: POSTGRES_USER
+              value: "{{ .Values.global.pipelineDB.username }}"
+            - name: POSTGRES_PW
+              value: "{{ .Values.global.pipelineDB.password }}"
+            - name: POSTGRES_SCHEMA
+              value: "public"
+            - name: CONNECTION_RETRIES
+              value: 30
+            - name: CONNECTION_BACKOFF_IN_MS
+              value: 2000
+            - name: AMQP_URL
+              value: "amqp://{{ .Values.global.rabbitmq.username }}:{{ .Values.global.rabbitmq.password }}@rabbitmq:5672"
+            - name: AMQP_PIPELINE_EXECUTION_EXCHANGE
+              value: "ods_global"
+            - name: AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC
+              value: "pipeline.execution.success"
+            - name: AMQP_PIPELINE_EXECUTION_ERROR_TOPIC
+              value: "pipeline.execution.error"
+            - name: AMQP_PIPELINE_CONFIG_CREATED_TOPIC
+              value: "pipeline.config.created"
+            - name: AMQP_PIPELINE_CONFIG_UPDATED_TOPIC
+              value: "pipeline.config.updated"
+            - name: AMQP_PIPELINE_CONFIG_DELETED_TOPIC
+              value: "pipeline.config.deleted"
+            - name: AMQP_DATASOURCE_EXECUTION_EXCHANGE
+              value: "ods_global"
+            - name: AMQP_DATASOURCE_EXECUTION_TOPIC
+              value: "datasource.execution.*"
+            - name: AMQP_DATASOURCE_EXECUTION_SUCCESS_TOPIC
+              value: "datasource.execution.success"
+            - name: AMQP_PIPELINE_EXECUTION_QUEUE
+              value: "pipeline.pipeline-execution"
+
+          ports:
+            - containerPort: 8080
+
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 10
+
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 10

@@ -1,0 +1,17 @@
+replicaCount: 1
+
+image:
+  repository: jvalue/open-data-service
+  pullPolicy: Always
+  tag: pipeline-latest
+
+
+global:
+  pipelineDB:
+    username: "pipeline"
+    password: "admin"
+    database: "ods-pipelines"
+
+  rabbitmq:
+    username: ""
+    password: ""

@@ -1,0 +1,7 @@
+apiVersion: v2
+name: notification
+description: ODS Notification Service
+
+version: 0.0.1
+
+type: application

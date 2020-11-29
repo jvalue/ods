@@ -1,0 +1,12 @@
+replicaCount: 1
+
+image:
+  repository: jvalue/open-data-service
+  pullPolicy: Always
+  tag: adapter-latest
+
+
+global:
+  adapterDB:
+    username: "adapter"
+    password: "admin"

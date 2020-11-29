@@ -1,0 +1,7 @@
+apiVersion: v2
+name: ui
+description: ODS UI
+
+version: 0.0.1
+
+type: application
