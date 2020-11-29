@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# use these yamls
+resources:
+- deployment.yaml
+- service.yaml
+- db-deployment.yaml
+- db-service.yaml
+- db-liquibase-job.yaml
+
+# apply this to everything above
+commonLabels:
+  tier: storage

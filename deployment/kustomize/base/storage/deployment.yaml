@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: storage-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ods
+      service: storage
+  template:
+    metadata:
+      labels:
+        app: ods
+        service: storage
+    spec:
+      containers:
+        - name: storage
+          image: jvalue/open-data-service:storage-latest
+          imagePullPolicy: Always
+        
+
+          env:
+            - name: DATABASE_HOST
+              value: "storage-db-service"
+            - name: DATABBASE_PORT
+              value: "5432"
+            - name: DATABASE_NAME
+              value: "ods"
+            - name: DATABASE_USER
+              value: "postgrest"
+            - name: DATABASE_PW_
+              value: "postgres-wrapper-pw"
+
+          ports:
+            - containerPort: 3000
+
+          livenessProbe:
+            tcpSocket:
+              port: 3000
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 10
+
+          readinessProbe:
+            failureThreshold: 3
+            tcpSocket:
+              port: 3000
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 10

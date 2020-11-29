@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adapter-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ods
+      service: adapter
+  template:
+    metadata:
+      labels:
+        app: ods
+        service: adapter
+    spec:
+      containers:
+        - name: adapter-service
+          image: jvalue/open-data-service:adapter-latest
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 8080
+
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 10
+
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 10

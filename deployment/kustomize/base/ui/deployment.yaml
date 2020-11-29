@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ui-deployment 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ods
+      service: ui
+  template:
+    metadata:
+      labels:
+        app: ods
+        service: ui
+    spec:
+      containers:
+        - name: ui-service
+          image: jvalue/open-data-service:ui-latest
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 8080
+
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 10
+
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 10

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: transformation-service
+spec:
+  selector:
+    service: transformation
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+

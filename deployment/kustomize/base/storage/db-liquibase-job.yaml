@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: storage-db-liquibase-job
+spec:
+  template:
+    spec:
+      containers:
+        - name: storage-db-liquibase
+          image: jvalue/open-data-service/storage-db-liquibase:latest
+          imagePullPolicy: Always
+        
+          env:
+            - name: DATABASE_HOST
+              value: "storage-db-service"
+            - name: DATABASE_PORT
+              value: "5432"
+            - name: DATABASE_NAME
+              value: "ods"
+            - name: DATABASE_USER
+              value: "ods_admin"
+            - name: DATABASE_PW
+              value: "ods_pw"
+
+      restartPolicy: Never
+
+  backoffLimit: 4

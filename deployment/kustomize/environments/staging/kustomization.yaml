@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+bases:
+  - ../../base/adapter
+  - ../../base/hpa
+  - ../../base/scheduler
+  - ../../base/storage
+  - ../../base/transformation
+  - ../../base/ui
+
+# 'adjust' the base deployments according to the yamls
+# in this folder:
+patchesStrategicMerge:
+  - ui-deployment.yaml
+
+# use this, to create the namespace, if not already created
+resources:
+  - namespace.yaml
+  - ingress.yaml
+
+# apply this namespace to every yaml of this deployment
+namespace: staging
+
+# apply this to every yaml above
+commonLabels:
+  app: ods
+  environment: staging

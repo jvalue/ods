@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: storage-db-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ods
+      service: storage-db
+  template:
+    metadata:
+      labels:
+        app: ods
+        service: storage-db
+    spec:
+      containers:
+        - name: storage-db
+          image: postgres:12-alpine
+          imagePullPolicy: Always
+        
+          env:
+            - name: POSTGRES_DB
+              value: "ods"
+            - name: POSTGRES_USER
+              value: "ods_admin"
+            - name: POSTGRES_PASSWORD
+              value: "ods_pw"
+
+          ports:
+            - containerPort: 5432 
+
+          livenessProbe:
+            tcpSocket:
+              port: 5432
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 10
+
+          readinessProbe:
+            failureThreshold: 3
+            tcpSocket:
+              port: 5432
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 10
