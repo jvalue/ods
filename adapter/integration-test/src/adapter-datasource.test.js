@@ -98,6 +98,16 @@ describe('Datasource Configuration', () => {
     expect(datasourceResponse.status).toEqual(400)
   }, TIMEOUT)
 
+  test('Should not create datasource with raw data format [POST /datasources]', async () => {
+    const rawDatasourceConfig = getDatasourceConfig()
+    rawDatasourceConfig.format.type = 'RAW'
+    const datasourceResponse = await request(ADAPTER_URL)
+      .post('/datasource')
+      .send(rawDatasourceConfig)
+
+    expect(datasourceResponse.status).toEqual(400)
+  }, TIMEOUT)
+
   test('Should create datasource with long URL [POST /datasources]', async () => {
     const longUrlDatasourceConfig = getDatasourceConfig()
     const queryParameter = '&veryLongParameter=verylongParameterValue'
