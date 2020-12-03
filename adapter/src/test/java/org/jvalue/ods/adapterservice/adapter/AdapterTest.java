@@ -41,7 +41,7 @@ public class AdapterTest {
   @Test
   public void testGetAllFormats() {
     var formats = adapter.getAllFormats();
-    assertThat(formats).extracting(Interpreter::getType).containsExactlyInAnyOrder("JSON", "XML", "CSV", "RAW");
+    assertThat(formats).extracting(Interpreter::getType).containsExactlyInAnyOrder("JSON", "XML", "CSV");
   }
 
   @Test

@@ -4,9 +4,13 @@ import org.jvalue.ods.adapterservice.adapter.importer.Importer;
 import org.jvalue.ods.adapterservice.adapter.interpreter.Interpreter;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
+import org.jvalue.ods.adapterservice.adapter.model.FormatConfig;
+import org.jvalue.ods.adapterservice.adapter.model.ProtocolConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -30,16 +34,29 @@ public class Adapter {
    * @throws IllegalArgumentException on errors in the adapter config (e.g. missing parameters, ...)
    * @throws RestClientException      on response errors when importing the data
    */
-  public DataBlob executeJob(AdapterConfig config) throws IllegalArgumentException, RestClientException {
-    var importer = config.protocolConfig.protocol.getImporter();
-    var interpreter = config.formatConfig.format.getInterpreter();
-
-    try {
-      var rawData = importer.fetch(config.protocolConfig.parameters);
-      var result = interpreter.interpret(rawData, config.formatConfig.parameters);
+  public DataBlob executeJob(AdapterConfig config) {
+      var rawData = this.executeProtocol(config.protocolConfig);
+      var result = this.executeFormat(rawData, config.formatConfig);
       return dataBlobRepository.save(new DataBlob(result));
+  }
+
+  public String executeProtocol(ProtocolConfig config) {
+    var importer = config.protocol.getImporter();
+    try {
+      return importer.fetch(config.parameters);
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not import data", e);
+    }
+  }
+
+  public String executeFormat(String rawData, FormatConfig config) {
+    var interpreter = config.format.getInterpreter();
+    try {
+      return interpreter.interpret(rawData, config.parameters);
     } catch (IOException e) {
-      throw new IllegalArgumentException("Not able to parse data as format: " + config.formatConfig.format, e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not able to parse data as format: " + config.format, e);
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not interpret data", e);
     }
   }
 

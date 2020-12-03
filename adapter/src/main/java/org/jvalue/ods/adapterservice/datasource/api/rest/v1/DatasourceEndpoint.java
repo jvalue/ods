@@ -43,10 +43,6 @@ public class DatasourceEndpoint {
     if (config.getId() != null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id is defined by the server. Id field must not be set");
     }
-    if (config.getFormat().getType() == Format.RAW) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Datasources with RAW format are not allowed.");
-    }
-
     Datasource savedConfig = datasourceManager.createDatasource(config);
 
     URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -63,9 +59,6 @@ public class DatasourceEndpoint {
     @PathVariable Long id,
     @Valid @RequestBody Datasource updateConfig) {
     try {
-      if (updateConfig.getFormat().getType() == Format.RAW) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Datasources with RAW format are not allowed.");
-      }
       datasourceManager.updateDatasource(id, updateConfig);
     } catch (IllegalArgumentException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Datasource needs to exist before updating", e);
