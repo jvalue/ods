@@ -8,31 +8,31 @@ import java.util.Objects;
 
 public class AdapterConfig {
 
-    @NotNull
-    public final ProtocolConfig protocolConfig;
+  @NotNull
+  public final ProtocolConfig protocolConfig;
 
-    @NotNull
-    public final FormatConfig formatConfig;
+  @NotNull
+  public final FormatConfig formatConfig;
 
-    @JsonCreator
-    public AdapterConfig(
-            @JsonProperty("protocol") ProtocolConfig protocolConfig,
-            @JsonProperty("format") FormatConfig formatConfig) {
-        this.protocolConfig = protocolConfig;
-        this.formatConfig = formatConfig;
-    }
+  @JsonCreator
+  public AdapterConfig(
+    @JsonProperty("protocol") ProtocolConfig protocolConfig,
+    @JsonProperty("format") FormatConfig formatConfig) {
+    this.protocolConfig = protocolConfig;
+    this.formatConfig = formatConfig;
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        AdapterConfig config = (AdapterConfig) o;
-        return protocolConfig.equals(config.protocolConfig) &&
-            formatConfig.equals(config.formatConfig);
-    }
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    AdapterConfig config = (AdapterConfig) o;
+    return protocolConfig.equals(config.protocolConfig) &&
+      formatConfig.equals(config.formatConfig);
+  }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(protocolConfig, formatConfig);
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hash(protocolConfig, formatConfig);
+  }
 }

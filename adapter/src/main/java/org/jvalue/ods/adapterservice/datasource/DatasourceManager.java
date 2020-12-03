@@ -93,7 +93,7 @@ public class DatasourceManager {
       return executionResult.getMetaData();
     } catch (Exception e) {
       String errMsg;
-      if(e.getCause() != null) {
+      if (e.getCause() != null) {
         errMsg = e.getCause().getMessage();
       } else {
         errMsg = e.getMessage();

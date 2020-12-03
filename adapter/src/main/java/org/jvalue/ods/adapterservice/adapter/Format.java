@@ -8,6 +8,7 @@ public enum Format {
   CSV(new CsvInterpreter());
 
   private final Interpreter interpreter;
+
   Format(Interpreter interpreter) {
     this.interpreter = interpreter;
   }

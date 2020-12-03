@@ -3,19 +3,20 @@ package org.jvalue.ods.adapterservice.adapter.importer;
 import java.util.Objects;
 
 public class ImporterParameterDescription {
-    private String name;
-    private String description;
-    private boolean required;
-    private Class type;
+  private String name;
+  private String description;
+  private boolean required;
+  private Class type;
 
-    private ImporterParameterDescription() {    }
+  private ImporterParameterDescription() {
+  }
 
-    public ImporterParameterDescription(String name, String description, Class type) {
-        this.name = name;
-        this.description = description;
-        this.required = true;
-        this.type = type;
-    }
+  public ImporterParameterDescription(String name, String description, Class type) {
+    this.name = name;
+    this.description = description;
+    this.required = true;
+    this.type = type;
+  }
 
   public ImporterParameterDescription(String name, String description, boolean required, Class type) {
     this.name = name;
@@ -25,28 +26,28 @@ public class ImporterParameterDescription {
   }
 
   public String getName() {
-        return name;
-    }
+    return name;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    public String getDescription() {
-        return description;
-    }
+  public String getDescription() {
+    return description;
+  }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+  public void setDescription(String description) {
+    this.description = description;
+  }
 
-    public Class getType() {
-        return type;
-    }
+  public Class getType() {
+    return type;
+  }
 
-    public void setType(Class type) {
-        this.type = type;
-    }
+  public void setType(Class type) {
+    this.type = type;
+  }
 
   public boolean isRequired() {
     return required;

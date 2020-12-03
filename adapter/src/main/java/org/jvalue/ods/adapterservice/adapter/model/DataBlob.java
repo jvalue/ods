@@ -43,7 +43,7 @@ public class DataBlob {
     if (o == null || getClass() != o.getClass()) return false;
     DataBlob dataBlob = (DataBlob) o;
     return Objects.equals(id, dataBlob.id) &&
-            Arrays.equals(data, dataBlob.data);
+      Arrays.equals(data, dataBlob.data);
   }
 
   @Override

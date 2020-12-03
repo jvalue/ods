@@ -8,6 +8,7 @@ public enum Protocol {
   HTTP(new HttpImporter(new RestTemplate()));
 
   private final Importer importer;
+
   Protocol(Importer importer) {
     this.importer = importer;
   }

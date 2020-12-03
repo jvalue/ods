@@ -35,14 +35,14 @@ public class Adapter {
    * @throws RestClientException      on response errors when importing the data
    */
   public DataBlob executeJob(AdapterConfig config) throws IllegalArgumentException, RestClientException {
-      var rawData = this.executeProtocol(config.protocolConfig);
-      var result = this.executeFormat(rawData, config.formatConfig);
-      return dataBlobRepository.save(new DataBlob(result));
+    var rawData = this.executeProtocol(config.protocolConfig);
+    var result = this.executeFormat(rawData, config.formatConfig);
+    return dataBlobRepository.save(new DataBlob(result));
   }
 
   public DataBlob executeRawImport(ProtocolConfig config, boolean persistData) {
     var rawData = this.executeProtocol(config);
-    if(persistData) {
+    if (persistData) {
       return dataBlobRepository.save(new DataBlob(rawData));
     }
 
