@@ -34,7 +34,7 @@ public class AdapterEndpoint {
   @PostMapping(value = Mappings.PREVIEW_PATH, produces = "application/json")
   public ResponseEntity<?> executePreview(
           @Valid @RequestBody AdapterConfig config,
-          @RequestParam(required = false) boolean includeData) {
+          @RequestParam(required = false, defaultValue = "true") boolean includeData) {
     try {
       DataBlob imported = adapter.executeJob(config);
 
@@ -52,11 +52,18 @@ public class AdapterEndpoint {
   }
 
   @PostMapping(value = Mappings.RAW_PREVIEW_PATH, produces = "application/json")
-  public ResponseEntity<?> executeRawPrevies(
-    @Valid @RequestBody ProtocolConfig config) {
+  public ResponseEntity<?> executeRawPreview(
+    @Valid @RequestBody ProtocolConfig config,
+    @RequestParam(required = false, defaultValue = "true") boolean includeData) {
     try {
-      String imported = adapter.executeProtocol(config);
-      return ResponseEntity.ok(new DataBlob(imported));
+      DataBlob imported = adapter.executeRawImport(config, includeData);
+
+      if(includeData) {
+        return ResponseEntity.ok(imported);
+      }
+
+      return ResponseEntity.ok(imported.getMetaData());
+
     } catch (ResponseStatusException e) {
       throw e;
     } catch (Exception e) {
