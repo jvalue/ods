@@ -34,7 +34,7 @@ public class Adapter {
    * @throws IllegalArgumentException on errors in the adapter config (e.g. missing parameters, ...)
    * @throws RestClientException      on response errors when importing the data
    */
-  public DataBlob executeJob(AdapterConfig config) {
+  public DataBlob executeJob(AdapterConfig config) throws IllegalArgumentException, RestClientException {
       var rawData = this.executeProtocol(config.protocolConfig);
       var result = this.executeFormat(rawData, config.formatConfig);
       return dataBlobRepository.save(new DataBlob(result));
@@ -53,8 +53,10 @@ public class Adapter {
     var importer = config.protocol.getImporter();
     try {
       return importer.fetch(config.parameters);
-    } catch (Exception e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not import data", e);
+    } catch (IllegalArgumentException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid protocol parameters", e);
+    } catch (RestClientException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to load data: ", e);
     }
   }
 
