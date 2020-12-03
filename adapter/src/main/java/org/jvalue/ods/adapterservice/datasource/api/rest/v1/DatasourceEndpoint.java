@@ -1,5 +1,6 @@
 package org.jvalue.ods.adapterservice.datasource.api.rest.v1;
 
+import org.jvalue.ods.adapterservice.adapter.Format;
 import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
 import org.jvalue.ods.adapterservice.datasource.DatasourceManager;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
@@ -41,6 +42,9 @@ public class DatasourceEndpoint {
   public ResponseEntity<Datasource> addDatasource(@Valid @RequestBody Datasource config) {
     if (config.getId() != null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id is defined by the server. Id field must not be set");
+    }
+    if (config.getFormat().getType() == Format.RAW) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Datasources with RAW format are not allowed.");
     }
 
     Datasource savedConfig = datasourceManager.createDatasource(config);
