@@ -63,6 +63,9 @@ public class DatasourceEndpoint {
     @PathVariable Long id,
     @Valid @RequestBody Datasource updateConfig) {
     try {
+      if (updateConfig.getFormat().getType() == Format.RAW) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Datasources with RAW format are not allowed.");
+      }
       datasourceManager.updateDatasource(id, updateConfig);
     } catch (IllegalArgumentException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Datasource needs to exist before updating", e);
