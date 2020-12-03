@@ -1,5 +1,6 @@
 package org.jvalue.ods.adapterservice.datasource.api.rest.v1;
 
+import org.apache.coyote.Response;
 import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
 import org.jvalue.ods.adapterservice.datasource.DatasourceManager;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
@@ -87,7 +88,7 @@ public class DatasourceEndpoint {
       .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Can not find Datasource with id: " + id));
     try {
       return datasourceManager.trigger(id, runtimeParameters);
-    } catch (RestClientException e) {
+    } catch (ResponseStatusException e) {
       throw e;
     } catch (Exception e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
