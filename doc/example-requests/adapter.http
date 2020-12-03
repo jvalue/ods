@@ -9,21 +9,15 @@ GET {{baseURL}}/formats  HTTP/1.1
 Content-Type: application/json
 
 ### Perform Data Import RAW
-POST {{baseURL}}/dataImport  HTTP/1.1
+POST {{baseURL}}/preview/raw  HTTP/1.1
 Content-Type: application/json
 
 {
-    "protocol": {
-      "type": "HTTP",
-      "parameters": {
-        "location": "https://www.bka.de/SharedDocs/Downloads/DE/Publikationen/PolizeilicheKriminalstatistik/2018/BKATabellen/FaelleLaenderKreiseStaedte/BKA-LKS-F-03-T01-Kreise_csv.csv?__blob=publicationFile&v=3",
-        "encoding": "UTF-8"
-      }
-    },
-    "format": {
-      "type": "RAW",
-      "parameters": {}
-    }
+  "type": "HTTP",
+  "parameters": {
+    "location": "https://www.bka.de/SharedDocs/Downloads/DE/Publikationen/PolizeilicheKriminalstatistik/2018/BKATabellen/FaelleLaenderKreiseStaedte/BKA-LKS-F-03-T01-Kreise_csv.csv?__blob=publicationFile&v=3",
+    "encoding": "UTF-8"
+  }
 }
 
 ### Perform Data Import JSON
