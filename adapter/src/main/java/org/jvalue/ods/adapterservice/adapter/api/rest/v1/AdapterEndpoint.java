@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
@@ -57,7 +56,7 @@ public class AdapterEndpoint {
     @Valid @RequestBody ProtocolConfig config) {
     try {
       String imported = adapter.executeProtocol(config);
-      return ResponseEntity.ok(imported);
+      return ResponseEntity.ok(new DataBlob(imported));
     } catch (ResponseStatusException e) {
       throw e;
     } catch (Exception e) {
