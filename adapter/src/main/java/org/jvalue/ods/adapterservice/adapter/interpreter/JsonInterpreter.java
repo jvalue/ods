@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class JsonInterpreter extends Interpreter {
 
-  private final List<InterpreterParameterDescription> parameters =  Collections.unmodifiableList(List.of());
+  private final List<InterpreterParameterDescription> parameters = Collections.unmodifiableList(List.of());
   private final ObjectMapper mapper = new ObjectMapper();
 
   @Override

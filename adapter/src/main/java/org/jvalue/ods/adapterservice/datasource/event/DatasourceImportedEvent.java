@@ -25,9 +25,9 @@ public class DatasourceImportedEvent implements Serializable {
   @Override
   public String toString() {
     return "DatasourceImportedEvent{" +
-            "datasourceId=" + datasourceId +
-            ", data='" + shortDataRepresentation() + '\'' +
-            '}';
+      "datasourceId=" + datasourceId +
+      ", data='" + shortDataRepresentation() + '\'' +
+      '}';
   }
 
   private String shortDataRepresentation() {

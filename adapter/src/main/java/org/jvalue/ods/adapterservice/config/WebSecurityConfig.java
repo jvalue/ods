@@ -16,31 +16,31 @@ import java.util.Arrays;
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-                // enable cors
-                .cors()
-                .and()
+  @Override
+  protected void configure(HttpSecurity http) throws Exception {
+    http
+      // enable cors
+      .cors()
+      .and()
 
-                // otherwise 403 on PUT and DELETE requests
-                .csrf()
-                .disable()
+      // otherwise 403 on PUT and DELETE requests
+      .csrf()
+      .disable()
 
-                // disable cookies
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-    }
+      // disable cookies
+      .sessionManagement()
+      .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+  }
 
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        // TODO for production: make this more restrictive!
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("*"));
-        configuration.setAllowedMethods(Arrays.asList("*"));
-        configuration.addAllowedHeader("*");
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+  @Bean
+  CorsConfigurationSource corsConfigurationSource() {
+    // TODO for production: make this more restrictive!
+    CorsConfiguration configuration = new CorsConfiguration();
+    configuration.setAllowedOrigins(Arrays.asList("*"));
+    configuration.setAllowedMethods(Arrays.asList("*"));
+    configuration.addAllowedHeader("*");
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
+  }
 }
