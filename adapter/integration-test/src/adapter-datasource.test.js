@@ -98,16 +98,6 @@ describe('Datasource Configuration', () => {
     expect(datasourceResponse.status).toEqual(400)
   }, TIMEOUT)
 
-  test('Should not create datasource with raw data format [POST /datasources]', async () => {
-    const rawDatasourceConfig = getDatasourceConfig()
-    rawDatasourceConfig.format.type = 'RAW'
-    const datasourceResponse = await request(ADAPTER_URL)
-      .post('/datasource')
-      .send(rawDatasourceConfig)
-
-    expect(datasourceResponse.status).toEqual(400)
-  }, TIMEOUT)
-
   test('Should create datasource with long URL [POST /datasources]', async () => {
     const longUrlDatasourceConfig = getDatasourceConfig()
     const queryParameter = '&veryLongParameter=verylongParameterValue'
@@ -198,36 +188,6 @@ describe('Datasource Configuration', () => {
     const datasourceResponse = await request(ADAPTER_URL)
       .put('/datasources/' + datasourceId)
       .send(invalidDatasourceConfig)
-    expect(datasourceResponse.status).toEqual(400)
-
-    const updatedGetResponse = await request(ADAPTER_URL)
-      .get('/datasources/' + datasourceId)
-    expect(updatedGetResponse.status).toEqual(200)
-
-    expect(originalGetResponse.body).toEqual(updatedGetResponse.body)
-
-    const delResponse = await request(ADAPTER_URL)
-      .delete('/datasources/' + datasourceId)
-      .send()
-    expect(delResponse.status).toEqual(204)
-  }, TIMEOUT)
-
-  test('Should not update datasource with raw format [PUT /datasources/{id}]', async () => {
-    const postResponse = await request(ADAPTER_URL)
-      .post('/datasources')
-      .send(getDatasourceConfig())
-    expect(postResponse.status).toEqual(201)
-    const datasourceId = postResponse.body.id
-
-    const originalGetResponse = await request(ADAPTER_URL)
-      .get('/datasources/' + datasourceId)
-    expect(originalGetResponse.status).toEqual(200)
-
-    const rawDatasourceConfig = getDatasourceConfig()
-    rawDatasourceConfig.format.type = 'RAW'
-    const datasourceResponse = await request(ADAPTER_URL)
-      .put('/datasources/' + datasourceId)
-      .send(rawDatasourceConfig)
     expect(datasourceResponse.status).toEqual(400)
 
     const updatedGetResponse = await request(ADAPTER_URL)
