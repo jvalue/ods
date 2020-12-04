@@ -21,6 +21,7 @@ RUN npm ci
 # copy rest of the files
 COPY ./src ./src
 COPY ./public ./public
+COPY ./tests ./tests
 COPY ./*.js ./
 COPY ./*.json ./
 
@@ -33,6 +34,9 @@ RUN echo "VUE_APP_BASE_URL=$UI_BASE_URL" > .env \
 
 # lint project
 RUN npm run lint-ci
+
+# test project
+RUN npm run test:unit
 
 # build vue.js production bundle to ./dist
 RUN npm run build
