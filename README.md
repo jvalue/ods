@@ -115,6 +115,8 @@ Examples showing the API of each microservice are in the [example request](doc/e
 
 Instructions on how to analyse the microservice architecture with a service dependency graph in Neo4j, can be found [here](doc/service-dependency-graph.md).
 
+Details on our used docker image versions and their reasoning can be found [here](doc/docker-dependencies.md).
+
 # Deployment
 Docker images of the microservices the ods consists of are deployed via our continous deployment pipeline. 
 

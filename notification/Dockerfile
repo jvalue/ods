@@ -1,5 +1,5 @@
 # First stage: image to build and test node application
-FROM node:lts-alpine as builder
+FROM node:14-alpine as builder
 
 WORKDIR /build
 
@@ -21,7 +21,7 @@ RUN npm run transpile
 RUN npm run test
 
 # Second stage: image to run node application
-FROM node:lts-alpine
+FROM node:14-alpine
 
 RUN mkdir /app
 WORKDIR /app
