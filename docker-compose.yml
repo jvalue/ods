@@ -48,7 +48,7 @@ services:
       - "traefik.http.middlewares.adapter-stripprefix.stripprefix.prefixes=/api/adapter"
 
   adapter-db:
-    image: postgres
+    image: postgres:13-alpine
     environment:
       - POSTGRES_USER=adapterservice
       - POSTGRES_PASSWORD=admin
@@ -137,7 +137,7 @@ services:
       - "traefik.http.middlewares.storage-addaccept.headers.customrequestheaders.Accept=application/json" # Firefox Browser Support
 
   storage-db:
-    image: postgres:12-alpine
+    image: postgres:13-alpine
     environment:
       POSTGRES_DB: ods
       POSTGRES_USER: ods_admin
@@ -203,7 +203,7 @@ services:
       - "traefik.http.middlewares.pipeline-stripprefix.stripprefix.prefixes=/api/pipelines"
 
   pipeline-db:
-    image: postgres
+    image: postgres:13-alpine
     environment:
       POSTGRES_USER: 'pipeline-service'
       POSTGRES_PASSWORD: 'pw'
@@ -242,7 +242,7 @@ services:
       - "traefik.http.middlewares.notification-stripprefix.stripprefix.prefixes=/api/notification"
 
   notification-db:
-    image: postgres
+    image: postgres:13-alpine
     environment:
       POSTGRES_USER: 'notification_usr'
       POSTGRES_PASSWORD: 'admin'
@@ -250,7 +250,7 @@ services:
 
 # -------------------- EDGE SERVER (PORT 9000) -----------------------------
   edge:
-    image: traefik:latest
+    image: traefik:2.3
     command:
       - --entrypoints.web.address=:80
       - --providers.docker # enable label annotations in compose file
@@ -265,7 +265,7 @@ services:
 
 # -------------------- RABBIT-MQ -------------------------------------------
   rabbitmq:
-    image:  rabbitmq:management
+    image:  rabbitmq:3-management-alpine
     environment:
       RABBITMQ_ERLANG_COOKIE: 'S0m3_R4bBi7_C0ok13'
       RABBITMQ_DEFAULT_USER: 'rabbit_adm'

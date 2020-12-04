@@ -1,7 +1,7 @@
 #---------------------------------------------#
 # First stage: image to build vue application #
 #---------------------------------------------#
-FROM node:lts-alpine as builder
+FROM node:14-alpine as builder
 
 ARG UI_BASE_URL
 ARG STORAGE_SERVICE_URL
@@ -40,7 +40,7 @@ RUN npm run build
 #---------------------------------------------------------#
 # Second stage: serve static html and js files with nginx #
 #---------------------------------------------------------#
-FROM nginx
+FROM nginx:1-alpine
 
 # copy static result of builder to the standard nginx webroot
 COPY --from=builder /app/dist /usr/share/nginx/html

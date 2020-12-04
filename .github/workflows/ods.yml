@@ -15,7 +15,7 @@ jobs:
 
   adapter-build:
     name: Adapter Build & Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
 
     steps:
       - uses: actions/checkout@v2
@@ -48,7 +48,7 @@ jobs:
 
   scheduler-build:
     name: Scheduler Build & Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
 
     steps:
       - uses: actions/checkout@v2
@@ -81,7 +81,7 @@ jobs:
 
   storage-build:
     name: Storage Build & Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
 
     steps:
       - uses: actions/checkout@v2
@@ -136,7 +136,7 @@ jobs:
 
   pipeline-build:
     name: Pipeline Build & Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
 
     steps:
       - uses: actions/checkout@v2
@@ -168,7 +168,7 @@ jobs:
 
   notification-build:
     name: Notification Build & Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
 
     steps:
       - uses: actions/checkout@v2
@@ -201,7 +201,7 @@ jobs:
 
   ui-build:
     name: UI Build & Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
 
     steps:
       - uses: actions/checkout@v2
@@ -225,7 +225,7 @@ jobs:
 
   systemtest:
     name: Systemtest
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
 
     needs: [adapter-build, notification-build, scheduler-build, storage-build, pipeline-build, ui-build]
 
@@ -278,7 +278,7 @@ jobs:
 
   adapter_upload:
     name: Adapter Publish
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
 
     needs: [systemtest]
 
@@ -312,7 +312,7 @@ jobs:
 
   scheduler_upload:
     name: Scheduler Publish
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
 
     needs: [systemtest]
 
@@ -345,7 +345,7 @@ jobs:
 
   storage_upload:
     name: Storage Publish
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
 
     needs: [systemtest]
 
@@ -403,7 +403,7 @@ jobs:
 
   pipeline_upload:
     name: Pipeline Publish
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
 
     needs: [systemtest]
 
@@ -436,7 +436,7 @@ jobs:
 
   notifcation_upload:
     name: Notifcation Publish
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
 
     needs: [systemtest]
 
@@ -469,7 +469,7 @@ jobs:
 
   ui_upload:
     name: UI Publish
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
 
     needs: [systemtest]
 
