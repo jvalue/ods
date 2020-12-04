@@ -62,7 +62,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Prop, Watch } from 'vue-property-decorator'
-import { getISODateString, getISOTimeString } from "./date-helpers";
+import { getISODateString, getISOTimeString } from './date-helpers'
 
 /**
  * DateTimePicker takes a Date via v-model as input and lets the user select it.
@@ -118,7 +118,7 @@ export default class DateTimePicker extends Vue {
   }
 
   private onSave (): void {
-    const selectedDate = new Date(`${this.date} ${this.time}`);
+    const selectedDate = new Date(`${this.date} ${this.time}`)
     
     this.$emit('input', selectedDate)
   }
