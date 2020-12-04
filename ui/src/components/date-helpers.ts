@@ -1,5 +1,5 @@
 /**
- * Get the date part of the given date using the browser's local time in ISO format: `YYYY-MM-DD`
+ * Gets the date part of the given date using the browser's local time in ISO format: `YYYY-MM-DD`
  *
  * @example
  * getISODateString(new Date('2020-12-1')) // "2020-12-01"
@@ -13,7 +13,7 @@ export const getISODateString = (date: Date): string => {
 }
 
 /**
- * Get the time part of the given date using the browser's local time in ISO format: `HH:mm`
+ * Gets the time part of the given date using the browser's local time in ISO format: `HH:mm`
  *
  * @example
  * getISOTimeString(new Date('2020-12-1 14:1')) // "14:01"
