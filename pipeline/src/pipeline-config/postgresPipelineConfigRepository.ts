@@ -62,7 +62,7 @@ const POOL_CONFIG: PoolConfig = {
 }
 
 export default class PostgresPipelineConfigRepository implements PipelineConfigRepository {
-  private readonly postgresRepository: PostgresRepository = new PostgresRepository()
+  private readonly postgresRepository: PostgresRepository = new PostgresRepository(POOL_CONFIG)
 
   /**
    * Initializes the PostgresPipelineConfigRepository.
@@ -70,7 +70,7 @@ export default class PostgresPipelineConfigRepository implements PipelineConfigR
    * @param backoffMs:  Time in ms to backoff before next connection retry
    */
   async init (retries: number, backoffMs: number): Promise<void> {
-    await this.postgresRepository.init(POOL_CONFIG, retries, backoffMs)
+    await this.postgresRepository.waitForConnection(retries, backoffMs)
     await this.postgresRepository.executeQuery(TABLE_CREATION_STATEMENT, [])
   }
 
