@@ -41,7 +41,6 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "eslint-plugin-vue": "^7.0.1",
-    "jest-html-reporter": "^3.3.0",
     "monaco-editor-webpack-plugin": "^1.9.0",
     "sass": "^1.26.8",
     "ts-jest": "^24.3.0",

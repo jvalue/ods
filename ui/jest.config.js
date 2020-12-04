@@ -2,14 +2,6 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
 
-  "reporters": [
-    "default",
-    ["./node_modules/jest-html-reporter", {
-        "pageTitle": "UI - Unit Test Report",
-        "outputPath": "build/test-results/unit-test-results.html"
-    }]
-  ],
-
   moduleFileExtensions: [
     'js',
     'jsx',
