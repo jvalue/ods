@@ -62,6 +62,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Prop, Watch } from 'vue-property-decorator'
+import { getISODateString, getISOTimeString } from "./date-helpers";
 
 /**
  * DateTimePicker takes a Date via v-model as input and lets the user select it.
@@ -105,8 +106,8 @@ export default class DateTimePicker extends Vue {
   }
 
   private resetValues (): void {
-    this.date = this.getISODateString(this.value)
-    this.time = this.getISOTimeString(this.value)
+    this.date = getISODateString(this.value)
+    this.time = getISOTimeString(this.value)
     this.dateTimeString = `${this.date} ${this.time}`
   }
 
@@ -117,36 +118,9 @@ export default class DateTimePicker extends Vue {
   }
 
   private onSave (): void {
-    const selectedDate = new Date(
-      this.sliceYearFromDateString(this.date),
-      this.sliceMonthFromDateString(this.date) - 1,
-      this.sliceDayFromDateString(this.date),
-      this.sliceHourFromTimeString(this.time),
-      this.sliceMinuteFromTimeString(this.time)
-    )
-
-    console.log(`Selected Date ${selectedDate.toISOString()}`)
-    this.$emit('input', selectedDate) // update parent
+    const selectedDate = new Date(`${this.date} ${this.time}`);
+    
+    this.$emit('input', selectedDate)
   }
-
-  /**
-   * Get the date part of the given date using the browser's local time in ISO format: `YYYY-MM-DD`
-   */
-  private getISODateString = (date: Date): string => `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
-
-  /**
-   * Get the time part of the given date using the browser's local time in ISO format: `hh:mm`
-   */
-  private getISOTimeString = (date: Date): string => `${date.getHours()}:${date.getMinutes()}`
-
-  private sliceYearFromDateString = (v: string): number => Number(v.slice(0, 4))
-
-  private sliceMonthFromDateString = (v: string): number => Number(v.slice(5, 7))
-
-  private sliceDayFromDateString = (v: string): number => Number(v.slice(8, 10))
-
-  private sliceHourFromTimeString = (v: string): number => Number(v.slice(0, 2))
-
-  private sliceMinuteFromTimeString = (v: string): number => Number(v.slice(3, 5))
 }
 </script>
