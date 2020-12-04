@@ -20,7 +20,7 @@ describe('#getISOTimeString', () => {
 })
 
 describe('#getISODateString', () => {
-  it('should return a date as "HH:mm"', () => {
+  it('should return a date as "YYYY-MM-DD"', () => {
     const date1 = new Date('2020-12-5')
     const date2 = new Date('2020-1-5')
 
