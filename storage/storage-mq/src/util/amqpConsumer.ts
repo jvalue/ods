@@ -1,7 +1,7 @@
+import { sleep, stringifiers } from '@jvalue/node-dry-basics'
 import * as AMQP from 'amqplib'
 
-import { sleep } from '../sleep'
-import { stringify } from '../logging'
+const { stringify } = stringifiers
 
 export default class AmqpConsumer {
   private connection?: AMQP.Connection
@@ -58,7 +58,7 @@ export default class AmqpConsumer {
       })
       await channel.bindQueue(q.queue, exchange, topic)
       await channel.consume(q.queue, msg => {
-        console.debug("[EventConsume] %s:'%s'", msg?.fields.routingKey, stringify(msg?.content.toString()))
+        console.debug("[EventConsume] %s:'%s'", msg?.fields.routingKey, stringify(msg?.content.toString(), 100))
         consumeEvent(msg)
           .catch(error => console.error(`Failed to handle ${msg?.fields.routingKey ?? 'null'} event`, error))
       })
