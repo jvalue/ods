@@ -1,7 +1,7 @@
+import { PostgresRepository } from '@jvalue/node-dry-pg'
 import { PoolConfig } from 'pg'
 
 import { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB, POSTGRES_SCHEMA } from '../env'
-import PostgresRepository from '../util/postgresRepository'
 
 import { StorageStructureRepository } from './storageStructureRepository'
 
@@ -15,33 +15,22 @@ const CREATE_BUCKET_STATEMENT =
   )`
 const DELETE_BUCKET_STATEMENT = (schema: string, table: string): string => `DROP TABLE "${schema}"."${table}" CASCADE`
 
+const POOL_CONFIG: PoolConfig = {
+  host: POSTGRES_HOST,
+  port: POSTGRES_PORT,
+  user: POSTGRES_USER,
+  password: POSTGRES_PW,
+  database: POSTGRES_DB,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000
+}
+
 export class PostgresStorageStructureRepository implements StorageStructureRepository {
-  constructor (private readonly postgresRepo: PostgresRepository) {}
+  private readonly postgresRepo = new PostgresRepository(POOL_CONFIG)
 
   /**
-     * Initializes the connection to the database.
-     * @param retries:  Number of retries to connect to the database
-     * @param backoffMs:  Time in milliseconds to backoff before next connection retry
-     */
-  public async init (retries: number, backoffMs: number): Promise<void> {
-    console.debug('Initializing PostgresStorageStructureRepository')
-
-    const poolConfig: PoolConfig = {
-      host: POSTGRES_HOST,
-      port: POSTGRES_PORT,
-      user: POSTGRES_USER,
-      password: POSTGRES_PW,
-      database: POSTGRES_DB,
-      max: 20,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: backoffMs
-    }
-
-    await this.postgresRepo.init(poolConfig, retries, backoffMs)
-  }
-
-  /**
-     * This funcion will create a table (if not already exists) for storing pipeline data.
+     * This function will create a table (if not already exists) for storing pipeline data.
      * Uses the database function 'createStructureForDataSource'.
      * @param tableIdentifier tableIdentifier for wich a table will be created with this name
      */
