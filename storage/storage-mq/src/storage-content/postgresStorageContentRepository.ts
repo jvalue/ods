@@ -1,6 +1,6 @@
+import { PostgresRepository } from '@jvalue/node-dry-pg'
 import { PoolConfig, QueryResult } from 'pg'
 
-import PostgresRepository from '../util/postgresRepository'
 import { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB, POSTGRES_SCHEMA } from '../env'
 
 import { StorageContentRepository, StorageContent, InsertStorageContent } from './storageContentRepository'
@@ -34,30 +34,19 @@ interface DatabaseStorageContent {
   pipelineId: string
 }
 
+const POOL_CONFIG: PoolConfig = {
+  host: POSTGRES_HOST,
+  port: POSTGRES_PORT,
+  user: POSTGRES_USER,
+  password: POSTGRES_PW,
+  database: POSTGRES_DB,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000
+}
+
 export class PostgresStorageContentRepository implements StorageContentRepository {
-  constructor (private readonly postgresRepository: PostgresRepository) {}
-
-  /**
-     * Initializes the connection to the database.
-     * @param retries:  Number of retries to connect to the database
-     * @param backoffMs:  Time in seconds to backoff before next connection retry
-     */
-  public async init (retries: number, backoffMs: number): Promise<void> {
-    console.debug('Initializing PostgresStorageStructureRepository')
-
-    const poolConfig: PoolConfig = {
-      host: POSTGRES_HOST,
-      port: POSTGRES_PORT,
-      user: POSTGRES_USER,
-      password: POSTGRES_PW,
-      database: POSTGRES_DB,
-      max: 20,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: backoffMs
-    }
-
-    await this.postgresRepository.init(poolConfig, retries, backoffMs)
-  }
+  private readonly postgresRepository = new PostgresRepository(POOL_CONFIG)
 
   async existsTable (tableIdentifier: string): Promise<boolean> {
     const resultSet: QueryResult<ExistsTableResultRow> =
