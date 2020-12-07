@@ -12,6 +12,7 @@ const getEnv = (envName) => {
 }
 
 const STORAGE_URL = getEnv('STORAGE_API')
+const STORAGE_MQ_URL = getEnv('STORAGE_MQ_API')
 const SCHEDULER_URL = getEnv('SCHEDULER_API')
 const ADAPTER_URL = getEnv('ADAPTER_API')
 const PIPELINE_URL = getEnv('PIPELINE_API')
@@ -22,6 +23,7 @@ const RABBIT_URL = getEnv('RABBIT_API')
 
 module.exports = {
   STORAGE_URL,
+  STORAGE_MQ_URL,
   SCHEDULER_URL,
   ADAPTER_URL,
   PIPELINE_URL,
