@@ -6,7 +6,7 @@
     "build": "vue-cli-service build",
     "lint": "eslint src --fix",
     "lint-ci": "eslint src --max-warnings=0",
-    "test:unit": "vue-cli-service test:unit"
+    "test": "jest --colors --verbose --passWithNoTests"
   },
   "dependencies": {
     "axios": "^0.19.2",
@@ -31,7 +31,7 @@
     "@vue/cli-plugin-unit-jest": "^4.5.7",
     "@vue/cli-service": "^4.5.7",
     "@vue/eslint-config-typescript": "^7.0.0",
-    "@vue/test-utils": "1.1.0",
+    "@vue/test-utils": "^1.1.0",
     "babel-core": "7.0.0-bridge.0",
     "eslint": "^7.11.0",
     "eslint-config-standard": "^14.1.1",
@@ -41,7 +41,6 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "eslint-plugin-vue": "^7.0.1",
-    "jest-html-reporter": "^2.8.2",
     "monaco-editor-webpack-plugin": "^1.9.0",
     "sass": "^1.26.8",
     "ts-jest": "^24.3.0",
