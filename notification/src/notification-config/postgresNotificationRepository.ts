@@ -31,8 +31,19 @@ interface DatabaseNotification {
   parameter: object
 }
 
+const POOL_CONFIG: PoolConfig = {
+  host: POSTGRES_HOST,
+  port: POSTGRES_PORT,
+  user: POSTGRES_USER,
+  password: POSTGRES_PW,
+  database: POSTGRES_DB,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000
+}
+
 export class PostgresNotificationRepository implements NotificationRepository {
-  constructor (private readonly postgresRepository: PostgresRepository) {}
+  private readonly postgresRepository = new PostgresRepository(POOL_CONFIG)
 
   /**
      * Initializes the connection to the database.
@@ -42,18 +53,7 @@ export class PostgresNotificationRepository implements NotificationRepository {
   public async init (retries: number, backoffMs: number): Promise<void> {
     console.debug('Initializing PostgresNotificationRepository')
 
-    const poolConfig: PoolConfig = {
-      host: POSTGRES_HOST,
-      port: POSTGRES_PORT,
-      user: POSTGRES_USER,
-      password: POSTGRES_PW,
-      database: POSTGRES_DB,
-      max: 20,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: backoffMs
-    }
-
-    await this.postgresRepository.init(poolConfig, retries, backoffMs)
+    await this.postgresRepository.waitForConnection(retries, backoffMs)
     await this.postgresRepository.executeQuery(CREATE_TABLE_STATEMENT, [])
   }
 
@@ -139,9 +139,7 @@ export class PostgresNotificationRepository implements NotificationRepository {
 
 export const initNotificationRepository =
   async (retries: number, backkoffMs: number): Promise<NotificationRepository> => {
-    const postgresRepository: PostgresRepository = new PostgresRepository()
-    const notificationRepository: PostgresNotificationRepository =
-      new PostgresNotificationRepository(postgresRepository)
+    const notificationRepository: PostgresNotificationRepository = new PostgresNotificationRepository()
     await notificationRepository.init(retries, backkoffMs)
     return notificationRepository
   }
