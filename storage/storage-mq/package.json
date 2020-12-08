@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@jvalue/node-dry-basics": "0.0.3",
-    "@jvalue/node-dry-pg": "1.0.0-alpha1",
+    "@jvalue/node-dry-pg": "1.0.0",
     "amqplib": "^0.6.0",
     "cors": "^2.8.5",
     "express": "^4.17.1"
