@@ -52,9 +52,9 @@ When started via docker-compose *base_url* is `http://localhost:9000/api/adapter
 ### Adapter Config
 ```
 {
-    "protocol": ProtocolConfig 
+    "protocol": ProtocolConfig, 
     "format": {
-      "type": "JSON" | "XML" | "CSV" | "RAW"
+      "type": "JSON" | "XML" | "CSV",
       "parameters": { } | CSVParameters
     }
   }
@@ -138,7 +138,7 @@ When started via docker-compose *base_url* is `http://localhost:9000/api/adapter
 ```
 {
   "format": {
-    "type": "JSON" | "XML" | "CSV" | "RAW"
+    "type": "JSON" | "XML" | "CSV",
     "parameters": { } | CSVParameters
   }
 }
