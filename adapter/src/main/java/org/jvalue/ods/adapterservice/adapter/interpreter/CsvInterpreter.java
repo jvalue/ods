@@ -57,12 +57,12 @@ public class CsvInterpreter extends Interpreter {
   }
 
   @Override
-  protected String doInterpret(String data, Map<String, Object> parameters) throws IOException {
+  protected JsonNode doInterpret(String data, Map<String, Object> parameters) throws IOException {
     CsvSchema csvSchema = createSchema(parameters);
     if ((boolean) parameters.get("firstRowAsHeader")) {
-      return parseWithHeader(data, csvSchema).toString();
+      return parseWithHeader(data, csvSchema);
     } else {
-      return parseWithoutHeader(data, csvSchema).toString();
+      return parseWithoutHeader(data, csvSchema);
     }
   }
 

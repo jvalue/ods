@@ -1,6 +1,7 @@
 package org.jvalue.ods.adapterservice.adapter.interpreter;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.io.IOException;
 import java.util.List;
@@ -15,12 +16,12 @@ public abstract class Interpreter {
   @JsonProperty("parameters")
   public abstract List<InterpreterParameterDescription> getAvailableParameters();
 
-  public final String interpret(String data, Map<String, Object> parameters) throws IOException {
+  public final JsonNode interpret(String data, Map<String, Object> parameters) throws IOException {
     validateParameters(parameters);
     return doInterpret(data, parameters);
   }
 
-  protected abstract String doInterpret(String data, Map<String, Object> parameters) throws IOException;
+  protected abstract JsonNode doInterpret(String data, Map<String, Object> parameters) throws IOException;
 
   protected void validateParameters(Map<String, Object> inputParameters) {
     boolean illegalArguments = false;

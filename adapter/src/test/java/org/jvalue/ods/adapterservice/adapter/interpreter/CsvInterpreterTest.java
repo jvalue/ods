@@ -17,108 +17,103 @@ public class CsvInterpreterTest {
 
   @Test
   public void interpretSimpleCSVData() throws IOException {
-    String result = interpreter.interpret(CSV_STRING, Map.of(
+    JsonNode result = interpreter.interpret(CSV_STRING, Map.of(
       "columnSeparator", ";",
       "lineSeparator", "\n",
       "skipFirstDataRow", false,
       "firstRowAsHeader", false
     ));
 
-    final JsonNode resultNode = mapper.readTree(result);
-    assertEquals(JsonNodeType.ARRAY, resultNode.getNodeType());
+    assertEquals(JsonNodeType.ARRAY, result.getNodeType());
 
-    assertEquals(2, resultNode.size());
+    assertEquals(2, result.size());
 
     // first row
-    assertEquals(3, resultNode.get(0).size());
-    assertEquals("1", resultNode.get(0).get(0).asText());
-    assertEquals("2", resultNode.get(0).get(1).asText());
-    assertEquals("sadf", resultNode.get(0).get(2).asText());
+    assertEquals(3, result.get(0).size());
+    assertEquals("1", result.get(0).get(0).asText());
+    assertEquals("2", result.get(0).get(1).asText());
+    assertEquals("sadf", result.get(0).get(2).asText());
 
     // second row
-    assertEquals(3, resultNode.get(1).size());
-    assertEquals("5", resultNode.get(1).get(0).asText());
-    assertEquals("3", resultNode.get(1).get(1).asText());
-    assertEquals("fasd", resultNode.get(1).get(2).asText());
+    assertEquals(3, result.get(1).size());
+    assertEquals("5", result.get(1).get(0).asText());
+    assertEquals("3", result.get(1).get(1).asText());
+    assertEquals("fasd", result.get(1).get(2).asText());
   }
 
   @Test
   public void interpretCSVDataOtherColumnSeparator() throws IOException {
     String csv = CSV_STRING.replace(';', '&');
-    String result = interpreter.interpret(csv, Map.of(
+    JsonNode result = interpreter.interpret(csv, Map.of(
       "columnSeparator", "&",
       "lineSeparator", "\n",
       "skipFirstDataRow", false,
       "firstRowAsHeader", false
     ));
 
-    final JsonNode resultNode = mapper.readTree(result);
-    assertEquals(JsonNodeType.ARRAY, resultNode.getNodeType());
+    assertEquals(JsonNodeType.ARRAY, result.getNodeType());
 
-    assertEquals(2, resultNode.size());
-    assertEquals(3, resultNode.get(0).size());
-    assertEquals(3, resultNode.get(1).size());
+    assertEquals(2, result.size());
+    assertEquals(3, result.get(0).size());
+    assertEquals(3, result.get(1).size());
   }
 
   @Test
   public void interpretCSVDataOtherLineSeparator() throws IOException {
     String csv = CSV_STRING.replace('\n', '\r');
-    String result = interpreter.interpret(csv, Map.of(
+    JsonNode result = interpreter.interpret(csv, Map.of(
       "columnSeparator", ";",
       "lineSeparator", "\r",
       "skipFirstDataRow", false,
       "firstRowAsHeader", false
     ));
 
-    final JsonNode resultNode = mapper.readTree(result);
-    assertEquals(JsonNodeType.ARRAY, resultNode.getNodeType());
+    assertEquals(JsonNodeType.ARRAY, result.getNodeType());
 
-    assertEquals(2, resultNode.size());
-    assertEquals(3, resultNode.get(0).size());
-    assertEquals(3, resultNode.get(1).size());
+    assertEquals(2, result.size());
+    assertEquals(3, result.get(0).size());
+    assertEquals(3, result.get(1).size());
   }
 
   @Test
   public void interpretCSVDataSkipFirstRow() throws IOException {
-    String result = interpreter.interpret(CSV_STRING, Map.of(
+    JsonNode result = interpreter.interpret(CSV_STRING, Map.of(
       "columnSeparator", ";",
       "lineSeparator", "\n",
       "skipFirstDataRow", true,
       "firstRowAsHeader", false
     ));
 
-    final JsonNode resultNode = mapper.readTree(result);
-    assertEquals(JsonNodeType.ARRAY, resultNode.getNodeType());
+    assertEquals(JsonNodeType.ARRAY, result.getNodeType());
 
-    assertEquals(1, resultNode.size());
+    assertEquals(1, result.size());
 
     // first row
-    assertEquals(3, resultNode.get(0).size());
-    assertEquals("5", resultNode.get(0).get(0).asText());
-    assertEquals("3", resultNode.get(0).get(1).asText());
-    assertEquals("fasd", resultNode.get(0).get(2).asText());
+    assertEquals(3, result.get(0).size());
+    assertEquals("5", result.get(0).get(0).asText());
+    assertEquals("3", result.get(0).get(1).asText());
+    assertEquals("fasd", result.get(0).get(2).asText());
   }
 
   @Test
   public void interpretCSVDataHeaderRow() throws IOException {
     String csv = "1;2;sadf\n5;3;fasd";
-    String result = interpreter.interpret(csv, Map.of(
+    JsonNode result = interpreter.interpret(csv, Map.of(
       "columnSeparator", ";",
       "lineSeparator", "\n",
       "skipFirstDataRow", false,
       "firstRowAsHeader", true
     ));
 
-    final JsonNode resultNode = mapper.readTree(result);
-    assertEquals(JsonNodeType.ARRAY, resultNode.getNodeType());
+    assertEquals(JsonNodeType.ARRAY, result.getNodeType());
 
-    assertEquals(1, resultNode.size());
+    assertEquals(1, result.size());
 
     // first row
-    assertEquals(3, resultNode.get(0).size());
-    assertEquals("5", resultNode.get(0).get("1").asText());
-    assertEquals("3", resultNode.get(0).get("2").asText());
-    assertEquals("fasd", resultNode.get(0).get("sadf").asText());
+    assertEquals(3, result.get(0).size());
+    assertEquals("5", result.get(0).get("1").asText());
+    assertEquals("3", result.get(0).get("2").asText());
+    assertEquals("fasd", result.get(0).get("sadf").asText());
   }
 
   @Test(expected = IllegalArgumentException.class)

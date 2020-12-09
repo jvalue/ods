@@ -1,5 +1,6 @@
 package org.jvalue.ods.adapterservice.adapter;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.jvalue.ods.adapterservice.adapter.importer.Importer;
 import org.jvalue.ods.adapterservice.adapter.interpreter.Interpreter;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
@@ -37,7 +38,7 @@ public class Adapter {
   public DataBlob executeJob(AdapterConfig config) throws IllegalArgumentException, RestClientException {
     var rawData = this.executeProtocol(config.protocolConfig);
     var result = this.executeFormat(rawData, config.formatConfig);
-    return dataBlobRepository.save(new DataBlob(result));
+    return dataBlobRepository.save(new DataBlob(result.toString()));
   }
 
   public DataBlob executeRawImport(ProtocolConfig config) {
@@ -57,7 +58,7 @@ public class Adapter {
     }
   }
 
-  public String executeFormat(String rawData, FormatConfig config) {
+  public JsonNode executeFormat(String rawData, FormatConfig config) {
     var interpreter = config.format.getInterpreter();
     try {
       return interpreter.interpret(rawData, config.parameters);
