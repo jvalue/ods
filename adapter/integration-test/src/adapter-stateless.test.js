@@ -93,9 +93,54 @@ describe('Stateless data import', () => {
       .send(reqBody)
 
     expect(response.status).toEqual(200)
-    expect(response.body).toEqual({
-      whateverwillbe: 'willbe', quesera: 'sera'
-    })
+    expect(response.body.id).toBeGreaterThan(0)
+    expect(JSON.parse(response.body.data)).toEqual({ whateverwillbe: 'willbe', quesera: 'sera' })
+  }, TIMEOUT)
+
+  test('Should execute data preview [POST /preview]', async () => {
+    const reqBody = {
+      protocol: {
+        type: 'HTTP',
+        parameters: {
+          location: MOCK_SERVER_URL + '/json',
+          encoding: 'UTF-8'
+        }
+      },
+      format: {
+        type: 'JSON'
+      }
+    }
+
+    const response = await request(ADAPTER_URL)
+      .post('/preview')
+      .query('includeData=true')
+      .send(reqBody)
+
+    expect(response.status).toEqual(200)
+    expect(response.body.id).toBeGreaterThan(0)
+    expect(JSON.parse(response.body.data)).toEqual({ whateverwillbe: 'willbe', quesera: 'sera' })
+  }, TIMEOUT)
+
+  test('Should execute raw preview [POST /preview/raw', async () => {
+    const reqBody = {
+      type: 'HTTP',
+      parameters: {
+        location: MOCK_SERVER_URL + '/xml',
+        encoding: 'UTF-8'
+      }
+    }
+
+    const response = await request(ADAPTER_URL)
+      .post('/preview/raw')
+      .query('includeData=true')
+      .send(reqBody)
+
+    expect(response.status).toEqual(200)
+    expect(response.body.id).toBeGreaterThan(0)
+    expect(response.body.data).toEqual(
+      '<?xml version="1.0" encoding="UTF-8"?>' +
+      '<root><from>Rick</from><to>Morty</to></root>'
+    )
   }, TIMEOUT)
 
   test('Should create a XML adapter as importer [POST /dataImport]', async () => {

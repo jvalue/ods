@@ -6,29 +6,29 @@ import java.io.Serializable;
 
 public class ImportFailedEvent implements Serializable {
 
-    private final Long datasourceId;
+  private final Long datasourceId;
 
-    private final String error;
+  private final String error;
 
-    public ImportFailedEvent(@JsonProperty("datasourceId") Long datasourceId, @JsonProperty("error") String error) {
-        this.datasourceId = datasourceId;
-        this.error = error;
-    }
+  public ImportFailedEvent(@JsonProperty("datasourceId") Long datasourceId, @JsonProperty("error") String error) {
+    this.datasourceId = datasourceId;
+    this.error = error;
+  }
 
-    @Override
-    public String toString() {
-        return "ImportFailedEvent{" +
-                "datasourceId=" + datasourceId +
-                ", errmsg='" + error + '\'' +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "ImportFailedEvent{" +
+      "datasourceId=" + datasourceId +
+      ", errmsg='" + error + '\'' +
+      '}';
+  }
 
-    public Long getDatasourceId() {
-        return datasourceId;
-    }
+  public Long getDatasourceId() {
+    return datasourceId;
+  }
 
-    public String getError() {
-        return error;
-    }
+  public String getError() {
+    return error;
+  }
 
 }
