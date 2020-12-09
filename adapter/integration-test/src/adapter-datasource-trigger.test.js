@@ -207,6 +207,38 @@ describe('Datasource triggering', () => {
       error: '404 Not Found: [404 NOT FOUND Error]'
     })
   })
+
+  test('Should persist data after trigger [POST /datasources/{id}/trigger]', async () => {
+    const creationResponse = await request(ADAPTER_URL)
+      .post('/datasource')
+      .send(staticDatasourceConfig)
+
+    const triggerResponse = await request(ADAPTER_URL)
+      .post(`/datasources/${creationResponse.body.id}/trigger`)
+      .send()
+
+    await request(ADAPTER_URL)
+      .get(`/data/${triggerResponse.body.id}`)
+      .expect(200, {
+        id: 1
+      })
+  })
+
+  test('Should not persist data after failing import [POST /datasource/{id}/trigger]', async () => {
+    const brokenDatasourceConfig = Object.assign({}, staticDatasourceConfig)
+    brokenDatasourceConfig.protocol.parameters.location = 'invalid'
+    const creationResponse = await request(ADAPTER_URL)
+      .post('/datasources')
+      .send(brokenDatasourceConfig)
+
+    const triggerResponse = await request(ADAPTER_URL)
+      .post(`/datasources/${creationResponse.body.id}/trigger`)
+      .send()
+
+    await request(ADAPTER_URL)
+      .get(`/data/${triggerResponse.body.id}`)
+      .expect(404)
+  })
 })
 
 const dynamicDatasourceConfig = {
