@@ -1,6 +1,5 @@
 package org.jvalue.ods.adapterservice.datasource.api.rest.v1;
 
-import org.apache.coyote.Response;
 import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
 import org.jvalue.ods.adapterservice.datasource.DatasourceManager;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
@@ -9,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
