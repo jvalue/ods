@@ -217,11 +217,12 @@ describe('Datasource triggering', () => {
       .post(`/datasources/${creationResponse.body.id}/trigger`)
       .send()
 
-    await request(ADAPTER_URL)
+    const dataResponse = await request(ADAPTER_URL)
       .get(`/data/${triggerResponse.body.id}`)
-      .expect(200, {
-        id: 1
-      })
+      .send()
+
+    expect(dataResponse.status).toEqual(200)
+    expect(dataResponse.body).toEqual({ id: 1 })
   })
 
   test('Should not persist data after failing import [POST /datasource/{id}/trigger]', async () => {
@@ -235,9 +236,11 @@ describe('Datasource triggering', () => {
       .post(`/datasources/${creationResponse.body.id}/trigger`)
       .send()
 
-    await request(ADAPTER_URL)
+    const dataResponse = await request(ADAPTER_URL)
       .get(`/data/${triggerResponse.body.id}`)
-      .expect(404)
+      .send()
+
+    expect(dataResponse.status).toEqual(404)
   })
 })
 
