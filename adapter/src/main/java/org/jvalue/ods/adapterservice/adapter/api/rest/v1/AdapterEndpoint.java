@@ -23,17 +23,8 @@ public class AdapterEndpoint {
   }
 
 
-  @PostMapping(value = Mappings.IMPORT_PATH, produces = "application/json")
-  public DataImportResponse executeDataImport(
-    @Valid @RequestBody AdapterConfig config,
-    @RequestParam(required = false) boolean includeData) {
-    return this.executePreview(config, includeData);
-  }
-
-  @PostMapping(value = Mappings.PREVIEW_PATH, produces = "application/json")
-  public DataImportResponse executePreview(
-    @Valid @RequestBody AdapterConfig config,
-    @RequestParam(required = false, defaultValue = "true") boolean includeData) {
+  @PostMapping(Mappings.IMPORT_PATH)
+  public DataImportResponse executeDataImport(@Valid @RequestBody AdapterConfig config) {
     try {
       return adapter.executeJob(config);
     } catch (ResponseStatusException e) {
@@ -43,10 +34,8 @@ public class AdapterEndpoint {
     }
   }
 
-  @PostMapping(value = Mappings.RAW_PREVIEW_PATH, produces = "application/json")
-  public DataImportResponse executeRawPreview(
-    @Valid @RequestBody ProtocolConfig config,
-    @RequestParam(required = false, defaultValue = "true") boolean includeData) {
+  @PostMapping(Mappings.RAW_IMPORT_PATH)
+  public DataImportResponse executeRawPreview(@Valid @RequestBody ProtocolConfig config) {
     try {
       return adapter.executeRawImport(config);
     } catch (ResponseStatusException e) {
