@@ -1,6 +1,7 @@
 const waitOn = require('wait-on')
 const {
   STORAGE_URL,
+  STORAGE_MQ_URL,
   SCHEDULER_URL,
   ADAPTER_URL,
   PIPELINE_URL,
@@ -22,6 +23,7 @@ async function waitForServicesToBeReady () {
   const waitOptions = {
     resources: [
       STORAGE_URL,
+      STORAGE_MQ_URL,
       SCHEDULER_URL,
       PIPELINE_URL,
       NOTIFICATION_URL + '/',

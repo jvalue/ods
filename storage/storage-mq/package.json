@@ -12,10 +12,11 @@
     "test": "jest --colors --verbose --passWithNoTests"
   },
   "dependencies": {
+    "@jvalue/node-dry-basics": "0.0.3",
+    "@jvalue/node-dry-pg": "1.0.0",
     "amqplib": "^0.6.0",
     "cors": "^2.8.5",
-    "express": "^4.17.1",
-    "pg": "^8.2.1"
+    "express": "^4.17.1"
   },
   "devDependencies": {
     "@types/amqplib": "^0.5.14",
@@ -23,7 +24,6 @@
     "@types/express": "^4.17.9",
     "@types/jest": "^25.2.3",
     "@types/node": "^14.0.23",
-    "@types/pg": "^7.14.3",
     "@typescript-eslint/eslint-plugin": "^4.4.1",
     "@typescript-eslint/parser": "^4.4.1",
     "eslint": "^7.11.0",

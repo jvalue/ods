@@ -14,7 +14,7 @@
   "dependencies": {
     "@jvalue/node-dry-amqp": "0.0.1",
     "@jvalue/node-dry-basics": "0.0.3",
-    "@jvalue/node-dry-pg": "0.0.3",
+    "@jvalue/node-dry-pg": "1.0.0",
     "axios": "^0.20.0",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
