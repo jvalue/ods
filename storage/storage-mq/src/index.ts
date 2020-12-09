@@ -12,7 +12,6 @@ import PipelineConfigEventHandler from './api/pipelineConfigEventHandler'
 import PipelineExecutionEventHandler from './api/pipelineExecutionEventHandler'
 import { PipelineExecutionConsumer } from './api/amqp/pipelineExecutionConsumer'
 import { CONNECTION_RETRIES, CONNECTION_BACKOFF } from './env'
-import PostgresRepository from './util/postgresRepository'
 import AmqpConsumer from './util/amqpConsumer'
 
 const port = 8080
@@ -24,17 +23,14 @@ process.on('SIGTERM', () => {
 })
 
 async function main (): Promise<void> {
-  const storageContentRepository = new PostgresStorageContentRepository(new PostgresRepository())
-  const storageStructureRepository = new PostgresStorageStructureRepository(new PostgresRepository())
+  const storageContentRepository = new PostgresStorageContentRepository()
+  const storageStructureRepository = new PostgresStorageStructureRepository()
 
   const pipelineConfigEventHandler = new PipelineConfigEventHandler(storageStructureRepository)
   const pipelineExecutionEventHandler = new PipelineExecutionEventHandler(storageContentRepository)
 
   const amqpPipelineConfigConsumer = new PipelineConfigConsumer(pipelineConfigEventHandler, new AmqpConsumer())
   const amqpPipelineExecutionConsumer = new PipelineExecutionConsumer(pipelineExecutionEventHandler, new AmqpConsumer())
-
-  await storageContentRepository.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
-  await storageStructureRepository.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
 
   await amqpPipelineConfigConsumer.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
   await amqpPipelineExecutionConsumer.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)

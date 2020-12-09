@@ -77,7 +77,7 @@ Step 1: Choose a name for the pipeline and fill in the datasource id of the data
 ![alt](doc/configuration-example/p02_name.jpg)
 
 Step 2: In this step, you can manipulate the raw data to fit your needs by writing JavaScript code. The data object represents the incoming raw data. In this example, the attribute test is added to the data object before returning it.
-![alt](doc/configuration-example/p03_pipeline.jpg)
+![alt](doc/configuration-example/p03_transformation.jpg)
 
 Step 3: Describe additional meta-data for the pipeline.
 ![alt](doc/configuration-example/p04_meta-data.jpg)
@@ -114,6 +114,8 @@ Further information about a specific microservice can be found in the respective
 Examples showing the API of each microservice are in the [example request](doc/example-requests) directory.
 
 Instructions on how to analyse the microservice architecture with a service dependency graph in Neo4j, can be found [here](doc/service-dependency-graph.md).
+
+Details on our used docker image versions and their reasoning can be found [here](doc/docker-dependencies.md).
 
 # Deployment
 Docker images of the microservices the ods consists of are deployed via our continous deployment pipeline. 
