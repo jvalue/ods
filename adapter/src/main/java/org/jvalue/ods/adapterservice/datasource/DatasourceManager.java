@@ -92,7 +92,13 @@ public class DatasourceManager {
       amqpPublisher.publishImportSuccess(id, executionResult.getData());
       return executionResult.getMetaData();
     } catch (Exception e) {
-      amqpPublisher.publishImportFailure(id, e.getMessage());
+      String errMsg;
+      if (e.getCause() != null) {
+        errMsg = e.getCause().getMessage();
+      } else {
+        errMsg = e.getMessage();
+      }
+      amqpPublisher.publishImportFailure(id, errMsg);
       if (e instanceof IllegalArgumentException) {
         System.err.println("Data Import request failed. Malformed Request: " + e.getMessage());
       } else {

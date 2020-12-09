@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/")
 public class VersionEndpoint {
 
-    @Value("${app.version}")
-    private String VERSION;
+  @Value("${app.version}")
+  private String VERSION;
 
-    @GetMapping(Mappings.VERSION_PATH)
-    public String getApplicationVersion() {
-        return VERSION;
-    }
+  @GetMapping(Mappings.VERSION_PATH)
+  public String getApplicationVersion() {
+    return VERSION;
+  }
 }

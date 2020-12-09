@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -42,7 +41,6 @@ public class DatasourceEndpoint {
     if (config.getId() != null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id is defined by the server. Id field must not be set");
     }
-
     Datasource savedConfig = datasourceManager.createDatasource(config);
 
     URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -88,10 +86,8 @@ public class DatasourceEndpoint {
       .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Can not find Datasource with id: " + id));
     try {
       return datasourceManager.trigger(id, runtimeParameters);
-    } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid datasource or parameters: " + e.getMessage());
-    } catch (RestClientException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to load data: " + e.getMessage());
+    } catch (ResponseStatusException e) {
+      throw e;
     } catch (Exception e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }

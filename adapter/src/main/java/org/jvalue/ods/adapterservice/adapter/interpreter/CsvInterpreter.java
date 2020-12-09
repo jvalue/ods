@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class CsvInterpreter extends Interpreter {
 
-  private final List<InterpreterParameterDescription> parameters =  Collections.unmodifiableList(List.of(
+  private final List<InterpreterParameterDescription> parameters = Collections.unmodifiableList(List.of(
     new InterpreterParameterDescription("columnSeparator", "Column delimiter character, only one character supported", String.class),
     new InterpreterParameterDescription("lineSeparator", "Line delimiter character, only \\r, \\r\\n, and \\n supported", String.class),
     new InterpreterParameterDescription("skipFirstDataRow", "Skip first data row (after header)", Boolean.class),
@@ -59,7 +59,7 @@ public class CsvInterpreter extends Interpreter {
   @Override
   protected JsonNode doInterpret(String data, Map<String, Object> parameters) throws IOException {
     CsvSchema csvSchema = createSchema(parameters);
-    if((boolean) parameters.get("firstRowAsHeader")) {
+    if ((boolean) parameters.get("firstRowAsHeader")) {
       return parseWithHeader(data, csvSchema);
     } else {
       return parseWithoutHeader(data, csvSchema);
@@ -72,7 +72,7 @@ public class CsvInterpreter extends Interpreter {
       .withColumnSeparator(((String) parameters.get("columnSeparator")).charAt(0))
       .withLineSeparator((String) parameters.get("lineSeparator"))
       .withSkipFirstDataRow((boolean) parameters.get("skipFirstDataRow"));
-    if((boolean) parameters.get("firstRowAsHeader")) {
+    if ((boolean) parameters.get("firstRowAsHeader")) {
       csvSchema = csvSchema
         .withHeader();
     }
@@ -86,7 +86,7 @@ public class CsvInterpreter extends Interpreter {
       .readValues(data);
 
     ArrayNode result = mapper.createArrayNode();
-    while(allLines.hasNext()) {
+    while (allLines.hasNext()) {
       result.add(jsonMapper.valueToTree(allLines.next()));
     }
 
@@ -100,7 +100,7 @@ public class CsvInterpreter extends Interpreter {
       .readValues(data);
 
     ArrayNode result = mapper.createArrayNode();
-    while(allLines.hasNext()) {
+    while (allLines.hasNext()) {
       result.add(jsonMapper.valueToTree(allLines.next()));
     }
 

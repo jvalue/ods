@@ -41,7 +41,9 @@ Support for new protocols or data formats can easily be achieved by adding class
 | *base_url*/version  | GET  | -  | String containing the application version  |
 | *base_url*/formats  | GET  | -  | JsonArray of data formats available for parsing and possible parameters |
 | *base_url*/protocols  | GET  | -  | JsonArray of protocols available for importing and possible parameters  |
-| *base_url*/dataImport  | POST  | AdapterConfig file  | ImportResponse | includeData: set to True to receive importedData in response instead of a reference
+| *base_url*/dataImport  | POST  | AdapterConfig | ImportResponse | includeData: set to True to receive importedData in response instead of a reference (default false)
+| *base_url*/preview  | POST  | AdapterConfig | ImportResponse | includeData: set to True to receive importedData in response instead of a reference (default true)
+| *base_url*/preview/raw  | POST  | ProtocolConfig | ImportResponse | includeData: set to True to receive importedData in response instead of a reference (default true)
 | *base_url*/data/{id}  | GET  | -  | JSON representation of imported data with {id} |
 
 
@@ -50,19 +52,24 @@ When started via docker-compose *base_url* is `http://localhost:9000/api/adapter
 ### Adapter Config
 ```
 {
-    "protocol": {
-      "type": "HTTP",
-      "parameters": {
-        "location": String,
-        "encoding": String
-      }
-    }
+    "protocol": ProtocolConfig, 
     "format": {
-      "type": "JSON" | "XML" | "CSV"
+      "type": "JSON" | "XML" | "CSV",
       "parameters": { } | CSVParameters
     }
   }
   ```
+
+### Protocol Config
+```
+{
+  "type": "HTTP",
+  "parameters": {
+   "location": String,
+   "encoding": String
+  }
+}
+```
 
 ### CSV Parameters
 ```
@@ -87,7 +94,8 @@ When started via docker-compose *base_url* is `http://localhost:9000/api/adapter
 
 ### ImportData
 ```
-The imported data as JSON (both array or object is possible)
+    "id": string | null,
+    "data": <<String or JSON representation of payload>>
 ```
 
 
@@ -130,7 +138,7 @@ When started via docker-compose *base_url* is `http://localhost:9000/api/adapter
 ```
 {
   "format": {
-    "type": "JSON" | "XML" | "CSV"
+    "type": "JSON" | "XML" | "CSV",
     "parameters": { } | CSVParameters
   }
 }

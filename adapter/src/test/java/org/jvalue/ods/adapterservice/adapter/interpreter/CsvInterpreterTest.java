@@ -2,7 +2,6 @@ package org.jvalue.ods.adapterservice.adapter.interpreter;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import org.junit.Test;
 
@@ -26,21 +25,20 @@ public class CsvInterpreterTest {
     ));
 
     assertEquals(JsonNodeType.ARRAY, result.getNodeType());
-    final ArrayNode results = (ArrayNode) result;
 
-    assertEquals(2, results.size());
+    assertEquals(2, result.size());
 
     // first row
     assertEquals(3, result.get(0).size());
-    assertEquals("1", results.get(0).get(0).asText());
-    assertEquals("2", results.get(0).get(1).asText());
-    assertEquals("sadf", results.get(0).get(2).asText());
+    assertEquals("1", result.get(0).get(0).asText());
+    assertEquals("2", result.get(0).get(1).asText());
+    assertEquals("sadf", result.get(0).get(2).asText());
 
     // second row
     assertEquals(3, result.get(1).size());
-    assertEquals("5", results.get(1).get(0).asText());
-    assertEquals("3", results.get(1).get(1).asText());
-    assertEquals("fasd", results.get(1).get(2).asText());
+    assertEquals("5", result.get(1).get(0).asText());
+    assertEquals("3", result.get(1).get(1).asText());
+    assertEquals("fasd", result.get(1).get(2).asText());
   }
 
   @Test
@@ -54,9 +52,8 @@ public class CsvInterpreterTest {
     ));
 
     assertEquals(JsonNodeType.ARRAY, result.getNodeType());
-    final ArrayNode results = (ArrayNode) result;
 
-    assertEquals(2, results.size());
+    assertEquals(2, result.size());
     assertEquals(3, result.get(0).size());
     assertEquals(3, result.get(1).size());
   }
@@ -72,9 +69,8 @@ public class CsvInterpreterTest {
     ));
 
     assertEquals(JsonNodeType.ARRAY, result.getNodeType());
-    final ArrayNode results = (ArrayNode) result;
 
-    assertEquals(2, results.size());
+    assertEquals(2, result.size());
     assertEquals(3, result.get(0).size());
     assertEquals(3, result.get(1).size());
   }
@@ -89,15 +85,14 @@ public class CsvInterpreterTest {
     ));
 
     assertEquals(JsonNodeType.ARRAY, result.getNodeType());
-    final ArrayNode results = (ArrayNode) result;
 
-    assertEquals(1, results.size());
+    assertEquals(1, result.size());
 
     // first row
     assertEquals(3, result.get(0).size());
-    assertEquals("5", results.get(0).get(0).asText());
-    assertEquals("3", results.get(0).get(1).asText());
-    assertEquals("fasd", results.get(0).get(2).asText());
+    assertEquals("5", result.get(0).get(0).asText());
+    assertEquals("3", result.get(0).get(1).asText());
+    assertEquals("fasd", result.get(0).get(2).asText());
   }
 
   @Test
@@ -111,15 +106,14 @@ public class CsvInterpreterTest {
     ));
 
     assertEquals(JsonNodeType.ARRAY, result.getNodeType());
-    final ArrayNode results = (ArrayNode) result;
 
-    assertEquals(1, results.size());
+    assertEquals(1, result.size());
 
     // first row
     assertEquals(3, result.get(0).size());
-    assertEquals("5", results.get(0).get("1").asText());
-    assertEquals("3", results.get(0).get("2").asText());
-    assertEquals("fasd", results.get(0).get("sadf").asText());
+    assertEquals("5", result.get(0).get("1").asText());
+    assertEquals("3", result.get(0).get("2").asText());
+    assertEquals("fasd", result.get(0).get("sadf").asText());
   }
 
   @Test(expected = IllegalArgumentException.class)

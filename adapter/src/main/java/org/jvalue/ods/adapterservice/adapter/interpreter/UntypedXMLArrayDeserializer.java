@@ -28,7 +28,7 @@ public class UntypedXMLArrayDeserializer extends UntypedObjectDeserializer {
     }
     if (key1 == null) {
       // empty map might work; but caller may want to modify... so better just give small modifiable
-      return new LinkedHashMap<String,Object>(2);
+      return new LinkedHashMap<String, Object>(2);
     }
 
     Map<String, Object> result = new LinkedHashMap<>();
@@ -40,11 +40,11 @@ public class UntypedXMLArrayDeserializer extends UntypedObjectDeserializer {
       Adaptations to the superclass start here.
       Inspired by: https://gist.github.com/joaovarandas/1543e792ed6204f0cf5fe860cb7d58ed
      */
-    while ((key1 = p.nextFieldName()) != null ) {
+    while ((key1 = p.nextFieldName()) != null) {
       p.nextToken();
       Object val = result.get(key1);
-      if(result.containsKey(key1)) { // key is not unique -> consider it as a list.
-        if(!(val instanceof List)) {
+      if (result.containsKey(key1)) { // key is not unique -> consider it as a list.
+        if (!(val instanceof List)) {
           val = new ArrayList<>();
           ((List) val).add(result.get(key1));
           result.put(key1, val);
