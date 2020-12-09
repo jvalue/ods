@@ -1,4 +1,4 @@
-package org.jvalue.ods.adapterservice.adapter.model;
+package org.jvalue.ods.adapterservice.datasource.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.jvalue.ods.adapterservice.adapter.api.rest.v1.Mappings;

@@ -5,9 +5,10 @@ import org.junit.runner.RunWith;
 import org.jvalue.ods.adapterservice.adapter.importer.Importer;
 import org.jvalue.ods.adapterservice.adapter.interpreter.Interpreter;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
-import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
+import org.jvalue.ods.adapterservice.datasource.model.DataBlob;
 import org.jvalue.ods.adapterservice.adapter.model.FormatConfig;
 import org.jvalue.ods.adapterservice.adapter.model.ProtocolConfig;
+import org.jvalue.ods.adapterservice.datasource.repository.DataBlobRepository;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -28,7 +29,8 @@ public class AdapterTest {
   private Adapter adapter;
 
   @Mock Importer importer;
-  @Mock DataBlobRepository dataBlobRepository;
+  @Mock
+  DataBlobRepository dataBlobRepository;
   @Mock
   Protocol httpProtocol;
 

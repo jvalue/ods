@@ -3,6 +3,7 @@ package org.jvalue.ods.adapterservice.adapter.model;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
+import org.jvalue.ods.adapterservice.datasource.model.DataBlob;
 
 import java.io.IOException;
 

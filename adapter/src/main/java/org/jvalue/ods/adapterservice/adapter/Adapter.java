@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.jvalue.ods.adapterservice.adapter.importer.Importer;
 import org.jvalue.ods.adapterservice.adapter.interpreter.Interpreter;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
-import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
+import org.jvalue.ods.adapterservice.adapter.model.DataImportResponse;
+import org.jvalue.ods.adapterservice.datasource.model.DataBlob;
 import org.jvalue.ods.adapterservice.adapter.model.FormatConfig;
 import org.jvalue.ods.adapterservice.adapter.model.ProtocolConfig;
+import org.jvalue.ods.adapterservice.datasource.repository.DataBlobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -35,10 +37,10 @@ public class Adapter {
    * @throws IllegalArgumentException on errors in the adapter config (e.g. missing parameters, ...)
    * @throws RestClientException      on response errors when importing the data
    */
-  public DataBlob executeJob(AdapterConfig config) throws IllegalArgumentException, RestClientException {
+  public DataImportResponse executeJob(AdapterConfig config) throws IllegalArgumentException, RestClientException {
     var rawData = this.executeProtocol(config.protocolConfig);
     var result = this.executeFormat(rawData, config.formatConfig);
-    return dataBlobRepository.save(new DataBlob(result.toString()));
+    return new DataImportResponse(result.toString());
   }
 
   public DataBlob executeRawImport(ProtocolConfig config) {
