@@ -1,5 +1,6 @@
 package org.jvalue.ods.adapterservice.adapter.interpreter;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -28,7 +29,7 @@ public class JsonInterpreter extends Interpreter {
   }
 
   @Override
-  protected String doInterpret(String data, Map<String, Object> parameters) throws IOException {
-    return mapper.readTree(data).toString();
+  protected JsonNode doInterpret(String data, Map<String, Object> parameters) throws IOException {
+    return mapper.readTree(data);
   }
 }

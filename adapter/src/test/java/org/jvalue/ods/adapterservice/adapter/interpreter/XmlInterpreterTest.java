@@ -8,8 +8,6 @@ import java.io.IOException;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 public class XmlInterpreterTest {
     private final Interpreter interpreter = new XmlInterpreter();
     private static final String XML_STRING = "<note><to>Walter Frosch</to><body>Nice game!</body></note>";
@@ -17,9 +15,9 @@ public class XmlInterpreterTest {
 
     @Test
     public void interpretXmlData() throws IOException {
-        String result = interpreter.interpret(XML_STRING, Map.of());
+        JsonNode result = interpreter.interpret(XML_STRING, Map.of());
 
-        assertEquals("{\"to\":\"Walter Frosch\",\"body\":\"Nice game!\"}", result);
+        assertEquals("{\"to\":\"Walter Frosch\",\"body\":\"Nice game!\"}", result.toString());
     }
 
     @Test
@@ -36,13 +34,13 @@ public class XmlInterpreterTest {
           "</pizza>" +
         "</menuItems>";
 
-      String result = interpreter.interpret(collectionString, Map.of());
+      JsonNode result = interpreter.interpret(collectionString, Map.of());
 
       assertEquals(
               "{\"pizza\":" +
                         "[{\"price\":\"2\",\"taste\":\"good\"}," +
                         "{\"price\":\"12\",\"taste\":\"disgusting\"}]}",
-              result);
+              result.toString());
     }
 
   @Test
@@ -61,14 +59,14 @@ public class XmlInterpreterTest {
         "</menu>" +
         "</menuItems>";
 
-    String result = interpreter.interpret(collectionString, Map.of());
+    JsonNode result = interpreter.interpret(collectionString, Map.of());
 
     assertEquals(
             "{\"menu\":" +
                         "{\"pizza\":[" +
                             "{\"price\":\"2\",\"taste\":\"good\"}," +
                             "{\"price\":\"12\",\"taste\":\"disgusting\"}]}}",
-            result
+            result.toString()
     );
   }
 
@@ -85,11 +83,11 @@ public class XmlInterpreterTest {
           "</pizza>" +
         "</menuItems>";
 
-      String result = interpreter.interpret(collectionString, Map.of());
+      JsonNode result = interpreter.interpret(collectionString, Map.of());
 
       assertEquals(
               "{\"pizza\":[{\"type\":\"funghi\",\"taste\":\"good\"},{\"price\":\"12\"}]}",
-              result);
+              result.toString());
     }
 
     @Test(expected = IOException.class)

@@ -1,5 +1,6 @@
 package org.jvalue.ods.adapterservice.adapter.interpreter;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
@@ -35,8 +36,8 @@ public class XmlInterpreter extends Interpreter {
   }
 
   @Override
-  public String doInterpret(String data, Map<String, Object> parameters) throws IOException {
+  public JsonNode doInterpret(String data, Map<String, Object> parameters) throws IOException {
     Object result = mapper.readValue(data, Object.class);
-    return mapper.valueToTree(result).toString();
+    return mapper.valueToTree(result);
   }
 }
