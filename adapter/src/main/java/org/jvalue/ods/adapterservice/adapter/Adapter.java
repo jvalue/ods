@@ -40,13 +40,10 @@ public class Adapter {
     return dataBlobRepository.save(new DataBlob(result));
   }
 
-  public DataBlob executeRawImport(ProtocolConfig config, boolean persistData) {
+  public DataBlob executeRawImport(ProtocolConfig config) {
     var rawData = this.executeProtocol(config);
-    if (persistData) {
-      return dataBlobRepository.save(new DataBlob(rawData));
-    }
 
-    return new DataBlob(rawData);
+    return dataBlobRepository.save(new DataBlob(rawData));
   }
 
   public String executeProtocol(ProtocolConfig config) {

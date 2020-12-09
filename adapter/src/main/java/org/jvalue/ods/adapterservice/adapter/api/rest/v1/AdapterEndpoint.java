@@ -56,7 +56,7 @@ public class AdapterEndpoint {
     @Valid @RequestBody ProtocolConfig config,
     @RequestParam(required = false, defaultValue = "true") boolean includeData) {
     try {
-      DataBlob imported = adapter.executeRawImport(config, includeData);
+      DataBlob imported = adapter.executeRawImport(config);
 
       if (includeData) {
         return ResponseEntity.ok(imported);
