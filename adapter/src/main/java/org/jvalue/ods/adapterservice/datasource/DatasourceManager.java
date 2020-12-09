@@ -2,11 +2,13 @@ package org.jvalue.ods.adapterservice.datasource;
 
 import org.jvalue.ods.adapterservice.adapter.Adapter;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
+import org.jvalue.ods.adapterservice.adapter.model.DataImportResponse;
 import org.jvalue.ods.adapterservice.datasource.model.DataBlob;
 import org.jvalue.ods.adapterservice.datasource.api.amqp.AmqpPublisher;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
 import org.jvalue.ods.adapterservice.datasource.model.DatasourceMetadata;
 import org.jvalue.ods.adapterservice.datasource.model.RuntimeParameters;
+import org.jvalue.ods.adapterservice.datasource.repository.DataBlobRepository;
 import org.jvalue.ods.adapterservice.datasource.repository.DatasourceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,12 +22,18 @@ import java.util.stream.StreamSupport;
 public class DatasourceManager {
 
   private final DatasourceRepository datasourceRepository;
+  private final DataBlobRepository dataBlobRepository;
   private final Adapter adapter;
   private final AmqpPublisher amqpPublisher;
 
   @Autowired
-  public DatasourceManager(DatasourceRepository datasourceRepository, Adapter adapter, AmqpPublisher amqpPublisher) {
+  public DatasourceManager(
+    DatasourceRepository datasourceRepository,
+    DataBlobRepository dataBlobRepository,
+    Adapter adapter,
+    AmqpPublisher amqpPublisher) {
     this.datasourceRepository = datasourceRepository;
+    this.dataBlobRepository = dataBlobRepository;
     this.adapter = adapter;
     this.amqpPublisher = amqpPublisher;
   }
@@ -88,9 +96,13 @@ public class DatasourceManager {
   public DataBlob.MetaData trigger(Long id, RuntimeParameters runtimeParameters) {
     AdapterConfig adapterConfig = getParametrizedDatasource(id, runtimeParameters);
     try {
-      DataBlob executionResult = adapter.executeJob(adapterConfig);
-      amqpPublisher.publishImportSuccess(id, executionResult.getData());
-      return executionResult.getMetaData();
+      DataImportResponse executionResult = adapter.executeJob(adapterConfig);
+      DataBlob importedBlob = new DataBlob(executionResult.getData());
+
+      DataBlob savedBlob = dataBlobRepository.save(importedBlob);
+
+      amqpPublisher.publishImportSuccess(id, savedBlob.getData());
+      return savedBlob.getMetaData();
     } catch (Exception e) {
       String errMsg;
       if (e.getCause() != null) {

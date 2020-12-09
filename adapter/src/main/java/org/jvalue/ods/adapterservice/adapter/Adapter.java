@@ -5,11 +5,8 @@ import org.jvalue.ods.adapterservice.adapter.importer.Importer;
 import org.jvalue.ods.adapterservice.adapter.interpreter.Interpreter;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.DataImportResponse;
-import org.jvalue.ods.adapterservice.datasource.model.DataBlob;
 import org.jvalue.ods.adapterservice.adapter.model.FormatConfig;
 import org.jvalue.ods.adapterservice.adapter.model.ProtocolConfig;
-import org.jvalue.ods.adapterservice.datasource.repository.DataBlobRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
@@ -22,12 +19,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class Adapter {
-  private final DataBlobRepository dataBlobRepository;
-
-  @Autowired
-  public Adapter(DataBlobRepository dataBlobRepository) {
-    this.dataBlobRepository = dataBlobRepository;
-  }
 
   /**
    * Executes an adapter configuration
@@ -43,10 +34,9 @@ public class Adapter {
     return new DataImportResponse(result.toString());
   }
 
-  public DataBlob executeRawImport(ProtocolConfig config) {
+  public DataImportResponse executeRawImport(ProtocolConfig config) {
     var rawData = this.executeProtocol(config);
-
-    return dataBlobRepository.save(new DataBlob(rawData));
+    return new DataImportResponse(rawData);
   }
 
   public String executeProtocol(ProtocolConfig config) {

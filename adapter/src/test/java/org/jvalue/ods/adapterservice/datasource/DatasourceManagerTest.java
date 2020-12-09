@@ -6,10 +6,12 @@ import org.junit.runner.RunWith;
 import org.jvalue.ods.adapterservice.adapter.Adapter;
 import org.jvalue.ods.adapterservice.adapter.Format;
 import org.jvalue.ods.adapterservice.adapter.Protocol;
+import org.jvalue.ods.adapterservice.adapter.model.DataImportResponse;
 import org.jvalue.ods.adapterservice.datasource.model.DataBlob;
 import org.jvalue.ods.adapterservice.datasource.api.amqp.AmqpPublisher;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
 import org.jvalue.ods.adapterservice.datasource.model.RuntimeParameters;
+import org.jvalue.ods.adapterservice.datasource.repository.DataBlobRepository;
 import org.jvalue.ods.adapterservice.datasource.repository.DatasourceRepository;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -39,6 +41,9 @@ public class DatasourceManagerTest {
 
     @Mock
     DatasourceRepository datasourceRepository;
+
+    @Mock
+    DataBlobRepository dataBlobRepository;
 
     @Mock
     AmqpPublisher amqpPublisher;
@@ -117,8 +122,9 @@ public class DatasourceManagerTest {
     public void testTriggerWithoutRuntimeParameters() throws ParseException {
         Datasource datasource = generateDatasource(Protocol.HTTP, Format.JSON, "location");
         when(datasourceRepository.findById(1L)).thenReturn(Optional.of(datasource));
+        when(dataBlobRepository.save(any())).thenAnswer( i -> i.getArgument(0));
         when(adapter.executeJob(datasource.toAdapterConfig(null))).thenReturn(
-                new DataBlob("{\"hallo\":\"hello\"}"));
+                new DataImportResponse("{\"hallo\":\"hello\"}"));
 
         DataBlob.MetaData result = manager.trigger(1L, null);
 
@@ -143,7 +149,8 @@ public class DatasourceManagerTest {
         ));
 
         when(adapter.executeJob(datasource.toAdapterConfig(runtimeParameters))).thenReturn(
-                new DataBlob("{\"hallo\":\"hello\"}"));
+                new DataImportResponse("{\"hallo\":\"hello\"}"));
+        when(dataBlobRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         DataBlob.MetaData result = manager.trigger(2L, runtimeParameters);
 
