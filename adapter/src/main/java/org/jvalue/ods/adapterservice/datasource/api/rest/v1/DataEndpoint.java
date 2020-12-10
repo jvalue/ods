@@ -1,4 +1,4 @@
-package org.jvalue.ods.adapterservice.adapter.api.rest.v1;
+package org.jvalue.ods.adapterservice.datasource.api.rest.v1;
 
 import org.jvalue.ods.adapterservice.datasource.repository.DataBlobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
