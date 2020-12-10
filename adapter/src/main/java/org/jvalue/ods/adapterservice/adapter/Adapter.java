@@ -46,7 +46,7 @@ public class Adapter {
     } catch (IllegalArgumentException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid protocol parameters", e);
     } catch (RestClientException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to load data: ", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to load data: ", e);
     }
   }
 
