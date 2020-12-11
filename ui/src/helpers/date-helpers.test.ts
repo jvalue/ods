@@ -1,4 +1,9 @@
-import { getISODateString, getISOTimeString } from '@/helpers/date-helpers'
+import {
+  getISOTimeString,
+  getISODateString,
+  convertMillisecondsToHours,
+  convertMillisecondsToMinutes
+} from '@/helpers/date-helpers'
 
 describe('#getISOTimeString', () => {
   it('should return a date\'s minutes and hours as "hh:mm"', () => {
@@ -29,5 +34,25 @@ describe('#getISODateString', () => {
 
     expect(date1Actual).toEqual('2020-12-05')
     expect(date2Actual).toEqual('2020-01-05')
+  })
+})
+
+describe('#convertMillisecondsToHours', () => {
+  it('should return the hours from n milliseconds', () => {
+    const fourHoursInMs = 3600 * 1000 * 4
+
+    const actualHours = convertMillisecondsToHours(fourHoursInMs)
+
+    expect(actualHours).toEqual(4)
+  })
+})
+
+describe('#convertMillisecondsToMinutes', () => {
+  it('should return the minutes from n milliseconds', () => {
+    const fiveMinutesInMs = 60 * 1000 * 5
+
+    const actualMinutes = convertMillisecondsToMinutes(fiveMinutesInMs)
+
+    expect(actualMinutes).toEqual(5)
   })
 })
