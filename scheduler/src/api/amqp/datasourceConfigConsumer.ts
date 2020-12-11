@@ -1,4 +1,5 @@
 import * as AMQP from 'amqplib'
+
 import { sleep } from '../../sleep'
 import Scheduler from '../../scheduling'
 import DatasourceConfig from '../datasource-config'
@@ -66,15 +67,19 @@ export class DatasourceConfigConsumer {
   }
 
   handleMsg = async (msg: AMQP.ConsumeMessage): Promise<void> => {
-    console.debug("[EventConsume] %s:'%s'", msg?.fields.routingKey, stringify(msg?.content))
+    console.debug("[EventConsume] %s:'%s'", msg?.fields.routingKey, stringify(msg?.content.toString()))
 
     if (isUpdateOrCreate(msg)) {
-      await this.scheduler.applyCreateOrUpdateEvent(JSON.parse(msg.content.toString()))
+      const event: DatasourceConfigEvent = JSON.parse(msg.content.toString())
+      const datasource = event.datasource
+      datasource.trigger.firstExecution = new Date(event.datasource.trigger.firstExecution)
+      this.scheduler.upsertJob(datasource)
       return
     }
 
     if (isDelete(msg)) {
-      this.scheduler.applyDeleteEvent(JSON.parse(msg.content.toString()))
+      const datasourceEvent: DatasourceConfigEvent = JSON.parse(msg.content.toString())
+      this.scheduler.removeJob(datasourceEvent.datasource.id)
       return
     }
 
