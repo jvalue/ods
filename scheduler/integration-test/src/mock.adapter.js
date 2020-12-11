@@ -1,10 +1,11 @@
-
 const Koa = require('koa')
 const Router = require('koa-router')
-const router = new Router()
-const app = new Koa()
+
 const { MOCK_SERVER_PORT } = require('./env')
 const { jsonDateAfter } = require('./testHelper')
+
+const router = new Router()
+const app = new Koa()
 
 const triggerRequests = new Map()
 const initialSources = [
@@ -13,7 +14,7 @@ const initialSources = [
     trigger: {
       firstExecution: jsonDateAfter(1000),
       periodic: true,
-      interval: 3000
+      interval: 1000
     }
   }
 ]
