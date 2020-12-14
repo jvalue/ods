@@ -14,45 +14,31 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.image.repository }}:storage-latest"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
 
           env:
-            - name: POSTGRES_HOST
-              value: "{{ .Chart.Name }}-db"
-            - name: POSTGRES_PORT
-              value: "5432"
-            - name: POSTGRES_DB
-              value: "{{ .Values.global.notificationDB.database }}"
-            - name: POSTGRES_USER
-              value: "{{ .Values.global.notificationDB.username }}"
-            - name: POSTGRES_PW
-              value: "{{ .Values.global.notificationDB.password }}"
-            - name: CONNECTION_RETRIES
-              value: 30
-            - name: CONNECTION_BACKOFF_IN_MS
-              value: 2000
-            - name: AMQP_URL
-              value: "amqp://{{ .Values.global.rabbitmq.username }}:{{ .Values.global.rabbitmq.password }}@rabbitmq:5672"
-            - name: AMQP_PIPELINE_EXECUTION_EXCHANGE
-              value: "ods_global"
-            - name: AMQP_PIPELINE_EXECUTION_QUEUE
-              value: "notification.pipeline-execution"
-            - name: AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC
-              value: "pipeline.execution.success"
-            - name: AMQP_NOTIFICATION_QUEUE
-              value: "NOTIF_QUEUE"
-            - name: NOTIFICATION_DATA_LOCATION_URL
-              value: "http://storage:8080"
+            - name: DATABASE_HOST
+              value: "storage-db"
+            - name: DATABASE_PORT
+              value: 5432
+            - name: DATABASE_NAME
+              value: "{{ .Values.global.postgrest.database }}"
+            - name: DATABASE_USER
+              value: "{{ .Values.global.postgrest.username }}"
+            - name: DATABASE_PW
+              value: "{{ .Values.global.postgrest.password }}"
+            - name: DATABASE_ANON
+              value: "{{ .Values.global.postgrest.anon }}"
 
           ports:
-            - containerPort: 8080
+            - containerPort: 80
 
           livenessProbe:
             failureThreshold: 3
             httpGet:
               path: /
-              port: 8080
+              port: 80
               scheme: HTTP
             initialDelaySeconds: 60
             periodSeconds: 60
@@ -63,7 +49,7 @@ spec:
             failureThreshold: 3
             httpGet:
               path: /
-              port: 8080
+              port: 80
               scheme: HTTP
             initialDelaySeconds: 60
             periodSeconds: 60

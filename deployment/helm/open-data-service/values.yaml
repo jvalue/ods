@@ -9,14 +9,16 @@ global:
     database: "ods-notifications"
 
   storageDB:
-    username: "storage"
-    password: "admin"
+    username: "ods_admin"
+    password: "ods_pw"
     database: "ods"
+    schema: "storage"
 
-  postgrest:
-    username:
-    password:
-    
+  postgres:
+    database: "ods"
+    username: "postgres"
+    password: "postgres-wrapper-pw"
+    anon: "web_anon"
 
   pipelineDB:
     username: "pipeline"

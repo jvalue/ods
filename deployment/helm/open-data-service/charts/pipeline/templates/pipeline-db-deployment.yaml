@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}-db
-          image: postgresql
+          image: postgresql:13-alpine
           imagePullPolicy: {{ .Values.image.pullPolicy }}
 
           ports:

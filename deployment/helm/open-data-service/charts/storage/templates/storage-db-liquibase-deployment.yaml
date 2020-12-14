@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Chart.Name }}-db
+  name: {{ .Chart.Name }}-db-liquibase
 spec:
   replicas: 1
   selector:
@@ -13,33 +13,19 @@ spec:
         tier: {{ .Chart.Name }}
     spec:
       containers:
-        - name: {{ .Chart.Name }}-db
-          image: postgresql
+        - name: {{ .Chart.Name }}-db-liquibase
+          image: "{{ .Values.image.repository }}:storage-db-liquibase-latest"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
 
-          ports:
-            - containerPort: 5432
-
           env:
-            - name: POSTGRES_USER
+            - name: DATABASE_USER
               value: "{{ .Values.global.storageDB.username }}"
-            - name: POSTGRES_PASSWORD
+            - name: DATABASE_PW
               value: "{{ .Values.global.storageDB.password }}"
+            - name: DATABASE_HOST
+              value: "storage-db"
+            - name: CONNECTION_RETRIES
+              value: 5
+            - name: CONNECTION_RETRIES_IN_SECONDS
+              value: 2
 
-          livenessProbe:
-            failureThreshold: 3
-            tcpSocket:
-              port: 5432
-            initialDelaySeconds: 60
-            periodSeconds: 60
-            successThreshold: 1
-            timeoutSeconds: 10
-
-          readinessProbe:
-            failureThreshold: 3
-            tcpSocket:
-              port: 5432
-            initialDelaySeconds: 60
-            periodSeconds: 60
-            successThreshold: 1
-            timeoutSeconds: 10

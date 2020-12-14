@@ -7,9 +7,16 @@ image:
 
 global:
   storageDB:
-    username: "storage"
-    password: "admin"
-    database: "ods"
+    username: ""
+    password: ""
+    database: ""
+    schema: ""
+
+  postgrest:
+    database: ""
+    username: ""
+    password: ""
+    anon: ""
 
   rabbitmq:
     username: ""
