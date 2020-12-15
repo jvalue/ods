@@ -8,8 +8,10 @@ image:
 
 global:
   notificationDB:
-    username: "notification"
-    password: "admin"
+    username: ""
+    password: ""
+    database: ""
+
 
   rabbitmq:
     username: ""

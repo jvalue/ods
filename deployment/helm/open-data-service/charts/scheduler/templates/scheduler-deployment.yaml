@@ -19,15 +19,15 @@ spec:
 
           env:
             - name: MAX_TRIGGER_RETRIES
-              value: 2
+              value: "2"
             - name: ADAPTER_SERVICE_URL
-              value : "http://adapter:8080"
+              value : "http://adapter-service:8080"
             - name: CONNECTION_RETRIES
-              value: 20
+              value: "20"
             - name: CONNECTION_BACKOFF_IN_MS
-              value: 5000
+              value: "5000"
             - name: AMQP_URL
-              value: "amqp://{{ .Values.global.rabbitmq.username }}:{{ .Values.global.rabbitmq.password }}@rabbitmq:5672"
+              value: "amqp://{{ .Values.global.rabbitmq.username }}:{{ .Values.global.rabbitmq.password }}@rabbitmq-service:5672"
             - name: AMQP_SCHEDULER_EXCHANGE
               value: "ods_global"
             - name: AMQP_SCHEDULER_QUEUE

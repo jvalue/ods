@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}-db
-          image: postgresql
+          image: postgres:13-alpine
           imagePullPolicy: {{ .Values.image.pullPolicy }}
 
           ports:
@@ -25,6 +25,8 @@ spec:
               value: "{{ .Values.global.notificationDB.username }}"
             - name: POSTGRES_PASSWORD
               value: "{{ .Values.global.notificationDB.password }}"
+            - name: POSTGRES_DB
+              value: "{{ .Values.global.notificationDB.database }}"
 
           livenessProbe:
             failureThreshold: 3

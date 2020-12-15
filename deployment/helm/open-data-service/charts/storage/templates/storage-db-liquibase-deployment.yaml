@@ -17,15 +17,20 @@ spec:
           image: "{{ .Values.image.repository }}:storage-db-liquibase-latest"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
 
+          ports:
+            - containerPort: 80
+
           env:
             - name: DATABASE_USER
               value: "{{ .Values.global.storageDB.username }}"
             - name: DATABASE_PW
               value: "{{ .Values.global.storageDB.password }}"
             - name: DATABASE_HOST
-              value: "storage-db"
+              value: "storage-db-service"
+            - name: DATABASE_PORT
+              value: "5432"
             - name: CONNECTION_RETRIES
-              value: 5
+              value: "5"
             - name: CONNECTION_RETRIES_IN_SECONDS
-              value: 2
+              value: "2"
 

@@ -19,19 +19,19 @@ spec:
 
           env:
             - name: POSTGRES_HOST
-              value: "storage-db"
+              value: "storage-db-service"
             - name: POSTGRES_PORT
-              value: 5432
+              value: "5432"
             - name: POSTGRES_DB
-              value: "{{ .Values.global.storageDB.database }}"
+              value: "{{ .Values.global.storagemq.database }}"
             - name: POSTGRES_USER
-              value: "{{ .Values.global.storageDB.username }}"
+              value: "{{ .Values.global.storagemq.username }}"
             - name: POSTGRES_PW
-              value: "{{ .Values.global.storageDB.password }}"
+              value: "{{ .Values.global.storagemq.password }}"
             - name: POSTGRES_SCHEMA
-              value: "{{ .Values.global.storageDB.schema }}"
+              value: "{{ .Values.global.storagemq.schema }}"
             - name: AMQP_URL
-              value: "amqp://{{ .Values.global.rabbitmq.username }}:{{ .Values.global.rabbitmq.password }}@rabbitmq:5672"
+              value: "amqp://{{ .Values.global.rabbitmq.username }}:{{ .Values.global.rabbitmq.password }}@rabbitmq-service:5672"
             - name: AMQP_PIPELINE_CONFIG_EXCHANGE
               value: "ods_global"
             - name: AMQP_PIPELINE_CONFIG_QUEUE
@@ -50,6 +50,10 @@ spec:
               value: "pipeline.execution.*"
             - name: AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC
               value: "pipeline.execution.success"
+            - name: CONNECTION_RETRIES
+              value: "30"
+            - name: CONNECTION_BACKOFF_IN_MS
+              value: "2000"
 
           ports:
             - containerPort: 8080

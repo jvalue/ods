@@ -583,10 +583,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup kustomize and kubectl
+      - name: Setup helm and kubectl
         run: |
           curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
           chmod +x ./kubectl
+          curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+          chmod 700 get_helm.sh
+          ./get_helm.sh
 
       - name: Setup k8s
         env:
@@ -599,5 +602,4 @@ jobs:
 
       - name: Deploy to k8s
         run: |
-          ./kubectl --kubeconfig=kube.config version
-          ./kubectl --kubeconfig=kube.config apply -k deployment/kustomize
+          ./helm install --generate-name --namespace github ./deployment/helm/open-data-service

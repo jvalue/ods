@@ -1,16 +1,22 @@
 global:
   adapterDB:
-    username: "adapter"
+    username: "adapterservice"
     password: "admin"
 
   notificationDB:
-    username: "notification"
+    username: "notification_usr"
     password: "admin"
     database: "ods-notifications"
 
   storageDB:
     username: "ods_admin"
     password: "ods_pw"
+    database: "ods"
+    schema: "storage"
+
+  storagemq:
+    username: "storagemq"
+    password: "storagemq-pw"
     database: "ods"
     schema: "storage"
 

@@ -31,13 +31,13 @@ spec:
             - name: AMQP_IMPORT_SUCCESS_TOPIC
               value: "datasource.execution.success"
             - name: AMQP_PUBLISH_BACKOFF
-              value: 1000
+              value: "1000"
             - name: AMQP_PUBLISH_RETRIES
-              value: 5
+              value: "5"
             - name: DB_URL
-              value: "jdbc:postgresql://{{ .Chart.Name }}-db:5432/adapterservice"
+              value: "jdbc:postgresql://{{ .Chart.Name }}-db-service:5432/adapterservice"
             - name: RABBIT_HOST
-              value: rabbitmq
+              value: "rabbitmq-service"
             - name: RABBIT_PORT
               value: "5672"
             - name: RABBIT_PWD

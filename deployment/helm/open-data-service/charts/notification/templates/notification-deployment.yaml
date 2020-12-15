@@ -19,7 +19,7 @@ spec:
 
           env:
             - name: POSTGRES_HOST
-              value: "{{ .Chart.Name }}-db"
+              value: "{{ .Chart.Name }}-db-service"
             - name: POSTGRES_PORT
               value: "5432"
             - name: POSTGRES_DB
@@ -29,11 +29,11 @@ spec:
             - name: POSTGRES_PW
               value: "{{ .Values.global.notificationDB.password }}"
             - name: CONNECTION_RETRIES
-              value: 30
+              value: "30"
             - name: CONNECTION_BACKOFF_IN_MS
-              value: 2000
+              value: "2000"
             - name: AMQP_URL
-              value: "amqp://{{ .Values.global.rabbitmq.username }}:{{ .Values.global.rabbitmq.password }}@rabbitmq:5672"
+              value: "amqp://{{ .Values.global.rabbitmq.username }}:{{ .Values.global.rabbitmq.password }}@rabbitmq-service:5672"
             - name: AMQP_PIPELINE_EXECUTION_EXCHANGE
               value: "ods_global"
             - name: AMQP_PIPELINE_EXECUTION_QUEUE

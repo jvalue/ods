@@ -12,6 +12,12 @@ global:
     database: ""
     schema: ""
 
+  storagemq:
+    username: ""
+    password: ""
+    database: ""
+    schema: ""
+
   postgrest:
     database: ""
     username: ""

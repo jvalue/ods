@@ -5,3 +5,7 @@ metadata:
 spec:
   selector:
     tier: {{ .Chart.Name }}
+
+  ports:
+    - protocol: TCP
+      port: 80

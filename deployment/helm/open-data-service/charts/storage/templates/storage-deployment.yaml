@@ -19,9 +19,9 @@ spec:
 
           env:
             - name: DATABASE_HOST
-              value: "storage-db"
+              value: "storage-db-service"
             - name: DATABASE_PORT
-              value: 5432
+              value: "5432"
             - name: DATABASE_NAME
               value: "{{ .Values.global.postgrest.database }}"
             - name: DATABASE_USER
