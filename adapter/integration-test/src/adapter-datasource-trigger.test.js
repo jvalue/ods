@@ -193,7 +193,7 @@ describe('Datasource triggering', () => {
       .post(`/datasources/${datasourceId}/trigger`)
       .send()
 
-    expect(triggerResponse.status).toEqual(400)
+    expect(triggerResponse.status).toEqual(500)
 
     const delResponse = await request(ADAPTER_URL)
       .delete(`/datasources/${datasourceId}`)
@@ -210,37 +210,22 @@ describe('Datasource triggering', () => {
 
   test('Should persist data after trigger [POST /datasources/{id}/trigger]', async () => {
     const creationResponse = await request(ADAPTER_URL)
-      .post('/datasource')
+      .post('/datasources')
       .send(staticDatasourceConfig)
 
+    expect(creationResponse.status).toEqual(201)
+
     const triggerResponse = await request(ADAPTER_URL)
       .post(`/datasources/${creationResponse.body.id}/trigger`)
-      .send()
+      .send(null)
+
+    expect(triggerResponse.status).toEqual(200)
 
     const dataResponse = await request(ADAPTER_URL)
       .get(`/data/${triggerResponse.body.id}`)
-      .send()
 
     expect(dataResponse.status).toEqual(200)
-    expect(dataResponse.body).toEqual({ id: 1 })
-  })
-
-  test('Should not persist data after failing import [POST /datasource/{id}/trigger]', async () => {
-    const brokenDatasourceConfig = Object.assign({}, staticDatasourceConfig)
-    brokenDatasourceConfig.protocol.parameters.location = 'invalid'
-    const creationResponse = await request(ADAPTER_URL)
-      .post('/datasources')
-      .send(brokenDatasourceConfig)
-
-    const triggerResponse = await request(ADAPTER_URL)
-      .post(`/datasources/${creationResponse.body.id}/trigger`)
-      .send()
-
-    const dataResponse = await request(ADAPTER_URL)
-      .get(`/data/${triggerResponse.body.id}`)
-      .send()
-
-    expect(dataResponse.status).toEqual(404)
+    expect(dataResponse.body).toEqual({ id: '1' })
   })
 })
 
