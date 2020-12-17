@@ -1,3 +1,6 @@
+const ONE_HOUR_IN_MS = 3600 * 1000
+const ONE_MINUTE_IN_MS = 60 * 1000
+
 /**
  * Gets the date part of the given date using the browser's local time in ISO format: `YYYY-MM-DD`
  *
@@ -23,4 +26,12 @@ export const getISOTimeString = (date: Date): string => {
   const minutes = `0${date.getMinutes()}`.replace(/0(\d\d)/, '$1')
 
   return `${hours}:${minutes}`
+}
+
+export const convertMillisecondsToHours = (ms: number): number => {
+  return Math.floor(ms / ONE_HOUR_IN_MS)
+}
+
+export const convertMillisecondsToMinutes = (ms: number): number => {
+  return Math.floor((ms % ONE_HOUR_IN_MS) / ONE_MINUTE_IN_MS)
 }

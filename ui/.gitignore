@@ -91,3 +91,6 @@ dist/
 # Idea files
 .idea/
 build/
+
+# VS Code
+.vscode
