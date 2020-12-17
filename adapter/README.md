@@ -36,14 +36,13 @@ Support for new protocols or data formats can easily be achieved by adding class
 ## API Docs
 
 ## Adapter API (data import)
-| Endpoint  | Method  | Request Body  | Response Body | Query Parameters
-|---|---|---|---|---|
+| Endpoint  | Method  | Request Body  | Response Body |
+|---|---|---|---|
 | *base_url*/version  | GET  | -  | String containing the application version  |
 | *base_url*/formats  | GET  | -  | JsonArray of data formats available for parsing and possible parameters |
 | *base_url*/protocols  | GET  | -  | JsonArray of protocols available for importing and possible parameters  |
-| *base_url*/dataImport  | POST  | AdapterConfig | ImportResponse | includeData: set to True to receive importedData in response instead of a reference (default false)
-| *base_url*/preview  | POST  | AdapterConfig | ImportResponse | includeData: set to True to receive importedData in response instead of a reference (default true)
-| *base_url*/preview/raw  | POST  | ProtocolConfig | ImportResponse | includeData: set to True to receive importedData in response instead of a reference (default true)
+| *base_url*/dataImport  | POST  | AdapterConfig | ImportResponse | 
+| *base_url*/dataImport/raw  | POST  | ProtocolConfig | ImportResponse | 
 | *base_url*/data/{id}  | GET  | -  | JSON representation of imported data with {id} |
 
 
@@ -82,20 +81,8 @@ When started via docker-compose *base_url* is `http://localhost:9000/api/adapter
 ```
 
 ### ImportResponse
-```ImportReference || ImportData```
-
-### ImportReference
 ```
-{
-    "id": string,
-    "location": <<String containing the relative location of the data>>
-}
-```
-
-### ImportData
-```
-    "id": string | null,
-    "data": <<String or JSON representation of payload>>
+    "data": <<Stringified JSON or RAW representation of payload>>
 ```
 
 
