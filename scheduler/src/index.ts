@@ -1,6 +1,8 @@
 import type { Server } from 'http'
 import express from 'express'
+
 import Scheduler from './scheduling'
+import { initSchedulerWithRetry } from './initializer'
 
 import {
   CONNECTION_RETRIES,
@@ -11,7 +13,7 @@ import { DatasourceConfigConsumer } from './api/amqp/datasourceConfigConsumer'
 
 process.on('SIGTERM', () => {
   console.info('Scheduler: SIGTERM signal received.')
-  scheduler.cancelAllJobs()
+  scheduler.removeAllJobs()
   server?.close()
 })
 
@@ -24,9 +26,9 @@ let scheduler: Scheduler
 async function main (): Promise<void> {
   scheduler = new Scheduler(MAX_TRIGGER_RETRIES)
   const datasourceConfigConsumer = new DatasourceConfigConsumer(scheduler)
-
   await datasourceConfigConsumer.initialize(CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS)
-  await scheduler.initializeJobsWithRetry(CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS)
+
+  await initSchedulerWithRetry(scheduler, CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS)
 
   const app = express()
   app.get('/', (req, res) => {
