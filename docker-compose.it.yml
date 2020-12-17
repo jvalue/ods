@@ -23,7 +23,6 @@ services:
     depends_on:
       - adapter
       - rabbitmq
-      - edge
 
   # ----------------- SCHEDULER SERVICE (PORTS 9300 - 9399) --------------------
   scheduler:

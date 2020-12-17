@@ -27,6 +27,7 @@ services:
       context: ./adapter/
     depends_on:
       - adapter-db
+      - rabbitmq
     environment:
       DB_URL: jdbc:postgresql://adapter-db:5432/adapterservice
       RABBIT_HOST: rabbitmq
