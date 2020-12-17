@@ -153,7 +153,7 @@ describe('Datasource triggering', () => {
   })
 
   test('Should publish results for datasources with invalid location [POST /datasources/{id}/trigger]', async () => {
-    const brokenDatasourceConfig = Object.assign({}, staticDatasourceConfig)
+    const brokenDatasourceConfig = JSON.parse(JSON.stringify(staticDatasourceConfig))
     brokenDatasourceConfig.protocol.parameters.location = 'invalid-location'
     const datasourceResponse = await request(ADAPTER_URL)
       .post('/datasources')
@@ -181,7 +181,7 @@ describe('Datasource triggering', () => {
   })
 
   test('Should publish results for datasources with failing import [POST /datasources/{id}/trigger]', async () => {
-    const brokenDatasourceConfig = Object.assign({}, staticDatasourceConfig)
+    const brokenDatasourceConfig = JSON.parse(JSON.stringify(staticDatasourceConfig))
     brokenDatasourceConfig.protocol.parameters.location = MOCK_SERVER_URL + '/not-found'
     const datasourceResponse = await request(ADAPTER_URL)
       .post('/datasources')
@@ -217,7 +217,7 @@ describe('Datasource triggering', () => {
 
     const triggerResponse = await request(ADAPTER_URL)
       .post(`/datasources/${creationResponse.body.id}/trigger`)
-      .send(null)
+      .send()
 
     expect(triggerResponse.status).toEqual(200)
 
