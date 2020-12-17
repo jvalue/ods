@@ -16,7 +16,7 @@ import java.net.URI;
 
 
 @RestController
-@RequestMapping("/datasources")
+@RequestMapping(Mappings.DATASOURCE_PATH)
 public class DatasourceEndpoint {
   private final DatasourceManager datasourceManager;
 
