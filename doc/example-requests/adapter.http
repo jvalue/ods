@@ -9,7 +9,7 @@ GET {{baseURL}}/formats  HTTP/1.1
 Content-Type: application/json
 
 ### Perform Data Import RAW
-POST {{baseURL}}/dataImport/raw  HTTP/1.1
+POST {{baseURL}}/preview/raw  HTTP/1.1
 Content-Type: application/json
 
 {
@@ -21,7 +21,7 @@ Content-Type: application/json
 }
 
 ### Perform Data Import JSON
-POST {{baseURL}}/dataImport  HTTP/1.1
+POST {{baseURL}}/preview  HTTP/1.1
 Content-Type: application/json
 
 {
@@ -39,7 +39,7 @@ Content-Type: application/json
 }
 
 ### Perform Data Import CSV
-POST {{baseURL}}/dataImport  HTTP/1.1
+POST {{baseURL}}/preview  HTTP/1.1
 Content-Type: application/json;charset=UTF-8
 
 {

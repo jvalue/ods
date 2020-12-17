@@ -41,8 +41,8 @@ Support for new protocols or data formats can easily be achieved by adding class
 | *base_url*/version  | GET  | -  | String containing the application version  |
 | *base_url*/formats  | GET  | -  | JsonArray of data formats available for parsing and possible parameters |
 | *base_url*/protocols  | GET  | -  | JsonArray of protocols available for importing and possible parameters  |
-| *base_url*/dataImport  | POST  | AdapterConfig | ImportResponse | 
-| *base_url*/dataImport/raw  | POST  | ProtocolConfig | ImportResponse | 
+| *base_url*/preview  | POST  | AdapterConfig | ImportResponse | 
+| *base_url*/preview/raw  | POST  | ProtocolConfig | ImportResponse | 
 | *base_url*/data/{id}  | GET  | -  | JSON representation of imported data with {id} |
 
 
