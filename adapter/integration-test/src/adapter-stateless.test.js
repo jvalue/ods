@@ -46,7 +46,7 @@ describe('Stateless data import', () => {
     })
   }, TIMEOUT)
 
-  test('Should create a JSON adapter as importer [POST /dataImport]', async () => {
+  test('Should import json data', async () => {
     const reqBody = {
       protocol: {
         type: 'HTTP',
@@ -64,64 +64,12 @@ describe('Stateless data import', () => {
       .post('/dataImport')
       .send(reqBody)
     expect(response.status).toEqual(200)
-    const dataBlobId = response.body.id
+    const importedData = response.body.data
 
-    const dataResponse = await request(ADAPTER_URL)
-      .get(`/data/${dataBlobId}`)
-      .send()
-    expect(dataResponse.status).toEqual(200)
-    expect(dataResponse.body).toEqual({ whateverwillbe: 'willbe', quesera: 'sera' })
+    expect(JSON.parse(importedData)).toEqual({ whateverwillbe: 'willbe', quesera: 'sera' })
   }, TIMEOUT)
 
-  test('Should handle includeData parameter appropriately when requesting a dataImport', async () => {
-    const reqBody = {
-      protocol: {
-        type: 'HTTP',
-        parameters: {
-          location: MOCK_SERVER_URL + '/json',
-          encoding: 'UTF-8'
-        }
-      },
-      format: {
-        type: 'JSON'
-      }
-    }
-
-    const response = await request(ADAPTER_URL)
-      .post('/dataImport')
-      .query('includeData=true')
-      .send(reqBody)
-
-    expect(response.status).toEqual(200)
-    expect(response.body.id).toBeGreaterThan(0)
-    expect(JSON.parse(response.body.data)).toEqual({ whateverwillbe: 'willbe', quesera: 'sera' })
-  }, TIMEOUT)
-
-  test('Should execute data preview [POST /preview]', async () => {
-    const reqBody = {
-      protocol: {
-        type: 'HTTP',
-        parameters: {
-          location: MOCK_SERVER_URL + '/json',
-          encoding: 'UTF-8'
-        }
-      },
-      format: {
-        type: 'JSON'
-      }
-    }
-
-    const response = await request(ADAPTER_URL)
-      .post('/preview')
-      .query('includeData=true')
-      .send(reqBody)
-
-    expect(response.status).toEqual(200)
-    expect(response.body.id).toBeGreaterThan(0)
-    expect(JSON.parse(response.body.data)).toEqual({ whateverwillbe: 'willbe', quesera: 'sera' })
-  }, TIMEOUT)
-
-  test('Should execute raw preview [POST /preview/raw', async () => {
+  test('Should import raw xml data', async () => {
     const reqBody = {
       type: 'HTTP',
       parameters: {
@@ -131,19 +79,17 @@ describe('Stateless data import', () => {
     }
 
     const response = await request(ADAPTER_URL)
-      .post('/preview/raw')
-      .query('includeData=true')
+      .post('/dataImport/raw')
       .send(reqBody)
 
     expect(response.status).toEqual(200)
-    expect(response.body.id).toBeGreaterThan(0)
     expect(response.body.data).toEqual(
       '<?xml version="1.0" encoding="UTF-8"?>' +
       '<root><from>Rick</from><to>Morty</to></root>'
     )
   }, TIMEOUT)
 
-  test('Should create a XML adapter as importer [POST /dataImport]', async () => {
+  test('Should import and format xml data', async () => {
     const reqBody = {
       protocol: {
         type: 'HTTP',
@@ -161,17 +107,12 @@ describe('Stateless data import', () => {
       .post('/dataImport')
       .send(reqBody)
     expect(response.status).toEqual(200)
+    const importedData = response.body.data
 
-    const dataBlobId = response.body.id
-    const dataResponse = await request(ADAPTER_URL)
-      .get(`/data/${dataBlobId}`)
-      .send()
-
-    expect(dataResponse.status).toEqual(200)
-    expect(dataResponse.body).toEqual({ from: 'Rick', to: 'Morty' })
+    expect(JSON.parse(importedData)).toEqual({ from: 'Rick', to: 'Morty' })
   }, TIMEOUT)
 
-  test('Should create a CSV adapter as importer [POST /dataImport]', async () => {
+  test('Should import and format csv data', async () => {
     const reqBody = {
       protocol: {
         type: 'HTTP',
@@ -194,13 +135,8 @@ describe('Stateless data import', () => {
       .post('/dataImport')
       .send(reqBody)
     expect(response.status).toEqual(200)
-    const dataBlobId = response.body.id
-
-    const dataResponse = await request(ADAPTER_URL)
-      .get(`/data/${dataBlobId}`)
-      .send()
-    expect(dataResponse.status).toEqual(200)
-    expect(dataResponse.body).toEqual([
+    const importedData = response.body.data
+    const expected = [
       {
         col1: 'val11',
         col2: 'val12',
@@ -209,8 +145,9 @@ describe('Stateless data import', () => {
         col1: 'val21',
         col2: 'val22',
         col3: 'val23'
-      }
-    ])
+      }]
+
+    expect(JSON.parse(importedData)).toEqual(expected)
   }, TIMEOUT)
 
   test('Should return 400 BAD_REQUEST for unsupported protocol [POST /dataImport]', async () => {
@@ -270,7 +207,7 @@ describe('Stateless data import', () => {
     expect(response.status).toEqual(400)
   }, TIMEOUT)
 
-  test('Should return 400 BAD_REQUEST for data not found [POST /dataImport]', async () => {
+  test('Should return 500 INTERNAL_SERVER_ERROR for data not found [POST /dataImport]', async () => {
     const reqBody = {
       protocol: {
         type: 'HTTP',
@@ -286,6 +223,6 @@ describe('Stateless data import', () => {
     const response = await request(ADAPTER_URL)
       .post('/dataImport')
       .send(reqBody)
-    expect(response.status).toEqual(400)
+    expect(response.status).toEqual(500)
   }, TIMEOUT)
 })
