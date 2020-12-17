@@ -1,150 +1,153 @@
 <template>
   <div class="datasource">
-    <v-card>
-      <v-card-title>
-        <v-btn
-          class="ma-2"
-          color="success"
-          @click="onCreate()"
-        >
-          Create new Datasource
-          <v-icon
-            dark
-            right
-          >
-            mdi mdi-pipe
-          </v-icon>
-        </v-btn>
-        <v-btn
-          class="ma-2"
-          @click="loadDataSources()"
-        >
-          <v-icon dark>
-            mdi mdi-sync
-          </v-icon>
-        </v-btn>
-        <v-spacer />
-        <v-text-field
-          v-model="search"
-          label="Search"
-          append-icon="mdi mdi-magnify"
-          single-line
-          hide-details
-        />
-      </v-card-title>
-
-      <v-data-table
-        :headers="headers"
-        :items="datasources"
-        :search="search"
-        :custom-filter="filterOnlyDisplayName"
-        :loading="isLoadingDatasources"
-        class="elevation-1"
+    <header class="d-flex mb-5">
+      <h1>Datasources</h1>
+      <v-spacer />
+      <v-btn
+        depressed
+        @click="loadDataSources()"
       >
-        <v-progress-linear
-          slot="progress"
-          indeterminate
+        <v-icon>
+          mdi-sync
+        </v-icon>
+      </v-btn>
+      <v-btn
+        class="ml-2"
+        color="primary"
+        @click="onCreate()"
+      >
+        Create Datasource
+      </v-btn>
+    </header>
+    <v-text-field
+      v-model="search"
+      class="mb-4"
+      label="Search name"
+      prepend-icon="mdi-magnify"
+      hide-details
+    />
+
+    <v-data-table
+      :headers="headers"
+      :items="datasources"
+      :single-expand="true"
+      :search="search"
+      :custom-filter="filterOnlyDisplayName"
+      :loading="isLoadingDatasources"
+      show-expand
+      class="elevation-3"
+    >
+      <v-progress-linear
+        slot="progress"
+        indeterminate
+      />
+
+      <template #[`item.trigger.periodic`]="{ item }">
+        <v-simple-checkbox
+          v-model="item.trigger.periodic"
+          disabled
         />
+      </template>
 
-        <template #[`item.trigger.interval`]="{ item }">
-          {{ getHoursFromMS(item.trigger.interval) }}h:{{ getMinutesFromMS(item.trigger.interval) }}m
-        </template>
+      <template #[`item.protocol.parameters.location`]="{ item }">
+        {{ trimQueryParams(item.protocol.parameters.location) }}
+      </template>
 
-        <template #[`item.trigger.periodic`]="{ item }">
-          <v-switch
-            v-model="item.trigger.periodic"
-            class="ma-2"
-            disabled
-          />
-        </template>
+      <template #[`item.action`]="{ item }">
+        <v-tooltip top>
+          <template #activator="{ on, attrs }">
+            <v-icon
+              v-bind="attrs"
+              small
+              class="mr-2"
+              v-on="on"
+              @click="onCreatePipeline(item)"
+            >
+              mdi-pipe
+            </v-icon>
+          </template>
+          <span>Create pipeline</span>
+        </v-tooltip>
+        <v-tooltip top>
+          <template #activator="{ on, attrs }">
+            <v-icon
+              v-bind="attrs"
+              small
+              class="mr-2"
+              v-on="on"
+              @click="onEdit(item)"
+            >
+              mdi-pencil
+            </v-icon>
+          </template>
+          <span>Edit</span>
+        </v-tooltip>
+        <v-tooltip top>
+          <template #activator="{ on, attrs }">
+            <v-icon
+              v-bind="attrs"
+              small
+              v-on="on"
+              @click="onDelete(item)"
+            >
+              mdi-delete
+            </v-icon>
+          </template>
+          <span>Delete</span>
+        </v-tooltip>
+      </template>
 
-        <template #[`item.action`]="{ item }">
-          <v-btn
-            depressed
-            small
-            class="ma-2"
-            @click="onEdit(item)"
-          >
-            Edit
-            <v-icon
-              dark
-              right
-            >
-              mdi mdi-pencil
-            </v-icon>
-          </v-btn>
-          <v-btn
-            depressed
-            small
-            class="ma-2"
-            @click="onDelete(item)"
-          >
-            Delete
-            <v-icon
-              dark
-              right
-            >
-              mdi mdi-delete
-            </v-icon>
-          </v-btn>
-          <v-btn
-            depressed
-            small
-            class="ma-2"
-            @click="onCreatePipeline(item)"
-          >
-            Create Pipeline
-            <v-icon
-              dark
-              right
-            >
-              mdi mdi-pipe
-            </v-icon>
-          </v-btn>
-        </template>
-      </v-data-table>
-    </v-card>
+      <template #expanded-item="{ headers, item }">
+        <td
+          class="pa-2"
+          :colspan="headers.length"
+        >
+          <pre>{{ datasourceToJson(item) }}</pre>
+        </td>
+      </template>
+    </v-data-table>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-
 import Datasource from './datasource'
 import * as DatasourceREST from './datasourceRest'
 
-const ONE_HOUR_IN_MS = 3600 * 1000
-const ONE_MINUTE_IN_MS = 60 * 1000
-
-@Component({})
+@Component
 export default class DatsourceOverview extends Vue {
   private isLoadingDatasources = false
   private datasources: Datasource[] = []
 
   private headers = [
     { text: 'Id', value: 'id' },
-    { text: 'Datasource Name', value: 'metadata.displayName', sortable: false }, // sorting to be implemented
+    { text: 'Name', value: 'metadata.displayName', sortable: false },
     { text: 'Author', value: 'metadata.author', sortable: false },
-    { text: 'Interval', value: 'trigger.interval', sortable: false },
+    { text: 'Location (URL)', value: 'protocol.parameters.location', sortable: false },
     { text: 'Periodic', value: 'trigger.periodic', sortable: false },
-    { text: 'Action', value: 'action', sortable: false }
+    { text: 'Actions', value: 'action', sortable: false },
+    { text: '', value: 'data-table-expand' },
   ]
-
+  
   private search = ''
 
   private mounted (): void {
-    this.loadDataSources()
-      .catch(error => console.error('Failed to load datasource', error))
+    this.loadDataSources().catch(error => console.error('Failed to load datasource', error))
   }
 
   private onCreate (): void {
-    this.$router.push({ name: 'datasource-new' })
+    this.$router
+      .push({ name: 'datasource-new' })
       .catch(error => console.log('Failed to route to datasource-new', error))
   }
 
   private onEdit (datasource: Datasource): void {
-    this.$router.push({ name: 'datasource-edit', params: { datasourceId: `${datasource.id}` } })
+    this.$router
+      .push({
+        name: 'datasource-edit',
+        params: { datasourceId: `${datasource.id}` },
+      })
       .catch(error => console.log('Failed to route to datasource-edit', error))
   }
 
@@ -154,23 +157,21 @@ export default class DatsourceOverview extends Vue {
   }
 
   private onCreatePipeline (datasource: Datasource): void {
-    this.$router.push({ name: 'pipeline-new', params: { datasourceId: `${datasource.id}` } })
+    this.$router
+      .push({
+        name: 'pipeline-new',
+        params: { datasourceId: `${datasource.id}` },
+      })
       .catch(error => console.log('Failed to route to pipeline-new', error))
   }
 
   private filterOnlyDisplayName (value: unknown, search: string, item: Datasource): boolean {
-    return value != null &&
-          search != null &&
-          typeof value === 'string' &&
-          item.metadata.displayName.toLocaleLowerCase().includes(search.toLocaleLowerCase())
-  }
-
-  private getHoursFromMS (intervalInMS: number): number {
-    return Math.floor(intervalInMS / ONE_HOUR_IN_MS)
-  }
-
-  private getMinutesFromMS (intervalInMS: number): number {
-    return Math.floor((intervalInMS % ONE_HOUR_IN_MS) / ONE_MINUTE_IN_MS)
+    return (
+      value != null &&
+      search != null &&
+      typeof value === 'string' &&
+      item.metadata.displayName.toLocaleLowerCase().includes(search.toLocaleLowerCase())
+    )
   }
 
   private async loadDataSources (): Promise<void> {
@@ -178,5 +179,30 @@ export default class DatsourceOverview extends Vue {
     this.datasources = await DatasourceREST.getAllDatasources()
     this.isLoadingDatasources = false
   }
+
+  private datasourceToJson (datasource: Datasource): string {
+    return JSON.stringify(datasource, null, 2)
+  }
+
+  private trimQueryParams (url: string): string {
+    const queryParamRegex = /\?.*/
+
+    const urlContainsQueryParams = queryParamRegex.test(url)
+
+    if (urlContainsQueryParams) {
+      return url.replace(queryParamRegex, '') + '...'
+    }
+    
+    return url
+  }
 }
 </script>
+<style>
+td {
+  word-break: break-all !important;
+}
+
+pre {
+    white-space: pre-wrap;
+}
+</style>
