@@ -1,4 +1,5 @@
-import { sleep } from './sleep'
+import { sleep } from '@jvalue/node-dry-basics'
+
 import DatasourceConfig from './api/datasource-config'
 import { getAllDatasources } from './api/http/adapter-client'
 import Scheduler from './scheduling'

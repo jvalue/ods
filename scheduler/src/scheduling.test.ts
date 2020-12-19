@@ -1,9 +1,9 @@
 /* eslint-env jest */
 import { mocked } from 'ts-jest/utils'
+import { sleep } from '@jvalue/node-dry-basics'
 
 import { triggerDatasource } from './api/http/adapter-client'
 import DatasourceConfig from './api/datasource-config'
-import { sleep } from './sleep'
 import Scheduler from './scheduling'
 
 jest.mock('./api/http/adapter-client')
