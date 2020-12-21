@@ -30,6 +30,8 @@ async function main (): Promise<void> {
 
   await initSchedulerWithRetry(scheduler, CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS)
 
+  await datasourceConfigConsumer.startEventConsumption()
+
   const app = express()
   app.get('/', (req, res) => {
     res.send('I am alive!')
