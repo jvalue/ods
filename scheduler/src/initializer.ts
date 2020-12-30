@@ -4,10 +4,14 @@ import DatasourceConfig from './api/datasource-config'
 import { getAllDatasources } from './api/http/adapter-client'
 import Scheduler from './scheduling'
 
-export async function initSchedulerWithRetry (scheduler: Scheduler, retries: number, backoff: number): Promise<void> {
+export async function setupInitialStateWithRetry (
+  scheduler: Scheduler,
+  retries: number,
+  backoff: number
+): Promise<void> {
   for (let i = 1; i <= retries; i++) {
     try {
-      await initScheduler(scheduler)
+      await setupInitialState(scheduler)
       return
     } catch (e) {
       if (e.code === 'ECONNREFUSED' || e.code === 'ENOTFOUND') {
@@ -22,7 +26,7 @@ export async function initSchedulerWithRetry (scheduler: Scheduler, retries: num
   throw new Error('Failed to initialize datasource/pipeline scheduler.')
 }
 
-async function initScheduler (scheduler: Scheduler): Promise<void> {
+async function setupInitialState (scheduler: Scheduler): Promise<void> {
   console.log('Starting scheduler initialization')
   const datasources: DatasourceConfig[] = await getAllDatasources()
   console.log(`Received ${datasources.length} datasources from adapter-service`)
