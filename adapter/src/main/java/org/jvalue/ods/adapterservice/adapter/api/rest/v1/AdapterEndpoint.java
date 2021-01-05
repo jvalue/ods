@@ -2,11 +2,10 @@ package org.jvalue.ods.adapterservice.adapter.api.rest.v1;
 
 import org.jvalue.ods.adapterservice.adapter.Adapter;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
-import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
+import org.jvalue.ods.adapterservice.adapter.model.DataImportResponse;
 import org.jvalue.ods.adapterservice.adapter.model.ProtocolConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -24,26 +23,10 @@ public class AdapterEndpoint {
   }
 
 
-  @PostMapping(value = Mappings.IMPORT_PATH, produces = "application/json")
-  public ResponseEntity<?> executeDataImport(
-    @Valid @RequestBody AdapterConfig config,
-    @RequestParam(required = false) boolean includeData) {
-    return this.executePreview(config, includeData);
-  }
-
-  @PostMapping(value = Mappings.PREVIEW_PATH, produces = "application/json")
-  public ResponseEntity<?> executePreview(
-    @Valid @RequestBody AdapterConfig config,
-    @RequestParam(required = false, defaultValue = "true") boolean includeData) {
+  @PostMapping(Mappings.IMPORT_PATH)
+  public DataImportResponse executeDataImport(@Valid @RequestBody AdapterConfig config) {
     try {
-      DataBlob imported = adapter.executeJob(config);
-
-      if (includeData) {
-        return ResponseEntity.ok(imported);
-      }
-
-      return ResponseEntity.ok(imported.getMetaData());
-
+      return adapter.executeJob(config);
     } catch (ResponseStatusException e) {
       throw e;
     } catch (Exception e) {
@@ -51,19 +34,10 @@ public class AdapterEndpoint {
     }
   }
 
-  @PostMapping(value = Mappings.RAW_PREVIEW_PATH, produces = "application/json")
-  public ResponseEntity<?> executeRawPreview(
-    @Valid @RequestBody ProtocolConfig config,
-    @RequestParam(required = false, defaultValue = "true") boolean includeData) {
+  @PostMapping(Mappings.RAW_IMPORT_PATH)
+  public DataImportResponse executeRawPreview(@Valid @RequestBody ProtocolConfig config) {
     try {
-      DataBlob imported = adapter.executeRawImport(config);
-
-      if (includeData) {
-        return ResponseEntity.ok(imported);
-      }
-
-      return ResponseEntity.ok(imported.getMetaData());
-
+      return adapter.executeRawImport(config);
     } catch (ResponseStatusException e) {
       throw e;
     } catch (Exception e) {
