@@ -3,7 +3,7 @@ import { mocked } from 'ts-jest/utils'
 
 import { getAllDatasources } from './api/http/adapter-client'
 import Scheduler from './scheduling'
-import { initSchedulerWithRetry } from './initializer'
+import { setupInitialStateWithRetry } from './initializer'
 
 jest.mock('./api/http/adapter-client')
 const mockedGetAllDatasources = mocked(getAllDatasources)
@@ -36,7 +36,7 @@ describe('Scheduler initializer', () => {
     }
     mockedGetAllDatasources.mockResolvedValue([config])
 
-    await initSchedulerWithRetry(scheduler, CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS)
+    await setupInitialStateWithRetry(scheduler, CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS)
     expect(scheduler.getAllJobs()).toHaveLength(1)
     expect(scheduler.getAllJobs()[0].datasourceConfig).toEqual(config)
   })

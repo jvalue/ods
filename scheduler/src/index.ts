@@ -2,7 +2,7 @@ import type { Server } from 'http'
 import express from 'express'
 
 import Scheduler from './scheduling'
-import { initSchedulerWithRetry } from './initializer'
+import { setupInitialStateWithRetry } from './initializer'
 
 import {
   CONNECTION_RETRIES,
@@ -28,7 +28,9 @@ async function main (): Promise<void> {
   const datasourceConfigConsumer = new DatasourceConfigConsumer(scheduler)
   await datasourceConfigConsumer.initialize(CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS)
 
-  await initSchedulerWithRetry(scheduler, CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS)
+  await setupInitialStateWithRetry(scheduler, CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS)
+
+  await datasourceConfigConsumer.startEventConsumption()
 
   const app = express()
   app.get('/', (req, res) => {
