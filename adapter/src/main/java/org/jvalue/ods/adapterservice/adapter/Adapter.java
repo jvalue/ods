@@ -4,10 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.jvalue.ods.adapterservice.adapter.importer.Importer;
 import org.jvalue.ods.adapterservice.adapter.interpreter.Interpreter;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
-import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
+import org.jvalue.ods.adapterservice.adapter.model.DataImportResponse;
 import org.jvalue.ods.adapterservice.adapter.model.FormatConfig;
 import org.jvalue.ods.adapterservice.adapter.model.ProtocolConfig;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
@@ -20,12 +19,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class Adapter {
-  private final DataBlobRepository dataBlobRepository;
-
-  @Autowired
-  public Adapter(DataBlobRepository dataBlobRepository) {
-    this.dataBlobRepository = dataBlobRepository;
-  }
 
   /**
    * Executes an adapter configuration
@@ -35,16 +28,15 @@ public class Adapter {
    * @throws IllegalArgumentException on errors in the adapter config (e.g. missing parameters, ...)
    * @throws RestClientException      on response errors when importing the data
    */
-  public DataBlob executeJob(AdapterConfig config) throws IllegalArgumentException, RestClientException {
+  public DataImportResponse executeJob(AdapterConfig config) throws IllegalArgumentException, RestClientException {
     var rawData = this.executeProtocol(config.protocolConfig);
     var result = this.executeFormat(rawData, config.formatConfig);
-    return dataBlobRepository.save(new DataBlob(result.toString()));
+    return new DataImportResponse(result.toString());
   }
 
-  public DataBlob executeRawImport(ProtocolConfig config) {
+  public DataImportResponse executeRawImport(ProtocolConfig config) {
     var rawData = this.executeProtocol(config);
-
-    return dataBlobRepository.save(new DataBlob(rawData));
+    return new DataImportResponse(rawData);
   }
 
   public String executeProtocol(ProtocolConfig config) {
@@ -54,7 +46,7 @@ public class Adapter {
     } catch (IllegalArgumentException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid protocol parameters", e);
     } catch (RestClientException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to load data: ", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to load data: ", e);
     }
   }
 

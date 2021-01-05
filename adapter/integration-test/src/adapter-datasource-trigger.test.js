@@ -153,7 +153,7 @@ describe('Datasource triggering', () => {
   })
 
   test('Should publish results for datasources with invalid location [POST /datasources/{id}/trigger]', async () => {
-    const brokenDatasourceConfig = Object.assign({}, staticDatasourceConfig)
+    const brokenDatasourceConfig = JSON.parse(JSON.stringify(staticDatasourceConfig))
     brokenDatasourceConfig.protocol.parameters.location = 'invalid-location'
     const datasourceResponse = await request(ADAPTER_URL)
       .post('/datasources')
@@ -181,7 +181,7 @@ describe('Datasource triggering', () => {
   })
 
   test('Should publish results for datasources with failing import [POST /datasources/{id}/trigger]', async () => {
-    const brokenDatasourceConfig = Object.assign({}, staticDatasourceConfig)
+    const brokenDatasourceConfig = JSON.parse(JSON.stringify(staticDatasourceConfig))
     brokenDatasourceConfig.protocol.parameters.location = MOCK_SERVER_URL + '/not-found'
     const datasourceResponse = await request(ADAPTER_URL)
       .post('/datasources')
@@ -193,7 +193,7 @@ describe('Datasource triggering', () => {
       .post(`/datasources/${datasourceId}/trigger`)
       .send()
 
-    expect(triggerResponse.status).toEqual(400)
+    expect(triggerResponse.status).toEqual(500)
 
     const delResponse = await request(ADAPTER_URL)
       .delete(`/datasources/${datasourceId}`)
@@ -206,6 +206,26 @@ describe('Datasource triggering', () => {
       datasourceId: datasourceId,
       error: '404 Not Found: [404 NOT FOUND Error]'
     })
+  })
+
+  test('Should persist data after trigger [POST /datasources/{id}/trigger]', async () => {
+    const creationResponse = await request(ADAPTER_URL)
+      .post('/datasources')
+      .send(staticDatasourceConfig)
+
+    expect(creationResponse.status).toEqual(201)
+
+    const triggerResponse = await request(ADAPTER_URL)
+      .post(`/datasources/${creationResponse.body.id}/trigger`)
+      .send()
+
+    expect(triggerResponse.status).toEqual(200)
+
+    const dataResponse = await request(ADAPTER_URL)
+      .get(`/data/${triggerResponse.body.id}`)
+
+    expect(dataResponse.status).toEqual(200)
+    expect(dataResponse.body).toEqual({ id: '1' })
   })
 })
 

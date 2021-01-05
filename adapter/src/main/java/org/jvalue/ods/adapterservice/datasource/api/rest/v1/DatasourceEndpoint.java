@@ -1,6 +1,6 @@
 package org.jvalue.ods.adapterservice.datasource.api.rest.v1;
 
-import org.jvalue.ods.adapterservice.adapter.model.DataBlob;
+import org.jvalue.ods.adapterservice.datasource.model.DataBlob;
 import org.jvalue.ods.adapterservice.datasource.DatasourceManager;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
 import org.jvalue.ods.adapterservice.datasource.model.RuntimeParameters;
@@ -16,7 +16,7 @@ import java.net.URI;
 
 
 @RestController
-@RequestMapping("/datasources")
+@RequestMapping(Mappings.DATASOURCE_PATH)
 public class DatasourceEndpoint {
   private final DatasourceManager datasourceManager;
 
