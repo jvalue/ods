@@ -28,7 +28,8 @@ public class DatasourceMetadata {
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", locale = "UTC")
   private Date creationTimestamp;
 
-  //Constructor for JPA
+  // Constructor for JPA
+  @SuppressWarnings("unused")
   private DatasourceMetadata() {
   }
 

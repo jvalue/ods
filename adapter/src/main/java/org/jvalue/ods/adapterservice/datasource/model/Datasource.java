@@ -33,7 +33,8 @@ public class Datasource {
   @NotNull
   private DatasourceTrigger trigger;
 
-  //Constructor for JPA
+  // Constructor for JPA
+  @SuppressWarnings("unused")
   private Datasource() {
   }
 

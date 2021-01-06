@@ -8,6 +8,7 @@ import java.util.Objects;
 
 public class DatasourceConfigEvent implements Serializable {
 
+  private static final long serialVersionUID = 1L;
   private final Datasource datasource;
 
   public DatasourceConfigEvent(@JsonProperty("datasource") Datasource datasource) {
