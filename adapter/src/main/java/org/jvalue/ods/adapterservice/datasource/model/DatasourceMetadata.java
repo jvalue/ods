@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
+
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
 
@@ -76,7 +78,7 @@ public class DatasourceMetadata {
       "displayName='" + displayName + '\'' +
       ", author='" + author + '\'' +
       ", license='" + license + '\'' +
-      ", creationTimestamp=" + creationTimestamp.toGMTString() +
+      ", creationTimestamp=" + (new SimpleDateFormat("YYYY-MM-dd HH:mm:ss")).format(creationTimestamp) +
       ", description='" + description + '\'' +
       '}';
   }
