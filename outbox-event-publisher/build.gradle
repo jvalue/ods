@@ -1,0 +1,26 @@
+plugins {
+  id 'java'
+  id 'application'
+}
+
+application {
+  mainClassName = 'org.jvalue.outboxeventpublisher.Main'
+}
+
+repositories {
+  mavenCentral()
+}
+
+ext {
+  debeziumVersion = '1.4.0.CR1'
+  lombokVersion = '1.18.16'
+}
+
+dependencies {
+  implementation "io.debezium:debezium-api:$debeziumVersion"
+  implementation "io.debezium:debezium-embedded:$debeziumVersion"
+  implementation "io.debezium:debezium-connector-postgres:$debeziumVersion"
+
+  compileOnly "org.projectlombok:lombok:$lombokVersion"
+  annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+}

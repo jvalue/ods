@@ -1,0 +1,14 @@
+version: '3.7'
+
+services:
+  database:
+    image: postgres:13-alpine
+    environment:
+      - POSTGRES_USER=debezium
+      - POSTGRES_PASSWORD=debezium
+    command:
+      - '-cwal_level=logical'
+      - '-cmax_wal_senders=1'
+      - '-cmax_replication_slots=1'
+    ports:
+      - 5432:5432
