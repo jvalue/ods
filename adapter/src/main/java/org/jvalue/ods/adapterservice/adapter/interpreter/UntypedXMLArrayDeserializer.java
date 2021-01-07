@@ -8,6 +8,11 @@ import com.fasterxml.jackson.databind.deser.std.UntypedObjectDeserializer;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Custom Deserializer, written by @mathiaszinnen.
+ * Will be no longer necessary once we switch to Jackson 2.12.
+ * Also see https://github.com/jvalue/open-data-service/pull/300#issuecomment-755966381
+ */
 @SuppressWarnings("deprecation")
 public class UntypedXMLArrayDeserializer extends UntypedObjectDeserializer {
   private static final long serialVersionUID = 1L;
