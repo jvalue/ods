@@ -24,7 +24,8 @@ public class OutboxEventPublisher {
       .apply(ConfigHelper.fromEnvVar(ENV_VAR_PREFIX))
       .build();
 
-    amqpPublisher = new AmqpPublisher(config.subset("publisher.", true));
+    amqpPublisher = new AmqpPublisher();
+    amqpPublisher.init(config.subset("publisher.", true));
   }
 
   public void start() {

@@ -14,12 +14,15 @@ repositories {
 ext {
   debeziumVersion = '1.4.0.CR1'
   lombokVersion = '1.18.16'
+  springRabbitVersion = '2.3.2'
 }
 
 dependencies {
   implementation "io.debezium:debezium-api:$debeziumVersion"
   implementation "io.debezium:debezium-embedded:$debeziumVersion"
   implementation "io.debezium:debezium-connector-postgres:$debeziumVersion"
+
+  implementation "org.springframework.amqp:spring-rabbit:$springRabbitVersion"
 
   compileOnly "org.projectlombok:lombok:$lombokVersion"
   annotationProcessor "org.projectlombok:lombok:$lombokVersion"
