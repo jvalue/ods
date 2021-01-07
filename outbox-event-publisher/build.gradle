@@ -4,7 +4,7 @@ plugins {
 }
 
 application {
-  mainClassName = 'org.jvalue.outboxeventpublisher.Main'
+  mainClass.set('org.jvalue.outboxeventpublisher.Main')
 }
 
 repositories {

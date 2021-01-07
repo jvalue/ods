@@ -29,7 +29,6 @@ public class AmqpPublisher implements DebeziumEngine.ChangeConsumer<SourceRecord
     this.exchange = config.getString(AMQP_EXCHANGE);
     this.connectionFactory = new CachingConnectionFactory(URI.create(config.getString(AMQP_URL)));
     this.template = new RabbitTemplate(connectionFactory);
-    this.connectionFactory.createConnection();
   }
 
   @Override

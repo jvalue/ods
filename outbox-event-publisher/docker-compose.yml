@@ -13,7 +13,7 @@ services:
     ports:
       - 5432:5432
   rabbitmq:
-    image:  rabbitmq:3-management-alpine
+    image: rabbitmq:3-management-alpine
     environment:
       RABBITMQ_ERLANG_COOKIE: 'S0m3_R4bBi7_C0ok13'
       RABBITMQ_DEFAULT_USER: 'rabbit_adm'
@@ -21,3 +21,18 @@ services:
     ports:
       - "15672:15672"
       - "5672:5672"
+  publisher:
+    image: outbox-event-publisher
+    build:
+      context: .
+    environment:
+      - DEBEZIUM_DATABASE_HOSTNAME=database
+      - DEBEZIUM_DATABASE_PORT=5432
+      - DEBEZIUM_DATABASE_USERNAME=debezium
+      - DEBEZIUM_DATABASE_PASSWORD=debezium
+      - DEBEZIUM_DATABASE_DBNAME=debezium
+      - DEBEZIUM_DATABASE_SERVER_NAME=outbox_publisher
+      - DEBEZIUM_PUBLISHER_AMQP_URL=amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672
+    depends_on:
+      - database
+      - rabbitmq
