@@ -24,7 +24,9 @@ services:
   publisher:
     image: outbox-event-publisher
     build:
-      context: .
+      context: ".."
+    #volumes:
+    #  - debezium-data:/data
     environment:
       - DEBEZIUM_DATABASE_HOSTNAME=database
       - DEBEZIUM_DATABASE_PORT=5432
@@ -33,6 +35,10 @@ services:
       - DEBEZIUM_DATABASE_DBNAME=debezium
       - DEBEZIUM_DATABASE_SERVER_NAME=outbox_publisher
       - DEBEZIUM_PUBLISHER_AMQP_URL=amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672
+      #- DEBEZIUM_OFFSET_STORAGE_FILE_FILENAME=/data/offset.dat
     depends_on:
       - database
       - rabbitmq
+
+#volumes:
+#  debezium-data:

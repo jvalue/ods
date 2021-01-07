@@ -1,0 +1,20 @@
+{
+  "name": "outbox-event-publisher-it",
+  "version": "1.0.0",
+  "description": "Outbox event publisher IT",
+  "scripts": {
+    "test": "jest --colors --verbose --runInBand --detectOpenHandles"
+  },
+  "dependencies": {
+    "@jvalue/node-dry-amqp": "0.0.1",
+    "jest": "26.6.3",
+    "pg": "8.5.1"
+  },
+  "licenses": [
+    {
+      "type": "GNU Affero General Public License 3",
+      "url": "https://opensource.org/licenses/AGPL-3.0"
+    }
+  ],
+  "repository": "https://github.com/jvalue/open-data-service.git"
+}
