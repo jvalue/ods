@@ -21,7 +21,6 @@ public class DatasourceMetadataTest {
                 "}";
 
         DatasourceMetadata result = mapper.readValue(metadataJson, DatasourceMetadata.class);
-
         assertEquals("harri", result.getAuthor());
         assertEquals("nobodymayuseanything v1.0", result.getLicense());
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));

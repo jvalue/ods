@@ -23,7 +23,8 @@ public class DatasourceTrigger {
   private Long interval;
 
 
-  //Constructor for JPA
+  // Constructor for JPA
+  @SuppressWarnings("unused")
   private DatasourceTrigger() {
   }
 

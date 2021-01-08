@@ -50,7 +50,7 @@ public class HttpImporterTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testTypoInArguments() throws IllegalArgumentException {
-        String result = importer.fetch(Map.of("locationS", from.getPath(), "encodingS", "UTF-8"));
+        importer.fetch(Map.of("locationS", from.getPath(), "encodingS", "UTF-8"));
     }
 
   @Test(expected = IllegalArgumentException.class)

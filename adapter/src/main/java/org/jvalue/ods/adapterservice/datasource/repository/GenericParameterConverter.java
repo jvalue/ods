@@ -29,6 +29,7 @@ public class GenericParameterConverter implements AttributeConverter<Map<String,
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public Map<String, Object> convertToEntityAttribute(String parametersJson) {
     Map<String, Object> parameters = null;
     try {

@@ -6,10 +6,8 @@ import org.jvalue.ods.adapterservice.adapter.importer.Importer;
 import org.jvalue.ods.adapterservice.adapter.interpreter.Interpreter;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.DataImportResponse;
-import org.jvalue.ods.adapterservice.datasource.model.DataBlob;
 import org.jvalue.ods.adapterservice.adapter.model.FormatConfig;
 import org.jvalue.ods.adapterservice.adapter.model.ProtocolConfig;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 

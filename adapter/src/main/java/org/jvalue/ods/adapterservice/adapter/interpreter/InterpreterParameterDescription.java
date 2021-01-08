@@ -5,12 +5,13 @@ import java.util.Objects;
 public class InterpreterParameterDescription {
   private String name;
   private String description;
-  private Class type;
+  private Class<?> type;
 
+  @SuppressWarnings("unused")
   private InterpreterParameterDescription() {
   }
 
-  public InterpreterParameterDescription(String name, String description, Class type) {
+  public InterpreterParameterDescription(String name, String description, Class<?> type) {
     this.name = name;
     this.description = description;
     this.type = type;
@@ -32,11 +33,11 @@ public class InterpreterParameterDescription {
     this.description = description;
   }
 
-  public Class getType() {
+  public Class<?> getType() {
     return type;
   }
 
-  public void setType(Class type) {
+  public void setType(Class<?> type) {
     this.type = type;
   }
 

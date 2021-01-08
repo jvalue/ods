@@ -24,6 +24,7 @@ public class DatasourceFormat {
   private Map<String, Object> parameters;
 
   // Constructor for JPA
+  @SuppressWarnings("unused")
   private DatasourceFormat() {
   }
 
