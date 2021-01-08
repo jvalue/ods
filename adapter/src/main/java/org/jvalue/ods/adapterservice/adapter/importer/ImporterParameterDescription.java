@@ -6,19 +6,16 @@ public class ImporterParameterDescription {
   private String name;
   private String description;
   private boolean required;
-  private Class type;
+  private Class<?> type;
 
-  private ImporterParameterDescription() {
-  }
-
-  public ImporterParameterDescription(String name, String description, Class type) {
+  public ImporterParameterDescription(String name, String description, Class<?> type) {
     this.name = name;
     this.description = description;
     this.required = true;
     this.type = type;
   }
 
-  public ImporterParameterDescription(String name, String description, boolean required, Class type) {
+  public ImporterParameterDescription(String name, String description, boolean required, Class<?> type) {
     this.name = name;
     this.description = description;
     this.required = required;
@@ -41,11 +38,11 @@ public class ImporterParameterDescription {
     this.description = description;
   }
 
-  public Class getType() {
+  public Class<?> getType() {
     return type;
   }
 
-  public void setType(Class type) {
+  public void setType(Class<?> type) {
     this.type = type;
   }
 

@@ -25,6 +25,7 @@ public class DatasourceProtocol {
   private Map<String, Object> parameters;
 
   // Constructor for JPA
+  @SuppressWarnings("unused")
   private DatasourceProtocol() {
   }
 

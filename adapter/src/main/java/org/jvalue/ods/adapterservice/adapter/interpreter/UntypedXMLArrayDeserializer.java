@@ -8,8 +8,17 @@ import com.fasterxml.jackson.databind.deser.std.UntypedObjectDeserializer;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Custom Deserializer, written by @mathiaszinnen.
+ * Will be no longer necessary once we switch to Jackson 2.12.
+ * Also see https://github.com/jvalue/open-data-service/pull/300#issuecomment-755966381
+ */
+@SuppressWarnings("deprecation")
 public class UntypedXMLArrayDeserializer extends UntypedObjectDeserializer {
+  private static final long serialVersionUID = 1L;
+
   @Override
+  @SuppressWarnings("unchecked")
   protected Object mapObject(JsonParser p, DeserializationContext ctxt) throws IOException {
     // Method beginning is just copied from superclass.
     String key1;
@@ -46,11 +55,11 @@ public class UntypedXMLArrayDeserializer extends UntypedObjectDeserializer {
       if (result.containsKey(key1)) { // key is not unique -> consider it as a list.
         if (!(val instanceof List)) {
           val = new ArrayList<>();
-          ((List) val).add(result.get(key1));
+          ((List<Object>) val).add(result.get(key1));
           result.put(key1, val);
         }
 
-        ((List) val).add(deserialize(p, ctxt));
+        ((List<Object>) val).add(deserialize(p, ctxt));
       } else {
         result.put(key1, deserialize(p, ctxt));
       }

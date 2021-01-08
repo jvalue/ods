@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
+
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
 
@@ -28,7 +30,8 @@ public class DatasourceMetadata {
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", locale = "UTC")
   private Date creationTimestamp;
 
-  //Constructor for JPA
+  // Constructor for JPA
+  @SuppressWarnings("unused")
   private DatasourceMetadata() {
   }
 
@@ -75,7 +78,7 @@ public class DatasourceMetadata {
       "displayName='" + displayName + '\'' +
       ", author='" + author + '\'' +
       ", license='" + license + '\'' +
-      ", creationTimestamp=" + creationTimestamp.toGMTString() +
+      ", creationTimestamp=" + (new SimpleDateFormat("YYYY-MM-dd HH:mm:ss")).format(creationTimestamp) +
       ", description='" + description + '\'' +
       '}';
   }

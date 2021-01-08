@@ -33,7 +33,8 @@ public class Datasource {
   @NotNull
   private DatasourceTrigger trigger;
 
-  //Constructor for JPA
+  // Constructor for JPA
+  @SuppressWarnings("unused")
   private Datasource() {
   }
 
@@ -101,6 +102,7 @@ public class Datasource {
 
     //Add all default parameters to the replacement parameters map
     if (this.getProtocol().getParameters().containsKey("defaultParameters")) {
+      @SuppressWarnings("unchecked")
       var defaultParams = (Map<String, String>) this.getProtocol().getParameters().get("defaultParameters");
       defaultParams.forEach(replacementParameters::put);
     }
