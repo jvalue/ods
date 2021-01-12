@@ -1,16 +1,10 @@
 package org.jvalue.ods.adapterservice.datasource.event;
 
-import java.io.Serializable;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-public class DatasourceImportedEvent implements Serializable {
-  private static final long serialVersionUID = 1L;
-
+public class ImportSuccessEvent {
   private final Long datasourceId;
   private final String data;
 
-  public DatasourceImportedEvent(@JsonProperty("datasourceId") final Long datasourceId, @JsonProperty("data") final String data) {
+  public ImportSuccessEvent(Long datasourceId, String data) {
     this.datasourceId = datasourceId;
     this.data = data;
   }

@@ -1,64 +1,64 @@
 package org.jvalue.ods.adapterservice.datasource.api.amqp;
 
-import org.jvalue.ods.adapterservice.config.RabbitConfiguration;
-import org.jvalue.ods.adapterservice.datasource.event.*;
+import org.jvalue.ods.adapterservice.config.AdapterProperties;
+import org.jvalue.ods.adapterservice.datasource.event.DatasourceConfigEvent;
+import org.jvalue.ods.adapterservice.datasource.event.ImportSuccessEvent;
+import org.jvalue.ods.adapterservice.datasource.event.ImportFailedEvent;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.io.Serializable;
 
 @Service
 public class AmqpPublisher {
+  private static final Logger logger = LoggerFactory.getLogger(AmqpPublisher.class);
 
-  Logger logger = LoggerFactory.getLogger(AmqpPublisher.class);
   private final RabbitTemplate rabbitTemplate;
+  private final AdapterProperties.Amqp amqpConfig;
 
-  @Autowired
-  public AmqpPublisher(RabbitTemplate rabbitTemplate) {
+  public AmqpPublisher(RabbitTemplate rabbitTemplate, AdapterProperties adapterProperties) {
     this.rabbitTemplate = rabbitTemplate;
+    this.amqpConfig = adapterProperties.getAmqp();
   }
 
   public void publishCreation(Datasource datasource) {
-    publish(RabbitConfiguration.AMQP_DATASOURCE_CREATED_TOPIC, new DatasourceConfigEvent(datasource));
+    publish(amqpConfig.getDatasourceCreatedTopic(), new DatasourceConfigEvent(datasource));
   }
 
   public void publishUpdate(Datasource datasource) {
-    publish(RabbitConfiguration.AMQP_DATASOURCE_UPDATED_TOPIC, new DatasourceConfigEvent(datasource));
+    publish(amqpConfig.getDatasourceUpdatedTopic(), new DatasourceConfigEvent(datasource));
   }
 
   public void publishDeletion(Datasource datasource) {
-    publish(RabbitConfiguration.AMQP_DATASOURCE_DELETED_TOPIC, new DatasourceConfigEvent(datasource));
+    publish(amqpConfig.getDatasourceDeletedTopic(), new DatasourceConfigEvent(datasource));
   }
 
   public void publishImportSuccess(Long id, String data) {
-    publish(RabbitConfiguration.AMQP_IMPORT_SUCCESS_TOPIC, new DatasourceImportedEvent(id, data));
+    publish(amqpConfig.getImportSuccessTopic(), new ImportSuccessEvent(id, data));
   }
 
   public void publishImportFailure(Long id, String errMsg) {
-    publish(RabbitConfiguration.AMQP_IMPORT_FAILED_TOPIC, new ImportFailedEvent(id, errMsg));
+    publish(amqpConfig.getImportFailedTopic(), new ImportFailedEvent(id, errMsg));
   }
 
-  private void publish(String topic, Serializable message) {
-    for (int retries = RabbitConfiguration.AMQP_PUBLISH_RETRIES; retries >= 0; retries--) {
+  private void publish(String topic, Object message) {
+    for (int retries = amqpConfig.getPublishRetries(); retries >= 0; retries--) {
       try {
-        this.rabbitTemplate.convertAndSend(RabbitConfiguration.AMPQ_EXCHANGE, topic, message);
+        this.rabbitTemplate.convertAndSend(amqpConfig.getExchange(), topic, message);
         return;
       } catch (AmqpException e) {
         try {
-          Thread.sleep(RabbitConfiguration.AMQP_PUBLISH_BACKOFF);
+          Thread.sleep(amqpConfig.getPublishBackoff());
         } catch (InterruptedException interruptedException) {
           Thread.currentThread().interrupt();
           throw new RuntimeException(interruptedException);
         }
-        logger.warn("Message publish failed (" + retries + "). Retrying in " + RabbitConfiguration.AMQP_PUBLISH_BACKOFF);
+        logger.warn("Message publish failed (" + retries + "). Retrying in " + amqpConfig.getPublishBackoff());
       }
     }
-    System.err.println("Sending message " + message.toString() + " to topic: " + topic + " failed.");
+    logger.error("Sending message " + message.toString() + " to topic: " + topic + " failed.");
   }
 
 }

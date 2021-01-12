@@ -1,7 +1,6 @@
 package org.jvalue.ods.adapterservice.datasource.api.rest.v1;
 
 import org.jvalue.ods.adapterservice.datasource.repository.DataBlobRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,7 +14,6 @@ public class DataEndpoint {
 
   private final DataBlobRepository blobRepository;
 
-  @Autowired
   public DataEndpoint(DataBlobRepository blobRepository) {
     this.blobRepository = blobRepository;
   }

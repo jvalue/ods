@@ -14,7 +14,7 @@ import java.util.Map;
  */
 public class GenericParameterConverter implements AttributeConverter<Map<String, Object>, String> {
 
-  private ObjectMapper objectMapper = new ObjectMapper();
+  private final ObjectMapper objectMapper = new ObjectMapper();
   private final Logger logger = LoggerFactory.getLogger(GenericParameterConverter.class);
 
   @Override

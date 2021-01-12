@@ -10,7 +10,8 @@ import org.jvalue.ods.adapterservice.datasource.model.DatasourceMetadata;
 import org.jvalue.ods.adapterservice.datasource.model.RuntimeParameters;
 import org.jvalue.ods.adapterservice.datasource.repository.DataBlobRepository;
 import org.jvalue.ods.adapterservice.datasource.repository.DatasourceRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,13 +21,13 @@ import java.util.stream.StreamSupport;
 
 @Service
 public class DatasourceManager {
+  private static final Logger log = LoggerFactory.getLogger(DatasourceManager.class);
 
   private final DatasourceRepository datasourceRepository;
   private final DataBlobRepository dataBlobRepository;
   private final Adapter adapter;
   private final AmqpPublisher amqpPublisher;
 
-  @Autowired
   public DatasourceManager(
     DatasourceRepository datasourceRepository,
     DataBlobRepository dataBlobRepository,
@@ -112,9 +113,9 @@ public class DatasourceManager {
       }
       amqpPublisher.publishImportFailure(id, errMsg);
       if (e instanceof IllegalArgumentException) {
-        System.err.println("Data Import request failed. Malformed Request: " + e.getMessage());
+        log.error("Data Import request failed. Malformed Request: " + e.getMessage());
       } else {
-        System.err.println("Exception in the Adapter: " + e.getMessage());
+        log.error("Exception in the Adapter: " + e.getMessage());
       }
       throw e;
     }
