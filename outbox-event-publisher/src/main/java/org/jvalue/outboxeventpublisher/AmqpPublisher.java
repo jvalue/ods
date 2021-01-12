@@ -41,11 +41,11 @@ public class AmqpPublisher implements DebeziumEngine.ChangeConsumer<SourceRecord
   }
 
   private void publishEvent(SourceRecord record) {
-    var topic = record.topic();
+    var routingKey = record.topic();
     var eventId = (String) record.key();
     var payload = (String) record.value();
 
-    log.info("Publishing event {} with topic {}", eventId, topic);
+    log.info("Publishing event {} with routingKey {}", eventId, routingKey);
 
     var message = createAmqpMessage(eventId, payload);
     // If the message could not be send to amqp, it is important that always an exception is thrown.
@@ -56,7 +56,7 @@ public class AmqpPublisher implements DebeziumEngine.ChangeConsumer<SourceRecord
     // again, the OutboxEventPublisher can be started again and will automatically reprocess the failed message,
     // because the message has never been marked as processed.
     // TODO: maybe add a retry
-    template.send(exchange, topic, message);
+    template.send(exchange, routingKey, message);
   }
 
   private Message createAmqpMessage(String eventId, String payload) {

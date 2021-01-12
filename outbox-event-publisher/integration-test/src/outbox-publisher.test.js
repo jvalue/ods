@@ -21,9 +21,9 @@ describe('Outbox event publisher', () => {
     const amqpConsumer = new AmqpConsumer()
     await amqpConsumer.init(msg => {
       const eventId = msg.properties.messageId
-      const topic = msg.fields.routingKey
+      const routingKey = msg.fields.routingKey
       const payload = JSON.parse(msg.content.toString())
-      receivedMessages.push({eventId, topic, payload})
+      receivedMessages.push({eventId, routingKey, payload})
     })
     return amqpConsumer
   }
@@ -65,65 +65,65 @@ describe('Outbox event publisher', () => {
   }, TEST_TIMEOUT_MS)
 
   test('publishes event from outbox', async () => {
-    const topic = 'datasource.create'
+    const routingKey = 'datasource.create'
     const payload = { id: 1, name: 'Test datasource' }
 
-    const eventId = await outboxDatabase.insertEvent(topic, payload)
+    const eventId = await outboxDatabase.insertEvent(routingKey, payload)
 
     //Wait for publication
     await sleep(PUBLICATION_WAIT_TIME_MS)
 
-    expect(receivedMessages).toEqual([{ eventId, topic, payload }])
+    expect(receivedMessages).toEqual([{ eventId, routingKey, payload }])
   }, TEST_TIMEOUT_MS)
 
   test.each(['publisher', 'database'])('does not republish event after %s restart', async service => {
-    const event1topic = 'datasource.create'
+    const event1routingKey = 'datasource.create'
     const event1payload = { id: 1, name: 'Test datasource' }
 
-    const event1Id = await outboxDatabase.insertEvent(event1topic, event1payload)
+    const event1Id = await outboxDatabase.insertEvent(event1routingKey, event1payload)
 
     //Wait for publication
     await sleep(PUBLICATION_WAIT_TIME_MS)
 
-    expect(receivedMessages).toEqual([{ eventId: event1Id, topic: event1topic, payload: event1payload }])
+    expect(receivedMessages).toEqual([{ eventId: event1Id, routingKey: event1routingKey, payload: event1payload }])
 
     //Restart service
     await DockerCompose(`stop ${service}`)
     await DockerCompose(`start ${service}`)
     await sleep(RESTART_WAIT_TIME_MS)
 
-    const event2topic = 'datasource.update'
+    const event2routingKey = 'datasource.update'
     const event2payload = { id: 1, name: 'Updated datasource'}
-    const event2Id = await outboxDatabase.insertEvent(event2topic, event2payload)
+    const event2Id = await outboxDatabase.insertEvent(event2routingKey, event2payload)
 
     //Wait for publication
     await sleep(PUBLICATION_WAIT_TIME_MS)
 
     expect(receivedMessages).toEqual([
-      { eventId: event1Id, topic: event1topic, payload: event1payload },
-      { eventId: event2Id, topic: event2topic, payload: event2payload },
+      { eventId: event1Id, routingKey: event1routingKey, payload: event1payload },
+      { eventId: event2Id, routingKey: event2routingKey, payload: event2payload },
     ])
   }, TEST_TIMEOUT_MS)
 
   test('does tolerate RabbitMQ restarts', async () => {
-    const event1topic = 'datasource.create'
+    const event1routingKey = 'datasource.create'
     const event1payload = { id: 1, name: 'Test datasource' }
 
-    const event1Id = await outboxDatabase.insertEvent(event1topic, event1payload)
+    const event1Id = await outboxDatabase.insertEvent(event1routingKey, event1payload)
 
     //Wait for publication
     await sleep(PUBLICATION_WAIT_TIME_MS)
 
-    expect(receivedMessages).toEqual([{ eventId: event1Id, topic: event1topic, payload: event1payload }])
+    expect(receivedMessages).toEqual([{ eventId: event1Id, routingKey: event1routingKey, payload: event1payload }])
 
     await amqpConsumer.stop() // close our amqp consumer because we are stopping RabbitMQ
 
     await DockerCompose('stop rabbitmq')
 
     // Publish an event
-    const event2topic = 'datasource.update'
+    const event2routingKey = 'datasource.update'
     const event2payload = { id: 1, name: 'Updated datasource'}
-    const event2Id = await outboxDatabase.insertEvent(event2topic, event2payload)
+    const event2Id = await outboxDatabase.insertEvent(event2routingKey, event2payload)
 
     await DockerCompose('start rabbitmq')
     await sleep(RESTART_WAIT_TIME_MS)
@@ -133,11 +133,11 @@ describe('Outbox event publisher', () => {
     await DockerCompose('start publisher')
     await sleep(RESTART_WAIT_TIME_MS)
 
-    // Event1 will be published again, because the first the first publication failed
+    // Event1 will be published again, because the first publication failed
     expect(receivedMessages).toEqual([
-      { eventId: event1Id, topic: event1topic, payload: event1payload },
-      { eventId: event1Id, topic: event1topic, payload: event1payload },
-      { eventId: event2Id, topic: event2topic, payload: event2payload },
+      { eventId: event1Id, routingKey: event1routingKey, payload: event1payload },
+      { eventId: event1Id, routingKey: event1routingKey, payload: event1payload },
+      { eventId: event2Id, routingKey: event2routingKey, payload: event2payload },
     ])
   }, TEST_TIMEOUT_MS)
 
@@ -151,10 +151,8 @@ describe('Outbox event publisher', () => {
     await sleep(PUBLICATION_WAIT_TIME_MS)
 
     expect(receivedMessages).toEqual([
-      { eventId: eventIds[0], topic: 'entity.create', payload: { id: 42 } },
-      { eventId: eventIds[1], topic: 'entity.create', payload: { id: 44 } },
+      { eventId: eventIds[0], routingKey: 'entity.create', payload: { id: 42 } },
+      { eventId: eventIds[1], routingKey: 'entity.create', payload: { id: 44 } },
     ])
   }, TEST_TIMEOUT_MS)
-
-
 })

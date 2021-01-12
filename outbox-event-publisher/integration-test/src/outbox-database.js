@@ -13,14 +13,14 @@ const POOL_CONFIG = {
 const CREATE_OUTBOX_TABLE_SQL = `
 CREATE TABLE "${OUTBOX_TABLE_NAME}"(
   id uuid not null constraint outbox_pk primary key default gen_random_uuid(),
-  topic varchar(255) not null,
+  routing_key varchar(255) not null,
   payload jsonb
 );
 `
 
 const INSERT_INTO_OUTBOX_TABLE_SQL = `
 INSERT INTO "${OUTBOX_TABLE_NAME}"
-  ("topic", "payload")
+  ("routing_key", "payload")
   VALUES ($1, $2)
   RETURNING id
 `
@@ -32,8 +32,8 @@ class OutboxDatabase {
     await this.pool.query(CREATE_OUTBOX_TABLE_SQL)
   }
 
-  async insertEvent(topic, payload) {
-    const { rows } = await this.pool.query(INSERT_INTO_OUTBOX_TABLE_SQL, [topic, payload])
+  async insertEvent(routingKey, payload) {
+    const { rows } = await this.pool.query(INSERT_INTO_OUTBOX_TABLE_SQL, [routingKey, payload])
     return rows[0].id;
   }
 
@@ -55,7 +55,7 @@ class OutboxDatabase {
       chunks.push('(' + valuesClause.join(', ') + ')')
     }
     return {
-      text: `INSERT INTO "${OUTBOX_TABLE_NAME}" ("topic", "payload") VALUES ${chunks.join(', ')} RETURNING id`,
+      text: `INSERT INTO "${OUTBOX_TABLE_NAME}" ("routing_key", "payload") VALUES ${chunks.join(', ')} RETURNING id`,
       values: params
     }
   }

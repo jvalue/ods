@@ -19,7 +19,7 @@ public class OutboxTableTransform<R extends ConnectRecord<R>> implements Transfo
   private final ExtractField<R> afterFieldExtractor = new ExtractField.Value<>();
 
   private String fieldEventId;
-  private String fieldEventTopic;
+  private String fieldEventRoutingKey;
   private String fieldEventPayload;
 
   private SmtManager<R> smtManager;
@@ -39,9 +39,9 @@ public class OutboxTableTransform<R extends ConnectRecord<R>> implements Transfo
       throw new ConnectException(String.format("Unable to find ID field %s in event", fieldEventId));
     }
 
-    var topicField = eventValueSchema.field(fieldEventTopic);
-    if (topicField == null) {
-      throw new ConnectException(String.format("Unable to find topic field %s in event", fieldEventTopic));
+    var routingKeyField = eventValueSchema.field(fieldEventRoutingKey);
+    if (routingKeyField == null) {
+      throw new ConnectException(String.format("Unable to find routing_key field %s in event", fieldEventRoutingKey));
     }
 
     var payloadField = eventValueSchema.field(fieldEventPayload);
@@ -50,10 +50,10 @@ public class OutboxTableTransform<R extends ConnectRecord<R>> implements Transfo
     }
 
     var id = eventStruct.get(fieldEventId);
-    var topic = eventStruct.getString(fieldEventTopic);
+    var routingKey = eventStruct.getString(fieldEventRoutingKey);
     var payload = eventStruct.get(fieldEventPayload);
 
-    return record.newRecord(topic, null, idField.schema(), id, payloadField.schema(), payload, null);
+    return record.newRecord(routingKey, null, idField.schema(), id, payloadField.schema(), payload, null);
   }
 
   @Override
@@ -71,7 +71,7 @@ public class OutboxTableTransform<R extends ConnectRecord<R>> implements Transfo
     var config = Configuration.from(configMap);
 
     fieldEventId = config.getString(OutboxTableTransformConfigDef.FIELD_EVENT_ID);
-    fieldEventTopic = config.getString(OutboxTableTransformConfigDef.FIELD_EVENT_TOPIC);
+    fieldEventRoutingKey = config.getString(OutboxTableTransformConfigDef.FIELD_EVENT_ROUTING_KEY);
     fieldEventPayload = config.getString(OutboxTableTransformConfigDef.FIELD_EVENT_PAYLOAD);
 
     smtManager = new SmtManager<>(config);
