@@ -18,16 +18,16 @@ import java.util.List;
 
 @Slf4j
 public class AmqpPublisher implements DebeziumEngine.ChangeConsumer<SourceRecord>, Closeable {
-  private static final String AMQP_URL = "amqp.url";
-  private static final String AMQP_EXCHANGE = "amqp.exchange";
+  private static final String AMQP_URL_CONFIG_NAME = "amqp.url";
+  private static final String AMQP_EXCHANGE_CONFIG_NAME = "amqp.exchange";
 
   private CachingConnectionFactory connectionFactory;
   private AmqpTemplate template;
   private String exchange;
 
   public void init(Configuration config) {
-    this.exchange = config.getString(AMQP_EXCHANGE);
-    this.connectionFactory = new CachingConnectionFactory(URI.create(config.getString(AMQP_URL)));
+    this.exchange = config.getString(AMQP_EXCHANGE_CONFIG_NAME);
+    this.connectionFactory = new CachingConnectionFactory(URI.create(config.getString(AMQP_URL_CONFIG_NAME)));
     this.template = new RabbitTemplate(connectionFactory);
   }
 
@@ -48,8 +48,14 @@ public class AmqpPublisher implements DebeziumEngine.ChangeConsumer<SourceRecord
     log.info("Publishing event {} with topic {}", eventId, topic);
 
     var message = createAmqpMessage(eventId, payload);
-    //TODO: maybe add a retry, but if it still fails, throw an exception to stop debezium.
-    // In that case new events can also not be processed, because we would then lose the order.
+    // If the message could not be send to amqp, it is important that always an exception is thrown.
+    // Otherwise the message will get marked as processed and in normal operation it would not be handled again.
+    // Because the order of the messages can not be guaranteed after a failed publication, normal operation
+    // is not possible anymore. Therefore we do not catch the AmqpException here and instead let it bubble up,
+    // so debezium can catch the exception and terminate. Once the operator has ensured that RabbitMQ is available
+    // again, the OutboxEventPublisher can be started again and will automatically reprocess the failed message,
+    // because the message has never been marked as processed.
+    // TODO: maybe add a retry
     template.send(exchange, topic, message);
   }
 

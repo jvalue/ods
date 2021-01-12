@@ -12,7 +12,7 @@ repositories {
 }
 
 ext {
-  debeziumVersion = '1.4.0.CR1'
+  debeziumVersion = '1.4.0.Final'
   lombokVersion = '1.18.16'
   springRabbitVersion = '2.3.2'
 }

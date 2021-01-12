@@ -48,14 +48,13 @@ public class OutboxEventPublisher {
     if (engine != null) {
       try {
         engine.await(1, TimeUnit.MINUTES);
-      } catch (InterruptedException ignore) {
-      }
+      } catch (InterruptedException ignore) {}
     }
     // Try to close the amqp connection
     if (amqpPublisher != null) {
       try {
         amqpPublisher.close();
-      } catch(IOException ignore){}
+      } catch(IOException ignore) {}
     }
   }
 }
