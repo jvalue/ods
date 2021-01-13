@@ -30,6 +30,8 @@ services:
       - rabbitmq
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://adapter-db:5432/adapterservice
+      SPRING_DATASOURCE_USERNAME: adapterservice
+      SPRING_DATASOURCE_PASSWORD: admin
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: rabbit_adm
