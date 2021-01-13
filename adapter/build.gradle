@@ -2,6 +2,7 @@ plugins {
 	id 'org.springframework.boot' version '2.3.0.RELEASE'
   id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 	id 'java'
+  id 'io.freefair.lombok' version '5.3.0'
 }
 
 def props = new Properties()
@@ -49,7 +50,6 @@ dependencies {
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv'
 	implementation 'org.postgresql:postgresql'
-
 
   testImplementation('org.springframework.boot:spring-boot-starter-test') {
     exclude group: 'org.junit.vintage:junit-vintage-engine'

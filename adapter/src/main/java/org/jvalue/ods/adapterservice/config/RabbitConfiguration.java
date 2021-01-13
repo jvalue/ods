@@ -1,7 +1,7 @@
 package org.jvalue.ods.adapterservice.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -10,18 +10,15 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+@Slf4j
+@AllArgsConstructor
 @Configuration
 public class RabbitConfiguration {
-  private static final Logger log = LoggerFactory.getLogger(RabbitConfiguration.class);
-  private final AdapterProperties.Amqp amqpConfig;
-
-  public RabbitConfiguration(AdapterProperties adapterProperties) {
-    this.amqpConfig = adapterProperties.getAmqp();
-  }
+  private final AdapterProperties properties;
 
   @Bean
   public TopicExchange exchange() {
-    return new TopicExchange(amqpConfig.getExchange());
+    return new TopicExchange(properties.getAmqp().getExchange());
   }
 
   @Bean

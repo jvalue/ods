@@ -1,5 +1,6 @@
 package org.jvalue.ods.adapterservice.adapter.api.rest.v1;
 
+import lombok.AllArgsConstructor;
 import org.jvalue.ods.adapterservice.adapter.Adapter;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.DataImportResponse;
@@ -11,14 +12,9 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.validation.Valid;
 
 @RestController
+@AllArgsConstructor
 public class AdapterEndpoint {
-
   private final Adapter adapter;
-
-  public AdapterEndpoint(Adapter adapter) {
-    this.adapter = adapter;
-  }
-
 
   @PostMapping(Mappings.IMPORT_PATH)
   public DataImportResponse executeDataImport(@Valid @RequestBody AdapterConfig config) {

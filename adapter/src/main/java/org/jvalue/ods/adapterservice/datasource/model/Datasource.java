@@ -2,6 +2,7 @@ package org.jvalue.ods.adapterservice.datasource.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 import org.jvalue.ods.adapterservice.adapter.Protocol;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.FormatConfig;
@@ -14,6 +15,11 @@ import java.util.Map;
 import java.util.Objects;
 
 @Entity
+@Getter
+@Setter
+@ToString
+@NoArgsConstructor
+@EqualsAndHashCode
 public class Datasource {
 
   @Id
@@ -33,11 +39,6 @@ public class Datasource {
   @NotNull
   private DatasourceTrigger trigger;
 
-  // Constructor for JPA
-  @SuppressWarnings("unused")
-  private Datasource() {
-  }
-
   @JsonCreator
   public Datasource(
     @JsonProperty("protocol") DatasourceProtocol protocol,
@@ -48,41 +49,6 @@ public class Datasource {
     this.format = format;
     this.metadata = metadata;
     this.trigger = trigger;
-  }
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public DatasourceProtocol getProtocol() {
-    return protocol;
-  }
-
-  public DatasourceFormat getFormat() {
-    return format;
-  }
-
-  public DatasourceMetadata getMetadata() {
-    return metadata;
-  }
-
-  public DatasourceTrigger getTrigger() {
-    return trigger;
-  }
-
-  @Override
-  public String toString() {
-    return "Datasource{" +
-      "id=" + id +
-      ", protocol=" + protocol +
-      ", format=" + format +
-      ", metadata=" + metadata +
-      ", trigger=" + trigger +
-      '}';
   }
 
   public AdapterConfig toAdapterConfig(RuntimeParameters runtimeParameters) {
@@ -108,8 +74,8 @@ public class Datasource {
     }
 
     //Add all runtime parameters to the replacement parameters map
-    if (runtimeParameters != null && runtimeParameters.parameters != null) {
-      runtimeParameters.parameters.forEach(replacementParameters::put);
+    if (runtimeParameters != null && runtimeParameters.getParameters() != null) {
+      runtimeParameters.getParameters().forEach(replacementParameters::put);
     }
 
     String url = (String) this.getProtocol().getParameters().get("location");
@@ -120,22 +86,5 @@ public class Datasource {
     Map<String, Object> parameters = new HashMap<>(this.getProtocol().getParameters());
     parameters.put("location", url);
     return parameters;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof Datasource)) return false;
-    Datasource that = (Datasource) o;
-    return Objects.equals(id, that.id) &&
-      Objects.equals(protocol, that.protocol) &&
-      Objects.equals(format, that.format) &&
-      Objects.equals(metadata, that.metadata) &&
-      Objects.equals(trigger, that.trigger);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(id, protocol, format, metadata, trigger);
   }
 }

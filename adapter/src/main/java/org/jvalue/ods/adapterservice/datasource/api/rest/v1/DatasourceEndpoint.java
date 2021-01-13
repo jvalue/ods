@@ -1,7 +1,8 @@
 package org.jvalue.ods.adapterservice.datasource.api.rest.v1;
 
-import org.jvalue.ods.adapterservice.datasource.model.DataBlob;
+import lombok.AllArgsConstructor;
 import org.jvalue.ods.adapterservice.datasource.DatasourceManager;
+import org.jvalue.ods.adapterservice.datasource.model.DataBlob;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
 import org.jvalue.ods.adapterservice.datasource.model.RuntimeParameters;
 import org.springframework.http.HttpStatus;
@@ -13,14 +14,11 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.validation.Valid;
 import java.net.URI;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping(Mappings.DATASOURCE_PATH)
 public class DatasourceEndpoint {
   private final DatasourceManager datasourceManager;
-
-  public DatasourceEndpoint(DatasourceManager datasourceManager) {
-    this.datasourceManager = datasourceManager;
-  }
 
   @GetMapping
   public Iterable<Datasource> getDatasources() {

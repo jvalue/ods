@@ -2,6 +2,7 @@ package org.jvalue.ods.adapterservice.datasource.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 import org.jvalue.ods.adapterservice.adapter.Protocol;
 import org.jvalue.ods.adapterservice.datasource.repository.GenericParameterConverter;
 
@@ -11,6 +12,11 @@ import java.util.Map;
 import java.util.Objects;
 
 @Embeddable
+@Getter
+@Setter
+@ToString
+@NoArgsConstructor
+@EqualsAndHashCode
 public class DatasourceProtocol {
 
   @NotNull
@@ -24,43 +30,10 @@ public class DatasourceProtocol {
   @Convert(converter = GenericParameterConverter.class)
   private Map<String, Object> parameters;
 
-  // Constructor for JPA
-  @SuppressWarnings("unused")
-  private DatasourceProtocol() {
-  }
-
   @JsonCreator
   public DatasourceProtocol(@JsonProperty("type") Protocol type,
                             @JsonProperty("parameters") Map<String, Object> parameters) {
     this.type = type;
     this.parameters = parameters;
-  }
-
-  public Protocol getType() {
-    return type;
-  }
-
-  public Map<String, Object> getParameters() {
-    return parameters;
-  }
-
-  @Override
-  public String toString() {
-    return "AdapterProtocolConfig {" + "type='" + type + '\'' + ", parameters='" + parameters + '\'' + '}';
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
-    DatasourceProtocol config = (DatasourceProtocol) o;
-    return type.equals(config.type) && parameters.equals(config.parameters);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(type, parameters);
   }
 }

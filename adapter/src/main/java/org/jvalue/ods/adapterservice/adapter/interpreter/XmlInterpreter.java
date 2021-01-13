@@ -4,15 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
-
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public class XmlInterpreter extends Interpreter {
 
-  private final List<InterpreterParameterDescription> parameters = Collections.unmodifiableList(List.of());
+  private final List<InterpreterParameterDescription> parameters = List.of();
   private final XmlMapper mapper = new XmlMapper();
 
   public XmlInterpreter() {

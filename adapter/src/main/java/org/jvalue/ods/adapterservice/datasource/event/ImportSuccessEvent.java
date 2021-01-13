@@ -1,21 +1,11 @@
 package org.jvalue.ods.adapterservice.datasource.event;
 
+import lombok.Value;
+
+@Value
 public class ImportSuccessEvent {
-  private final Long datasourceId;
-  private final String data;
-
-  public ImportSuccessEvent(Long datasourceId, String data) {
-    this.datasourceId = datasourceId;
-    this.data = data;
-  }
-
-  public Long getDatasourceId() {
-    return this.datasourceId;
-  }
-
-  public String getData() {
-    return this.data;
-  }
+  Long datasourceId;
+  String data;
 
   @Override
   public String toString() {

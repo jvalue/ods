@@ -9,18 +9,17 @@ import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public class CsvInterpreter extends Interpreter {
 
-  private final List<InterpreterParameterDescription> parameters = Collections.unmodifiableList(List.of(
+  private final List<InterpreterParameterDescription> parameters = List.of(
     new InterpreterParameterDescription("columnSeparator", "Column delimiter character, only one character supported", String.class),
     new InterpreterParameterDescription("lineSeparator", "Line delimiter character, only \\r, \\r\\n, and \\n supported", String.class),
     new InterpreterParameterDescription("skipFirstDataRow", "Skip first data row (after header)", Boolean.class),
     new InterpreterParameterDescription("firstRowAsHeader", "Interpret first row as header for columns", Boolean.class)
-  ));
+  );
   private final CsvMapper mapper = new CsvMapper().enable(CsvParser.Feature.WRAP_AS_ARRAY);
   private final ObjectMapper jsonMapper = new ObjectMapper();
 
