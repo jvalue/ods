@@ -1,16 +1,17 @@
 package org.jvalue.ods.adapterservice.datasource;
 
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jvalue.ods.adapterservice.adapter.Adapter;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.DataImportResponse;
-import org.jvalue.ods.adapterservice.datasource.model.DataBlob;
 import org.jvalue.ods.adapterservice.datasource.api.amqp.AmqpPublisher;
+import org.jvalue.ods.adapterservice.datasource.model.DataBlob;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
 import org.jvalue.ods.adapterservice.datasource.model.DatasourceMetadata;
 import org.jvalue.ods.adapterservice.datasource.model.RuntimeParameters;
 import org.jvalue.ods.adapterservice.datasource.repository.DataBlobRepository;
 import org.jvalue.ods.adapterservice.datasource.repository.DatasourceRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,26 +19,14 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
 
+@Slf4j
 @Service
+@AllArgsConstructor
 public class DatasourceManager {
-
   private final DatasourceRepository datasourceRepository;
   private final DataBlobRepository dataBlobRepository;
   private final Adapter adapter;
   private final AmqpPublisher amqpPublisher;
-
-  @Autowired
-  public DatasourceManager(
-    DatasourceRepository datasourceRepository,
-    DataBlobRepository dataBlobRepository,
-    Adapter adapter,
-    AmqpPublisher amqpPublisher) {
-    this.datasourceRepository = datasourceRepository;
-    this.dataBlobRepository = dataBlobRepository;
-    this.adapter = adapter;
-    this.amqpPublisher = amqpPublisher;
-  }
-
 
   @Transactional
   public Datasource createDatasource(Datasource config) {
@@ -49,16 +38,13 @@ public class DatasourceManager {
     return savedConfig;
   }
 
-
   public Optional<Datasource> getDatasource(Long id) {
     return datasourceRepository.findById(id);
   }
 
-
   public Iterable<Datasource> getAllDatasources() {
     return datasourceRepository.findAll();
   }
-
 
   @Transactional
   public void updateDatasource(Long id, Datasource update) throws IllegalArgumentException {
@@ -69,7 +55,6 @@ public class DatasourceManager {
     amqpPublisher.publishUpdate(existing);
   }
 
-
   @Transactional
   public void deleteDatasource(Long id) {
     Datasource datasource = datasourceRepository.findById(id)
@@ -77,7 +62,6 @@ public class DatasourceManager {
     datasourceRepository.deleteById(id);
     amqpPublisher.publishDeletion(datasource);
   }
-
 
   @Transactional
   public void deleteAllDatasources() {
@@ -112,9 +96,9 @@ public class DatasourceManager {
       }
       amqpPublisher.publishImportFailure(id, errMsg);
       if (e instanceof IllegalArgumentException) {
-        System.err.println("Data Import request failed. Malformed Request: " + e.getMessage());
+        log.error("Data Import request failed. Malformed Request: " + e.getMessage());
       } else {
-        System.err.println("Exception in the Adapter: " + e.getMessage());
+        log.error("Exception in the Adapter: " + e.getMessage());
       }
       throw e;
     }

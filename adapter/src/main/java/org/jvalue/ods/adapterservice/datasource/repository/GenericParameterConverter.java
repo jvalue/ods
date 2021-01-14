@@ -2,6 +2,7 @@ package org.jvalue.ods.adapterservice.datasource.repository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,10 +13,9 @@ import java.util.Map;
 /**
  * Serialize and deserialize map of objects (e.g. parameters) as a string
  */
+@Slf4j
 public class GenericParameterConverter implements AttributeConverter<Map<String, Object>, String> {
-
-  private ObjectMapper objectMapper = new ObjectMapper();
-  private final Logger logger = LoggerFactory.getLogger(GenericParameterConverter.class);
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Override
   public String convertToDatabaseColumn(Map<String, Object> parameters) {
@@ -23,7 +23,7 @@ public class GenericParameterConverter implements AttributeConverter<Map<String,
     try {
       parametersJson = objectMapper.writeValueAsString(parameters);
     } catch (final JsonProcessingException e) {
-      logger.error("JSON serialization error", e);
+      log.error("JSON serialization error", e);
     }
     return parametersJson;
   }
@@ -35,7 +35,7 @@ public class GenericParameterConverter implements AttributeConverter<Map<String,
     try {
       parameters = objectMapper.readValue(parametersJson, Map.class);
     } catch (final IOException e) {
-      logger.error("JSON deserialization error", e);
+      log.error("JSON deserialization error", e);
     }
     return parameters;
   }

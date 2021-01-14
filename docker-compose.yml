@@ -29,19 +29,21 @@ services:
       - adapter-db
       - rabbitmq
     environment:
-      DB_URL: jdbc:postgresql://adapter-db:5432/adapterservice
-      RABBIT_HOST: rabbitmq
-      RABBIT_USR: rabbit_adm
-      RABBIT_PWD: R4bb!7_4DM_p4SS
-      RABBIT_PORT: 5672
-      AMQP_EXCHANGE: 'ods_global'
-      AMQP_IMPORT_SUCCESS_TOPIC: 'datasource.execution.success'
-      AMQP_IMPORT_FAILED_TOPIC: 'datasource.execution.failed'
-      AMQP_DATASOURCE_CREATED_TOPIC: 'datasource.config.created'
-      AMQP_DATASOURCE_UPDATED_TOPIC: 'datasource.config.updated'
-      AMQP_DATASOURCE_DELETED_TOPIC: 'datasource.config.deleted'
-      AMQP_PUBLISH_RETRIES: 5
-      AMQP_PUBLISH_BACKOFF: 1000
+      SPRING_DATASOURCE_URL: jdbc:postgresql://adapter-db:5432/adapterservice
+      SPRING_DATASOURCE_USERNAME: adapterservice
+      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: rabbit_adm
+      SPRING_RABBITMQ_PASSWORD: R4bb!7_4DM_p4SS
+      ADAPTER_AMQP_EXCHANGE: 'ods_global'
+      ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC: 'datasource.execution.success'
+      ADAPTER_AMQP_IMPORT_FAILED_TOPIC: 'datasource.execution.failed'
+      ADAPTER_AMQP_DATASOURCE_CREATED_TOPIC: 'datasource.config.created'
+      ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC: 'datasource.config.updated'
+      ADAPTER_AMQP_DATASOURCE_DELETED_TOPIC: 'datasource.config.deleted'
+      ADAPTER_AMQP_PUBLISH_RETRIES: 5
+      ADAPTER_AMQP_PUBLISH_BACKOFF: 1000
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-adapter.rule=PathPrefix(`/api/adapter`)"
