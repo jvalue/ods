@@ -7,6 +7,12 @@ application {
   mainClass.set('org.jvalue.outboxeventpublisher.Main')
 }
 
+assert JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_15)
+
+java {
+  sourceCompatibility = JavaVersion.VERSION_15
+}
+
 repositories {
   mavenCentral()
 }

@@ -16,6 +16,18 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+/**
+ * This class is a {@link io.debezium.engine.DebeziumEngine.ChangeConsumer} that publishes
+ * the events via AMQP. It will get called by the debezium engine to handle the change records.
+ *
+ * This implementation requires a specific format of the change records, which can be created by
+ * the {@link OutboxTableTransform}:
+ * <ul>
+ *   <li>The record's topic will be the AMQP routing key</li>
+ *   <li>The record's key is the unique event id and will be the AMQP message id</li>
+ *   <li>The record's value is the event payload and will be the AMQP message body</li>
+ * </ul>
+ */
 @Slf4j
 public class AmqpPublisher implements DebeziumEngine.ChangeConsumer<SourceRecord>, Closeable {
   private static final String AMQP_URL_CONFIG_NAME = "amqp.url";

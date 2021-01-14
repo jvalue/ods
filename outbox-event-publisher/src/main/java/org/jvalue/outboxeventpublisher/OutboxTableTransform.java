@@ -14,6 +14,11 @@ import java.util.Map;
 
 import static org.apache.kafka.connect.transforms.util.Requirements.requireStruct;
 
+/**
+ * This transformation extracts the unique event id, the routing key, and the payload from the raw change records.
+ * Delete and update change events will be discarded, because once an event is published (e.g. added
+ * to the outbox table) it should neither be changed nor deleted.
+ */
 @Slf4j
 public class OutboxTableTransform<R extends ConnectRecord<R>> implements Transformation<R> {
   private final ExtractField<R> afterFieldExtractor = new ExtractField.Value<>();

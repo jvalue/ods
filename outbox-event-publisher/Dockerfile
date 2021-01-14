@@ -2,7 +2,7 @@
 # First stage: image to build the application           #
 #-------------------------------------------------------#
 # The gradle version here should match the gradle version in gradle/wrapper/gradle-wrapper.properties
-FROM gradle:6.7-jdk14-openj9 as builder
+FROM gradle:6.7-jdk15-openj9 as builder
 
 WORKDIR /builder
 
@@ -16,7 +16,7 @@ RUN gradle installDist
 #-------------------------------------------------------#
 # Second stage: image to run the application            #
 #-------------------------------------------------------#
-FROM adoptopenjdk/openjdk14-openj9:alpine-slim
+FROM adoptopenjdk/openjdk15-openj9:alpine-slim
 
 RUN mkdir /app
 WORKDIR /app

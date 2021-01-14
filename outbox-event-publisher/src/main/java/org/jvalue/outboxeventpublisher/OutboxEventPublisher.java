@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 public class OutboxEventPublisher {
   private static final String DEFAULT_CONFIG_FILE = "/debezium.properties";
   private static final String ENV_VAR_PREFIX = "debezium.";
+  private static final String STOP_TIMEOUT_MS_KEY = "stop.timeout.ms";
 
   private Configuration config;
   private EmbeddedEngine engine;
@@ -47,7 +48,7 @@ public class OutboxEventPublisher {
     log.info("Stopping the OutboxEventPublisher");
     if (engine != null) {
       try {
-        engine.await(1, TimeUnit.MINUTES);
+        engine.await(config.getInteger(STOP_TIMEOUT_MS_KEY), TimeUnit.MILLISECONDS);
       } catch (InterruptedException ignore) {}
     }
     // Try to close the amqp connection

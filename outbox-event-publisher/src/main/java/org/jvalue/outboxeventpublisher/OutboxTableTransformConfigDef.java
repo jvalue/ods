@@ -3,6 +3,9 @@ package org.jvalue.outboxeventpublisher;
 import io.debezium.config.Field;
 import org.apache.kafka.common.config.ConfigDef;
 
+/**
+ * This class contains the configuration definition for the {@link OutboxTableTransform}.
+ */
 public class OutboxTableTransformConfigDef {
   static final Field FIELD_EVENT_ID = Field.create("table.field.event.id")
     .withDisplayName("Event ID field")

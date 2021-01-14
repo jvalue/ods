@@ -35,6 +35,7 @@ services:
       - DEBEZIUM_DATABASE_DBNAME=debezium
       - DEBEZIUM_DATABASE_SERVER_NAME=outbox_publisher
       - DEBEZIUM_PUBLISHER_AMQP_URL=amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672
+      - DEBEZIUM_PUBLISHER_AMQP_EXCHANGE=ods_global
       #- DEBEZIUM_OFFSET_STORAGE_FILE_FILENAME=/data/offset.dat
     depends_on:
       - database
