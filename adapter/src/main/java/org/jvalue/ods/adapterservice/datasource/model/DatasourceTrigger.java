@@ -3,6 +3,7 @@ package org.jvalue.ods.adapterservice.datasource.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
@@ -10,6 +11,11 @@ import java.util.Date;
 import java.util.Objects;
 
 @Embeddable
+@Getter
+@Setter
+@ToString
+@NoArgsConstructor
+@EqualsAndHashCode
 public class DatasourceTrigger {
 
   private boolean periodic;
@@ -22,12 +28,6 @@ public class DatasourceTrigger {
   //execution interval in ms
   private Long interval;
 
-
-  // Constructor for JPA
-  @SuppressWarnings("unused")
-  private DatasourceTrigger() {
-  }
-
   @JsonCreator
   public DatasourceTrigger(
     @JsonProperty("periodic") boolean periodic,
@@ -36,41 +36,5 @@ public class DatasourceTrigger {
     this.periodic = periodic;
     this.firstExecution = firstExecution;
     this.interval = interval;
-  }
-
-  public boolean isPeriodic() {
-    return periodic;
-  }
-
-  public Date getFirstExecution() {
-    return firstExecution;
-  }
-
-  public Long getInterval() {
-    return interval;
-  }
-
-  @Override
-  public String toString() {
-    return "PipelineTriggerConfig{" +
-      "periodic=" + periodic +
-      ", firstExecution=" + firstExecution +
-      ", interval=" + interval +
-      '}';
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof DatasourceTrigger)) return false;
-    DatasourceTrigger that = (DatasourceTrigger) o;
-    return periodic == that.periodic &&
-      Objects.equals(firstExecution, that.firstExecution) &&
-      Objects.equals(interval, that.interval);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(periodic, firstExecution, interval);
   }
 }

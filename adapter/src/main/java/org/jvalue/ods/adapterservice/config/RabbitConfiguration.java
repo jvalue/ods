@@ -1,5 +1,7 @@
 package org.jvalue.ods.adapterservice.config;
 
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -8,21 +10,15 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+@Slf4j
+@AllArgsConstructor
 @Configuration
 public class RabbitConfiguration {
-
-  public static final String AMPQ_EXCHANGE = System.getenv("AMQP_EXCHANGE");
-  public static final String AMQP_IMPORT_SUCCESS_TOPIC = System.getenv("AMQP_IMPORT_SUCCESS_TOPIC");
-  public static final String AMQP_IMPORT_FAILED_TOPIC = System.getenv("AMQP_IMPORT_FAILED_TOPIC");
-  public static final String AMQP_DATASOURCE_CREATED_TOPIC = System.getenv("AMQP_DATASOURCE_CREATED_TOPIC");
-  public static final String AMQP_DATASOURCE_UPDATED_TOPIC = System.getenv("AMQP_DATASOURCE_UPDATED_TOPIC");
-  public static final String AMQP_DATASOURCE_DELETED_TOPIC = System.getenv("AMQP_DATASOURCE_DELETED_TOPIC");
-  public static final int AMQP_PUBLISH_RETRIES = Integer.parseInt(System.getenv("AMQP_PUBLISH_RETRIES"));
-  public static final long AMQP_PUBLISH_BACKOFF = Long.parseLong(System.getenv("AMQP_PUBLISH_BACKOFF"));
+  private final AdapterProperties properties;
 
   @Bean
   public TopicExchange exchange() {
-    return new TopicExchange(AMPQ_EXCHANGE);
+    return new TopicExchange(properties.getAmqp().getExchange());
   }
 
   @Bean
@@ -31,7 +27,7 @@ public class RabbitConfiguration {
       @Override
       public void convertAndSend(String exchange, String routingKey, Object object) throws AmqpException {
         super.convertAndSend(exchange, routingKey, object);
-        System.out.println("[EventPublish] " + routingKey + ": " + object.toString());
+        log.debug("Publishing event " + routingKey + ": " + object.toString());
       }
     };
     rabbitTemplate.setMessageConverter(jackson2JsonConverter());

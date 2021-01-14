@@ -1,14 +1,18 @@
 package org.jvalue.ods.adapterservice.datasource.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 import org.jvalue.ods.adapterservice.datasource.api.rest.v1.Mappings;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Objects;
 
 @Entity
+@ToString
+@NoArgsConstructor
+@EqualsAndHashCode
 public class DataBlob {
 
   @Id
@@ -16,9 +20,6 @@ public class DataBlob {
   private Long id;
 
   private byte[] data;
-
-  public DataBlob() {
-  }
 
   public DataBlob(String data) {
     this.data = data.getBytes(StandardCharsets.UTF_8);
@@ -34,34 +35,14 @@ public class DataBlob {
 
   @JsonIgnore
   public MetaData getMetaData() {
-    return new MetaData(this);
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    DataBlob dataBlob = (DataBlob) o;
-    return Objects.equals(id, dataBlob.id) &&
-      Arrays.equals(data, dataBlob.data);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(id, data);
+    return new MetaData(id);
   }
 
   // json representation without the actual data (as response for adapter trigger)
+  @AllArgsConstructor
+  @Getter
   public static class MetaData {
     private final Long id;
-
-    public MetaData(DataBlob dataBlob) {
-      this.id = dataBlob.id;
-    }
-
-    public Long getId() {
-      return id;
-    }
 
     public String getLocation() {
       return Mappings.DATA_PATH + "/" + id;
