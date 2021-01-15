@@ -65,6 +65,7 @@ export default class AdapterConfig extends Vue {
 
   @Emit('value')
   emitValue (): Datasource {
+    this.adapterConfig.dataSchema.schema = 'NewTest1234'
     return this.adapterConfig
   }
 
