@@ -67,6 +67,9 @@ export default class DatasourceCreate extends Vue {
       type: 'JSON',
       parameters: {}
     },
+    dataSchema: {
+      schema: 'Test1234'
+    },
     metadata: {
       author: '',
       license: '',
