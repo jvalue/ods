@@ -1,7 +1,7 @@
 package org.jvalue.ods.adapterservice.adapter;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.jvalue.ods.adapterservice.adapter.importer.Importer;
 import org.jvalue.ods.adapterservice.adapter.interpreter.Interpreter;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
@@ -9,22 +9,24 @@ import org.jvalue.ods.adapterservice.adapter.model.DataImportResponse;
 import org.jvalue.ods.adapterservice.adapter.model.FormatConfig;
 import org.jvalue.ods.adapterservice.adapter.model.ProtocolConfig;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AdapterTest {
 
   private final Adapter adapter = new Adapter();
 
-  @Mock Importer importer;
-  @Mock Protocol httpProtocol;
+  @Mock
+  Importer importer;
+  @Mock
+  Protocol httpProtocol;
 
   @Test
   public void testGetAllProtocols() {
@@ -41,16 +43,16 @@ public class AdapterTest {
   @Test
   public void testExecuteJob() {
     ProtocolConfig protocol = new ProtocolConfig(
-            httpProtocol,
-            Map.of(
-                    "location", "http://www.test.com",
-                    "encoding", "UTF-8"));
+      httpProtocol,
+      Map.of(
+        "location", "http://www.test.com",
+        "encoding", "UTF-8"));
     when(httpProtocol.getImporter()).thenReturn(importer);
     FormatConfig format = new FormatConfig(
-            Format.XML,
-            Collections.emptyMap());
+      Format.XML,
+      Collections.emptyMap());
     AdapterConfig adapterConfig = new AdapterConfig(
-            protocol, format);
+      protocol, format);
 
     when(importer.fetch(protocol.parameters)).thenReturn("<greeting><hallo>hello</hallo></greeting>");
 

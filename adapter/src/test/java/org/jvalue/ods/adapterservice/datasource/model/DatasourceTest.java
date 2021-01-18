@@ -2,7 +2,7 @@ package org.jvalue.ods.adapterservice.datasource.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.FormatConfig;
 import org.jvalue.ods.adapterservice.adapter.model.ProtocolConfig;
@@ -14,7 +14,7 @@ import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.jvalue.ods.adapterservice.adapter.Format.JSON;
 import static org.jvalue.ods.adapterservice.adapter.Format.XML;
 import static org.jvalue.ods.adapterservice.adapter.Protocol.HTTP;
@@ -70,9 +70,10 @@ public class DatasourceTest {
 
   @Test
   public void testFillQueryParametersWithRuntimeParameters() throws ParseException {
-    Datasource datasource = generateParameterizableDatasource(HTTP, JSON, "http://www.test-url.com/{userId}/{dataId}", Map.of("userId", "1", "dataId", "123"));
+    var defaultParameters = Map.of("userId", "1", "dataId", "123");
+    var datasource = generateParameterizableDatasource(HTTP, JSON, "http://www.test-url.com/{userId}/{dataId}", defaultParameters);
 
-    RuntimeParameters runtimeParameters = new RuntimeParameters(Map.of(
+    var runtimeParameters = new RuntimeParameters(Map.of(
       "userId", "42",
       "dataId", "4242",
       "notAKey", "notAValue"
@@ -82,7 +83,8 @@ public class DatasourceTest {
 
   @Test
   public void testFillQueryParametersWithoutRuntimeParameters() throws ParseException {
-    Datasource datasource = generateParameterizableDatasource(HTTP, JSON, "http://www.test-url.com/{userId}/{dataId}", Map.of("userId", "1", "dataId", "123"));
+    var defaultParameters = Map.of("userId", "1", "dataId", "123");
+    var datasource = generateParameterizableDatasource(HTTP, JSON, "http://www.test-url.com/{userId}/{dataId}", defaultParameters);
 
     assertEquals("http://www.test-url.com/1/123", datasource.fillQueryParameters(null).get("location"));
   }
