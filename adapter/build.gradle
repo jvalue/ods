@@ -10,7 +10,10 @@ file("src/main/resources/application.properties").withInputStream { props.load(i
 
 group = 'org.jvalue.ods'
 version = props.getProperty("app.version")
-sourceCompatibility = '14'
+
+java {
+  sourceCompatibility = JavaVersion.VERSION_15
+}
 
 task testProps {
 	doFirst {
@@ -52,6 +55,6 @@ dependencies {
 	implementation 'org.postgresql:postgresql'
 
   testImplementation('org.springframework.boot:spring-boot-starter-test') {
-    exclude group: 'org.junit.vintage:junit-vintage-engine'
+    exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
 }

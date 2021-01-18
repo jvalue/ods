@@ -3,12 +3,13 @@ package org.jvalue.ods.adapterservice.adapter.interpreter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CsvInterpreterTest {
   private final Interpreter interpreter = new CsvInterpreter();
@@ -116,52 +117,63 @@ public class CsvInterpreterTest {
     assertEquals("fasd", result.get(0).get("sadf").asText());
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void interpretMissingParameters() throws IOException {
-    interpreter.interpret("{\"this is\":\"no CSV\"", Map.of());
+  @Test
+  public void interpretMissingParameters() {
+    assertThrows(IllegalArgumentException.class, () ->
+      interpreter.interpret("{\"this is\":\"no CSV\"", Map.of())
+    );
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void interpretWrongParameterType() throws IOException {
-    interpreter.interpret(CSV_STRING, Map.of(
-      "columnSeparator", ",",
-      "lineSeparator", ";",
-      "skipFirstDataRow", false,
-      "firstRowAsHeader", 123 // should be boolean!
-    ));
+  @Test
+  public void interpretWrongParameterType() {
+    assertThrows(IllegalArgumentException.class, () ->
+      interpreter.interpret(CSV_STRING, Map.of(
+        "columnSeparator", ",",
+        "lineSeparator", ";",
+        "skipFirstDataRow", false,
+        "firstRowAsHeader", 123 // should be boolean!
+      ))
+    );
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void interpretInvalidLineSeparator() throws IOException {
-    interpreter.interpret(CSV_STRING, Map.of(
-      "columnSeparator", ",",
-      "lineSeparator", "&", // only \n, \r, or \r\n
-      "skipFirstDataRow", false,
-      "firstRowAsHeader", false
-    ));
+  @Test
+  public void interpretInvalidLineSeparator() {
+    assertThrows(IllegalArgumentException.class, () ->
+      interpreter.interpret(CSV_STRING, Map.of(
+        "columnSeparator", ",",
+        "lineSeparator", "&", // only \n, \r, or \r\n
+        "skipFirstDataRow", false,
+        "firstRowAsHeader", false
+      ))
+    );
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void interpretInvalidColumnSeparator() throws IOException {
-    interpreter.interpret(CSV_STRING, Map.of(
-      "columnSeparator", ",asd",  // only one char
-      "lineSeparator", "\n",
-      "skipFirstDataRow", false,
-      "firstRowAsHeader", false
-    ));
+  @Test
+  public void interpretInvalidColumnSeparator() {
+    assertThrows(IllegalArgumentException.class, () ->
+      interpreter.interpret(CSV_STRING, Map.of(
+        "columnSeparator", ",asd",  // only one char
+        "lineSeparator", "\n",
+        "skipFirstDataRow", false,
+        "firstRowAsHeader", false
+      ))
+    );
   }
 
 
   @Test
   public void testSerialization() throws IOException {
-    JsonNode expected = mapper.readTree("{\"type\":\"CSV\"," +
-      "\"description\":\"Interpret data as CSV data\"," +
-      "\"parameters\":[" +
-      "{\"name\":\"columnSeparator\",\"description\":\"Column delimiter character, only one character supported\",\"type\":\"java.lang.String\"}," +
-      "{\"name\":\"lineSeparator\",\"description\":\"Line delimiter character, only \\\\r, \\\\r\\\\n, and \\\\n supported\",\"type\":\"java.lang.String\"}," +
-      "{\"name\":\"skipFirstDataRow\",\"description\":\"Skip first data row (after header)\",\"type\":\"java.lang.Boolean\"}," +
-      "{\"name\":\"firstRowAsHeader\",\"description\":\"Interpret first row as header for columns\",\"type\":\"java.lang.Boolean\"}" +
-      "]}");
+    JsonNode expected = mapper.readTree("""
+      {
+        "type":"CSV",
+        "description":"Interpret data as CSV data",
+        "parameters":[
+          {"name":"columnSeparator","description":"Column delimiter character, only one character supported","type":"java.lang.String"},
+          {"name":"lineSeparator","description":"Line delimiter character, only \\\\r, \\\\r\\\\n, and \\\\n supported","type":"java.lang.String"},
+          {"name":"skipFirstDataRow","description":"Skip first data row (after header)","type":"java.lang.Boolean"},
+          {"name":"firstRowAsHeader","description":"Interpret first row as header for columns","type":"java.lang.Boolean"}
+        ]
+      }""");
     JsonNode result = mapper.valueToTree(interpreter);
 
     assertEquals(expected, result);
