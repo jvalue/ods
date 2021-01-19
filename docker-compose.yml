@@ -1,10 +1,9 @@
 # Service configurations for all microservices
 # has to be specified by environment files
 
-version: '3.7'
+version: "3.7"
 
 services:
-
   # ----------------- UI SERVICE (/ui) --------------------
   ui:
     image: ${DOCKER_REGISTRY}/ui
@@ -34,12 +33,12 @@ services:
       RABBIT_USR: rabbit_adm
       RABBIT_PWD: R4bb!7_4DM_p4SS
       RABBIT_PORT: 5672
-      AMQP_EXCHANGE: 'ods_global'
-      AMQP_IMPORT_SUCCESS_TOPIC: 'datasource.execution.success'
-      AMQP_IMPORT_FAILED_TOPIC: 'datasource.execution.failed'
-      AMQP_DATASOURCE_CREATED_TOPIC: 'datasource.config.created'
-      AMQP_DATASOURCE_UPDATED_TOPIC: 'datasource.config.updated'
-      AMQP_DATASOURCE_DELETED_TOPIC: 'datasource.config.deleted'
+      AMQP_EXCHANGE: "ods_global"
+      AMQP_IMPORT_SUCCESS_TOPIC: "datasource.execution.success"
+      AMQP_IMPORT_FAILED_TOPIC: "datasource.execution.failed"
+      AMQP_DATASOURCE_CREATED_TOPIC: "datasource.config.created"
+      AMQP_DATASOURCE_UPDATED_TOPIC: "datasource.config.updated"
+      AMQP_DATASOURCE_DELETED_TOPIC: "datasource.config.deleted"
       AMQP_PUBLISH_RETRIES: 5
       AMQP_PUBLISH_BACKOFF: 1000
     labels:
@@ -63,13 +62,13 @@ services:
       CONNECTION_RETRIES: 20
       CONNECTION_BACKOFF_IN_MS: 5000
 
-      AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
-      AMQP_SCHEDULER_EXCHANGE: 'ods_global'
-      AMQP_SCHEDULER_QUEUE: 'scheduler.datasource-config'
-      AMQP_DATASOURCE_CONFIG_TOPIC: 'datasource.config.*'
-      AMQP_DATASOURCE_CONFIG_CREATED_TOPIC: 'datasource.config.created'
-      AMQP_DATASOURCE_CONFIG_UPDATED_TOPIC: 'datasource.config.updated'
-      AMQP_DATASOURCE_CONFIG_DELETED_TOPIC: 'datasource.config.deleted'
+      AMQP_URL: "amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672"
+      AMQP_SCHEDULER_EXCHANGE: "ods_global"
+      AMQP_SCHEDULER_QUEUE: "scheduler.datasource-config"
+      AMQP_DATASOURCE_CONFIG_TOPIC: "datasource.config.*"
+      AMQP_DATASOURCE_CONFIG_CREATED_TOPIC: "datasource.config.created"
+      AMQP_DATASOURCE_CONFIG_UPDATED_TOPIC: "datasource.config.updated"
+      AMQP_DATASOURCE_CONFIG_DELETED_TOPIC: "datasource.config.deleted"
     build:
       context: ./scheduler/
     labels:
@@ -93,20 +92,20 @@ services:
       POSTGRES_DB: ods
       POSTGRES_USER: storagemq
       POSTGRES_PW: storagemq-pw
-      POSTGRES_SCHEMA: 'storage'
+      POSTGRES_SCHEMA: "storage"
 
-      AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
+      AMQP_URL: "amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672"
 
-      AMQP_PIPELINE_CONFIG_EXCHANGE: 'ods_global'
-      AMQP_PIPELINE_CONFIG_QUEUE: 'storage-mq.pipeline-config'
-      AMQP_PIPELINE_CONFIG_TOPIC: 'pipeline.config.*'
-      AMQP_PIPELINE_CONFIG_CREATED_TOPIC: 'pipeline.config.created'
-      AMQP_PIPELINE_CONFIG_DELETED_TOPIC: 'pipeline.config.deleted'
+      AMQP_PIPELINE_CONFIG_EXCHANGE: "ods_global"
+      AMQP_PIPELINE_CONFIG_QUEUE: "storage-mq.pipeline-config"
+      AMQP_PIPELINE_CONFIG_TOPIC: "pipeline.config.*"
+      AMQP_PIPELINE_CONFIG_CREATED_TOPIC: "pipeline.config.created"
+      AMQP_PIPELINE_CONFIG_DELETED_TOPIC: "pipeline.config.deleted"
 
-      AMQP_PIPELINE_EXECUTION_EXCHANGE: 'ods_global'
-      AMQP_PIPELINE_EXECUTION_QUEUE: 'storage-mq.pipeline-execution'
-      AMQP_PIPELINE_EXECUTION_TOPIC: 'pipeline.execution.*'
-      AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: 'pipeline.execution.success'
+      AMQP_PIPELINE_EXECUTION_EXCHANGE: "ods_global"
+      AMQP_PIPELINE_EXECUTION_QUEUE: "storage-mq.pipeline-execution"
+      AMQP_PIPELINE_EXECUTION_TOPIC: "pipeline.execution.*"
+      AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: "pipeline.execution.success"
     depends_on:
       - storage-db
       - storage-db-liquibase # TODO: make sure the migration runs through before reading db structure
@@ -176,8 +175,8 @@ services:
       - rabbitmq
       - pipeline-db
     environment:
-      CONNECTION_RETRIES: '30'
-      CONNECTION_BACKOFF_IN_MS: '2000'
+      CONNECTION_RETRIES: "30"
+      CONNECTION_BACKOFF_IN_MS: "2000"
 
       POSTGRES_HOST: "pipeline-db"
       POSTGRES_PORT: 5432
@@ -187,16 +186,16 @@ services:
       POSTGRES_SCHEMA: "public" # other schemas have to be created somewhere before use!
 
       AMQP_URL: "amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672"
-      AMQP_PIPELINE_EXECUTION_EXCHANGE: 'ods_global'
-      AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: 'pipeline.execution.success'
-      AMQP_PIPELINE_EXECUTION_ERROR_TOPIC: 'pipeline.execution.error'
-      AMQP_PIPELINE_CONFIG_CREATED_TOPIC: 'pipeline.config.created'
-      AMQP_PIPELINE_CONFIG_UPDATED_TOPIC: 'pipeline.config.updated'
-      AMQP_PIPELINE_CONFIG_DELETED_TOPIC: 'pipeline.config.deleted'
-      AMQP_DATASOURCE_EXECUTION_EXCHANGE: 'ods_global'
-      AMQP_DATASOURCE_EXECUTION_TOPIC: 'datasource.execution.*'
-      AMQP_DATASOURCE_EXECUTION_SUCCESS_TOPIC: 'datasource.execution.success'
-      AMQP_PIPELINE_EXECUTION_QUEUE: 'pipeline.pipeline-execution'
+      AMQP_PIPELINE_EXECUTION_EXCHANGE: "ods_global"
+      AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: "pipeline.execution.success"
+      AMQP_PIPELINE_EXECUTION_ERROR_TOPIC: "pipeline.execution.error"
+      AMQP_PIPELINE_CONFIG_CREATED_TOPIC: "pipeline.config.created"
+      AMQP_PIPELINE_CONFIG_UPDATED_TOPIC: "pipeline.config.updated"
+      AMQP_PIPELINE_CONFIG_DELETED_TOPIC: "pipeline.config.deleted"
+      AMQP_DATASOURCE_EXECUTION_EXCHANGE: "ods_global"
+      AMQP_DATASOURCE_EXECUTION_TOPIC: "datasource.execution.*"
+      AMQP_DATASOURCE_EXECUTION_SUCCESS_TOPIC: "datasource.execution.success"
+      AMQP_PIPELINE_EXECUTION_QUEUE: "pipeline.pipeline-execution"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-pipeline.rule=PathPrefix(`/api/pipelines`)"
@@ -206,9 +205,9 @@ services:
   pipeline-db:
     image: postgres:13-alpine
     environment:
-      POSTGRES_USER: 'pipeline-service'
-      POSTGRES_PASSWORD: 'pw'
-      POSTGRES_DB: 'ods-pipelines'
+      POSTGRES_USER: "pipeline-service"
+      POSTGRES_PASSWORD: "pw"
+      POSTGRES_DB: "ods-pipelines"
 
   # ----------------- NOTIFICATION SERVICE (/notification) --------------------
   notification:
@@ -217,22 +216,22 @@ services:
       context: ./notification/
     environment:
       # Postgres connection vars
-      POSTGRES_HOST: 'notification-db'
+      POSTGRES_HOST: "notification-db"
       POSTGRES_PORT: 5432
-      POSTGRES_DB: 'ods-notifications'
-      POSTGRES_USER: 'notification_usr'
-      POSTGRES_PW: 'admin'
+      POSTGRES_DB: "ods-notifications"
+      POSTGRES_USER: "notification_usr"
+      POSTGRES_PW: "admin"
 
       CONNECTION_RETRIES: 30
       CONNECTION_BACKOFF_IN_MS: 2000
 
       AMQP_URL: "amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672"
-      AMQP_PIPELINE_EXECUTION_EXCHANGE: 'ods_global'
-      AMQP_PIPELINE_EXECUTION_QUEUE: 'notification.pipeline-execution'
-      AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: 'pipeline.execution.success'
-      AMQP_NOTIFICATION_QUEUE: 'NOTIF_QUEUE'
+      AMQP_PIPELINE_EXECUTION_EXCHANGE: "ods_global"
+      AMQP_PIPELINE_EXECUTION_QUEUE: "notification.pipeline-execution"
+      AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: "pipeline.execution.success"
+      AMQP_NOTIFICATION_QUEUE: "NOTIF_QUEUE"
 
-      NOTIFICATION_DATA_LOCATION_URL: 'http://localhost:9000/storage'
+      NOTIFICATION_DATA_LOCATION_URL: "http://localhost:9000/storage"
     depends_on:
       - notification-db
       - rabbitmq
@@ -245,11 +244,11 @@ services:
   notification-db:
     image: postgres:13-alpine
     environment:
-      POSTGRES_USER: 'notification_usr'
-      POSTGRES_PASSWORD: 'admin'
-      POSTGRES_DB: 'ods-notifications'
+      POSTGRES_USER: "notification_usr"
+      POSTGRES_PASSWORD: "admin"
+      POSTGRES_DB: "ods-notifications"
 
-# -------------------- EDGE SERVER (PORT 9000) -----------------------------
+  # -------------------- EDGE SERVER (PORT 9000) -----------------------------
   edge:
     image: traefik:2.3
     command:
@@ -259,18 +258,25 @@ services:
       - --api.insecure # Dashboard: don't do that in production
       # - --log.level=DEBUG
     ports:
-      - "9000:80"     # The HTTP port
-      - "9001:8080"   # The Web UI (enabled by --api)
+      - "9000:80" # The HTTP port
+      - "9001:8080" # The Web UI (enabled by --api)
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
 
-# -------------------- RABBIT-MQ -------------------------------------------
+  # -------------------- RABBIT-MQ -------------------------------------------
   rabbitmq:
-    image:  rabbitmq:3-management-alpine
+    image: rabbitmq:3-management-alpine
     environment:
-      RABBITMQ_ERLANG_COOKIE: 'S0m3_R4bBi7_C0ok13'
-      RABBITMQ_DEFAULT_USER: 'rabbit_adm'
-      RABBITMQ_DEFAULT_PASS: 'R4bb!7_4DM_p4SS'
+      RABBITMQ_ERLANG_COOKIE: "S0m3_R4bBi7_C0ok13"
+      RABBITMQ_DEFAULT_USER: "rabbit_adm"
+      RABBITMQ_DEFAULT_PASS: "R4bb!7_4DM_p4SS"
     ports:
       - "15672:15672"
       - "5672:5672"
+  # -------------------- schema -----------------------------------------------
+  schema:
+    image: ${DOCKER_REGISTRY}/schema
+    build:
+      context: ./schema/
+    ports:
+      - "8520:8520"
