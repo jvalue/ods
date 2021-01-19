@@ -302,7 +302,7 @@ jobs:
 
           IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/adapter
 
-          ADAPTER_VERSION=$(grep "version =" ./adapter/src/main/resources/application.properties | awk '{print $3}' | sed "s/[']//g")
+          ADAPTER_VERSION=$(grep "app.version=" ./adapter/src/main/resources/application.properties | sed "s/[=]/ /g" | awk '{print $2}' | sed "s/[']//g")
 
           docker tag $IMAGE_ID $IMAGE_ID:$ADAPTER_VERSION
           docker tag $IMAGE_ID $IMAGE_ID:latest
