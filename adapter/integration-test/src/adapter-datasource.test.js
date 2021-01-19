@@ -2,12 +2,14 @@ const request = require('supertest')
 
 const {
   ADAPTER_URL,
-  AMQP_URL
+  AMQP_URL,
+  PUBLICATION_DELAY
 } = require('./env')
 const { waitForServicesToBeReady } = require('./waitForServices')
 const {
   connectAmqp,
-  consumeAmqpMsg
+  consumeAmqpMsg,
+  sleep
 } = require('./testHelper')
 
 const AMQP_EXCHANGE = 'ods_global'
@@ -69,13 +71,14 @@ describe('Datasource Configuration', () => {
     expect(response.body.trigger).toEqual(datasourceConfig.trigger)
     expect(response.body.id).toBeGreaterThan(0)
 
-    expect(publishedEvents.get(CONFIG_CREATED_TOPIC)).toContainEqual({
-      datasource
-    })
-
     const allDatasourceResponse = await request(ADAPTER_URL)
       .get('/datasources')
     expect(allDatasourceResponse.body).toContainEqual(datasource)
+
+    await sleep(PUBLICATION_DELAY)
+    expect(publishedEvents.get(CONFIG_CREATED_TOPIC)).toContainEqual({
+      datasource
+    })
   }, TIMEOUT)
 
   test('Should not create datasource with unsupported protocol [POST /datasources]', async () => {
@@ -114,32 +117,29 @@ describe('Datasource Configuration', () => {
     const postResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(getDatasourceConfig())
-    const createdDatasource = postResponse.body
+    const datasource = postResponse.body
 
     const originalGetResponse = await request(ADAPTER_URL)
-      .get('/datasources/' + createdDatasource.id)
+      .get('/datasources/' + datasource.id)
 
-    const updatedConfig = getDatasourceConfig()
-    updatedConfig.protocol.parameters.location = 'http://www.location.com'
+    datasource.protocol.parameters.location = 'http://www.location.com/updated'
 
     const putResponse = await request(ADAPTER_URL)
-      .put('/datasources/' + createdDatasource.id)
-      .send(updatedConfig)
-
+      .put('/datasources/' + datasource.id)
+      .send(datasource)
     expect(putResponse.status).toEqual(204)
-    updatedConfig.id = createdDatasource.id
-    updatedConfig.metadata.creationTimestamp = createdDatasource.metadata.creationTimestamp
-    expect(publishedEvents.get(CONFIG_UPDATED_TOPIC)).toContainEqual({
-      datasource: updatedConfig
-    })
 
     const updatedGetResponse = await request(ADAPTER_URL)
-      .get('/datasources/' + createdDatasource.id)
+      .get('/datasources/' + datasource.id)
+    expect(updatedGetResponse.body.protocol.parameters.location).toEqual('http://www.location.com/updated')
+    expect(updatedGetResponse.body.metadata).toEqual(originalGetResponse.body.metadata)
+    expect(updatedGetResponse.body.id).toEqual(originalGetResponse.body.id)
+    expect(updatedGetResponse.body.adapter).toEqual(originalGetResponse.body.adapter)
 
-    expect(originalGetResponse.body.metadata).toEqual(updatedGetResponse.body.metadata)
-    expect(originalGetResponse.body.id).toEqual(updatedGetResponse.body.id)
-
-    expect(originalGetResponse.body.adapter).toEqual(updatedGetResponse.body.adapter)
+    await sleep(PUBLICATION_DELAY)
+    expect(publishedEvents.get(CONFIG_UPDATED_TOPIC)).toContainEqual({
+      datasource: datasource
+    })
   }, TIMEOUT)
 
   test('Should not update datasource with unsupported protocol [PUT /datasources/{id}]', async () => {
@@ -211,18 +211,17 @@ describe('Datasource Configuration', () => {
     const delResponse = await request(ADAPTER_URL)
       .delete(`/datasources/${datasource.id}`)
       .send()
-
     expect(delResponse.status).toEqual(204)
-
-    expect(publishedEvents.get(CONFIG_DELETED_TOPIC)).toContainEqual({
-      datasource
-    })
 
     const getDeletedRequest = await request(ADAPTER_URL)
       .get(`/datasource/${datasource.id}`)
       .send()
-
     expect(getDeletedRequest.status).toEqual(404)
+
+    await sleep(PUBLICATION_DELAY)
+    expect(publishedEvents.get(CONFIG_DELETED_TOPIC)).toContainEqual({
+      datasource
+    })
   }, TIMEOUT)
 
   test('Should return 404 NOT FOUND when deleting unknown datasource [DELETE /datasources/0]', async () => {

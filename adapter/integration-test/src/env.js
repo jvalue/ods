@@ -20,6 +20,7 @@ const RABBIT_HEALTH = getEnv('RABBIT_HEALTH')
 const AMQP_URL = getEnv('AMQP_URL')
 
 const STARTUP_DELAY = +getEnv('STARTUP_DELAY')
+const PUBLICATION_DELAY = +getEnv('PUBLICATION_DELAY')
 
 const envLog = `
 [Environment Variable] ADAPTER_URL = ${ADAPTER_URL}
@@ -28,6 +29,7 @@ const envLog = `
 [Environment Variable] RABBIT_HEALTH = ${RABBIT_HEALTH}
 [Environment Variable] AMQP_URL = ${AMQP_URL}
 [Environment Variable] STARTUP_DELAY = ${STARTUP_DELAY}
+[Environment Variable] PUBLICATION_DELAY = ${PUBLICATION_DELAY}
 `
 console.log(envLog)
 
@@ -37,5 +39,6 @@ module.exports = {
   MOCK_SERVER_PORT,
   RABBIT_HEALTH,
   AMQP_URL,
-  STARTUP_DELAY
+  STARTUP_DELAY,
+  PUBLICATION_DELAY
 }

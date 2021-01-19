@@ -19,6 +19,7 @@ services:
       AMQP_URL: "amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672"
       AMQP_EXCHANGE: "ods_global"
       STARTUP_DELAY: 5000
+      PUBLICATION_DELAY: 2000
 
     depends_on:
       - adapter

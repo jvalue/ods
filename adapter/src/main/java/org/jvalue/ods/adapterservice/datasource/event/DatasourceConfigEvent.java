@@ -1,9 +1,13 @@
 package org.jvalue.ods.adapterservice.datasource.event;
 
-import lombok.Value;
+import lombok.*;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
 
-@Value
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+@EqualsAndHashCode
 public class DatasourceConfigEvent {
-  Datasource datasource;
+  private Datasource datasource;
 }

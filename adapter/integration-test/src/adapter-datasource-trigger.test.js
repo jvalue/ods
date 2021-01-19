@@ -5,12 +5,14 @@ const request = require('supertest')
 const {
   ADAPTER_URL,
   MOCK_SERVER_URL,
-  AMQP_URL
+  AMQP_URL,
+  PUBLICATION_DELAY
 } = require('./env')
 const { waitForServicesToBeReady } = require('./waitForServices')
 const {
   connectAmqp,
-  consumeAmqpMsg
+  consumeAmqpMsg,
+  sleep
 } = require('./testHelper')
 
 const AMQP_EXCHANGE = 'ods_global'
@@ -47,30 +49,30 @@ describe('Datasource triggering', () => {
     const datasourceResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(dynamicDatasourceConfig)
+    expect(datasourceResponse.status).toEqual(201)
     const datasourceId = datasourceResponse.body.id
 
     const dataMetaData = await request(ADAPTER_URL)
       .post(`/datasources/${datasourceId}/trigger`)
       .send(runtimeParameters)
-
+    expect(dataMetaData.status).toEqual(200)
+    expect(dataMetaData.body.id).toBeGreaterThanOrEqual(0)
     const id = dataMetaData.body.id
+    expect(dataMetaData.body.location).toEqual(`/data/${id}`)
+
     const data = await request(ADAPTER_URL)
       .get(`/data/${id}`)
       .send()
+    expect(data.status).toEqual(200)
+    expect(data.body.id).toBe(runtimeParameters.parameters.id)
 
     const delResponse = await request(ADAPTER_URL)
       .delete(`/datasources/${datasourceId}`)
       .send()
-
     expect(delResponse.status).toEqual(204)
-    expect(datasourceResponse.status).toEqual(201)
-    expect(dataMetaData.status).toEqual(200)
-    expect(dataMetaData.body.id).toBeGreaterThanOrEqual(0)
-    expect(dataMetaData.body.location).toEqual(`/data/${id}`)
-    expect(data.status).toEqual(200)
-    expect(data.body.id).toBe(runtimeParameters.parameters.id)
 
-    // check for rabbitmq notification
+    // check for rabbitmq message
+    await sleep(PUBLICATION_DELAY)
     expect(publishedEvents.get(EXECUTION_SUCCESS_TOPIC)).toContainEqual({
       datasourceId: datasourceId,
       data: '{"id":"2"}'
@@ -81,30 +83,30 @@ describe('Datasource triggering', () => {
     const datasourceResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(dynamicDatasourceConfig)
+    expect(datasourceResponse.status).toEqual(201)
     const datasourceId = datasourceResponse.body.id
 
     const dataMetaData = await request(ADAPTER_URL)
       .post(`/datasources/${datasourceId}/trigger`)
       .send(null)
-
+    expect(dataMetaData.status).toEqual(200)
+    expect(dataMetaData.body.id).toBeGreaterThanOrEqual(0)
     const id = dataMetaData.body.id
+    expect(dataMetaData.body.location).toEqual(`/data/${id}`)
+
     const data = await request(ADAPTER_URL)
       .get(`/data/${id}`)
       .send()
+    expect(data.status).toEqual(200)
+    expect(data.body.id).toBe(dynamicDatasourceConfig.protocol.parameters.defaultParameters.id)
 
     const delResponse = await request(ADAPTER_URL)
       .delete(`/datasources/${datasourceId}`)
       .send()
-
     expect(delResponse.status).toEqual(204)
-    expect(datasourceResponse.status).toEqual(201)
-    expect(dataMetaData.status).toEqual(200)
-    expect(dataMetaData.body.id).toBeGreaterThanOrEqual(0)
-    expect(dataMetaData.body.location).toEqual(`/data/${id}`)
-    expect(data.status).toEqual(200)
-    expect(data.body.id).toBe(dynamicDatasourceConfig.protocol.parameters.defaultParameters.id)
 
-    // check for rabbitmq notification
+    // check for rabbitmq message
+    await sleep(PUBLICATION_DELAY)
     expect(publishedEvents.get(EXECUTION_SUCCESS_TOPIC)).toContainEqual({
       datasourceId: datasourceId,
       data: '{"id":"1"}'
@@ -120,24 +122,24 @@ describe('Datasource triggering', () => {
     const dataMetaData = await request(ADAPTER_URL)
       .post(`/datasources/${datasourceId}/trigger`)
       .send(null)
-
+    expect(dataMetaData.status).toEqual(200)
+    expect(dataMetaData.body.id).toBeGreaterThanOrEqual(0)
     const id = dataMetaData.body.id
+    expect(dataMetaData.body.location).toEqual(`/data/${id}`)
+
     const normalData = await request(ADAPTER_URL)
       .get(`/data/${id}`)
       .send()
+    expect(normalData.status).toEqual(200)
+    expect(normalData.body.id).toEqual('1')
 
     const delResponse = await request(ADAPTER_URL)
       .delete(`/datasources/${datasourceId}`)
       .send()
-
     expect(delResponse.status).toEqual(204)
-    expect(dataMetaData.status).toEqual(200)
-    expect(dataMetaData.body.id).toBeGreaterThanOrEqual(0)
-    expect(dataMetaData.body.location).toEqual(`/data/${id}`)
-    expect(normalData.status).toEqual(200)
-    expect(normalData.body.id).toBe('1')
 
-    // check for rabbitmq notification
+    // check for rabbitmq message
+    await sleep(PUBLICATION_DELAY)
     expect(publishedEvents.get(EXECUTION_SUCCESS_TOPIC)).toContainEqual({
       datasourceId: datasourceId,
       data: '{"id":"1"}'
@@ -164,16 +166,15 @@ describe('Datasource triggering', () => {
     const triggerResponse = await request(ADAPTER_URL)
       .post(`/datasources/${datasourceId}/trigger`)
       .send()
-
     expect(triggerResponse.status).toEqual(400)
 
     const delResponse = await request(ADAPTER_URL)
       .delete(`/datasources/${datasourceId}`)
       .send()
-
     expect(delResponse.status).toEqual(204)
 
-    // check for rabbitmq notification
+    // check for rabbitmq message
+    await sleep(PUBLICATION_DELAY)
     expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)).toContainEqual({
       datasourceId: datasourceId,
       error: 'URI is not absolute'
@@ -192,16 +193,15 @@ describe('Datasource triggering', () => {
     const triggerResponse = await request(ADAPTER_URL)
       .post(`/datasources/${datasourceId}/trigger`)
       .send()
-
     expect(triggerResponse.status).toEqual(500)
 
     const delResponse = await request(ADAPTER_URL)
       .delete(`/datasources/${datasourceId}`)
       .send()
-
     expect(delResponse.status).toEqual(204)
 
     // check for rabbitmq notification
+    await sleep(PUBLICATION_DELAY)
     expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)).toContainEqual({
       datasourceId: datasourceId,
       error: '404 Not Found: [404 NOT FOUND Error]'
@@ -212,18 +212,15 @@ describe('Datasource triggering', () => {
     const creationResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(staticDatasourceConfig)
-
     expect(creationResponse.status).toEqual(201)
 
     const triggerResponse = await request(ADAPTER_URL)
       .post(`/datasources/${creationResponse.body.id}/trigger`)
       .send()
-
     expect(triggerResponse.status).toEqual(200)
 
     const dataResponse = await request(ADAPTER_URL)
       .get(`/data/${triggerResponse.body.id}`)
-
     expect(dataResponse.status).toEqual(200)
     expect(dataResponse.body).toEqual({ id: '1' })
   })

@@ -7,16 +7,16 @@ import org.jvalue.ods.adapterservice.datasource.event.DatasourceConfigEvent;
 import org.jvalue.ods.adapterservice.datasource.event.ImportFailedEvent;
 import org.jvalue.ods.adapterservice.datasource.event.ImportSuccessEvent;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
-import org.springframework.amqp.AmqpException;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.jvalue.ods.adapterservice.datasource.model.OutboxEvent;
+import org.jvalue.ods.adapterservice.datasource.repository.OutboxEventRepository;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
 @AllArgsConstructor
 public class AmqpPublisher {
-  private final RabbitTemplate rabbitTemplate;
   private final AdapterProperties properties;
+  private final OutboxEventRepository outboxEventRepository;
 
   public void publishCreation(Datasource datasource) {
     publish(properties.getAmqp().getDatasourceCreatedTopic(), new DatasourceConfigEvent(datasource));
@@ -39,21 +39,7 @@ public class AmqpPublisher {
   }
 
   private void publish(String topic, Object message) {
-    for (int retries = properties.getAmqp().getPublishRetries(); retries >= 0; retries--) {
-      try {
-        this.rabbitTemplate.convertAndSend(properties.getAmqp().getExchange(), topic, message);
-        return;
-      } catch (AmqpException e) {
-        try {
-          Thread.sleep(properties.getAmqp().getPublishBackoff());
-        } catch (InterruptedException interruptedException) {
-          Thread.currentThread().interrupt();
-          throw new RuntimeException(interruptedException);
-        }
-        log.warn("Message publish failed ({}). Retrying in {}", retries, properties.getAmqp().getPublishBackoff());
-      }
-    }
-    log.error("Sending message {} to topic {} failed", message.toString(), topic);
+    var event = new OutboxEvent(topic, message);
+    outboxEventRepository.save(event);
   }
-
 }
