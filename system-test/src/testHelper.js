@@ -61,10 +61,10 @@ async function checkWebhook (uri, maxRetries = 10) {
       return response
     }
 
-    await sleep(1000)
+    await sleep(5000)
   }
 
-  await Promise.reject(new Error(`Webhook ${uri} was not triggered within ${maxRetries} retries.`))
+  throw new Error(`Webhook ${uri} was not triggered within ${maxRetries} retries.`)
 }
 
 module.exports = {
