@@ -49,6 +49,7 @@ services:
       - POSTGRES_USER=adapterservice
       - POSTGRES_PASSWORD=admin
     command:
+      # This enables and configures Postgres logical decoding feature that is needed for outboxer/debezium to work
       - '-cwal_level=logical'
       - '-cmax_wal_senders=1'
       - '-cmax_replication_slots=1'
@@ -68,6 +69,7 @@ services:
       - OUTBOXER_PUBLISHER_AMQP_EXCHANGE=ods_global
       - OUTBOXER_PUBLISHER_AMQP_RETRIES=5
       - OUTBOXER_PUBLISHER_AMQP_RETRY_DELAY_MS=1000
+      # In production this file should be storage outside of the container, so it does survive outboxer restarts.
       #- OUTBOXER_OFFSET_STORAGE_FILE_FILENAME=/data/offset.dat
     depends_on:
       - adapter-db
