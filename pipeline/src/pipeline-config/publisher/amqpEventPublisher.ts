@@ -1,15 +1,17 @@
 import { AmqpPublisher } from '@jvalue/node-dry-amqp'
 
-import ConfigWritesPublisher from './configWritesPublisher'
 import {
-  AMQP_EXCHANGE,
   AMQP_URL,
+  AMQP_EXCHANGE,
+  AMQP_PIPELINE_EXECUTION_ERROR_TOPIC,
+  AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC,
   AMQP_PIPELINE_CONFIG_CREATED_TOPIC,
   AMQP_PIPELINE_CONFIG_UPDATED_TOPIC,
   AMQP_PIPELINE_CONFIG_DELETED_TOPIC
 } from '../../env'
+import { EventPublisher } from './eventPublisher'
 
-export default class AmqpConfigWritesPublisher implements ConfigWritesPublisher {
+export class AmqpEventPublisher implements EventPublisher {
   private readonly publisher: AmqpPublisher
 
   constructor () {
@@ -47,5 +49,23 @@ export default class AmqpConfigWritesPublisher implements ConfigWritesPublisher 
       pipelineName: pipelineName
     }
     return this.publisher.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_DELETED_TOPIC, content)
+  }
+
+  publishError (pipelineId: number, pipelineName: string, errorMsg: string): boolean {
+    const content = {
+      pipelineId: pipelineId,
+      pipelineName: pipelineName,
+      error: errorMsg
+    }
+    return this.publisher.publish(AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_ERROR_TOPIC, content)
+  }
+
+  publishSuccess (pipelineId: number, pipelineName: string, result: unknown): boolean {
+    const content = {
+      pipelineId: pipelineId,
+      pipelineName: pipelineName,
+      data: result
+    }
+    return this.publisher.publish(AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC, content)
   }
 }

@@ -11,10 +11,9 @@ import VM2SandboxExecutor from './pipeline-execution/sandbox/vm2SandboxExecutor'
 import PipelineExecutor from './pipeline-execution/pipelineExecutor'
 import { PipelineConfigEndpoint } from './api/rest/pipelineConfigEndpoint'
 import { PipelineConfigManager } from './pipeline-config/pipelineConfigManager'
-import AmqpExecutionResultPublisher from './pipeline-config/publisher/amqpExecutionResultPublisher'
 import PostgresPipelineConfigRepository from './pipeline-config/postgresPipelineConfigRepository'
-import AmqpConfigWritesPublisher from './pipeline-config/publisher/amqpConfigWritesPublisher'
 import { PipelineConfigConsumer } from './api/amqp/pipelineConfigConsumer'
+import { AmqpEventPublisher } from './pipeline-config/publisher/amqpEventPublisher'
 
 const port = 8080
 let server: Server | undefined
@@ -27,20 +26,17 @@ process.on('SIGTERM', () => {
 async function main (): Promise<void> {
   const sandboxExecutor = new VM2SandboxExecutor()
   const pipelineExecutor = new PipelineExecutor(sandboxExecutor)
-  const executionResultPublisher = new AmqpExecutionResultPublisher()
-  const configWritesPublisher = new AmqpConfigWritesPublisher()
+  const eventPublisher = new AmqpEventPublisher()
 
   const pipelineConfigRepository = new PostgresPipelineConfigRepository()
   await pipelineConfigRepository.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
 
-  await executionResultPublisher.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
-  await configWritesPublisher.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
+  await eventPublisher.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
 
   const pipelineConfigManager = new PipelineConfigManager(
     pipelineConfigRepository,
     pipelineExecutor,
-    configWritesPublisher,
-    executionResultPublisher
+    eventPublisher
   )
 
   const pipelineConfigConsumer = new PipelineConfigConsumer(pipelineConfigManager)

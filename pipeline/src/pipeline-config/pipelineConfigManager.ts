@@ -1,20 +1,18 @@
 import PipelineExecutor from '../pipeline-execution/pipelineExecutor'
-import { ExecutionResultPublisher } from './publisher/executionResultPublisher'
 import PipelineConfigRepository from './pipelineConfigRepository'
 import { PipelineConfig, PipelineConfigDTO } from './model/pipelineConfig'
-import ConfigWritesPublisher from './publisher/configWritesPublisher'
+import { EventPublisher } from './publisher/eventPublisher'
 
 export class PipelineConfigManager {
   constructor (
     private readonly pipelineConfigRepository: PipelineConfigRepository,
     private readonly pipelineExecutor: PipelineExecutor,
-    private readonly configWritesPublisher: ConfigWritesPublisher,
-    private readonly executionResultPublisher: ExecutionResultPublisher
+    private readonly eventPublisher: EventPublisher
   ) {}
 
   async create (config: PipelineConfigDTO): Promise<PipelineConfig> {
     const savedConfig = await this.pipelineConfigRepository.create(config)
-    const success = this.configWritesPublisher.publishCreation(savedConfig.id, savedConfig.metadata.displayName)
+    const success = this.eventPublisher.publishCreation(savedConfig.id, savedConfig.metadata.displayName)
     if (!success) {
       console.error(
         `Saved pipeline ${savedConfig.id} but was not able to publish success.
@@ -38,7 +36,7 @@ export class PipelineConfigManager {
 
   async update (id: number, config: PipelineConfigDTO): Promise<void> {
     await this.pipelineConfigRepository.update(id, config)
-    const success = this.configWritesPublisher.publishUpdate(id, config.metadata.displayName)
+    const success = this.eventPublisher.publishUpdate(id, config.metadata.displayName)
     if (!success) {
       console.error(`Updated pipeline ${id} but was not able to publish success. Error handling not implemented!`)
     }
@@ -46,7 +44,7 @@ export class PipelineConfigManager {
 
   async delete (id: number): Promise<void> {
     const deletedPipeline = await this.pipelineConfigRepository.delete(id)
-    const success = this.configWritesPublisher.publishDeletion(id, deletedPipeline.metadata.displayName)
+    const success = this.eventPublisher.publishDeletion(id, deletedPipeline.metadata.displayName)
     if (!success) {
       console.error(`Deleted pipeline ${id} but was not able to publish success. Error handling not implemented!`)
     }
@@ -55,7 +53,7 @@ export class PipelineConfigManager {
   async deleteAll (): Promise<void> {
     const deletedConfigs = await this.pipelineConfigRepository.deleteAll()
     for (const deletedConfig of deletedConfigs) {
-      const success = this.configWritesPublisher.publishDeletion(deletedConfig.id, deletedConfig.metadata.displayName)
+      const success = this.eventPublisher.publishDeletion(deletedConfig.id, deletedConfig.metadata.displayName)
       if (!success) {
         console.error(
           `Deleted pipeline ${deletedConfig.id} but was not able to publish success.
@@ -70,9 +68,9 @@ export class PipelineConfigManager {
     for (const config of allConfigs) {
       const result = this.pipelineExecutor.executeJob(config.transformation.func, data)
       if ('error' in result) {
-        this.executionResultPublisher.publishError(config.id, config.metadata.displayName, result.error.message)
+        this.eventPublisher.publishError(config.id, config.metadata.displayName, result.error.message)
       } else if ('data' in result) {
-        this.executionResultPublisher.publishSuccess(config.id, config.metadata.displayName, result.data)
+        this.eventPublisher.publishSuccess(config.id, config.metadata.displayName, result.data)
       } else {
         console.error(`Pipeline ${config.id} executed with ambiguous result: no data and no error!`)
       }
