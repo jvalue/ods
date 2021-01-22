@@ -53,8 +53,9 @@ services:
       - '-cwal_level=logical'
       - '-cmax_wal_senders=1'
       - '-cmax_replication_slots=1'
-    ports:
-      - 5432:5432
+    # Uncomment if you want to access to adapter-db from outside the docker environment
+    # ports:
+    #   - 5432:5432
 
   adapter-outboxer:
     image: ghcr.io/jvalue/outboxer-postgres2rabbitmq
