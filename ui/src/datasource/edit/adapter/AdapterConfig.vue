@@ -46,6 +46,8 @@ import { Emit, PropSync, Watch } from 'vue-property-decorator'
 import Datasource from '../../datasource'
 import CsvAdapterConfig from './CsvAdapterConfig.vue'
 import { requiredRule } from '../../../validators'
+import * as DatasourceREST from './../../datasourceRest'
+
 
 @Component({
   components: { CsvAdapterConfig }
@@ -65,7 +67,12 @@ export default class AdapterConfig extends Vue {
 
   @Emit('value')
   emitValue (): Datasource {
-    this.adapterConfig.dataSchema.schema = 'NewTest1234'
+    DatasourceREST.getSchema()
+      .then((value) => {
+        this.adapterConfig.dataSchema.schema = value
+        console.log(value)
+      })
+      .catch(error => console.error('Failed to create datasource', error))
     return this.adapterConfig
   }
 

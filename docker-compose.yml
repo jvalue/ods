@@ -274,9 +274,9 @@ services:
       - "15672:15672"
       - "5672:5672"
   # -------------------- schema -----------------------------------------------
-  schema:
-    image: ${DOCKER_REGISTRY}/schema
-    build:
-      context: ./schema/
-    ports:
-      - "8520:8520"
+ # schema:
+  #  image: ${DOCKER_REGISTRY}/schema
+   # build:
+    #  context: ./schema/
+    #ports:
+    #  - "8520:8520"

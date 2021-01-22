@@ -56,3 +56,8 @@ export async function getDatasourceData (id: number): Promise<Data> {
   const dataResponse = await http.get<string>(location)
   return JSON.parse(dataResponse.data)
 }
+
+export async function getSchema (): Promise<string> {
+  const response = await http.get<string>('/schema/')
+  return response.data
+}
