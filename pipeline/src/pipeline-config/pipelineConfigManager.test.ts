@@ -1,11 +1,10 @@
 /* eslint-env jest */import
 { mocked } from 'ts-jest/utils'
 
-import ConfigWritesPublisher from './publisher/configWritesPublisher'
+import { EventPublisher } from './publisher/eventPublisher'
 import PipelineConfigRepository from './pipelineConfigRepository'
 import { PipelineConfigManager } from './pipelineConfigManager'
 import PipelineExecutor from '../pipeline-execution/pipelineExecutor'
-import { ExecutionResultPublisher } from './publisher/executionResultPublisher'
 import { PipelineConfig, PipelineConfigDTO } from './model/pipelineConfig'
 import VM2SandboxExecutor from '../pipeline-execution/sandbox/vm2SandboxExecutor'
 
@@ -47,13 +46,11 @@ const pipelineConfigDTO = (): PipelineConfigDTO => {
   }
 }
 
-const WritesPublisherMock: jest.Mock<ConfigWritesPublisher> = jest.fn(() => ({
+const EventPublisherMock: jest.Mock<EventPublisher> = jest.fn(() => ({
   publishCreation: jest.fn().mockReturnValue(true),
   publishUpdate: jest.fn().mockReturnValue(true),
-  publishDeletion: jest.fn().mockReturnValue(true)
-}))
+  publishDeletion: jest.fn().mockReturnValue(true),
 
-const ExecutionPublisherMock: jest.Mock<ExecutionResultPublisher> = jest.fn(() => ({
   publishSuccess: jest.fn(),
   publishError: jest.fn()
 }))
@@ -76,66 +73,62 @@ test('Should call create and publish event', async () => {
   const config = pipelineConfigDTO()
 
   const repositoryMock = new RepositoryMock()
-  const writesPublisherMock = new WritesPublisherMock()
+  const eventPublisherMock = new EventPublisherMock()
 
   const manager = new PipelineConfigManager(
     repositoryMock,
     new PipelineExecutor(new VM2SandboxExecutor()),
-    writesPublisherMock,
-    new ExecutionPublisherMock()
+    eventPublisherMock
   )
   await manager.create(config)
 
   expect(repositoryMock.create).toHaveBeenCalledWith(config)
-  expect(writesPublisherMock.publishCreation).toHaveBeenCalledTimes(1)
+  expect(eventPublisherMock.publishCreation).toHaveBeenCalledTimes(1)
 })
 
 test('Should call update and publish event', async () => {
   const config = pipelineConfigDTO()
 
   const repositoryMock = new RepositoryMock()
-  const writesPublisherMock = new WritesPublisherMock()
+  const eventPublisherMock = new EventPublisherMock()
 
   const manager = new PipelineConfigManager(
     repositoryMock,
     new PipelineExecutor(new VM2SandboxExecutor()),
-    writesPublisherMock,
-    new ExecutionPublisherMock()
+    eventPublisherMock
   )
   await manager.update(123, config)
 
   expect(repositoryMock.update).toHaveBeenCalledWith(123, config)
-  expect(writesPublisherMock.publishUpdate).toHaveBeenCalledTimes(1)
+  expect(eventPublisherMock.publishUpdate).toHaveBeenCalledTimes(1)
 })
 
 test('Should call delete and publish event', async () => {
   const repositoryMock = new RepositoryMock()
-  const writesPublisherMock = new WritesPublisherMock()
+  const eventPublisherMock = new EventPublisherMock()
 
   const manager = new PipelineConfigManager(
     repositoryMock,
     new PipelineExecutor(new VM2SandboxExecutor()),
-    writesPublisherMock,
-    new ExecutionPublisherMock()
+    eventPublisherMock
   )
   await manager.delete(1234)
 
   expect(repositoryMock.delete).toHaveBeenCalledWith(1234)
-  expect(writesPublisherMock.publishDeletion).toHaveBeenCalledTimes(1)
+  expect(eventPublisherMock.publishDeletion).toHaveBeenCalledTimes(1)
 })
 
 test('Should call delete all and publish event', async () => {
   const repositoryMock = new RepositoryMock()
-  const writesPublisherMock = new WritesPublisherMock()
+  const eventPublisherMock = new EventPublisherMock()
 
   const manager = new PipelineConfigManager(
     repositoryMock,
     new PipelineExecutor(new VM2SandboxExecutor()),
-    writesPublisherMock,
-    new ExecutionPublisherMock()
+    eventPublisherMock
   )
   await manager.deleteAll()
 
   expect(repositoryMock.deleteAll).toHaveBeenCalledTimes(1)
-  expect(writesPublisherMock.publishDeletion).toHaveBeenCalledTimes(2)
+  expect(eventPublisherMock.publishDeletion).toHaveBeenCalledTimes(2)
 })
