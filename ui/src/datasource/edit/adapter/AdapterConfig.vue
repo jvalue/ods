@@ -38,7 +38,10 @@
     </v-form>
     <h2>Configuration Preview</h2>
     <v-container>
-      <pre style="height: 500px; overflow: scroll; background: lightgray" class="py-3">
+      <pre
+        style="height: 500px; overflow: scroll; background: lightgray"
+        class="py-3"
+      >
         {{ preview }}
       </pre>
     </v-container>
@@ -81,7 +84,7 @@ export default class AdapterConfig extends Vue {
   }
 
   private async updatePreview (): Promise<void> {
-    const fallback = "No preview available. Datasource might not be configured right!"
+    const fallback = 'No preview available. Datasource might not be configured right!'
     if (!this.isValid) {
       this.preview = fallback
       return
@@ -93,7 +96,7 @@ export default class AdapterConfig extends Vue {
     }
   }
 
-  async created () {
+  async created (): Promise<void> {
     await this.updatePreview()
   }
 
@@ -123,9 +126,9 @@ export default class AdapterConfig extends Vue {
   }
 
   @Watch('adapterConfig', { deep: true })
-  formChanged (): void {
-    this.updatePreview()
+  async formChanged (): Promise<void> {
     this.emitValue()
+    await this.updatePreview()
   }
 
   @Watch('isValid')
