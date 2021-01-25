@@ -13,6 +13,12 @@ const http = axios.create({
   transformResponse: []
 })
 
+const httpSchema = axios.create({
+  baseURL: '/api/schema',
+  headers: { 'Content-Type': 'application/json' },
+  transformResponse: []
+})
+
 /**
  * This reviver function replaces firstExecution attribute with a date object
  * if the current type is string.
@@ -58,6 +64,6 @@ export async function getDatasourceData (id: number): Promise<Data> {
 }
 
 export async function getSchema (): Promise<string> {
-  const response = await http.get<string>('/schema/')
+  const response = await httpSchema.get<string>('/schema/')
   return response.data
 }

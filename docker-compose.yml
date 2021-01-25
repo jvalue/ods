@@ -274,9 +274,14 @@ services:
       - "15672:15672"
       - "5672:5672"
   # -------------------- schema -----------------------------------------------
- # schema:
-  #  image: ${DOCKER_REGISTRY}/schema
-   # build:
-    #  context: ./schema/
-    #ports:
-    #  - "8520:8520"
+  schema:
+    image: ${DOCKER_REGISTRY}/schema
+    build:
+      context: ./schema/
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.to-schema.rule=PathPrefix(`/api/schema`)"
+      - "traefik.http.routers.to-schema.middlewares=schema-stripprefix@docker"
+      - "traefik.http.middlewares.schema-stripprefix.stripprefix.prefixes=/api/schema"
+    ports:
+      - "8520:8520"
