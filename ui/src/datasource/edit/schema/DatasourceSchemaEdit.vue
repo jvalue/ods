@@ -2,6 +2,12 @@
   <v-form
     v-model="isValid"
   >
+    <v-select
+      v-model="dataSchema.mode"
+      :items="availableSchemaModes"
+      label="Mode"
+      :rules="[required]"
+    />
     <v-textarea
       v-model="dataSchema.schema"
       label="Datasource schema suggestion"
@@ -15,13 +21,16 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 
 import { Emit, PropSync } from 'vue-property-decorator'
-
+import { requiredRule } from '../../../validators'
 import { DataSchema } from '../../datasource'
 
 @Component({ })
 export default class DatasourceSchemaEdit extends Vue {
-  private isValid = true
+  private availableSchemaModes = ['NONE', 'FAST', 'DETAILED']
 
+  private isValid = true
+  private required = requiredRule
+  
   @PropSync('value')
   private dataSchema!: DataSchema
 

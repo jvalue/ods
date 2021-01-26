@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios'
 import Datasource, { Data, DataLocation } from './datasource'
-import { ADAPTER_SERVICE_URL } from '@/env'
+import { ADAPTER_SERVICE_URL, SCHEMA_SERVICE_URL } from '@/env'
 
 /**
  * Axios instance with default headers and base url.
@@ -14,7 +14,7 @@ const http = axios.create({
 })
 
 const httpSchema = axios.create({
-  baseURL: '/api/schema',
+  baseURL: SCHEMA_SERVICE_URL,
   headers: { 'Content-Type': 'application/json' },
   transformResponse: []
 })

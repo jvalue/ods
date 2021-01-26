@@ -32,6 +32,7 @@ export interface DataLocation {
 }
 
 export interface DataSchema {
+  mode: string
   schema: string
 }
 

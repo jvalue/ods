@@ -3,7 +3,7 @@ var app = express()
 
 // define a route handler for the default home page
 app.get('/schema/', (req: express.Request, res: express.Response) => {
-  res.setHeader('Content-Type', 'application/json')
+  res.setHeader('Access-Controll-Allow-Origin', '*')
   res.send(JSON.stringify({ a: 1 }))
 })
 
