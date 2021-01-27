@@ -11,9 +11,8 @@ import VM2SandboxExecutor from './pipeline-execution/sandbox/vm2SandboxExecutor'
 import PipelineExecutor from './pipeline-execution/pipelineExecutor'
 import { PipelineConfigEndpoint } from './api/rest/pipelineConfigEndpoint'
 import { PipelineConfigManager } from './pipeline-config/pipelineConfigManager'
-import PostgresPipelineConfigRepository from './pipeline-config/postgresPipelineConfigRepository'
 import { PipelineConfigConsumer } from './api/amqp/pipelineConfigConsumer'
-import { AmqpEventPublisher } from './pipeline-config/publisher/amqpEventPublisher'
+import { init as initDatabase } from './pipeline-config/pipelineDatabase'
 
 const port = 8080
 let server: Server | undefined
@@ -26,17 +25,12 @@ process.on('SIGTERM', () => {
 async function main (): Promise<void> {
   const sandboxExecutor = new VM2SandboxExecutor()
   const pipelineExecutor = new PipelineExecutor(sandboxExecutor)
-  const eventPublisher = new AmqpEventPublisher()
 
-  const pipelineConfigRepository = new PostgresPipelineConfigRepository()
-  await pipelineConfigRepository.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
-
-  await eventPublisher.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
+  const postgresClient = await initDatabase(CONNECTION_RETRIES, CONNECTION_BACKOFF)
 
   const pipelineConfigManager = new PipelineConfigManager(
-    pipelineConfigRepository,
-    pipelineExecutor,
-    eventPublisher
+    postgresClient,
+    pipelineExecutor
   )
 
   const pipelineConfigConsumer = new PipelineConfigConsumer(pipelineConfigManager)
