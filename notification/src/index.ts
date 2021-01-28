@@ -14,7 +14,7 @@ import { initNotificationRepository } from './notification-config/postgresNotifi
 const port = 8080
 
 async function main (): Promise<void> {
-  const notificationRepository = await initNotificationRepository(CONNECTION_RETRIES, CONNECTION_RETRIES)
+  const notificationRepository = await initNotificationRepository(CONNECTION_RETRIES, CONNECTION_BACKOFF)
   const sandboxExecutor = new VM2SandboxExecutor()
   const notificationExecutor = new NotificationExecutor(sandboxExecutor)
   const triggerEventHandler = new TriggerEventHandler(notificationRepository, notificationExecutor)
