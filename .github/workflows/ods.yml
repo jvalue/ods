@@ -24,12 +24,15 @@ jobs:
         run: |
           docker-compose -f docker-compose.yml build adapter
 
-      - name: Integration-test
+      - name: Build Integration-test
         run: |
           docker-compose -f docker-compose.yml -f docker-compose.it.yml build adapter-it
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d adapter
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from adapter-it adapter-it
-          docker-compose logs
+
+      - name: Run Integration-test
+        # Only the logs from the services listed in the `docker-compose up` command are going to be printed to stdout
+        # To get logs from other services too, just add them to the `docker-compose up` command
+        run: |
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from adapter-it adapter adapter-it
           docker-compose -f docker-compose.yml -f docker-compose.it.yml down
 
       - name: Save Docker image as artifact
@@ -57,12 +60,15 @@ jobs:
         run: |
           docker-compose -f docker-compose.yml build scheduler
 
-      - name: Integration-test
+      - name: Build Integration-test
         run: |
           docker-compose -f docker-compose.yml -f docker-compose.it.yml build scheduler-it
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d scheduler
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from scheduler-it scheduler-it
-          docker-compose logs
+
+      - name: Run Integration-test
+        # Only the logs from the services listed in the `docker-compose up` command are going to be printed to stdout
+        # To get logs from other services too, just add them to the `docker-compose up` command
+        run: |
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from scheduler-it scheduler scheduler-it
           docker-compose -f docker-compose.yml -f docker-compose.it.yml down
 
       - name: Save Docker image as artifact
@@ -92,15 +98,18 @@ jobs:
           docker-compose -f docker-compose.yml build storage-db-liquibase
           docker-compose -f docker-compose.yml build storage-mq
 
-      - name: Integration-test
+      - name: Build Integration-test
         run: |
           docker-compose -f docker-compose.yml -f docker-compose.it.yml build storage-it
+
+      - name: Run Integration-test
+        # Only the logs from the services listed in the `docker-compose up` command are going to be printed to stdout
+        # To get logs from other services too, just add them to the `docker-compose up` command
+        run: |
           docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d storage-db
           docker-compose -f docker-compose.yml -f docker-compose.it.yml up storage-db-liquibase
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d storage-mq
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d storage
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from storage-it storage-it
-          docker-compose logs
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d storage-mq storage
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from storage-it storage-mq storage-it
           docker-compose -f docker-compose.yml -f docker-compose.it.yml down
 
       - name: Save Docker image as artifact
@@ -145,12 +154,15 @@ jobs:
         run: |
           docker-compose -f docker-compose.yml build pipeline
 
-      - name: Integration-test
+      - name: Build Integration-test
         run: |
           docker-compose -f docker-compose.yml -f docker-compose.it.yml build pipeline-it
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d pipeline
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from pipeline-it pipeline-it
-          docker-compose logs
+
+      - name: Run Integration-test
+        # Only the logs from the services listed in the `docker-compose up` command are going to be printed to stdout
+        # To get logs from other services too, just add them to the `docker-compose up` command
+        run: |
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from pipeline-it pipeline pipeline-it
           docker-compose -f docker-compose.yml -f docker-compose.it.yml down
 
       - name: Save Docker image as artifact
@@ -177,12 +189,15 @@ jobs:
         run: |
           docker-compose -f docker-compose.yml build notification
 
-      - name: Integration-test
+      - name: Build Integration-test
         run: |
           docker-compose -f docker-compose.yml -f docker-compose.it.yml build notification-it
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml up -d notification
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from notification-it notification-it
-          docker-compose logs
+
+      - name: Run Integration-test
+        # Only the logs from the services listed in the `docker-compose up` command are going to be printed to stdout
+        # To get logs from other services too, just add them to the `docker-compose up` command
+        run: |
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from notification-it notification notification-it
           docker-compose -f docker-compose.yml -f docker-compose.it.yml down
 
       - name: Save Docker image as artifact
@@ -261,17 +276,21 @@ jobs:
         with:
           name: notification-artifact
 
-      - name: Run Systemtest
+      - name: Load images from artifacts
         run: |
-          docker load -i ./scheduler-artifact/scheduler.tar &
-          docker load -i ./storage-artifact/storage_postgrest.tar &
-          docker load -i ./liquibase-artifact/storage_liquibase.tar &
-          docker load -i ./storagemq-artifact/storage_mq.tar &
-          docker load -i ./pipeline-artifact/pipeline.tar &
-          docker load -i ./notification-artifact/notification.tar &
+          docker load -i ./scheduler-artifact/scheduler.tar
+          docker load -i ./storage-artifact/storage_postgrest.tar
+          docker load -i ./liquibase-artifact/storage_liquibase.tar
+          docker load -i ./storagemq-artifact/storage_mq.tar
+          docker load -i ./pipeline-artifact/pipeline.tar
+          docker load -i ./notification-artifact/notification.tar
           docker load -i ./adapter-artifact/adapter.tar
+
+      - name: Run Systemtest
+        # Only the logs from the services listed in the `docker-compose up` command are going to be printed to stdout
+        # To get logs from other services too, just add them to the `docker-compose up` command
+        run: |
           docker-compose -f docker-compose.yml -f docker-compose.st.yml up --exit-code-from system-test adapter pipeline storage storage-mq notification scheduler system-test
-          docker-compose logs
           docker-compose -f docker-compose.yml -f docker-compose.st.yml down
 
   # ----------------- Registry Upload --------------------
