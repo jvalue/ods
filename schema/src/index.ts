@@ -1,10 +1,21 @@
 import express from 'express'
 var app = express()
+app.use(express.json())
 
 // define a route handler for the default home page
-app.get('/schema/', (req: express.Request, res: express.Response) => {
-  res.setHeader('Access-Controll-Allow-Origin', '*')
-  res.send(JSON.stringify({ a: 1 }))
+app.post('/fastGen', (req: express.Request, res: express.Response) => {
+  console.log(req.body)
+  res.send(req.body)
+})
+
+// define a route handler for the default home page
+app.post('/detailedGen', (req: express.Request, res: express.Response) => {
+  console.log(req.body)
+  res.send(req.body)
+})
+
+app.get('/', (req: express.Request, res: express.Response) => {
+  res.send(200)
 })
 
 app.listen(8520, () => {

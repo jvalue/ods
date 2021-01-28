@@ -69,7 +69,7 @@ export default class DatasourceCreate extends Vue {
     },
     dataSchema: {
       mode: 'NONE',
-      schema: 'Test1234'
+      data: JSON.stringify({a:'1'})
     },
     metadata: {
       author: '',

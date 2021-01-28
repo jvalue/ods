@@ -2,14 +2,23 @@
   <v-form
     v-model="isValid"
   >
-    <v-select
-      v-model="dataSchema.mode"
-      :items="availableSchemaModes"
-      label="Mode"
-      :rules="[required]"
-    />
+    <v-card-actions>
+      <v-select
+        v-model="dataSchema.mode"
+        :items="availableSchemaModes"
+        label="Mode"
+        :rules="[required]"
+      />
+      <v-btn
+        color="primary"
+        class="ma-2"
+        @click="onGenerate"
+      >
+        Generate
+      </v-btn>
+    </v-card-actions>
     <v-textarea
-      v-model="dataSchema.schema"
+      v-model="dataSchema.data"
       label="Datasource schema suggestion"
       @keyup="formChanged"
     />
@@ -19,6 +28,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
+import * as DatasourceREST from './../../datasourceRest'
 
 import { Emit, PropSync } from 'vue-property-decorator'
 import { requiredRule } from '../../../validators'
@@ -47,6 +57,26 @@ export default class DatasourceSchemaEdit extends Vue {
   formChanged (): void {
     this.emitValue()
     this.emitValid()
+  }
+
+  private onGenerate (): void {
+    if (this.dataSchema.mode == 'NONE')
+      return
+    else if (this.dataSchema.mode == 'FAST') {
+      DatasourceREST.getSchemaFast(this.dataSchema)
+        .then((value) => {
+          this.dataSchema.data = value
+          console.log(value)
+        })
+        .catch(error => console.error('Failed to create datasource', error))
+    } else if (this.dataSchema.mode == 'DETAILED') {
+      DatasourceREST.getSchemaDetailed(this.dataSchema)
+        .then((value) => {
+          this.dataSchema.data = value
+          console.log(value)
+        })
+        .catch(error => console.error('Failed to create datasource', error))
+    }
   }
 }
 </script>

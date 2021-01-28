@@ -33,7 +33,7 @@ export interface DataLocation {
 
 export interface DataSchema {
   mode: string
-  schema: string
+  data: string
 }
 
 export type Data = object

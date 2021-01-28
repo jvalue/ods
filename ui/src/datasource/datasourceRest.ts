@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from 'axios'
-import Datasource, { Data, DataLocation } from './datasource'
+import Datasource, { Data, DataLocation, DataSchema } from './datasource'
 import { ADAPTER_SERVICE_URL, SCHEMA_SERVICE_URL } from '@/env'
 
 /**
@@ -63,7 +63,14 @@ export async function getDatasourceData (id: number): Promise<Data> {
   return JSON.parse(dataResponse.data)
 }
 
-export async function getSchema (): Promise<string> {
-  const response = await httpSchema.get<string>('/schema/')
+export async function getSchemaFast (dataSchema: DataSchema): Promise<string> {
+  console.log(dataSchema.data)
+  const response = await httpSchema.post<string>('/fastGen', dataSchema.data)
+  return response.data
+}
+
+export async function getSchemaDetailed (dataSchema: DataSchema): Promise<string> {
+  console.log(dataSchema.data)
+  const response = await httpSchema.post<string>('/detailedGen', dataSchema.data)
   return response.data
 }
