@@ -78,30 +78,47 @@ public class DatasourceManager {
   }
 
   public DataBlob.MetaData trigger(Long id, RuntimeParameters runtimeParameters) {
-    AdapterConfig adapterConfig = getParametrizedDatasource(id, runtimeParameters);
     try {
-      DataImportResponse executionResult = adapter.executeJob(adapterConfig);
-      DataBlob importedBlob = new DataBlob(executionResult.getData());
-
-      DataBlob savedBlob = dataBlobRepository.save(importedBlob);
-
-      amqpPublisher.publishImportSuccess(id, savedBlob.getData());
-      return savedBlob.getMetaData();
+      return executeImport(id, runtimeParameters);
     } catch (Exception e) {
-      String errMsg;
-      if (e.getCause() != null) {
-        errMsg = e.getCause().getMessage();
-      } else {
-        errMsg = e.getMessage();
-      }
-      amqpPublisher.publishImportFailure(id, errMsg);
-      if (e instanceof IllegalArgumentException) {
-        log.error("Data Import request failed. Malformed Request: " + e.getMessage());
-      } else {
-        log.error("Exception in the Adapter: " + e.getMessage());
-      }
+      log.error("Failed to execute import", e);
+      publishImportFailure(id, e);
       throw e;
     }
+  }
+
+  /**
+   * Performs the actual import inside a database transaction. This ensures that,
+   * the imported data and the event are always inserted together into the database.
+   * <br>
+   * Note: This method is an internal API, do not use it from the outside. It is
+   * package-private only because {@link Transactional} requires the method to be overridable.
+   *
+   * @param id the id of the datasource to import
+   * @param runtimeParameters the runtime parameters to use for the import
+   * @return the metadata of the imported data
+   */
+  @Transactional
+  DataBlob.MetaData executeImport(Long id, RuntimeParameters runtimeParameters) {
+    AdapterConfig adapterConfig = getParametrizedDatasource(id, runtimeParameters);
+    DataImportResponse executionResult = adapter.executeJob(adapterConfig);
+    DataBlob importedBlob = new DataBlob(executionResult.getData());
+
+    DataBlob savedBlob = dataBlobRepository.save(importedBlob);
+
+    amqpPublisher.publishImportSuccess(id, savedBlob.getData());
+
+    return savedBlob.getMetaData();
+  }
+
+  private void publishImportFailure(Long id, Exception e) {
+    String errMsg;
+    if (e.getCause() != null) {
+      errMsg = e.getCause().getMessage();
+    } else {
+      errMsg = e.getMessage();
+    }
+    amqpPublisher.publishImportFailure(id, errMsg);
   }
 
   /**

@@ -15,14 +15,10 @@ public class AdapterProperties {
   @Getter
   @Setter
   public static class Amqp {
-    private String exchange;
     private String importSuccessTopic;
     private String importFailedTopic;
     private String datasourceCreatedTopic;
     private String datasourceUpdatedTopic;
     private String datasourceDeletedTopic;
-
-    private int publishRetries;
-    private long publishBackoff;
   }
 }

@@ -1,11 +1,14 @@
 package org.jvalue.ods.adapterservice.datasource.event;
 
-import lombok.Value;
+import lombok.*;
 
-@Value
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode
 public class ImportSuccessEvent {
-  Long datasourceId;
-  String data;
+  private Long datasourceId;
+  private String data;
 
   @Override
   public String toString() {
