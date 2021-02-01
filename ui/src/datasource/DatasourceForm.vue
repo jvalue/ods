@@ -57,7 +57,7 @@
       </v-stepper-step>
       <v-stepper-content step="3">
         <datasource-schema-edit
-          v-model="datasource.dataSchema"
+          v-model="datasource"
           @validityChanged="validStep3 = $event"
         />
         <stepper-button-group

@@ -4,7 +4,7 @@
   >
     <v-card-actions>
       <v-select
-        v-model="dataSchema.mode"
+        v-model="dataSource.mode"
         :items="availableSchemaModes"
         label="Mode"
         :rules="[required]"
