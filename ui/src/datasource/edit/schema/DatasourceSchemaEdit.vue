@@ -18,7 +18,7 @@
       </v-btn>
     </v-card-actions>
     <v-textarea
-      v-model="dataSchema.data"
+      v-model="dataSource.dataSchema.data"
       label="Datasource schema suggestion"
       @keyup="formChanged"
     />
@@ -28,25 +28,25 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import * as DatasourceREST from './../../datasourceRest'
+import * as SchemaSuggestionREST from './../../schemaSuggestionRest'
 
 import { Emit, PropSync } from 'vue-property-decorator'
 import { requiredRule } from '../../../validators'
-import { DataSchema } from '../../datasource'
+import DataSource, { Mode } from '../../datasource'
 
 @Component({ })
 export default class DatasourceSchemaEdit extends Vue {
-  private availableSchemaModes = ['NONE', 'FAST', 'DETAILED']
+  private availableSchemaModes = [Mode.NONE, Mode.FAST, Mode.DETAILED]
 
   private isValid = true
   private required = requiredRule
   
   @PropSync('value')
-  private dataSchema!: DataSchema
+  private dataSource!: DataSource
 
   @Emit('value')
-  emitValue (): DataSchema {
-    return this.dataSchema
+  emitValue (): DataSource {
+    return this.dataSource
   }
 
   @Emit('validityChanged')
@@ -60,20 +60,18 @@ export default class DatasourceSchemaEdit extends Vue {
   }
 
   private onGenerate (): void {
-    if (this.dataSchema.mode == 'NONE')
+    if (this.dataSource.mode == Mode.NONE)
       return
-    else if (this.dataSchema.mode == 'FAST') {
-      DatasourceREST.getSchemaFast(this.dataSchema)
+    else if (this.dataSource.mode == Mode.FAST) {
+      SchemaSuggestionREST.getSchemaFast(this.dataSource.dataSchema)
         .then((value) => {
-          this.dataSchema.data = value
-          console.log(value)
+          this.dataSource.dataSchema.data = value
         })
         .catch(error => console.error('Failed to create datasource', error))
-    } else if (this.dataSchema.mode == 'DETAILED') {
-      DatasourceREST.getSchemaDetailed(this.dataSchema)
+    } else if (this.dataSource.mode == Mode.DETAILED) {
+      SchemaSuggestionREST.getSchemaDetailed(this.dataSource.dataSchema)
         .then((value) => {
-          this.dataSchema.data = value
-          console.log(value)
+          this.dataSource.dataSchema.data = value
         })
         .catch(error => console.error('Failed to create datasource', error))
     }

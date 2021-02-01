@@ -12,9 +12,9 @@ COPY ./package*.json ./
 RUN npm ci
 
 # copy rest of the files
-COPY ./src ./src
 COPY ./tsconfig.json ./
 COPY ./.eslintrc.js ./
+COPY ./src ./src
 
 # lint project
 RUN npm run lint-ci
@@ -33,6 +33,6 @@ COPY --from=build-stage /build/dist/ ./dist/
 COPY --from=build-stage /build/package*.json ./
 
 RUN npm ci --only=production
-EXPOSE 8520
+EXPOSE 8080
 
 CMD [ "npm", "run", "start:transpiled" ]
