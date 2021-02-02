@@ -1,6 +1,12 @@
 # Adapter Service of the ODS
 The adapter service fetches data from external data sources and provides them via a HTTP API in JSON format. 
 The data coming from the external sources can be fetched over various protocols and can have various formats.
+
+## Concepts
+- **Datasource**: Description of a datasource. This description can be transformed into an *adapter* to import data from a data source and forward it to downstream services.
+- **Adapter**: Configuration to import data from a datasource; can be derived from a *datasource* config, or is provided by a user to generate a *preview*
+- **Preview**: Stateless preview that allows executing a datasource config once and synchronously returning the result of the import and interpretation; does not send the result to downstream services (difference tocreating and triggering a datasource).
+
 ## Current Features
 * Currently the adapter service is only a prototype and can handle JSON, XML and CSV files that can be fetched over HTTP.
 ## Planned Features
