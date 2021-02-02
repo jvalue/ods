@@ -1,6 +1,6 @@
 import { ClientBase } from 'pg'
 
-import { insertEvent } from './pipelineDatabase'
+import { insertEvent } from './pipelineEventRepository'
 import {
   AMQP_PIPELINE_CONFIG_CREATED_TOPIC, AMQP_PIPELINE_CONFIG_DELETED_TOPIC, AMQP_PIPELINE_CONFIG_UPDATED_TOPIC,
   AMQP_PIPELINE_EXECUTION_ERROR_TOPIC, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC

@@ -6,7 +6,7 @@ import { PipelineConfigManager } from './pipelineConfigManager'
 import PipelineExecutor from '../pipeline-execution/pipelineExecutor'
 import { PipelineConfig, PipelineConfigDTO } from './model/pipelineConfig'
 import VM2SandboxExecutor from '../pipeline-execution/sandbox/vm2SandboxExecutor'
-import * as PipelineDatabase from './pipelineDatabase'
+import * as PipelineConfigRepository from './pipelineConfigRepository'
 import * as OutboxEventPublisher from './outboxEventPublisher'
 
 jest.mock('@jvalue/node-dry-pg', () => {
@@ -21,7 +21,7 @@ jest.mock('@jvalue/node-dry-pg', () => {
 
 jest.mock('../pipeline-execution/pipelineExecutor')
 
-jest.mock('./pipelineDatabase', () => {
+jest.mock('./pipelineConfigRepository', () => {
   return {
     create: jest.fn().mockImplementation(async (_, config) => config),
     get: jest.fn(),
@@ -29,8 +29,7 @@ jest.mock('./pipelineDatabase', () => {
     getByDatasourceId: jest.fn(),
     update: jest.fn(),
     deleteById: jest.fn().mockResolvedValue(generateConfig()),
-    deleteAll: jest.fn().mockResolvedValue([generateConfig(), generateConfig()]),
-    insertEvent: jest.fn()
+    deleteAll: jest.fn().mockResolvedValue([generateConfig(), generateConfig()])
   }
 })
 
@@ -77,7 +76,7 @@ function pipelineConfigDTO (): PipelineConfigDTO {
   }
 }
 
-const pipelineConfigDatabaseMock = mocked(PipelineDatabase, true)
+const pipelineConfigRepositoryMock = mocked(PipelineConfigRepository, true)
 const outboxEventPublisherMock = mocked(OutboxEventPublisher, true)
 
 afterEach(() => {
@@ -93,7 +92,7 @@ test('Should call create and publish event', async () => {
   )
   await manager.create(config)
 
-  expect(pipelineConfigDatabaseMock.create).toHaveBeenCalledWith(undefined, config)
+  expect(pipelineConfigRepositoryMock.create).toHaveBeenCalledWith(undefined, config)
   expect(outboxEventPublisherMock.publishCreation).toHaveBeenCalledTimes(1)
 })
 
@@ -106,7 +105,7 @@ test('Should call update and publish event', async () => {
   )
   await manager.update(123, config)
 
-  expect(pipelineConfigDatabaseMock.update).toHaveBeenCalledWith(undefined, 123, config)
+  expect(pipelineConfigRepositoryMock.update).toHaveBeenCalledWith(undefined, 123, config)
   expect(outboxEventPublisherMock.publishUpdate).toHaveBeenCalledTimes(1)
 })
 
@@ -117,7 +116,7 @@ test('Should call delete and publish event', async () => {
   )
   await manager.delete(1234)
 
-  expect(pipelineConfigDatabaseMock.deleteById).toHaveBeenCalledWith(undefined, 1234)
+  expect(pipelineConfigRepositoryMock.deleteById).toHaveBeenCalledWith(undefined, 1234)
   expect(outboxEventPublisherMock.publishDeletion).toHaveBeenCalledTimes(1)
 })
 
@@ -128,6 +127,6 @@ test('Should call delete all and publish event', async () => {
   )
   await manager.deleteAll()
 
-  expect(pipelineConfigDatabaseMock.deleteAll).toHaveBeenCalledTimes(1)
+  expect(pipelineConfigRepositoryMock.deleteAll).toHaveBeenCalledTimes(1)
   expect(outboxEventPublisherMock.publishDeletion).toHaveBeenCalledTimes(2)
 })

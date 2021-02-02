@@ -3,7 +3,7 @@ import { PostgresClient } from '@jvalue/node-dry-pg'
 import PipelineExecutor from '../pipeline-execution/pipelineExecutor'
 import { PipelineConfig, PipelineConfigDTO } from './model/pipelineConfig'
 import * as EventPublisher from './outboxEventPublisher'
-import * as PipelineDatabase from './pipelineDatabase'
+import * as PipelineConfigRepository from './pipelineConfigRepository'
 
 export class PipelineConfigManager {
   constructor (
@@ -13,7 +13,7 @@ export class PipelineConfigManager {
 
   async create (config: PipelineConfigDTO): Promise<PipelineConfig> {
     return await this.pgClient.transaction(async client => {
-      const savedConfig = await PipelineDatabase.create(client, config)
+      const savedConfig = await PipelineConfigRepository.create(client, config)
       await EventPublisher.publishCreation(client, savedConfig.id, savedConfig.metadata.displayName)
       return savedConfig
     })
@@ -21,36 +21,36 @@ export class PipelineConfigManager {
 
   async get (id: number): Promise<PipelineConfig | undefined> {
     return await this.pgClient.transaction(async client =>
-      await PipelineDatabase.get(client, id))
+      await PipelineConfigRepository.get(client, id))
   }
 
   async getAll (): Promise<PipelineConfig[]> {
     return await this.pgClient.transaction(async client =>
-      await PipelineDatabase.getAll(client))
+      await PipelineConfigRepository.getAll(client))
   }
 
   async getByDatasourceId (datasourceId: number): Promise<PipelineConfig[]> {
     return await this.pgClient.transaction(async client =>
-      await PipelineDatabase.getByDatasourceId(client, datasourceId))
+      await PipelineConfigRepository.getByDatasourceId(client, datasourceId))
   }
 
   async update (id: number, config: PipelineConfigDTO): Promise<void> {
     return await this.pgClient.transaction(async client => {
-      await PipelineDatabase.update(client, id, config)
+      await PipelineConfigRepository.update(client, id, config)
       await EventPublisher.publishUpdate(client, id, config.metadata.displayName)
     })
   }
 
   async delete (id: number): Promise<void> {
     return await this.pgClient.transaction(async client => {
-      const deletedPipeline = await PipelineDatabase.deleteById(client, id)
+      const deletedPipeline = await PipelineConfigRepository.deleteById(client, id)
       await EventPublisher.publishDeletion(client, id, deletedPipeline.metadata.displayName)
     })
   }
 
   async deleteAll (): Promise<void> {
     return await this.pgClient.transaction(async client => {
-      const deletedConfigs = await PipelineDatabase.deleteAll(client)
+      const deletedConfigs = await PipelineConfigRepository.deleteAll(client)
       for (const deletedConfig of deletedConfigs) {
         await EventPublisher.publishDeletion(client, deletedConfig.id, deletedConfig.metadata.displayName)
       }
