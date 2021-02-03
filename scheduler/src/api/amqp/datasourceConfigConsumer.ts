@@ -1,12 +1,10 @@
 import * as AMQP from 'amqplib'
-import * as AmqpConnector from '@jvalue/node-dry-amqp/dist/amqpConnector'
-import { sleep } from '@jvalue/node-dry-basics'
+import { AmqpConnection, AmqpChannel } from '@jvalue/node-dry-amqp'
 
 import Scheduler from '../../scheduling'
 import DatasourceConfig from '../datasource-config'
 
 import {
-  AMQP_URL,
   AMQP_SCHEDULER_EXCHANGE,
   AMQP_SCHEDULER_QUEUE,
   AMQP_DATASOURCE_CONFIG_TOPIC,
@@ -16,39 +14,19 @@ import {
 } from '../../env'
 
 export class DatasourceConfigConsumer {
-  private connection?: AMQP.Connection
-  private channel?: AMQP.Channel
+  private channel?: AmqpChannel
 
-  constructor (private readonly scheduler: Scheduler) {
+  constructor (
+    private readonly connection: AmqpConnection,
+    private readonly scheduler: Scheduler) {
   }
 
-  public async initialize (retries: number, backoff: number): Promise<void> {
-    for (let i = 1; i <= retries; i++) {
-      try {
-        this.connection = await AmqpConnector.connect(AMQP_URL)
-        break
-      } catch (error) {
-        console.info(`Error initializing the AMQP Client (${i}/${retries}):
-        ${error}. Retrying in ${backoff}...`)
-      }
-      await sleep(backoff)
-    }
+  public async initialize (): Promise<void> {
+    this.channel = await this.connection.createChannel()
 
-    if (this.connection === undefined) {
-      throw new Error(`Could not connect to AMQP broker at ${AMQP_URL}`)
-    }
-
-    const exchange = { name: AMQP_SCHEDULER_EXCHANGE, type: 'topic' }
-    const exchangeOptions = {}
-    const queue = { name: AMQP_SCHEDULER_QUEUE, routingKey: AMQP_DATASOURCE_CONFIG_TOPIC }
-    const queueOptions = {
-      exclusive: false
-    }
-
-    this.channel = await AmqpConnector.initChannel(this.connection, exchange, exchangeOptions)
-
-    await this.channel.assertQueue(queue.name, queueOptions)
-    await this.channel.bindQueue(queue.name, exchange.name, queue.routingKey)
+    await this.channel.assertExchange(AMQP_SCHEDULER_EXCHANGE, 'topic')
+    await this.channel.assertQueue(AMQP_SCHEDULER_QUEUE, { exclusive: false })
+    await this.channel.bindQueue(AMQP_SCHEDULER_QUEUE, AMQP_SCHEDULER_EXCHANGE, AMQP_DATASOURCE_CONFIG_TOPIC)
   }
 
   public async startEventConsumption (): Promise<void> {
@@ -56,10 +34,7 @@ export class DatasourceConfigConsumer {
       throw new Error('Missing channel, AMQP client not initialized')
     }
 
-    await this.channel.consume(AMQP_SCHEDULER_QUEUE, msg => {
-      this.consumeEvent(msg)
-        .catch(error => console.error(`Failed to handle ${msg?.fields.routingKey ?? 'null'} event`, error))
-    })
+    await this.channel.consume(AMQP_SCHEDULER_QUEUE, this.consumeEvent)
   }
 
   private readonly consumeEvent = async (msg: AMQP.ConsumeMessage | null): Promise<void> => {
@@ -73,16 +48,13 @@ export class DatasourceConfigConsumer {
       const datasource = event.datasource
       datasource.trigger.firstExecution = new Date(event.datasource.trigger.firstExecution)
       this.scheduler.upsertJob(datasource)
-      return
-    }
-
-    if (isDelete(msg)) {
+    } else if (isDelete(msg)) {
       const datasourceEvent: DatasourceConfigEvent = JSON.parse(msg.content.toString())
       this.scheduler.removeJob(datasourceEvent.datasource.id)
-      return
+    } else {
+      console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
     }
-
-    console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
+    await this.channel?.ack(msg)
   }
 }
 
