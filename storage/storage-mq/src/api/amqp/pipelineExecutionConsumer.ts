@@ -1,28 +1,34 @@
 import * as AMQP from 'amqplib'
+import { AmqpChannel, AmqpConnection } from '@jvalue/node-dry-amqp'
 
-import AmqpConsumer from '../../util/amqpConsumer'
 import {
-  AMQP_URL,
   AMQP_PIPELINE_EXECUTION_EXCHANGE,
-  AMQP_PIPELINE_EXECUTION_TOPIC,
   AMQP_PIPELINE_EXECUTION_QUEUE,
+  AMQP_PIPELINE_EXECUTION_QUEUE_TOPIC,
   AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC
 } from '../../env'
-import PipelineExecutionEventHandler from '../pipelineExecutionEventHandler'
+import { PipelineExecutionEventHandler } from '../pipelineExecutionEventHandler'
+
+export async function createPipelineExecutionEventConsumer (amqpConnection: AmqpConnection,
+  executionEventHandler: PipelineExecutionEventHandler): Promise<PipelineExecutionConsumer> {
+  const channel = await amqpConnection.createChannel()
+  const pipelineExecutionConsumer = new PipelineExecutionConsumer(executionEventHandler, channel)
+  await pipelineExecutionConsumer.init()
+  return pipelineExecutionConsumer
+}
 
 export class PipelineExecutionConsumer {
   constructor (
     private readonly pipelineExecutionEventHandler: PipelineExecutionEventHandler,
-    private readonly consumer: AmqpConsumer) {}
+    private readonly amqpChannel: AmqpChannel) {}
 
-  async init (retries: number, msBackoff: number): Promise<void> {
-    await this.consumer.init(AMQP_URL, retries, msBackoff)
-    await this.consumer.consume(
-      AMQP_PIPELINE_EXECUTION_EXCHANGE,
-      AMQP_PIPELINE_EXECUTION_TOPIC,
-      AMQP_PIPELINE_EXECUTION_QUEUE,
-      this.consumeEvent
-    )
+  async init (): Promise<void> {
+    await this.amqpChannel.assertExchange(AMQP_PIPELINE_EXECUTION_EXCHANGE, 'topic')
+    await this.amqpChannel.assertQueue(AMQP_PIPELINE_EXECUTION_QUEUE, { exclusive: false })
+    await this.amqpChannel.bindQueue(
+      AMQP_PIPELINE_EXECUTION_QUEUE, AMQP_PIPELINE_EXECUTION_EXCHANGE, AMQP_PIPELINE_EXECUTION_QUEUE_TOPIC)
+
+    await this.amqpChannel.consume(AMQP_PIPELINE_EXECUTION_QUEUE, this.consumeEvent)
   }
 
   // use the f = () => {} syntax to access 'this' scope
@@ -36,5 +42,6 @@ export class PipelineExecutionConsumer {
     } else {
       console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
     }
+    await this.amqpChannel.ack(msg)
   }
 }
