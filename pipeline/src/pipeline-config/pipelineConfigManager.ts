@@ -1,66 +1,60 @@
+import { PostgresClient } from '@jvalue/node-dry-pg'
+
 import PipelineExecutor from '../pipeline-execution/pipelineExecutor'
-import PipelineConfigRepository from './pipelineConfigRepository'
 import { PipelineConfig, PipelineConfigDTO } from './model/pipelineConfig'
-import { EventPublisher } from './publisher/eventPublisher'
+import * as EventPublisher from './outboxEventPublisher'
+import * as PipelineConfigRepository from './pipelineConfigRepository'
 
 export class PipelineConfigManager {
   constructor (
-    private readonly pipelineConfigRepository: PipelineConfigRepository,
-    private readonly pipelineExecutor: PipelineExecutor,
-    private readonly eventPublisher: EventPublisher
+    private readonly pgClient: PostgresClient,
+    private readonly pipelineExecutor: PipelineExecutor
   ) {}
 
   async create (config: PipelineConfigDTO): Promise<PipelineConfig> {
-    const savedConfig = await this.pipelineConfigRepository.create(config)
-    const success = this.eventPublisher.publishCreation(savedConfig.id, savedConfig.metadata.displayName)
-    if (!success) {
-      console.error(
-        `Saved pipeline ${savedConfig.id} but was not able to publish success.
-        Error handling not implemented!`
-      )
-    }
-    return savedConfig
+    return await this.pgClient.transaction(async client => {
+      const savedConfig = await PipelineConfigRepository.create(client, config)
+      await EventPublisher.publishCreation(client, savedConfig.id, savedConfig.metadata.displayName)
+      return savedConfig
+    })
   }
 
   async get (id: number): Promise<PipelineConfig | undefined> {
-    return await this.pipelineConfigRepository.get(id)
+    return await this.pgClient.transaction(async client =>
+      await PipelineConfigRepository.get(client, id))
   }
 
   async getAll (): Promise<PipelineConfig[]> {
-    return await this.pipelineConfigRepository.getAll()
+    return await this.pgClient.transaction(async client =>
+      await PipelineConfigRepository.getAll(client))
   }
 
   async getByDatasourceId (datasourceId: number): Promise<PipelineConfig[]> {
-    return await this.pipelineConfigRepository.getByDatasourceId(datasourceId)
+    return await this.pgClient.transaction(async client =>
+      await PipelineConfigRepository.getByDatasourceId(client, datasourceId))
   }
 
   async update (id: number, config: PipelineConfigDTO): Promise<void> {
-    await this.pipelineConfigRepository.update(id, config)
-    const success = this.eventPublisher.publishUpdate(id, config.metadata.displayName)
-    if (!success) {
-      console.error(`Updated pipeline ${id} but was not able to publish success. Error handling not implemented!`)
-    }
+    return await this.pgClient.transaction(async client => {
+      await PipelineConfigRepository.update(client, id, config)
+      await EventPublisher.publishUpdate(client, id, config.metadata.displayName)
+    })
   }
 
   async delete (id: number): Promise<void> {
-    const deletedPipeline = await this.pipelineConfigRepository.delete(id)
-    const success = this.eventPublisher.publishDeletion(id, deletedPipeline.metadata.displayName)
-    if (!success) {
-      console.error(`Deleted pipeline ${id} but was not able to publish success. Error handling not implemented!`)
-    }
+    return await this.pgClient.transaction(async client => {
+      const deletedPipeline = await PipelineConfigRepository.deleteById(client, id)
+      await EventPublisher.publishDeletion(client, id, deletedPipeline.metadata.displayName)
+    })
   }
 
   async deleteAll (): Promise<void> {
-    const deletedConfigs = await this.pipelineConfigRepository.deleteAll()
-    for (const deletedConfig of deletedConfigs) {
-      const success = this.eventPublisher.publishDeletion(deletedConfig.id, deletedConfig.metadata.displayName)
-      if (!success) {
-        console.error(
-          `Deleted pipeline ${deletedConfig.id} but was not able to publish success.
-          Error handling not implemented!`
-        )
+    return await this.pgClient.transaction(async client => {
+      const deletedConfigs = await PipelineConfigRepository.deleteAll(client)
+      for (const deletedConfig of deletedConfigs) {
+        await EventPublisher.publishDeletion(client, deletedConfig.id, deletedConfig.metadata.displayName)
       }
-    }
+    })
   }
 
   async triggerConfig (datasourceId: number, data: object): Promise<void> {
@@ -68,9 +62,11 @@ export class PipelineConfigManager {
     for (const config of allConfigs) {
       const result = this.pipelineExecutor.executeJob(config.transformation.func, data)
       if ('error' in result) {
-        this.eventPublisher.publishError(config.id, config.metadata.displayName, result.error.message)
+        await this.pgClient.transaction(async client =>
+          await EventPublisher.publishError(client, config.id, config.metadata.displayName, result.error.message))
       } else if ('data' in result) {
-        this.eventPublisher.publishSuccess(config.id, config.metadata.displayName, result.data)
+        await this.pgClient.transaction(async client =>
+          await EventPublisher.publishSuccess(client, config.id, config.metadata.displayName, result.data))
       } else {
         console.error(`Pipeline ${config.id} executed with ambiguous result: no data and no error!`)
       }
