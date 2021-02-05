@@ -1,6 +1,4 @@
 /* eslint-env jest */
-// @ts-check
-
 const request = require('supertest')
 const waitOn = require('wait-on')
 const amqp = require('amqplib')
@@ -16,6 +14,9 @@ const AMQP_PIPELINE_EXECUTION_ERROR_TOPIC = process.env.AMQP_PIPELINE_EXECUTION_
 const AMQP_IMPORT_SUCCESS_TOPIC = process.env.AMQP_IMPORT_SUCCESS_TOPIC
 const CONNECTION_RETRIES = +process.env.CONNECTION_RETRIES
 const CONNECTION_BACKOFF = +process.env.CONNECTION_BACKOFF
+const PIPELINE_EXECUTION_WAIT_TIME_MS = +process.env.PIPELINE_EXECUTION_WAIT_TIME_MS
+
+const TEST_TIMEOUT = 120000
 
 let amqpConnection
 let channel
@@ -33,7 +34,7 @@ describe('Pipeline Service Config Trigger', () => {
       console.log(`Could not initialize amqp connection: ${e.message}`)
       process.exit(1)
     }
-  }, 60000)
+  }, TEST_TIMEOUT)
 
   afterAll(async () => {
     if (amqpConnection) {
@@ -80,14 +81,14 @@ describe('Pipeline Service Config Trigger', () => {
 
     channel.publish(AMQP_EXCHANGE, AMQP_IMPORT_SUCCESS_TOPIC, Buffer.from(JSON.stringify(importSuccessEvent)))
 
-    await sleep(10000) // pipeline should have been executing until now!
+    await sleep(PIPELINE_EXECUTION_WAIT_TIME_MS) // pipeline should have been executing until now!
     expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC)).toContainEqual(
       {
         pipelineId: configId,
         pipelineName: pipelineConfig.metadata.displayName,
         data: data.a + data.b
       })
-  }, 12000)
+  }, TEST_TIMEOUT)
 
   test('Pipeline runs through with error with successful publish', async () => {
     const pipelineConfig = {
@@ -121,13 +122,13 @@ describe('Pipeline Service Config Trigger', () => {
 
     channel.publish(AMQP_EXCHANGE, AMQP_IMPORT_SUCCESS_TOPIC, Buffer.from(JSON.stringify(importSuccessEvent)))
 
-    await sleep(10000) // pipeline should have been executing until now!
+    await sleep(PIPELINE_EXECUTION_WAIT_TIME_MS) // pipeline should have been executing until now!
     expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)).toBeDefined()
     expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)).toHaveLength(1)
     expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].pipelineId).toEqual(configId)
     expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].pipelineName).toEqual(pipelineConfig.metadata.displayName)
     expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].error).toBeDefined()
-  }, 12000)
+  }, TEST_TIMEOUT)
 })
 
 async function initAmqp (url, exchange, topic, queue, retries, backoff) {

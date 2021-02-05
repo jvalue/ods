@@ -79,6 +79,9 @@ services:
       AMQP_PIPELINE_CONFIG_DELETED_TOPIC: "pipeline.config.deleted"
       AMQP_IMPORT_SUCCESS_TOPIC: "datasource.execution.success"
 
+      PUBLICATION_WAIT_TIME_MS: 2000
+      PIPELINE_EXECUTION_WAIT_TIME_MS: 10000
+
       CONNECTION_RETRIES: 3
       CONNECTION_BACKOFF: 2000
 

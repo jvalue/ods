@@ -1,5 +1,4 @@
 /* eslint-env jest */
-// @ts-check
 const request = require('supertest')
 const waitOn = require('wait-on')
 const amqp = require('amqplib')
@@ -12,6 +11,8 @@ const AMQP_IT_QUEUE = process.env.AMQP_IT_QUEUE
 const AMQP_PIPELINE_CONFIG_CREATED_TOPIC = process.env.AMQP_PIPELINE_CONFIG_CREATED_TOPIC
 const AMQP_PIPELINE_CONFIG_UPDATED_TOPIC = process.env.AMQP_PIPELINE_CONFIG_UPDATED_TOPIC
 const AMQP_PIPELINE_CONFIG_DELETED_TOPIC = process.env.AMQP_PIPELINE_CONFIG_DELETED_TOPIC
+
+const PUBLICATION_WAIT_TIME_MS = +process.env.PUBLICATION_WAIT_TIME_MS
 
 let amqpConnection
 const publishedEvents = new Map() // routing key -> received msgs []
@@ -77,7 +78,7 @@ describe('Pipeline Config Test', () => {
 
     expect(delResponse.status).toEqual(204)
 
-    await sleep(1000)
+    await sleep(PUBLICATION_WAIT_TIME_MS)
     expect(publishedEvents.get(AMQP_PIPELINE_CONFIG_CREATED_TOPIC)).toContainEqual({
       pipelineId: configId,
       pipelineName: pipelineConfig.metadata.displayName
@@ -120,7 +121,7 @@ describe('Pipeline Config Test', () => {
 
     expect(delResponse.status).toEqual(204)
 
-    await sleep(1000)
+    await sleep(PUBLICATION_WAIT_TIME_MS)
     expect(publishedEvents.get(AMQP_PIPELINE_CONFIG_CREATED_TOPIC)).toContainEqual({
       pipelineId: configId,
       pipelineName: pipelineConfig.metadata.displayName
@@ -151,7 +152,7 @@ describe('Pipeline Config Test', () => {
 
     expect(delResponse.status).toEqual(204)
 
-    await sleep(1000)
+    await sleep(PUBLICATION_WAIT_TIME_MS)
     expect(publishedEvents.get(AMQP_PIPELINE_CONFIG_DELETED_TOPIC)).toContainEqual({
       pipelineId: config1Id,
       pipelineName: pipelineConfig.metadata.displayName

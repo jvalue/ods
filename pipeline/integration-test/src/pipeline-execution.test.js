@@ -1,5 +1,4 @@
 /* eslint-env jest */
-// @ts-check
 const request = require('supertest')
 const waitOn = require('wait-on')
 

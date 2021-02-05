@@ -197,6 +197,7 @@ services:
     depends_on:
       - rabbitmq
       - pipeline-db
+      - pipeline-outboxer
     environment:
       CONNECTION_RETRIES: '30'
       CONNECTION_BACKOFF_IN_MS: '2000'
@@ -209,12 +210,13 @@ services:
       POSTGRES_SCHEMA: "public" # other schemas have to be created somewhere before use!
 
       AMQP_URL: "amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672"
-      AMQP_PIPELINE_EXECUTION_EXCHANGE: 'ods_global'
+
       AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: 'pipeline.execution.success'
       AMQP_PIPELINE_EXECUTION_ERROR_TOPIC: 'pipeline.execution.error'
       AMQP_PIPELINE_CONFIG_CREATED_TOPIC: 'pipeline.config.created'
       AMQP_PIPELINE_CONFIG_UPDATED_TOPIC: 'pipeline.config.updated'
       AMQP_PIPELINE_CONFIG_DELETED_TOPIC: 'pipeline.config.deleted'
+
       AMQP_DATASOURCE_EXECUTION_EXCHANGE: 'ods_global'
       AMQP_DATASOURCE_EXECUTION_TOPIC: 'datasource.execution.*'
       AMQP_DATASOURCE_EXECUTION_SUCCESS_TOPIC: 'datasource.execution.success'
@@ -231,6 +233,30 @@ services:
       POSTGRES_USER: 'pipeline-service'
       POSTGRES_PASSWORD: 'pw'
       POSTGRES_DB: 'ods-pipelines'
+    command:
+      # This enables and configures Postgres logical decoding feature that is needed for outboxer/debezium to work
+      - '-cwal_level=logical'
+      - '-cmax_wal_senders=1'
+      - '-cmax_replication_slots=1'
+
+  pipeline-outboxer:
+    image: ghcr.io/jvalue/outboxer-postgres2rabbitmq
+    environment:
+      - OUTBOXER_DATABASE_HOSTNAME=pipeline-db
+      - OUTBOXER_DATABASE_PORT=5432
+      - OUTBOXER_DATABASE_USER=pipeline-service
+      - OUTBOXER_DATABASE_PASSWORD=pw
+      - OUTBOXER_DATABASE_DBNAME=ods-pipelines
+      - OUTBOXER_DATABASE_SERVER_NAME=pipeline-outboxer
+      - OUTBOXER_PUBLISHER_AMQP_URL=amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672
+      - OUTBOXER_PUBLISHER_AMQP_EXCHANGE=ods_global
+      - OUTBOXER_PUBLISHER_AMQP_RETRIES=5
+      - OUTBOXER_PUBLISHER_AMQP_RETRY_DELAY_MS=1000
+      # In production this file should be storage outside of the container, so it does survive outboxer restarts.
+      #- OUTBOXER_OFFSET_STORAGE_FILE_FILENAME=/data/offset.dat
+    depends_on:
+      - pipeline-db
+      - rabbitmq
 
   # ----------------- NOTIFICATION SERVICE (/notification) --------------------
   notification:
