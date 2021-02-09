@@ -1,11 +1,9 @@
 const waitOn = require('wait-on')
 const request = require('supertest')
-const AMQP = require('amqplib')
-const {
-  STORAGE_URL,
-  STORAGEMQ_URL,
-  AMQP_URL
-} = require('./env')
+const { sleep } = require('@jvalue/node-dry-basics')
+const AmqpConnector = require('@jvalue/node-dry-amqp/dist/amqpConnector')
+
+const { STORAGE_URL, STORAGEMQ_URL, AMQP_URL } = require('./env')
 
 const AMQP_EXCHANGE = 'ods_global'
 const AMQP_PIPELINE_CONFIG_CREATED_TOPIC = 'pipeline.config.created'
@@ -36,7 +34,7 @@ describe('IT against Storage service', () => {
 
     try {
       const promiseResults = await Promise.all([
-        amqpConnect(AMQP_URL, 40, 2000),
+        AmqpConnector.connect(AMQP_URL, 40, 2000),
         waitOn({ resources: [STORAGE_URL, `${STORAGEMQ_URL}/`], timeout: 80 * SECOND, log: false })
       ])
       amqpConnection = promiseResults[0]
@@ -46,16 +44,12 @@ describe('IT against Storage service', () => {
   }, 90 * SECOND)
 
   afterAll(async () => {
-    if (amqpConnection) {
-      await amqpConnection.close()
-    }
+    await amqpConnection?.close()
   }, TIMEOUT)
 
   test('Should provide transformed data after successful pipeline event', async () => {
     const channel = await amqpConnection.createChannel()
-    channel.assertExchange(AMQP_EXCHANGE, 'topic', {
-      durable: true
-    })
+    channel.assertExchange(AMQP_EXCHANGE, 'topic')
 
     channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_CREATED_TOPIC, pipelineCreatedEventBuf)
     await sleep(PROCESS_TIME)
@@ -87,24 +81,4 @@ const logConfigs = () => {
   [Environment Variable] AMQP_URL = ${AMQP_URL}
   `
   console.log(msg)
-}
-
-const amqpConnect = async (amqpUrl, retries, backoff) => {
-  console.log('AMQP URL: ' + amqpUrl)
-  for (let i = 1; i <= retries; i++) {
-    try {
-      const connection = await AMQP.connect(amqpUrl)
-      console.log(`Successfully establish connection to AMQP broker (${amqpUrl})`)
-      return connection
-    } catch (error) {
-      console.info(`Error connecting to RabbitMQ: ${error}. Retrying in ${backoff} seconds`)
-      console.info(`Connecting to Amqp broker (${i}/${retries})`)
-      await sleep(backoff)
-    }
-  }
-  throw new Error(`Could not establish connection to AMQP broker (${amqpUrl})`)
-}
-
-const sleep = (ms) => {
-  return new Promise(resolve => setTimeout(resolve, ms))
 }

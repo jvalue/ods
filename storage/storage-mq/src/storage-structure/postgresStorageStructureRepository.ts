@@ -1,7 +1,6 @@
-import { PostgresRepository } from '@jvalue/node-dry-pg'
-import { PoolConfig } from 'pg'
+import { PostgresClient } from '@jvalue/node-dry-pg'
 
-import { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB, POSTGRES_SCHEMA } from '../env'
+import { POSTGRES_SCHEMA } from '../env'
 
 import { StorageStructureRepository } from './storageStructureRepository'
 
@@ -15,19 +14,8 @@ const CREATE_BUCKET_STATEMENT =
   )`
 const DELETE_BUCKET_STATEMENT = (schema: string, table: string): string => `DROP TABLE "${schema}"."${table}" CASCADE`
 
-const POOL_CONFIG: PoolConfig = {
-  host: POSTGRES_HOST,
-  port: POSTGRES_PORT,
-  user: POSTGRES_USER,
-  password: POSTGRES_PW,
-  database: POSTGRES_DB,
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000
-}
-
 export class PostgresStorageStructureRepository implements StorageStructureRepository {
-  private readonly postgresRepo = new PostgresRepository(POOL_CONFIG)
+  constructor (private readonly postgresClient: PostgresClient) {}
 
   /**
      * This function will create a table (if not already exists) for storing pipeline data.
@@ -35,7 +23,7 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
      * @param tableIdentifier tableIdentifier for wich a table will be created with this name
      */
   async create (tableIdentifier: string): Promise<void> {
-    await this.postgresRepo.executeQuery(CREATE_BUCKET_STATEMENT(POSTGRES_SCHEMA, tableIdentifier), [])
+    await this.postgresClient.executeQuery(CREATE_BUCKET_STATEMENT(POSTGRES_SCHEMA, tableIdentifier))
   }
 
   /**
@@ -43,6 +31,6 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
      * @param tableIdentifier name of the table to be dropped
      */
   async delete (tableIdentifier: string): Promise<void> {
-    await this.postgresRepo.executeQuery(DELETE_BUCKET_STATEMENT(POSTGRES_SCHEMA, tableIdentifier), [])
+    await this.postgresClient.executeQuery(DELETE_BUCKET_STATEMENT(POSTGRES_SCHEMA, tableIdentifier))
   }
 }

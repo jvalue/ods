@@ -121,13 +121,13 @@ services:
 
       AMQP_PIPELINE_CONFIG_EXCHANGE: 'ods_global'
       AMQP_PIPELINE_CONFIG_QUEUE: 'storage-mq.pipeline-config'
-      AMQP_PIPELINE_CONFIG_TOPIC: 'pipeline.config.*'
+      AMQP_PIPELINE_CONFIG_QUEUE_TOPIC: 'pipeline.config.*'
       AMQP_PIPELINE_CONFIG_CREATED_TOPIC: 'pipeline.config.created'
       AMQP_PIPELINE_CONFIG_DELETED_TOPIC: 'pipeline.config.deleted'
 
       AMQP_PIPELINE_EXECUTION_EXCHANGE: 'ods_global'
       AMQP_PIPELINE_EXECUTION_QUEUE: 'storage-mq.pipeline-execution'
-      AMQP_PIPELINE_EXECUTION_TOPIC: 'pipeline.execution.*'
+      AMQP_PIPELINE_EXECUTION_QUEUE_TOPIC: 'pipeline.execution.success'
       AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: 'pipeline.execution.success'
     depends_on:
       - storage-db
