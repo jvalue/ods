@@ -3,19 +3,25 @@ import { Server } from 'http'
 import express from 'express'
 import cors from 'cors'
 import bodyParser from 'body-parser'
+import { AmqpConnection } from '@jvalue/node-dry-amqp'
 
-import { CONNECTION_RETRIES, CONNECTION_BACKOFF } from './env'
+import { AMQP_URL, CONNECTION_RETRIES, CONNECTION_BACKOFF } from './env'
 
 import { PipelineExecutionEndpoint } from './api/rest/pipelineExecutionEndpoint'
 import VM2SandboxExecutor from './pipeline-execution/sandbox/vm2SandboxExecutor'
 import PipelineExecutor from './pipeline-execution/pipelineExecutor'
 import { PipelineConfigEndpoint } from './api/rest/pipelineConfigEndpoint'
 import { PipelineConfigManager } from './pipeline-config/pipelineConfigManager'
-import { PipelineConfigConsumer } from './api/amqp/pipelineConfigConsumer'
+import { createDatasourceExecutionConsumer } from './api/amqp/datasourceExecutionConsumer'
 import { init as initDatabase } from './pipeline-config/pipelineDatabase'
 
 const port = 8080
 let server: Server | undefined
+
+function onAmqpConnectionLoss (error: any): never {
+  console.log('Terminating because connection to AMQP lost:', error)
+  process.exit(1)
+}
 
 process.on('SIGTERM', () => {
   console.info('Tramsformation-Service: SIGTERM signal received.')
@@ -33,8 +39,8 @@ async function main (): Promise<void> {
     pipelineExecutor
   )
 
-  const pipelineConfigConsumer = new PipelineConfigConsumer(pipelineConfigManager)
-  await pipelineConfigConsumer.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
+  const amqpConnection = new AmqpConnection(AMQP_URL, CONNECTION_RETRIES, CONNECTION_BACKOFF, onAmqpConnectionLoss)
+  await createDatasourceExecutionConsumer(amqpConnection, pipelineConfigManager)
 
   const pipelineExecutionEndpoint = new PipelineExecutionEndpoint(pipelineExecutor)
   const pipelineConfigEndpoint = new PipelineConfigEndpoint(pipelineConfigManager)
