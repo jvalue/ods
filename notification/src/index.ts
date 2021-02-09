@@ -1,17 +1,23 @@
 import express from 'express'
 import cors from 'cors'
 import bodyParser from 'body-parser'
+import { AmqpConnection } from '@jvalue/node-dry-amqp'
 
 import NotificationExecutor from './notification-execution/notificationExecutor'
 import VM2SandboxExecutor from './notification-execution/condition-evaluation/vm2SandboxExecutor'
 import { NotificationConfigEndpoint } from './api/rest/notificationConfigEndpoint'
 import { NotificationExecutionEndpoint } from './api/rest/notificationExecutionEndpoint'
-import { PipelineSuccessConsumer } from './api/amqp/pipelineSuccessConsumer'
+import { createPipelineSuccessConsumer } from './api/amqp/pipelineSuccessConsumer'
 import { TriggerEventHandler } from './api/triggerEventHandler'
-import { CONNECTION_RETRIES, CONNECTION_BACKOFF } from './env'
+import { AMQP_URL, CONNECTION_RETRIES, CONNECTION_BACKOFF } from './env'
 import { initNotificationRepository } from './notification-config/postgresNotificationRepository'
 
 const port = 8080
+
+function onAmqpConnectionLoss (error: any): never {
+  console.log('Terminating because connection to AMQP lost:', error)
+  process.exit(1)
+}
 
 async function main (): Promise<void> {
   const notificationRepository = await initNotificationRepository(CONNECTION_RETRIES, CONNECTION_BACKOFF)
@@ -20,9 +26,9 @@ async function main (): Promise<void> {
   const triggerEventHandler = new TriggerEventHandler(notificationRepository, notificationExecutor)
   const notificationConfigEndpoint = new NotificationConfigEndpoint(notificationRepository)
   const notificationExecutionEndpoint = new NotificationExecutionEndpoint(triggerEventHandler)
-  const pipelineSuccessConsumer = new PipelineSuccessConsumer(triggerEventHandler)
 
-  await pipelineSuccessConsumer.init(CONNECTION_RETRIES, CONNECTION_BACKOFF)
+  const amqpConnection = new AmqpConnection(AMQP_URL, CONNECTION_RETRIES, CONNECTION_BACKOFF, onAmqpConnectionLoss)
+  await createPipelineSuccessConsumer(amqpConnection, triggerEventHandler)
 
   const app = express()
   app.use(cors())
