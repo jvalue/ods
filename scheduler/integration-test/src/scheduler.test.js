@@ -1,7 +1,9 @@
 /* eslint-env jest */
 const request = require('supertest')
 const waitOn = require('wait-on')
-const AMQP = require('amqplib')
+const { sleep } = require('@jvalue/node-dry-basics')
+const AmqpConnector = require('@jvalue/node-dry-amqp/dist/amqpConnector')
+
 const { jsonDateAfter } = require('./testHelper')
 
 const AMQP_EXCHANGE = 'ods_global'
@@ -27,7 +29,7 @@ describe('Scheduler-IT', () => {
     logConfigs()
     try {
       const promiseResults = await Promise.all([
-        amqpConnect(AMQP_URL, AMQP_CONNECTION_RETRIES, AMQP_CONNECTION_BACKOFF),
+        AmqpConnector.connect(AMQP_URL, AMQP_CONNECTION_RETRIES, AMQP_CONNECTION_BACKOFF),
         waitOn({ resources: [`${SCHEDULER_URL}/`], timeout: 50000, log: false })
       ])
       amqpConnection = promiseResults[0]
@@ -37,17 +39,15 @@ describe('Scheduler-IT', () => {
   }, 60000)
 
   afterAll(async () => {
-    if (amqpConnection) {
-      await amqpConnection.close()
-    }
+    await amqpConnection?.close()
   }, TIMEOUT)
 
   test('Should respond with semantic version [GET /version]', async () => {
     const response = await request(SCHEDULER_URL).get('/version')
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('text/plain')
-    const semanticVersionRegEx = '^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)'
-    expect(response.text).toMatch(new RegExp(semanticVersionRegEx))
+    const semanticVersionRegEx = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)/
+    expect(response.text).toMatch(semanticVersionRegEx)
   }, TIMEOUT)
 
   test('Should initialize schedule jobs correctly', async () => {
@@ -134,28 +134,9 @@ function createDatasourceEvent (datasourceId, delay, interval, periodic) {
   return Buffer.from(JSON.stringify(event))
 }
 
-function sleep (ms) {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
-
-const amqpConnect = async (amqpUrl, retries, backoff) => {
-  for (let i = 1; i <= retries; i++) {
-    console.info(`Connecting to AMQP broker (${i}/${retries})`)
-    try {
-      const connection = await AMQP.connect(amqpUrl)
-      console.log('Successfully established connection to AMQP broker.')
-      return connection
-    } catch (error) {
-      console.info(`Error connecting to AMQP broker: ${error}. Retrying in ${backoff} seconds`)
-      await sleep(backoff)
-    }
-  }
-  throw new Error('Could not establish connection to AMQP broker')
-}
-
 const createAmqpChannel = async () => {
   const channel = await amqpConnection.createChannel()
-  await channel.assertExchange(AMQP_EXCHANGE, 'topic', { durable: true })
+  await channel.assertExchange(AMQP_EXCHANGE, 'topic')
   return channel
 }
 
