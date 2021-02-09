@@ -24,11 +24,11 @@
     "testEnvironment": "node"
   },
   "dependencies": {
+    "@jvalue/node-dry-amqp": "0.1.0",
     "axios": "^0.21.1",
     "koa": "^2.13.0",
     "koa-bodyparser": "^4.3.0",
     "koa-router": "^9.4.0",
-    "amqplib": "^0.6.0",
     "wait-on": "^5.1.0"
   }
 }
