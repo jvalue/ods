@@ -12,7 +12,7 @@
     "test": "jest --colors --verbose"
   },
   "dependencies": {
-    "@jvalue/node-dry-amqp": "0.0.1",
+    "@jvalue/node-dry-amqp": "0.1.0",
     "@jvalue/node-dry-basics": "0.0.3",
     "@jvalue/node-dry-pg": "1.2.0",
     "axios": "^0.21.1",
@@ -34,7 +34,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "jest": "^26.6.3",
-    "ts-jest": "^26.4.4",
+    "ts-jest": "^26.5.0",
     "tslib": "^2.1.0",
     "typescript": "^4.1.3"
   },

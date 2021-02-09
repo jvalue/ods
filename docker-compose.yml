@@ -218,9 +218,9 @@ services:
       AMQP_PIPELINE_CONFIG_DELETED_TOPIC: 'pipeline.config.deleted'
 
       AMQP_DATASOURCE_EXECUTION_EXCHANGE: 'ods_global'
-      AMQP_DATASOURCE_EXECUTION_TOPIC: 'datasource.execution.*'
+      AMQP_DATASOURCE_EXECUTION_QUEUE: 'pipeline.datasource-execution'
+      AMQP_DATASOURCE_EXECUTION_QUEUE_TOPIC: 'datasource.execution.success'
       AMQP_DATASOURCE_EXECUTION_SUCCESS_TOPIC: 'datasource.execution.success'
-      AMQP_PIPELINE_EXECUTION_QUEUE: 'pipeline.pipeline-execution'
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-pipeline.rule=PathPrefix(`/api/pipelines`)"
