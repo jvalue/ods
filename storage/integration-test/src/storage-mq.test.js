@@ -1,10 +1,9 @@
 const waitOn = require('wait-on')
 const request = require('supertest')
-const AMQP = require('amqplib')
-const {
-  STORAGEMQ_URL,
-  AMQP_URL
-} = require('./env')
+const { sleep } = require('@jvalue/node-dry-basics')
+const AmqpConnector = require('@jvalue/node-dry-amqp/dist/amqpConnector')
+
+const { STORAGEMQ_URL, AMQP_URL } = require('./env')
 
 const AMQP_EXCHANGE = 'ods_global'
 const AMQP_PIPELINE_CONFIG_CREATED_TOPIC = 'pipeline.config.created'
@@ -23,7 +22,7 @@ describe('IT against Storage-MQ service', () => {
 
     try {
       const promiseResults = await Promise.all([
-        amqpConnect(AMQP_URL, 40, 2000),
+        AmqpConnector.connect(AMQP_URL, 40, 2000),
         waitOn({ resources: [STORAGEMQ_URL + '/'], timeout: 80 * SECOND, log: false })
       ])
       amqpConnection = promiseResults[0]
@@ -33,9 +32,7 @@ describe('IT against Storage-MQ service', () => {
   }, 90 * SECOND)
 
   afterAll(async () => {
-    if (amqpConnection) {
-      await amqpConnection.close()
-    }
+    await amqpConnection?.close()
   }, TIMEOUT)
 
   test('Should respond with semantic version [GET /version]', async () => {
@@ -44,8 +41,8 @@ describe('IT against Storage-MQ service', () => {
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('text/plain')
 
-    const semanticVersionRegEx = '^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)'
-    expect(response.text).toMatch(new RegExp(semanticVersionRegEx))
+    const semanticVersionRegEx = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)/
+    expect(response.text).toMatch(semanticVersionRegEx)
   }, TIMEOUT)
 
   test('Should respond with 404 for non-existing bucket [GET /bucket/3000/content]', async () => {
@@ -62,9 +59,7 @@ describe('IT against Storage-MQ service', () => {
     const pipelineId = '333'
 
     const channel = await amqpConnection.createChannel()
-    channel.assertExchange(AMQP_EXCHANGE, 'topic', {
-      durable: true
-    })
+    channel.assertExchange(AMQP_EXCHANGE, 'topic')
 
     const pipelineCreatedEvent = {
       pipelineId: pipelineId
@@ -84,9 +79,7 @@ describe('IT against Storage-MQ service', () => {
     const pipelineId = 444
 
     const channel = await amqpConnection.createChannel()
-    channel.assertExchange(AMQP_EXCHANGE, 'topic', {
-      durable: true
-    })
+    channel.assertExchange(AMQP_EXCHANGE, 'topic')
 
     const pipelineCreatedEvent = {
       pipelineId: pipelineId
@@ -130,9 +123,7 @@ describe('IT against Storage-MQ service', () => {
     const pipelineId = '555'
 
     const channel = await amqpConnection.createChannel()
-    channel.assertExchange(AMQP_EXCHANGE, 'topic', {
-      durable: true
-    })
+    await channel.assertExchange(AMQP_EXCHANGE, 'topic')
 
     const pipelineCreatedEvent = {
       pipelineId: pipelineId
@@ -153,27 +144,7 @@ describe('IT against Storage-MQ service', () => {
     const response = await request(STORAGEMQ_URL).get(`/bucket/${pipelineId}/content/`)
     expect(response.status).toEqual(404)
   })
-}, TIMEOUT)
-
-const amqpConnect = async (amqpUrl, retries, backoff) => {
-  console.log('AMQP URL: ' + amqpUrl)
-  for (let i = 1; i <= retries; i++) {
-    try {
-      const connection = await AMQP.connect(amqpUrl)
-      console.log(`Successfully establish connection to AMQP broker (${amqpUrl})`)
-      return connection
-    } catch (error) {
-      console.info(`Error connecting to RabbitMQ: ${error}. Retrying in ${backoff} seconds`)
-      console.info(`Connecting to Amqp broker (${i}/${retries})`)
-      await sleep(backoff)
-    }
-  }
-  throw new Error(`Could not establish connection to AMQP broker (${amqpUrl})`)
-}
-
-const sleep = (ms) => {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
+})
 
 const logConfigs = () => {
   const msg = `

@@ -1,11 +1,7 @@
 import { StorageContentRepository } from '../storage-content/storageContentRepository'
 
-export default class PipelineExecutionEventHandler {
-  contentRepository: StorageContentRepository
-
-  constructor (contentRepository: StorageContentRepository) {
-    this.contentRepository = contentRepository
-  }
+export class PipelineExecutionEventHandler {
+  constructor (private readonly contentRepository: StorageContentRepository) {}
 
   async handleSuccess (pipelineExecutedEvent: PipelineExecutedEvent): Promise<void> {
     await this.contentRepository.saveContent(pipelineExecutedEvent.pipelineId.toString(), {

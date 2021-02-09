@@ -1,11 +1,7 @@
 import { StorageStructureRepository } from '../storage-structure/storageStructureRepository'
 
-export default class PipelineConfigEventHandler {
-  structureRepository: StorageStructureRepository
-
-  constructor (structureRepository: StorageStructureRepository) {
-    this.structureRepository = structureRepository
-  }
+export class PipelineConfigEventHandler {
+  constructor (private readonly structureRepository: StorageStructureRepository) {}
 
   async handleCreation (pipelineCreatedEvent: PipelineCreatedEvent): Promise<void> {
     await this.structureRepository.create(pipelineCreatedEvent.pipelineId.toString())
