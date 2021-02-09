@@ -1,13 +1,20 @@
 import * as AMQP from 'amqplib'
 
-import { AmqpConsumer } from '@jvalue/node-dry-amqp'
+import { AmqpChannel, AmqpConnection } from '@jvalue/node-dry-amqp'
 import { TriggerEventHandler } from '../triggerEventHandler'
 import {
-  AMQP_URL,
   AMQP_PIPELINE_EXECUTION_EXCHANGE,
   AMQP_PIPELINE_EXECUTION_QUEUE,
   AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC
 } from '../../env'
+
+export async function createPipelineSuccessConsumer (amqpConnection: AmqpConnection,
+  triggerEventHandler: TriggerEventHandler): Promise<PipelineSuccessConsumer> {
+  const channel = await amqpConnection.createChannel()
+  const pipelineSuccessConsumer = new PipelineSuccessConsumer(channel, triggerEventHandler)
+  await pipelineSuccessConsumer.init()
+  return pipelineSuccessConsumer
+}
 
 /**
  * This class handles the communication with the AMQP service (rabbitmq)
@@ -20,30 +27,19 @@ import {
  *
  */
 export class PipelineSuccessConsumer {
-  amqpConsumer: AmqpConsumer = new AmqpConsumer()
+  constructor (
+    private readonly amqpChannel: AmqpChannel,
+    private readonly triggerEventHandler: TriggerEventHandler
+  ) {}
 
-  constructor (private readonly triggerEventHandler: TriggerEventHandler) { }
+  /** Initializes the pipeline success consumer */
+  public async init (): Promise<void> {
+    await this.amqpChannel.assertExchange(AMQP_PIPELINE_EXECUTION_EXCHANGE, 'topic')
+    await this.amqpChannel.assertQueue(AMQP_PIPELINE_EXECUTION_QUEUE, { exclusive: false })
+    await this.amqpChannel.bindQueue(
+      AMQP_PIPELINE_EXECUTION_QUEUE, AMQP_PIPELINE_EXECUTION_EXCHANGE, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC)
 
-  /**
-     * Connects to Amqp Service and initializes a channel
-     *
-     * @param retries   Number of retries to connect to the notification-config db
-     * @param ms   Time to wait until the next retry
-     */
-  public async init (retries: number, ms: number): Promise<void> {
-    await this.amqpConsumer.init(AMQP_URL, retries, ms)
-
-    const exchange = { name: AMQP_PIPELINE_EXECUTION_EXCHANGE, type: 'topic' }
-    const exchangeOptions = {}
-    const queue = { name: AMQP_PIPELINE_EXECUTION_QUEUE, routingKey: AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC }
-    const queueOptions = { exclusive: false }
-    await this.amqpConsumer.registerConsumer(
-      exchange,
-      exchangeOptions,
-      queue,
-      queueOptions,
-      this.handleEvent
-    )
+    await this.amqpChannel.consume(AMQP_PIPELINE_EXECUTION_QUEUE, this.handleEvent)
   }
 
   private readonly handleEvent = async (msg: AMQP.ConsumeMessage | null): Promise<void> => {
@@ -57,5 +53,6 @@ export class PipelineSuccessConsumer {
     } else {
       console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
     }
+    await this.amqpChannel.ack(msg)
   }
 }

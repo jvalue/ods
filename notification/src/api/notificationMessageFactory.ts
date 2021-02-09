@@ -6,6 +6,7 @@ import { PipelineSuccessEvent } from './pipelineEvent'
  * message
  *
  * @param event event to extract transformation results from
+ * @param dataLocation the location of the data
  * @returns message to be sent as notification
  */
 export const buildMessage = (event: PipelineSuccessEvent, dataLocation: string): string => {

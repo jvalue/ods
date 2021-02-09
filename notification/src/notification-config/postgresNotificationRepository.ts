@@ -1,5 +1,5 @@
 import { PoolConfig, QueryResult } from 'pg'
-import { PostgresRepository } from '@jvalue/node-dry-pg'
+import { PostgresClient } from '@jvalue/node-dry-pg'
 import { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB } from '../env'
 import { NotificationRepository } from './notificationRepository'
 import { isValidNotificationConfig, NotificationConfig } from './notificationConfig'
@@ -43,7 +43,7 @@ const POOL_CONFIG: PoolConfig = {
 }
 
 export class PostgresNotificationRepository implements NotificationRepository {
-  private readonly postgresRepository = new PostgresRepository(POOL_CONFIG)
+  private readonly postgresClient = new PostgresClient(POOL_CONFIG)
 
   /**
      * Initializes the connection to the database.
@@ -53,25 +53,25 @@ export class PostgresNotificationRepository implements NotificationRepository {
   public async init (retries: number, backoffMs: number): Promise<void> {
     console.debug('Initializing PostgresNotificationRepository')
 
-    await this.postgresRepository.waitForConnection(retries, backoffMs)
-    await this.postgresRepository.executeQuery(CREATE_TABLE_STATEMENT, [])
+    await this.postgresClient.waitForConnection(retries, backoffMs)
+    await this.postgresClient.executeQuery(CREATE_TABLE_STATEMENT)
   }
 
   async getForPipeline (pipelineId: number): Promise<NotificationConfig[]> {
     const resultSet: QueryResult<DatabaseNotification> =
-      await this.postgresRepository.executeQuery(GET_NOTIFICATION_BY_PIPELINEID_STATEMENT, [pipelineId])
+      await this.postgresClient.executeQuery(GET_NOTIFICATION_BY_PIPELINEID_STATEMENT, [pipelineId])
     return this.deserializeNotifications(resultSet)
   }
 
   async getById (id: number): Promise<NotificationConfig | undefined> {
     const resultSet: QueryResult<DatabaseNotification> =
-      await this.postgresRepository.executeQuery(GET_NOTIFICATION_STATEMENT, [id])
+      await this.postgresClient.executeQuery(GET_NOTIFICATION_STATEMENT, [id])
     return this.deserializeNotifications(resultSet)[0]
   }
 
   async getAll (): Promise<NotificationConfig[]> {
     const resultSet: QueryResult<DatabaseNotification> =
-      await this.postgresRepository.executeQuery(GET_ALL_NOTIFICATIONS_STATEMENT, [])
+      await this.postgresClient.executeQuery(GET_ALL_NOTIFICATIONS_STATEMENT)
     return this.deserializeNotifications(resultSet)
   }
 
@@ -80,8 +80,7 @@ export class PostgresNotificationRepository implements NotificationRepository {
     const values = [config.pipelineId, config.condition, config.type, parameter]
 
     const resultSet: QueryResult<DatabaseNotification> =
-      await this.postgresRepository
-        .executeQuery(INSERT_NOTIFICATION_STATEMENT, values)
+      await this.postgresClient.executeQuery(INSERT_NOTIFICATION_STATEMENT, values)
     const notifications = this.deserializeNotifications(resultSet)
     if (notifications.length === 0) {
       throw Error(`Could not create notification config: ${JSON.stringify(config)}`)
@@ -95,8 +94,7 @@ export class PostgresNotificationRepository implements NotificationRepository {
     const values = [id, config.pipelineId, config.condition, config.type, parameter]
 
     const resultSet: QueryResult<DatabaseNotification> =
-      await this.postgresRepository
-        .executeQuery(UPDATE_NOTIFICATION_STATEMENT, values)
+      await this.postgresClient.executeQuery(UPDATE_NOTIFICATION_STATEMENT, values)
     const notifications = this.deserializeNotifications(resultSet)
     if (notifications.length === 0) {
       throw Error(`Could not update notification config: ${JSON.stringify(config)}`)
@@ -107,7 +105,7 @@ export class PostgresNotificationRepository implements NotificationRepository {
 
   async delete (id: number): Promise<void> {
     const resultSet: QueryResult<DatabaseNotification> =
-      await this.postgresRepository.executeQuery(DELETE_NOTIFICATION_STATEMENT, [id])
+      await this.postgresClient.executeQuery(DELETE_NOTIFICATION_STATEMENT, [id])
 
     if (resultSet.rowCount === 0) {
       throw Error(`Could not delete notification config with id ${id}`)
