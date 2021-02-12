@@ -3,10 +3,10 @@ name: Open Data Service (ODS)
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
   workflow_dispatch:
 
 jobs:
@@ -301,7 +301,7 @@ jobs:
 
     needs: [systemtest]
 
-    if: github.repository == 'jvalue/open-data-service' && github.ref == 'refs/heads/master'
+    if: github.repository == 'jvalue/open-data-service' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v2
 
@@ -335,7 +335,7 @@ jobs:
 
     needs: [systemtest]
 
-    if: github.repository == 'jvalue/open-data-service' && github.ref == 'refs/heads/master'
+    if: github.repository == 'jvalue/open-data-service' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v2
 
@@ -368,7 +368,7 @@ jobs:
 
     needs: [systemtest]
 
-    if: github.repository == 'jvalue/open-data-service' && github.ref == 'refs/heads/master'
+    if: github.repository == 'jvalue/open-data-service' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v2
 
@@ -426,7 +426,7 @@ jobs:
 
     needs: [systemtest]
 
-    if: github.repository == 'jvalue/open-data-service' && github.ref == 'refs/heads/master'
+    if: github.repository == 'jvalue/open-data-service' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v2
 
@@ -459,7 +459,7 @@ jobs:
 
     needs: [systemtest]
 
-    if: github.repository == 'jvalue/open-data-service' && github.ref == 'refs/heads/master'
+    if: github.repository == 'jvalue/open-data-service' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v2
 
@@ -492,7 +492,7 @@ jobs:
 
     needs: [systemtest]
 
-    if: github.repository == 'jvalue/open-data-service' && github.ref == 'refs/heads/master'
+    if: github.repository == 'jvalue/open-data-service' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v2
 
