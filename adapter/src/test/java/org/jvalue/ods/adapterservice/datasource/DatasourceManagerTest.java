@@ -8,10 +8,13 @@ import org.jvalue.ods.adapterservice.adapter.Format;
 import org.jvalue.ods.adapterservice.adapter.Protocol;
 import org.jvalue.ods.adapterservice.adapter.model.DataImportResponse;
 import org.jvalue.ods.adapterservice.datasource.api.amqp.AmqpPublisher;
-import org.jvalue.ods.adapterservice.datasource.model.DataBlob;
+import org.jvalue.ods.adapterservice.datasource.model.DataImport;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
 import org.jvalue.ods.adapterservice.datasource.model.RuntimeParameters;
-import org.jvalue.ods.adapterservice.datasource.repository.DataBlobRepository;
+import org.jvalue.ods.adapterservice.datasource.model.exceptions.DataImportLatestNotFoundException;
+import org.jvalue.ods.adapterservice.datasource.model.exceptions.DataImportNotFoundException;
+import org.jvalue.ods.adapterservice.datasource.model.exceptions.DatasourceNotFoundException;
+import org.jvalue.ods.adapterservice.datasource.repository.DataImportRepository;
 import org.jvalue.ods.adapterservice.datasource.repository.DatasourceRepository;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -21,9 +24,11 @@ import org.springframework.web.client.RestClientException;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.jvalue.ods.adapterservice.adapter.Format.JSON;
@@ -36,13 +41,14 @@ import static org.mockito.Mockito.*;
 public class DatasourceManagerTest {
 
   private final ObjectMapper mapper = new ObjectMapper();
-  private final File configFile = new File("src/test/java/org/jvalue/ods/adapterservice/datasource/model/DatasourceConfig.json");
+  private final File configFile = new File(
+      "src/test/java/org/jvalue/ods/adapterservice/datasource/model/DatasourceConfig.json");
 
   @Mock
   DatasourceRepository datasourceRepository;
 
   @Mock
-  DataBlobRepository dataBlobRepository;
+  DataImportRepository dataImportRepository;
 
   @Mock
   AmqpPublisher amqpPublisher;
@@ -56,8 +62,10 @@ public class DatasourceManagerTest {
   @Test
   public void testCreateDatasource() throws IOException {
     Datasource config = mapper.readValue(configFile, Datasource.class);
+    config.setId(null);
 
-    Datasource expectedConfig = new Datasource(config.getProtocol(), config.getFormat(), config.getMetadata(), config.getTrigger());
+    Datasource expectedConfig = new Datasource(config.getProtocol(), config.getFormat(), config.getMetadata(),
+        config.getTrigger());
     expectedConfig.setId(123L);
 
     when(datasourceRepository.save(config)).thenReturn(expectedConfig);
@@ -70,11 +78,34 @@ public class DatasourceManagerTest {
   }
 
   @Test
-  public void testUpdateDatasource() throws IOException {
+  public void testGetDatasource() throws IOException, DatasourceNotFoundException {
+    Datasource config = mapper.readValue(configFile, Datasource.class);
+
+    Datasource expectedConfig = new Datasource(config.getProtocol(), config.getFormat(), config.getMetadata(),
+        config.getTrigger());
+    expectedConfig.setId(123L);
+
+    when(datasourceRepository.findById(123L)).thenReturn(Optional.of(config));
+
+    Datasource result = manager.getDatasource(123L);
+
+    assertEquals(config, result);
+  }
+
+  @Test
+  public void testGetNonExistingDatasource() {
+    when(datasourceRepository.findById(123L)).thenReturn(Optional.empty());
+
+    assertThrows(DatasourceNotFoundException.class, () -> manager.getDatasource(123L));
+  }
+
+  @Test
+  public void testUpdateDatasource() throws IOException, DatasourceNotFoundException {
     Datasource config = mapper.readValue(configFile, Datasource.class);
     config.setId(123L);
 
-    Datasource updated = new Datasource(config.getProtocol(), config.getFormat(), config.getMetadata(), config.getTrigger());
+    Datasource updated = new Datasource(config.getProtocol(), config.getFormat(), config.getMetadata(),
+        config.getTrigger());
     updated.setId(123L);
 
     when(datasourceRepository.findById(123L)).thenReturn(Optional.of(config));
@@ -86,7 +117,16 @@ public class DatasourceManagerTest {
   }
 
   @Test
-  public void testDeleteDatasource() throws IOException {
+  public void testUpdateNonExistingDatasource() throws IOException {
+    Datasource config = mapper.readValue(configFile, Datasource.class);
+    config.setId(123L);
+
+    when(datasourceRepository.findById(123L)).thenReturn(Optional.empty());
+    assertThrows(DatasourceNotFoundException.class, () -> manager.updateDatasource(123L, config));
+  }
+
+  @Test
+  public void testDeleteDatasource() throws IOException, DatasourceNotFoundException {
     Datasource config = mapper.readValue(configFile, Datasource.class);
     when(datasourceRepository.findById(123L)).thenReturn(Optional.of(config));
     manager.deleteDatasource(123L);
@@ -96,79 +136,158 @@ public class DatasourceManagerTest {
   }
 
   @Test
+  public void testDeleteNonExistingDatasource() {
+    when(datasourceRepository.findById(123L)).thenReturn(Optional.empty());
+    assertThrows(DatasourceNotFoundException.class, () -> manager.deleteDatasource(123L));
+  }
+
+  @Test
   public void testDeleteAllDatasources() throws IOException {
     Datasource config = mapper.readValue(configFile, Datasource.class);
 
-    when(datasourceRepository.findAll()).thenReturn(
-      List.of(config, config, config) // add the same config three times with different id's
+    when(datasourceRepository.findAll()).thenReturn(List.of(config, config, config) // add the same config three times
+                                                                                    // with different id's
     );
 
     manager.deleteAllDatasources();
 
     verify(datasourceRepository).deleteAll();
-    verify(amqpPublisher, times(3))
-      .publishDeletion(config);
+    verify(amqpPublisher, times(3)).publishDeletion(config);
   }
 
   @Test
   public void testTriggerForNotExistingDatasource() {
     when(datasourceRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-    assertThrows(IllegalArgumentException.class, () -> manager.trigger(1L, null));
+    assertThrows(DatasourceNotFoundException.class, () -> manager.trigger(1L, null));
   }
 
   @Test
-  public void testTriggerWithoutRuntimeParameters() throws ParseException {
+  public void testTriggerWithoutRuntimeParameters() throws Exception {
     Datasource datasource = generateDatasource(Protocol.HTTP, Format.JSON, "location");
     when(datasourceRepository.findById(1L)).thenReturn(Optional.of(datasource));
-    when(dataBlobRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-    when(adapter.executeJob(datasource.toAdapterConfig(null))).thenReturn(
-      new DataImportResponse("{\"hallo\":\"hello\"}"));
+    when(dataImportRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+    when(adapter.executeJob(datasource.toAdapterConfig(null)))
+        .thenReturn(new DataImportResponse("{\"hallo\":\"hello\"}"));
 
-    DataBlob.MetaData result = manager.trigger(1L, null);
+    DataImport.MetaData result = manager.trigger(1L, null);
 
     verify(amqpPublisher).publishImportSuccess(1L, "{\"hallo\":\"hello\"}");
-    assertEquals(result.getLocation(), "/data/null");
+    assertEquals("/datasources/null/imports/null/data", result.getLocation());
     assertNull(result.getId());
+    verify(dataImportRepository).save(any(DataImport.class));
   }
 
   @Test
-  public void testTriggerWithRuntimeParameters() throws ParseException {
-    Datasource datasource = generateParameterizableDatasource(
-      HTTP,
-      JSON,
-      "http://www.test-url.com/{userId}/{dataId}",
-      Map.of("userId", "1", "dataId", "123"));
-
+  public void testTriggerWithRuntimeParameters() throws Exception {
+    Datasource datasource = generateParameterizableDatasource(HTTP, JSON, "http://www.test-url.com/{userId}/{dataId}",
+        Map.of("userId", "1", "dataId", "123"));
 
     when(datasourceRepository.findById(2L)).thenReturn(Optional.of(datasource));
 
-    RuntimeParameters runtimeParameters = new RuntimeParameters(Map.of(
-      "userId", "42"
-    ));
+    RuntimeParameters runtimeParameters = new RuntimeParameters(Map.of("userId", "42"));
 
-    when(adapter.executeJob(datasource.toAdapterConfig(runtimeParameters))).thenReturn(
-      new DataImportResponse("{\"hallo\":\"hello\"}"));
-    when(dataBlobRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+    when(adapter.executeJob(datasource.toAdapterConfig(runtimeParameters)))
+        .thenReturn(new DataImportResponse("{\"hallo\":\"hello\"}"));
+    when(dataImportRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-    DataBlob.MetaData result = manager.trigger(2L, runtimeParameters);
+    DataImport.MetaData result = manager.trigger(2L, runtimeParameters);
 
     verify(amqpPublisher).publishImportSuccess(2L, "{\"hallo\":\"hello\"}");
-    assertEquals(result.getLocation(), "/data/null");
+    assertEquals("/datasources/null/imports/null/data", result.getLocation());
     assertNull(result.getId());
+    verify(dataImportRepository).save(any(DataImport.class));
   }
 
   @Test
-  public void testTriggerPublishesFailingImport() throws ParseException {
+  public void testTriggerPublishesFailingImport() throws Exception {
     Datasource datasource = generateDatasource(Protocol.HTTP, Format.JSON, "location");
 
     when(datasourceRepository.findById(3L)).thenReturn(Optional.of(datasource));
 
     when(adapter.executeJob(datasource.toAdapterConfig(null)))
-      .thenThrow(new RestClientException("Do not upset the elders of the internet!"));
+        .thenThrow(new RestClientException("Do not upset the elders of the internet!"));
 
     assertThrows(RestClientException.class, () -> manager.trigger(3L, null));
 
     verify(amqpPublisher).publishImportFailure(3L, "Do not upset the elders of the internet!");
+  }
+
+  @Test
+  public void testGetDataImports() throws ParseException, DatasourceNotFoundException {
+    Datasource datasource = generateDatasource(Protocol.HTTP, Format.JSON, "location");
+    DataImport dataimport1 = new DataImport(datasource, "{}");
+    DataImport dataimport2 = new DataImport(datasource, "");
+    datasource.setDataImports(Set.of(dataimport1, dataimport2));
+    when(datasourceRepository.findById(123L)).thenReturn(Optional.of(datasource));
+
+    Collection<DataImport> result = manager.getDataImportsForDatasource(123L);
+    assertEquals(2, result.size());
+  }
+
+  @Test
+  public void testGetDataImportsNonExistingDatasource() {
+    when(datasourceRepository.findById(123L)).thenReturn(Optional.empty());
+    assertThrows(DatasourceNotFoundException.class, () -> manager.getDataImportsForDatasource(123L));
+  }
+
+  @Test
+  public void testGetDataImport() throws ParseException, DatasourceNotFoundException, DataImportNotFoundException {
+    Datasource datasource = generateDatasource(Protocol.HTTP, Format.JSON, "location");
+    when(datasourceRepository.findById(123L)).thenReturn(Optional.of(datasource));
+
+    DataImport dataimport = new DataImport(datasource, "{}");
+    when(dataImportRepository.findByDatasourceIdAndId(123L, 234L)).thenReturn(Optional.of(dataimport));
+
+    DataImport result = manager.getDataImportForDatasource(123L, 234L);
+
+    assertEquals(result, dataimport);
+  }
+
+  @Test
+  public void testGetDataImportNonExistingDatasource() {
+    when(datasourceRepository.findById(123L)).thenReturn(Optional.empty());
+
+    assertThrows(DatasourceNotFoundException.class, () -> manager.getDataImportForDatasource(123L, 234L));
+  }
+
+  @Test
+  public void testGetDataImportNonExistingDataImport() throws ParseException {
+    Datasource datasource = generateDatasource(Protocol.HTTP, Format.JSON, "location");
+    when(datasourceRepository.findById(123L)).thenReturn(Optional.of(datasource));
+
+    when(dataImportRepository.findByDatasourceIdAndId(123L, 234L)).thenReturn(Optional.empty());
+
+    assertThrows(DataImportNotFoundException.class, () -> manager.getDataImportForDatasource(123L, 234L));
+  }
+
+  @Test
+  public void testGetLatestDataImportForDatasource()
+      throws ParseException, DatasourceNotFoundException, DataImportLatestNotFoundException {
+    Datasource datasource = generateDatasource(Protocol.HTTP, Format.JSON, "location");
+    when(datasourceRepository.findById(123L)).thenReturn(Optional.of(datasource));
+
+    DataImport dataimport = new DataImport(datasource, "{}");
+    when(dataImportRepository.findTopByDatasourceIdOrderByTimestampDesc(123L)).thenReturn(Optional.of(dataimport));
+
+    DataImport result = manager.getLatestDataImportForDatasource(123L);
+    assertEquals(result, dataimport);
+  }
+
+  @Test
+  public void testGetLatestDataImportNonExistingDatasource()
+      throws ParseException, DatasourceNotFoundException, DataImportLatestNotFoundException {
+    when(datasourceRepository.findById(123L)).thenReturn(Optional.empty());
+    assertThrows(DatasourceNotFoundException.class, () -> manager.getLatestDataImportForDatasource(123L));
+  }
+
+  @Test
+  public void testGetLatestDataImportForDatasourceNoDataImport()
+      throws ParseException, DatasourceNotFoundException, DataImportLatestNotFoundException {
+    Datasource datasource = generateDatasource(Protocol.HTTP, Format.JSON, "location");
+    when(datasourceRepository.findById(123L)).thenReturn(Optional.of(datasource));
+
+    when(dataImportRepository.findTopByDatasourceIdOrderByTimestampDesc(123L)).thenReturn(Optional.empty());
+    assertThrows(DataImportLatestNotFoundException.class, () -> manager.getLatestDataImportForDatasource(123L));
   }
 }

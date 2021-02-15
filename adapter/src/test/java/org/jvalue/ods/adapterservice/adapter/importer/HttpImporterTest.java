@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.jvalue.ods.adapterservice.adapter.model.exceptions.ImporterParameterException;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -37,7 +38,7 @@ public class HttpImporterTest {
   }
 
   @Test
-  public void testFetch() throws IOException {
+  public void testFetch() throws IOException, ImporterParameterException {
     ResponseEntity<byte[]> response = new ResponseEntity<>("{\"content\":\"the internet as a string\"}".getBytes(), HttpStatus.OK);
     ArgumentMatcher<URI> uriMatcher = (URI uri) -> uri.getPath().equals(this.from.getPath());
     when(restTemplate.getForEntity(argThat(uriMatcher), eq(byte[].class))).thenReturn(response);
@@ -51,14 +52,14 @@ public class HttpImporterTest {
 
   @Test
   public void testTypoInArguments() {
-    assertThrows(IllegalArgumentException.class, () ->
+    assertThrows(ImporterParameterException.class, () ->
       importer.fetch(Map.of("locationS", from.getPath(), "encodingS", "UTF-8"))
     );
   }
 
   @Test
   public void testFetchMissingURI() {
-    assertThrows(IllegalArgumentException.class, () ->
+    assertThrows(ImporterParameterException.class, () ->
       importer.fetch(Map.of())
     );
   }

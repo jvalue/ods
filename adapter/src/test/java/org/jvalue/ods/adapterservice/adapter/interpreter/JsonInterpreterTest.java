@@ -2,6 +2,7 @@ package org.jvalue.ods.adapterservice.adapter.interpreter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.jvalue.ods.adapterservice.adapter.model.exceptions.InterpreterParameterException;
 
 import java.io.IOException;
 import java.util.Map;
@@ -14,7 +15,7 @@ public class JsonInterpreterTest {
   private final ObjectMapper mapper = new ObjectMapper();
 
   @Test
-  public void interpretJsonData() throws IOException {
+  public void interpretJsonData() throws IOException, InterpreterParameterException {
     var jsonString = "{\"attribute\":\"value\"}";
 
     var result = interpreter.interpret(jsonString, Map.of());

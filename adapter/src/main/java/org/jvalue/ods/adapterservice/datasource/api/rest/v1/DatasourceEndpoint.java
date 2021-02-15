@@ -1,10 +1,12 @@
 package org.jvalue.ods.adapterservice.datasource.api.rest.v1;
 
 import lombok.AllArgsConstructor;
+
 import org.jvalue.ods.adapterservice.datasource.DatasourceManager;
-import org.jvalue.ods.adapterservice.datasource.model.DataBlob;
+import org.jvalue.ods.adapterservice.datasource.model.DataImport;
 import org.jvalue.ods.adapterservice.datasource.model.Datasource;
 import org.jvalue.ods.adapterservice.datasource.model.RuntimeParameters;
+import org.jvalue.ods.adapterservice.util.CheckedSupplier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +22,15 @@ import java.net.URI;
 public class DatasourceEndpoint {
   private final DatasourceManager datasourceManager;
 
+  private <T> T handleErrors(CheckedSupplier<T> function) throws ResponseStatusException {
+    try {
+      return function.get();
+    } catch (Exception e) {
+      HttpStatus errorCode = Mappings.ERROR_MAPPING.getOrDefault(e.getClass(), HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new ResponseStatusException(errorCode, e.getMessage());
+    }
+  }
+
   @GetMapping
   public Iterable<Datasource> getDatasources() {
     return datasourceManager.getAllDatasources();
@@ -27,45 +38,32 @@ public class DatasourceEndpoint {
 
   @GetMapping("/{id}")
   public Datasource getDatasource(@PathVariable Long id) {
-    return datasourceManager.getDatasource(id)
-      .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find datasource with id " + id));
+    return this.handleErrors(() -> datasourceManager.getDatasource(id));
   }
 
   @PostMapping
   public ResponseEntity<Datasource> addDatasource(@Valid @RequestBody Datasource config) {
-    if (config.getId() != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id is defined by the server. Id field must not be set");
-    }
-    Datasource savedConfig = datasourceManager.createDatasource(config);
-
-    URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+    return this.handleErrors(() -> {
+      Datasource savedConfig = datasourceManager.createDatasource(config);
+      URI location = ServletUriComponentsBuilder.fromCurrentRequest()
       .path("/{id}")
       .buildAndExpand(savedConfig.getId())
       .toUri();
-
-    return ResponseEntity.created(location).body(savedConfig);
+      
+      return ResponseEntity.created(location).body(savedConfig);
+    });
   }
 
   @PutMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void updateDatasource(
-    @PathVariable Long id,
-    @Valid @RequestBody Datasource updateConfig) {
-    try {
-      datasourceManager.updateDatasource(id, updateConfig);
-    } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Datasource needs to exist before updating", e);
-    }
+  public void updateDatasource(@PathVariable Long id, @Valid @RequestBody Datasource updateConfig) {
+    this.handleErrors(() -> { datasourceManager.updateDatasource(id, updateConfig); return null;});
   }
 
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void deleteDatasource(@PathVariable Long id) {
-    try {
-      datasourceManager.deleteDatasource(id);
-    } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Can not find Datasource with id: " + id, e);
-    }
+    this.handleErrors(() -> { datasourceManager.deleteDatasource(id); return null; });
   }
 
   @DeleteMapping("/")
@@ -75,16 +73,10 @@ public class DatasourceEndpoint {
   }
 
   @PostMapping("/{id}/trigger")
-  public DataBlob.MetaData getData(@PathVariable Long id,
-                                   @Valid @RequestBody(required = false) RuntimeParameters runtimeParameters) {
-    datasourceManager.getDatasource(id)
-      .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Can not find Datasource with id: " + id));
-    try {
+  public DataImport.MetaData getData(@PathVariable Long id, @Valid @RequestBody(required = false) RuntimeParameters runtimeParameters) {
+    return this.handleErrors(() -> { 
+      datasourceManager.getDatasource(id);
       return datasourceManager.trigger(id, runtimeParameters);
-    } catch (ResponseStatusException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
-    }
+    });                          
   }
 }

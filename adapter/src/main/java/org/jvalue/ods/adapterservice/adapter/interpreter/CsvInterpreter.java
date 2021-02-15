@@ -8,6 +8,8 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
+import org.jvalue.ods.adapterservice.adapter.model.exceptions.InterpreterParameterException;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -39,18 +41,18 @@ public class CsvInterpreter extends Interpreter {
   }
 
   @Override
-  protected void validateParameters(Map<String, Object> inputParameters) {
+  protected void validateParameters(Map<String, Object> inputParameters) throws InterpreterParameterException {
     super.validateParameters(inputParameters);
 
     String lineSeparator = (String) inputParameters.get("lineSeparator");
     if (!lineSeparator.equals("\n") && !lineSeparator.equals("\r") && !lineSeparator.equals("\r\n")) {
-      throw new IllegalArgumentException(getType() + " interpreter requires parameter lineSeparator to have" +
+      throw new InterpreterParameterException(getType() + " interpreter requires parameter lineSeparator to have" +
         " value \\n, \\r, or \\r\\n. Your given value " + lineSeparator + " is invalid!");
     }
 
     String columnSeparator = (String) inputParameters.get("columnSeparator");
     if (columnSeparator.length() != 1) {
-      throw new IllegalArgumentException(getType() + " interpreter requires parameter columnSeparator to have" +
+      throw new InterpreterParameterException(getType() + " interpreter requires parameter columnSeparator to have" +
         " length 1. Your given value " + columnSeparator + " is invalid!");
     }
   }

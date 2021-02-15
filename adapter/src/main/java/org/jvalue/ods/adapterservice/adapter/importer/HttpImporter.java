@@ -1,6 +1,8 @@
 package org.jvalue.ods.adapterservice.adapter.importer;
 
 import lombok.AllArgsConstructor;
+
+import org.jvalue.ods.adapterservice.adapter.model.exceptions.ImporterParameterException;
 import org.jvalue.ods.adapterservice.datasource.model.RuntimeParameters;
 import org.springframework.web.client.RestTemplate;
 
@@ -14,10 +16,11 @@ import java.util.Map;
 public class HttpImporter extends Importer {
 
   private final List<ImporterParameterDescription> parameters = List.of(
-    new ImporterParameterDescription("location", "String of the URI for the HTTP call", String.class),
-    new ImporterParameterDescription("encoding", "Encoding of the source. Available encodings: ISO-8859-1, US-ASCII, UTF-8", String.class),
-    new ImporterParameterDescription("defaultParameters", "Default values for open parameters in the URI", false, RuntimeParameters.class)
-  );
+      new ImporterParameterDescription("location", "String of the URI for the HTTP call", String.class),
+      new ImporterParameterDescription("encoding",
+          "Encoding of the source. Available encodings: ISO-8859-1, US-ASCII, UTF-8", String.class),
+      new ImporterParameterDescription("defaultParameters", "Default values for open parameters in the URI", false,
+          RuntimeParameters.class));
   private final RestTemplate restTemplate;
 
   @Override
@@ -31,7 +34,7 @@ public class HttpImporter extends Importer {
   }
 
   @Override
-  protected void validateParameters(Map<String, Object> inputParameters) {
+  protected void validateParameters(Map<String, Object> inputParameters) throws ImporterParameterException {
     super.validateParameters(inputParameters);
 
     String encoding = (String) inputParameters.get("encoding");
@@ -50,12 +53,14 @@ public class HttpImporter extends Importer {
   }
 
   @Override
-  protected String doFetch(Map<String, Object> parameters) {
-    validateParameters(parameters);
+  protected String doFetch(Map<String, Object> parameters) throws ImporterParameterException {
     String location = parameters.get("location").toString();
-
-    URI uri = URI.create(location);
-    byte[] rawResponse = restTemplate.getForEntity(uri, byte[].class).getBody();
-    return new String(rawResponse, Charset.forName((String) parameters.get("encoding")));
+    try {
+      URI uri = URI.create(location);
+      byte[] rawResponse = restTemplate.getForEntity(uri, byte[].class).getBody();
+      return new String(rawResponse, Charset.forName((String) parameters.get("encoding")));
+    } catch (IllegalArgumentException e) {
+      throw new ImporterParameterException(e.getMessage());
+    }
   }
 }

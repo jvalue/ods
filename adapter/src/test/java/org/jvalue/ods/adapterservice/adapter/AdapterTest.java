@@ -8,9 +8,12 @@ import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.DataImportResponse;
 import org.jvalue.ods.adapterservice.adapter.model.FormatConfig;
 import org.jvalue.ods.adapterservice.adapter.model.ProtocolConfig;
+import org.jvalue.ods.adapterservice.adapter.model.exceptions.ImporterParameterException;
+import org.jvalue.ods.adapterservice.adapter.model.exceptions.InterpreterParameterException;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
@@ -41,7 +44,7 @@ public class AdapterTest {
   }
 
   @Test
-  public void testExecuteJob() {
+  public void testExecuteJob() throws ImporterParameterException, InterpreterParameterException, IOException {
     ProtocolConfig protocol = new ProtocolConfig(
       httpProtocol,
       Map.of(

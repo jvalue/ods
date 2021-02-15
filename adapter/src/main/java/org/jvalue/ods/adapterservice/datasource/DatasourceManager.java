@@ -5,18 +5,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.jvalue.ods.adapterservice.adapter.Adapter;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.DataImportResponse;
+import org.jvalue.ods.adapterservice.adapter.model.exceptions.*;
 import org.jvalue.ods.adapterservice.datasource.api.amqp.AmqpPublisher;
-import org.jvalue.ods.adapterservice.datasource.model.DataBlob;
-import org.jvalue.ods.adapterservice.datasource.model.Datasource;
-import org.jvalue.ods.adapterservice.datasource.model.DatasourceMetadata;
-import org.jvalue.ods.adapterservice.datasource.model.RuntimeParameters;
-import org.jvalue.ods.adapterservice.datasource.repository.DataBlobRepository;
+import org.jvalue.ods.adapterservice.datasource.model.*;
+import org.jvalue.ods.adapterservice.datasource.model.exceptions.*;
+import org.jvalue.ods.adapterservice.datasource.repository.DataImportRepository;
 import org.jvalue.ods.adapterservice.datasource.repository.DatasourceRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.util.Collection;
 import java.util.Date;
-import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 @Slf4j
@@ -24,12 +24,15 @@ import java.util.stream.StreamSupport;
 @AllArgsConstructor
 public class DatasourceManager {
   private final DatasourceRepository datasourceRepository;
-  private final DataBlobRepository dataBlobRepository;
+  private final DataImportRepository dataImportRepository;
   private final Adapter adapter;
   private final AmqpPublisher amqpPublisher;
 
   @Transactional
   public Datasource createDatasource(Datasource config) {
+    if (config.getId() != null) {
+      throw new IllegalArgumentException("Id is defined by the server. Id field must not be set.");
+    }
     config.getMetadata().setCreationTimestamp(new Date()); // creation time documented by server
 
     Datasource savedConfig = datasourceRepository.save(config);
@@ -38,8 +41,8 @@ public class DatasourceManager {
     return savedConfig;
   }
 
-  public Optional<Datasource> getDatasource(Long id) {
-    return datasourceRepository.findById(id);
+  public Datasource getDatasource(Long id) throws DatasourceNotFoundException {
+    return datasourceRepository.findById(id).orElseThrow(() -> new DatasourceNotFoundException(id));
   }
 
   public Iterable<Datasource> getAllDatasources() {
@@ -47,18 +50,16 @@ public class DatasourceManager {
   }
 
   @Transactional
-  public void updateDatasource(Long id, Datasource update) throws IllegalArgumentException {
-    Datasource existing = datasourceRepository.findById(id)
-      .orElseThrow(() -> new IllegalArgumentException("Datasource with id " + id + " not found"));
+  public void updateDatasource(Long id, Datasource update) throws DatasourceNotFoundException {
+    Datasource existing = datasourceRepository.findById(id).orElseThrow(() -> new DatasourceNotFoundException(id));
 
     datasourceRepository.save(applyUpdate(existing, update));
     amqpPublisher.publishUpdate(existing);
   }
 
   @Transactional
-  public void deleteDatasource(Long id) {
-    Datasource datasource = datasourceRepository.findById(id)
-      .orElseThrow(() -> new IllegalArgumentException("Datasource with id " + id + " not found"));
+  public void deleteDatasource(Long id) throws DatasourceNotFoundException {
+    Datasource datasource = datasourceRepository.findById(id).orElseThrow(() -> new DatasourceNotFoundException(id));
     datasourceRepository.deleteById(id);
     amqpPublisher.publishDeletion(datasource);
   }
@@ -67,17 +68,10 @@ public class DatasourceManager {
   public void deleteAllDatasources() {
     Iterable<Datasource> allDatasourceConfigs = getAllDatasources();
     datasourceRepository.deleteAll();
-    StreamSupport.stream(allDatasourceConfigs.spliterator(), true)
-      .forEach(amqpPublisher::publishDeletion);
+    StreamSupport.stream(allDatasourceConfigs.spliterator(), true).forEach(amqpPublisher::publishDeletion);
   }
 
-  private AdapterConfig getParametrizedDatasource(Long id, RuntimeParameters runtimeParameters) {
-    Datasource datasource = getDatasource(id)
-      .orElseThrow(() -> new IllegalArgumentException("No datasource found with id " + id));
-    return datasource.toAdapterConfig(runtimeParameters);
-  }
-
-  public DataBlob.MetaData trigger(Long id, RuntimeParameters runtimeParameters) {
+  public DataImport.MetaData trigger(Long id, RuntimeParameters runtimeParameters) throws DatasourceNotFoundException, AdapterException, IOException {
     try {
       return executeImport(id, runtimeParameters);
     } catch (Exception e) {
@@ -89,26 +83,32 @@ public class DatasourceManager {
 
   /**
    * Performs the actual import inside a database transaction. This ensures that,
-   * the imported data and the event are always inserted together into the database.
-   * <br>
+   * the imported data and the event are always inserted together into the
+   * database. <br>
    * Note: This method is an internal API, do not use it from the outside. It is
-   * package-private only because {@link Transactional} requires the method to be overridable.
+   * package-private only because {@link Transactional} requires the method to be
+   * overridable.
    *
-   * @param id the id of the datasource to import
+   * @param id                the id of the datasource to import
    * @param runtimeParameters the runtime parameters to use for the import
    * @return the metadata of the imported data
+   * @throws IOException
+   * @throws InterpreterParameterException
+   * @throws ImporterParameterException
    */
   @Transactional
-  DataBlob.MetaData executeImport(Long id, RuntimeParameters runtimeParameters) {
-    AdapterConfig adapterConfig = getParametrizedDatasource(id, runtimeParameters);
+  DataImport.MetaData executeImport(Long id, RuntimeParameters runtimeParameters)
+      throws DatasourceNotFoundException, ImporterParameterException, InterpreterParameterException, IOException {
+    Datasource datasource = getDatasource(id);
+    AdapterConfig adapterConfig = datasource.toAdapterConfig(runtimeParameters);
     DataImportResponse executionResult = adapter.executeJob(adapterConfig);
-    DataBlob importedBlob = new DataBlob(executionResult.getData());
+    DataImport dataImport = new DataImport(datasource, executionResult.getData());
 
-    DataBlob savedBlob = dataBlobRepository.save(importedBlob);
+    DataImport savedDataImport = dataImportRepository.save(dataImport);
 
-    amqpPublisher.publishImportSuccess(id, savedBlob.getData());
+    amqpPublisher.publishImportSuccess(id, savedDataImport.getData());
 
-    return savedBlob.getMetaData();
+    return savedDataImport.getMetaData();
   }
 
   private void publishImportFailure(Long id, Exception e) {
@@ -145,4 +145,26 @@ public class DatasourceManager {
 
     return updated;
   }
+
+  public Collection<DataImport> getDataImportsForDatasource(Long datasourceId) throws DatasourceNotFoundException {
+    Datasource datasource = getDatasource(datasourceId);
+    return datasource.getDataImports();
+  }
+
+  public DataImport getLatestDataImportForDatasource(Long datasourceId) throws DatasourceNotFoundException, DataImportLatestNotFoundException {
+    getDatasource(datasourceId);
+    DataImport dataImport = dataImportRepository
+      .findTopByDatasourceIdOrderByTimestampDesc(datasourceId)
+      .orElseThrow(() -> new DataImportLatestNotFoundException(datasourceId));
+    return dataImport;
+  }
+
+  public DataImport getDataImportForDatasource(Long datasourceId, Long dataImportId) throws DatasourceNotFoundException, DataImportNotFoundException {
+    getDatasource(datasourceId);
+    DataImport dataImport = dataImportRepository
+      .findByDatasourceIdAndId(datasourceId, dataImportId)
+      .orElseThrow(() -> new DataImportNotFoundException(datasourceId, dataImportId));
+    return dataImport;
+  }
+
 }

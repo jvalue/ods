@@ -2,6 +2,7 @@ package org.jvalue.ods.adapterservice.adapter.interpreter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.jvalue.ods.adapterservice.adapter.model.exceptions.InterpreterParameterException;
 
 import java.io.IOException;
 import java.util.Map;
@@ -15,7 +16,7 @@ public class XmlInterpreterTest {
   private final ObjectMapper mapper = new ObjectMapper();
 
   @Test
-  public void interpretXmlData() throws IOException {
+  public void interpretXmlData() throws IOException, InterpreterParameterException {
     var xmlString = "<note><to>Walter Frosch</to><body>Nice game!</body></note>";
 
     var result = interpreter.interpret(xmlString, Map.of());
@@ -27,7 +28,7 @@ public class XmlInterpreterTest {
   }
 
   @Test
-  public void interpretXmlCollection() throws IOException {
+  public void interpretXmlCollection() throws IOException, InterpreterParameterException {
     var collectionString = """
       <menuItems>
         <pizza>
@@ -53,7 +54,7 @@ public class XmlInterpreterTest {
   }
 
   @Test
-  public void interpretXmlCollectionNested() throws IOException {
+  public void interpretXmlCollectionNested() throws IOException, InterpreterParameterException {
     var collectionString = """
       <menuItems>
         <menu>
@@ -83,7 +84,7 @@ public class XmlInterpreterTest {
   }
 
   @Test
-  public void interpretInconsistentXMLCollection() throws IOException {
+  public void interpretInconsistentXMLCollection() throws IOException, InterpreterParameterException {
     var collectionString = """
       <menuItems>
         <pizza>

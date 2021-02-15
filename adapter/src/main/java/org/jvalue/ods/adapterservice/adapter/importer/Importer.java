@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import org.jvalue.ods.adapterservice.adapter.model.exceptions.ImporterParameterException;
+
 public abstract class Importer {
 
   public abstract String getType();
@@ -20,14 +22,14 @@ public abstract class Importer {
       .filter(ImporterParameterDescription::isRequired).collect(Collectors.toList());
   }
 
-  public final String fetch(Map<String, Object> parameters) {
+  public final String fetch(Map<String, Object> parameters) throws ImporterParameterException {
     validateParameters(parameters);
     return doFetch(parameters);
   }
 
-  protected abstract String doFetch(Map<String, Object> parameters);
+  protected abstract String doFetch(Map<String, Object> parameters) throws ImporterParameterException;
 
-  protected void validateParameters(Map<String, Object> inputParameters) {
+  protected void validateParameters(Map<String, Object> inputParameters) throws ImporterParameterException {
     boolean illegalArguments = false;
     String illegalArgumentsMessage = "";
 
@@ -57,7 +59,7 @@ public abstract class Importer {
       }
     }
     if (illegalArguments) {
-      throw new IllegalArgumentException(illegalArgumentsMessage);
+      throw new ImporterParameterException(illegalArgumentsMessage);
     }
   }
 
