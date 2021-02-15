@@ -12,7 +12,7 @@ import java.util.Date;
 @Entity
 @NoArgsConstructor
 @EqualsAndHashCode
-@Getters
+@Getter
 public class DataImport {
 
   @Id
