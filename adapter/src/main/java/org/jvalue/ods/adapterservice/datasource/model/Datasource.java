@@ -40,7 +40,7 @@ public class Datasource {
   @NotNull
   private DatasourceTrigger trigger;
 
-  @OneToMany(cascade = CascadeType.ALL, mappedBy = "datasource")
+  @OneToMany(cascade = CascadeType.ALL, mappedBy = "datasource", fetch = FetchType.LAZY)
   @JsonIgnore
   @EqualsAndHashCode.Exclude // needed to avoid an endless loop because of a circular reference
   private Set<DataImport> dataImports;
