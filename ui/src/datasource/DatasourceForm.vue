@@ -52,11 +52,12 @@
         :complete="dialogStep > 3"
         step="3"
       >
-        Meta-Data
+        Generated schema
+        <small>Customize the generated schema </small>
       </v-stepper-step>
       <v-stepper-content step="3">
-        <datasource-metadata-config
-          v-model="datasource.metadata"
+        <datasource-schema-edit
+          v-model="datasource"
           @validityChanged="validStep3 = $event"
         />
         <stepper-button-group
@@ -70,17 +71,35 @@
         :complete="dialogStep > 4"
         step="4"
       >
-        Trigger Configuration
-        <small>Configure Execution Details</small>
+        Meta-Data
       </v-stepper-step>
       <v-stepper-content step="4">
-        <trigger-config
-          v-model="datasource.trigger"
+        <datasource-metadata-config
+          v-model="datasource.metadata"
           @validityChanged="validStep4 = $event"
         />
         <stepper-button-group
           :step="4"
           :next-enabled="validStep4"
+          @stepChanged="dialogStep = $event"
+        />
+      </v-stepper-content>
+
+      <v-stepper-step
+        :complete="dialogStep > 5"
+        step="5"
+      >
+        Trigger Configuration
+        <small>Configure Execution Details</small>
+      </v-stepper-step>
+      <v-stepper-content step="5">
+        <trigger-config
+          v-model="datasource.trigger"
+          @validityChanged="validStep5 = $event"
+        />
+        <stepper-button-group
+          :step="5"
+          :next-enabled="validStep5"
           :next-visible="false"
           @stepChanged="dialogStep = $event"
         />
@@ -93,24 +112,25 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Emit, PropSync, Watch } from 'vue-property-decorator'
-
 import StepperButtonGroup from '../components/StepperButtonGroup.vue'
 import AdapterConfig from './edit/adapter/AdapterConfig.vue'
 import DatasourceMetadataConfig from './edit/DatasourceMetadataConfig.vue'
+import DatasourceSchemaEdit from './edit/schema/DatasourceSchemaEdit.vue'
 import TriggerConfig from './edit/TriggerConfig.vue'
 import Datasource from './datasource'
 import { requiredRule } from '../validators'
-
 @Component({
-  components: { AdapterConfig, StepperButtonGroup, DatasourceMetadataConfig, TriggerConfig }
+  components: { AdapterConfig, StepperButtonGroup, DatasourceMetadataConfig, 
+    TriggerConfig, DatasourceSchemaEdit }
 })
 export default class DatasourceForm extends Vue {
+  
   private dialogStep = 1
-
   private validStep1 = false
   private validStep2 = true // starts with valid default values
   private validStep3 = true // starts with valid default values
   private validStep4 = true // starts with valid default values
+  private validStep5 = true // starts with valid default values
 
   @PropSync('value')
   private datasource: Datasource | undefined
@@ -125,7 +145,8 @@ export default class DatasourceForm extends Vue {
     return this.validStep1 &&
         this.validStep2 &&
         this.validStep3 &&
-        this.validStep4
+        this.validStep4 &&
+        this.validStep5
   }
 
   @Emit('validityChanged')
@@ -137,5 +158,6 @@ export default class DatasourceForm extends Vue {
   private onIsValidChanged (): void {
     this.emitIsValid()
   }
+
 }
 </script>

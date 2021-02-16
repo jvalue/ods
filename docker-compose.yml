@@ -16,6 +16,7 @@ services:
         STORAGE_SERVICE_URL: /api/storage
         PIPELINE_SERVICE_URL: /api/pipelines
         NOTIFICATION_SERVICE_URL: /api/notification
+        SCHEMA_SERVICE_URL: /api/schema
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-ui.rule=PathPrefix(`/`)"
