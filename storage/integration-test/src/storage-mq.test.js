@@ -114,6 +114,45 @@ describe('IT against Storage-MQ service', () => {
     expect(allContentResponse.body[0]).toEqual(contentResponse.body)
   }, TIMEOUT)
 
+  test('Should create bucket with array content', async () => {
+    const pipelineId = 4442
+
+    const channel = await amqpConnection.createChannel()
+    channel.assertExchange(AMQP_EXCHANGE, 'topic')
+
+    const pipelineCreatedEvent = {
+      pipelineId: pipelineId
+    }
+    const eventAsBuffer = Buffer.from(JSON.stringify(pipelineCreatedEvent))
+
+    channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_CREATED_TOPIC, eventAsBuffer)
+    await sleep(PROCESS_TIME)
+
+    const pipelineExecutedEvent = {
+      pipelineId: pipelineId,
+      timestamp: new Date(Date.now()),
+      data: [1, 2, 3]
+    }
+    const execEventAsBuffer = Buffer.from(JSON.stringify(pipelineExecutedEvent))
+
+    channel.publish(AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC, execEventAsBuffer)
+    await sleep(PROCESS_TIME)
+
+    const contentResponse = await request(STORAGEMQ_URL).get(`/bucket/${pipelineId}/content/1`)
+    expect(contentResponse.status).toEqual(200)
+    expect(contentResponse.type).toEqual('application/json')
+    expect(contentResponse.body.id).toEqual(1)
+    expect(contentResponse.body.timestamp).toEqual(pipelineExecutedEvent.timestamp.toISOString())
+    expect(contentResponse.body.pipelineId).toEqual(pipelineExecutedEvent.pipelineId)
+    expect(contentResponse.body.data).toEqual(pipelineExecutedEvent.data)
+
+    const allContentResponse = await request(STORAGEMQ_URL).get(`/bucket/${pipelineId}/content`)
+    expect(allContentResponse.status).toEqual(200)
+    expect(allContentResponse.type).toEqual('application/json')
+    expect(allContentResponse.body).toHaveLength(1)
+    expect(allContentResponse.body[0]).toEqual(contentResponse.body)
+  }, TIMEOUT)
+
   test('Should respond with 404 for non-existing content of exiting bucket  [GET /bucket/3000/content/5]', async () => {
     const response = await request(STORAGEMQ_URL).get('/bucket/3000/content/5')
     expect(response.status).toEqual(404)
