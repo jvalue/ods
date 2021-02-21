@@ -75,9 +75,10 @@ describe('IT against Storage-MQ service', () => {
     expect(response.body).toEqual([])
   }, TIMEOUT)
 
-  test('Should create bucket with content', async () => {
-    const pipelineId = 444
-
+  test.each([
+    [441, { exampleNumber: 123, exampleString: 'abc', exampleArray: [{ x: 'y' }, { t: 456 }] }],
+    [442, [1, 2, 3]]
+  ])('Should create bucket with content', async (pipelineId, data) => {
     const channel = await amqpConnection.createChannel()
     channel.assertExchange(AMQP_EXCHANGE, 'topic')
 
@@ -92,7 +93,7 @@ describe('IT against Storage-MQ service', () => {
     const pipelineExecutedEvent = {
       pipelineId: pipelineId,
       timestamp: new Date(Date.now()),
-      data: { exampleNumber: 123, exampleString: 'abc', exampleArray: [{ x: 'y' }, { t: 456 }] }
+      data: data
     }
     const execEventAsBuffer = Buffer.from(JSON.stringify(pipelineExecutedEvent))
 

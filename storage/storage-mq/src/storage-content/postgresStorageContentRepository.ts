@@ -79,7 +79,17 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
       if (!tableExists) {
         throw new Error(`Table "${tableIdentifier}" does not exist - can not save content`)
       }
-      const values = [content.data, content.pipelineId, content.timestamp]
+
+      /**
+       * When passed an array as value, pg assumes the value is meant to be a native Postgres array
+       * and therefore fails with a "invalid input syntax for type json" error when the target field
+       * is actually of type jsob/jsonb.
+       *
+       * Ref: https://github.com/brianc/node-postgres/issues/2012
+       */
+      const data = Array.isArray(content.data) ? JSON.stringify(content.data) : content.data
+
+      const values = [data, content.pipelineId, content.timestamp]
       const { rows } = await client.query(INSERT_CONTENT_STATEMENT(tableIdentifier), values)
       return parseInt(rows[0].id)
     })
