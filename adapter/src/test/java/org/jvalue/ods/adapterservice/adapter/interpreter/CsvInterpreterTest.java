@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import org.junit.jupiter.api.Test;
+import org.jvalue.ods.adapterservice.adapter.model.exceptions.InterpreterParameterException;
 
 import java.io.IOException;
 import java.util.Map;
@@ -17,7 +18,7 @@ public class CsvInterpreterTest {
   private final ObjectMapper mapper = new ObjectMapper();
 
   @Test
-  public void interpretSimpleCSVData() throws IOException {
+  public void interpretSimpleCSVData() throws IOException, InterpreterParameterException {
     JsonNode result = interpreter.interpret(CSV_STRING, Map.of(
       "columnSeparator", ";",
       "lineSeparator", "\n",
@@ -43,7 +44,7 @@ public class CsvInterpreterTest {
   }
 
   @Test
-  public void interpretCSVDataOtherColumnSeparator() throws IOException {
+  public void interpretCSVDataOtherColumnSeparator() throws IOException, InterpreterParameterException {
     String csv = CSV_STRING.replace(';', '&');
     JsonNode result = interpreter.interpret(csv, Map.of(
       "columnSeparator", "&",
@@ -60,7 +61,7 @@ public class CsvInterpreterTest {
   }
 
   @Test
-  public void interpretCSVDataOtherLineSeparator() throws IOException {
+  public void interpretCSVDataOtherLineSeparator() throws IOException, InterpreterParameterException {
     String csv = CSV_STRING.replace('\n', '\r');
     JsonNode result = interpreter.interpret(csv, Map.of(
       "columnSeparator", ";",
@@ -77,7 +78,7 @@ public class CsvInterpreterTest {
   }
 
   @Test
-  public void interpretCSVDataSkipFirstRow() throws IOException {
+  public void interpretCSVDataSkipFirstRow() throws IOException, InterpreterParameterException {
     JsonNode result = interpreter.interpret(CSV_STRING, Map.of(
       "columnSeparator", ";",
       "lineSeparator", "\n",
@@ -97,7 +98,7 @@ public class CsvInterpreterTest {
   }
 
   @Test
-  public void interpretCSVDataHeaderRow() throws IOException {
+  public void interpretCSVDataHeaderRow() throws IOException, InterpreterParameterException {
     String csv = "1;2;sadf\n5;3;fasd";
     JsonNode result = interpreter.interpret(csv, Map.of(
       "columnSeparator", ";",
@@ -119,14 +120,14 @@ public class CsvInterpreterTest {
 
   @Test
   public void interpretMissingParameters() {
-    assertThrows(IllegalArgumentException.class, () ->
+    assertThrows(InterpreterParameterException.class, () ->
       interpreter.interpret("{\"this is\":\"no CSV\"", Map.of())
     );
   }
 
   @Test
   public void interpretWrongParameterType() {
-    assertThrows(IllegalArgumentException.class, () ->
+    assertThrows(InterpreterParameterException.class, () ->
       interpreter.interpret(CSV_STRING, Map.of(
         "columnSeparator", ",",
         "lineSeparator", ";",
@@ -138,7 +139,7 @@ public class CsvInterpreterTest {
 
   @Test
   public void interpretInvalidLineSeparator() {
-    assertThrows(IllegalArgumentException.class, () ->
+    assertThrows(InterpreterParameterException.class, () ->
       interpreter.interpret(CSV_STRING, Map.of(
         "columnSeparator", ",",
         "lineSeparator", "&", // only \n, \r, or \r\n
@@ -150,7 +151,7 @@ public class CsvInterpreterTest {
 
   @Test
   public void interpretInvalidColumnSeparator() {
-    assertThrows(IllegalArgumentException.class, () ->
+    assertThrows(InterpreterParameterException.class, () ->
       interpreter.interpret(CSV_STRING, Map.of(
         "columnSeparator", ",asd",  // only one char
         "lineSeparator", "\n",

@@ -1,6 +1,7 @@
 package org.jvalue.ods.adapterservice.datasource.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.jvalue.ods.adapterservice.adapter.Protocol;
@@ -12,7 +13,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -38,6 +39,11 @@ public class Datasource {
 
   @NotNull
   private DatasourceTrigger trigger;
+
+  @OneToMany(cascade = CascadeType.ALL, mappedBy = "datasource", fetch = FetchType.LAZY)
+  @JsonIgnore
+  @EqualsAndHashCode.Exclude // needed to avoid an endless loop because of a circular reference
+  private Set<DataImport> dataImports;
 
   @JsonCreator
   public Datasource(

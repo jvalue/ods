@@ -8,7 +8,6 @@ import lombok.*;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
-import java.util.Objects;
 
 @Embeddable
 @Getter

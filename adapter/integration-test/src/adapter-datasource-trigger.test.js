@@ -1,5 +1,3 @@
-/* eslint-env jest */
-// @ts-check
 const request = require('supertest')
 
 const {
@@ -52,16 +50,17 @@ describe('Datasource triggering', () => {
     expect(datasourceResponse.status).toEqual(201)
     const datasourceId = datasourceResponse.body.id
 
-    const dataMetaData = await request(ADAPTER_URL)
+    const dataImportMetaData = await request(ADAPTER_URL)
       .post(`/datasources/${datasourceId}/trigger`)
       .send(runtimeParameters)
-    expect(dataMetaData.status).toEqual(200)
-    expect(dataMetaData.body.id).toBeGreaterThanOrEqual(0)
-    const id = dataMetaData.body.id
-    expect(dataMetaData.body.location).toEqual(`/data/${id}`)
+    expect(dataImportMetaData.status).toEqual(200)
+    expect(dataImportMetaData.body.id).toBeGreaterThanOrEqual(0)
+    expect(dataImportMetaData.body.timestamp).toBeTruthy()
+    const dataImportId = dataImportMetaData.body.id
+    expect(dataImportMetaData.body.location).toEqual(`/datasources/${datasourceId}/imports/${dataImportId}/data`)
 
     const data = await request(ADAPTER_URL)
-      .get(`/data/${id}`)
+      .get(dataImportMetaData.body.location)
       .send()
     expect(data.status).toEqual(200)
     expect(data.body.id).toBe(runtimeParameters.parameters.id)
@@ -86,16 +85,16 @@ describe('Datasource triggering', () => {
     expect(datasourceResponse.status).toEqual(201)
     const datasourceId = datasourceResponse.body.id
 
-    const dataMetaData = await request(ADAPTER_URL)
+    const dataImportMetadata = await request(ADAPTER_URL)
       .post(`/datasources/${datasourceId}/trigger`)
       .send(null)
-    expect(dataMetaData.status).toEqual(200)
-    expect(dataMetaData.body.id).toBeGreaterThanOrEqual(0)
-    const id = dataMetaData.body.id
-    expect(dataMetaData.body.location).toEqual(`/data/${id}`)
+    expect(dataImportMetadata.status).toEqual(200)
+    expect(dataImportMetadata.body.id).toBeGreaterThanOrEqual(0)
+    const dataImportId = dataImportMetadata.body.id
+    expect(dataImportMetadata.body.location).toEqual(`/datasources/${datasourceId}/imports/${dataImportId}/data`)
 
     const data = await request(ADAPTER_URL)
-      .get(`/data/${id}`)
+      .get(dataImportMetadata.body.location)
       .send()
     expect(data.status).toEqual(200)
     expect(data.body.id).toBe(dynamicDatasourceConfig.protocol.parameters.defaultParameters.id)
@@ -124,14 +123,14 @@ describe('Datasource triggering', () => {
       .send(null)
     expect(dataMetaData.status).toEqual(200)
     expect(dataMetaData.body.id).toBeGreaterThanOrEqual(0)
-    const id = dataMetaData.body.id
-    expect(dataMetaData.body.location).toEqual(`/data/${id}`)
+    const dataImportId = dataMetaData.body.id
+    expect(dataMetaData.body.location).toEqual(`/datasources/${datasourceId}/imports/${dataImportId}/data`)
 
-    const normalData = await request(ADAPTER_URL)
-      .get(`/data/${id}`)
+    const data = await request(ADAPTER_URL)
+      .get(dataMetaData.body.location)
       .send()
-    expect(normalData.status).toEqual(200)
-    expect(normalData.body.id).toEqual('1')
+    expect(data.status).toEqual(200)
+    expect(data.body.id).toEqual('1')
 
     const delResponse = await request(ADAPTER_URL)
       .delete(`/datasources/${datasourceId}`)
@@ -220,7 +219,7 @@ describe('Datasource triggering', () => {
     expect(triggerResponse.status).toEqual(200)
 
     const dataResponse = await request(ADAPTER_URL)
-      .get(`/data/${triggerResponse.body.id}`)
+      .get(triggerResponse.body.location)
     expect(dataResponse.status).toEqual(200)
     expect(dataResponse.body).toEqual({ id: '1' })
   })
