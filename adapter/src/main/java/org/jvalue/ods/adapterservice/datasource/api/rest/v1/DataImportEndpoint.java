@@ -16,21 +16,21 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping(Mappings.DATASOURCE_PATH)
+@RequestMapping(Mappings.DATASOURCE_PATH + "/{datasourceId}" + Mappings.DATAIMPORT_PATH)
 public class DataImportEndpoint {
   private final DatasourceManager datasourceManager;
 
-  @GetMapping("/{datasourceId}" + Mappings.DATAIMPORT_PATH)
+  @GetMapping()
   @Transactional
   public Iterable<DataImport.MetaData> getDataImports(@PathVariable Long datasourceId)
       throws DatasourceNotFoundException {
     Collection<DataImport> dataImports = datasourceManager.getDataImportsForDatasource(datasourceId);
     Collection<DataImport.MetaData> metadatas = dataImports.stream()
-        .map((DataImport dataImport) -> dataImport.getMetaData()).collect(Collectors.toList());
+        .map(DataImport::getMetaData).collect(Collectors.toList());
     return metadatas;
   }
 
-  @GetMapping("/{datasourceId}" + Mappings.DATAIMPORT_PATH + Mappings.LATEST_PATH)
+  @GetMapping(Mappings.LATEST_PATH)
   @Transactional
   public DataImport.MetaData getLatestDataImport(@PathVariable Long datasourceId)
       throws DatasourceNotFoundException, DataImportLatestNotFoundException {
@@ -38,7 +38,7 @@ public class DataImportEndpoint {
     return latestDataImport.getMetaData();
   }
 
-  @GetMapping("/{datasourceId}" + Mappings.DATAIMPORT_PATH + Mappings.LATEST_PATH + Mappings.DATA_PATH)
+  @GetMapping(Mappings.LATEST_PATH + Mappings.DATA_PATH)
   @Transactional
   public String getLatestDataImportData(@PathVariable Long datasourceId)
       throws DatasourceNotFoundException, DataImportLatestNotFoundException {
@@ -46,7 +46,7 @@ public class DataImportEndpoint {
     return latestDataImport.getData();
   }
 
-  @GetMapping("/{datasourceId}" + Mappings.DATAIMPORT_PATH + "/{dataImportId}")
+  @GetMapping("/{dataImportId}")
   @Transactional
   public DataImport.MetaData getDataImport(@PathVariable Long datasourceId, @PathVariable Long dataImportId)
       throws DatasourceNotFoundException, DataImportNotFoundException {
@@ -54,7 +54,7 @@ public class DataImportEndpoint {
     return dataImport.getMetaData();
   }
 
-  @GetMapping(value = "/{datasourceId}" + Mappings.DATAIMPORT_PATH + "/{dataImportId}" + Mappings.DATA_PATH, produces = "application/json")
+  @GetMapping(value = "/{dataImportId}" + Mappings.DATA_PATH, produces = "application/json")
   @Transactional 
   public String getData(@PathVariable Long datasourceId, @PathVariable Long dataImportId)
       throws DatasourceNotFoundException, DataImportNotFoundException {
