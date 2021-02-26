@@ -1,7 +1,7 @@
 #---------------------------------------------#
 # First stage: image to build vue application #
 #---------------------------------------------#
-FROM node:14-alpine as builder
+FROM node:15-alpine as builder
 
 ARG UI_BASE_URL
 ARG STORAGE_SERVICE_URL
