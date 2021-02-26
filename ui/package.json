@@ -11,6 +11,7 @@
   "dependencies": {
     "axios": "^0.21.1",
     "clipboard-copy": "^4.0.1",
+    "monaco-editor": "^0.22.3",
     "vue": "^2.6.12",
     "vue-class-component": "^7.2.6",
     "vue-monaco": "^1.2.2",
