@@ -34,7 +34,7 @@ router.post('/:path', async ctx => {
   ctx.status = 201
 })
 
-router.get('/slack/*', async ctx => {
+router.get('/slack/(.*)', async ctx => {
   const notification = notifications.get('slack')
   if (!notification) {
     ctx.throw(404)
@@ -45,7 +45,7 @@ router.get('/slack/*', async ctx => {
   }
 })
 
-router.post('/slack/*', async ctx => {
+router.post('/slack/(.*)', async ctx => {
   console.log('Slack notification triggered.')
   notifications.set('slack', ctx.request.body)
   ctx.status = 201
