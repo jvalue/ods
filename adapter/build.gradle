@@ -1,8 +1,8 @@
 plugins {
-	id 'org.springframework.boot' version '2.3.0.RELEASE'
-  id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	id 'org.springframework.boot' version '2.4.3'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
-  id 'io.freefair.lombok' version '5.3.0'
+	id 'io.freefair.lombok' version '5.3.0'
 }
 
 def props = new Properties()
@@ -12,7 +12,7 @@ group = 'org.jvalue.ods'
 version = props.getProperty("app.version")
 
 java {
-  sourceCompatibility = JavaVersion.VERSION_15
+	sourceCompatibility = JavaVersion.VERSION_15
 }
 
 task testProps {
@@ -45,16 +45,16 @@ test {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-  implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
-  implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv'
 	implementation 'org.postgresql:postgresql'
 
-  implementation 'com.vladmihalcea:hibernate-types-52:2.10.2'
+	implementation 'com.vladmihalcea:hibernate-types-52:2.10.2'
 
-  testImplementation('org.springframework.boot:spring-boot-starter-test') {
-    exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-  }
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
 }
