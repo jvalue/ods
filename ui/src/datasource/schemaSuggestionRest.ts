@@ -13,6 +13,11 @@ const httpSchema = axios.create({
   transformResponse: []
 })
 
+export async function getIsAlive (): Promise<string> {
+  const response = await httpSchema.get<string>('/check')
+  return response.data
+}
+
 export async function getSchemaFast (dataSchema: DataSchema): Promise<string> {
   const response = await httpSchema.post<string>('/suggestion/fast', dataSchema.data)
   return response.data

@@ -43,7 +43,7 @@ import Component from 'vue-class-component'
 
 import DatasourceForm from './DatasourceForm.vue'
 
-import Datasource, { Mode } from './datasource'
+import Datasource from './datasource'
 import * as DatasourceREST from './datasourceRest'
 
 const MINUTE = 60000
@@ -67,7 +67,6 @@ export default class DatasourceCreate extends Vue {
       type: 'JSON',
       parameters: {}
     },
-    mode: Mode.NONE,
     dataSchema: {
       data: JSON.stringify({a:'1'})
     },

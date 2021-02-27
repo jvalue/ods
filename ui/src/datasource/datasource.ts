@@ -8,7 +8,6 @@ export default interface Datasource {
     type: string
     parameters: object
   }
-  mode: Mode
   dataSchema: DataSchema
   metadata: DatasourceMetaData
   trigger: Trigger
@@ -34,12 +33,6 @@ export interface DataLocation {
 
 export interface DataSchema {
   data: string
-}
-
-export enum Mode {
-  NONE = 'NONE',
-  FAST = 'FAST',
-  DETAILED = 'DETAILED'
 }
 
 export type Data = object

@@ -3,18 +3,19 @@
     v-model="isValid"
   >
     <v-card-actions>
-      <v-select
-        v-model="dataSource.mode"
-        :items="availableSchemaModes"
-        label="Mode"
-        :rules="[required]"
-      />
       <v-btn
         color="primary"
         class="ma-2"
-        @click="onGenerate"
+        @click="onGenerateFast"
       >
-        Generate
+        Generate fast
+      </v-btn>
+      <v-btn
+        color="primary"
+        class="ma-2"
+        @click="onGenerateDetailed"
+      >
+        Generate detailed
       </v-btn>
     </v-card-actions>
     <v-textarea
@@ -32,11 +33,10 @@ import * as SchemaSuggestionREST from './../../schemaSuggestionRest'
 
 import { Emit, PropSync } from 'vue-property-decorator'
 import { requiredRule } from '../../../validators'
-import DataSource, { Mode } from '../../datasource'
+import DataSource from '../../datasource'
 
 @Component({ })
 export default class DatasourceSchemaEdit extends Vue {
-  private availableSchemaModes = [Mode.NONE, Mode.FAST, Mode.DETAILED]
 
   private isValid = true
   private required = requiredRule
@@ -59,22 +59,12 @@ export default class DatasourceSchemaEdit extends Vue {
     this.emitValid()
   }
 
-  private onGenerate (): void {
-    if (this.dataSource.mode == Mode.NONE)
-      return
-    else if (this.dataSource.mode == Mode.FAST) {
-      SchemaSuggestionREST.getSchemaFast(this.dataSource.dataSchema)
-        .then((value) => {
-          this.dataSource.dataSchema.data = value
-        })
-        .catch(error => console.error('Fast schema suggestion failed!', error))
-    } else if (this.dataSource.mode == Mode.DETAILED) {
-      SchemaSuggestionREST.getSchemaDetailed(this.dataSource.dataSchema)
-        .then((value) => {
-          this.dataSource.dataSchema.data = value
-        })
-        .catch(error => console.error('Detailed schema suggestion failed!', error))
-    }
+  private async onGenerateFast (): Promise<void> {
+    this.dataSource.dataSchema.data = await SchemaSuggestionREST.getSchemaFast(this.dataSource.dataSchema)
+  }
+
+  private async onGenerateDetailed (): Promise<void> {   
+    this.dataSource.dataSchema.data = await SchemaSuggestionREST.getSchemaDetailed(this.dataSource.dataSchema)
   }
 }
 </script>
