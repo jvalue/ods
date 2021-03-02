@@ -57,7 +57,13 @@ const server = app.listen(PORT, () => console.log(`Starting mock notification re
 
 process.on('SIGTERM', async () => {
   console.info('Mock-Notification-Receiver: SIGTERM signal received.')
-  await server.close()
+  try {
+    await server.close()
+  } catch (e) {
+    console.error('Could not shutdown server')
+    console.error(e)
+    process.exit(-1)
+  }
 })
 
 module.exports = server
