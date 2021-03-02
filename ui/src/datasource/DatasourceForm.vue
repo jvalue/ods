@@ -37,35 +37,18 @@
         <small>Configure the data import</small>
       </v-stepper-step>
       <v-stepper-content 
-        v-if="updateIsSchemaAlive" 
         step="2"
       >
         <adapter-config
           v-model="datasource"
-          @validityChanged="validStep2 = $event"
+          @validityChanged="validStep2 = isSchemaAlive? $event : $event+1"
         />
         <stepper-button-group
           :step="2"
           :next-enabled="validStep2"
-          @stepChanged="dialogStep = $event"
+          @stepChanged="dialogStep = isSchemaAlive? $event : $event+1"
         />
-      </v-stepper-content>
-      <v-stepper-content 
-        v-if="!updateIsSchemaAlive" 
-        step="2"
-      >
-        <adapter-config
-          v-model="datasource"
-          @validityChanged="validStep2 = $event+1"
-        />
-        <stepper-button-group
-          :step="2"
-          :next-enabled="validStep2"
-          @stepChanged="dialogStep = $event+1"
-        />
-      </v-stepper-content>
-      
-
+      </v-stepper-content>  
       <v-stepper-step
         v-if="isSchemaAlive"
         :complete="dialogStep > 3"
@@ -142,6 +125,7 @@ import TriggerConfig from './edit/TriggerConfig.vue'
 import Datasource from './datasource'
 import { requiredRule } from '../validators'
 import * as SchemaSuggestionREST from './schemaSuggestionRest'
+
 @Component({
   components: { AdapterConfig, StepperButtonGroup, DatasourceMetadataConfig, 
     TriggerConfig, DatasourceSchemaEdit }
@@ -161,22 +145,16 @@ export default class DatasourceForm extends Vue {
   private isSchemaAlive: boolean = false
   private required = requiredRule
 
+  mounted (): void{
+    void this.updateIsSchemaAlive()
+  }
+
   get isLoading (): boolean {
     return this.datasource === undefined
   }
 
-  get updateIsSchemaAlive (): boolean {
-    SchemaSuggestionREST.getIsAlive().then( (isAlive) => {
-      if (isAlive == 'alive')
-        this.isSchemaAlive = true
-      else {
-        this.isSchemaAlive = false
-      }
-    }).catch( () => {
-      this.isSchemaAlive = false
-    })
-
-    return this.isSchemaAlive
+  private async updateIsSchemaAlive (): Promise<void> {
+    this.isSchemaAlive = (await SchemaSuggestionREST.getIsAlive() === 'alive')    
   }
 
   get isValid (): boolean {
