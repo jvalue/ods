@@ -34,7 +34,7 @@ router.post('/:path', async ctx => {
   ctx.status = 201
 })
 
-router.get('/slack/*', async ctx => {
+router.get('/slack/(.*)', async ctx => {
   const notification = notifications.get('slack')
   if (!notification) {
     ctx.throw(404)
@@ -45,7 +45,7 @@ router.get('/slack/*', async ctx => {
   }
 })
 
-router.post('/slack/*', async ctx => {
+router.post('/slack/(.*)', async ctx => {
   console.log('Slack notification triggered.')
   notifications.set('slack', ctx.request.body)
   ctx.status = 201
@@ -57,7 +57,13 @@ const server = app.listen(PORT, () => console.log(`Starting mock notification re
 
 process.on('SIGTERM', async () => {
   console.info('Mock-Notification-Receiver: SIGTERM signal received.')
-  await server.close()
+  try {
+    await server.close()
+  } catch (e) {
+    console.error('Could not shutdown server')
+    console.error(e)
+    process.exit(-1)
+  }
 })
 
 module.exports = server

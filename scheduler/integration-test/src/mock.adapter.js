@@ -53,7 +53,13 @@ const server = app.listen(MOCK_SERVER_PORT, () => console.log('Starting mock ada
 
 process.on('SIGTERM', async () => {
   console.info('Mock-Adapter-Server: SIGTERM signal received.')
-  await server.close()
+  try {
+    await server.close()
+  } catch (e) {
+    console.error('Could not shutdown server')
+    console.error(e)
+    process.exit(-1)
+  }
 })
 
 module.exports = server
