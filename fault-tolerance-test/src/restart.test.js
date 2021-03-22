@@ -1,4 +1,3 @@
-const axios = require('axios')
 const Docker = require('dockerode')
 const { sleep } = require('@jvalue/node-dry-basics')
 
@@ -6,6 +5,7 @@ const { ADAPTER_URL, NOTIFICATION_URL, PIPELINE_URL, STORAGE_URL, STORAGE_MQ_URL
 const { DockerCompose, writeDockerLogs } = require('./util/docker-compose')
 const { waitForServicesToBeReady } = require('./util/waitForServices')
 const { publishEvent } = require('./util/amqp')
+const http = require('./util/http')
 
 const SECOND = 1000
 const MINUTE = 60 * SECOND
@@ -25,7 +25,7 @@ const ALL_SERVICES = [
   'scheduler',
   'storage',
   'storage-db',
-  // 'storage-db-liquibase', //Only create the database schema and then exits, therefore ignore
+  // 'storage-db-liquibase', //Only creates the database schema and then exits, therefore ignore
   'storage-mq',
 ].sort()
 
@@ -103,14 +103,14 @@ describe('Restart test', () => {
 
     //Check if other services are still running
     const runningServicesAfterKill = (await docker.listContainers()).map(getComposeName).sort()
-    expect(runningServicesAfterKill).toEqual(runningServicesAtStart)
+    expect(runningServicesAfterKill).toEqual(ALL_SERVICES)
   }, TEST_TIMEOUT)
 
   test('rabbitmq', async () => {
     const runningServicesAtStart = (await docker.listContainers()).map(getComposeName).sort()
     expect(runningServicesAtStart).toEqual(ALL_SERVICES)
 
-    const datasourceCreateResponse = await axios.post(`${ADAPTER_URL}/datasources`, {
+    const {id: datasourceId} = await http.post(`${ADAPTER_URL}/datasources`, {
       protocol: {
         type: 'HTTP',
         parameters: {location: `http://localhost:8080/datasources`, encoding: 'UTF-8'}
@@ -123,11 +123,9 @@ describe('Restart test', () => {
         displayName: 'test datasource 1',
         description: 'restart test datasource'
       }
-    }, {validateStatus: () => true})
-    expect(datasourceCreateResponse.status).toEqual(201)
-    const datasourceId = datasourceCreateResponse.data.id
+    }, 201)
 
-    const pipelineCreateResponse = await axios.post(`${PIPELINE_URL}/configs`, {
+    const {id: pipelineId} = await http.post(`${PIPELINE_URL}/configs`, {
       datasourceId,
       transformation: {func: 'return data.item;'},
       metadata: {
@@ -136,9 +134,7 @@ describe('Restart test', () => {
         displayName: 'restart test pipeline',
         description: ''
       }
-    }, {validateStatus: () => true})
-    expect(pipelineCreateResponse.status).toEqual(201)
-    const pipelineId = pipelineCreateResponse.data.id
+    }, 201)
 
     console.log('killing pipeline so import success event stays in queue')
     await dockerCompose('kill pipeline')
@@ -155,25 +151,23 @@ describe('Restart test', () => {
     await waitForServicesToBeReady()
     await sleep(10000)
 
-    const storageResponse = await axios.get(`${STORAGE_URL}/${pipelineId}`, {validateStatus: () => true})
-    expect(storageResponse.status).toEqual(200)
-    expect(storageResponse.data.length).toEqual(1)
-    expect(storageResponse.data[0].pipelineId).toEqual(pipelineId)
-    expect(storageResponse.data[0].data.metadata.displayName).toEqual('test datasource 1')
+    const storageContent = await http.get(`${STORAGE_URL}/${pipelineId}`, 200)
+    expect(storageContent).toHaveLength(1)
+    expect(storageContent[0].pipelineId).toEqual(pipelineId)
+    expect(storageContent[0].data.metadata.displayName).toEqual('test datasource 1')
 
-    const storageMqResponse = await axios.get(`${STORAGE_MQ_URL}/bucket/${pipelineId}/content`, {validateStatus: () => true})
-    expect(storageMqResponse.status).toEqual(200)
-    expect(storageMqResponse.data.length).toEqual(1)
-    expect(storageMqResponse.data[0].pipelineId).toEqual(pipelineId)
-    expect(storageResponse.data[0].data.metadata.displayName).toEqual('test datasource 1')
+    const storageMqContent = await http.get(`${STORAGE_MQ_URL}/bucket/${pipelineId}/content`, 200)
+    expect(storageMqContent).toHaveLength(1)
+    expect(storageMqContent[0].pipelineId).toEqual(pipelineId)
+    expect(storageMqContent[0].data.metadata.displayName).toEqual('test datasource 1')
 
     const runningServicesAfterKill = (await docker.listContainers()).map(getComposeName).sort()
-    expect(runningServicesAfterKill).toEqual(runningServicesAtStart)
+    expect(runningServicesAfterKill).toEqual(ALL_SERVICES)
   }, TEST_TIMEOUT)
 })
 
 async function initAdapter() {
-  const response = await axios.post(`${ADAPTER_URL}/datasources`, {
+  await http.post(`${ADAPTER_URL}/datasources`, {
     protocol: {type: 'HTTP', parameters: {location: 'http://www.location.com'}},
     format: {type: 'JSON', parameters: {}},
     trigger: {firstExecution: '1905-12-01T02:30:00.123Z', periodic: false, interval: 50000},
@@ -183,38 +177,34 @@ async function initAdapter() {
       displayName: 'test datasource 1',
       description: 'restart testing datasources'
     }
-  }, {validateStatus: () => true})
-  expect(response.status).toEqual(201)
+  }, 201)
 }
 
 async function testAdapter() {
-  const response = await axios.get(`${ADAPTER_URL}/datasources`, {validateStatus: () => true})
-  expect(response.status).toEqual(200)
-  expect(response.data.length).toEqual(1)
-  expect(response.data[0].metadata.displayName).toEqual('test datasource 1')
+  const dataSources = await http.get(`${ADAPTER_URL}/datasources`, 200)
+  expect(dataSources).toHaveLength(1)
+  expect(dataSources[0].metadata.displayName).toEqual('test datasource 1')
 }
 
 async function initNotification() {
-  const response = await axios.post(`${NOTIFICATION_URL}/configs`, {
+  await http.post(`${NOTIFICATION_URL}/configs`, {
     type: 'WEBHOOK',
     pipelineId: 1,
     condition: 'true',
     parameter: {
       url: 'http://test-server/webhook1'
     }
-  }, {validateStatus: () => true})
-  expect(response.status).toEqual(201)
+  }, 201)
 }
 
 async function testNotification() {
-  const response = await axios.get(`${NOTIFICATION_URL}/configs`, {validateStatus: () => true})
-  expect(response.status).toEqual(200)
-  expect(response.data.length).toEqual(1)
-  expect(response.data[0].parameter.url).toEqual('http://test-server/webhook1')
+  const notificationConfigs = await http.get(`${NOTIFICATION_URL}/configs`, 200)
+  expect(notificationConfigs).toHaveLength(1)
+  expect(notificationConfigs[0].parameter.url).toEqual('http://test-server/webhook1')
 }
 
 async function initPipeline() {
-  const response = await axios.post(`${PIPELINE_URL}/configs`, {
+  await http.post(`${PIPELINE_URL}/configs`, {
     id: 12345,
     datasourceId: 1,
     transformation: {func: 'return data;'},
@@ -224,15 +214,13 @@ async function initPipeline() {
       displayName: 'restart test pipeline',
       description: ''
     }
-  }, {validateStatus: () => true})
-  expect(response.status).toEqual(201)
+  }, 201)
 }
 
 async function testPipeline() {
-  const response = await axios.get(`${PIPELINE_URL}/configs`, {validateStatus: () => true})
-  expect(response.status).toEqual(200)
-  expect(response.data.length).toEqual(1)
-  expect(response.data[0].metadata.displayName).toEqual('restart test pipeline')
+  const pipelineConfigs = await http.get(`${PIPELINE_URL}/configs`, 200)
+  expect(pipelineConfigs).toHaveLength(1)
+  expect(pipelineConfigs[0].metadata.displayName).toEqual('restart test pipeline')
 }
 
 async function initStorage() {
@@ -244,19 +232,17 @@ async function initStorage() {
   expect(await publishEvent('pipeline.execution.success', { pipelineId, pipelineName, data: { test: true } })).toEqual(true)
   await sleep(1000)
 
-  //storageResponse.data and storageMqResponse.data should be equal but timestamp is serialized differently
-  //therefore we can not do: expect(storageResponse.data).toEqual(storageMqResponse.data)
-  const storageResponse = await axios.get(`${STORAGE_URL}/${pipelineId}`, {validateStatus: () => true})
-  expect(storageResponse.status).toEqual(200)
-  expect(storageResponse.data.length).toEqual(1)
-  expect(storageResponse.data[0].pipelineId).toEqual(pipelineId)
-  expect(storageResponse.data[0].data.test).toEqual(true)
+  //storageContent and storageMqContent should be equal but timestamp is serialized differently
+  //therefore we can not do: expect(storageContent).toEqual(storageMqContent)
+  const storageContent = await http.get(`${STORAGE_URL}/${pipelineId}`, 200);
+  expect(storageContent).toHaveLength(1)
+  expect(storageContent[0].pipelineId).toEqual(pipelineId)
+  expect(storageContent[0].data.test).toEqual(true)
 
-  const storageMqResponse = await axios.get(`${STORAGE_MQ_URL}/bucket/${pipelineId}/content`, {validateStatus: () => true})
-  expect(storageMqResponse.status).toEqual(200)
-  expect(storageMqResponse.data.length).toEqual(1)
-  expect(storageMqResponse.data[0].pipelineId).toEqual(pipelineId)
-  expect(storageMqResponse.data[0].data.test).toEqual(true)
+  const storageMqContent = await http.get(`${STORAGE_MQ_URL}/bucket/${pipelineId}/content`, 200)
+  expect(storageMqContent).toHaveLength(1)
+  expect(storageMqContent[0].pipelineId).toEqual(pipelineId)
+  expect(storageMqContent[0].data.test).toEqual(true)
 }
 
 async function testStorage() {
@@ -264,20 +250,18 @@ async function testStorage() {
   const pipelineName = 'Restart test RabbitMQ'
 
   //Old content is still there
-  const storageMqOldResponse = await axios.get(`${STORAGE_URL}/${pipelineId}`, {validateStatus: () => true})
-  expect(storageMqOldResponse.status).toEqual(200)
-  expect(storageMqOldResponse.data.length).toEqual(1)
-  expect(storageMqOldResponse.data[0].pipelineId).toEqual(42)
-  expect(storageMqOldResponse.data[0].data.test).toEqual(true)
+  const storageMqOldContent = await http.get(`${STORAGE_URL}/${pipelineId}`, 200)
+  expect(storageMqOldContent).toHaveLength(1)
+  expect(storageMqOldContent[0].pipelineId).toEqual(42)
+  expect(storageMqOldContent[0].data.test).toEqual(true)
 
   expect(await publishEvent('pipeline.execution.success', { pipelineId, pipelineName, data: { test: '123' } })).toEqual(true)
   await sleep(1000)
 
-  const storageMqResponse = await axios.get(`${STORAGE_URL}/${pipelineId}`, {validateStatus: () => true})
-  expect(storageMqResponse.status).toEqual(200)
-  expect(storageMqResponse.data.length).toEqual(2)
-  expect(storageMqResponse.data[0].pipelineId).toEqual(42)
-  expect(storageMqResponse.data[0].data.test).toEqual(true)
-  expect(storageMqResponse.data[1].pipelineId).toEqual(42)
-  expect(storageMqResponse.data[1].data.test).toEqual('123')
+  const storageMqNewContent = await http.get(`${STORAGE_URL}/${pipelineId}`, 200)
+  expect(storageMqNewContent).toHaveLength(2)
+  expect(storageMqNewContent[0].pipelineId).toEqual(42)
+  expect(storageMqNewContent[0].data.test).toEqual(true)
+  expect(storageMqNewContent[1].pipelineId).toEqual(42)
+  expect(storageMqNewContent[1].data.test).toEqual('123')
 }

@@ -5,6 +5,7 @@
   "scripts": {
     "test:restart": "jest --colors --verbose --runInBand restart.test.js",
     "test:scheduler-init": "jest --colors --verbose --runInBand scheduler-init.test.js",
+    "test:scaling": "jest --colors --verbose --runInBand scaling.test.js",
     "fake-adapter": "node src/fake-adapter.js"
   },
   "dependencies": {
@@ -12,8 +13,8 @@
     "axios": "0.21.1",
     "express": "4.17.1",
     "dockerode": "3.2.1",
-    "jest": "27.0.0-next.2",
-    "wait-on": "5.2.1"
+    "jest": "27.0.0-next.5",
+    "wait-on": "5.3.0"
   },
   "devDependencies": {
     "@types/express": "4.17.11",

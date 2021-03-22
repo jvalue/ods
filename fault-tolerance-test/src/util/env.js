@@ -8,7 +8,7 @@ const AMQP_URL = process.env.AMQP_URL || 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@loca
 const AMQP_EXCHANGE =  process.env.AMQP_EXCHANGE || 'ods_global'
 
 const DOCKER_COMPOSE_FILE = process.env.DOCKER_COMPOSE_FILE || '../docker-compose.yml'
-const ENV_FILE = process.env.ENV_FILE || './.env'
+const ENV_FILE = process.env.ENV_FILE || '../.env'
 
 module.exports = {
   ADAPTER_URL,

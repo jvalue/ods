@@ -63,3 +63,31 @@ jobs:
         with:
           name: SchedulerTestLogs
           path: fault-tolerance-test/logs/Scheduler*
+  scaling-test:
+    name: Scaling test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Login to GitHub Packages Docker Registry
+        uses: docker/login-action@v1
+        with:
+          registry: docker.pkg.github.com
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pull ODS docker images
+        run: docker-compose pull -q
+      - name: Check docker images
+        run: docker images
+      - name: Install dependencies
+        working-directory: ./fault-tolerance-test
+        run: npm ci
+      - name: Run test
+        working-directory: ./fault-tolerance-test
+        run: npm run test:scaling
+      - name: Upload logs
+        if: success() || failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: ScalingTestLogs
+          path: fault-tolerance-test/logs/Scaling*

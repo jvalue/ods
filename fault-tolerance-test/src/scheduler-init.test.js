@@ -1,9 +1,9 @@
-const axios = require('axios')
 const { sleep } = require('@jvalue/node-dry-basics')
 
 const { DOCKER_COMPOSE_FILE, ENV_FILE, SCHEDULER_URL } = require('./util/env')
 const { DockerCompose, writeDockerLogs } = require('./util/docker-compose')
 const { waitForServicesToBeReady } = require('./util/waitForServices')
+const http = require('./util/http');
 
 const SECOND = 1000
 const MINUTE = 60 * SECOND
@@ -35,7 +35,7 @@ describe('Scheduler test', () => {
 
     await sleep(1000)
 
-    const response = await axios.get(`${SCHEDULER_URL}/jobs`)
-    expect(response.data).toHaveLength(0)
+    const jobs = await http.get(`${SCHEDULER_URL}/jobs`, 200);
+    expect(jobs).toHaveLength(0)
   }, TEST_TIMEOUT)
 })
