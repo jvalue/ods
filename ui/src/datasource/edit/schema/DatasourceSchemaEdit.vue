@@ -30,6 +30,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import * as SchemaSuggestionREST from './../../schemaSuggestionRest'
+import * as PreviewClient from '../../previewRest'
 
 import { Emit, PropSync } from 'vue-property-decorator'
 import { requiredRule } from '../../../validators'
@@ -60,7 +61,8 @@ export default class DatasourceSchemaEdit extends Vue {
   }
 
   private async onGenerateFast (): Promise<void> {
-    this.dataSource.dataSchema.data = await SchemaSuggestionREST.getSchemaFast(this.dataSource.dataSchema)
+    const preview = await PreviewClient.getPreview(this.dataSource)
+    this.dataSource.dataSchema.data = await SchemaSuggestionREST.getSchemaFast({ data: JSON.stringify(preview) })
   }
 
   private async onGenerateDetailed (): Promise<void> {   

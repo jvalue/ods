@@ -10,6 +10,8 @@ import { SCHEMA_SERVICE_URL } from '@/env'
 const httpSchema = axios.create({
   baseURL: SCHEMA_SERVICE_URL,
   headers: { 'Content-Type': 'application/json' },
+  maxContentLength: 100000000,
+  maxBodyLength: 1000000000,
   transformResponse: []
 })
 
