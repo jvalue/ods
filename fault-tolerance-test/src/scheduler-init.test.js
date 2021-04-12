@@ -3,7 +3,7 @@ const { sleep } = require('@jvalue/node-dry-basics')
 const { DOCKER_COMPOSE_FILE, ENV_FILE, SCHEDULER_URL } = require('./util/env')
 const { DockerCompose, writeDockerLogs } = require('./util/docker-compose')
 const { waitForServicesToBeReady } = require('./util/waitForServices')
-const http = require('./util/http');
+const http = require('./util/http')
 
 const SECOND = 1000
 const MINUTE = 60 * SECOND
@@ -14,7 +14,6 @@ describe('Scheduler test', () => {
   beforeAll(async () => {
     dockerCompose = DockerCompose([DOCKER_COMPOSE_FILE, './docker-compose.scheduler-init.yml'], ENV_FILE)
     await dockerCompose('build fake-adapter')
-
   }, TEST_TIMEOUT)
 
   afterEach(async () => {
@@ -35,7 +34,7 @@ describe('Scheduler test', () => {
 
     await sleep(1000)
 
-    const jobs = await http.get(`${SCHEDULER_URL}/jobs`, 200);
+    const jobs = await http.get(`${SCHEDULER_URL}/jobs`, 200)
     expect(jobs).toHaveLength(0)
   }, TEST_TIMEOUT)
 })

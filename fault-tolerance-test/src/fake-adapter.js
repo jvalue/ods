@@ -10,23 +10,22 @@ app.get('/', (req, res) => {
 })
 
 app.get('/datasources', (req, res) => {
-
   console.log('Scheduler requesting datasources')
 
-  //Create the response, but do not send it immediately to simulate slow network
+  // Create the response, but do not send it immediately to simulate slow network
   const response = [getDatasource(42)]
 
-  //Delete the datasource => send event
-  publishEvent('datasource.config.deleted', {datasource: getDatasource(42)})
-    .catch(error => console.log("Failed to publish delete event:", error))
+  // Delete the datasource => send event
+  publishEvent('datasource.config.deleted', { datasource: getDatasource(42) })
+    .catch(error => console.log('Failed to publish delete event:', error))
 
-  //Send the message after 100ms to simulate slow network
+  // Send the message after 100ms to simulate slow network
   setTimeout(() => res.json(response), 100)
 })
 
 app.listen(FAKE_ADAPTER_PORT, () => console.log('Fake adapter running'))
 
-function getDatasource(id) {
+function getDatasource (id) {
   return {
     id,
     trigger: {

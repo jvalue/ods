@@ -26,7 +26,7 @@ const ALL_SERVICES = [
   'storage',
   'storage-db',
   // 'storage-db-liquibase', //Only creates the database schema and then exits, therefore ignore
-  'storage-mq',
+  'storage-mq'
 ].sort()
 
 describe('Scaling test', () => {
@@ -39,9 +39,11 @@ describe('Scaling test', () => {
   })
 
   beforeEach(async () => {
-    expect(await docker.listContainers()).toHaveLength(0)
+    if ((await docker.listContainers()).length !== 0) {
+      throw Error('Can not execute restart test if other containers are running')
+    }
 
-    //Do not try to build the images because then timing is really hard
+    // Do not try to build the images because then timing is really hard
     await dockerCompose('up -d --no-build adapter-db notification-db pipeline-db storage-db')
     await dockerCompose('up -d --no-build storage-db-liquibase')
     await dockerCompose('up -d --no-build adapter notification pipeline scheduler storage storage-mq')
@@ -65,9 +67,9 @@ describe('Scaling test', () => {
     await dockerCompose('up -d --scale pipeline=2 pipeline')
 
     // Create pipeline
-    const {id: pipelineId} = await http.post(`${PIPELINE_URL}/configs`, {
+    const { id: pipelineId } = await http.post(`${PIPELINE_URL}/configs`, {
       datasourceId,
-      transformation: {func: 'return data;'},
+      transformation: { func: 'return data;' },
       metadata: {
         author: 'Test pipeline',
         license: 'none',
@@ -92,9 +94,9 @@ describe('Scaling test', () => {
     await sleep(2000)
 
     // Create pipeline
-    const {id: pipelineId} = await http.post(`${PIPELINE_URL}/configs`, {
+    const { id: pipelineId } = await http.post(`${PIPELINE_URL}/configs`, {
       datasourceId: 1,
-      transformation: {func: 'return data;'},
+      transformation: { func: 'return data;' },
       metadata: {
         author: 'Test pipeline',
         license: 'none',
@@ -103,28 +105,28 @@ describe('Scaling test', () => {
       }
     }, 201)
 
-    const container1 = docker.getContainer("open-data-service_pipeline_1")
-    const container2 = docker.getContainer("open-data-service_pipeline_2")
+    const container1 = docker.getContainer('open-data-service_pipeline_1')
+    const container2 = docker.getContainer('open-data-service_pipeline_2')
 
     await http.get(`${PIPELINE_URL}/configs/${pipelineId}`, 200)
     await http.get(`${PIPELINE_URL}/configs/${pipelineId}`, 200)
 
     await container1.kill()
-    console.log("container1 killed")
+    console.log('container1 killed')
     await sleep(2000)
 
     await http.get(`${PIPELINE_URL}/configs/${pipelineId}`, 200)
     await http.get(`${PIPELINE_URL}/configs/${pipelineId}`, 200)
 
     await dockerCompose('up -d --scale pipeline=2 pipeline')
-    console.log("container1 started")
+    console.log('container1 started')
     await sleep(2000)
 
     await http.get(`${PIPELINE_URL}/configs/${pipelineId}`, 200)
     await http.get(`${PIPELINE_URL}/configs/${pipelineId}`, 200)
 
     await container2.kill()
-    console.log("container2 killed")
+    console.log('container2 killed')
     await sleep(2000)
 
     await http.get(`${PIPELINE_URL}/configs/${pipelineId}`, 200)

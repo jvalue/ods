@@ -4,7 +4,7 @@ const exec = promisify(require('child_process').exec)
 
 const LOGS_DIRECTORY = 'logs'
 
-function DockerCompose(composeFiles, envFile) {
+function DockerCompose (composeFiles, envFile) {
   if (!Array.isArray(composeFiles)) {
     composeFiles = [composeFiles]
   }
@@ -12,7 +12,7 @@ function DockerCompose(composeFiles, envFile) {
   return async command => await exec(`docker-compose ${composeFilesString} --env-file ${envFile} ${command}`)
 }
 
-async function writeDockerLogs(dockerComposeFn, services) {
+async function writeDockerLogs (dockerComposeFn, services) {
   const escapedTestName = expect.getState().currentTestName.split(' ').join('_')
   const logFile = `${LOGS_DIRECTORY}/${escapedTestName}.log`
   if (!fs.existsSync(LOGS_DIRECTORY)) {

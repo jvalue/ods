@@ -26,7 +26,7 @@ const ALL_SERVICES = [
   'storage',
   'storage-db',
   // 'storage-db-liquibase', //Only creates the database schema and then exits, therefore ignore
-  'storage-mq',
+  'storage-mq'
 ].sort()
 
 const SERVICES_TO_KILL = [
@@ -42,10 +42,10 @@ const SERVICES_TO_KILL = [
   ['scheduler', undefined, undefined],
   ['storage', initStorage, testStorage],
   ['storage-db', initStorage, testStorage],
-  ['storage-mq', initStorage, testStorage],
+  ['storage-mq', initStorage, testStorage]
 ]
 
-function getComposeName(container) {
+function getComposeName (container) {
   return container.Labels['com.docker.compose.service']
 }
 
@@ -59,9 +59,11 @@ describe('Restart test', () => {
   })
 
   beforeEach(async () => {
-    expect(await docker.listContainers()).toHaveLength(0)
+    if ((await docker.listContainers()).length !== 0) {
+      throw Error('Can not execute restart test if other containers are running')
+    }
 
-    //Do not try to build the images because then timing is really hard
+    // Do not try to build the images because then timing is really hard
     await dockerCompose('up -d --no-build adapter-db notification-db pipeline-db storage-db')
     await dockerCompose('up -d --no-build storage-db-liquibase')
     await dockerCompose('up -d --no-build adapter notification pipeline scheduler storage storage-mq')
@@ -83,12 +85,12 @@ describe('Restart test', () => {
     const runningServicesAtStart = (await docker.listContainers()).map(getComposeName).sort()
     expect(runningServicesAtStart).toEqual(ALL_SERVICES)
 
-    //Add some data/state
+    // Add some data/state
     if (initFn) {
       await initFn()
     }
 
-    //Kill service
+    // Kill service
     console.log(`killing ${service}`)
     await dockerCompose(`kill ${service}`)
     console.log(`starting ${service}`)
@@ -96,12 +98,12 @@ describe('Restart test', () => {
 
     await waitForServicesToBeReady()
 
-    //Test
+    // Test
     if (testFn) {
       await testFn()
     }
 
-    //Check if other services are still running
+    // Check if other services are still running
     const runningServicesAfterKill = (await docker.listContainers()).map(getComposeName).sort()
     expect(runningServicesAfterKill).toEqual(ALL_SERVICES)
   }, TEST_TIMEOUT)
@@ -110,13 +112,13 @@ describe('Restart test', () => {
     const runningServicesAtStart = (await docker.listContainers()).map(getComposeName).sort()
     expect(runningServicesAtStart).toEqual(ALL_SERVICES)
 
-    const {id: datasourceId} = await http.post(`${ADAPTER_URL}/datasources`, {
+    const { id: datasourceId } = await http.post(`${ADAPTER_URL}/datasources`, {
       protocol: {
         type: 'HTTP',
-        parameters: {location: `http://localhost:8080/datasources`, encoding: 'UTF-8'}
+        parameters: { location: 'http://localhost:8080/datasources', encoding: 'UTF-8' }
       },
-      format: {type: 'XML', parameters: {}},
-      trigger: {firstExecution: new Date(Date.now() - 1000), periodic: false, interval: 10000},
+      format: { type: 'XML', parameters: {} },
+      trigger: { firstExecution: new Date(Date.now() - 1000), periodic: false, interval: 10000 },
       metadata: {
         author: 'Test author',
         license: 'none',
@@ -125,9 +127,9 @@ describe('Restart test', () => {
       }
     }, 201)
 
-    const {id: pipelineId} = await http.post(`${PIPELINE_URL}/configs`, {
+    const { id: pipelineId } = await http.post(`${PIPELINE_URL}/configs`, {
       datasourceId,
-      transformation: {func: 'return data.item;'},
+      transformation: { func: 'return data.item;' },
       metadata: {
         author: 'Test author',
         license: 'none',
@@ -139,7 +141,7 @@ describe('Restart test', () => {
     console.log('killing pipeline so import success event stays in queue')
     await dockerCompose('kill pipeline')
 
-    await sleep(15000) //Wait for import and published import success event
+    await sleep(15000) // Wait for import and published import success event
 
     console.log('killing rabbitmq')
     await dockerCompose('kill rabbitmq')
@@ -166,11 +168,11 @@ describe('Restart test', () => {
   }, TEST_TIMEOUT)
 })
 
-async function initAdapter() {
+async function initAdapter () {
   await http.post(`${ADAPTER_URL}/datasources`, {
-    protocol: {type: 'HTTP', parameters: {location: 'http://www.location.com'}},
-    format: {type: 'JSON', parameters: {}},
-    trigger: {firstExecution: '1905-12-01T02:30:00.123Z', periodic: false, interval: 50000},
+    protocol: { type: 'HTTP', parameters: { location: 'http://www.location.com' } },
+    format: { type: 'JSON', parameters: {} },
+    trigger: { firstExecution: '1905-12-01T02:30:00.123Z', periodic: false, interval: 50000 },
     metadata: {
       author: 'author',
       license: 'none',
@@ -180,13 +182,13 @@ async function initAdapter() {
   }, 201)
 }
 
-async function testAdapter() {
+async function testAdapter () {
   const dataSources = await http.get(`${ADAPTER_URL}/datasources`, 200)
   expect(dataSources).toHaveLength(1)
   expect(dataSources[0].metadata.displayName).toEqual('test datasource 1')
 }
 
-async function initNotification() {
+async function initNotification () {
   await http.post(`${NOTIFICATION_URL}/configs`, {
     type: 'WEBHOOK',
     pipelineId: 1,
@@ -197,17 +199,17 @@ async function initNotification() {
   }, 201)
 }
 
-async function testNotification() {
+async function testNotification () {
   const notificationConfigs = await http.get(`${NOTIFICATION_URL}/configs`, 200)
   expect(notificationConfigs).toHaveLength(1)
   expect(notificationConfigs[0].parameter.url).toEqual('http://test-server/webhook1')
 }
 
-async function initPipeline() {
+async function initPipeline () {
   await http.post(`${PIPELINE_URL}/configs`, {
     id: 12345,
     datasourceId: 1,
-    transformation: {func: 'return data;'},
+    transformation: { func: 'return data;' },
     metadata: {
       author: 'icke',
       license: 'none',
@@ -217,14 +219,14 @@ async function initPipeline() {
   }, 201)
 }
 
-async function testPipeline() {
+async function testPipeline () {
   const pipelineConfigs = await http.get(`${PIPELINE_URL}/configs`, 200)
   expect(pipelineConfigs).toHaveLength(1)
   expect(pipelineConfigs[0].metadata.displayName).toEqual('restart test pipeline')
 }
 
-async function initStorage() {
-  const pipelineId = 42;
+async function initStorage () {
+  const pipelineId = 42
   const pipelineName = 'Restart test pipeline'
 
   expect(await publishEvent('pipeline.config.created', { pipelineId, pipelineName })).toEqual(true)
@@ -232,9 +234,9 @@ async function initStorage() {
   expect(await publishEvent('pipeline.execution.success', { pipelineId, pipelineName, data: { test: true } })).toEqual(true)
   await sleep(1000)
 
-  //storageContent and storageMqContent should be equal but timestamp is serialized differently
-  //therefore we can not do: expect(storageContent).toEqual(storageMqContent)
-  const storageContent = await http.get(`${STORAGE_URL}/${pipelineId}`, 200);
+  // storageContent and storageMqContent should be equal but timestamp is serialized differently
+  // therefore we can not do: expect(storageContent).toEqual(storageMqContent)
+  const storageContent = await http.get(`${STORAGE_URL}/${pipelineId}`, 200)
   expect(storageContent).toHaveLength(1)
   expect(storageContent[0].pipelineId).toEqual(pipelineId)
   expect(storageContent[0].data.test).toEqual(true)
@@ -245,11 +247,11 @@ async function initStorage() {
   expect(storageMqContent[0].data.test).toEqual(true)
 }
 
-async function testStorage() {
-  const pipelineId = 42;
+async function testStorage () {
+  const pipelineId = 42
   const pipelineName = 'Restart test RabbitMQ'
 
-  //Old content is still there
+  // Old content is still there
   const storageMqOldContent = await http.get(`${STORAGE_URL}/${pipelineId}`, 200)
   expect(storageMqOldContent).toHaveLength(1)
   expect(storageMqOldContent[0].pipelineId).toEqual(42)

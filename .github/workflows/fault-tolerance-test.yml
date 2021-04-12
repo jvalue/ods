@@ -7,9 +7,23 @@ on:
   workflow_dispatch:
 
 jobs:
+  linting:
+    name: Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        working-directory: ./fault-tolerance-test
+        run: npm ci
+      - name: Run linter
+        working-directory: ./fault-tolerance-test
+        run: npm run lint-ci
+
   restart-test:
     name: Restart test
     runs-on: ubuntu-latest
+    needs: [linting]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -25,7 +39,7 @@ jobs:
         run: docker images
       - name: Install dependencies
         working-directory: ./fault-tolerance-test
-        run: npm ci
+        run: npm ci --only=production
       - name: Run test
         working-directory: ./fault-tolerance-test
         run: npm run test:restart
@@ -35,9 +49,11 @@ jobs:
         with:
           name: RestartTestLogs
           path: fault-tolerance-test/logs/Restart*
+
   scheduler-init-test:
     name: Scheduler initialization test
     runs-on: ubuntu-latest
+    needs: [linting]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -53,7 +69,7 @@ jobs:
         run: docker images
       - name: Install dependencies
         working-directory: ./fault-tolerance-test
-        run: npm ci
+        run: npm ci --only=production
       - name: Run test
         working-directory: ./fault-tolerance-test
         run: npm run test:scheduler-init
@@ -63,9 +79,11 @@ jobs:
         with:
           name: SchedulerTestLogs
           path: fault-tolerance-test/logs/Scheduler*
+
   scaling-test:
     name: Scaling test
     runs-on: ubuntu-latest
+    needs: [linting]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -81,7 +99,7 @@ jobs:
         run: docker images
       - name: Install dependencies
         working-directory: ./fault-tolerance-test
-        run: npm ci
+        run: npm ci --only=production
       - name: Run test
         working-directory: ./fault-tolerance-test
         run: npm run test:scaling
