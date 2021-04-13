@@ -3,6 +3,7 @@ const express = require('express')
 const { publishEvent } = require('./util/amqp')
 
 const FAKE_ADAPTER_PORT = 8080
+const RESPONSE_DELAY = 100
 
 const app = express()
 app.get('/', (req, res) => {
@@ -19,8 +20,8 @@ app.get('/datasources', (req, res) => {
   publishEvent('datasource.config.deleted', { datasource: getDatasource(42) })
     .catch(error => console.log('Failed to publish delete event:', error))
 
-  // Send the message after 100ms to simulate slow network
-  setTimeout(() => res.json(response), 100)
+  // Send the message after a delay to simulate slow network
+  setTimeout(() => res.json(response), RESPONSE_DELAY)
 })
 
 app.listen(FAKE_ADAPTER_PORT, () => console.log('Fake adapter running'))

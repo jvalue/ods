@@ -10,6 +10,8 @@ const http = require('./util/http')
 const SECOND = 1000
 const MINUTE = 60 * SECOND
 const TEST_TIMEOUT = 5 * MINUTE
+const SCALING_DELAY = 2 * SECOND
+const KILL_CONTAINER_DELAY = 2 * SECOND
 
 const ALL_SERVICES = [
   'adapter',
@@ -28,6 +30,10 @@ const ALL_SERVICES = [
   // 'storage-db-liquibase', //Only creates the database schema and then exits, therefore ignore
   'storage-mq'
 ].sort()
+
+function getComposeName (container) {
+  return container.Labels['com.docker.compose.service']
+}
 
 describe('Scaling test', () => {
   let dockerCompose
@@ -61,10 +67,18 @@ describe('Scaling test', () => {
     await dockerCompose('down')
   }, TEST_TIMEOUT)
 
+  async function scalePipelineService (count) {
+    await dockerCompose(`up -d --scale pipeline=${count} pipeline`)
+    await sleep(SCALING_DELAY)
+
+    const runningContainers = await docker.listContainers()
+    expect(runningContainers.map(getComposeName).filter(name => name === 'pipeline')).toHaveLength(count)
+  }
+
   test('event is only consumed by one instance', async () => {
     const datasourceId = 1
 
-    await dockerCompose('up -d --scale pipeline=2 pipeline')
+    await scalePipelineService(2)
 
     // Create pipeline
     const { id: pipelineId } = await http.post(`${PIPELINE_URL}/configs`, {
@@ -77,6 +91,7 @@ describe('Scaling test', () => {
         description: ''
       }
     }, 201)
+    // Wait so StorageMQ service can receive pipeline created event and create storage table
     await sleep(5000)
 
     // Publish import success event, so pipeline is executed
@@ -90,8 +105,7 @@ describe('Scaling test', () => {
   }, TEST_TIMEOUT)
 
   test('requests are shifted to the running instances', async () => {
-    await dockerCompose('up -d --scale pipeline=2 pipeline')
-    await sleep(2000)
+    await scalePipelineService(2)
 
     // Create pipeline
     const { id: pipelineId } = await http.post(`${PIPELINE_URL}/configs`, {
@@ -108,28 +122,31 @@ describe('Scaling test', () => {
     const container1 = docker.getContainer('open-data-service_pipeline_1')
     const container2 = docker.getContainer('open-data-service_pipeline_2')
 
-    await http.get(`${PIPELINE_URL}/configs/${pipelineId}`, 200)
-    await http.get(`${PIPELINE_URL}/configs/${pipelineId}`, 200)
+    await expectGetPipelineSucceed(pipelineId)
 
-    await container1.kill()
+    await killContainer(container1)
     console.log('container1 killed')
-    await sleep(2000)
 
-    await http.get(`${PIPELINE_URL}/configs/${pipelineId}`, 200)
-    await http.get(`${PIPELINE_URL}/configs/${pipelineId}`, 200)
+    await expectGetPipelineSucceed(pipelineId)
 
-    await dockerCompose('up -d --scale pipeline=2 pipeline')
+    await scalePipelineService(2)
     console.log('container1 started')
-    await sleep(2000)
 
-    await http.get(`${PIPELINE_URL}/configs/${pipelineId}`, 200)
-    await http.get(`${PIPELINE_URL}/configs/${pipelineId}`, 200)
+    await expectGetPipelineSucceed(pipelineId)
 
-    await container2.kill()
+    await killContainer(container2)
     console.log('container2 killed')
-    await sleep(2000)
 
-    await http.get(`${PIPELINE_URL}/configs/${pipelineId}`, 200)
-    await http.get(`${PIPELINE_URL}/configs/${pipelineId}`, 200)
+    await expectGetPipelineSucceed(pipelineId)
   }, TEST_TIMEOUT)
 })
+
+async function killContainer (container) {
+  await container.kill()
+  await sleep(KILL_CONTAINER_DELAY)
+}
+
+async function expectGetPipelineSucceed (pipelineId) {
+  await http.get(`${PIPELINE_URL}/configs/${pipelineId}`, 200)
+  await http.get(`${PIPELINE_URL}/configs/${pipelineId}`, 200)
+}
