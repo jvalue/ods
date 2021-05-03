@@ -20,12 +20,7 @@ export async function getIsAlive (): Promise<string> {
   return response.data
 }
 
-export async function getSchemaFast (dataSchema: DataSchema): Promise<string> {
-  const response = await httpSchema.post<string>('/suggestion/fast', dataSchema.data)
-  return response.data
-}
-
-export async function getSchemaDetailed (dataSchema: DataSchema): Promise<string> {
-  const response = await httpSchema.post<string>('/suggestion/detailed', dataSchema.data)
+export async function getSchema (dataSchema: DataSchema, precision: string): Promise<string> {
+  const response = await httpSchema.post<string>('/suggestion', { data: dataSchema.data, precision: precision })
   return response.data
 }

@@ -3,20 +3,22 @@
     v-model="isValid"
   >
     <v-card-actions>
+      <div>
+        <vue-slider 
+          v-model="currentSliderValue"
+          v-bind="sliderConfig.options"
+          :data="sliderConfig.sliderData"
+          :data-value="'name'"
+          :data-label="'name'"
+        />
+      </div>
       <v-btn
         color="primary"
         class="ma-2"
-        @click="onGenerateFast"
+        @click="onGenerate"
       >
-        Generate fast
-      </v-btn>
-      <v-btn
-        color="primary"
-        class="ma-2"
-        @click="onGenerateDetailed"
-      >
-        Generate detailed
-      </v-btn>
+        Generate schema
+      </v-btn>      
     </v-card-actions>
     <v-textarea
       v-model="dataSource.dataSchema.data"
@@ -31,17 +33,22 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import * as SchemaSuggestionREST from './../../schemaSuggestionRest'
 import * as PreviewClient from '../../previewRest'
+import VueSlider from 'vue-slider-component'
+import 'vue-slider-component/theme/default.css'
 
 import { Emit, PropSync } from 'vue-property-decorator'
 import { requiredRule } from '../../../validators'
 import DataSource from '../../datasource'
+import { SliderConfig } from './slider/config'
 
-@Component({ })
+@Component({ components: { VueSlider } })
 export default class DatasourceSchemaEdit extends Vue {
 
   private isValid = true
   private required = requiredRule
-  
+  private currentSliderValue = '1'
+  private sliderConfig = SliderConfig
+
   @PropSync('value')
   private dataSource!: DataSource
 
@@ -60,13 +67,10 @@ export default class DatasourceSchemaEdit extends Vue {
     this.emitValid()
   }
 
-  private async onGenerateFast (): Promise<void> {
+  private async onGenerate (): Promise<void> {
     const preview = await PreviewClient.getPreview(this.dataSource)
-    this.dataSource.dataSchema.data = await SchemaSuggestionREST.getSchemaFast({ data: JSON.stringify(preview) })
-  }
-
-  private async onGenerateDetailed (): Promise<void> {   
-    this.dataSource.dataSchema.data = await SchemaSuggestionREST.getSchemaDetailed(this.dataSource.dataSchema)
+    this.dataSource.dataSchema.data = 
+      await SchemaSuggestionREST.getSchema({ data: JSON.stringify(preview) }, this.currentSliderValue)
   }
 }
 </script>
