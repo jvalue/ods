@@ -24,7 +24,7 @@
     "testEnvironment": "node"
   },
   "dependencies": {
-    "@jvalue/node-dry-amqp": "0.1.0",
+    "@jvalue/node-dry-amqp": "0.1.1",
     "axios": "^0.21.1",
     "koa": "^2.13.0",
     "koa-bodyparser": "^4.3.0",
