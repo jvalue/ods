@@ -24,7 +24,7 @@
     "testEnvironment": "node"
   },
   "dependencies": {
-    "amqplib": "^0.7.0",
+    "amqplib": "^0.7.1",
     "koa": "^2.13.0",
     "koa-router": "^10.0.0",
     "wait-on": "^5.1.0"
