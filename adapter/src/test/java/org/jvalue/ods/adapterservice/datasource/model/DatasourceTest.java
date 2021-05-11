@@ -32,6 +32,8 @@ public class DatasourceTest {
     Datasource expectedDatasource = generateDatasource(HTTP, XML, "http://www.test-url.com");
     expectedDatasource.setId(123L);
 
+    assertEquals("{a:1}", result.getSchema().getData());
+    assertEquals("{a:1}", expectedDatasource.getSchema().getData());
     assertEquals(expectedDatasource, result);
     assertNotNull(result.getId());
     assertTrue(result.getTrigger().isPeriodic());
@@ -56,14 +58,16 @@ public class DatasourceTest {
     Datasource datasource = generateDatasource(HTTP, JSON, "http://www.test-url.com");
     DatasourceTrigger trigger = new DatasourceTrigger(false, new Date(), 10L);
     DatasourceMetadata metadata = new DatasourceMetadata("person", "none", "Display", "description");
-    Datasource config = new Datasource(datasource.getProtocol(), datasource.getFormat(), metadata, trigger);
+    DatasourceSchema schema = new DatasourceSchema("{a:1}");
+    Datasource config = new Datasource(datasource.getProtocol(), datasource.getFormat(), metadata, trigger, schema);
 
     JsonNode result = mapper.valueToTree(config);
 
     System.out.println(result);
-    assertEquals(5, result.size());
+    assertEquals(6, result.size());
     assertEquals("HTTP", result.get("protocol").get("type").textValue());
     assertEquals("JSON", result.get("format").get("type").textValue());
+    assertEquals("{a:1}", result.get("schema").get("data").textValue());
     assertEquals("http://www.test-url.com",
       result.get("protocol").get("parameters").get("location").textValue());
   }

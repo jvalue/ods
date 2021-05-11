@@ -18,7 +18,8 @@ public class TestHelper {
       true,
       new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse("1905-12-01T02:30:00.123Z"),
       50000L);
-    return new Datasource(protocolConfig, formatConfig, metadata, trigger);
+    DatasourceSchema schema = new DatasourceSchema("{a:1}");
+    return new Datasource(protocolConfig, formatConfig, metadata, trigger, schema);
   }
 
   public static Datasource generateParameterizableDatasource(
@@ -39,6 +40,8 @@ public class TestHelper {
       true,
       new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse("1905-12-01T02:30:00.123Z"),
       50000L);
-    return new Datasource(protocolConfig, formatConfig, metadata, trigger);
+      DatasourceSchema schema = new DatasourceSchema("{a:1}");
+
+    return new Datasource(protocolConfig, formatConfig, metadata, trigger, schema);
   }
 }

@@ -40,6 +40,9 @@ public class Datasource {
   @NotNull
   private DatasourceTrigger trigger;
 
+  @NotNull
+  private DatasourceSchema schema;
+
   @OneToMany(cascade = CascadeType.ALL, mappedBy = "datasource", fetch = FetchType.LAZY)
   @JsonIgnore
   @EqualsAndHashCode.Exclude // needed to avoid an endless loop because of a circular reference
@@ -50,11 +53,13 @@ public class Datasource {
     @JsonProperty("protocol") DatasourceProtocol protocol,
     @JsonProperty("format") DatasourceFormat format,
     @JsonProperty("metadata") DatasourceMetadata metadata,
-    @JsonProperty("trigger") DatasourceTrigger trigger) {
+    @JsonProperty("trigger") DatasourceTrigger trigger,
+    @JsonProperty("schema") DatasourceSchema schema) {
     this.protocol = protocol;
     this.format = format;
     this.metadata = metadata;
     this.trigger = trigger;
+    this.schema = schema;
   }
 
   public AdapterConfig toAdapterConfig(RuntimeParameters runtimeParameters) {
