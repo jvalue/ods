@@ -2,6 +2,7 @@ package org.jvalue.ods.adapterservice.datasource.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.jupiter.api.Test;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.FormatConfig;
@@ -32,8 +33,6 @@ public class DatasourceTest {
     Datasource expectedDatasource = generateDatasource(HTTP, XML, "http://www.test-url.com");
     expectedDatasource.setId(123L);
 
-    assertEquals("{a:1}", result.getSchema().getData());
-    assertEquals("{a:1}", expectedDatasource.getSchema().getData());
     assertEquals(expectedDatasource, result);
     assertNotNull(result.getId());
     assertTrue(result.getTrigger().isPeriodic());
@@ -58,7 +57,14 @@ public class DatasourceTest {
     Datasource datasource = generateDatasource(HTTP, JSON, "http://www.test-url.com");
     DatasourceTrigger trigger = new DatasourceTrigger(false, new Date(), 10L);
     DatasourceMetadata metadata = new DatasourceMetadata("person", "none", "Display", "description");
-    DatasourceSchema schema = new DatasourceSchema("{a:1}");
+    String jsonObject = "{\"test\":1}";
+    ObjectMapper objectMapper = new ObjectMapper();
+    Object schema = null;
+    try { 
+      schema  = objectMapper.readValue(jsonObject, new TypeReference<Map<String,Object>>(){});
+    } catch (Exception e) {
+      //TODO: handle exception
+    }   
     Datasource config = new Datasource(datasource.getProtocol(), datasource.getFormat(), metadata, trigger, schema);
 
     JsonNode result = mapper.valueToTree(config);
@@ -67,7 +73,6 @@ public class DatasourceTest {
     assertEquals(6, result.size());
     assertEquals("HTTP", result.get("protocol").get("type").textValue());
     assertEquals("JSON", result.get("format").get("type").textValue());
-    assertEquals("{a:1}", result.get("schema").get("data").textValue());
     assertEquals("http://www.test-url.com",
       result.get("protocol").get("parameters").get("location").textValue());
   }

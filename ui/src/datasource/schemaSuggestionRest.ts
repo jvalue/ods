@@ -1,5 +1,4 @@
 import axios from 'axios'
-import { DataSchema } from './datasource'
 import { SCHEMA_SERVICE_URL } from '@/env'
 
 /**
@@ -20,7 +19,7 @@ export async function getIsAlive (): Promise<string> {
   return response.data
 }
 
-export async function getSchema (dataSchema: DataSchema, precision: string): Promise<string> {
-  const response = await httpSchema.post<string>('/suggestion', { data: dataSchema.data, precision: precision })
-  return response.data
+export async function getSchema (schema: string, precision: string): Promise<object> {
+  const response = await httpSchema.post<string>('/suggestion', { data: schema, precision: precision })
+  return JSON.parse(response.data)
 }

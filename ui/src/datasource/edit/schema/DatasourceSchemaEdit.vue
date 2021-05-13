@@ -21,7 +21,7 @@
       </v-btn>      
     </v-card-actions>
     <v-textarea
-      v-model="dataSource.dataSchema.data"
+      v-model="schemaAsText"
       label="Datasource schema suggestion"
       @keyup="formChanged"
     />
@@ -48,6 +48,11 @@ export default class DatasourceSchemaEdit extends Vue {
   private required = requiredRule
   private currentSliderValue = '1'
   private sliderConfig = SliderConfig
+  private schemaAsText = ''
+
+  mounted (): void{
+    this.schemaAsText = JSON.stringify(this.dataSource.schema)
+  }
 
   @PropSync('value')
   private dataSource!: DataSource
@@ -69,8 +74,9 @@ export default class DatasourceSchemaEdit extends Vue {
 
   private async onGenerate (): Promise<void> {
     const preview = await PreviewClient.getPreview(this.dataSource)
-    this.dataSource.dataSchema.data = 
-      await SchemaSuggestionREST.getSchema({ data: JSON.stringify(preview) }, this.currentSliderValue)
+    this.dataSource.schema = 
+      await SchemaSuggestionREST.getSchema(JSON.stringify(preview), this.currentSliderValue)
+    this.schemaAsText = JSON.stringify(this.dataSource.schema)
   }
 }
 </script>

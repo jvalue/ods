@@ -37,6 +37,7 @@ export async function getDatasourceById (id: number): Promise<Datasource> {
 
 export async function createDatasource (datasource: Datasource): Promise<Datasource> {
   const { id, ...creationDTO } = datasource
+  console.log(creationDTO)
   const response = await http.post('/datasources', JSON.stringify(creationDTO))
   return JSON.parse(response.data, reviver)
 }

@@ -23,6 +23,6 @@
     "description": "Describing..."
   },
   "schema": {
-    "data": "{a:1}"
+    "test": 1
   }
 }
