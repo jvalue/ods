@@ -1,0 +1,114 @@
+name: Fault tolerance test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  linting:
+    name: Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        working-directory: ./fault-tolerance-test
+        run: npm ci
+      - name: Run linter
+        working-directory: ./fault-tolerance-test
+        run: npm run lint-ci
+
+  restart-test:
+    name: Restart test
+    runs-on: ubuntu-latest
+    needs: [linting]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Login to GitHub Packages Docker Registry
+        uses: docker/login-action@v1
+        with:
+          registry: docker.pkg.github.com
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pull ODS docker images
+        run: docker-compose pull -q
+      - name: Check docker images
+        run: docker images
+      - name: Install dependencies
+        working-directory: ./fault-tolerance-test
+        run: npm ci --only=production
+      - name: Run test
+        working-directory: ./fault-tolerance-test
+        run: npm run test:restart
+      - name: Upload logs
+        if: success() || failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: RestartTestLogs
+          path: fault-tolerance-test/logs/Restart*
+
+  scheduler-init-test:
+    name: Scheduler initialization test
+    runs-on: ubuntu-latest
+    needs: [linting]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Login to GitHub Packages Docker Registry
+        uses: docker/login-action@v1
+        with:
+          registry: docker.pkg.github.com
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pull ODS docker images
+        run: docker-compose pull -q
+      - name: Check docker images
+        run: docker images
+      - name: Install dependencies
+        working-directory: ./fault-tolerance-test
+        run: npm ci --only=production
+      - name: Run test
+        working-directory: ./fault-tolerance-test
+        run: npm run test:scheduler-init
+      - name: Upload logs
+        if: success() || failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: SchedulerTestLogs
+          path: fault-tolerance-test/logs/Scheduler*
+
+  scaling-test:
+    name: Scaling test
+    runs-on: ubuntu-latest
+    needs: [linting]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Login to GitHub Packages Docker Registry
+        uses: docker/login-action@v1
+        with:
+          registry: docker.pkg.github.com
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pull ODS docker images
+        run: docker-compose pull -q
+      - name: Check docker images
+        run: docker images
+      - name: Install dependencies
+        working-directory: ./fault-tolerance-test
+        run: npm ci --only=production
+      - name: Run test
+        working-directory: ./fault-tolerance-test
+        run: npm run test:scaling
+      - name: Upload logs
+        if: success() || failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: ScalingTestLogs
+          path: fault-tolerance-test/logs/Scaling*

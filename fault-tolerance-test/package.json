@@ -1,0 +1,39 @@
+{
+  "name": "fault-tolerance-test",
+  "version": "1.0.0",
+  "description": "ODS fault tolerance test",
+  "scripts": {
+    "test:restart": "jest --colors --verbose --runInBand restart.test.js",
+    "test:scheduler-init": "jest --colors --verbose --runInBand scheduler-init.test.js",
+    "test:scaling": "jest --colors --verbose --runInBand scaling.test.js",
+    "fake-adapter": "node src/fake-adapter.js",
+    "lint": "eslint src --fix",
+    "lint-ci": "eslint src --max-warnings=0"
+  },
+  "dependencies": {
+    "@jvalue/node-dry-amqp": "0.1.1",
+    "axios": "0.21.1",
+    "dockerode": "3.2.1",
+    "express": "4.17.1",
+    "jest": "27.0.0-next.7",
+    "wait-on": "5.3.0"
+  },
+  "devDependencies": {
+    "@types/dockerode": "3.2.3",
+    "@types/express": "4.17.11",
+    "@types/wait-on": "5.2.0",
+    "eslint": "^7.24.0",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jest": "^24.3.5",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.3.1"
+  },
+  "licenses": [
+    {
+      "type": "GNU Affero General Public License 3",
+      "url": "https://opensource.org/licenses/AGPL-3.0"
+    }
+  ],
+  "repository": "https://github.com/jvalue/open-data-service.git"
+}
