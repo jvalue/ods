@@ -21,6 +21,7 @@ import static org.jvalue.ods.adapterservice.adapter.Format.XML;
 import static org.jvalue.ods.adapterservice.adapter.Protocol.HTTP;
 import static org.jvalue.ods.adapterservice.datasource.TestHelper.generateDatasource;
 import static org.jvalue.ods.adapterservice.datasource.TestHelper.generateParameterizableDatasource;
+import static org.jvalue.ods.adapterservice.datasource.TestHelper.parseJsonToObject;
 
 public class DatasourceTest {
   private final ObjectMapper mapper = new ObjectMapper();
@@ -57,14 +58,7 @@ public class DatasourceTest {
     Datasource datasource = generateDatasource(HTTP, JSON, "http://www.test-url.com");
     DatasourceTrigger trigger = new DatasourceTrigger(false, new Date(), 10L);
     DatasourceMetadata metadata = new DatasourceMetadata("person", "none", "Display", "description");
-    String jsonObject = "{\"test\":1}";
-    ObjectMapper objectMapper = new ObjectMapper();
-    Object schema = null;
-    try { 
-      schema  = objectMapper.readValue(jsonObject, new TypeReference<Map<String,Object>>(){});
-    } catch (Exception e) {
-      //TODO: handle exception
-    }   
+    Object schema = parseJsonToObject("{\"test\":1}");
     Datasource config = new Datasource(datasource.getProtocol(), datasource.getFormat(), metadata, trigger, schema);
 
     JsonNode result = mapper.valueToTree(config);

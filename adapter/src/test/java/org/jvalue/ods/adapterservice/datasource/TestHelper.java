@@ -21,14 +21,7 @@ public class TestHelper {
       true,
       new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse("1905-12-01T02:30:00.123Z"),
       50000L);
-    String jsonObject = "{\"test\":1}";
-    ObjectMapper objectMapper = new ObjectMapper();
-    Object schema = null;
-    try { 
-      schema  = objectMapper.readValue(jsonObject, new TypeReference<Map<String,Object>>(){});
-    } catch (Exception e) {
-      //TODO: handle exception
-    }
+    Object schema = parseJsonToObject("{\"test\":1}");
     return new Datasource(protocolConfig, formatConfig, metadata, trigger, schema);
   }
 
@@ -50,16 +43,19 @@ public class TestHelper {
       true,
       new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse("1905-12-01T02:30:00.123Z"),
       50000L);
+    Object schema = parseJsonToObject("{\"test\":1}");
 
-    String jsonObject = "{\"test\":1}";
+    return new Datasource(protocolConfig, formatConfig, metadata, trigger, schema);
+  }
+
+  public static Object parseJsonToObject(String jsonObject) {
     ObjectMapper objectMapper = new ObjectMapper();
     Object schema = null;
     try { 
       schema  = objectMapper.readValue(jsonObject, new TypeReference<Map<String,Object>>(){});
     } catch (Exception e) {
-      //TODO: handle exception
+      throw new RuntimeException("Could not parse schema string to object");
     }
-
-    return new Datasource(protocolConfig, formatConfig, metadata, trigger, schema);
+    return schema;
   }
 }
