@@ -12,7 +12,7 @@
     "test": "jest --colors --verbose"
   },
   "dependencies": {
-    "@jvalue/node-dry-amqp": "0.1.0",
+    "@jvalue/node-dry-amqp": "0.1.1",
     "@jvalue/node-dry-basics": "0.0.3",
     "axios": "^0.21.1",
     "deep-equal": "^2.0.3",

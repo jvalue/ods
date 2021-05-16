@@ -9,7 +9,7 @@
     "lint-ci": "eslint src --max-warnings=0"
   },
   "devDependencies": {
-    "@jvalue/node-dry-amqp": "0.1.0",
+    "@jvalue/node-dry-amqp": "0.1.1",
     "eslint": "^7.20.0",
     "eslint-config-standard": "^16.0.2",
     "eslint-plugin-import": "^2.22.1",
