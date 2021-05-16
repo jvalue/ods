@@ -23,6 +23,9 @@ function generateDataSourceConfig (sourceLocation, periodic, interval = 5000) {
       license: 'AGPL v30',
       displayName: 'test1',
       description: 'system test 1'
+    },
+    schema: {
+      test: 1
     }
   }
 }
