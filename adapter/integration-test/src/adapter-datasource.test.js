@@ -271,5 +271,8 @@ const getDatasourceConfig = () => ({
     license: 'none',
     displayName: 'test datasource 1',
     description: 'integration testing datasources'
+  },
+  schema: {
+    test: 1
   }
 })
