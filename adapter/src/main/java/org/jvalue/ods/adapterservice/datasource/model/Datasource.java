@@ -49,7 +49,6 @@ public class Datasource {
   @NotNull
   private DatasourceTrigger trigger;
 
-  @NotNull
   @Type(type = "jsonb")
   @Column(columnDefinition = "jsonb")
   private Object schema;
