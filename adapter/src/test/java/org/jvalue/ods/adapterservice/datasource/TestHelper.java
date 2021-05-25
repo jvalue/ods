@@ -4,9 +4,12 @@ import org.jvalue.ods.adapterservice.adapter.Format;
 import org.jvalue.ods.adapterservice.adapter.Protocol;
 import org.jvalue.ods.adapterservice.datasource.model.*;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Map;
+import java.util.*;
 
 public class TestHelper {
 
@@ -18,7 +21,8 @@ public class TestHelper {
       true,
       new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse("1905-12-01T02:30:00.123Z"),
       50000L);
-    return new Datasource(protocolConfig, formatConfig, metadata, trigger);
+    Object schema = parseJsonToObject("{\"test\":1}");
+    return new Datasource(protocolConfig, formatConfig, metadata, trigger, schema);
   }
 
   public static Datasource generateParameterizableDatasource(
@@ -39,6 +43,19 @@ public class TestHelper {
       true,
       new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse("1905-12-01T02:30:00.123Z"),
       50000L);
-    return new Datasource(protocolConfig, formatConfig, metadata, trigger);
+    Object schema = parseJsonToObject("{\"test\":1}");
+
+    return new Datasource(protocolConfig, formatConfig, metadata, trigger, schema);
+  }
+
+  public static Object parseJsonToObject(String jsonObject) {
+    ObjectMapper objectMapper = new ObjectMapper();
+    Object schema = null;
+    try { 
+      schema  = objectMapper.readValue(jsonObject, new TypeReference<Map<String,Object>>(){});
+    } catch (Exception e) {
+      throw new RuntimeException("Could not parse schema string to object");
+    }
+    return schema;
   }
 }

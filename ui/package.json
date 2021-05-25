@@ -16,6 +16,7 @@
     "vue-monaco": "^1.2.2",
     "vue-property-decorator": "^9.1.2",
     "vue-router": "^3.5.1",
+    "vue-slider-component": "^3.2.11",
     "vuetify": "^2.4.5",
     "vuex": "^3.6.2",
     "vuex-class": "^0.3.2"

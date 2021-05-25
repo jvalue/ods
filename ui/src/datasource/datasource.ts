@@ -8,7 +8,7 @@ export default interface Datasource {
     type: string
     parameters: object
   }
-  dataSchema: DataSchema
+  schema: object
   metadata: DatasourceMetaData
   trigger: Trigger
 }
@@ -29,10 +29,6 @@ export interface Trigger {
 export interface DataLocation {
   id: number
   location: string
-}
-
-export interface DataSchema {
-  data: string
 }
 
 export type Data = object

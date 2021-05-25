@@ -15,12 +15,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+
+
 @Entity
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
 @EqualsAndHashCode
+@TypeDefs({
+  @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
+})
 public class Datasource {
 
   @Id
@@ -40,6 +49,10 @@ public class Datasource {
   @NotNull
   private DatasourceTrigger trigger;
 
+  @Type(type = "jsonb")
+  @Column(columnDefinition = "jsonb")
+  private Object schema;
+
   @OneToMany(cascade = CascadeType.ALL, mappedBy = "datasource", fetch = FetchType.LAZY)
   @JsonIgnore
   @EqualsAndHashCode.Exclude // needed to avoid an endless loop because of a circular reference
@@ -50,11 +63,13 @@ public class Datasource {
     @JsonProperty("protocol") DatasourceProtocol protocol,
     @JsonProperty("format") DatasourceFormat format,
     @JsonProperty("metadata") DatasourceMetadata metadata,
-    @JsonProperty("trigger") DatasourceTrigger trigger) {
+    @JsonProperty("trigger") DatasourceTrigger trigger,
+    @JsonProperty("schema") Object schema) {
     this.protocol = protocol;
     this.format = format;
     this.metadata = metadata;
     this.trigger = trigger;
+    this.schema = schema;
   }
 
   public AdapterConfig toAdapterConfig(RuntimeParameters runtimeParameters) {

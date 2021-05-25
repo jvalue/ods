@@ -21,5 +21,8 @@
     "license": "none",
     "displayName": "TestName",
     "description": "Describing..."
+  },
+  "schema": {
+    "test": 1
   }
 }

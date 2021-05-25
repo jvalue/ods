@@ -1,5 +1,4 @@
 import axios from 'axios'
-import { DataSchema } from './datasource'
 import { SCHEMA_SERVICE_URL } from '@/env'
 
 /**
@@ -10,6 +9,8 @@ import { SCHEMA_SERVICE_URL } from '@/env'
 const httpSchema = axios.create({
   baseURL: SCHEMA_SERVICE_URL,
   headers: { 'Content-Type': 'application/json' },
+  maxContentLength: 100000000,
+  maxBodyLength: 1000000000,
   transformResponse: []
 })
 
@@ -18,12 +19,7 @@ export async function getIsAlive (): Promise<string> {
   return response.data
 }
 
-export async function getSchemaFast (dataSchema: DataSchema): Promise<string> {
-  const response = await httpSchema.post<string>('/suggestion/fast', dataSchema.data)
-  return response.data
-}
-
-export async function getSchemaDetailed (dataSchema: DataSchema): Promise<string> {
-  const response = await httpSchema.post<string>('/suggestion/detailed', dataSchema.data)
-  return response.data
+export async function getSchema (schema: string, precision: string): Promise<object> {
+  const response = await httpSchema.post<string>('/suggestion', { data: schema, precision: precision })
+  return JSON.parse(response.data)
 }

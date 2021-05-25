@@ -251,6 +251,9 @@ const dynamicDatasourceConfig = {
     license: 'none',
     displayName: 'test datasource 2',
     description: 'integration testing dynamic datasources'
+  },
+  schema: {
+    test: 1
   }
 }
 
@@ -276,6 +279,9 @@ const staticDatasourceConfig = {
     license: 'none',
     displayName: 'test datasource 2',
     description: 'integration testing dynamic datasources'
+  },
+  schema: {
+    test: 1
   }
 }
 

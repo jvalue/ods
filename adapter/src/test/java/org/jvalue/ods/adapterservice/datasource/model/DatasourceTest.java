@@ -2,6 +2,7 @@ package org.jvalue.ods.adapterservice.datasource.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.jupiter.api.Test;
 import org.jvalue.ods.adapterservice.adapter.model.AdapterConfig;
 import org.jvalue.ods.adapterservice.adapter.model.FormatConfig;
@@ -20,6 +21,7 @@ import static org.jvalue.ods.adapterservice.adapter.Format.XML;
 import static org.jvalue.ods.adapterservice.adapter.Protocol.HTTP;
 import static org.jvalue.ods.adapterservice.datasource.TestHelper.generateDatasource;
 import static org.jvalue.ods.adapterservice.datasource.TestHelper.generateParameterizableDatasource;
+import static org.jvalue.ods.adapterservice.datasource.TestHelper.parseJsonToObject;
 
 public class DatasourceTest {
   private final ObjectMapper mapper = new ObjectMapper();
@@ -56,12 +58,13 @@ public class DatasourceTest {
     Datasource datasource = generateDatasource(HTTP, JSON, "http://www.test-url.com");
     DatasourceTrigger trigger = new DatasourceTrigger(false, new Date(), 10L);
     DatasourceMetadata metadata = new DatasourceMetadata("person", "none", "Display", "description");
-    Datasource config = new Datasource(datasource.getProtocol(), datasource.getFormat(), metadata, trigger);
+    Object schema = parseJsonToObject("{\"test\":1}");
+    Datasource config = new Datasource(datasource.getProtocol(), datasource.getFormat(), metadata, trigger, schema);
 
     JsonNode result = mapper.valueToTree(config);
 
     System.out.println(result);
-    assertEquals(5, result.size());
+    assertEquals(6, result.size());
     assertEquals("HTTP", result.get("protocol").get("type").textValue());
     assertEquals("JSON", result.get("format").get("type").textValue());
     assertEquals("http://www.test-url.com",

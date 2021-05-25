@@ -65,7 +65,7 @@ public class DatasourceManagerTest {
     config.setId(null);
 
     Datasource expectedConfig = new Datasource(config.getProtocol(), config.getFormat(), config.getMetadata(),
-        config.getTrigger());
+        config.getTrigger(), config.getSchema());
     expectedConfig.setId(123L);
 
     when(datasourceRepository.save(config)).thenReturn(expectedConfig);
@@ -82,7 +82,7 @@ public class DatasourceManagerTest {
     Datasource config = mapper.readValue(configFile, Datasource.class);
 
     Datasource expectedConfig = new Datasource(config.getProtocol(), config.getFormat(), config.getMetadata(),
-        config.getTrigger());
+        config.getTrigger(), config.getSchema());
     expectedConfig.setId(123L);
 
     when(datasourceRepository.findById(123L)).thenReturn(Optional.of(config));
@@ -105,7 +105,7 @@ public class DatasourceManagerTest {
     config.setId(123L);
 
     Datasource updated = new Datasource(config.getProtocol(), config.getFormat(), config.getMetadata(),
-        config.getTrigger());
+        config.getTrigger(), config.getSchema());
     updated.setId(123L);
 
     when(datasourceRepository.findById(123L)).thenReturn(Optional.of(config));
