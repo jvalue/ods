@@ -56,6 +56,7 @@ describe('Pipeline Service Execution', () => {
   })
 
   test('POST /job with transformation', async () => {
+    console.log('Entered error Test')
     const transformationJob = {
       func: 'return {numberTwo: data.number+1};',
       data: { number: 1 }
