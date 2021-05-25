@@ -10,7 +10,7 @@ import JobError from './jobError'
 export function parseStacktraceLine (line: string): [string, string, number, number] {
   const match = line.match(/^ +at (.+) \((.+):(\d+):(\d+)\)/)
   if (match === null) {
-    throw new Error('Unexpected stacktrace line format')
+    throw new Error(`Unexpected stacktrace line format: ${line}`)
   }
   const [, functionName, fileName, lineNumber, position] = match
   return [functionName, fileName, parseInt(lineNumber), parseInt(position)]
@@ -24,7 +24,7 @@ export function parseStacktraceLine (line: string): [string, string, number, num
 function parseSyntaxErrorHeader (header: string): [string, number] {
   const match = header.match(/^(.+):(\d+)/)
   if (match === null) {
-    throw new Error('Unexpected stacktrace format')
+    throw new Error(`Unexpected stacktrace format: ${header}`)
   }
   const [, fileName, lineNumber] = match
   return [fileName, parseInt(lineNumber)]
