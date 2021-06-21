@@ -97,6 +97,16 @@
         </v-tooltip>
       </template>
 
+      <template #[`item.health`]="{ item }">
+        <v-icon
+          v-bind="attrs"
+          small
+          :color="getHealthColor(item.id)"
+        >
+          {{ getHealthIcon(item.id) }}
+        </v-icon>
+      </template>
+
       <template #expanded-item="{ headers, item }">
         <td
           class="pa-2"
@@ -119,6 +129,7 @@ import * as DatasourceREST from './datasourceRest'
 export default class DatsourceOverview extends Vue {
   private isLoadingDatasources = false
   private datasources: Datasource[] = []
+  
 
   private headers = [
     { text: 'Id', value: 'id' },
@@ -127,6 +138,7 @@ export default class DatsourceOverview extends Vue {
     { text: 'Location (URL)', value: 'protocol.parameters.location', sortable: false },
     { text: 'Periodic', value: 'trigger.periodic', sortable: false },
     { text: 'Actions', value: 'action', sortable: false },
+    { text: '', value: 'health'},
     { text: '', value: 'data-table-expand' },
   ]
   
@@ -134,6 +146,38 @@ export default class DatsourceOverview extends Vue {
 
   private mounted (): void {
     this.loadDataSources().catch(error => console.error('Failed to load datasource', error))
+  }
+
+  private async getHealthIcon (id: number): Promise<string> {
+    const dataImport = await DatasourceREST.getLatestDataimport(id)
+    const status = dataImport.health
+    let healthIcon = ''
+
+    if (status === 'OK') {
+      healthIcon = 'mdi-water'
+    } else if (status === 'WARNING') {
+      healthIcon = 'mdi-water'
+    } else {
+      healthIcon = 'mdi-water'
+    }
+
+    return healthIcon
+  }
+
+  private async getHealthColor (id: number): Promise<string> {
+    const dataImport = await DatasourceREST.getLatestDataimport(id)
+    const status = dataImport.health
+    let healthColor = ''
+
+    if (status === 'OK') {
+      healthColor = 'success'
+    } else if (status === 'WARNING') {
+      healthColor = 'orange'
+    } else {
+      healthColor = 'red'
+    }
+
+    return healthColor
   }
 
   private onCreate (): void {

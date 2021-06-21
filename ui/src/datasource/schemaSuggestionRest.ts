@@ -21,5 +21,6 @@ export async function getIsAlive (): Promise<string> {
 
 export async function getSchema (schema: string, precision: string): Promise<object> {
   const response = await httpSchema.post<string>('/suggestion', { data: schema, precision: precision })
+  console.log(response.data)
   return JSON.parse(response.data)
 }

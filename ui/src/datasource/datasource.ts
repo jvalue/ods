@@ -13,6 +13,13 @@ export default interface Datasource {
   trigger: Trigger
 }
 
+export interface DataimportMetaData {
+  id: number
+  health: string
+  timestamp: string
+  datasource: Datasource
+}
+
 export interface DatasourceMetaData {
   displayName: string
   description: string

@@ -2,6 +2,7 @@ package org.jvalue.ods.adapterservice.datasource.api.rest.v1;
 
 import lombok.AllArgsConstructor;
 
+import org.jvalue.ods.adapterservice.adapter.interpreter.JsonInterpreter;
 import org.jvalue.ods.adapterservice.adapter.model.exceptions.AdapterException;
 import org.jvalue.ods.adapterservice.datasource.DatasourceManager;
 import org.jvalue.ods.adapterservice.datasource.model.*;
