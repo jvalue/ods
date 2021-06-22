@@ -19,6 +19,7 @@ import org.everit.json.schema.loader.SchemaLoader;
 import org.everit.json.schema.ValidationException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -77,20 +78,16 @@ public class DatasourceManager {
     StreamSupport.stream(allDatasourceConfigs.spliterator(), true).forEach(amqpPublisher::publishDeletion);
   }
 
-  public void validate(Long id) throws DatasourceNotFoundException, IOException, ValidationException {   
+  public void validate(Datasource datasource, DataImport dataImport) throws IOException, ValidationException {   
     try 
     {
-      Datasource datasource = getDatasource(id);
-      DataImport dataImport = getLatestDataImportForDatasource(id);
-      if(dataImport == null)
-        System.out.println("**************Fehler****************"); 
-      JSONObject rawSchema = (JSONObject) datasource.getSchema();
+      String schemaString = new Gson().toJson(datasource.getSchema());
+      JSONObject rawSchema = new JSONObject(schemaString);
       Schema schema = SchemaLoader.load(rawSchema);
 
       JSONObject validationData = new JSONObject(dataImport.getData());
       schema.validate(validationData);
-    } catch (DataImportLatestNotFoundException e){
-    } catch (DatasourceNotFoundException | ValidationException e) {
+    } catch ( ValidationException e) {
       throw e;
     }
     
@@ -123,27 +120,28 @@ public class DatasourceManager {
    */
   @Transactional
   DataImport.MetaData executeImport(Long id, RuntimeParameters runtimeParameters)
-      throws DatasourceNotFoundException, ImporterParameterException, InterpreterParameterException, IOException {
+      throws DatasourceNotFoundException, ImporterParameterException, InterpreterParameterException, IOException {    
     Datasource datasource = getDatasource(id);
-    AdapterConfig adapterConfig = datasource.toAdapterConfig(runtimeParameters);
     try {
+      AdapterConfig adapterConfig = datasource.toAdapterConfig(runtimeParameters);
+
       DataImportResponse executionResult = adapter.executeJob(adapterConfig);
 
       DataImport dataImport = new DataImport(datasource, executionResult.getData());
+
+      if (datasource.getSchema() != null) {
+        validate(datasource, dataImport);
+      }
 
       DataImport savedDataImport = dataImportRepository.save(dataImport);
 
       amqpPublisher.publishImportSuccess(id, savedDataImport.getData());
 
-      if (datasource.getSchema() != null) {
-        validate(id);
-      }
-
       return savedDataImport.getMetaData();
     } catch (ValidationException e) {
       handleImportException(id, datasource, "WARNING", e);
       throw e;
-    } catch (DatasourceNotFoundException | ImporterParameterException | InterpreterParameterException | IOException e) {
+    } catch (ImporterParameterException | InterpreterParameterException | IOException e) {
       handleImportException(id, datasource, "FAILED", e);
       throw e;
     }   

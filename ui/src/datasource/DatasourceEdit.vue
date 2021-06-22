@@ -68,6 +68,8 @@ export default class DatasourceEdit extends Vue {
     if (this.datasource === null) {
       return
     }
+
+    await DatasourceREST.updateDatasource(this.datasource)
     this.routeToOverview()
   }
 

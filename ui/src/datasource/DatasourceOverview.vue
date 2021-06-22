@@ -122,7 +122,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import Datasource from './datasource'
+import Datasource , { HealthStatus } from './datasource'
 import * as DatasourceREST from './datasourceRest'
 
 @Component
@@ -153,9 +153,9 @@ export default class DatsourceOverview extends Vue {
     const status = dataImport.health
     let healthIcon = ''
 
-    if (status === 'OK') {
+    if (status === HealthStatus.OK) {
       healthIcon = 'mdi-water'
-    } else if (status === 'WARNING') {
+    } else if (status === HealthStatus.WARINING) {
       healthIcon = 'mdi-water'
     } else {
       healthIcon = 'mdi-water'
@@ -169,9 +169,9 @@ export default class DatsourceOverview extends Vue {
     const status = dataImport.health
     let healthColor = ''
 
-    if (status === 'OK') {
+    if (status === HealthStatus.OK) {
       healthColor = 'success'
-    } else if (status === 'WARNING') {
+    } else if (status === HealthStatus.WARINING) {
       healthColor = 'orange'
     } else {
       healthColor = 'red'

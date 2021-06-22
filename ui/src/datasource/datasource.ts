@@ -15,7 +15,7 @@ export default interface Datasource {
 
 export interface DataimportMetaData {
   id: number
-  health: string
+  health: HealthStatus
   timestamp: string
   datasource: Datasource
 }
@@ -39,3 +39,9 @@ export interface DataLocation {
 }
 
 export type Data = object
+
+export enum HealthStatus {
+  OK = 'OK',
+  WARINING = 'WARNING',
+  FAILED = 'FAILED'
+}

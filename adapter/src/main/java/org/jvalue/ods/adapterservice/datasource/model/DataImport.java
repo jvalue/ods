@@ -62,7 +62,6 @@ public class DataImport {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", locale = "UTC")
     private final Date timestamp;
 
-    @JsonIgnore
     private final String health;
 
     @JsonIgnore

@@ -39,7 +39,7 @@ public class DataImportTest {
     JsonNode result = mapper.valueToTree(dataImport.getMetaData());
 
     System.out.println(result.toString());
-    assertEquals(3, result.size());
+    assertEquals(4, result.size());
     assertEquals("null", result.get("id").asText());
     assertEquals("/datasources/null/imports/null/data", result.get("location").asText());
   }
