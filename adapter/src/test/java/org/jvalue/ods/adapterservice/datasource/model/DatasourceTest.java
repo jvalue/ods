@@ -33,7 +33,6 @@ public class DatasourceTest {
 
     Datasource expectedDatasource = generateDatasource(HTTP, XML, "http://www.test-url.com");
     expectedDatasource.setId(123L);
-
     assertEquals(expectedDatasource, result);
     assertNotNull(result.getId());
     assertTrue(result.getTrigger().isPeriodic());
@@ -63,7 +62,6 @@ public class DatasourceTest {
 
     JsonNode result = mapper.valueToTree(config);
 
-    System.out.println(result);
     assertEquals(6, result.size());
     assertEquals("HTTP", result.get("protocol").get("type").textValue());
     assertEquals("JSON", result.get("format").get("type").textValue());

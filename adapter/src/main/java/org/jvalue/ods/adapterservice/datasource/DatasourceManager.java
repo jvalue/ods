@@ -25,8 +25,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.stream.StreamSupport;
 
-import javax.sql.DataSource;
-
 @Slf4j
 @Service
 @AllArgsConstructor
@@ -79,14 +77,23 @@ public class DatasourceManager {
     StreamSupport.stream(allDatasourceConfigs.spliterator(), true).forEach(amqpPublisher::publishDeletion);
   }
 
-  public void validate(Long id) throws DatasourceNotFoundException, AdapterException, IOException, ValidationException {
-    Datasource datasource = getDatasource(id);
-    DataImport dataImport = getLatestDataImportForDatasource(id);
-    JSONObject rawSchema = (JSONObject) datasource.getSchema();
-    Schema schema = SchemaLoader.load(rawSchema);
+  public void validate(Long id) throws DatasourceNotFoundException, IOException, ValidationException {   
+    try 
+    {
+      Datasource datasource = getDatasource(id);
+      DataImport dataImport = getLatestDataImportForDatasource(id);
+      if(dataImport == null)
+        System.out.println("**************Fehler****************"); 
+      JSONObject rawSchema = (JSONObject) datasource.getSchema();
+      Schema schema = SchemaLoader.load(rawSchema);
 
-    JSONObject validationData = new JSONObject(dataImport.getData());
-    schema.validate(validationData);
+      JSONObject validationData = new JSONObject(dataImport.getData());
+      schema.validate(validationData);
+    } catch (DataImportLatestNotFoundException e){
+    } catch (DatasourceNotFoundException | ValidationException e) {
+      throw e;
+    }
+    
   }
 
   public DataImport.MetaData trigger(Long id, RuntimeParameters runtimeParameters) throws DatasourceNotFoundException, AdapterException, IOException {
@@ -122,28 +129,31 @@ public class DatasourceManager {
     try {
       DataImportResponse executionResult = adapter.executeJob(adapterConfig);
 
-      if (datasource.getSchema() != null) {
-        validate(id);
-      }
-
       DataImport dataImport = new DataImport(datasource, executionResult.getData());
 
       DataImport savedDataImport = dataImportRepository.save(dataImport);
 
       amqpPublisher.publishImportSuccess(id, savedDataImport.getData());
+
+      if (datasource.getSchema() != null) {
+        validate(id);
+      }
+
       return savedDataImport.getMetaData();
     } catch (ValidationException e) {
-      return handleImportException(id, datasource, "WARNING", e);
-    } catch (Exception e) {
-      return handleImportException(id, datasource, "FAILED", e);
+      handleImportException(id, datasource, "WARNING", e);
+      throw e;
+    } catch (DatasourceNotFoundException | ImporterParameterException | InterpreterParameterException | IOException e) {
+      handleImportException(id, datasource, "FAILED", e);
+      throw e;
     }   
   }
 
-  DataImport.MetaData handleImportException(Long id, Datasource datasource, String healthStatus, Exception e) {
-    DataImport dataImport = new DataImport(datasource, null, healthStatus);
-    DataImport savedDataImport = dataImportRepository.save(dataImport);
-    publishImportFailure(id, e);
-    return savedDataImport.getMetaData();
+  @Transactional
+  void handleImportException(Long id, Datasource datasource, String healthStatus, Exception e){
+      DataImport dataImport = new DataImport(datasource, "", healthStatus);
+      DataImport savedDataImport = dataImportRepository.save(dataImport);
+      publishImportFailure(id, e);   
   }
 
   private void publishImportFailure(Long id, Exception e) {

@@ -32,8 +32,7 @@ describe('Scheduler initializer', () => {
         periodic: false,
         firstExecution: new Date(),
         interval: 60000
-      },
-      health: ''
+      }
     }
     mockedGetAllDatasources.mockResolvedValue([config])
 

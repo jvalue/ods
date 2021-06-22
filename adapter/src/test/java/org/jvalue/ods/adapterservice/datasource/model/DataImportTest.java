@@ -25,7 +25,7 @@ public class DataImportTest {
     JsonNode result = mapper.valueToTree(dataImport);
 
     System.out.println(result.toString());
-    assertEquals(3, result.size());
+    assertEquals(4, result.size());
     assertEquals("null", result.get("id").asText());
     assertEquals("{\"whateverwillbe\":\"willbe\",\"quesera\":\"sera\"}", result.get("data").asText());
   }

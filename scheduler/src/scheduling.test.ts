@@ -214,7 +214,6 @@ function generateConfig (periodic: boolean, firstExecution: Date, interval: numb
       periodic: periodic,
       firstExecution: firstExecution,
       interval: interval
-    },
-    health: 'WANRNING'
+    }
   }
 }
