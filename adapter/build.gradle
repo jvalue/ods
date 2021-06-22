@@ -25,6 +25,7 @@ repositories {
 	mavenCentral()
 	maven { url 'https://repo.spring.io/snapshot' }
 	maven { url 'https://repo.spring.io/milestone' }
+	maven { url 'https://jitpack.io' }
 }
 
 test {
@@ -32,7 +33,7 @@ test {
 
 	testLogging {
 		events "passed", "skipped", "failed"
-		//showStandardStreams = true
+		showStandardStreams = true
 		afterSuite { desc, result ->
 			if (!desc.parent) {
 				println "Tests run: ${result.testCount}, " +
