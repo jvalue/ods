@@ -1,4 +1,4 @@
-const { sleep } = require('@jvalue/node-dry-basics')
+const { setTimeout: sleep } = require('timers/promises')
 
 const { DOCKER_COMPOSE_FILE, ENV_FILE, SCHEDULER_URL } = require('./util/env')
 const { DockerCompose, writeDockerLogs } = require('./util/docker-compose')
