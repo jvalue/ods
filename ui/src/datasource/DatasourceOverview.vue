@@ -122,7 +122,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import Datasource , { HealthStatus } from './datasource'
+import Datasource, { HealthStatus } from './datasource'
 import * as DatasourceREST from './datasourceRest'
 
 @Component
