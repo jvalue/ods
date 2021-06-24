@@ -1,6 +1,7 @@
 /* eslint-env jest */
+import { setTimeout as sleep } from 'timers/promises'
+
 import { mocked } from 'ts-jest/utils'
-import { sleep } from '@jvalue/node-dry-basics'
 
 import { triggerDatasource } from './api/http/adapter-client'
 import DatasourceConfig from './api/datasource-config'
