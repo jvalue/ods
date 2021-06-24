@@ -1,5 +1,4 @@
-FROM node:14-alpine
-# Note: Node 15 has problems shutting down mock servers (last checked: 2021-03-02)
+FROM node:16-alpine
 
 COPY ./package*.json ./
 RUN npm ci

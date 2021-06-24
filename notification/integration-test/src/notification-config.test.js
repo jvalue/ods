@@ -1,4 +1,3 @@
-/* eslint-env jest */
 const request = require('supertest')
 const waitOn = require('wait-on')
 
@@ -9,15 +8,15 @@ const MOCK_RECEIVER_URL = process.env.MOCK_RECEIVER_URL || 'http://localhost:808
 describe('Notification Service', () => {
   beforeAll(async () => {
     const pingUrl = URL + '/'
-    await waitOn({ resources: [pingUrl, MOCK_RECEIVER_URL], timeout: 50000, log: true })
+    await waitOn({ resources: [pingUrl], timeout: 50000, log: true })
   }, 60000)
 
   test('should have semantic version', async () => {
     const response = await request(URL).get('/version')
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('text/plain')
-    const semanticVersionReExp = '^(0|[1-9]d*).(0|[1-9]d*).(0|[1-9]d*)'
-    expect(response.text).toMatch(new RegExp(semanticVersionReExp))
+    const semanticVersionRegExp = /^(0|[1-9]d*).(0|[1-9]d*).(0|[1-9]d*)/
+    expect(response.text).toMatch(semanticVersionRegExp)
   })
 
   test('should return empty list for non-existing pipeline', async () => {

@@ -103,7 +103,7 @@ export class NotificationConfigEndpoint {
     res.status(200).send('DELETED')
   }
 
-  /*
+  /**
    * Handles a request to update a NotificationConfig
    * This is done by checking the validity of the config and then save
    * it to the database on success

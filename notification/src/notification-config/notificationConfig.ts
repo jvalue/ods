@@ -49,7 +49,7 @@ export type NotificationConfig = SlackNotification | WebhookNotification | Fireb
 /**
  * Evaluates the validity of the NotificationConfig (provided by argument),
  * by checking for the field variables.
- * @param conf NotificationConfig to be validated
+ * @param config NotificationConfig to be validated
  * @returns true, if conf is a valid, false else
  */
 export const isValidNotificationConfig = (config: unknown): config is NotificationConfig => {
