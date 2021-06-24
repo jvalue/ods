@@ -3,10 +3,7 @@
   "version": "1.0.0",
   "description": "Notification Service Integration-Tests",
   "scripts": {
-    "mock:receiver": "node src/mock.receiver.js",
-    "pretest": "npm run mock:receiver &",
-    "test": "jest --colors --verbose",
-    "posttest": "killall node",
+    "test": "jest --colors --verbose --runInBand",
     "lint": "eslint src --fix",
     "lint-ci": "eslint src --max-warnings=0"
   },

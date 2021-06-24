@@ -1,14 +1,27 @@
+const { setTimeout: sleep } = require('timers/promises')
+
 const request = require('supertest')
 const waitOn = require('wait-on')
+
+const { createMockReceiver, getTriggeredNotification } = require('./mock.receiver')
 
 const URL = process.env.NOTIFICATION_API || 'http://localhost:8080'
 
 const MOCK_RECEIVER_URL = process.env.MOCK_RECEIVER_URL || 'http://localhost:8081'
 
+let mockReceiverServer
+
 describe('Notification Service', () => {
   beforeAll(async () => {
-    const pingUrl = URL + '/'
-    await waitOn({ resources: [pingUrl, MOCK_RECEIVER_URL], timeout: 50000, log: true })
+    const pingUrl = URL + '/';
+    [mockReceiverServer] = await Promise.all([
+      createMockReceiver(),
+      waitOn({ resources: [pingUrl, MOCK_RECEIVER_URL], timeout: 50000, log: true })
+    ])
+  }, 60000)
+
+  afterAll(async () => {
+    await mockReceiverServer?.close()
   }, 60000)
 
   test('should trigger a configured webhook', async () => {
@@ -44,11 +57,8 @@ describe('Notification Service', () => {
     await sleep(3000) // wait for processing
 
     // ASSERT
-    const receiverResponse = await request(MOCK_RECEIVER_URL)
-      .get('/webhook1')
-
-    expect(receiverResponse.status).toEqual(200)
-    expect(receiverResponse.body.location).toEqual(`http://localhost:9000/storage/${triggerEvent.pipelineId}`)
+    const notification = getTriggeredNotification('webhook1')
+    expect(notification.location).toEqual(`http://localhost:9000/storage/${triggerEvent.pipelineId}`)
   }, 10000)
 
   test('should not trigger webhook if given condition does not hold', async () => {
@@ -85,10 +95,7 @@ describe('Notification Service', () => {
     await sleep(3000) // wait for processing
 
     // ASSERT
-    const receiverResponse = await request(MOCK_RECEIVER_URL)
-      .get('/webhook2')
-      .send()
-    expect(receiverResponse.status).toEqual(404)
+    expect(getTriggeredNotification('webhook2')).toBeUndefined()
 
     // CLEANUP
     notificationResponse = await request(URL)
@@ -132,14 +139,10 @@ describe('Notification Service', () => {
     await sleep(3000) // wait for processing
 
     // ASSERT
-    const receiverResponse = await request(MOCK_RECEIVER_URL)
-      .get('/slack/12/34/56')
-      .send()
-
-    expect(receiverResponse.status).toEqual(200)
-    expect(receiverResponse.body.text).toMatch(`${triggerEvent.pipelineName}`)
-    expect(receiverResponse.body.text).toMatch(`${triggerEvent.pipelineId}`)
-    expect(receiverResponse.body.text).toMatch(`http://localhost:9000/storage/${triggerEvent.pipelineId}`)
+    const notification = getTriggeredNotification('slack')
+    expect(notification.text).toMatch(`${triggerEvent.pipelineName}`)
+    expect(notification.text).toMatch(`${triggerEvent.pipelineId}`)
+    expect(notification.text).toMatch(`http://localhost:9000/storage/${triggerEvent.pipelineId}`)
 
     // CLEANUP
     notificationResponse = await request(URL)
@@ -147,8 +150,4 @@ describe('Notification Service', () => {
       .send()
     expect(notificationResponse.status).toEqual(200)
   }, 10000)
-
-  function sleep (ms) {
-    return new Promise(resolve => setTimeout(resolve, ms))
-  }
 })
