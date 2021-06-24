@@ -1,4 +1,4 @@
-import { sleep } from '@jvalue/node-dry-basics'
+import { setTimeout as sleep } from 'timers/promises'
 
 import DatasourceConfig from './api/datasource-config'
 import { getAllDatasources } from './api/http/adapter-client'

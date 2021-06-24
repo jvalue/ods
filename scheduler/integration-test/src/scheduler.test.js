@@ -1,10 +1,11 @@
-/* eslint-env jest */
+const { setTimeout: sleep } = require('timers/promises')
+
 const request = require('supertest')
 const waitOn = require('wait-on')
-const { sleep } = require('@jvalue/node-dry-basics')
 const AmqpConnector = require('@jvalue/node-dry-amqp/dist/amqpConnector')
 
 const { jsonDateAfter } = require('./testHelper')
+const { createMockAdapter, getTriggeredRequests } = require('./mock.adapter')
 
 const AMQP_EXCHANGE = 'ods_global'
 const AMQP_DATASOURCE_CONFIG_TOPIC = 'datasource.config.*'
@@ -13,13 +14,13 @@ const AMQP_DATASOURCE_CONFIG_UPDATED_TOPIC = 'datasource.config.updated'
 const AMQP_DATASOURCE_CONFIG_DELETED_TOPIC = 'datasource.config.deleted'
 
 let amqpConnection
+let mockAdapterServer
 
 const {
   SCHEDULER_URL,
   AMQP_URL,
   AMQP_CONNECTION_RETRIES,
-  AMQP_CONNECTION_BACKOFF,
-  MOCK_SERVER_URL
+  AMQP_CONNECTION_BACKOFF
 } = require('./env')
 
 const TIMEOUT = 10000
@@ -28,18 +29,18 @@ describe('Scheduler-IT', () => {
   beforeAll(async () => {
     logConfigs()
     try {
-      const promiseResults = await Promise.all([
+      [amqpConnection, mockAdapterServer] = await Promise.all([
         AmqpConnector.connect(AMQP_URL, AMQP_CONNECTION_RETRIES, AMQP_CONNECTION_BACKOFF),
+        createMockAdapter(),
         waitOn({ resources: [`${SCHEDULER_URL}/`], timeout: 50000, log: false })
       ])
-      amqpConnection = promiseResults[0]
     } catch (err) {
       throw new Error(`Error during setup of tests: ${err}`)
     }
   }, 60000)
 
   afterAll(async () => {
-    await amqpConnection?.close()
+    await Promise.all([amqpConnection?.close(), mockAdapterServer?.close()])
   }, TIMEOUT)
 
   test('Should respond with semantic version [GET /version]', async () => {
@@ -53,10 +54,7 @@ describe('Scheduler-IT', () => {
   test('Should initialize schedule jobs correctly', async () => {
     await sleep(5000)
 
-    const multipleTrigger = await request(MOCK_SERVER_URL)
-      .get('/triggerRequests/101')
-
-    expect(multipleTrigger.body).toBeGreaterThan(1)
+    expect(getTriggeredRequests(101)).toBeGreaterThan(1)
   }, TIMEOUT)
 
   test('Should trigger datasource after creation event', async () => {
@@ -68,10 +66,7 @@ describe('Scheduler-IT', () => {
 
     await sleep(3000)
 
-    const triggerRequests = await request(MOCK_SERVER_URL)
-      .get('/triggerRequests/1')
-
-    expect(triggerRequests.body).toBe(1)
+    expect(getTriggeredRequests(1)).toBe(1)
   }, TIMEOUT)
 
   test('Should not trigger datasource after deletion event', async () => {
@@ -85,10 +80,7 @@ describe('Scheduler-IT', () => {
 
     await sleep(3000)
 
-    const triggerRequests = await request(MOCK_SERVER_URL)
-      .get('/triggerRequests/2')
-
-    expect(triggerRequests.body).toBe(0)
+    expect(getTriggeredRequests(2)).toBe(0)
   }, TIMEOUT)
 
   test('Should update trigger after update event', async () => {
@@ -104,10 +96,7 @@ describe('Scheduler-IT', () => {
 
     await sleep(4500)
 
-    const triggerRequests = await request(MOCK_SERVER_URL)
-      .get('/triggerRequests/3')
-
-    expect(triggerRequests.body).toBeGreaterThan(1)
+    expect(getTriggeredRequests(3)).toBeGreaterThan(1)
   }, TIMEOUT)
 })
 
