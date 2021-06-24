@@ -1,4 +1,3 @@
-/* eslint-env jest */
 const request = require('supertest')
 const waitOn = require('wait-on')
 
@@ -16,8 +15,7 @@ describe('Notification Service', () => {
     const response = await request(URL).get('/version')
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('text/plain')
-    const semanticVersionReExp = '^(0|[1-9]d*).(0|[1-9]d*).(0|[1-9]d*)'
-    expect(response.text).toMatch(new RegExp(semanticVersionReExp))
+    expect(response.text).toMatch(/^(0|[1-9]d*).(0|[1-9]d*).(0|[1-9]d*)/)
   })
 
   test('should return empty list for non-existing pipeline', async () => {
