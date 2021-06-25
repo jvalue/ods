@@ -1,7 +1,10 @@
-/* eslint-env jest */
+const { setTimeout: sleep } = require('timers/promises')
+
+const { AmqpConnection } = require('@jvalue/node-dry-amqp')
 const request = require('supertest')
 const waitOn = require('wait-on')
-const amqp = require('amqplib')
+
+const { consumeTopics } = require('./amqp-msg-consumer')
 
 const URL = process.env.PIPELINE_API || 'http://localhost:8080'
 
@@ -19,8 +22,7 @@ const PIPELINE_EXECUTION_WAIT_TIME_MS = +process.env.PIPELINE_EXECUTION_WAIT_TIM
 const TEST_TIMEOUT = 120000
 
 let amqpConnection
-let channel
-const publishedEvents = new Map() // routing key -> received msgs []
+let getPublishedEvent
 
 describe('Pipeline Service Config Trigger', () => {
   beforeAll(async () => {
@@ -28,20 +30,12 @@ describe('Pipeline Service Config Trigger', () => {
     const pingUrl = URL + '/'
     await waitOn({ resources: [pingUrl], timeout: 50000, log: true })
 
-    try {
-      await initAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_PIPELINE_EXECUTION_TOPIC, AMQP_IT_QUEUE, CONNECTION_RETRIES, CONNECTION_BACKOFF)
-    } catch (e) {
-      console.log(`Could not initialize amqp connection: ${e.message}`)
-      process.exit(1)
-    }
+    amqpConnection = new AmqpConnection(AMQP_URL, CONNECTION_RETRIES, CONNECTION_BACKOFF)
+    getPublishedEvent = await consumeTopics(amqpConnection, AMQP_EXCHANGE, AMQP_IT_QUEUE, [AMQP_PIPELINE_EXECUTION_TOPIC])
   }, TEST_TIMEOUT)
 
   afterAll(async () => {
-    if (amqpConnection) {
-      console.log('Closing AMQP Connection...')
-      await amqpConnection.close()
-      console.log('AMQP Connection closed')
-    }
+    await amqpConnection?.close()
 
     // clear stored configs
     await request(URL)
@@ -79,10 +73,10 @@ describe('Pipeline Service Config Trigger', () => {
       data: JSON.stringify(data)
     }
 
-    channel.publish(AMQP_EXCHANGE, AMQP_IMPORT_SUCCESS_TOPIC, Buffer.from(JSON.stringify(importSuccessEvent)))
+    await publish(AMQP_EXCHANGE, AMQP_IMPORT_SUCCESS_TOPIC, importSuccessEvent)
 
     await sleep(PIPELINE_EXECUTION_WAIT_TIME_MS) // pipeline should have been executing until now!
-    expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC)).toContainEqual(
+    expect(getPublishedEvent(AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC)).toContainEqual(
       {
         pipelineId: configId,
         pipelineName: pipelineConfig.metadata.displayName,
@@ -120,63 +114,18 @@ describe('Pipeline Service Config Trigger', () => {
       data: JSON.stringify(data)
     }
 
-    channel.publish(AMQP_EXCHANGE, AMQP_IMPORT_SUCCESS_TOPIC, Buffer.from(JSON.stringify(importSuccessEvent)))
+    await publish(AMQP_EXCHANGE, AMQP_IMPORT_SUCCESS_TOPIC, importSuccessEvent)
 
     await sleep(PIPELINE_EXECUTION_WAIT_TIME_MS) // pipeline should have been executing until now!
-    expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)).toBeDefined()
-    expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)).toHaveLength(1)
-    expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].pipelineId).toEqual(configId)
-    expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].pipelineName).toEqual(pipelineConfig.metadata.displayName)
-    expect(publishedEvents.get(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].error).toBeDefined()
+    expect(getPublishedEvent(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)).toBeDefined()
+    expect(getPublishedEvent(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)).toHaveLength(1)
+    expect(getPublishedEvent(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].pipelineId).toEqual(configId)
+    expect(getPublishedEvent(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].pipelineName).toEqual(pipelineConfig.metadata.displayName)
+    expect(getPublishedEvent(AMQP_PIPELINE_EXECUTION_ERROR_TOPIC)[0].error).toBeDefined()
   }, TEST_TIMEOUT)
 })
 
-async function initAmqp (url, exchange, topic, queue, retries, backoff) {
-  for (let i = 1; ; i++) {
-    try {
-      if (!amqpConnection) {
-        console.log('Connecting to amqp...')
-        amqpConnection = await amqp.connect(url)
-        console.log(`Connected to AMQP on host "${url}"`)
-      }
-      if (!channel) {
-        console.log('Creating channel...')
-        channel = await amqpConnection.createChannel()
-      }
-      await channel.assertExchange(AMQP_EXCHANGE, 'topic')
-
-      await receiveAmqp(url, exchange, topic, queue)
-      console.log('AMQP initialization successful')
-      return
-    } catch (e) {
-      console.info(`Error initializing RabbitMQ(${i}/${retries}: ${e}.`)
-      if (i <= retries) {
-        console.info(`Retrying in ${backoff}`)
-        await sleep(backoff)
-      } else {
-        throw e
-      }
-    }
-  }
-}
-
-async function receiveAmqp (url, exchange, topic, queue) {
-  const q = await channel.assertQueue(queue)
-  await channel.bindQueue(q.queue, exchange, topic)
-
-  console.log(`Listening on AMQP host "${url}" on exchange "${exchange}" for topic "${topic}"`)
-
-  await channel.consume(q.queue, msg => {
-    const event = JSON.parse(msg.content.toString())
-    console.log(`Event received via amqp (${topic}): ${JSON.stringify(event)}`)
-    const routingKey = msg.fields.routingKey
-    if (!publishedEvents.get(routingKey)) {
-      publishedEvents.set(routingKey, [])
-    }
-    publishedEvents.get(routingKey).push(event)
-  })
-}
-
-function sleep (ms) {
-  return new Promise(resolve => setTimeout(resolve, ms))
+async function publish (exchange, topic, content) {
+  const channel = await amqpConnection.createChannel()
+  await channel.publish(exchange, topic, Buffer.from(JSON.stringify(content)))
 }

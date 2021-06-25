@@ -1,7 +1,7 @@
 #-------------------------------------------------------#
 # First stage: image to build and test node application #
 #-------------------------------------------------------#
-FROM node:14-alpine as build-stage
+FROM node:16-alpine as build-stage
 
 WORKDIR /build
 
@@ -25,7 +25,7 @@ RUN npm run test
 #---------------------------------------------#
 # Second stage: image to run node application #
 #---------------------------------------------#
-FROM node:14-alpine
+FROM node:16-alpine
 
 WORKDIR /app
 
