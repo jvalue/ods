@@ -1,4 +1,3 @@
-/* eslint-env jest */
 const request = require('supertest')
 const waitOn = require('wait-on')
 
@@ -15,8 +14,8 @@ describe('Pipeline Service Execution', () => {
     const response = await request(URL).get('/version')
     expect(response.status).toEqual(200)
     expect(response.type).toEqual('text/plain')
-    const semanticVersionReExp = '^(0|[1-9]d*).(0|[1-9]d*).(0|[1-9]d*)'
-    expect(response.text).toMatch(new RegExp(semanticVersionReExp))
+    const semanticVersionRegExp = /^(0|[1-9]d*).(0|[1-9]d*).(0|[1-9]d*)/
+    expect(response.text).toMatch(semanticVersionRegExp)
   })
 
   test('POST /job numerical', async () => {

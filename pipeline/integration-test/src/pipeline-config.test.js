@@ -1,7 +1,10 @@
-/* eslint-env jest */
+const { setTimeout: sleep } = require('timers/promises')
+
+const { AmqpConnection } = require('@jvalue/node-dry-amqp')
 const request = require('supertest')
 const waitOn = require('wait-on')
-const amqp = require('amqplib')
+
+const { consumeTopics } = require('./amqp-msg-consumer')
 
 const URL = process.env.PIPELINE_API || 'http://localhost:8080'
 
@@ -11,11 +14,13 @@ const AMQP_IT_QUEUE = process.env.AMQP_IT_QUEUE
 const AMQP_PIPELINE_CONFIG_CREATED_TOPIC = process.env.AMQP_PIPELINE_CONFIG_CREATED_TOPIC
 const AMQP_PIPELINE_CONFIG_UPDATED_TOPIC = process.env.AMQP_PIPELINE_CONFIG_UPDATED_TOPIC
 const AMQP_PIPELINE_CONFIG_DELETED_TOPIC = process.env.AMQP_PIPELINE_CONFIG_DELETED_TOPIC
+const CONNECTION_RETRIES = +process.env.CONNECTION_RETRIES
+const CONNECTION_BACKOFF = +process.env.CONNECTION_BACKOFF
 
 const PUBLICATION_WAIT_TIME_MS = +process.env.PUBLICATION_WAIT_TIME_MS
 
 let amqpConnection
-const publishedEvents = new Map() // routing key -> received msgs []
+let getPublishedEvent
 
 describe('Pipeline Config Test', () => {
   beforeAll(async () => {
@@ -24,18 +29,16 @@ describe('Pipeline Config Test', () => {
     await waitOn({ resources: [pingUrl], timeout: 50000, log: true })
     console.log('[online] Service with URL:  ' + pingUrl)
 
-    await connectAmqp(AMQP_URL)
-    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_CREATED_TOPIC, AMQP_IT_QUEUE)
-    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_UPDATED_TOPIC, AMQP_IT_QUEUE)
-    await receiveAmqp(AMQP_URL, AMQP_EXCHANGE, AMQP_PIPELINE_CONFIG_DELETED_TOPIC, AMQP_IT_QUEUE)
+    amqpConnection = new AmqpConnection(AMQP_URL, CONNECTION_RETRIES, CONNECTION_BACKOFF)
+    getPublishedEvent = await consumeTopics(amqpConnection, AMQP_EXCHANGE, AMQP_IT_QUEUE, [
+      AMQP_PIPELINE_CONFIG_CREATED_TOPIC,
+      AMQP_PIPELINE_CONFIG_UPDATED_TOPIC,
+      AMQP_PIPELINE_CONFIG_DELETED_TOPIC
+    ])
   }, 60000)
 
   afterAll(async () => {
-    if (amqpConnection) {
-      console.log('Closing AMQP Connection...')
-      await amqpConnection.close()
-      console.log('AMQP Connection closed')
-    }
+    await amqpConnection?.close()
 
     // clear stored configs
     await request(URL)
@@ -58,7 +61,7 @@ describe('Pipeline Config Test', () => {
 
     expect(response.status).toEqual(201)
     const configId = response.body.id
-    expect(response.header.location).toContain(configId)
+    expect(response.header.location).toEqual('/configs/1')
 
     expect(response.body.id).toBeDefined()
     expect(configId).not.toEqual(pipelineConfig.id) // id not under control of client
@@ -79,11 +82,11 @@ describe('Pipeline Config Test', () => {
     expect(delResponse.status).toEqual(204)
 
     await sleep(PUBLICATION_WAIT_TIME_MS)
-    expect(publishedEvents.get(AMQP_PIPELINE_CONFIG_CREATED_TOPIC)).toContainEqual({
+    expect(getPublishedEvent(AMQP_PIPELINE_CONFIG_CREATED_TOPIC)).toContainEqual({
       pipelineId: configId,
       pipelineName: pipelineConfig.metadata.displayName
     })
-    expect(publishedEvents.get(AMQP_PIPELINE_CONFIG_DELETED_TOPIC)).toContainEqual({
+    expect(getPublishedEvent(AMQP_PIPELINE_CONFIG_DELETED_TOPIC)).toContainEqual({
       pipelineId: configId,
       pipelineName: pipelineConfig.metadata.displayName
     })
@@ -122,15 +125,15 @@ describe('Pipeline Config Test', () => {
     expect(delResponse.status).toEqual(204)
 
     await sleep(PUBLICATION_WAIT_TIME_MS)
-    expect(publishedEvents.get(AMQP_PIPELINE_CONFIG_CREATED_TOPIC)).toContainEqual({
+    expect(getPublishedEvent(AMQP_PIPELINE_CONFIG_CREATED_TOPIC)).toContainEqual({
       pipelineId: configId,
       pipelineName: pipelineConfig.metadata.displayName
     })
-    expect(publishedEvents.get(AMQP_PIPELINE_CONFIG_UPDATED_TOPIC)).toContainEqual({
+    expect(getPublishedEvent(AMQP_PIPELINE_CONFIG_UPDATED_TOPIC)).toContainEqual({
       pipelineId: configId,
       pipelineName: pipelineConfig.metadata.displayName
     })
-    expect(publishedEvents.get(AMQP_PIPELINE_CONFIG_DELETED_TOPIC)).toContainEqual({
+    expect(getPublishedEvent(AMQP_PIPELINE_CONFIG_DELETED_TOPIC)).toContainEqual({
       pipelineId: configId,
       pipelineName: pipelineConfig.metadata.displayName
     })
@@ -153,11 +156,11 @@ describe('Pipeline Config Test', () => {
     expect(delResponse.status).toEqual(204)
 
     await sleep(PUBLICATION_WAIT_TIME_MS)
-    expect(publishedEvents.get(AMQP_PIPELINE_CONFIG_DELETED_TOPIC)).toContainEqual({
+    expect(getPublishedEvent(AMQP_PIPELINE_CONFIG_DELETED_TOPIC)).toContainEqual({
       pipelineId: config1Id,
       pipelineName: pipelineConfig.metadata.displayName
     })
-    expect(publishedEvents.get(AMQP_PIPELINE_CONFIG_DELETED_TOPIC)).toContainEqual({
+    expect(getPublishedEvent(AMQP_PIPELINE_CONFIG_DELETED_TOPIC)).toContainEqual({
       pipelineId: config2Id,
       pipelineName: pipelineConfig.metadata.displayName
     })
@@ -204,32 +207,4 @@ const pipelineConfig = {
     displayName: 'test pipeline',
     description: 'integraiton testing pipeline'
   }
-}
-
-async function connectAmqp (url) {
-  amqpConnection = await amqp.connect(url)
-  console.log(`Connected to AMQP on host "${url}"`)
-}
-
-async function receiveAmqp (url, exchange, topic, queue) {
-  const channel = await amqpConnection.createChannel()
-  const q = await channel.assertQueue(queue)
-  await channel.bindQueue(q.queue, exchange, topic)
-
-  console.log(`Listening on AMQP host "${url}" on exchange "${exchange}" for topic "${topic}"`)
-
-  await channel.consume(q.queue, msg => {
-    const event = JSON.parse(msg.content.toString())
-    const routingKey = msg.fields.routingKey
-    console.log(`Event received on topic "${routingKey}": ${JSON.stringify(event)}`)
-    if (!publishedEvents.get(routingKey)) {
-      publishedEvents.set(routingKey, [event])
-    } else {
-      publishedEvents.get(routingKey).push(event)
-    }
-  })
-}
-
-function sleep (ms) {
-  return new Promise(resolve => setTimeout(resolve, ms))
 }
