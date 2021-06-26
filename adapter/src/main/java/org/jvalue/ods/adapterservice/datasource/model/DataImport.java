@@ -8,6 +8,7 @@ import org.jvalue.ods.adapterservice.datasource.api.rest.v1.Mappings;
 import javax.persistence.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -25,23 +26,31 @@ public class DataImport {
 
   private String health;
 
+  private List<String> errorMessages;
+
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name="datasource_id")
   @JsonIgnore
   private Datasource datasource;
 
   public DataImport(Datasource datasource, String data) {
-    this.datasource = datasource;
-    this.data = data.getBytes(StandardCharsets.UTF_8);
-    this.health = "OK";
-    this.timestamp = new Date();
+    this(datasource, data, "OK", null);
   }
 
   public DataImport(Datasource datasource, String data, String health) {
+    this(datasource, data, health, null);
+  }
+
+  public DataImport(Datasource datasource, String data, String health, List<String> errorMessages) {
     this.datasource = datasource;
     this.data = data.getBytes(StandardCharsets.UTF_8);
     this.health = health;
+    this.errorMessages = errorMessages;
     this.timestamp = new Date();
+  }
+
+  public void setHealth(String health) {
+    this.health = health;
   }
 
   public String getData() {
@@ -50,7 +59,7 @@ public class DataImport {
 
   @JsonIgnore
   public MetaData getMetaData() {
-    return new MetaData(this.id, this.timestamp, this.health, this.datasource);
+    return new MetaData(this.id, this.timestamp, this.health, this.errorMessages, this.datasource);
   }
 
   // json representation without the actual data (for import list)
@@ -63,6 +72,8 @@ public class DataImport {
     private final Date timestamp;
 
     private final String health;
+
+    private final List<String> errorMessages;
 
     @JsonIgnore
     private final Datasource datasource;

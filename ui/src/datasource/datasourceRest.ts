@@ -58,6 +58,7 @@ export async function getDatasourceData (id: number): Promise<Data> {
 }
 
 export async function getLatestDataimport (id: number): Promise<DataimportMetaData> {
-  const response = await http.get<DataimportMetaData>(`/datasources/${id}/imports/latest`)
-  return response.data
+  const importResponse = await http.get<string>(`/datasources/${id}/imports/latest`)
+  const jsonResponse: DataimportMetaData = JSON.parse(importResponse.data)
+  return jsonResponse
 }

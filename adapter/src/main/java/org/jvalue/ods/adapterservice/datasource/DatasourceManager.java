@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.everit.json.schema.ValidationException;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import com.google.gson.Gson;
@@ -84,9 +85,13 @@ public class DatasourceManager {
       String schemaString = new Gson().toJson(datasource.getSchema());
       JSONObject rawSchema = new JSONObject(schemaString);
       Schema schema = SchemaLoader.load(rawSchema);
-
-      JSONObject validationData = new JSONObject(dataImport.getData());
-      schema.validate(validationData);
+      String dataString = dataImport.getData();
+      if (dataString.substring(0, 1).equals("[")) {
+        schema.validate(new JSONArray(dataImport.getData()));
+      }
+      else {
+        schema.validate(new JSONObject(dataImport.getData()));
+      }
     } catch ( ValidationException e) {
       throw e;
     }
@@ -122,12 +127,13 @@ public class DatasourceManager {
   DataImport.MetaData executeImport(Long id, RuntimeParameters runtimeParameters)
       throws DatasourceNotFoundException, ImporterParameterException, InterpreterParameterException, IOException {    
     Datasource datasource = getDatasource(id);
+    DataImport dataImport = new DataImport(datasource, "", "FAILED");
     try {
+
       AdapterConfig adapterConfig = datasource.toAdapterConfig(runtimeParameters);
-
       DataImportResponse executionResult = adapter.executeJob(adapterConfig);
-
-      DataImport dataImport = new DataImport(datasource, executionResult.getData());
+      String responseData = executionResult.getData();
+      dataImport = new DataImport(datasource, responseData);
 
       if (datasource.getSchema() != null) {
         validate(datasource, dataImport);
@@ -139,19 +145,30 @@ public class DatasourceManager {
 
       return savedDataImport.getMetaData();
     } catch (ValidationException e) {
-      handleImportException(id, datasource, "WARNING", e);
-      throw e;
+      return handleImportWarning(datasource, dataImport, e, runtimeParameters);
     } catch (ImporterParameterException | InterpreterParameterException | IOException e) {
-      handleImportException(id, datasource, "FAILED", e);
+      handleImportFailed(datasource, dataImport, e);
       throw e;
     }   
   }
 
   @Transactional
-  void handleImportException(Long id, Datasource datasource, String healthStatus, Exception e){
-      DataImport dataImport = new DataImport(datasource, "", healthStatus);
+  private DataImport.MetaData handleImportWarning (
+    Datasource datasource,
+    DataImport dataImport,
+    ValidationException e,
+    RuntimeParameters runtimeParameters
+  ) {
+    dataImport.setHealth("WARNING");
+    DataImport savedDataImport = dataImportRepository.save(dataImport);
+    amqpPublisher.publishImportSuccess(datasource.getId(), savedDataImport.getData());
+    return savedDataImport.getMetaData();
+  }
+
+  @Transactional
+  void handleImportFailed(Datasource datasource, DataImport dataImport, Exception e){
       DataImport savedDataImport = dataImportRepository.save(dataImport);
-      publishImportFailure(id, e);   
+      publishImportFailure(datasource.getId(), e);   
   }
 
   private void publishImportFailure(Long id, Exception e) {

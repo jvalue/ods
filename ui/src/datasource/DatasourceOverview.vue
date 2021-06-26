@@ -33,7 +33,7 @@
       :single-expand="true"
       :search="search"
       :custom-filter="filterOnlyDisplayName"
-      :loading="isLoadingDatasources"
+      :loading="isLoadingDatasources && isLoadingDatasourcesStatus"
       show-expand
       class="elevation-3"
     >
@@ -99,11 +99,10 @@
 
       <template #[`item.health`]="{ item }">
         <v-icon
-          v-bind="attrs"
           small
-          :color="getHealthColor(item.id)"
+          :color="getHealthColor(datasourcesStatus.get(item.id))"
         >
-          {{ getHealthIcon(item.id) }}
+          mdi-water
         </v-icon>
       </template>
 
@@ -122,13 +121,15 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import Datasource, { HealthStatus } from './datasource'
+import Datasource, { DataimportMetaData, HealthStatus } from './datasource'
 import * as DatasourceREST from './datasourceRest'
 
 @Component
 export default class DatsourceOverview extends Vue {
   private isLoadingDatasources = false
+  private isLoadingDatasourcesStatus = false
   private datasources: Datasource[] = []
+  private datasourcesStatus: Map<number, HealthStatus> = new Map<number, HealthStatus>()
   
 
   private headers = [
@@ -138,46 +139,25 @@ export default class DatsourceOverview extends Vue {
     { text: 'Location (URL)', value: 'protocol.parameters.location', sortable: false },
     { text: 'Periodic', value: 'trigger.periodic', sortable: false },
     { text: 'Actions', value: 'action', sortable: false },
-    { text: '', value: 'health'},
+    { text: 'Status', value: 'health', sortable: false},
     { text: '', value: 'data-table-expand' },
   ]
   
   private search = ''
 
-  private mounted (): void {
-    this.loadDataSources().catch(error => console.error('Failed to load datasource', error))
+  private async mounted (): Promise<void> {
+    await this.loadDataSources().catch(error => console.error('Failed to load datasource', error))
+    await this.loadDataSourcesStatus().catch(error => console.error('Failed to load datasource status', error))
   }
 
-  private async getHealthIcon (id: number): Promise<string> {
-    const dataImport = await DatasourceREST.getLatestDataimport(id)
-    const status = dataImport.health
-    let healthIcon = ''
-
+  private getHealthColor (status: HealthStatus): string {
     if (status === HealthStatus.OK) {
-      healthIcon = 'mdi-water'
+      return 'success'
     } else if (status === HealthStatus.WARINING) {
-      healthIcon = 'mdi-water'
+      return 'orange'
     } else {
-      healthIcon = 'mdi-water'
+      return 'red'
     }
-
-    return healthIcon
-  }
-
-  private async getHealthColor (id: number): Promise<string> {
-    const dataImport = await DatasourceREST.getLatestDataimport(id)
-    const status = dataImport.health
-    let healthColor = ''
-
-    if (status === HealthStatus.OK) {
-      healthColor = 'success'
-    } else if (status === HealthStatus.WARINING) {
-      healthColor = 'orange'
-    } else {
-      healthColor = 'red'
-    }
-
-    return healthColor
   }
 
   private onCreate (): void {
@@ -222,6 +202,20 @@ export default class DatsourceOverview extends Vue {
     this.isLoadingDatasources = true
     this.datasources = await DatasourceREST.getAllDatasources()
     this.isLoadingDatasources = false
+  }
+
+  private async loadDataSourcesStatus (): Promise<void> {
+    this.isLoadingDatasourcesStatus = true
+    
+    for (const element of this.datasources ) {
+      const dataImport: DataimportMetaData = await DatasourceREST.getLatestDataimport(element.id)
+      console.log(dataImport)
+      console.log(dataImport.health)
+      this.datasourcesStatus.set(element.id, dataImport.health)
+    }
+
+    console.log(this.datasourcesStatus)
+    this.isLoadingDatasourcesStatus = false
   }
 
   private datasourceToJson (datasource: Datasource): string {

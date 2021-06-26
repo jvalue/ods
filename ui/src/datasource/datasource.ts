@@ -17,7 +17,6 @@ export interface DataimportMetaData {
   id: number
   health: HealthStatus
   timestamp: string
-  datasource: Datasource
 }
 
 export interface DatasourceMetaData {
