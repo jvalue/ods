@@ -26,6 +26,7 @@ public class DataImport {
 
   private String health;
 
+  @ElementCollection
   private List<String> errorMessages;
 
   @ManyToOne(fetch = FetchType.EAGER)

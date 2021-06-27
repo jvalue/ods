@@ -145,6 +145,7 @@ public class DatasourceManager {
 
       return savedDataImport.getMetaData();
     } catch (ValidationException e) {
+      System.out.println("exception catch validation");
       return handleImportWarning(datasource, dataImport, e, runtimeParameters);
     } catch (ImporterParameterException | InterpreterParameterException | IOException e) {
       handleImportFailed(datasource, dataImport, e);
@@ -159,6 +160,7 @@ public class DatasourceManager {
     ValidationException e,
     RuntimeParameters runtimeParameters
   ) {
+    System.out.println("seting warning");
     dataImport.setHealth("WARNING");
     DataImport savedDataImport = dataImportRepository.save(dataImport);
     amqpPublisher.publishImportSuccess(datasource.getId(), savedDataImport.getData());
