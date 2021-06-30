@@ -123,6 +123,7 @@ import Pipeline from '@/pipeline/pipeline'
 import StepperButtonGroup from '@/components/StepperButtonGroup.vue'
 import PipelineMetadataConfig from '@/pipeline/edit/PipelineMetadataConfig.vue'
 import PipelineTransformationConfig from '@/pipeline/edit/transformation/PipelineTransformationConfig.vue'
+import PipelneSchemaEdit from './edit/transformation/schema/PipelineSchemaEdit.vue'
 import { requiredRule } from '@/validators'
 
 const pipelineNamespace = { namespace: 'pipeline' }
