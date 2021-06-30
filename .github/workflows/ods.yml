@@ -248,7 +248,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '16'
-      - - name: Download adapter artifact
+      - name: Download adapter artifact
         uses: actions/download-artifact@v1
         with:
           name: adapter-artifact
