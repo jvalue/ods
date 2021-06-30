@@ -238,7 +238,7 @@ jobs:
 
   # ----------------- SYSTEMTEST --------------------
   systemtest:
-    name: Systemtest
+    name: System test
     runs-on: ubuntu-18.04
     needs: [adapter-build, notification-build, scheduler-build, storage-build, pipeline-build, ui-build]
     steps:
