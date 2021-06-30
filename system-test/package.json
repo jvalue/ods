@@ -5,11 +5,11 @@
   "scripts": {
     "mockServer": "node src/mock.server.js",
     "test": "jest src/*.test.js --colors --verbose --runInBand",
-    "posttest": "killall node",
     "lint": "eslint src --fix",
     "lint-ci": "eslint src --max-warnings=0"
   },
   "dependencies": {
+    "dockerode": "^3.3.0",
     "koa": "^2.13.1",
     "koa-bodyparser": "^4.3.0",
     "koa-router": "^10.0.0",
