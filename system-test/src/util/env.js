@@ -1,4 +1,4 @@
-const DOCKER_COMPOSE_FILE = '../docker-compose.yml -f ../docker-compose.st.yml'
+const DOCKER_COMPOSE_FILES = ['../docker-compose.yml -f', '../docker-compose.st.yml']
 const DOCKER_ENV_FILE = '../.env'
 const STORAGE_URL = 'http://localhost:9000/api/storage'
 const STORAGE_MQ_URL = 'http://localhost:9000/api/storage-mq'
@@ -28,7 +28,7 @@ const ALL_SERVICES = [
 
 module.exports = {
   ALL_SERVICES,
-  DOCKER_COMPOSE_FILE,
+  DOCKER_COMPOSE_FILES,
   DOCKER_ENV_FILE,
   STORAGE_URL,
   STORAGE_MQ_URL,

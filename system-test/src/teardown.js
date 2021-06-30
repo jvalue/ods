@@ -1,5 +1,5 @@
 
-const { DOCKER_COMPOSE_FILE, DOCKER_ENV_FILE } = require('./util/env')
+const { DOCKER_COMPOSE_FILES: DOCKER_COMPOSE_FILE, DOCKER_ENV_FILE } = require('./util/env')
 const { DockerCompose } = require('./util/docker-compose')
 
 async function teardownTestEnv () {
