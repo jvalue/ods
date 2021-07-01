@@ -1,7 +1,7 @@
 const request = require('supertest')
 const {
   ALL_SERVICES,
-  DOCKER_COMPOSE_FILE,
+  DOCKER_COMPOSE_FILES,
   DOCKER_ENV_FILE,
   STORAGE_URL,
   ADAPTER_URL,
@@ -29,7 +29,7 @@ let pipelineId = -1
 describe('Test 2: Create periodic pipeline without transformation', () => {
   afterAll(async () => {
     try {
-      const dockerCompose = DockerCompose(DOCKER_COMPOSE_FILE, DOCKER_ENV_FILE)
+      const dockerCompose = DockerCompose(DOCKER_COMPOSE_FILES, DOCKER_ENV_FILE)
       await writeDockerLogs(dockerCompose, ALL_SERVICES)
     } catch (error) {
       console.log('Failed to save logs', error)

@@ -1,11 +1,11 @@
 const Docker = require('dockerode')
 
-const { DOCKER_COMPOSE_FILE, DOCKER_ENV_FILE } = require('./util/env')
+const { DOCKER_COMPOSE_FILES, DOCKER_ENV_FILE } = require('./util/env')
 const { DockerCompose } = require('./util/docker-compose')
 const { waitForServicesToBeReady } = require('./util/waitForServices')
 
 async function setupTestEnv () {
-  const dockerCompose = DockerCompose(DOCKER_COMPOSE_FILE, DOCKER_ENV_FILE)
+  const dockerCompose = DockerCompose(DOCKER_COMPOSE_FILES, DOCKER_ENV_FILE)
   const docker = new Docker({})
 
   if ((await docker.listContainers()).length !== 0) {
@@ -13,7 +13,7 @@ async function setupTestEnv () {
   }
 
   // Do not try to build the images because then timing is really hard
-  await dockerCompose('up -d --no-build mock-server')
+  await dockerCompose('up -d mock-server')
   await dockerCompose('up -d --no-build adapter-db notification-db pipeline-db storage-db')
   await dockerCompose('up -d --no-build storage-db-liquibase')
   await dockerCompose('up -d --no-build adapter notification pipeline scheduler storage storage-mq')

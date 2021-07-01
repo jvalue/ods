@@ -1,4 +1,4 @@
-const DOCKER_COMPOSE_FILES = ['../docker-compose.yml -f', '../docker-compose.st.yml']
+const DOCKER_COMPOSE_FILES = ['../docker-compose.yml', '../docker-compose.st.yml']
 const DOCKER_ENV_FILE = '../.env'
 const STORAGE_URL = 'http://localhost:9000/api/storage'
 const STORAGE_MQ_URL = 'http://localhost:9000/api/storage-mq'
