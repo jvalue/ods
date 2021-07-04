@@ -47,6 +47,7 @@ interface DatabasePipeline {
   license: string
   description: string
   createdAt: Date
+  schema?: object
 }
 
 export async function createPipelineConfigTable (client: ClientBase): Promise<void> {
@@ -122,6 +123,7 @@ function toPipelineConfig (dbResult: DatabasePipeline): PipelineConfig {
   return {
     id: +dbResult.id,
     datasourceId: +dbResult.datasourceId,
+    schema: dbResult.schema,
     transformation: {
       func: dbResult.func
     },

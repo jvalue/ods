@@ -48,5 +48,7 @@ export async function publishSuccess
     data: result,
     schema: schema
   }
+  console.debug('*******outboxerpipeline***********')
+  console.debug(schema)
   return await insertEvent(client, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC, content)
 }
