@@ -66,7 +66,14 @@ export class PipelineConfigManager {
           await EventPublisher.publishError(client, config.id, config.metadata.displayName, result.error.message))
       } else if ('data' in result) {
         await this.pgClient.transaction(async client =>
-          await EventPublisher.publishSuccess(client, config.id, config.metadata.displayName, result.data))
+          await EventPublisher.publishSuccess(
+            client,
+            config.id,
+            config.metadata.displayName,
+            result.data,
+            config.schema
+          )
+        )
       } else {
         console.error(`Pipeline ${config.id} executed with ambiguous result: no data and no error!`)
       }

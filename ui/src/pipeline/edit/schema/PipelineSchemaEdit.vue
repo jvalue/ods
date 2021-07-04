@@ -22,7 +22,7 @@
     </v-card-actions>
     <v-textarea
       v-model="schemaAsText"
-      label="Datasource schema suggestion"
+      label="Pipeline schema suggestion"
       @keyup="formChanged"
     />
   </v-form>
@@ -31,13 +31,16 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import * as SchemaSuggestionREST from './../../../../datasource/schemaSuggestionRest'
+import * as SchemaSuggestionREST from './../../../datasource/schemaSuggestionRest'
+import * as DatasourceRest from './../../../datasource/datasourceRest'
+import * as TransformationRest from './../transformation/transformationRest'
 import VueSlider from 'vue-slider-component'
 import 'vue-slider-component/theme/default.css'
 
+import { TransformationRequest, JobResult } from './../transformation/transformation'
 import { Emit, PropSync } from 'vue-property-decorator'
-import { requiredRule } from '../../../../validators'
-import PipeLine from '../../../pipeline'
+import { requiredRule } from '../../../validators'
+import Pipeline from '../../pipeline'
 import { SliderConfig } from './slider/config'
 
 @Component({ components: { VueSlider } })
@@ -50,15 +53,17 @@ export default class PipelineSchemaEdit extends Vue {
   private schemaAsText = ''
 
   mounted (): void{
-    this.schemaAsText = JSON.stringify(this.pipeLine.schema)
+    if (this.pipeline.schema !== null || this.pipeline.schema !== undefined) {
+      this.schemaAsText = JSON.stringify(this.pipeline.schema)
+    }
   }
 
   @PropSync('value')
-  private pipeLine!: PipeLine
+  private pipeline!: Pipeline
 
   @Emit('value')
-  emitValue (): PipeLine {
-    return this.pipeLine
+  emitValue (): Pipeline {
+    return this.pipeline
   }
 
   @Emit('validityChanged')
@@ -72,9 +77,12 @@ export default class PipelineSchemaEdit extends Vue {
   }
 
   private async onGenerate (): Promise<void> {
-    this.pipeLine.schema = 
-      await SchemaSuggestionREST.getSchema(JSON.stringify(preview), this.currentSliderValue)
-    this.schemaAsText = JSON.stringify(this.dataSource.schema)
+    const data = await DatasourceRest.getDatasourceData(this.pipeline.datasourceId)
+    const request: TransformationRequest = { data: data, func: this.pipeline.transformation.func }
+    const result: JobResult = await TransformationRest.transformData(request)
+    this.pipeline.schema = 
+      await SchemaSuggestionREST.getSchema(JSON.stringify(result.data), this.currentSliderValue)
+    this.schemaAsText = JSON.stringify(this.pipeline.schema)
   }
 }
 </script>

@@ -60,7 +60,6 @@ const namespace = { namespace: 'transformation' }
 export default class PipelineTransformationConfig extends Vue {
   @Prop() value!: TransformationConfig
   @Prop() datasourceId!: number
-  @Prop() transformedData!: JobResult
 
   private validForm = false // function needs to be tested in order to be valid
 
