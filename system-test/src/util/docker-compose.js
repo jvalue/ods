@@ -14,7 +14,7 @@ function DockerCompose (composeFiles, envFile) {
 }
 
 async function writeDockerLogs (dockerComposeFn, services) {
-  const escapedTestName = expect.getState().currentTestName.split(' ').join('_')
+  const escapedTestName = expect.getState().currentTestName.split(/,| |:/).join('_')
   const logFile = `${LOGS_DIRECTORY}/${escapedTestName}.log`
   if (!fs.existsSync(LOGS_DIRECTORY)) {
     fs.mkdirSync(LOGS_DIRECTORY)
