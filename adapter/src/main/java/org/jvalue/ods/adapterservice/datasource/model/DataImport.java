@@ -26,7 +26,7 @@ public class DataImport {
 
   private String health;
 
-  @ElementCollection
+  @Column(name = "error_messages", columnDefinition= "text[]")
   private List<String> errorMessages;
 
   @ManyToOne(fetch = FetchType.EAGER)
