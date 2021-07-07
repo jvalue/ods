@@ -47,7 +47,7 @@ interface DatabasePipeline {
   license: string
   description: string
   createdAt: Date
-  schema?: object
+  schema: object
 }
 
 export async function createPipelineConfigTable (client: ClientBase): Promise<void> {

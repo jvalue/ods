@@ -7,6 +7,7 @@ import PipelineExecutor from '../pipeline-execution/pipelineExecutor'
 import { PipelineConfig, PipelineConfigDTO } from './model/pipelineConfig'
 import VM2SandboxExecutor from '../pipeline-execution/sandbox/vm2SandboxExecutor'
 import * as PipelineConfigRepository from './pipelineConfigRepository'
+// import * as PipelineTransformedDataRepository from './pipelineTransformedDataRepository'
 import * as OutboxEventPublisher from './outboxEventPublisher'
 
 jest.mock('@jvalue/node-dry-pg', () => {
@@ -30,6 +31,18 @@ jest.mock('./pipelineConfigRepository', () => {
     update: jest.fn(),
     deleteById: jest.fn().mockResolvedValue(generateConfig()),
     deleteAll: jest.fn().mockResolvedValue([generateConfig(), generateConfig()])
+  }
+})
+
+jest.mock('./pipelineTransformedDataRepository', () => {
+  return {
+    insertTransformedData: jest.fn(),
+    get: jest.fn(),
+    getAll: jest.fn(),
+    getByDatasourceId: jest.fn(),
+    update: jest.fn(),
+    deleteById: jest.fn(),
+    deleteAll: jest.fn()
   }
 })
 
@@ -57,7 +70,8 @@ function generateConfig (): PipelineConfig {
       license: 'Test License',
       description: 'A test pipeline.',
       creationTimestamp: new Date()
-    }
+    },
+    schema: {}
   }
 }
 
@@ -72,12 +86,14 @@ function pipelineConfigDTO (): PipelineConfigDTO {
       displayName: 'Pipeline Test',
       license: 'Test License',
       description: 'A test pipeline.'
-    }
+    },
+    schema: {}
   }
 }
 
 const pipelineConfigRepositoryMock = mocked(PipelineConfigRepository, true)
 const outboxEventPublisherMock = mocked(OutboxEventPublisher, true)
+// const pipelineTransformedDataRepositoryMock = mocked(PipelineTransformedDataRepository, true)
 
 afterEach(() => {
   jest.clearAllMocks()

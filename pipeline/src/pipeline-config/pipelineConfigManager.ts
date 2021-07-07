@@ -1,9 +1,12 @@
 import { PostgresClient } from '@jvalue/node-dry-pg'
+import Ajv from 'ajv'
 
 import PipelineExecutor from '../pipeline-execution/pipelineExecutor'
 import { PipelineConfig, PipelineConfigDTO } from './model/pipelineConfig'
+import { PipelineTransformedDataDTO } from './model/pipelineTransformedData'
 import * as EventPublisher from './outboxEventPublisher'
 import * as PipelineConfigRepository from './pipelineConfigRepository'
+import * as PipelineTransformedDataRepository from './pipelineTransformedDataRepository'
 
 export class PipelineConfigManager {
   constructor (
@@ -59,12 +62,33 @@ export class PipelineConfigManager {
 
   async triggerConfig (datasourceId: number, data: object): Promise<void> {
     const allConfigs = await this.getByDatasourceId(datasourceId)
+    const ajv = new Ajv({ strict: false })
     for (const config of allConfigs) {
       const result = this.pipelineExecutor.executeJob(config.transformation.func, data)
       if ('error' in result) {
         await this.pgClient.transaction(async client =>
           await EventPublisher.publishError(client, config.id, config.metadata.displayName, result.error.message))
       } else if ('data' in result) {
+        let validate: any
+        let valid: boolean = true
+        if (config.schema !== undefined || config.schema !== null) {
+          validate = ajv.compile(config.schema)
+          valid = validate(result.data)
+        }
+
+        const transformedData: PipelineTransformedDataDTO = {
+          pipelineId: config.id,
+          healthStatus: 'OK',
+          data: result.data as object,
+          schema: config.schema
+        }
+
+        if (!valid) {
+          transformedData.healthStatus = 'WARNING'
+        }
+        await this.pgClient.transaction(async client =>
+          await PipelineTransformedDataRepository.insertTransformedData(client, transformedData))
+
         await this.pgClient.transaction(async client =>
           await EventPublisher.publishSuccess(
             client,
