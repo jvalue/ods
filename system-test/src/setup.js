@@ -1,14 +1,11 @@
-const Docker = require('dockerode')
-
 const { DOCKER_COMPOSE_FILES, DOCKER_ENV_FILE } = require('./util/env')
-const { DockerCompose } = require('./util/docker-compose')
+const { DockerCompose, areAllContainersDown } = require('./util/docker-compose')
 const { waitForServicesToBeReady } = require('./util/waitForServices')
 
 async function setupTestEnv () {
   const dockerCompose = DockerCompose(DOCKER_COMPOSE_FILES, DOCKER_ENV_FILE)
-  const docker = new Docker({})
 
-  if ((await docker.listContainers()).length !== 0) {
+  if (await !areAllContainersDown(dockerCompose)) {
     throw Error('Can not execute restart test if other containers are running')
   }
 

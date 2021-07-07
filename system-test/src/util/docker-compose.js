@@ -27,7 +27,16 @@ async function writeDockerLogs (dockerComposeFn, services) {
   fs.closeSync(fd)
 }
 
+async function areAllContainersDown (dockerComposeFn) {
+  const dockerPsResult = await dockerComposeFn('ps')
+  const resultMessage = dockerPsResult.stdout
+  const resultLines = resultMessage.split('\n').length
+  // 1st line = header col; 2nd line = separator; 3rd line empty (trailnig '\n'); then the running containers follow
+  return resultLines <= 3
+}
+
 module.exports = {
   DockerCompose,
-  writeDockerLogs
+  writeDockerLogs,
+  areAllContainersDown
 }
