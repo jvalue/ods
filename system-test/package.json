@@ -9,7 +9,6 @@
     "lint-ci": "eslint src --max-warnings=0"
   },
   "dependencies": {
-    "dockerode": "^3.3.0",
     "jest": "^27.0.6",
     "koa": "^2.13.1",
     "koa-bodyparser": "^4.3.0",
