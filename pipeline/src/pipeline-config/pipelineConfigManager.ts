@@ -72,32 +72,47 @@ export class PipelineConfigManager {
       } else if ('data' in result) {
         let validate: any
         let valid: boolean = true
-        if (config.schema !== undefined || config.schema !== null) {
-          validate = ajv.compile(config.schema)
-          valid = validate(result.data)
-        }
-
-        const transformedData: PipelineTransformedDataDTO = {
+        let transformedData: PipelineTransformedDataDTO = {
           pipelineId: config.id,
           healthStatus: 'OK',
-          data: result.data as object,
-          schema: config.schema
+          data: result.data as object
         }
+        if (config.schema !== undefined || config.schema !== null) {
+          validate = ajv.compile(config.schema as object)
+          valid = validate(result.data)
 
-        if (!valid) {
-          transformedData.healthStatus = 'WARNING'
-        }
-        await this.pipelineTransformedDataManager.insert(transformedData)
+          transformedData = {
+            ...transformedData,
+            schema: config.schema as object
+          }
 
-        await this.pgClient.transaction(async client =>
-          await EventPublisher.publishSuccess(
-            client,
-            config.id,
-            config.metadata.displayName,
-            result.data,
-            config.schema
+          if (!valid) {
+            transformedData.healthStatus = 'WARNING'
+          }
+          await this.pipelineTransformedDataManager.insert(transformedData)
+
+          await this.pgClient.transaction(async client =>
+            await EventPublisher.publishSuccess(
+              client,
+              config.id,
+              config.metadata.displayName,
+              result.data,
+              config.schema
+            )
           )
-        )
+        } else {
+          console.debug('***********WITHOUT SCHEMA************')
+          await this.pipelineTransformedDataManager.insert(transformedData)
+
+          await this.pgClient.transaction(async client =>
+            await EventPublisher.publishSuccess(
+              client,
+              config.id,
+              config.metadata.displayName,
+              result.data
+            )
+          )
+        }
       } else {
         console.error(`Pipeline ${config.id} executed with ambiguous result: no data and no error!`)
       }

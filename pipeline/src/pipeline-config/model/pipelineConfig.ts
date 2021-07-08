@@ -5,7 +5,7 @@ export interface PipelineConfig {
   datasourceId: number
   transformation: TransformationConfig
   metadata: Metadata
-  schema: object
+  schema?: object
 }
 
 export interface TransformationConfig {
@@ -27,7 +27,7 @@ export interface PipelineConfigDTO {
   datasourceId: number
   transformation: TransformationConfig
   metadata: MetadataDTO
-  schema: object
+  schema?: object
 }
 
 export interface MetadataDTO {

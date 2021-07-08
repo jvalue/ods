@@ -5,7 +5,7 @@ export interface PipelineTransformedData {
   pipelineId: number
   healthStatus: string
   data: unknown
-  schema: object
+  schema?: object
   createdAt?: string
 }
 
@@ -19,7 +19,7 @@ export interface PipelineTransformedDataDTO {
   pipelineId: number
   healthStatus: string
   data: unknown
-  schema: object
+  schema?: object
 }
 
 export class PipelineTransformedDataDTOValidator {
