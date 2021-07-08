@@ -6,12 +6,13 @@ import { PipelineConfig, PipelineConfigDTO } from './model/pipelineConfig'
 import { PipelineTransformedDataDTO } from './model/pipelineTransformedData'
 import * as EventPublisher from './outboxEventPublisher'
 import * as PipelineConfigRepository from './pipelineConfigRepository'
-import * as PipelineTransformedDataRepository from './pipelineTransformedDataRepository'
+import { PipelineTransformedDataManager } from './pipelineTransformedDataManager'
 
 export class PipelineConfigManager {
   constructor (
     private readonly pgClient: PostgresClient,
-    private readonly pipelineExecutor: PipelineExecutor
+    private readonly pipelineExecutor: PipelineExecutor,
+    private readonly pipelineTransformedDataManager: PipelineTransformedDataManager
   ) {}
 
   async create (config: PipelineConfigDTO): Promise<PipelineConfig> {
@@ -86,8 +87,7 @@ export class PipelineConfigManager {
         if (!valid) {
           transformedData.healthStatus = 'WARNING'
         }
-        await this.pgClient.transaction(async client =>
-          await PipelineTransformedDataRepository.insertTransformedData(client, transformedData))
+        await this.pipelineTransformedDataManager.insert(transformedData)
 
         await this.pgClient.transaction(async client =>
           await EventPublisher.publishSuccess(

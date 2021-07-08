@@ -33,6 +33,11 @@ const GET_ALL_TRANSFORMED_DATAS_STATEMENT = `
   SELECT * FROM "${POSTGRES_SCHEMA}"."${TRANSFORMED_DATA_TABLE_NAME}"`
 const GET_ALL_TRANSFORMED_DATAS_BY_PIPELINE_ID_STATEMENT = `
   SELECT * FROM "${POSTGRES_SCHEMA}"."${TRANSFORMED_DATA_TABLE_NAME}" WHERE "pipelineId" = $1`
+const GET_LATEST_TRANSFORMED_DATA_BY_PIPELINE_ID_STATEMENT = `
+  SELECT * FROM "${POSTGRES_SCHEMA}"."${TRANSFORMED_DATA_TABLE_NAME}" 
+  WHERE "pipelineId" = $1
+  ORDER BY "createdAt"
+  DESC LIMIT 1`
 const DELETE_TRANSFORMED_DATA_STATEMENT = `
   DELETE FROM "${POSTGRES_SCHEMA}"."${TRANSFORMED_DATA_TABLE_NAME}" WHERE "id" = $1 RETURNING *`
 const DELETE_ALL_TRANSFORMED_DATAS_STATEMENT = `
@@ -44,6 +49,7 @@ interface DatabaseTransformedData {
   healthStatus: string
   data: unknown
   schema: object
+  createdAt?: string
 }
 
 export async function createPipelineTransormDataTable (client: ClientBase): Promise<void> {
@@ -78,6 +84,15 @@ export async function get (client: ClientBase, id: number): Promise<PipelineTran
 export async function getAll (client: ClientBase): Promise<PipelineTransformedData[]> {
   const resultSet = await client.query(GET_ALL_TRANSFORMED_DATAS_STATEMENT, [])
   return toPipelineTransformedDatas(resultSet)
+}
+
+export async function getLatest (client: ClientBase, pipelineId: number): Promise<PipelineTransformedData | undefined> {
+  const resultSet = await client.query(GET_LATEST_TRANSFORMED_DATA_BY_PIPELINE_ID_STATEMENT, [pipelineId])
+  if (resultSet.rowCount === 0) {
+    return undefined
+  }
+  const content = toPipelineTransformedDatas(resultSet)
+  return content[0]
 }
 
 export async function getByPipelineId (client: ClientBase, pipelineId: number): Promise<PipelineTransformedData[]> {
@@ -123,7 +138,8 @@ function toPipelineTransformedData (dbResult: DatabaseTransformedData): Pipeline
     pipelineId: +dbResult.pipelineId,
     healthStatus: dbResult.healthStatus,
     data: dbResult.data,
-    schema: dbResult.schema
+    schema: dbResult.schema,
+    createdAt: dbResult.createdAt
   }
 }
 

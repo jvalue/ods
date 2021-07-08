@@ -6,6 +6,13 @@ export interface PipelineTransformedData {
   healthStatus: string
   data: unknown
   schema: object
+  createdAt?: string
+}
+
+export interface PipelineTransformedDataMetaData {
+  id: number
+  healthStatus: string
+  timestamp: string
 }
 
 export interface PipelineTransformedDataDTO {

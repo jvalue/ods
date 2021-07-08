@@ -4,8 +4,6 @@ export class PipelineExecutionEventHandler {
   constructor (private readonly contentRepository: StorageContentRepository) {}
 
   async handleSuccess (pipelineExecutedEvent: PipelineExecutedEvent): Promise<void> {
-    console.debug('***************')
-    console.debug(pipelineExecutedEvent)
     await this.contentRepository.saveContent(pipelineExecutedEvent.pipelineId.toString(), {
       pipelineId: pipelineExecutedEvent.pipelineId,
       timestamp: pipelineExecutedEvent.timestamp ?? new Date(),

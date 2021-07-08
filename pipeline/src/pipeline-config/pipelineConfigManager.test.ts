@@ -3,6 +3,7 @@ import { mocked } from 'ts-jest/utils'
 import { PostgresClient } from '@jvalue/node-dry-pg'
 
 import { PipelineConfigManager } from './pipelineConfigManager'
+import { PipelineTransformedDataManager } from './pipelineTransformedDataManager'
 import PipelineExecutor from '../pipeline-execution/pipelineExecutor'
 import { PipelineConfig, PipelineConfigDTO } from './model/pipelineConfig'
 import VM2SandboxExecutor from '../pipeline-execution/sandbox/vm2SandboxExecutor'
@@ -21,6 +22,8 @@ jest.mock('@jvalue/node-dry-pg', () => {
 })
 
 jest.mock('../pipeline-execution/pipelineExecutor')
+
+jest.mock('./pipelineTransformedDataManager')
 
 jest.mock('./pipelineConfigRepository', () => {
   return {
@@ -94,6 +97,7 @@ function pipelineConfigDTO (): PipelineConfigDTO {
 const pipelineConfigRepositoryMock = mocked(PipelineConfigRepository, true)
 const outboxEventPublisherMock = mocked(OutboxEventPublisher, true)
 // const pipelineTransformedDataRepositoryMock = mocked(PipelineTransformedDataRepository, true)
+const postgresClient = new PostgresClient()
 
 afterEach(() => {
   jest.clearAllMocks()
@@ -103,8 +107,9 @@ test('Should call create and publish event', async () => {
   const config = pipelineConfigDTO()
 
   const manager = new PipelineConfigManager(
-    new PostgresClient(),
-    new PipelineExecutor(new VM2SandboxExecutor())
+    postgresClient,
+    new PipelineExecutor(new VM2SandboxExecutor()),
+    new PipelineTransformedDataManager(postgresClient)
   )
   await manager.create(config)
 
@@ -116,8 +121,9 @@ test('Should call update and publish event', async () => {
   const config = pipelineConfigDTO()
 
   const manager = new PipelineConfigManager(
-    new PostgresClient(),
-    new PipelineExecutor(new VM2SandboxExecutor())
+    postgresClient,
+    new PipelineExecutor(new VM2SandboxExecutor()),
+    new PipelineTransformedDataManager(postgresClient)
   )
   await manager.update(123, config)
 
@@ -127,8 +133,9 @@ test('Should call update and publish event', async () => {
 
 test('Should call delete and publish event', async () => {
   const manager = new PipelineConfigManager(
-    new PostgresClient(),
-    new PipelineExecutor(new VM2SandboxExecutor())
+    postgresClient,
+    new PipelineExecutor(new VM2SandboxExecutor()),
+    new PipelineTransformedDataManager(postgresClient)
   )
   await manager.delete(1234)
 
@@ -138,8 +145,9 @@ test('Should call delete and publish event', async () => {
 
 test('Should call delete all and publish event', async () => {
   const manager = new PipelineConfigManager(
-    new PostgresClient(),
-    new PipelineExecutor(new VM2SandboxExecutor())
+    postgresClient,
+    new PipelineExecutor(new VM2SandboxExecutor()),
+    new PipelineTransformedDataManager(postgresClient)
   )
   await manager.deleteAll()
 

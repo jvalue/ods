@@ -16,3 +16,15 @@ export interface PipelineMetaData {
 export interface TransformationConfig {
   func: string
 }
+
+export interface TransformedDataMetaData {
+  id: number
+  health: HealthStatus
+  timestamp: string
+}
+
+export enum HealthStatus {
+  OK = 'OK',
+  WARINING = 'WARNING',
+  FAILED = 'FAILED'
+}
