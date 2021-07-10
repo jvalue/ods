@@ -53,5 +53,6 @@ export async function publishSuccess
       schema: schema as object
     }
   }
+  console.log('**********PIPELOINEEXECUTIONSUCCESS************')
   return await insertEvent(client, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC, content)
 }

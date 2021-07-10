@@ -19,7 +19,7 @@ export interface TransformationConfig {
 
 export interface TransformedDataMetaData {
   id: number
-  health: HealthStatus
+  healthStatus: HealthStatus
   timestamp: string
 }
 

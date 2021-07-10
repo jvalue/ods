@@ -51,7 +51,17 @@ export default class PipelineModule extends VuexModule {
     const pipelineStates = new Map<number, string>()
     for (const element of this.pipelines) {
       const transformedData: TransformedDataMetaData = await RestTransService.getLatestTransformedData(element.id)
-      pipelineStates.set(element.id, this.getHealthColor(transformedData.health))
+
+      let healthStatus: string
+      if (transformedData.healthStatus === HealthStatus.OK) {
+        healthStatus = 'success'
+      } else if (transformedData.healthStatus === HealthStatus.WARINING) {
+        healthStatus = 'orange'
+      } else {
+        healthStatus = 'red'
+      }
+
+      pipelineStates.set(element.id, healthStatus)
     }
 
     return pipelineStates
@@ -83,15 +93,5 @@ export default class PipelineModule extends VuexModule {
   public async deletePipeline (pipelineId: number): Promise<Pipeline[]> {
     await RestService.deletePipeline(pipelineId)
     return await RestService.getAllPipelines()
-  }
-
-  private getHealthColor (status: HealthStatus): string {
-    if (status === HealthStatus.OK) {
-      return 'success'
-    } else if (status === HealthStatus.WARINING) {
-      return 'orange'
-    } else {
-      return 'red'
-    }
   }
 }

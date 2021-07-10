@@ -140,8 +140,8 @@ const namespace = { namespace: 'pipeline' }
 
 @Component({})
 export default class PipelineOverview extends Vue {
-  @Action('loadPipelines', namespace) private loadPipelinesAction!: () => void
-  @Action('loadPipelineStates', namespace) private loadPipelineStatesAction!: () => void
+  @Action('loadPipelines', namespace) private loadPipelinesAction!: () => Promise<void>
+  @Action('loadPipelineStates', namespace) private loadPipelineStatesAction!: () => Promise<void>
   @Action('deletePipeline', namespace) private deletePipelineAction!: (id: number) => void
 
   @State('isLoadingPipelines', namespace) private isLoadingPipelines!: boolean
@@ -161,9 +161,9 @@ export default class PipelineOverview extends Vue {
 
   private search = ''
 
-  private mounted (): void {
-    this.loadPipelinesAction()
-    this.loadPipelineStatesAction()
+  private async mounted (): Promise<void> {
+    await this.loadPipelinesAction()
+    await this.loadPipelineStatesAction()
   }
 
   private onShowPipelineData (pipeline: Pipeline): void {
