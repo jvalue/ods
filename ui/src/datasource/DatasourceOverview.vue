@@ -100,7 +100,7 @@
       <template #[`item.health`]="{ item }">
         <v-icon
           small
-          :color="getHealthColor(datasourcesStatus.get(item.id))"
+          :color="datasourcesStatus.get(item.id)"
         >
           mdi-water
         </v-icon>
@@ -129,7 +129,7 @@ export default class DatsourceOverview extends Vue {
   private isLoadingDatasources = false
   private isLoadingDatasourcesStatus = false
   private datasources: Datasource[] = []
-  private datasourcesStatus: Map<number, HealthStatus> = new Map<number, HealthStatus>()
+  private datasourcesStatus: Map<number, string> = new Map<number, string>()
   
 
   private headers = [
@@ -206,15 +206,14 @@ export default class DatsourceOverview extends Vue {
 
   private async loadDataSourcesStatus (): Promise<void> {
     this.isLoadingDatasourcesStatus = true
-    
+    const datasourcesStatus: Map<number, string> = new Map<number, string>()
+
     for (const element of this.datasources ) {
       const dataImport: DataimportMetaData = await DatasourceREST.getLatestDataimport(element.id)
-      console.log(dataImport)
-      console.log(dataImport.health)
-      this.datasourcesStatus.set(element.id, dataImport.health)
+      datasourcesStatus.set(element.id, this.getHealthColor(dataImport.health))
     }
 
-    console.log(this.datasourcesStatus)
+    this.datasourcesStatus = datasourcesStatus
     this.isLoadingDatasourcesStatus = false
   }
 

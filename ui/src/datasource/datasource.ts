@@ -8,7 +8,7 @@ export default interface Datasource {
     type: string
     parameters: object
   }
-  schema: object
+  schema?: object
   metadata: DatasourceMetaData
   trigger: Trigger
 }
