@@ -13,17 +13,9 @@ import org.jvalue.ods.adapterservice.datasource.repository.DataImportRepository;
 import org.jvalue.ods.adapterservice.datasource.repository.DatasourceRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import org.everit.json.schema.Schema;
-import org.everit.json.schema.loader.SchemaLoader;
 import org.everit.json.schema.ValidationException;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.json.JSONTokener;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import java.util.List;
-import java.lang.reflect.Type;
+
+import org.jvalue.ods.adapterservice.datasource.validator.*;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -82,25 +74,6 @@ public class DatasourceManager {
     StreamSupport.stream(allDatasourceConfigs.spliterator(), true).forEach(amqpPublisher::publishDeletion);
   }
 
-  public void validate(Datasource datasource, DataImport dataImport) throws IOException, ValidationException {   
-    try 
-    {
-      String schemaString = new Gson().toJson(datasource.getSchema());
-      JSONObject rawSchema = new JSONObject(schemaString);
-      Schema schema = SchemaLoader.load(rawSchema);
-      String dataString = dataImport.getData();
-      if (dataString.substring(0, 1).equals("[")) {
-        schema.validate(new JSONArray(dataImport.getData()));
-      }
-      else {
-        schema.validate(new JSONObject(dataImport.getData()));
-      }
-    } catch ( ValidationException e) {
-      throw e;
-    }
-    
-  }
-
   public DataImport.MetaData trigger(Long id, RuntimeParameters runtimeParameters) throws DatasourceNotFoundException, AdapterException, IOException {
     try {
       return executeImport(id, runtimeParameters);
@@ -130,45 +103,23 @@ public class DatasourceManager {
   DataImport.MetaData executeImport(Long id, RuntimeParameters runtimeParameters)
       throws DatasourceNotFoundException, ImporterParameterException, InterpreterParameterException, IOException {    
     Datasource datasource = getDatasource(id);
-    DataImport dataImport = new DataImport(datasource, "", "FAILED");
+    DataImport dataImport = new DataImport(datasource, "", ValidationMetaData.HealthStatus.FAILED);
+    Validator validator = new JsonSchemaValidator();
     try {
-
       AdapterConfig adapterConfig = datasource.toAdapterConfig(runtimeParameters);
       DataImportResponse executionResult = adapter.executeJob(adapterConfig);
       String responseData = executionResult.getData();
       dataImport = new DataImport(datasource, responseData);
-
-      if (datasource.getSchema() != null) {
-        validate(datasource, dataImport);
-      }
+      dataImport.setValidationMetaData(validator.validate(dataImport));
 
       DataImport savedDataImport = dataImportRepository.save(dataImport);
-
       amqpPublisher.publishImportSuccess(id, savedDataImport.getData());
 
       return savedDataImport.getMetaData();
-    } catch (ValidationException e) {
-      return handleImportWarning(datasource, dataImport, e, runtimeParameters);
     } catch (ImporterParameterException | InterpreterParameterException | IOException e) {
       handleImportFailed(datasource, dataImport, e);
       throw e;
     }   
-  }
-
-  @Transactional
-  private DataImport.MetaData handleImportWarning (
-    Datasource datasource,
-    DataImport dataImport,
-    ValidationException e,
-    RuntimeParameters runtimeParameters
-  ) {
-    dataImport.setHealth("WARNING");
-    Type listType = new TypeToken<List<String>>() {}.getType();
-    String errorMessagesAsString = new Gson().toJson(e.getAllMessages(), listType);
-    dataImport.setErrorMessages(errorMessagesAsString);
-    DataImport savedDataImport = dataImportRepository.save(dataImport);
-    amqpPublisher.publishImportSuccess(datasource.getId(), savedDataImport.getData());
-    return savedDataImport.getMetaData();
   }
 
   @Transactional

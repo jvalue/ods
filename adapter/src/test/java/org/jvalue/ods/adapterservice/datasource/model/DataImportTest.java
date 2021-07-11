@@ -24,7 +24,6 @@ public class DataImportTest {
 
     JsonNode result = mapper.valueToTree(dataImport);
 
-    System.out.println(result.toString());
     assertEquals(5, result.size());
     assertEquals("null", result.get("id").asText());
     assertEquals("{\"whateverwillbe\":\"willbe\",\"quesera\":\"sera\"}", result.get("data").asText());
@@ -38,7 +37,6 @@ public class DataImportTest {
 
     JsonNode result = mapper.valueToTree(dataImport.getMetaData());
 
-    System.out.println(result.toString());
     assertEquals(5, result.size());
     assertEquals("null", result.get("id").asText());
     assertEquals("/datasources/null/imports/null/data", result.get("location").asText());

@@ -28,7 +28,7 @@ public class DatasourceTest {
 
   @Test
   public void testDeserialization() throws IOException, ParseException {
-    File datasourceConfig = new File("src/test/java/org/jvalue/ods/adapterservice/datasource/model/DatasourceConfig.json");
+    File datasourceConfig = new File("src/test/java/org/jvalue/ods/adapterservice/datasource/config/DatasourceConfig.json");
     Datasource result = mapper.readValue(datasourceConfig, Datasource.class);
 
     Datasource expectedDatasource = generateDatasource(HTTP, XML, "http://www.test-url.com");

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.jvalue.ods.adapterservice.datasource.api.rest.v1.Mappings;
+import org.jvalue.ods.adapterservice.datasource.validator.ValidationMetaData;
 
 import javax.persistence.*;
 import java.nio.charset.StandardCharsets;
@@ -28,7 +29,8 @@ public class DataImport {
   
   private Date timestamp;
 
-  private String health;
+  @Enumerated(EnumType.STRING)
+  private ValidationMetaData.HealthStatus health;
 
   @Column(columnDefinition="TEXT")
   private String errorMessages;
@@ -39,14 +41,14 @@ public class DataImport {
   private Datasource datasource;
 
   public DataImport(Datasource datasource, String data) {
-    this(datasource, data, "OK", null);
+    this(datasource, data, ValidationMetaData.HealthStatus.OK, "");
   }
 
-  public DataImport(Datasource datasource, String data, String health) {
-    this(datasource, data, health, null);
+  public DataImport(Datasource datasource, String data, ValidationMetaData.HealthStatus health) {
+    this(datasource, data, health, "");
   }
 
-  public DataImport(Datasource datasource, String data, String health, String errorMessages) {
+  public DataImport(Datasource datasource, String data, ValidationMetaData.HealthStatus health, String errorMessages) {
     this.datasource = datasource;
     this.data = data.getBytes(StandardCharsets.UTF_8);
     this.health = health;
@@ -54,12 +56,9 @@ public class DataImport {
     this.timestamp = new Date();
   }
 
-  public void setHealth(String health) {
-    this.health = health;
-  }
-
-  public void setErrorMessages(String errorMessages) {
-    this.errorMessages = errorMessages;
+  public void setValidationMetaData(ValidationMetaData validationData) {
+    this.health = validationData.getHealthStatus();
+    this.errorMessages = validationData.getErrorMessages();
   }
 
   public String getData() {
@@ -80,7 +79,7 @@ public class DataImport {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", locale = "UTC")
     private final Date timestamp;
 
-    private final String health;
+    private final ValidationMetaData.HealthStatus health;
 
     private final String errorMessages;
 
