@@ -8,7 +8,11 @@ import org.jvalue.ods.adapterservice.datasource.api.rest.v1.Mappings;
 import javax.persistence.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.List;
+
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 
 @Entity
 @NoArgsConstructor
@@ -26,8 +30,8 @@ public class DataImport {
 
   private String health;
 
-  @ElementCollection
-  private List<String> errorMessages;
+  @Column(columnDefinition="TEXT")
+  private String errorMessages;
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name="datasource_id")
@@ -42,7 +46,7 @@ public class DataImport {
     this(datasource, data, health, null);
   }
 
-  public DataImport(Datasource datasource, String data, String health, List<String> errorMessages) {
+  public DataImport(Datasource datasource, String data, String health, String errorMessages) {
     this.datasource = datasource;
     this.data = data.getBytes(StandardCharsets.UTF_8);
     this.health = health;
@@ -52,6 +56,10 @@ public class DataImport {
 
   public void setHealth(String health) {
     this.health = health;
+  }
+
+  public void setErrorMessages(String errorMessages) {
+    this.errorMessages = errorMessages;
   }
 
   public String getData() {
@@ -74,7 +82,7 @@ public class DataImport {
 
     private final String health;
 
-    private final List<String> errorMessages;
+    private final String errorMessages;
 
     @JsonIgnore
     private final Datasource datasource;

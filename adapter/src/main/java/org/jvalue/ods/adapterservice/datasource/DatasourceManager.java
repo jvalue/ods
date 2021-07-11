@@ -21,6 +21,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.util.List;
+import java.lang.reflect.Type;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -145,7 +148,6 @@ public class DatasourceManager {
 
       return savedDataImport.getMetaData();
     } catch (ValidationException e) {
-      System.out.println("exception catch validation");
       return handleImportWarning(datasource, dataImport, e, runtimeParameters);
     } catch (ImporterParameterException | InterpreterParameterException | IOException e) {
       handleImportFailed(datasource, dataImport, e);
@@ -160,8 +162,10 @@ public class DatasourceManager {
     ValidationException e,
     RuntimeParameters runtimeParameters
   ) {
-    System.out.println("seting warning");
     dataImport.setHealth("WARNING");
+    Type listType = new TypeToken<List<String>>() {}.getType();
+    String errorMessagesAsString = new Gson().toJson(e.getAllMessages(), listType);
+    dataImport.setErrorMessages(errorMessagesAsString);
     DataImport savedDataImport = dataImportRepository.save(dataImport);
     amqpPublisher.publishImportSuccess(datasource.getId(), savedDataImport.getData());
     return savedDataImport.getMetaData();
