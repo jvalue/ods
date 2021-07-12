@@ -15,12 +15,7 @@ export interface PipelineTransformedDataMetaData {
   timestamp: string
 }
 
-export interface PipelineTransformedDataDTO {
-  pipelineId: number
-  healthStatus: string
-  data: unknown
-  schema?: object
-}
+export type PipelineTransformedDataDTO = Omit<PipelineTransformedData, 'id' | 'createdAt'>
 
 export class PipelineTransformedDataDTOValidator {
   private errors: string[] = []
