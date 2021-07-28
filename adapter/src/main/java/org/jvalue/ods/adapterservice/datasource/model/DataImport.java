@@ -59,7 +59,6 @@ public class DataImport {
   }
 
   public void setValidationMetaData(ValidationMetaData validationData) {
-    System.out.println(validationData.getErrorMessages());
     this.health = validationData.getHealthStatus();
     this.errorMessages = validationData.getErrorMessages();
   }

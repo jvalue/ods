@@ -31,10 +31,7 @@ public class CustomStringArrayType implements UserType {
   @Override
   public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session)
     throws HibernateException, SQLException {
-      System.out.println("**********Print");
-      System.out.println(value);
       if (value != null && st != null) {
-        System.out.println("**********NotNullPrint");
           Array array = session.connection().createArrayOf("text", (String[])value);
           st.setArray(index, array);
       } else {
