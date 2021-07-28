@@ -33,7 +33,7 @@ test {
 
 	testLogging {
 		events "passed", "skipped", "failed"
-		showStandardStreams = true
+		//showStandardStreams = true
 		afterSuite { desc, result ->
 			if (!desc.parent) {
 				println "Tests run: ${result.testCount}, " +
