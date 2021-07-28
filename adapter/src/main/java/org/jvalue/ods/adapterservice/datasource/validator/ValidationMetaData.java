@@ -7,7 +7,7 @@ import lombok.*;
 @Setter
 public class ValidationMetaData {
   private HealthStatus healthStatus;
-  private String errorMessages;
+  private String[] errorMessages;
 
   public static enum HealthStatus {
     OK {

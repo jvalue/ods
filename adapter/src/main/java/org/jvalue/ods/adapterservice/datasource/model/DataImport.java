@@ -10,10 +10,11 @@ import javax.persistence.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.util.List;
+import java.util.ArrayList;
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 
 @Entity
 @NoArgsConstructor
@@ -32,8 +33,9 @@ public class DataImport {
   @Enumerated(EnumType.STRING)
   private ValidationMetaData.HealthStatus health;
 
-  @Column(columnDefinition="TEXT")
-  private String errorMessages;
+  @Column(columnDefinition = "text[]")
+  @Type(type = "org.jvalue.ods.adapterservice.datasource.type.CustomStringArrayType")
+  private String[] errorMessages;
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name="datasource_id")
@@ -41,14 +43,14 @@ public class DataImport {
   private Datasource datasource;
 
   public DataImport(Datasource datasource, String data) {
-    this(datasource, data, ValidationMetaData.HealthStatus.OK, "");
+    this(datasource, data, ValidationMetaData.HealthStatus.OK, null);
   }
 
   public DataImport(Datasource datasource, String data, ValidationMetaData.HealthStatus health) {
-    this(datasource, data, health, "");
+    this(datasource, data, health, null);
   }
 
-  public DataImport(Datasource datasource, String data, ValidationMetaData.HealthStatus health, String errorMessages) {
+  public DataImport(Datasource datasource, String data, ValidationMetaData.HealthStatus health, String[] errorMessages) {
     this.datasource = datasource;
     this.data = data.getBytes(StandardCharsets.UTF_8);
     this.health = health;
@@ -57,6 +59,7 @@ public class DataImport {
   }
 
   public void setValidationMetaData(ValidationMetaData validationData) {
+    System.out.println(validationData.getErrorMessages());
     this.health = validationData.getHealthStatus();
     this.errorMessages = validationData.getErrorMessages();
   }
@@ -81,7 +84,7 @@ public class DataImport {
 
     private final ValidationMetaData.HealthStatus health;
 
-    private final String errorMessages;
+    private final String[] errorMessages;
 
     @JsonIgnore
     private final Datasource datasource;

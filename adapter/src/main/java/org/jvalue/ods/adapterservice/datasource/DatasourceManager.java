@@ -111,10 +111,8 @@ public class DatasourceManager {
       String responseData = executionResult.getData();
       dataImport = new DataImport(datasource, responseData);
       dataImport.setValidationMetaData(validator.validate(dataImport));
-
       DataImport savedDataImport = dataImportRepository.save(dataImport);
       amqpPublisher.publishImportSuccess(id, savedDataImport.getData());
-
       return savedDataImport.getMetaData();
     } catch (ImporterParameterException | InterpreterParameterException | IOException e) {
       handleImportFailed(datasource, dataImport, e);

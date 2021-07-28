@@ -11,18 +11,17 @@ import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import java.util.List;
-import java.lang.reflect.Type;
+import java.util.Arrays;
 
 public class JsonSchemaValidator implements Validator {
   
   @Override
   public ValidationMetaData validate(DataImport dataImport){
-    ValidationMetaData validationMetaData = new ValidationMetaData(dataImport.getHealth(), "");
+    ValidationMetaData validationMetaData = new ValidationMetaData(dataImport.getHealth(), null);
     if (dataImport.getDatasource().getSchema() == null) {
-      return new ValidationMetaData(ValidationMetaData.HealthStatus.OK, "");
+      return new ValidationMetaData(ValidationMetaData.HealthStatus.OK, null);
     }
     try {
       String schemaString = new Gson().toJson(dataImport.getDatasource().getSchema());
@@ -35,16 +34,13 @@ public class JsonSchemaValidator implements Validator {
       else {
         schema.validate(new JSONObject(dataImport.getData()));
       }
-
+      
       validationMetaData.setHealthStatus(ValidationMetaData.HealthStatus.OK);
       return validationMetaData;
     } catch ( ValidationException e) {
-      Type listType = new TypeToken<List<String>>() {}.getType();
-      String errorMessagesAsString = new Gson().toJson(e.getAllMessages(), listType);
-
-      validationMetaData.setErrorMessages(errorMessagesAsString);
+      String[] array = e.getAllMessages().stream().toArray(String[]::new);
+      validationMetaData.setErrorMessages(array);
       validationMetaData.setHealthStatus(ValidationMetaData.HealthStatus.WARNING);
-
       return validationMetaData;
     }
   }
