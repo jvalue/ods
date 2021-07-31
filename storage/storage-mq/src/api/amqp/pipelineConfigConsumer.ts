@@ -29,7 +29,7 @@ export class PipelineConfigConsumer {
     await this.amqpChannel.bindQueue(
       AMQP_PIPELINE_CONFIG_QUEUE, AMQP_PIPELINE_CONFIG_EXCHANGE, AMQP_PIPELINE_CONFIG_QUEUE_TOPIC)
 
-    await this.amqpChannel.consume(AMQP_PIPELINE_CONFIG_QUEUE, this.consumeEvent)
+    await this.amqpChannel.consume(AMQP_PIPELINE_CONFIG_QUEUE, this.consumeEvent)±
   }
 
   // use the f = () => {} syntax to access 'this' scope
@@ -39,6 +39,7 @@ export class PipelineConfigConsumer {
       return
     }
     if (msg.fields.routingKey === AMQP_PIPELINE_CONFIG_CREATED_TOPIC) {
+      console.log(JSON.parse(msg.content.toString()))
       await this.pipelineConfigEventHandler.handleCreation(JSON.parse(msg.content.toString()))
     } else if (msg.fields.routingKey === AMQP_PIPELINE_CONFIG_DELETED_TOPIC) {
       await this.pipelineConfigEventHandler.handleDeletion(JSON.parse(msg.content.toString()))
