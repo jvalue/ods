@@ -29,7 +29,7 @@ export class PipelineConfigConsumer {
     await this.amqpChannel.bindQueue(
       AMQP_PIPELINE_CONFIG_QUEUE, AMQP_PIPELINE_CONFIG_EXCHANGE, AMQP_PIPELINE_CONFIG_QUEUE_TOPIC)
 
-    await this.amqpChannel.consume(AMQP_PIPELINE_CONFIG_QUEUE, this.consumeEvent)±
+    await this.amqpChannel.consume(AMQP_PIPELINE_CONFIG_QUEUE, this.consumeEvent)
   }
 
   // use the f = () => {} syntax to access 'this' scope

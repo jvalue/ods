@@ -60,7 +60,6 @@ export const JSONSchemaOrdngungsamtComplete = {
         type: 'object',
         additionalProperties: true,
         required: [
-          'id',
           'meldungsNummern',
           'bezirk',
           'betreff',
@@ -69,10 +68,6 @@ export const JSONSchemaOrdngungsamtComplete = {
           'sachverhalt'
         ],
         properties: {
-          id: {
-            $id: '#/root/index/items/id',
-            type: 'number'
-          },
           meldungsNummern: {
             $id: '#/root/index/items/meldungsNummern',
             type: 'array',
@@ -183,3 +178,85 @@ export const JSONSchemaPegelComplete = {
     }
   }
 }
+
+export const MultiCompleteOrdnungsamt = {
+  messages: {
+    success: true
+  },
+  results: {
+    count: 1,
+    itemsPerPage: 2
+  },
+  index: [
+    {
+      meldungsNummern: ["Hallo", "Welt"],
+      bezirk: '48900237',
+      betreff: 'FIRST',
+      erstellungsDatum: 'FIRST',
+      status: '9.56',
+      sachverhalt: 'WSA VERDEN'
+    },
+    {
+      meldungsNummern: ["Hallo", "Welt"],
+      bezirk: '48900237',
+      betreff: 'SECOND',
+      erstellungsDatum: 'SECOND',
+      status: '9.56',
+      sachverhalt: 'WSA VERDEN'
+    }
+  ]
+}
+
+export const MultiCompletePegel = [
+  {
+    uuid: '1',
+    number: '48900237',
+    shortname: 'FIRST',
+    longname: 'FIRST',
+    km: 9.56,
+    agency: 'WSA VERDEN',
+    longitude: 9.27676943537587,
+    latitude: 52.90406541008721,
+    water: {
+      shortname: 'FIRST',
+      longname: 'FIRST'
+    }
+  },
+  {
+    uuid: '2',
+    number: '48900237',
+    shortname: 'SECOND',
+    longname: 'SECOND',
+    km: 9.56,
+    agency: 'WSA VERDEN',
+    longitude: 9.27676943537587,
+    latitude: 52.90406541008721,
+    water: {
+      shortname: 'SECOND',
+      longname: 'SECOND'
+    }
+  }
+]
+
+export const PostgresSchemaPegelCreate = [
+  'CREATE TABLE IF NOT EXISTS "TESTSCHEMA"."TESTTABLE" (' +
+    '"id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY, ' +
+    '"uuid" text, "number" text, "shortname" text, "longname" text, ' +
+    '"km" integer, "agency" text, "longitude" integer, "latitude" integer, ' +
+    'CONSTRAINT "Data_pk_TESTSCHEMA_TESTTABLE" PRIMARY KEY (id)' +
+  ')',
+  'CREATE TABLE IF NOT EXISTS "TESTSCHEMA"."TESTTABLE_water" (' +
+    '"id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY, ' +
+    '"shortname" text, "longname" text, "TESTTABLEid" bigint NOT NULL, ' +
+    'CONSTRAINT "Data_fk_TESTSCHEMA_TESTTABLE_water" FOREIGN KEY (TESTTABLEid) ' +
+      'REFERENCES TESTSCHEMA.TESTTABLE(id), ' +
+    'CONSTRAINT "Data_pk_TESTSCHEMA_TESTTABLE_water" PRIMARY KEY (id)' +
+  ')'
+]
+
+export const PostgresSchemaMultiPegelInsert = [
+  'INSERT INTO "TESTSCHEMA"."TESTTABLE" ("uuid","number","shortname","longname","km","agency","longitude","latitude") VALUES ("1","48900237","FIRST","FIRST","9.56","WSA VERDEN","9.27676943537587","52.90406541008721") RETURNING *',
+  'INSERT INTO "TESTSCHEMA"."TESTTABLE_water" ("shortname","longname","TESTTABLEid") VALUES ("FIRST","FIRST","0") RETURNING *',
+  'INSERT INTO "TESTSCHEMA"."TESTTABLE" ("uuid","number","shortname","longname","km","agency","longitude","latitude") VALUES ("2","48900237","SECOND","SECOND","9.56","WSA VERDEN","9.27676943537587","52.90406541008721") RETURNING *',
+  'INSERT INTO "TESTSCHEMA"."TESTTABLE_water" ("shortname","longname","TESTTABLEid") VALUES ("SECOND","SECOND","1") RETURNING *'
+]

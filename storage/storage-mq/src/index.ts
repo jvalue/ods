@@ -9,8 +9,7 @@ import { PoolConfig } from 'pg'
 
 import { StorageContentEndpoint } from './api/rest/storageContentEndpoint'
 import { PostgresStorageContentRepository } from './storage-content/postgresStorageContentRepository'
-// import { PostgresStorageStructureRepository } from './storage-structure/postgresStorageStructureRepository'
-import { PostgresStorageStructureSchemaRepository } from './storage-structure/postgresStorageStructureSchemaRepository'
+import { PostgresStorageStructureRepository } from './storage-structure/postgresStorageStructureRepository'
 import { createPipelineConfigEventConsumer } from './api/amqp/pipelineConfigConsumer'
 import { createPipelineExecutionEventConsumer } from './api/amqp/pipelineExecutionConsumer'
 import { PipelineConfigEventHandler } from './api/pipelineConfigEventHandler'
@@ -53,7 +52,7 @@ function onAmqpConnectionLoss (error: any): never {
 async function main (): Promise<void> {
   const postgresClient = new PostgresClient(POOL_CONFIG)
   const storageContentRepository = new PostgresStorageContentRepository(postgresClient)
-  const storageStructureRepository = new PostgresStorageStructureSchemaRepository(postgresClient)
+  const storageStructureRepository = new PostgresStorageStructureRepository(postgresClient)
 
   const pipelineConfigEventHandler = new PipelineConfigEventHandler(storageStructureRepository)
   const pipelineExecutionEventHandler = new PipelineExecutionEventHandler(storageContentRepository)
