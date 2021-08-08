@@ -16,6 +16,6 @@ export interface PipelineExecutedEvent {
   pipelineId: number
   pipelineName: string
   data: unknown
-  schema: object
+  schema?: object
   timestamp?: Date
 }

@@ -1,6 +1,6 @@
 import Ajv from 'ajv'
-import { PipelineConfig } from 'src/pipeline-config/model/pipelineConfig'
-import { PipelineTransformedDataDTO } from 'src/pipeline-config/model/pipelineTransformedData'
+import { HealthStatus, PipelineConfig } from './../pipeline-config/model/pipelineConfig'
+import { PipelineTransformedDataDTO } from './../pipeline-config/model/pipelineTransformedData'
 import Validator from './validator'
 
 export default class JsonSchemaValidator implements Validator {
@@ -10,7 +10,7 @@ export default class JsonSchemaValidator implements Validator {
 
     const transformedData: PipelineTransformedDataDTO = {
       pipelineId: config.id,
-      healthStatus: 'OK',
+      healthStatus: HealthStatus.OK,
       data: data as object
     }
 
@@ -21,7 +21,7 @@ export default class JsonSchemaValidator implements Validator {
 
       const result = {
         ...transformedData,
-        healthStatus: valid ? transformedData.healthStatus : 'WARNING',
+        healthStatus: valid ? transformedData.healthStatus : HealthStatus.WARNING,
         schema: config.schema
       }
 

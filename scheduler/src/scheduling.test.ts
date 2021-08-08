@@ -28,7 +28,7 @@ describe('Scheduler', () => {
   })
 
   test('should schedule new periodic datasource and trigger once', async () => {
-    const config = generateConfig(true, new Date(Date.now() + 500), 6000)
+    const config = generateConfig(true, new Date(Date.now() + 500), 1000)
     const job = scheduler.upsertJob(config)
     expect(job.datasourceConfig).toEqual(config)
 

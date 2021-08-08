@@ -1,6 +1,7 @@
 import { ClientBase, QueryResult } from 'pg'
 
 import { POSTGRES_SCHEMA } from '../env'
+import { HealthStatus } from './model/pipelineConfig'
 import { PipelineTransformedData, PipelineTransformedDataDTO } from './model/pipelineTransformedData'
 
 const TRANSFORMED_DATA_TABLE_NAME = 'transformedData'
@@ -46,7 +47,7 @@ const DELETE_ALL_TRANSFORMED_DATAS_STATEMENT = `
 interface DatabaseTransformedData {
   id: string
   pipelineId: string
-  healthStatus: string
+  healthStatus: HealthStatus
   data: unknown
   schema: object
   createdAt?: string
