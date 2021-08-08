@@ -109,7 +109,7 @@ services:
     build: ./storage/storage-mq/
     environment:
       CONNECTION_RETRIES: 30
-      CONNECTION_BACKOFF_IN_MS: 2000
+      CONNECTION_BACKOFF_IN_MS: 20000
 
       POSTGRES_HOST: storage-db
       POSTGRES_PORT: 5432
@@ -166,6 +166,19 @@ services:
       POSTGRES_DB: ods
       POSTGRES_USER: ods_admin
       POSTGRES_PASSWORD: ods_pw
+
+  graphql:
+    image: ${DOCKER_REGISTRY}/postgraphile
+    build: ./storage/postgraphile/
+    environment:
+      DATABASE_URL: postgres://ods_admin:ods_pw@storage-db:5432/ods
+    depends_on:
+        - storage-db
+        - storage-db-liquibase
+    ports:
+        - 5432:5432
+    command: ["--connection", "${DATABASE_URL}", "--port", "5432", "--schema", "public", "--append-plugins", "postgraphile-plugin-connection-filter"]
+
   # Uncomment this if you want to persist the data.
   # volumes:
   #   - "./pgdata:/var/lib/postgresql/data"
