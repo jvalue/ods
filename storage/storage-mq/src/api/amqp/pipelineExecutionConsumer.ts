@@ -38,6 +38,7 @@ export class PipelineExecutionConsumer {
       return
     }
     if (msg.fields.routingKey === AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC) {
+      console.log(msg.content.toString())
       await this.pipelineExecutionEventHandler.handleSuccess(JSON.parse(msg.content.toString()))
     } else {
       console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)

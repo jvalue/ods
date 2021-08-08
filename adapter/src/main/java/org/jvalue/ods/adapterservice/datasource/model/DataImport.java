@@ -4,10 +4,17 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.jvalue.ods.adapterservice.datasource.api.rest.v1.Mappings;
+import org.jvalue.ods.adapterservice.datasource.validator.ValidationMetaData;
 
 import javax.persistence.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.util.List;
+import java.util.ArrayList;
+import org.hibernate.annotations.Type;
 
 @Entity
 @NoArgsConstructor
@@ -23,15 +30,37 @@ public class DataImport {
   
   private Date timestamp;
 
+  @Enumerated(EnumType.STRING)
+  private ValidationMetaData.HealthStatus health;
+
+  @Column(columnDefinition = "text[]")
+  @Type(type = "org.jvalue.ods.adapterservice.datasource.type.CustomStringArrayType")
+  private String[] errorMessages;
+
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name="datasource_id")
   @JsonIgnore
   private Datasource datasource;
 
   public DataImport(Datasource datasource, String data) {
+    this(datasource, data, ValidationMetaData.HealthStatus.OK, null);
+  }
+
+  public DataImport(Datasource datasource, String data, ValidationMetaData.HealthStatus health) {
+    this(datasource, data, health, null);
+  }
+
+  public DataImport(Datasource datasource, String data, ValidationMetaData.HealthStatus health, String[] errorMessages) {
     this.datasource = datasource;
     this.data = data.getBytes(StandardCharsets.UTF_8);
+    this.health = health;
+    this.errorMessages = errorMessages;
     this.timestamp = new Date();
+  }
+
+  public void setValidationMetaData(ValidationMetaData validationData) {
+    this.health = validationData.getHealthStatus();
+    this.errorMessages = validationData.getErrorMessages();
   }
 
   public String getData() {
@@ -40,7 +69,7 @@ public class DataImport {
 
   @JsonIgnore
   public MetaData getMetaData() {
-    return new MetaData(this.id, this.timestamp, this.datasource);
+    return new MetaData(this.id, this.timestamp, this.health, this.errorMessages, this.datasource);
   }
 
   // json representation without the actual data (for import list)
@@ -51,6 +80,11 @@ public class DataImport {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", locale = "UTC")
     private final Date timestamp;
+
+    private final ValidationMetaData.HealthStatus health;
+
+    private final String[] errorMessages;
+
     @JsonIgnore
     private final Datasource datasource;
 
