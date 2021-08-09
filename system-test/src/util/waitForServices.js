@@ -6,9 +6,7 @@ const {
   ADAPTER_URL,
   PIPELINE_URL,
   NOTIFICATION_URL,
-  MOCK_SERVER_URL,
-  MOCK_SERVER_WITHIN_DOCKER,
-  RABBIT_URL
+  MOCK_SERVER_URL
 } = require('./env')
 
 const {
@@ -28,12 +26,10 @@ async function waitForServicesToBeReady () {
       PIPELINE_URL,
       NOTIFICATION_URL + '/',
       ADAPTER_URL + '/version',
-      MOCK_SERVER_URL + '/',
-      MOCK_SERVER_WITHIN_DOCKER + '/',
-      RABBIT_URL
+      MOCK_SERVER_URL + '/'
     ],
     timeout: TIMEOUT,
-    log: false
+    log: true
   }
 
   await waitOn(waitOptions)

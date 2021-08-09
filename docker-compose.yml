@@ -315,7 +315,7 @@ services:
 
 # -------------------- RABBIT-MQ -------------------------------------------
   rabbitmq:
-    image:  rabbitmq:3-management-alpine
+    image:  rabbitmq:3.8-management-alpine
     environment:
       RABBITMQ_ERLANG_COOKIE: 'S0m3_R4bBi7_C0ok13'
       RABBITMQ_DEFAULT_USER: 'rabbit_adm'

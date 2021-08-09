@@ -6,26 +6,6 @@ version: '3.7'
 
 services:
 # --------------------- SYSTEM TEST ----------------------------------------
-  system-test:
-    image: open-data-service/ods-main/system-test
-    depends_on:
-      - mock-server
-      - rabbitmq
-      - edge
-    build:
-      context: ./system-test/
-
-    environment:
-      STORAGE_API: http://storage:3000
-      STORAGE_MQ_API: http://storage-mq:8080
-      PIPELINE_API: http://pipeline:8080
-      SCHEDULER_API: http://scheduler:8080
-      ADAPTER_API: http://adapter:8080
-      MOCK_SERVER_API: http://mock-server:8080
-      MOCK_SERVER_WITHIN_DOCKER_API: http://mock-server:8080
-      NOTIFICATION_API: http://notification:8080
-      RABBIT_API: http://rabbitmq:15672
-
   mock-server:
     build:
       context: ./system-test/

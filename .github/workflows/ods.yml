@@ -237,16 +237,17 @@ jobs:
           path: ui.tar
 
   # ----------------- SYSTEMTEST --------------------
-
   systemtest:
     name: Systemtest
     runs-on: ubuntu-18.04
-
     needs: [adapter-build, notification-build, scheduler-build, storage-build, pipeline-build, ui-build]
-
     steps:
-      - uses: actions/checkout@v2
-
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '16'
       - name: Download adapter artifact
         uses: actions/download-artifact@v1
         with:
@@ -286,12 +287,19 @@ jobs:
           docker load -i ./notification-artifact/notification.tar
           docker load -i ./adapter-artifact/adapter.tar
 
-      - name: Run Systemtest
-        # Only the logs from the services listed in the `docker-compose up` command are going to be printed to stdout
-        # To get logs from other services too, just add them to the `docker-compose up` command
-        run: |
-          docker-compose -f docker-compose.yml -f docker-compose.st.yml up --exit-code-from system-test adapter pipeline storage storage-mq notification scheduler system-test
-          docker-compose -f docker-compose.yml -f docker-compose.st.yml down
+      - name: Install dependencies
+        working-directory: ./system-test
+        run: npm ci
+      - name: Run test
+        working-directory: ./system-test
+        run: npm run test
+      - name: Upload logs
+        if: success() || failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: SystemTestLogs
+          path: system-test/logs/*
+
 
   # ----------------- Registry Upload --------------------
 
