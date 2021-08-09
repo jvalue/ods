@@ -16,7 +16,7 @@ export default class JsonSchemaValidator implements Validator {
 
     const ajv = new Ajv({ strict: false })
     if (config.schema !== undefined && config.schema !== null) {
-      validate = ajv.compile(config.schema as object)
+      validate = ajv.compile(config.schema)
       valid = validate(data)
 
       const result = {

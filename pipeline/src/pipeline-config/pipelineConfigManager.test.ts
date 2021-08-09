@@ -25,7 +25,7 @@ jest.mock('../pipeline-execution/pipelineExecutor')
 
 jest.mock('./pipelineTransformedDataManager')
 
-jest.mock('./../pipeline-validator/jsonschemavalidator')
+jest.mock('./../pipeline-validator/jsonSchemaValidator')
 
 jest.mock('./pipelineConfigRepository', () => {
   return {
