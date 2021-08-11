@@ -49,7 +49,7 @@ interface DatabaseTransformedData {
   pipelineId: string
   healthStatus: HealthStatus
   data: unknown
-  schema: object
+  schema?: object
   createdAt?: string
 }
 
@@ -61,11 +61,13 @@ export async function insertTransformedData (
   client: ClientBase,
   transformedData: PipelineTransformedDataDTO
 ): Promise<PipelineTransformedData> {
-  const data = Array.isArray(transformedData.data) ? JSON.stringify(transformedData.data) : transformedData.data
+  const transData = {
+    data: transformedData.data
+  }
   const values = [
     transformedData.pipelineId,
     transformedData.healthStatus,
-    data,
+    transData,
     transformedData.schema,
     new Date()
   ]
