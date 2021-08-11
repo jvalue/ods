@@ -5,6 +5,7 @@ export interface PipelineConfig {
   datasourceId: number
   transformation: TransformationConfig
   metadata: Metadata
+  schema?: object
 }
 
 export interface TransformationConfig {
@@ -26,6 +27,7 @@ export interface PipelineConfigDTO {
   datasourceId: number
   transformation: TransformationConfig
   metadata: MetadataDTO
+  schema?: object
 }
 
 export interface MetadataDTO {
@@ -33,6 +35,12 @@ export interface MetadataDTO {
   displayName: string
   license: string
   description: string
+}
+
+export enum HealthStatus {
+  OK = 'OK',
+  WARNING = 'WARNING',
+  FAILED = 'FAILED'
 }
 
 export class PipelineConfigDTOValidator {
