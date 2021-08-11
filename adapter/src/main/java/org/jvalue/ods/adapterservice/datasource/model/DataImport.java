@@ -10,16 +10,13 @@ import javax.persistence.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import java.util.List;
-import java.util.ArrayList;
 import org.hibernate.annotations.Type;
 
 @Entity
 @NoArgsConstructor
 @EqualsAndHashCode
 @Getter
+@Setter
 public class DataImport {
 
   @Id
@@ -27,14 +24,14 @@ public class DataImport {
   private Long id;
 
   private byte[] data;
-  
+
   private Date timestamp;
 
   @Enumerated(EnumType.STRING)
   private ValidationMetaData.HealthStatus health;
 
   @Column(columnDefinition = "text[]")
-  @Type(type = "org.jvalue.ods.adapterservice.datasource.type.CustomStringArrayType")
+  @Type(type = "org.jvalue.ods.adapterservice.datasource.model.types.CustomStringArrayType")
   private String[] errorMessages;
 
   @ManyToOne(fetch = FetchType.EAGER)
@@ -43,11 +40,11 @@ public class DataImport {
   private Datasource datasource;
 
   public DataImport(Datasource datasource, String data) {
-    this(datasource, data, ValidationMetaData.HealthStatus.OK, null);
+    this(datasource, data, ValidationMetaData.HealthStatus.OK, new String[] {});
   }
 
   public DataImport(Datasource datasource, String data, ValidationMetaData.HealthStatus health) {
-    this(datasource, data, health, null);
+    this(datasource, data, health, new String[] {});
   }
 
   public DataImport(Datasource datasource, String data, ValidationMetaData.HealthStatus health, String[] errorMessages) {
