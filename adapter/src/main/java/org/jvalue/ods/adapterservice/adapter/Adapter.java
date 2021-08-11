@@ -24,7 +24,7 @@ public class Adapter {
    * @param config the adapter configuration
    * @return the imported and interpreted data
    * @throws ImporterParameterException    on errors in the interpreter config (e.g. missing parameters, ...)
-   * @throws InterpreterParameterException on errors in the interpreter config (e.g. missing parameters, ...)         
+   * @throws InterpreterParameterException on errors in the interpreter config (e.g. missing parameters, ...)
    * @throws IOException                   on response errors when importing the data
    */
   public DataImportResponse executeJob(AdapterConfig config) throws ImporterParameterException, InterpreterParameterException, IOException {
