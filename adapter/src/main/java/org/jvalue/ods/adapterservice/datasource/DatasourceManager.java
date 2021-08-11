@@ -115,15 +115,16 @@ public class DatasourceManager {
       amqpPublisher.publishImportSuccess(id, savedDataImport.getData());
       return savedDataImport.getMetaData();
     } catch (ImporterParameterException | InterpreterParameterException | IOException e) {
+      dataImport.setErrorMessages(new String[] { e.getMessage() });
       handleImportFailed(datasource, dataImport, e);
       throw e;
-    }   
+    }
   }
 
   @Transactional
   void handleImportFailed(Datasource datasource, DataImport dataImport, Exception e){
-      DataImport savedDataImport = dataImportRepository.save(dataImport);
-      publishImportFailure(datasource.getId(), e);   
+      dataImportRepository.save(dataImport);
+      publishImportFailure(datasource.getId(), e);
   }
 
   private void publishImportFailure(Long id, Exception e) {

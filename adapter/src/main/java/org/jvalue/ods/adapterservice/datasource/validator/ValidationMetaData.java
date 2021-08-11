@@ -2,12 +2,20 @@ package org.jvalue.ods.adapterservice.datasource.validator;
 
 import lombok.*;
 
-@AllArgsConstructor
 @Getter
 @Setter
 public class ValidationMetaData {
   private HealthStatus healthStatus;
   private String[] errorMessages;
+
+  public ValidationMetaData(HealthStatus healthStatus) {
+    this(healthStatus, new String[]{});
+  }
+
+  public ValidationMetaData(HealthStatus healthStatus, String[] errorMessages) {
+    this.healthStatus = healthStatus;
+    this.errorMessages = errorMessages;
+  }
 
   public static enum HealthStatus {
     OK {

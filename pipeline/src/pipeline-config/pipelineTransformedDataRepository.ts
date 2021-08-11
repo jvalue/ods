@@ -1,6 +1,7 @@
 import { ClientBase, QueryResult } from 'pg'
 
 import { POSTGRES_SCHEMA } from '../env'
+import { HealthStatus } from './model/pipelineConfig'
 import { PipelineTransformedData, PipelineTransformedDataDTO } from './model/pipelineTransformedData'
 
 const TRANSFORMED_DATA_TABLE_NAME = 'transformedData'
@@ -46,9 +47,9 @@ const DELETE_ALL_TRANSFORMED_DATAS_STATEMENT = `
 interface DatabaseTransformedData {
   id: string
   pipelineId: string
-  healthStatus: string
+  healthStatus: HealthStatus
   data: unknown
-  schema: object
+  schema?: object
   createdAt?: string
 }
 
@@ -60,11 +61,13 @@ export async function insertTransformedData (
   client: ClientBase,
   transformedData: PipelineTransformedDataDTO
 ): Promise<PipelineTransformedData> {
-  const data = Array.isArray(transformedData.data) ? JSON.stringify(transformedData.data) : transformedData.data
+  const transData = {
+    data: transformedData.data
+  }
   const values = [
     transformedData.pipelineId,
     transformedData.healthStatus,
-    data,
+    transData,
     transformedData.schema,
     new Date()
   ]

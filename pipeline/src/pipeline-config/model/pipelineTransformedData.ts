@@ -1,9 +1,10 @@
 import { validators } from '@jvalue/node-dry-basics'
+import { HealthStatus } from './pipelineConfig'
 
 export interface PipelineTransformedData {
   id: number
   pipelineId: number
-  healthStatus: string
+  healthStatus: HealthStatus
   data: unknown
   schema?: object
   createdAt?: string
@@ -35,8 +36,6 @@ export class PipelineTransformedDataDTOValidator {
 
     if (!validators.hasProperty(pipelineTransformedData, 'healthStatus')) {
       this.errors.push('\'metadata.displayName\' property is missing')
-    } else if (!validators.isString(pipelineTransformedData.healthStatus)) {
-      this.errors.push('\'metadata.displayName\' property must be a string')
     }
 
     if (!validators.hasProperty(pipelineTransformedData, 'data')) {

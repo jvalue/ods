@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 package org.jvalue.ods.adapterservice.datasource.type;
+=======
+package org.jvalue.ods.adapterservice.datasource.model.types;
+>>>>>>> main
 
 import java.sql.*;
 import java.io.Serializable;
@@ -32,7 +36,7 @@ public class CustomStringArrayType implements UserType {
   public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session)
     throws HibernateException, SQLException {
       if (value != null && st != null) {
-          Array array = session.connection().createArrayOf("text", (String[])value);
+          Array array = session.connection().createArrayOf("text", (String[]) value);
           st.setArray(index, array);
       } else {
           st.setNull(index, sqlTypes()[0]);
@@ -54,26 +58,24 @@ public class CustomStringArrayType implements UserType {
     return (Serializable) value;
   }
   
-  
   @Override
   public boolean equals(Object x, Object y) throws HibernateException {
     return x.equals(y);
   }
- 
+
   @Override
   public int	hashCode(Object x) {
     assert (x != null);
     return x.hashCode();
   }
- 
+
   @Override
   public boolean	isMutable() {
     return false;
   }
-  
+
   @Override
   public Object	replace(Object original, Object target, Object owner) throws HibernateException {
     return original;
   }
-
 }

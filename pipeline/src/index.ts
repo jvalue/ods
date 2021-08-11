@@ -16,7 +16,7 @@ import { PipelineTransformedDataManager } from './pipeline-config/pipelineTransf
 import { PipelineTranformedDataEndpoint } from './api/rest/pipelineTransformedDataEndpoint'
 import { createDatasourceExecutionConsumer } from './api/amqp/datasourceExecutionConsumer'
 import { init as initDatabase } from './pipeline-config/pipelineDatabase'
-import JsonSchemaValidator from './pipeline-validator/jsonschemavalidator'
+import JsonSchemaValidator from './pipeline-validator/jsonSchemaValidator'
 
 const port = 8080
 let server: Server | undefined

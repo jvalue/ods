@@ -9,7 +9,7 @@ import { PipelineConfig, PipelineConfigDTO } from './model/pipelineConfig'
 import VM2SandboxExecutor from '../pipeline-execution/sandbox/vm2SandboxExecutor'
 import * as PipelineConfigRepository from './pipelineConfigRepository'
 import * as OutboxEventPublisher from './outboxEventPublisher'
-import JsonSchemaValidator from './../pipeline-validator/jsonschemavalidator'
+import JsonSchemaValidator from './../pipeline-validator/jsonSchemaValidator'
 
 jest.mock('@jvalue/node-dry-pg', () => {
   return {
@@ -25,7 +25,7 @@ jest.mock('../pipeline-execution/pipelineExecutor')
 
 jest.mock('./pipelineTransformedDataManager')
 
-jest.mock('./../pipeline-validator/jsonschemavalidator')
+jest.mock('./../pipeline-validator/jsonSchemaValidator')
 
 jest.mock('./pipelineConfigRepository', () => {
   return {

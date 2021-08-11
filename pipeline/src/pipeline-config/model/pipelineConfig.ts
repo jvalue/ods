@@ -37,6 +37,12 @@ export interface MetadataDTO {
   description: string
 }
 
+export enum HealthStatus {
+  OK = 'OK',
+  WARNING = 'WARNING',
+  FAILED = 'FAILED'
+}
+
 export class PipelineConfigDTOValidator {
   private errors: string[] = []
 
