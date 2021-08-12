@@ -44,6 +44,9 @@ export class PostgresStorageStructureSchemaRepository implements StorageStructur
     await this.postgresClient.executeQuery(CREATE_BUCKET_WATER_STATEMENT(POSTGRES_SCHEMA, tableIdentifier))
   }
 
+  async createForSchema (schema: any, schemaName: string, tableName: string): Promise<void> {
+  }
+
   /**
      * Drops a table with name, provided by parameter tableIdentifier
      * @param tableIdentifier name of the table to be dropped

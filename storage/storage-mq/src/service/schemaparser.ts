@@ -1,5 +1,4 @@
-import { response } from "express"
-import * as SharedHelper from "./sharedhelper"
+import * as SharedHelper from './sharedhelper'
 
 const CREATE_STATEMENT =
 (schema: string, table: string): string =>
@@ -92,21 +91,21 @@ export default class SchemaParser {
     parentName: string = ''
   ): Promise<string[]> {
     if (SharedHelper.isArray(schema.type)) {
-      await this.doParseArray(schema.items, data, index, schemaName, tableName, parentId,parentName)
+      await this.doParseArray(schema.items, data, index, schemaName, tableName, parentId, parentName)
     } else if (SharedHelper.isObject(schema.type)) {
       await this.doParseObject(schema, data, index, schemaName, tableName, parentId, parentName)
     }
 
-    const result: string[] = []    
-    this.postgresSchemaInsertColumns.forEach( (insertColumnString, index) => {
+    const result: string[] = []
+    this.postgresSchemaInsertColumns.forEach((insertColumnString, index) => {
       if (insertColumnString.charAt(insertColumnString.length - 1) === ',') {
         result[index] = insertColumnString.slice(0, -1) + // drops the unnecessary comma
-          this.postgresSchemaInsertValues[index].slice(0,-1) + // drops the unnecessary comma
+          this.postgresSchemaInsertValues[index].slice(0, -1) + // drops the unnecessary comma
           END_STATEMENT_INSERT
-        } else {
-          result[index] = insertColumnString +
-            this.postgresSchemaInsertValues[index] +
-            END_STATEMENT_INSERT
+      } else {
+        result[index] = insertColumnString +
+          this.postgresSchemaInsertValues[index] +
+          END_STATEMENT_INSERT
       }
     })
     return result
@@ -114,15 +113,19 @@ export default class SchemaParser {
 
   async doParseArray (
     schema: any,
-    data: any,
+    data: any[],
     index: number,
     schemaName: string,
     tableName: string,
     parentId: number,
     parentName: string = ''
-  ): Promise<any> {
-    let currentIndex = index
-    const element = data.shift() // instead of loop to handle async behavior 
+  ): Promise<void> {
+    const currentIndex = index
+    if (data.length === 0) {
+      return
+    }
+    console.log(typeof data)
+    const element = data.shift() // instead of loop to handle async behavior
     if (element === undefined) {
       return
     }
@@ -145,13 +148,14 @@ export default class SchemaParser {
         if (SharedHelper.isObject(childSchema.type)) {
           await this.parse(
             currentProperty,
-            data[key],
+            element[key],
             schemaName,
             tableName + '_' + key,
-            (parentName === '') ? parentId: 1,
+            (parentName === '') ? parentId : 1,
             ++index,
             tableName
-          )        } else {
+          )
+        } else {
           if (currentProperty.items.type !== undefined) {
             this.addToInsertArrays(currentIndex, key, element[key])
           }
@@ -160,7 +164,7 @@ export default class SchemaParser {
         this.addToInsertArrays(currentIndex, key, element[key])
       }
     }
-    if ( parentName !== '') {
+    if (parentName !== '') {
       this.addToInsertArrays(currentIndex, parentName + 'id', parentId)
     }
     await this.doParseArray(
@@ -169,7 +173,7 @@ export default class SchemaParser {
       ++index,
       schemaName,
       tableName,
-      (parentName === '') ? ++parentId: parentId,
+      (parentName === '') ? ++parentId : parentId,
       parentName
     )
   }
@@ -183,7 +187,7 @@ export default class SchemaParser {
     parentId: number,
     parentName: string = ''
   ): Promise<any> {
-    let currentIndex = index
+    const currentIndex = index
     this.postgresSchemaInsertColumns[currentIndex] = INSERT_STATEMENT_COLUMNS(schemaName, tableName) // Insertion
     this.postgresSchemaInsertValues[currentIndex] = INSERT_CONTENT_STATEMENT_VALUES
     for (const key in schema.properties) {
@@ -194,7 +198,7 @@ export default class SchemaParser {
           data[key],
           schemaName,
           tableName + '_' + key,
-          (parentName === '') ? parentId: 1,
+          (parentName === '') ? parentId : 1,
           ++index,
           tableName
         )
@@ -206,7 +210,7 @@ export default class SchemaParser {
             data[key],
             schemaName,
             tableName + '_' + key,
-            (parentName === '') ? parentId: 1,
+            (parentName === '') ? parentId : 1,
             ++index,
             tableName
           )
@@ -219,7 +223,7 @@ export default class SchemaParser {
         this.addToInsertArrays(currentIndex, key, data[key])
       }
     }
-    if ( parentName !== '') {
+    if (parentName !== '') {
       this.addToInsertArrays(currentIndex, parentName + 'id', parentId)
     }
   }

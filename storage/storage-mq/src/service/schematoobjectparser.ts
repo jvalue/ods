@@ -1,12 +1,10 @@
 import * as SharedHelper from './sharedhelper'
 
-
 export default class SchemaToObjectParser {
-  
   async parse (
     schema: any
-    ): Promise<{[key: string]: string|object} > {
-    let parsedSchema: {[key: string]: string|object}  = {}
+  ): Promise<{[key: string]: string|object} > {
+    let parsedSchema: {[key: string]: string|object} = {}
     if (SharedHelper.isArray(schema.type)) {
       parsedSchema = await this.doParse(schema.items)
     } else if (SharedHelper.isObject(schema.type)) {
@@ -17,8 +15,8 @@ export default class SchemaToObjectParser {
   }
 
   async doParse (
-    schema: any,
-  ): Promise<{[key: string]: string|object} > {
+    schema: any
+  ): Promise<{[key: string]: string|object}> {
     const parsedSchema: {[key: string]: string|object} = {}
     for (const key in schema.properties) {
       const currentProperty = schema.properties[key]
@@ -30,7 +28,8 @@ export default class SchemaToObjectParser {
           parsedSchema[key] = await this.doParse(childSchema)
         } else {
           if (currentProperty.items.type !== undefined) {
-            parsedSchema[key] = currentProperty.items.type + '[]'
+            const type: string = currentProperty.items.type
+            parsedSchema[key] = type + '[]'
           }
         }
       } else {

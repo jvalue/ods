@@ -5,6 +5,11 @@ export class PipelineConfigEventHandler {
 
   async handleCreation (pipelineCreatedEvent: PipelineCreatedEvent): Promise<void> {
     await this.structureRepository.create(pipelineCreatedEvent.pipelineId.toString())
+    await this.structureRepository.createForSchema(
+      pipelineCreatedEvent.pipelineId.toString(),
+      pipelineCreatedEvent.pipelineName,
+      pipelineCreatedEvent.schema
+    )
   }
 
   async handleDeletion (pipelineDeletedEvent: PipelineDeletedEvent): Promise<void> {
@@ -15,6 +20,7 @@ export class PipelineConfigEventHandler {
 export interface PipelineCreatedEvent {
   pipelineId: number
   pipelineName: string
+  schema: any
 }
 
 export interface PipelineDeletedEvent {

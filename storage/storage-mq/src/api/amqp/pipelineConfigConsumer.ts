@@ -39,7 +39,6 @@ export class PipelineConfigConsumer {
       return
     }
     if (msg.fields.routingKey === AMQP_PIPELINE_CONFIG_CREATED_TOPIC) {
-      console.log(JSON.parse(msg.content.toString()))
       await this.pipelineConfigEventHandler.handleCreation(JSON.parse(msg.content.toString()))
     } else if (msg.fields.routingKey === AMQP_PIPELINE_CONFIG_DELETED_TOPIC) {
       await this.pipelineConfigEventHandler.handleDeletion(JSON.parse(msg.content.toString()))

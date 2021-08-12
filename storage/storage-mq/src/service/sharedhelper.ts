@@ -9,16 +9,3 @@ export function isArray (value: string): boolean {
 export function isObject (value: string): boolean {
   return value === 'object'
 }
-
-export type MapSchema<T extends Record<string, keyof MapSchemaTypes>> = {
-  -readonly [K in keyof T]: MapSchemaTypes[T[K]]
-}
-
-type MapSchemaTypes = {
-  string: string;
-  integer: number;
-  boolean: boolean;
-  float: number;
-  number: number;
-  regexp: RegExp;
-}

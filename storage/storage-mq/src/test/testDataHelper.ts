@@ -189,7 +189,7 @@ export const MultiCompleteOrdnungsamt = {
   },
   index: [
     {
-      meldungsNummern: ["Hallo", "Welt"],
+      meldungsNummern: ['Hallo', 'Welt'],
       bezirk: '48900237',
       betreff: 'FIRST',
       erstellungsDatum: 'FIRST',
@@ -197,7 +197,7 @@ export const MultiCompleteOrdnungsamt = {
       sachverhalt: 'WSA VERDEN'
     },
     {
-      meldungsNummern: ["Hallo", "Welt"],
+      meldungsNummern: ['Hallo', 'Welt'],
       bezirk: '48900237',
       betreff: 'SECOND',
       erstellungsDatum: 'SECOND',
@@ -255,8 +255,15 @@ export const PostgresSchemaPegelCreate = [
 ]
 
 export const PostgresSchemaMultiPegelInsert = [
-  'INSERT INTO "TESTSCHEMA"."TESTTABLE" ("uuid","number","shortname","longname","km","agency","longitude","latitude") VALUES ("1","48900237","FIRST","FIRST","9.56","WSA VERDEN","9.27676943537587","52.90406541008721") RETURNING *',
-  'INSERT INTO "TESTSCHEMA"."TESTTABLE_water" ("shortname","longname","TESTTABLEid") VALUES ("FIRST","FIRST","0") RETURNING *',
-  'INSERT INTO "TESTSCHEMA"."TESTTABLE" ("uuid","number","shortname","longname","km","agency","longitude","latitude") VALUES ("2","48900237","SECOND","SECOND","9.56","WSA VERDEN","9.27676943537587","52.90406541008721") RETURNING *',
-  'INSERT INTO "TESTSCHEMA"."TESTTABLE_water" ("shortname","longname","TESTTABLEid") VALUES ("SECOND","SECOND","1") RETURNING *'
+  'INSERT INTO "TESTSCHEMA"."TESTTABLE" (' +
+  '"uuid","number","shortname","longname","km","agency","longitude","latitude")' +
+  ' VALUES ("1","48900237","FIRST","FIRST","9.56","WSA VERDEN","9.27676943537587","52.90406541008721")' +
+  ' RETURNING *',
+  'INSERT INTO "TESTSCHEMA"."TESTTABLE_water" (' +
+  '"shortname","longname","TESTTABLEid") VALUES ("FIRST","FIRST","0") RETURNING *',
+  'INSERT INTO "TESTSCHEMA"."TESTTABLE" (' +
+  '"uuid","number","shortname","longname","km","agency","longitude","latitude")' +
+  ' VALUES ("2","48900237","SECOND","SECOND","9.56","WSA VERDEN","9.27676943537587","52.90406541008721") RETURNING *',
+  'INSERT INTO "TESTSCHEMA"."TESTTABLE_water" (' +
+  '"shortname","longname","TESTTABLEid") VALUES ("SECOND","SECOND","1") RETURNING *'
 ]

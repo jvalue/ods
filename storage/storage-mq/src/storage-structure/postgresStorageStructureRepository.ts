@@ -4,6 +4,8 @@ import { POSTGRES_SCHEMA } from '../env'
 
 import { StorageStructureRepository } from './storageStructureRepository'
 
+import SchemaParser from './../service/schemaparser'
+
 const CREATE_BUCKET_STATEMENT =
 (schema: string, table: string): string => `CREATE TABLE IF NOT EXISTS "${schema}"."${table}" (
   "id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
@@ -24,6 +26,15 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
      */
   async create (tableIdentifier: string): Promise<void> {
     await this.postgresClient.executeQuery(CREATE_BUCKET_STATEMENT(POSTGRES_SCHEMA, tableIdentifier))
+  }
+
+  async createForSchema (schema: any, schemaName: string, tableName: string): Promise<void> {
+    const schemaParser = new SchemaParser()
+    const createStatements: string[] = await schemaParser.parseCreateStatement(schema, schemaName, tableName)
+
+    for (const statement of createStatements) {
+      await this.postgresClient.executeQuery(statement)
+    }
   }
 
   /**
