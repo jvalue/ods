@@ -1,4 +1,4 @@
-package org.jvalue.ods.adapterservice.datasource.type;
+package org.jvalue.ods.adapterservice.datasource.model.types;
 
 import java.sql.*;
 import java.io.Serializable;
