@@ -5,10 +5,12 @@ export class PipelineConfigEventHandler {
 
   async handleCreation (pipelineCreatedEvent: PipelineCreatedEvent): Promise<void> {
     await this.structureRepository.create(pipelineCreatedEvent.pipelineId.toString())
-    await this.structureRepository.createForSchema(
-      pipelineCreatedEvent.schema as object,
-      pipelineCreatedEvent.pipelineName + pipelineCreatedEvent.pipelineId.toString()
-    )
+    if (pipelineCreatedEvent.schema !== undefined && pipelineCreatedEvent.schema !== null) {
+      await this.structureRepository.createForSchema(
+        pipelineCreatedEvent.schema as object,
+        pipelineCreatedEvent.pipelineName + pipelineCreatedEvent.pipelineId.toString()
+      )
+    }
   }
 
   async handleDeletion (pipelineDeletedEvent: PipelineDeletedEvent): Promise<void> {
