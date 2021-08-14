@@ -18,7 +18,7 @@ export class PipelineConfigManager {
   async create (config: PipelineConfigDTO): Promise<PipelineConfig> {
     return await this.pgClient.transaction(async client => {
       const savedConfig = await PipelineConfigRepository.create(client, config)
-      await EventPublisher.publishCreation(client, savedConfig.id, savedConfig.metadata.displayName)
+      await EventPublisher.publishCreation(client, savedConfig.id, savedConfig.metadata.displayName, savedConfig.schema)
       return savedConfig
     })
   }

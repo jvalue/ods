@@ -5,9 +5,13 @@ import { POSTGRES_SCHEMA } from '../env'
 
 import { StorageContentRepository, StorageContent, InsertStorageContent } from './storageContentRepository'
 
+import SchemaParser from './../service/schemaparser'
+
 const EXISTS_TABLE_STATEMENT = (table: string): string => `SELECT to_regclass('"${POSTGRES_SCHEMA}"."${table}"')`
 const GET_ALL_CONTENT_STATEMENT = (table: string): string => `SELECT * FROM "${POSTGRES_SCHEMA}"."${table}"`
 const GET_CONTENT_STATEMENT = (table: string): string => `SELECT * FROM "${POSTGRES_SCHEMA}"."${table}" WHERE id = $1`
+const GET_LAST_ELEMENT_STATEMENT = (table: string): string =>
+  `SELECT "createdAt", "id" FROM "${POSTGRES_SCHEMA}"."${table}" ORDER BY "createdAt" DESC LIMIT 1`
 const INSERT_CONTENT_STATEMENT = (table: string): string =>
   `INSERT INTO "${POSTGRES_SCHEMA}"."${table}" ("data", "pipelineId", "timestamp") VALUES ($1, $2, $3) RETURNING *`
 
@@ -88,10 +92,29 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
        * Ref: https://github.com/brianc/node-postgres/issues/2012
        */
       const data = Array.isArray(content.data) ? JSON.stringify(content.data) : content.data
-
       const values = [data, content.pipelineId, content.timestamp]
       const { rows } = await client.query(INSERT_CONTENT_STATEMENT(tableIdentifier), values)
       return parseInt(rows[0].id)
+    })
+  }
+
+  async saveContentForSchema (tableIdentifier: string, content: InsertStorageContent): Promise<number> {
+    return await this.postgresClient.transaction(async client => {
+      const schemaParser = new SchemaParser()
+      const resultSet = await client.query(GET_LAST_ELEMENT_STATEMENT(tableIdentifier))
+      const nextId = (resultSet.rowCount === 0) ? 1 : parseInt(resultSet.rows[0].id) + 1
+
+      /**
+       * When passed an array as value, pg assumes the value is meant to be a native Postgres array
+       * and therefore fails with a "invalid input syntax for type json" error when the target field
+       * is actually of type jsob/jsonb.
+       *
+       * Ref: https://github.com/brianc/node-postgres/issues/2012
+       */
+      const insertStatement: string =
+        await schemaParser.parse(content.schema as object, content.data, POSTGRES_SCHEMA, tableIdentifier, nextId)
+      await client.query(insertStatement)
+      return nextId
     })
   }
 

@@ -2,7 +2,9 @@ import * as SharedHelper from './sharedhelper'
 
 const CREATE_STATEMENT =
 (schema: string, table: string): string =>
-`CREATE TABLE IF NOT EXISTS "${schema}"."${table}" ("id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY`
+`CREATE TABLE IF NOT EXISTS "${schema}"."${table}" (` +
+  '"id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY, ' +
+  '"createdAt" timestamp not null default CURRENT_TIMESTAMP'
 
 const INSERT_STATEMENT_COLUMNS = (schema: string, table: string): string =>
   `INSERT INTO "${schema}"."${table}" (`
@@ -14,11 +16,12 @@ const PRIMARY_KEY_STATEMENT =
 
 const FOREGIN_KEY_STATEMENT =
 (schema: string, table: string, parentTable: string): string =>
-`, CONSTRAINT "Data_fk_${schema}_${table}" FOREIGN KEY (${parentTable}id) REFERENCES ${schema}.${parentTable}(id)`
+`, CONSTRAINT "Data_fk_${schema}_${table}" FOREIGN KEY (${parentTable}id)` +
+  `REFERENCES ${schema}.${parentTable}(id)`
 
 const END_STATEMENT_CREATE = ')'
 
-const END_STATEMENT_INSERT = ') RETURNING *'
+const END_STATEMENT_INSERT = ') RETURNING *;'
 
 const PG_TYPES: any = { string: 'text', number: 'integer', boolean: 'boolean' }
 
@@ -89,25 +92,26 @@ export default class SchemaParser {
     parentId: number,
     index: number = 0,
     parentName: string = ''
-  ): Promise<string[]> {
+  ): Promise<string> {
     if (SharedHelper.isArray(schema.type)) {
       await this.doParseArray(schema.items, data, index, schemaName, tableName, parentId, parentName)
     } else if (SharedHelper.isObject(schema.type)) {
       await this.doParseObject(schema, data, index, schemaName, tableName, parentId, parentName)
     }
 
-    const result: string[] = []
+    let result: string = 'BEGIN;'
     this.postgresSchemaInsertColumns.forEach((insertColumnString, index) => {
       if (insertColumnString.charAt(insertColumnString.length - 1) === ',') {
-        result[index] = insertColumnString.slice(0, -1) + // drops the unnecessary comma
+        result += insertColumnString.slice(0, -1) + // drops the unnecessary comma
           this.postgresSchemaInsertValues[index].slice(0, -1) + // drops the unnecessary comma
           END_STATEMENT_INSERT
       } else {
-        result[index] = insertColumnString +
+        result += insertColumnString +
           this.postgresSchemaInsertValues[index] +
           END_STATEMENT_INSERT
       }
     })
+    result += 'END;'
     return result
   }
 
@@ -120,62 +124,50 @@ export default class SchemaParser {
     parentId: number,
     parentName: string = ''
   ): Promise<void> {
-    const currentIndex = index
-    if (data.length === 0) {
-      return
-    }
-    console.log(typeof data)
-    const element = data.shift() // instead of loop to handle async behavior
-    if (element === undefined) {
-      return
-    }
-    this.postgresSchemaInsertColumns[currentIndex] = INSERT_STATEMENT_COLUMNS(schemaName, tableName) // Insertion
-    this.postgresSchemaInsertValues[currentIndex] = INSERT_CONTENT_STATEMENT_VALUES
-    for (const key in schema.properties) {
-      const currentProperty = schema.properties[key]
-      if (SharedHelper.isObject(currentProperty.type)) {
-        await this.parse(
-          currentProperty,
-          element[key],
-          schemaName,
-          tableName + '_' + key,
-          parentId,
-          ++index,
-          tableName
-        )
-      } else if (SharedHelper.isArray(currentProperty.type)) {
-        const childSchema = currentProperty.items
-        if (SharedHelper.isObject(childSchema.type)) {
+    let element: any
+    for (element of data) {
+      const currentIndex = index
+      this.postgresSchemaInsertColumns[currentIndex] = INSERT_STATEMENT_COLUMNS(schemaName, tableName) // Insertion
+      this.postgresSchemaInsertValues[currentIndex] = INSERT_CONTENT_STATEMENT_VALUES
+      for (const key in schema.properties) {
+        const currentProperty = schema.properties[key]
+        if (SharedHelper.isObject(currentProperty.type)) {
           await this.parse(
             currentProperty,
             element[key],
             schemaName,
             tableName + '_' + key,
-            (parentName === '') ? parentId : 1,
+            parentId,
             ++index,
             tableName
           )
-        } else {
-          if (currentProperty.items.type !== undefined) {
-            this.addToInsertArrays(currentIndex, key, element[key])
+        } else if (SharedHelper.isArray(currentProperty.type)) {
+          const childSchema = currentProperty.items
+          if (SharedHelper.isObject(childSchema.type)) {
+            await this.parse(
+              currentProperty,
+              element[key],
+              schemaName,
+              tableName + '_' + key,
+              (parentName === '') ? parentId : 1,
+              ++index,
+              tableName
+            )
+          } else {
+            if (currentProperty.items.type !== undefined) {
+              this.addToInsertArrays(currentIndex, key, element[key], `${currentProperty.items.type}[]`)
+            }
           }
+        } else {
+          this.addToInsertArrays(currentIndex, key, element[key], currentProperty.type)
         }
-      } else {
-        this.addToInsertArrays(currentIndex, key, element[key])
       }
+      if (parentName !== '') {
+        this.addToInsertArrays(currentIndex, parentName + 'id', parentId, 'number')
+      }
+      index = await this.asyncIncrement(index)
+      parentId = await this.asyncIncParent(parentId, parentName)
     }
-    if (parentName !== '') {
-      this.addToInsertArrays(currentIndex, parentName + 'id', parentId)
-    }
-    await this.doParseArray(
-      schema,
-      data,
-      ++index,
-      schemaName,
-      tableName,
-      (parentName === '') ? ++parentId : parentId,
-      parentName
-    )
   }
 
   async doParseObject (
@@ -216,20 +208,37 @@ export default class SchemaParser {
           )
         } else {
           if (currentProperty.items.type !== undefined) {
-            this.addToInsertArrays(currentIndex, key, data[key])
+            this.addToInsertArrays(currentIndex, key, data[key], `${currentProperty.items.type}[]`)
           }
         }
       } else {
-        this.addToInsertArrays(currentIndex, key, data[key])
+        this.addToInsertArrays(currentIndex, key, data[key], currentProperty.type)
       }
     }
     if (parentName !== '') {
-      this.addToInsertArrays(currentIndex, parentName + 'id', parentId)
+      this.addToInsertArrays(currentIndex, parentName + 'id', parentId, 'number')
     }
   }
 
-  addToInsertArrays (index: number, key: string, value: any): void {
+  addToInsertArrays (index: number, key: string, value: any, type: string): void {
     this.postgresSchemaInsertColumns[index] += `"${key}",`
-    this.postgresSchemaInsertValues[index] += `"${value}",`
+    if (value === undefined) {
+      value = null
+    }
+    if (type.includes('[]')) {
+      this.postgresSchemaInsertValues[index] += `'{"${value}"}',`
+    } else if (type === 'number') {
+      this.postgresSchemaInsertValues[index] += `${value},`
+    } else {
+      this.postgresSchemaInsertValues[index] += `'${value}',`
+    }
+  }
+
+  async asyncIncrement (value: number): Promise<number> {
+    return ++value
+  }
+
+  async asyncIncParent (value: number, name: string): Promise<number> {
+    return (name === '') ? ++value : value
   }
 }

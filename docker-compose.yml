@@ -177,17 +177,17 @@ services:
         - storage-db-liquibase
     ports:
         - 5432:5432
-    command: ["--connection", "${DATABASE_URL}", "--port", "5432", "--schema", "public", "--append-plugins", "postgraphile-plugin-connection-filter"]
+    command: ["--connection", "${DATABASE_URL}", "--port", "5432", "--schema", "storage", "--append-plugins", "postgraphile-plugin-connection-filter"]
 
   # Uncomment this if you want to persist the data.
   # volumes:
   #   - "./pgdata:/var/lib/postgresql/data"
 
   # Uncomment this if you want to manage the Postgres databases with adminer
-  # adminer: # management UI for Postgres
-  #   image: adminer
-  #   ports:
-  #     - 8081:8080
+  adminer: # management UI for Postgres
+    image: adminer
+    ports:
+      - 8081:8080
 
   storage-db-liquibase: # perform database migration on start up
     image: ${DOCKER_REGISTRY}/storage-db-liquibase

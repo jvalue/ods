@@ -6,10 +6,16 @@ import {
   AMQP_PIPELINE_EXECUTION_ERROR_TOPIC, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC
 } from '../env'
 
-export async function publishCreation (client: ClientBase, pipelineId: number, pipelineName: string): Promise<string> {
+export async function publishCreation (
+  client: ClientBase,
+  pipelineId: number,
+  pipelineName: string,
+  schema?: object
+): Promise<string> {
   const content = {
     pipelineId: pipelineId,
-    pipelineName: pipelineName
+    pipelineName: pipelineName,
+    schema: (schema !== null) ? schema as object : undefined
   }
   return await insertEvent(client, AMQP_PIPELINE_CONFIG_CREATED_TOPIC, content)
 }

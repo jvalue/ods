@@ -241,12 +241,14 @@ export const MultiCompletePegel = [
 export const PostgresSchemaPegelCreate = [
   'CREATE TABLE IF NOT EXISTS "TESTSCHEMA"."TESTTABLE" (' +
     '"id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY, ' +
+    '"createdAt" timestamp not null default CURRENT_TIMESTAMP, ' +
     '"uuid" text, "number" text, "shortname" text, "longname" text, ' +
     '"km" integer, "agency" text, "longitude" integer, "latitude" integer, ' +
     'CONSTRAINT "Data_pk_TESTSCHEMA_TESTTABLE" PRIMARY KEY (id)' +
   ')',
   'CREATE TABLE IF NOT EXISTS "TESTSCHEMA"."TESTTABLE_water" (' +
     '"id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY, ' +
+    '"createdAt" timestamp not null default CURRENT_TIMESTAMP, ' +
     '"shortname" text, "longname" text, "TESTTABLEid" bigint NOT NULL, ' +
     'CONSTRAINT "Data_fk_TESTSCHEMA_TESTTABLE_water" FOREIGN KEY (TESTTABLEid) ' +
       'REFERENCES TESTSCHEMA.TESTTABLE(id), ' +
@@ -254,16 +256,16 @@ export const PostgresSchemaPegelCreate = [
   ')'
 ]
 
-export const PostgresSchemaMultiPegelInsert = [
+/* export const PostgresSchemaMultiPegelInsert =
   'INSERT INTO "TESTSCHEMA"."TESTTABLE" (' +
   '"uuid","number","shortname","longname","km","agency","longitude","latitude")' +
-  ' VALUES ("1","48900237","FIRST","FIRST","9.56","WSA VERDEN","9.27676943537587","52.90406541008721")' +
-  ' RETURNING *',
+  ' VALUES ('1','48900237','FIRST','FIRST',9.56,'WSA VERDEN',9.27676943537587,52.90406541008721)` +
+  ' RETURNING *;' +
   'INSERT INTO "TESTSCHEMA"."TESTTABLE_water" (' +
-  '"shortname","longname","TESTTABLEid") VALUES ("FIRST","FIRST","0") RETURNING *',
+  `"shortname","longname","TESTTABLEid") VALUES ('FIRST','FIRST',0) RETURNING *;` +
   'INSERT INTO "TESTSCHEMA"."TESTTABLE" (' +
   '"uuid","number","shortname","longname","km","agency","longitude","latitude")' +
-  ' VALUES ("2","48900237","SECOND","SECOND","9.56","WSA VERDEN","9.27676943537587","52.90406541008721") RETURNING *',
+  ` VALUES ('2','48900237','SECOND','SECOND',9.56,'WSA VERDEN',9.27676943537587,52.90406541008721) RETURNING *;` +
   'INSERT INTO "TESTSCHEMA"."TESTTABLE_water" (' +
-  '"shortname","longname","TESTTABLEid") VALUES ("SECOND","SECOND","1") RETURNING *'
-]
+  `"shortname","longname","TESTTABLEid") VALUES ('SECOND','SECOND',1) RETURNING *;`
+*/

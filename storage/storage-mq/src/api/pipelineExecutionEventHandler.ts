@@ -9,6 +9,15 @@ export class PipelineExecutionEventHandler {
       timestamp: pipelineExecutedEvent.timestamp ?? new Date(),
       data: pipelineExecutedEvent.data
     })
+
+    await this.contentRepository.saveContentForSchema(
+      pipelineExecutedEvent.pipelineName + pipelineExecutedEvent.pipelineId.toString(), {
+        pipelineId: pipelineExecutedEvent.pipelineId,
+        timestamp: pipelineExecutedEvent.timestamp ?? new Date(),
+        data: pipelineExecutedEvent.data,
+        schema: pipelineExecutedEvent.schema
+      }
+    )
   }
 }
 

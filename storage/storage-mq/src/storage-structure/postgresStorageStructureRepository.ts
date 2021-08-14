@@ -26,12 +26,12 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
      */
   async create (tableIdentifier: string): Promise<void> {
     await this.postgresClient.executeQuery(CREATE_BUCKET_STATEMENT(POSTGRES_SCHEMA, tableIdentifier))
+    console.log('called create: postgresStorageStructureRepository')
   }
 
-  async createForSchema (schema: any, schemaName: string, tableName: string): Promise<void> {
+  async createForSchema (schema: any, tableName: string): Promise<void> {
     const schemaParser = new SchemaParser()
-    const createStatements: string[] = await schemaParser.parseCreateStatement(schema, schemaName, tableName)
-
+    const createStatements: string[] = await schemaParser.parseCreateStatement(schema, POSTGRES_SCHEMA, tableName)
     for (const statement of createStatements) {
       await this.postgresClient.executeQuery(statement)
     }
