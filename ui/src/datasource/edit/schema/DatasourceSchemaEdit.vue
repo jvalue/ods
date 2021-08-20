@@ -70,6 +70,7 @@ export default class DatasourceSchemaEdit extends Vue {
   }
 
   formChanged (): void {
+    this.dataSource.schema = JSON.parse(this.schemaAsText)
     this.emitValue()
     this.emitValid()
   }

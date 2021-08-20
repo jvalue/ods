@@ -1,3 +1,4 @@
+import PostgresParser from './postgresParser'
 import * as SharedHelper from './sharedhelper'
 
 const CREATE_STATEMENT =
@@ -25,7 +26,7 @@ const END_STATEMENT_INSERT = ') RETURNING *;'
 
 const PG_TYPES: any = { string: 'text', number: 'integer', boolean: 'boolean' }
 
-export default class SchemaParser {
+export default class JsonSchemaParser implements PostgresParser {
   private postgresSchemaCreate: string[] = []
   private postgresSchemaInsertColumns: string[] = []
   private postgresSchemaInsertValues: string[] = []
@@ -84,7 +85,7 @@ export default class SchemaParser {
     this.postgresSchemaCreate[currentIndex] += END_STATEMENT_CREATE
   }
 
-  async parse (
+  async parseInsertStatement (
     schema: any,
     data: any,
     schemaName: string,
@@ -94,9 +95,9 @@ export default class SchemaParser {
     parentName: string = ''
   ): Promise<string> {
     if (SharedHelper.isArray(schema.type)) {
-      await this.doParseArray(schema.items, data, index, schemaName, tableName, parentId, parentName)
+      await this.doParseInsertArray(schema.items, data, index, schemaName, tableName, parentId, parentName)
     } else if (SharedHelper.isObject(schema.type)) {
-      await this.doParseObject(schema, data, index, schemaName, tableName, parentId, parentName)
+      await this.doParseInsertObject(schema, data, index, schemaName, tableName, parentId, parentName)
     }
 
     let result: string = 'BEGIN;'
@@ -115,7 +116,7 @@ export default class SchemaParser {
     return result
   }
 
-  async doParseArray (
+  async doParseInsertArray (
     schema: any,
     data: any[],
     index: number,
@@ -132,7 +133,7 @@ export default class SchemaParser {
       for (const key in schema.properties) {
         const currentProperty = schema.properties[key]
         if (SharedHelper.isObject(currentProperty.type)) {
-          await this.parse(
+          await this.parseInsertStatement(
             currentProperty,
             element[key],
             schemaName,
@@ -144,7 +145,7 @@ export default class SchemaParser {
         } else if (SharedHelper.isArray(currentProperty.type)) {
           const childSchema = currentProperty.items
           if (SharedHelper.isObject(childSchema.type)) {
-            await this.parse(
+            await this.parseInsertStatement(
               currentProperty,
               element[key],
               schemaName,
@@ -170,7 +171,7 @@ export default class SchemaParser {
     }
   }
 
-  async doParseObject (
+  async doParseInsertObject (
     schema: any,
     data: any,
     index: number,
@@ -185,7 +186,7 @@ export default class SchemaParser {
     for (const key in schema.properties) {
       const currentProperty = schema.properties[key]
       if (SharedHelper.isObject(currentProperty.type)) {
-        await this.parse(
+        await this.parseInsertStatement(
           currentProperty,
           data[key],
           schemaName,
@@ -197,7 +198,7 @@ export default class SchemaParser {
       } else if (SharedHelper.isArray(currentProperty.type)) {
         const childSchema = currentProperty.items
         if (SharedHelper.isObject(childSchema.type)) {
-          await this.parse(
+          await this.parseInsertStatement(
             currentProperty,
             data[key],
             schemaName,

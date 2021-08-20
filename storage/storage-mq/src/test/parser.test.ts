@@ -1,12 +1,13 @@
-import SchemaParser from '../service/schemaparser'
+import PostgresParser from 'src/service/postgresParser'
+import JsonSchemaParser from '../service/jsonSchemaParser'
 // import SchemaToObjectParser from '../service/schematoobjectparser'
 import * as testData from './testDataHelper'
 
 describe('schema generation', () => {
   test('return valid jsonschema for Pegel based on the ontology schema', async () => {
-    const schemaParser = new SchemaParser()
+    const jsonSchemaParser: PostgresParser = new JsonSchemaParser()
     const response =
-      await schemaParser.parseCreateStatement(testData.JSONSchemaPegelComplete, 'TESTSCHEMA', 'TESTTABLE')
+      await jsonSchemaParser.parseCreateStatement(testData.JSONSchemaPegelComplete, 'TESTSCHEMA', 'TESTTABLE')
     expect(response[0]).toEqual(testData.PostgresSchemaPegelCreate[0])
   })
 })

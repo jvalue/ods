@@ -4,7 +4,8 @@ import { POSTGRES_SCHEMA } from '../env'
 
 import { StorageStructureRepository } from './storageStructureRepository'
 
-import SchemaParser from './../service/schemaparser'
+import JsonSchemaParser from '../service/jsonSchemaParser'
+import PostgresParser from 'src/service/postgresParser'
 
 const CREATE_BUCKET_STATEMENT =
 (schema: string, table: string): string => `CREATE TABLE IF NOT EXISTS "${schema}"."${table}" (
@@ -30,8 +31,8 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
   }
 
   async createForSchema (schema: any, tableName: string): Promise<void> {
-    const schemaParser = new SchemaParser()
-    const createStatements: string[] = await schemaParser.parseCreateStatement(schema, POSTGRES_SCHEMA, tableName)
+    const jsonSchemaParser: PostgresParser = new JsonSchemaParser()
+    const createStatements: string[] = await jsonSchemaParser.parseCreateStatement(schema, POSTGRES_SCHEMA, tableName)
     for (const statement of createStatements) {
       await this.postgresClient.executeQuery(statement)
     }

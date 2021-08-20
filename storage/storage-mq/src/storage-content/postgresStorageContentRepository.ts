@@ -5,7 +5,8 @@ import { POSTGRES_SCHEMA } from '../env'
 
 import { StorageContentRepository, StorageContent, InsertStorageContent } from './storageContentRepository'
 
-import SchemaParser from './../service/schemaparser'
+import JsonSchemaParser from '../service/jsonSchemaParser'
+import PostgresParser from 'src/service/postgresParser'
 
 const EXISTS_TABLE_STATEMENT = (table: string): string => `SELECT to_regclass('"${POSTGRES_SCHEMA}"."${table}"')`
 const GET_ALL_CONTENT_STATEMENT = (table: string): string => `SELECT * FROM "${POSTGRES_SCHEMA}"."${table}"`
@@ -100,7 +101,7 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
 
   async saveContentForSchema (tableIdentifier: string, content: InsertStorageContent): Promise<number> {
     return await this.postgresClient.transaction(async client => {
-      const schemaParser = new SchemaParser()
+      const jsonSchemaParser: PostgresParser = new JsonSchemaParser()
       const resultSet = await client.query(GET_LAST_ELEMENT_STATEMENT(tableIdentifier))
       const nextId = (resultSet.rowCount === 0) ? 1 : parseInt(resultSet.rows[0].id) + 1
 
@@ -112,7 +113,13 @@ export class PostgresStorageContentRepository implements StorageContentRepositor
        * Ref: https://github.com/brianc/node-postgres/issues/2012
        */
       const insertStatement: string =
-        await schemaParser.parse(content.schema as object, content.data, POSTGRES_SCHEMA, tableIdentifier, nextId)
+        await jsonSchemaParser.parseInsertStatement(
+          content.schema as object,
+          content.data,
+          POSTGRES_SCHEMA,
+          tableIdentifier,
+          nextId
+        )
       await client.query(insertStatement)
       return nextId
     })
