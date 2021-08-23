@@ -401,6 +401,10 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: storagemq-artifact
+      - name: Download storage-graphql artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: storagegraphql-artifact
 
       - name: Load Docker Images from artifacts
         run: |
@@ -408,6 +412,7 @@ jobs:
           docker load -i ./storage-artifact/storage_postgrest.tar
           docker load -i ./liquibase-artifact/storage_liquibase.tar
           docker load -i ./storagemq-artifact/storage_mq.tar
+          docker load -i ./storagegraphql-artifact/storage_graphql.tar
 
       - name: Storage Push to registry
         run: |
@@ -418,6 +423,7 @@ jobs:
           IMAGE_ID_STORAGE=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/storage
           IMAGE_ID_LIQUIBASE=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/storage-db-liquibase
           IMAGE_ID_STORAGE_MQ=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/storage-mq
+          IMAGE_ID_STORAGE_GRAPHQL=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/storage-graphql
 
           docker tag $IMAGE_ID_STORAGE $IMAGE_ID_STORAGE:$STORAGE_VERSION
           docker tag $IMAGE_ID_STORAGE $IMAGE_ID_STORAGE:latest
@@ -428,6 +434,9 @@ jobs:
           docker tag $IMAGE_ID_STORAGE_MQ $IMAGE_ID_STORAGE_MQ:$STORAGE_VERSION
           docker tag $IMAGE_ID_STORAGE_MQ $IMAGE_ID_STORAGE_MQ:latest
 
+          docker tag $IMAGE_ID_STORAGE_GRAPHQL $IMAGE_ID_STORAGE_GRAPHQL:$STORAGE_VERSION
+          docker tag $IMAGE_ID_STORAGE_GRAPHQL $IMAGE_ID_STORAGE_GRAPHQL:latest
+
           docker push $IMAGE_ID_STORAGE:$STORAGE_VERSION
           docker push $IMAGE_ID_STORAGE:latest
 
@@ -436,6 +445,9 @@ jobs:
 
           docker push $IMAGE_ID_STORAGE_MQ:$STORAGE_VERSION
           docker push $IMAGE_ID_STORAGE_MQ:latest
+
+          docker push $IMAGE_ID_STORAGE_GRAPHQL:$STORAGE_VERSION
+          docker push $IMAGE_ID_STORAGE_GRAPHQL:latest
 
   pipeline_upload:
     name: Pipeline Publish
