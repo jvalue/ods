@@ -169,15 +169,13 @@ services:
 
   graphql:
     image: ${DOCKER_REGISTRY}/storage-graphql
-    build: ./storage/postgraphile/
-    environment:
-      DATABASE_URL: postgres://ods_admin:ods_pw@storage-db:5432/ods
+    build: ./storage/storage-graphql/
     depends_on:
         - storage-db
         - storage-db-liquibase
     ports:
         - 5432:5432
-    command: ["--connection", "${DATABASE_URL}", "--port", "5432", "--schema", "storage", "--append-plugins", "postgraphile-plugin-connection-filter"]
+    command: ["--connection", postgres://ods_admin:ods_pw@storage-db:5432/ods, "--port", "5432", "--schema", "storage", "--append-plugins", "postgraphile-plugin-connection-filter"]
 
   # Uncomment this if you want to persist the data.
   # volumes:
