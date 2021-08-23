@@ -150,7 +150,7 @@ export default class JsonSchemaParser implements PostgresParser {
               element[key],
               schemaName,
               tableName + '_' + key,
-              (parentName === '') ? parentId : 1,
+              parentId,
               ++index,
               tableName
             )
@@ -191,7 +191,7 @@ export default class JsonSchemaParser implements PostgresParser {
           data[key],
           schemaName,
           tableName + '_' + key,
-          (parentName === '') ? parentId : 1,
+          parentId,
           ++index,
           tableName
         )
@@ -203,7 +203,7 @@ export default class JsonSchemaParser implements PostgresParser {
             data[key],
             schemaName,
             tableName + '_' + key,
-            (parentName === '') ? parentId : 1,
+            parentId,
             ++index,
             tableName
           )

@@ -12,7 +12,7 @@ const EXISTS_TABLE_STATEMENT = (table: string): string => `SELECT to_regclass('"
 const GET_ALL_CONTENT_STATEMENT = (table: string): string => `SELECT * FROM "${POSTGRES_SCHEMA}"."${table}"`
 const GET_CONTENT_STATEMENT = (table: string): string => `SELECT * FROM "${POSTGRES_SCHEMA}"."${table}" WHERE id = $1`
 const GET_LAST_ELEMENT_STATEMENT = (table: string): string =>
-  `SELECT "createdAt", "id" FROM "${POSTGRES_SCHEMA}"."${table}" ORDER BY "createdAt" DESC LIMIT 1`
+  `SELECT "id" FROM "${POSTGRES_SCHEMA}"."${table}" ORDER BY "id" DESC LIMIT 1`
 const INSERT_CONTENT_STATEMENT = (table: string): string =>
   `INSERT INTO "${POSTGRES_SCHEMA}"."${table}" ("data", "pipelineId", "timestamp") VALUES ($1, $2, $3) RETURNING *`
 
