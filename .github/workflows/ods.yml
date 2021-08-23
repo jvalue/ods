@@ -97,6 +97,7 @@ jobs:
           docker-compose -f docker-compose.yml build storage
           docker-compose -f docker-compose.yml build storage-db-liquibase
           docker-compose -f docker-compose.yml build storage-mq
+          docker-compose -f docker-compose.yml build graphql
 
       - name: Build Integration-test
         run: |
@@ -117,10 +118,12 @@ jobs:
           IMAGE_ID_STORAGE=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/storage
           IMAGE_ID_LIQUIBASE=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/storage-db-liquibase
           IMAGE_ID_STORAGEMQ=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/storage-mq
+          IMAGE_ID_STORAGE_GRAPHQL=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/storage-graphql
 
           docker save $IMAGE_ID_STORAGE > storage_postgrest.tar
           docker save $IMAGE_ID_LIQUIBASE > storage_liquibase.tar
           docker save $IMAGE_ID_STORAGEMQ > storage_mq.tar
+          docker save $IMAGE_ID_STORAGE_GRAPHQL > storage_graphql.tar
 
       - name: Upload Storage Docker image as artifact
         uses: actions/upload-artifact@v1
@@ -139,6 +142,12 @@ jobs:
         with:
           name: storagemq-artifact
           path: storage_mq.tar
+
+      - name: Upload Storage-GraphQL Docker image as artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: storagegraphql-artifact
+          path: storage_graphql.tar
 
 
   # ----------------- PIPELINE SERVICE --------------------

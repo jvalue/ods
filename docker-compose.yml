@@ -168,7 +168,7 @@ services:
       POSTGRES_PASSWORD: ods_pw
 
   graphql:
-    image: ${DOCKER_REGISTRY}/postgraphile
+    image: ${DOCKER_REGISTRY}/storage-graphql
     build: ./storage/postgraphile/
     environment:
       DATABASE_URL: postgres://ods_admin:ods_pw@storage-db:5432/ods
