@@ -1,7 +1,7 @@
 export default interface PostgresParser {
   parseCreateStatement: (
     schema: any,
-    schemaName: string,
+    pgSchemaName: string,
     tableName: string,
     index?: number,
     parentName?: string
@@ -10,7 +10,7 @@ export default interface PostgresParser {
   parseInsertStatement: (
     schema: any,
     data: any,
-    schemaName: string,
+    pgSchemaName: string,
     tableName: string,
     parentId: number,
     index?: number,

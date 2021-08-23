@@ -33,15 +33,15 @@ export default class JsonSchemaParser implements PostgresParser {
 
   async parseCreateStatement (
     schema: any,
-    schemaName: string,
+    pgSchemaName: string,
     tableName: string,
     index: number = 0,
     parentName: string = ''
   ): Promise<string[]> {
     if (SharedHelper.isArray(schema.type)) {
-      await this.doParseCreate(schema.items, index, schemaName, tableName, parentName)
+      await this.doParseCreate(schema.items, index, pgSchemaName, tableName, parentName)
     } else if (SharedHelper.isObject(schema.type)) {
-      await this.doParseCreate(schema, index, schemaName, tableName, parentName)
+      await this.doParseCreate(schema, index, pgSchemaName, tableName, parentName)
     }
 
     return this.postgresSchemaCreate
@@ -50,21 +50,21 @@ export default class JsonSchemaParser implements PostgresParser {
   async doParseCreate (
     schema: any,
     index: number,
-    schemaName: string,
+    pgSchemaName: string,
     tableName: string,
     parentName: string = ''
   ): Promise<void> {
     const currentIndex = index
-    this.postgresSchemaCreate[currentIndex] = CREATE_STATEMENT(schemaName, tableName)
+    this.postgresSchemaCreate[currentIndex] = CREATE_STATEMENT(pgSchemaName, tableName)
 
     for (const key in schema.properties) {
       const currentProperty = schema.properties[key]
       if (SharedHelper.isObject(currentProperty.type)) {
-        await this.parseCreateStatement(currentProperty, schemaName, tableName + '_' + key, ++index, tableName)
+        await this.parseCreateStatement(currentProperty, pgSchemaName, tableName + '_' + key, ++index, tableName)
       } else if (SharedHelper.isArray(currentProperty.type)) {
         const childSchema = currentProperty.items
         if (SharedHelper.isObject(childSchema.type)) {
-          await this.parseCreateStatement(childSchema, schemaName, tableName + '_' + key, ++index, tableName)
+          await this.parseCreateStatement(childSchema, pgSchemaName, tableName + '_' + key, ++index, tableName)
         } else {
           if (currentProperty.items.type !== undefined) {
             this.postgresSchemaCreate[currentIndex] +=
@@ -78,26 +78,26 @@ export default class JsonSchemaParser implements PostgresParser {
 
     if (SharedHelper.hasParent(parentName)) {
       this.postgresSchemaCreate[currentIndex] += `, "${parentName}id" bigint NOT NULL`
-      this.postgresSchemaCreate[currentIndex] += FOREGIN_KEY_STATEMENT(schemaName, tableName, parentName)
+      this.postgresSchemaCreate[currentIndex] += FOREGIN_KEY_STATEMENT(pgSchemaName, tableName, parentName)
     }
 
-    this.postgresSchemaCreate[currentIndex] += PRIMARY_KEY_STATEMENT(schemaName, tableName)
+    this.postgresSchemaCreate[currentIndex] += PRIMARY_KEY_STATEMENT(pgSchemaName, tableName)
     this.postgresSchemaCreate[currentIndex] += END_STATEMENT_CREATE
   }
 
   async parseInsertStatement (
     schema: any,
     data: any,
-    schemaName: string,
+    pgSchemaName: string,
     tableName: string,
     parentId: number,
     index: number = 0,
     parentName: string = ''
   ): Promise<string> {
     if (SharedHelper.isArray(schema.type)) {
-      await this.doParseInsertArray(schema.items, data, index, schemaName, tableName, parentId, parentName)
+      await this.doParseInsertArray(schema.items, data, index, pgSchemaName, tableName, parentId, parentName)
     } else if (SharedHelper.isObject(schema.type)) {
-      await this.doParseInsertObject(schema, data, index, schemaName, tableName, parentId, parentName)
+      await this.doParseInsertObject(schema, data, index, pgSchemaName, tableName, parentId, parentName)
     }
 
     let result: string = 'BEGIN;'
@@ -120,7 +120,7 @@ export default class JsonSchemaParser implements PostgresParser {
     schema: any,
     data: any[],
     index: number,
-    schemaName: string,
+    pgSchemaName: string,
     tableName: string,
     parentId: number,
     parentName: string = ''
@@ -128,7 +128,7 @@ export default class JsonSchemaParser implements PostgresParser {
     let element: any
     for (element of data) {
       const currentIndex = index
-      this.postgresSchemaInsertColumns[currentIndex] = INSERT_STATEMENT_COLUMNS(schemaName, tableName) // Insertion
+      this.postgresSchemaInsertColumns[currentIndex] = INSERT_STATEMENT_COLUMNS(pgSchemaName, tableName) // Insertion
       this.postgresSchemaInsertValues[currentIndex] = INSERT_CONTENT_STATEMENT_VALUES
       for (const key in schema.properties) {
         const currentProperty = schema.properties[key]
@@ -136,7 +136,7 @@ export default class JsonSchemaParser implements PostgresParser {
           await this.parseInsertStatement(
             currentProperty,
             element[key],
-            schemaName,
+            pgSchemaName,
             tableName + '_' + key,
             parentId,
             ++index,
@@ -148,7 +148,7 @@ export default class JsonSchemaParser implements PostgresParser {
             await this.parseInsertStatement(
               currentProperty,
               element[key],
-              schemaName,
+              pgSchemaName,
               tableName + '_' + key,
               parentId,
               ++index,
@@ -175,13 +175,13 @@ export default class JsonSchemaParser implements PostgresParser {
     schema: any,
     data: any,
     index: number,
-    schemaName: string,
+    pgSchemaName: string,
     tableName: string,
     parentId: number,
     parentName: string = ''
   ): Promise<any> {
     const currentIndex = index
-    this.postgresSchemaInsertColumns[currentIndex] = INSERT_STATEMENT_COLUMNS(schemaName, tableName) // Insertion
+    this.postgresSchemaInsertColumns[currentIndex] = INSERT_STATEMENT_COLUMNS(pgSchemaName, tableName) // Insertion
     this.postgresSchemaInsertValues[currentIndex] = INSERT_CONTENT_STATEMENT_VALUES
     for (const key in schema.properties) {
       const currentProperty = schema.properties[key]
@@ -189,7 +189,7 @@ export default class JsonSchemaParser implements PostgresParser {
         await this.parseInsertStatement(
           currentProperty,
           data[key],
-          schemaName,
+          pgSchemaName,
           tableName + '_' + key,
           parentId,
           ++index,
@@ -201,7 +201,7 @@ export default class JsonSchemaParser implements PostgresParser {
           await this.parseInsertStatement(
             currentProperty,
             data[key],
-            schemaName,
+            pgSchemaName,
             tableName + '_' + key,
             parentId,
             ++index,
