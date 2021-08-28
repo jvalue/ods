@@ -6,7 +6,8 @@
     "build": "vue-cli-service build",
     "lint": "eslint src --fix",
     "lint-ci": "eslint src --max-warnings=0",
-    "test": "jest --colors --verbose --passWithNoTests"
+    "test": "jest --colors --verbose --passWithNoTests",
+    "test:pact": "jest --colors --verbose --testTimeout 30000 --testPathPattern \".*\\.pact\\.test\\.ts$\""
   },
   "dependencies": {
     "axios": "^0.21.1",
@@ -23,6 +24,7 @@
   },
   "devDependencies": {
     "@mdi/font": "^5.9.55",
+    "@pact-foundation/pact": "^9.16.0",
     "@types/jest": "^26.0.20",
     "@types/node": "^14.14.31",
     "@typescript-eslint/eslint-plugin": "^4.15.2",
@@ -40,12 +42,16 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.3.1",
     "eslint-plugin-vue": "^7.6.0",
+    "jest-pact": "^0.9.1",
     "monaco-editor-webpack-plugin": "^1.9.0",
     "sass": "^1.32.8",
     "ts-jest": "^26.5.2",
     "typescript": "^4.2.2",
     "vue-template-compiler": "^2.6.12",
     "vuex-module-decorators": "^1.0.1"
+  },
+  "config": {
+    "pact_do_not_track": true
   },
   "homepage": "https://github.com/jvalue/open-data-service",
   "licenses": [
