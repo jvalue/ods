@@ -4,7 +4,6 @@ import { PipelineRest } from './pipelineRest'
 import { PIPELINE_SERVICE_URL } from '@/env'
 import * as RestTransService from './pipelineTransRest'
 
-
 @Module({ namespaced: true })
 export default class PipelineModule extends VuexModule {
   private pipelines: Pipeline[] = []
