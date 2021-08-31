@@ -2,10 +2,13 @@ import { RequestOptions, ResponseOptions } from '@pact-foundation/pact'
 import { JestPactOptions, pactWith } from 'jest-pact'
 import { PipelineRest } from './pipelineRest'
 import Pipeline from './pipeline'
+import path from 'path'
 
 const options: JestPactOptions = {
   consumer: 'UI',
-  provider: 'Pipeline'
+  provider: 'Pipeline',
+  dir: path.resolve(process.cwd(), '..', 'pacts'),
+  logDir: path.resolve(process.cwd(), '..', 'pacts', 'logs')
 }
 
 const request: RequestOptions = {

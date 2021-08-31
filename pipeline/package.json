@@ -9,8 +9,8 @@
     "transpile": "tsc",
     "lint": "eslint src --fix",
     "lint-ci": "eslint src --max-warnings=0",
-    "test": "jest --colors --verbose",
-    "test:pact": "jest --colors --verbose --testTimeout 30000 --testPathPattern \".*\\.pact\\.test\\.ts$\""
+    "test": "jest --colors --verbose --testPathIgnorePatterns \".*\\.pact\\.test\\.ts$\"",
+    "test:pact-provider": "jest --colors --verbose --testTimeout 30000 --testPathPattern \".*\\.provider\\.pact\\.test\\.ts$\""
   },
   "dependencies": {
     "@jvalue/node-dry-amqp": "0.1.2",

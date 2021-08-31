@@ -235,6 +235,28 @@ jobs:
         with:
           name: ui-artifact
           path: ui.tar
+          
+  # ----------------- CONSUMER-DRIVEN CONTRACT TEST --------------------
+  cdct:
+    name: Consumer-Driven Contract Test
+    runs-on: ubuntu-18.04
+    
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build Consumer-Driven Contract Test
+        run: |
+          docker-compose -f docker-compose.pact.yml build
+
+      - name: Run Consumer-Driven Contract Test
+        run: |
+          docker-compose -f docker-compose.pact.yml up
+      
+      - name: Commit latest contracts
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Update auto-generated contracts
+          file_pattern: pacts/*.json
 
   # ----------------- SYSTEMTEST --------------------
   systemtest:

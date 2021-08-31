@@ -1,4 +1,3 @@
-import * as child from 'child_process'
 import getPort from 'get-port'
 import { Verifier } from '@pact-foundation/pact'
 import path from 'path'
@@ -48,9 +47,6 @@ const mockPipelineTransformedDataManager = PipelineTransformedDataManager as jes
 jest.mock('../../pipeline-validator/jsonSchemaValidator')
 const mockValidator = JsonSchemaValidator as jest.Mock<JsonSchemaValidator>
 
-const gitHash = child.execSync('git rev-parse HEAD').toString().trim()
-const gitBranch = child.execSync('git rev-parse --abbrev-ref HEAD').toString().trim()
-
 describe('Pact Provider Verification', () => {
   let port: number
   let server: Server
@@ -81,11 +77,9 @@ describe('Pact Provider Verification', () => {
   it('validates the expectations of the UI', async () => {
     const verifier = new Verifier({
       provider: 'Pipeline',
-      providerVersion: gitHash,
-      providerVersionTags: [gitBranch],
       providerBaseUrl: `http://localhost:${port}`,
       pactUrls: [
-        path.resolve(process.cwd(), '..', 'ui', 'pact', 'pacts', 'ui-pipeline.json')
+        path.resolve(process.cwd(), '..', 'pacts', 'ui-pipeline.json')
       ],
       stateHandlers: {
         'no pipelines registered': async () => {

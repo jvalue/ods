@@ -1,0 +1,22 @@
+version: "3.7"
+
+services:
+  # ----------------- UI Consumer --------------------
+  ui-consumer:
+    image: open-data-service/ods-main/ui-consumer
+    build:
+      context: ./ui
+      dockerfile: Dockerfile.consumer
+    volumes:
+      - ./pacts:/app/pacts
+
+  # ----------------- PIPELINE SERVICE Provider --------------------
+  pipeline-provider:
+    image: open-data-service/ods-main/pipeline-provider
+    build:
+      context: .
+      dockerfile: ./pipeline/Dockerfile.provider
+    depends_on:
+      ui-consumer:
+        condition: service_completed_successfully
+        
