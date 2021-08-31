@@ -19,7 +19,6 @@ RUN npm ci
 COPY ./pipeline/src ./src
 COPY ./pipeline/*.js ./
 COPY ./pipeline/*.json ./
-COPY ./pacts ../pacts
 
 # run provider tests
 CMD ["npm", "run", "test:pact-provider"]

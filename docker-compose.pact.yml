@@ -19,4 +19,6 @@ services:
     depends_on:
       ui-consumer:
         condition: service_completed_successfully
+    volumes:
+      - ./pacts:/app/pacts
         
