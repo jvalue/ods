@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-unresolved
 import { setTimeout as sleep } from 'timers/promises';
 
 import DatasourceConfig from './api/datasource-config';
@@ -13,8 +14,8 @@ export async function setupInitialStateWithRetry(
     try {
       await setupInitialState(scheduler);
       return;
-    } catch (e: any) {
-      const error: { code: string | number } = e;
+    } catch (e) {
+      const error = e as { code: string | number };
       if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
         console.warn(`Failed to sync with Adapter Service on init (${retries}) . Retrying after ${backoff}ms... `);
       } else {

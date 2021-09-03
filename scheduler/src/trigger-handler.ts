@@ -8,6 +8,8 @@ export async function triggerDatasource(datasourceId: number, triggerRetries: nu
       await AdapterClient.triggerDatasource(datasourceId);
       console.log(`Datasource ${datasourceId} triggered.`);
       break;
+      // Necessary due to error: "'Unknown' not assignable to type '{ isAxiosError: boolean | undefined }'" otherwise
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       if (isAxiosError(error)) {
         handleAxiosError(error);
