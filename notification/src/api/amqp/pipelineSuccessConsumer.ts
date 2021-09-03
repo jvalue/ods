@@ -1,19 +1,21 @@
-import * as AMQP from 'amqplib'
+import { AmqpChannel, AmqpConnection } from '@jvalue/node-dry-amqp';
+import * as AMQP from 'amqplib';
 
-import { AmqpChannel, AmqpConnection } from '@jvalue/node-dry-amqp'
-import { TriggerEventHandler } from '../triggerEventHandler'
 import {
   AMQP_PIPELINE_EXECUTION_EXCHANGE,
   AMQP_PIPELINE_EXECUTION_QUEUE,
-  AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC
-} from '../../env'
+  AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC,
+} from '../../env';
+import { TriggerEventHandler } from '../triggerEventHandler';
 
-export async function createPipelineSuccessConsumer (amqpConnection: AmqpConnection,
-  triggerEventHandler: TriggerEventHandler): Promise<PipelineSuccessConsumer> {
-  const channel = await amqpConnection.createChannel()
-  const pipelineSuccessConsumer = new PipelineSuccessConsumer(channel, triggerEventHandler)
-  await pipelineSuccessConsumer.init()
-  return pipelineSuccessConsumer
+export async function createPipelineSuccessConsumer(
+  amqpConnection: AmqpConnection,
+  triggerEventHandler: TriggerEventHandler,
+): Promise<PipelineSuccessConsumer> {
+  const channel = await amqpConnection.createChannel();
+  const pipelineSuccessConsumer = new PipelineSuccessConsumer(channel, triggerEventHandler);
+  await pipelineSuccessConsumer.init();
+  return pipelineSuccessConsumer;
 }
 
 /**
@@ -27,32 +29,32 @@ export async function createPipelineSuccessConsumer (amqpConnection: AmqpConnect
  *
  */
 export class PipelineSuccessConsumer {
-  constructor (
-    private readonly amqpChannel: AmqpChannel,
-    private readonly triggerEventHandler: TriggerEventHandler
-  ) {}
+  constructor(private readonly amqpChannel: AmqpChannel, private readonly triggerEventHandler: TriggerEventHandler) {}
 
   /** Initializes the pipeline success consumer */
-  public async init (): Promise<void> {
-    await this.amqpChannel.assertExchange(AMQP_PIPELINE_EXECUTION_EXCHANGE, 'topic')
-    await this.amqpChannel.assertQueue(AMQP_PIPELINE_EXECUTION_QUEUE, { exclusive: false })
+  async init(): Promise<void> {
+    await this.amqpChannel.assertExchange(AMQP_PIPELINE_EXECUTION_EXCHANGE, 'topic');
+    await this.amqpChannel.assertQueue(AMQP_PIPELINE_EXECUTION_QUEUE, { exclusive: false });
     await this.amqpChannel.bindQueue(
-      AMQP_PIPELINE_EXECUTION_QUEUE, AMQP_PIPELINE_EXECUTION_EXCHANGE, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC)
+      AMQP_PIPELINE_EXECUTION_QUEUE,
+      AMQP_PIPELINE_EXECUTION_EXCHANGE,
+      AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC,
+    );
 
-    await this.amqpChannel.consume(AMQP_PIPELINE_EXECUTION_QUEUE, this.handleEvent)
+    await this.amqpChannel.consume(AMQP_PIPELINE_EXECUTION_QUEUE, this.handleEvent);
   }
 
   private readonly handleEvent = async (msg: AMQP.ConsumeMessage | null): Promise<void> => {
-    if (msg === null) {
-      console.debug('Received empty event when listening on pipeline executions - doing nothing')
-      return
+    if (msg == null) {
+      console.debug('Received empty event when listening on pipeline executions - doing nothing');
+      return;
     }
 
     if (msg.fields.routingKey === AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC) {
-      await this.triggerEventHandler.handleEvent(JSON.parse(msg.content.toString()))
+      await this.triggerEventHandler.handleEvent(JSON.parse(msg.content.toString()));
     } else {
-      console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey)
+      console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey);
     }
-    await this.amqpChannel.ack(msg)
-  }
+    await this.amqpChannel.ack(msg);
+  };
 }

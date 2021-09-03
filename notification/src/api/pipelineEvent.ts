@@ -1,10 +1,10 @@
-import { validators } from '@jvalue/node-dry-basics'
+import { validators } from '@jvalue/node-dry-basics';
 
 export interface PipelineSuccessEvent {
-  pipelineId: number
-  pipelineName: string
-  data: object
-  schema?: object
+  pipelineId: number;
+  pipelineName: string;
+  data: Record<string, unknown>;
+  schema?: Record<string, unknown>;
 }
 
 /**
@@ -13,9 +13,11 @@ export interface PipelineSuccessEvent {
  *
  * @returns     true, if param event is a PipelineSuccessEvent, else false
  */
-export function isValidPipelineSuccessEvent (event: unknown): event is PipelineSuccessEvent {
-  return validators.isObject(event) &&
+export function isValidPipelineSuccessEvent(event: unknown): event is PipelineSuccessEvent {
+  return (
+    validators.isObject(event) &&
     validators.hasProperty(event, 'pipelineId') &&
     validators.hasProperty(event, 'pipelineName') &&
     validators.hasProperty(event, 'data')
+  );
 }
