@@ -32,14 +32,16 @@ export default class VM2SandboxExecutor implements SandboxExecutor {
     try {
       script.compile();
     } catch (err) {
-      return { error: convertSyntaxError(err, FUNCTION_WRAP_PREFIX_LENGTH) };
+      const error = err as Error;
+      return { error: convertSyntaxError(error, FUNCTION_WRAP_PREFIX_LENGTH) };
     }
 
     try {
       const result = this.vm.run(script) as Record<string, unknown>;
       return { data: result };
     } catch (err) {
-      return { error: convertRuntimeError(err, FUNCTION_WRAP_PREFIX_LENGTH) };
+      const error = err as Error;
+      return { error: convertRuntimeError(error, FUNCTION_WRAP_PREFIX_LENGTH) };
     }
   }
 }
