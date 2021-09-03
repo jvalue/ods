@@ -12,9 +12,9 @@
     "test": "jest --colors --verbose --passWithNoTests"
   },
   "dependencies": {
-    "@jvalue/node-dry-amqp": "0.1.1",
+    "@jvalue/node-dry-amqp": "0.1.2",
     "@jvalue/node-dry-basics": "0.0.3",
-    "@jvalue/node-dry-pg": "1.2.0",
+    "@jvalue/node-dry-pg": "1.2.1",
     "cors": "^2.8.5",
     "express": "^4.17.1"
   },
