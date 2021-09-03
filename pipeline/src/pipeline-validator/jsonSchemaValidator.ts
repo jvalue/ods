@@ -1,33 +1,35 @@
-import Ajv from 'ajv'
-import { HealthStatus, PipelineConfig } from '../pipeline-config/model/pipelineConfig'
-import { PipelineTransformedDataDTO } from '../pipeline-config/model/pipelineTransformedData'
-import Validator from './validator'
+import Ajv, { ValidateFunction } from 'ajv';
+
+import { HealthStatus, PipelineConfig } from '../pipeline-config/model/pipelineConfig';
+import { PipelineTransformedDataDTO } from '../pipeline-config/model/pipelineTransformedData';
+
+import Validator from './validator';
 
 export default class JsonSchemaValidator implements Validator {
-  validate (config: PipelineConfig, data: unknown): PipelineTransformedDataDTO {
-    let validate: any
-    let valid: boolean = true
+  validate(config: PipelineConfig, data: unknown): PipelineTransformedDataDTO {
+    let validate: ValidateFunction;
+    let valid = true;
 
     const transformedData: PipelineTransformedDataDTO = {
       pipelineId: config.id,
       healthStatus: HealthStatus.OK,
-      data: data as object
-    }
+      data: data as Record<string, unknown>, // Fix @typescript-eslint/ban-types for object type
+    };
 
-    const ajv = new Ajv({ strict: false })
-    if (config.schema !== undefined && config.schema !== null) {
-      validate = ajv.compile(config.schema)
-      valid = validate(data)
+    const ajv = new Ajv({ strict: false });
+    if (config.schema !== undefined && config.schema != null) {
+      validate = ajv.compile(config.schema);
+      valid = validate(data);
 
       const result = {
         ...transformedData,
         healthStatus: valid ? transformedData.healthStatus : HealthStatus.WARNING,
-        schema: config.schema
-      }
+        schema: config.schema,
+      };
 
-      return result
+      return result;
     }
 
-    return transformedData
+    return transformedData;
   }
 }

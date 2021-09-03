@@ -1,5 +1,6 @@
-import { ExecutionResult } from './executionResult'
+import { ExecutionResult } from './executionResult';
 
 export default interface SandboxExecutor {
-  execute: (code: string, data: object) => ExecutionResult
+  // Fix @typescript-eslint/ban-types for object type
+  execute: (code: string, data: Record<string, unknown>) => ExecutionResult;
 }

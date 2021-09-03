@@ -1,56 +1,55 @@
-import { ExecutionResult } from './sandbox/executionResult'
-import { JobResult } from './jobResult'
-import Stats from './stats'
+import { JobResult } from './jobResult';
+import { ExecutionResult } from './sandbox/executionResult';
+import SandboxExecutor from './sandbox/sandboxExecutor';
+import Stats from './stats';
 
-import SandboxExecutor from './sandbox/sandboxExecutor'
-
-const VERSION = '0.0.2'
+const VERSION = '0.0.2';
 
 export default class PipelineExecutor {
-  constructor (private readonly executor: SandboxExecutor) {}
+  constructor(private readonly executor: SandboxExecutor) {}
 
-  getVersion (): string {
-    return VERSION
+  getVersion(): string {
+    return VERSION;
   }
 
-  private executionTimeInMillis (func: () => ExecutionResult): [number, ExecutionResult] {
-    const start = process.hrtime()
-    const result = func()
-    const hrresult = process.hrtime(start)
-    const time = hrresult[0] * 1e3 + hrresult[1] / 1e6
-    return [time, result]
+  private executionTimeInMillis(func: () => ExecutionResult): [number, ExecutionResult] {
+    const start = process.hrtime();
+    const result = func();
+    const hrresult = process.hrtime(start);
+    const time = hrresult[0] * 1e3 + hrresult[1] / 1e6;
+    return [time, result];
   }
 
-  executeJob (code: string, data: object): JobResult {
-    const startTimestamp = Date.now()
+  executeJob(code: string, data: Record<string, unknown>): JobResult {
+    const startTimestamp = Date.now();
 
-    const [time, result] = this.executionTimeInMillis(() => this.executor.execute(code, data))
+    const [time, result] = this.executionTimeInMillis(() => this.executor.execute(code, data));
 
-    const endTimestamp = Date.now()
+    const endTimestamp = Date.now();
 
     const stats: Stats = {
       durationInMilliSeconds: time,
       startTimestamp,
-      endTimestamp
-    }
+      endTimestamp,
+    };
 
     if ('error' in result) {
-      return { error: result.error, stats }
+      return { error: result.error, stats };
     }
 
-    if (result.data === undefined || result.data === null) {
+    if (result.data === undefined || result.data == null) {
       return {
         error: {
           name: 'MissingReturnError',
           message: 'Code snippet is not returning valid data',
           lineNumber: 0,
           position: 0,
-          stacktrace: []
+          stacktrace: [],
         },
-        stats
-      }
+        stats,
+      };
     }
 
-    return { data: result.data, stats }
+    return { data: result.data, stats };
   }
 }
