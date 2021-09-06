@@ -8,7 +8,8 @@ const options: JestPactOptions = {
   consumer: 'UI',
   provider: 'Pipeline',
   dir: path.resolve(process.cwd(), '..', 'pacts'),
-  logDir: path.resolve(process.cwd(), '..', 'pacts', 'logs')
+  logDir: path.resolve(process.cwd(), '..', 'pacts', 'logs'),
+  pactfileWriteMode: 'overwrite'
 }
 
 const request: RequestOptions = {
