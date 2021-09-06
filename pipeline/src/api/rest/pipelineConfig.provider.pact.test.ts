@@ -1,20 +1,9 @@
-import getPort from 'get-port'
 import { Verifier } from '@pact-foundation/pact'
 import path from 'path'
-import express from 'express'
-import cors from 'cors'
-import bodyParser from 'body-parser'
-import { Server } from 'http'
-import { PipelineConfigManager } from '../../pipeline-config/pipelineConfigManager'
-import { PostgresClient } from '@jvalue/node-dry-pg'
-import PipelineExecutor from '../../pipeline-execution/pipelineExecutor'
-import { PipelineTransformedDataManager } from '../../pipeline-config/pipelineTransformedDataManager'
-import JsonSchemaValidator from '../../pipeline-validator/jsonSchemaValidator'
-import { PipelineConfigEndpoint } from './pipelineConfigEndpoint'
-import { PipelineConfig } from 'src/pipeline-config/model/pipelineConfig'
+import { PipelineConfig } from '../../pipeline-config/model/pipelineConfig'
+import { port, server } from '../../index' // the main method is automatically called due to this import
 
-// without this mocking, errors due to missing environment variables would occur during test execution
-jest.mock('../../pipeline-config/pipelineTransformedDataRepository', () => { })
+jest.mock('../../env', () => ({ }))
 
 const pipelineConfigs: PipelineConfig[] = []
 
@@ -23,57 +12,29 @@ jest.mock('../../pipeline-config/pipelineConfigManager', () => {
     PipelineConfigManager: jest.fn().mockImplementation(() => {
       return {
         getAll: jest.fn().mockResolvedValue(pipelineConfigs)
-        // create: jest.fn(),
-        // get: jest.fn(),
-        // getByDatasourceId: jest.fn(),
-        // update: jest.fn(),
-        // delete: jest.fn(),
-        // deleteAll: jest.fn(),
-        // triggerConfig: jest.fn(),
       }
     })
   }
 })
 
-jest.mock('@jvalue/node-dry-pg')
-const mockPgClient = PostgresClient as jest.Mock<PostgresClient>
-
-jest.mock('../../pipeline-execution/pipelineExecutor')
-const mockPipelineExecutor = PipelineExecutor as jest.Mock<PipelineExecutor>
-
-jest.mock('../../pipeline-config/pipelineTransformedDataManager')
-const mockPipelineTransformedDataManager = PipelineTransformedDataManager as jest.Mock<PipelineTransformedDataManager>
-
-jest.mock('../../pipeline-validator/jsonSchemaValidator')
-const mockValidator = JsonSchemaValidator as jest.Mock<JsonSchemaValidator>
+// the following mocks are needed for propper execution of the main function
+jest.mock('../../pipeline-config/pipelineDatabase', () => {
+  return {
+    init: jest.fn()
+  }
+})
+jest.mock('@jvalue/node-dry-amqp', () => {
+  return {
+    AmqpConnection: jest.fn()
+  }
+})
+jest.mock('../amqp/datasourceExecutionConsumer', () => {
+  return {
+    createDatasourceExecutionConsumer: jest.fn()
+  }
+})
 
 describe('Pact Provider Verification', () => {
-  let port: number
-  let server: Server
-
-  beforeEach(async () => {
-    port = await getPort()
-    const pipelineConfigManager = new PipelineConfigManager(
-      mockPgClient(),
-      mockPipelineExecutor(),
-      mockPipelineTransformedDataManager(),
-      mockValidator()
-    )
-
-    // TODO avoid code duplication
-    // the following provider startup is an excerpt of the main function in index.ts:
-    const pipelineConfigEndpoint = new PipelineConfigEndpoint(pipelineConfigManager)
-
-    const app = express()
-    app.use(cors())
-    app.use(bodyParser.json({ limit: '50mb' }))
-    app.use(bodyParser.urlencoded({ extended: false }))
-
-    pipelineConfigEndpoint.registerRoutes(app)
-
-    server = app.listen(port)
-  })
-
   it('validates the expectations of the UI', async () => {
     const verifier = new Verifier({
       provider: 'Pipeline',
@@ -88,7 +49,7 @@ describe('Pact Provider Verification', () => {
       }
     })
     await verifier.verifyProvider().finally(() => {
-      server.close()
+      server?.close()
     })
   })
 })

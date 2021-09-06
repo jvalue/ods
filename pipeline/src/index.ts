@@ -18,8 +18,8 @@ import { createDatasourceExecutionConsumer } from './api/amqp/datasourceExecutio
 import { init as initDatabase } from './pipeline-config/pipelineDatabase'
 import JsonSchemaValidator from './pipeline-validator/jsonSchemaValidator'
 
-const port = 8080
-let server: Server | undefined
+export const port = 8080
+export let server: Server | undefined
 
 function onAmqpConnectionLoss (error: any): never {
   console.log('Terminating because connection to AMQP lost:', error)

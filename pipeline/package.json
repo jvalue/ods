@@ -36,7 +36,6 @@
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.3.1",
-    "get-port": "^5.1.1",
     "jest": "^27.0.5",
     "jest-pact": "^0.9.1",
     "ts-jest": "^27.0.3",
