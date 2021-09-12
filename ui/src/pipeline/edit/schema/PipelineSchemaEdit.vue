@@ -33,7 +33,8 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import * as SchemaSuggestionREST from './../../../datasource/schemaSuggestionRest'
 import * as DatasourceRest from './../../../datasource/datasourceRest'
-import * as TransformationRest from './../transformation/transformationRest'
+import { TransformationRest } from './../transformation/transformationRest'
+import { PIPELINE_SERVICE_URL } from './../../../env'
 import VueSlider from 'vue-slider-component'
 import 'vue-slider-component/theme/default.css'
 
@@ -79,7 +80,7 @@ export default class PipelineSchemaEdit extends Vue {
   private async onGenerate (): Promise<void> {
     const data = await DatasourceRest.getDatasourceData(this.pipeline.datasourceId)
     const request: TransformationRequest = { data: data, func: this.pipeline.transformation.func }
-    const result: JobResult = await TransformationRest.transformData(request)
+    const result: JobResult = await new TransformationRest(PIPELINE_SERVICE_URL).transformData(request)
     this.pipeline.schema = 
       await SchemaSuggestionREST.getSchema(JSON.stringify(result.data), this.currentSliderValue)
     this.schemaAsText = JSON.stringify(this.pipeline.schema)
