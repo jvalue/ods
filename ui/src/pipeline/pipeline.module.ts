@@ -1,8 +1,8 @@
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
-import Pipeline, { HealthStatus, TransformedDataMetaData } from './pipeline'
+import Pipeline, { HealthStatus } from './pipeline'
 import { PipelineRest } from './pipelineRest'
 import { PIPELINE_SERVICE_URL } from '@/env'
-import * as RestTransService from './pipelineTransRest'
+import { PipelineTransRest } from './pipelineTransRest'
 
 @Module({ namespaced: true })
 export default class PipelineModule extends VuexModule {
@@ -12,6 +12,7 @@ export default class PipelineModule extends VuexModule {
   private isLoadingPipelines = true
   private isLoadingPipelineStates = true
   private readonly restService = new PipelineRest(PIPELINE_SERVICE_URL)
+  private readonly restTransService = new PipelineTransRest(PIPELINE_SERVICE_URL)
 
   @Mutation
   public setPipelines (pipelines: Pipeline[]): void {
@@ -52,7 +53,7 @@ export default class PipelineModule extends VuexModule {
     this.context.commit('setIsLoadingPipelineStates', true)
     const pipelineStates = new Map<number, string>()
     for (const element of this.pipelines) {
-      const transformedData: TransformedDataMetaData = await RestTransService.getLatestTransformedData(element.id)
+      const transformedData = await this.restTransService.getLatestTransformedData(element.id)
 
       let healthStatus: string
       if (transformedData.healthStatus === HealthStatus.OK) {
