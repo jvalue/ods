@@ -7,7 +7,7 @@ export const options: JestPactOptions = {
   provider: 'Pipeline',
   dir: path.resolve(process.cwd(), '..', 'pacts'),
   logDir: path.resolve(process.cwd(), '..', 'pacts', 'logs'),
-  pactfileWriteMode: 'update'
+  pactfileWriteMode: 'overwrite'
 }
 
 export const notFoundResponse: ResponseOptions = {
