@@ -1,0 +1,32 @@
+name: Consumer-Driven Contract Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  cdct:
+    name: Consumer- and Provider-Side Testing
+    runs-on: ubuntu-18.04
+    
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build Consumer-Driven Contract Test
+        run: |
+          docker-compose -f docker-compose.pact.yml build
+
+      - name: Run Consumer-Driven Contract Test
+        run: |
+          docker-compose -f docker-compose.pact.yml up
+      
+      - name: Commit latest contracts
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Update auto-generated contracts
+          file_pattern: pacts/*.json
