@@ -8,6 +8,7 @@ export const POSTGRES_USER = readEnvOrDie('POSTGRES_USER')
 export const POSTGRES_PW = readEnvOrDie('POSTGRES_PW')
 export const POSTGRES_DB = readEnvOrDie('POSTGRES_DB')
 export const POSTGRES_SCHEMA = readEnvOrDie('POSTGRES_SCHEMA')
+export const POSTGRES_SSL = readEnvOrDie('POSTGRES_SSL').toLowerCase() === 'true'
 
 export const AMQP_URL = readEnvOrDie('AMQP_URL')
 
