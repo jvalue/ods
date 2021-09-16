@@ -278,3 +278,13 @@ export const transformDataErrorThrownResponse: ResponseOptions = {
     }
   })
 }
+
+export const notFoundResponse: ResponseOptions = {
+  // TODO any status code that results in throwing an error is actually acceptable (i.e. 4xx, 5xx)
+  status: 404
+}
+
+export const badRequestResponse: ResponseOptions = {
+  // TODO any status code that results in throwing an error is actually acceptable (i.e. 4xx, 5xx)
+  status: 400
+}

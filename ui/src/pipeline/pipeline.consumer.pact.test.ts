@@ -1,5 +1,6 @@
-import { pactWith } from 'jest-pact'
+import { JestPactOptions, pactWith } from 'jest-pact'
 import {
+  badRequestResponse,
   createRequest,
   createRequestTitle,
   createSuccessResponse,
@@ -27,6 +28,7 @@ import {
   getLatestTransformedDataRequest,
   getLatestTransformedDataRequestTitle,
   getLatestTransformedDataSuccessResponse,
+  notFoundResponse,
   transformDataErrorThrownResponse,
   transformDataInvalidSyntaxResponse,
   transformDataRequest,
@@ -35,10 +37,18 @@ import {
   updateRequestTitle,
   updateSuccessResponse
 } from './pipeline.consumer.pact.fixtures'
-import { badRequestResponse, notFoundResponse, options } from './common.pact.fixtures'
 import { PipelineRest } from './pipelineRest'
 import { PipelineTransRest } from './pipelineTransRest'
 import { TransformationRest } from './edit/transformation/transformationRest'
+import path from 'path'
+
+const options: JestPactOptions = {
+  consumer: 'UI',
+  provider: 'Pipeline',
+  dir: path.resolve(process.cwd(), '..', 'pacts'),
+  logDir: path.resolve(process.cwd(), '..', 'pacts', 'logs'),
+  pactfileWriteMode: 'overwrite'
+}
 
 pactWith(options, (provider) => {
   let restService: PipelineRest
