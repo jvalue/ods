@@ -17,8 +17,8 @@ import PipelineExecutor from './pipeline-execution/pipelineExecutor';
 import VM2SandboxExecutor from './pipeline-execution/sandbox/vm2SandboxExecutor';
 import JsonSchemaValidator from './pipeline-validator/jsonSchemaValidator';
 
-const port = 8080;
-let server: Server | undefined;
+export const port = 8080;
+export let server: Server | undefined;
 
 function onAmqpConnectionLoss(error: unknown): never {
   console.log('Terminating because connection to AMQP lost:', error);

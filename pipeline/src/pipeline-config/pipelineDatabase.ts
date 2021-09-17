@@ -1,7 +1,7 @@
 import { PostgresClient } from '@jvalue/node-dry-pg';
 import { PoolConfig } from 'pg';
 
-import { POSTGRES_DB, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_PW, POSTGRES_USER } from '../env';
+import { POSTGRES_DB, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_PW, POSTGRES_SSL, POSTGRES_USER } from '../env';
 
 import { createPipelineConfigTable } from './pipelineConfigRepository';
 import { createPipelineEventTable } from './pipelineEventRepository';
@@ -13,6 +13,7 @@ const POOL_CONFIG: PoolConfig = {
   user: POSTGRES_USER,
   password: POSTGRES_PW,
   database: POSTGRES_DB,
+  ssl: POSTGRES_SSL,
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,

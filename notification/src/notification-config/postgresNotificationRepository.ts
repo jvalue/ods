@@ -1,5 +1,8 @@
-import { PostgresClient } from '@jvalue/node-dry-pg';
-import { PoolConfig, QueryResult } from 'pg';
+import { PoolConfig, QueryResult } from 'pg'
+import { PostgresClient } from '@jvalue/node-dry-pg'
+import { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB, POSTGRES_SSL } from '../env'
+import { NotificationRepository } from './notificationRepository'
+import { isValidNotificationConfig, NotificationConfig } from './notificationConfig'
 
 import { POSTGRES_DB, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_PW, POSTGRES_USER } from '../env';
 
@@ -37,6 +40,7 @@ const POOL_CONFIG: PoolConfig = {
   user: POSTGRES_USER,
   password: POSTGRES_PW,
   database: POSTGRES_DB,
+  ssl: POSTGRES_SSL,
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,

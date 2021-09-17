@@ -1,8 +1,10 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 
 import Pipeline, { HealthStatus, TransformedDataMetaData } from './pipeline';
-import * as RestService from './pipelineRest';
+import { PipelineRest } from './pipelineRest';
 import * as RestTransService from './pipelineTransRest';
+
+import { PIPELINE_SERVICE_URL } from '@/env';
 
 @Module({ namespaced: true })
 export default class PipelineModule extends VuexModule {
@@ -11,6 +13,7 @@ export default class PipelineModule extends VuexModule {
   private selectedPipeline?: Pipeline = undefined;
   private isLoadingPipelines = true;
   private isLoadingPipelineStates = true;
+  private readonly restService = new PipelineRest(PIPELINE_SERVICE_URL);
 
   @Mutation
   setPipelines(pipelines: Pipeline[]): void {
@@ -43,7 +46,7 @@ export default class PipelineModule extends VuexModule {
   async loadPipelines(): Promise<Pipeline[]> {
     this.context.commit('setIsLoadingPipelines', true);
 
-    return await RestService.getAllPipelines();
+    return await this.restService.getAllPipelines();
   }
 
   @Action({ commit: 'setPipelineStates', rawError: true })
@@ -70,29 +73,29 @@ export default class PipelineModule extends VuexModule {
 
   @Action({ commit: 'setSelectedPipeline', rawError: true })
   async loadPipelineById(id: number): Promise<Pipeline> {
-    return await RestService.getPipelineById(id);
+    return await this.restService.getPipelineById(id);
   }
 
   @Action({ commit: 'setSelectedPipeline', rawError: true })
   async loadPipelineByDatasourceId(datasourceId: number): Promise<Pipeline> {
-    return await RestService.getPipelineByDatasourceId(datasourceId);
+    return await this.restService.getPipelineByDatasourceId(datasourceId);
   }
 
   @Action({ commit: 'setPipelines', rawError: true })
   async createPipeline(pipeline: Pipeline): Promise<Pipeline[]> {
-    await RestService.createPipeline(pipeline);
-    return await RestService.getAllPipelines();
+    await this.restService.createPipeline(pipeline);
+    return await this.restService.getAllPipelines();
   }
 
   @Action({ commit: 'setPipelines', rawError: true })
   async updatePipeline(pipeline: Pipeline): Promise<Pipeline[]> {
-    await RestService.updatePipeline(pipeline);
-    return await RestService.getAllPipelines();
+    await this.restService.updatePipeline(pipeline);
+    return await this.restService.getAllPipelines();
   }
 
   @Action({ commit: 'setPipelines', rawError: true })
   async deletePipeline(pipelineId: number): Promise<Pipeline[]> {
-    await RestService.deletePipeline(pipelineId);
-    return await RestService.getAllPipelines();
+    await this.restService.deletePipeline(pipelineId);
+    return await this.restService.getAllPipelines();
   }
 }
