@@ -11,6 +11,7 @@ describe('PipelineExecutor', () => {
 
     beforeEach(() => {
       const SandboxMock = jest.fn(() => ({
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         execute: jest.fn((func, data) => ({ data: {} })),
       }));
       sandboxExecutorMock = new SandboxMock();
@@ -34,7 +35,8 @@ describe('PipelineExecutor', () => {
     let sandboxExecutorMock: SandboxExecutor;
 
     beforeEach(() => {
-      sandboxExecutorMock = { execute: (code, data): { data: unknown } => ({ data: null }) };
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      sandboxExecutorMock = { execute: (_code, _data): { data: unknown } => ({ data: null }) };
       transformationService = new PipelineExecutor(sandboxExecutorMock);
     });
 

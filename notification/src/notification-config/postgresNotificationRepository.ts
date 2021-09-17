@@ -1,10 +1,7 @@
-import { PoolConfig, QueryResult } from 'pg'
-import { PostgresClient } from '@jvalue/node-dry-pg'
-import { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PW, POSTGRES_DB, POSTGRES_SSL } from '../env'
-import { NotificationRepository } from './notificationRepository'
-import { isValidNotificationConfig, NotificationConfig } from './notificationConfig'
+import { PostgresClient } from '@jvalue/node-dry-pg';
+import { PoolConfig, QueryResult } from 'pg';
 
-import { POSTGRES_DB, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_PW, POSTGRES_USER } from '../env';
+import { POSTGRES_DB, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_PW, POSTGRES_SSL, POSTGRES_USER } from '../env';
 
 import { NotificationConfig, isValidNotificationConfig } from './notificationConfig';
 import { NotificationRepository } from './notificationRepository';

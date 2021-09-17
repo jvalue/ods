@@ -20,22 +20,22 @@ export class PipelineRest {
 
   async getAllPipelines(): Promise<Pipeline[]> {
     const response = await this.httpPipelineConfigs.get('/');
-    return JSON.parse(response.data);
+    return JSON.parse(response.data) as Pipeline[];
   }
 
   async getPipelineById(id: number): Promise<Pipeline> {
     const response = await this.httpPipelineConfigs.get(`/${id}`);
-    return JSON.parse(response.data);
+    return JSON.parse(response.data) as Pipeline;
   }
 
   async getPipelineByDatasourceId(datasourceId: number): Promise<Pipeline> {
     const response = await this.httpPipelineConfigs.get(`?datasourceId=${datasourceId}`);
-    return JSON.parse(response.data);
+    return JSON.parse(response.data) as Pipeline;
   }
 
   async createPipeline(pipeline: Pipeline): Promise<Pipeline> {
     const response = await this.httpPipelineConfigs.post('/', JSON.stringify(pipeline));
-    return JSON.parse(response.data);
+    return JSON.parse(response.data) as Pipeline;
   }
 
   async updatePipeline(pipeline: Pipeline): Promise<AxiosResponse> {
