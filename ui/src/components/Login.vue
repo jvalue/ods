@@ -1,37 +1,17 @@
 <template>
   <v-toolbar-items>
-    <v-btn
-      v-show="!isAuthenticated"
-      text
-      @click="onLogin"
-    >
+    <v-btn v-show="!isAuthenticated" text @click="onLogin">
       Login
-      <v-icon
-        dark
-        right
-      >
+      <v-icon dark right>
         mdi-account
       </v-icon>
     </v-btn>
 
-    <v-menu
-      v-model="menu"
-      :close-on-content-click="false"
-      :nudge-width="200"
-      offset-x
-    >
+    <v-menu v-model="menu" :close-on-content-click="false" :nudge-width="200" offset-x>
       <template #activator="{ on }">
-        <v-btn
-          v-show="isAuthenticated"
-          text
-          to="/"
-          v-on="on"
-        >
+        <v-btn v-show="isAuthenticated" text to="/" v-on="on">
           {{ userProfile.firstName }}
-          <v-icon
-            dark
-            right
-          >
+          <v-icon dark right>
             mdi-chevron-down
           </v-icon>
         </v-btn>
@@ -47,10 +27,7 @@
 
         <v-divider />
 
-        <v-list-item
-          disabled
-          @click="onEditProfile"
-        >
+        <v-list-item disabled @click="onEditProfile">
           <v-list-item-title>Edit Profile</v-list-item-title>
         </v-list-item>
         <v-list-item @click="onLogout">
@@ -62,50 +39,51 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import Component from 'vue-class-component'
-import { Action, State } from 'vuex-class'
-import { UserProfile } from '@/authentication'
+import Vue from 'vue';
+import Component from 'vue-class-component';
+import { Action, State } from 'vuex-class';
 
-const namespace = { namespace: 'auth' }
+import { UserProfile } from '@/authentication';
+
+const namespace = { namespace: 'auth' };
 
 @Component
 export default class Login extends Vue {
-  private menu = false
+  private menu = false;
 
   @State('isAuth', namespace)
-  private isAuthenticated!: boolean
+  private isAuthenticated!: boolean;
 
   @State('userProfile', namespace)
-  private userProfile!: UserProfile
+  private userProfile!: UserProfile;
 
   @Action('login', namespace)
-  private login!: () => Promise<boolean>
+  private login!: () => Promise<boolean>;
 
   @Action('logout', namespace)
-  private logout!: () => boolean
+  private logout!: () => boolean;
 
   @Action('editProfile', namespace)
-  private editProfile!: () => Promise<boolean>
+  private editProfile!: () => Promise<boolean>;
 
   @Action('init', namespace)
-  private init!: () => Promise<boolean>
+  private init!: () => Promise<boolean>;
 
-  private async mounted (): Promise<void> {
-    await this.init()
+  private async mounted(): Promise<void> {
+    await this.init();
   }
 
-  private async onLogin (): Promise<void> {
-    await this.login()
+  private async onLogin(): Promise<void> {
+    await this.login();
   }
 
-  private onLogout (): void {
-    this.logout()
-    this.menu = false
+  private onLogout(): void {
+    this.logout();
+    this.menu = false;
   }
 
-  private async onEditProfile (): Promise<void> {
-    await this.editProfile()
+  private async onEditProfile(): Promise<void> {
+    await this.editProfile();
   }
 }
 </script>

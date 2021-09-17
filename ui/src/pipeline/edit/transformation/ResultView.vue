@@ -20,9 +20,9 @@
       <v-subheader>Meta-Data</v-subheader>
       <v-card-text style="text-align:left">
         <p>
-          start: {{ result.stats.startTimestamp | timestamp }}<br>
-          end: {{ result.stats.endTimestamp | timestamp }}<br>
-          job duration: {{ result.stats.durationInMilliSeconds | duration }}
+          start: {{ formatTimestamp(result.stats.startTimestamp) }}<br />
+          end: {{ formatTimestamp(result.stats.endTimestamp) }}<br />
+          job duration: {{ formatDuration(result.stats.durationInMilliSeconds) }}
         </p>
       </v-card-text>
     </div>
@@ -35,17 +35,24 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import Component from 'vue-class-component'
+import Vue from 'vue';
+import Component from 'vue-class-component';
+import { Prop } from 'vue-property-decorator';
 
-import { duration, timestamp } from '@/filters'
-import { JobResult } from './transformation'
-import { Prop } from 'vue-property-decorator'
+import { JobResult } from './transformation';
 
-@Component({
-  filters: { duration, timestamp }
-})
+import { duration, timestamp } from '@/filters';
+
+@Component
 export default class ResultView extends Vue {
-  @Prop() readonly result!: JobResult
+  @Prop() readonly result!: JobResult;
+
+  // Vetur does not like filters -> use Vue 3 approach with computed
+  formatTimestamp(value: number): string {
+    return timestamp(value);
+  }
+  formatDuration(value: number): string {
+    return duration(value);
+  }
 }
 </script>

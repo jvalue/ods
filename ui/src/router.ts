@@ -1,49 +1,52 @@
-import Vue from 'vue'
-import Router, { RouteConfig } from 'vue-router'
-import Home from '@/views/Home.vue'
-import storageRoutes from '@/storage/router'
-import datasourceRoutes from '@/datasource/router'
-import pipelineRoutes from '@/pipeline/router'
-import notificationRoutes from '@/notification/router'
-import { isAuthenticated, login } from './authentication'
-import { BASE_URL } from '@/env'
+import Vue from 'vue';
+import Router, { RouteConfig } from 'vue-router';
 
-Vue.use(Router)
+import { isAuthenticated, login } from './authentication';
+
+import datasourceRoutes from '@/datasource/router';
+import { BASE_URL } from '@/env';
+import notificationRoutes from '@/notification/router';
+import pipelineRoutes from '@/pipeline/router';
+import RouterMeta from '@/routerMeta';
+import storageRoutes from '@/storage/router';
+import Home from '@/views/Home.vue';
+
+Vue.use(Router);
 
 const routes: RouteConfig[] = [
   {
     path: '/',
     name: 'home',
     component: Home,
-    meta: { title: 'Dashboard' }
+    meta: { title: 'Dashboard' },
   },
   {
     path: '/about',
     name: 'about',
     meta: { title: 'About' },
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: async () =>
-      await import(/* webpackChunkName: "about" */ './views/About.vue')
+    // Route level code-splitting
+    // This generates a separate chunk (about.[hash].js) for this route
+    // Which is lazy-loaded when the route is visited.
+    component: async (): Promise<typeof import('*.vue')> =>
+      await import(/* WebpackChunkName: "about" */ './views/About.vue'),
   },
   ...pipelineRoutes,
   ...datasourceRoutes,
   ...notificationRoutes,
-  ...storageRoutes
-]
+  ...storageRoutes,
+];
 
 const router = new Router({
   mode: 'history',
   base: BASE_URL,
-  routes
-})
+  routes,
+});
 
 router.beforeEach(async (to, from, next) => {
-  if (to.meta.requiresAuth === true && !isAuthenticated()) {
-    await login()
+  if ((to.meta as RouterMeta).requiresAuth === true && !isAuthenticated()) {
+    await login();
   }
-  next()
-})
+  next();
+});
 
-export default router
+export default router;

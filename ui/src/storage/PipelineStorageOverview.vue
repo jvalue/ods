@@ -14,10 +14,7 @@
                   <v-list-item-subtitle>{{ getLatestStorageItemUrl(pipelineId) }}</v-list-item-subtitle>
                 </v-list-item-content>
                 <v-list-item-action>
-                  <v-btn
-                    icon
-                    @click="clipUrl(getLatestStorageItemUrl(pipelineId))"
-                  >
+                  <v-btn icon @click="clipUrl(getLatestStorageItemUrl(pipelineId))">
                     <v-icon color="grey lighten-1">mdi mdi-content-copy</v-icon>
                   </v-btn>
                 </v-list-item-action>
@@ -25,9 +22,7 @@
             </v-list>
           </span>
           <span>
-            <v-btn
-              @click="fetchData(pipelineId)"
-            >
+            <v-btn @click="fetchData(pipelineId)">
               <v-icon dark>
                 mdi mdi-sync
               </v-icon>
@@ -38,29 +33,17 @@
 
       <div class="mt-3">
         <v-layout row>
-          <v-flex
-            xs12
-            sm6
-            offset-sm3
-          >
+          <v-flex xs12 sm6 offset-sm3>
             <v-expansion-panels>
-              <v-expansion-panel
-                v-for="entry in data"
-                :key="entry.id"
-              >
+              <v-expansion-panel v-for="entry in data" :key="entry.id">
                 <v-expansion-panel-header>
                   <div primary-title>
-                    <div class="headline">
-                      # {{ entry.id }}
-                    </div>
+                    <div class="headline"># {{ entry.id }}</div>
                     <span class="grey--text">{{ entry.timestamp }}</span>
                   </div>
                 </v-expansion-panel-header>
                 <v-expansion-panel-content>
-                  <storage-item-view
-                    :pipeline-id="entry.pipelineId"
-                    :item-id="entry.id"
-                  />
+                  <storage-item-view :pipeline-id="entry.pipelineId" :item-id="entry.id" />
                 </v-expansion-panel-content>
               </v-expansion-panel>
             </v-expansion-panels>
@@ -72,48 +55,47 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import Component from 'vue-class-component'
-import clipboardCopy from 'clipboard-copy'
+import clipboardCopy from 'clipboard-copy';
+import Vue from 'vue';
+import Component from 'vue-class-component';
 
-import StorageItemView from './StorageItemView.vue'
-
-import { StorageItemMetaData } from './storage-item'
-import * as StorageREST from './storageRest'
+import { StorageItemMetaData } from './storage-item';
+import StorageItemView from './StorageItemView.vue';
+import * as StorageREST from './storageRest';
 
 @Component({
-  components: { StorageItemView }
+  components: { StorageItemView },
 })
 export default class PipelineStorageOverview extends Vue {
-  private data: StorageItemMetaData[] = []
+  private data: StorageItemMetaData[] = [];
 
-  private pipelineId = 0
+  private pipelineId = 0;
 
-  private clipUrl = clipboardCopy
+  private clipUrl = clipboardCopy;
 
-  private getStorageItemUrl (pipelineId: number, itemId: number): string {
-    let url = StorageREST.createUrlForItem(pipelineId, itemId)
+  private getStorageItemUrl(pipelineId: number, itemId: number): string {
+    let url = StorageREST.createUrlForItem(pipelineId, itemId);
     if (url.startsWith('/')) {
-      url = window.location.origin + url
+      url = window.location.origin + url;
     }
-    return url
-  };
-
-  private getLatestStorageItemUrl (pipelineId: number): string {
-    let url = StorageREST.createUrlForLatestItem(pipelineId)
-    if (url.startsWith('/')) {
-      url = window.location.origin + url
-    }
-    return url
+    return url;
   }
 
-  private async created (): Promise<void> {
-    this.pipelineId = parseInt(this.$route.params.storageId)
-    await this.fetchData(this.pipelineId)
+  private getLatestStorageItemUrl(pipelineId: number): string {
+    let url = StorageREST.createUrlForLatestItem(pipelineId);
+    if (url.startsWith('/')) {
+      url = window.location.origin + url;
+    }
+    return url;
   }
 
-  private async fetchData (pipelineId: number): Promise<void> {
-    this.data = await StorageREST.getStoredItems(this.pipelineId)
+  private async created(): Promise<void> {
+    this.pipelineId = Number.parseInt(this.$route.params.storageId, 10);
+    await this.fetchData(this.pipelineId);
+  }
+
+  private async fetchData(pipelineId: number): Promise<void> {
+    this.data = await StorageREST.getStoredItems(pipelineId);
   }
 }
 </script>
