@@ -14,6 +14,7 @@ module.exports = {
 
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    'monaco-editor': '<rootDir>/node_modules/monaco-editor/esm/vs/editor/editor.api.d.ts',
   },
 
   snapshotSerializers: ['jest-serializer-vue'],
