@@ -10,23 +10,40 @@ on:
   workflow_dispatch:
 
 jobs:
-  cdct:
-    name: Consumer- and Provider-Side Testing
+  consumer:
+    name: Consumer-Side Testing
     runs-on: ubuntu-18.04
     
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build Consumer-Driven Contract Test
+      - name: Build Consumer-Side Test
         run: |
-          docker-compose -f docker-compose.pact.yml build
+          docker-compose -f docker-compose.consumer.yml build
 
-      - name: Run Consumer-Driven Contract Test
+      - name: Run Consumer-Side Test
         run: |
-          docker-compose -f docker-compose.pact.yml up
+          docker-compose -f docker-compose.consumer.yml up
       
       - name: Commit latest contracts
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Update auto-generated contracts
           file_pattern: pacts/*.json
+
+  provider:
+    name: Provider-Side Testing
+    runs-on: ubuntu-18.04
+
+    needs: [consumer]
+    
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build Provider-Side Test
+        run: |
+          docker-compose -f docker-compose.provider.yml build
+
+      - name: Run Provider-Side Test
+        run: |
+          docker-compose -f docker-compose.provider.yml up --abort-on-container-exit --exit-code-from pipeline-provider
