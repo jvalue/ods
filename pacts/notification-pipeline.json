@@ -1,0 +1,41 @@
+{
+  "consumer": {
+    "name": "Notification"
+  },
+  "provider": {
+    "name": "Pipeline"
+  },
+  "messages": [
+    {
+      "description": "a success event",
+      "providerStates": [
+        {
+          "name": "any state",
+          "params": null
+        }
+      ],
+      "contents": {
+        "pipelineId": 1,
+        "pipelineName": "some pipeline name",
+        "data": {
+        }
+      },
+      "matchingRules": {
+        "body": {
+          "$": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  }
+}
