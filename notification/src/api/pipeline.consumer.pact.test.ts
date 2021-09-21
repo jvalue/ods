@@ -19,7 +19,8 @@ const options: JestMessageConsumerOptions = {
   // pactfileWriteMode: 'overwrite'
 }
 // TODO remove this workaround as soon as the pactfileWriteMode can be set to 'overwrite' in JestMessageConsumerOptions
-fs.unlinkSync(path.resolve(pactsDir, 'notification-pipeline.json'))
+const contractPath = path.resolve(pactsDir, 'notification-pipeline.json')
+if (fs.existsSync(contractPath)) fs.unlinkSync(contractPath)
 
 const examplePipelineSuccessEvent: PipelineSuccessEvent = {
   pipelineId: 1,

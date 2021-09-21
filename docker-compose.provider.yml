@@ -9,7 +9,7 @@ services:
     depends_on:
       - rabbitmq-provider
       - pipeline-db-provider
-      - pipeline-outboxer
+      - pipeline-outboxer-provider
     environment:
       CONNECTION_RETRIES: '30'
       CONNECTION_BACKOFF_IN_MS: '2000'
