@@ -4,6 +4,7 @@
     "./pipeline",
     "./ui",
     "./scheduler",
+    "./storage/storage-mq",
     "./system-test",
     "./adapter/integration-test",
     "./scheduler/integration-test",
