@@ -5,7 +5,7 @@ services:
   pipeline-provider:
     build:
       context: .
-      dockerfile: ./pipeline/Dockerfile.provider
+      dockerfile: ./pipeline/pact/Dockerfile.provider
     depends_on:
       - rabbitmq-provider
       - pipeline-db-provider
