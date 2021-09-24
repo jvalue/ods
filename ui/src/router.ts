@@ -27,7 +27,9 @@ const routes: RouteConfig[] = [
     // Route level code-splitting
     // This generates a separate chunk (about.[hash].js) for this route
     // Which is lazy-loaded when the route is visited.
-    component: async (): Promise<typeof import('*.vue')> =>
+    // Disable any due to missing type in vue-router for vue2
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    component: async (): Promise<any> =>
       await import(/* WebpackChunkName: "about" */ './views/About.vue'),
   },
   ...pipelineRoutes,

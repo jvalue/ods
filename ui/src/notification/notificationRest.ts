@@ -70,7 +70,7 @@ interface NotificationApiWriteModel {
   pipelineId: number;
   condition: string;
   type: ApiNotificationType;
-  parameter: NotificationParameters;
+  parameter: NotificationParameters | Record<string, unknown>;
 }
 
 type ApiNotificationType = 'WEBHOOK' | 'SLACK' | 'FCM';
