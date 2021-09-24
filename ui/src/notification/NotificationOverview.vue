@@ -20,7 +20,12 @@
         </v-btn>
       </v-card-title>
 
-      <v-data-table :headers="headers" :items="notifications" :loading="isLoading" class="elevation-1">
+      <v-data-table
+        :headers="headers"
+        :items="notifications"
+        :loading="isLoading"
+        class="elevation-1"
+      >
         <template v-slot:progress>
           <v-progress-linear indeterminate />
         </template>
@@ -34,13 +39,23 @@
           {{ item.condition }}
         </template>
         <template #[`item.action`]="{ item }">
-          <v-btn depressed small class="ma-2" @click="onEditNotification(item.id)">
+          <v-btn
+            depressed
+            small
+            class="ma-2"
+            @click="onEditNotification(item.id)"
+          >
             Edit
             <v-icon dark right>
               mdi-pencil
             </v-icon>
           </v-btn>
-          <v-btn depressed small class="ma-2" @click="onDeleteNotification(item)">
+          <v-btn
+            depressed
+            small
+            class="ma-2"
+            @click="onDeleteNotification(item)"
+          >
             Delete
             <v-icon dark right>
               mdi-delete
@@ -75,39 +90,57 @@ export default class PipelineNotifications extends Vue {
 
   mounted(): void {
     this.pipelineId = Number.parseInt(this.$route.params.pipelineId, 10);
-    this.loadNotifications().catch(error => console.error('Failed to load notification', error));
+    this.loadNotifications().catch(error =>
+      console.error('Failed to load notification', error),
+    );
   }
 
   private onCreateNotification(): void {
     this.$router
-      .push({ name: 'notification-create', params: { pipelineId: `${this.pipelineId}` } })
-      .catch(error => console.log('Failed to route to notification-create', error));
+      .push({
+        name: 'notification-create',
+        params: { pipelineId: `${this.pipelineId}` },
+      })
+      .catch(error =>
+        console.log('Failed to route to notification-create', error),
+      );
   }
 
   private onEditNotification(notificationId: string): void {
     this.$router
       .push({
         name: 'notification-edit',
-        params: { pipelineId: `${this.pipelineId}`, notificationId: `${notificationId}` },
+        params: {
+          pipelineId: `${this.pipelineId}`,
+          notificationId: `${notificationId}`,
+        },
       })
-      .catch(error => console.log('Failed to route to notification-edit', error));
+      .catch(error =>
+        console.log('Failed to route to notification-edit', error),
+      );
   }
 
-  private async onDeleteNotification(notification: NotificationConfig): Promise<void> {
+  private async onDeleteNotification(
+    notification: NotificationConfig,
+  ): Promise<void> {
     await NotificaitonREST.remove(notification);
     await this.loadNotifications();
   }
 
   private async loadNotifications(): Promise<void> {
     this.isLoading = true;
-    this.notifications = await NotificaitonREST.getAllByPipelineId(this.pipelineId);
+    this.notifications = await NotificaitonREST.getAllByPipelineId(
+      this.pipelineId,
+    );
     this.isLoading = false;
   }
 
   private onNavigateBack(): void {
     this.$router
       .push({ name: 'pipeline-overview' })
-      .catch(error => console.log('Failed to route to notification-overview', error));
+      .catch(error =>
+        console.log('Failed to route to notification-overview', error),
+      );
   }
 }
 </script>

@@ -1,7 +1,14 @@
 <template>
   <v-form v-model="isValid">
-    <v-switch v-model="triggerConfig.periodic" label="Periodic execution" @change="formChanged" />
-    <date-time-picker v-model="triggerConfig.firstExecution" @change="formChanged" />
+    <v-switch
+      v-model="triggerConfig.periodic"
+      label="Periodic execution"
+      @change="formChanged"
+    />
+    <date-time-picker
+      v-model="triggerConfig.firstExecution"
+      @change="formChanged"
+    />
 
     <span class="subheading font-weight-light mr-1">
       Interval: {{ dialogIntervalHours }}h {{ dialogIntervalMinutes }}m

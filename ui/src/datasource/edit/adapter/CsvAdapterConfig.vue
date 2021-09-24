@@ -1,8 +1,19 @@
 <template>
   <v-form v-model="isFormValid">
-    <v-switch v-model="csvConfig.firstRowAsHeader" label="Use first row as header" />
-    <v-switch v-model="csvConfig.skipFirstDataRow" label="Skip the first data row (after header if selected)" />
-    <v-text-field v-model="csvConfig.columnSeparator" label="Column separator" :rules="[required]" :maxlength="1" />
+    <v-switch
+      v-model="csvConfig.firstRowAsHeader"
+      label="Use first row as header"
+    />
+    <v-switch
+      v-model="csvConfig.skipFirstDataRow"
+      label="Skip the first data row (after header if selected)"
+    />
+    <v-text-field
+      v-model="csvConfig.columnSeparator"
+      label="Column separator"
+      :rules="[required]"
+      :maxlength="1"
+    />
     <v-select
       v-model="csvConfig.lineSeparator"
       :items="availableLineSeparators"

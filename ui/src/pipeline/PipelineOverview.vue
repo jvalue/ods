@@ -14,7 +14,13 @@
           </v-icon>
         </v-btn>
         <v-spacer />
-        <v-text-field v-model="search" label="Search" append-icon="mdi mdi-magnify" single-line hide-details />
+        <v-text-field
+          v-model="search"
+          label="Search"
+          append-icon="mdi mdi-magnify"
+          single-line
+          hide-details
+        />
       </v-card-title>
 
       <v-data-table
@@ -30,7 +36,9 @@
         </template>
 
         <template #[`item.trigger.interval`]="{ item }">
-          {{ getHoursFromMS(item.trigger.interval) }}h:{{ getMinutesFromMS(item.trigger.interval) }}m
+          {{ getHoursFromMS(item.trigger.interval) }}h:{{
+            getMinutesFromMS(item.trigger.interval)
+          }}m
         </template>
 
         <template #[`item.trigger.periodic`]="{ item }">
@@ -81,20 +89,31 @@ import { Action, State } from 'vuex-class';
 
 import Pipeline from './pipeline';
 
-import { convertMillisecondsToHours, convertMillisecondsToMinutes } from '@/helpers/date-helpers';
+import {
+  convertMillisecondsToHours,
+  convertMillisecondsToMinutes,
+} from '@/helpers/date-helpers';
 
 const namespace = { namespace: 'pipeline' };
 
 @Component({})
 export default class PipelineOverview extends Vue {
-  @Action('loadPipelines', namespace) private loadPipelinesAction!: () => Promise<void>;
-  @Action('loadPipelineStates', namespace) private loadPipelineStatesAction!: () => Promise<void>;
-  @Action('deletePipeline', namespace) private deletePipelineAction!: (id: number) => void;
+  @Action('loadPipelines', namespace)
+  private loadPipelinesAction!: () => Promise<void>;
+  @Action('loadPipelineStates', namespace)
+  private loadPipelineStatesAction!: () => Promise<void>;
+  @Action('deletePipeline', namespace) private deletePipelineAction!: (
+    id: number,
+  ) => void;
 
   @State('isLoadingPipelines', namespace) private isLoadingPipelines!: boolean;
-  @State('isLoadingPipelineStates', namespace) private isLoadingPipelineStates!: boolean;
+  @State('isLoadingPipelineStates', namespace)
+  private isLoadingPipelineStates!: boolean;
   @State('pipelines', namespace) private pipelines!: Pipeline[];
-  @State('pipelineStates', namespace) private pipelineStates!: Map<number, string>;
+  @State('pipelineStates', namespace) private pipelineStates!: Map<
+    number,
+    string
+  >;
 
   private headers = [
     { text: 'Id', value: 'id' },
@@ -114,12 +133,19 @@ export default class PipelineOverview extends Vue {
 
   private onShowPipelineData(pipeline: Pipeline): void {
     this.$router
-      .push({ name: 'pipeline-storage-overview', params: { storageId: `${pipeline.id}` } })
-      .catch(error => console.log('Failed to route to pipeline-storage-overview', error));
+      .push({
+        name: 'pipeline-storage-overview',
+        params: { storageId: `${pipeline.id}` },
+      })
+      .catch(error =>
+        console.log('Failed to route to pipeline-storage-overview', error),
+      );
   }
 
   private onCreatePipeline(): void {
-    this.$router.push({ name: 'pipeline-new' }).catch(error => console.log('Failed to route to pipeline-new', error));
+    this.$router
+      .push({ name: 'pipeline-new' })
+      .catch(error => console.log('Failed to route to pipeline-new', error));
   }
 
   private onEditPipeline(pipeline: Pipeline): void {
@@ -134,16 +160,27 @@ export default class PipelineOverview extends Vue {
 
   private onNotifications(pipeline: Pipeline): void {
     this.$router
-      .push({ name: 'notification-overview', params: { pipelineId: `${pipeline.id}` } })
-      .catch(error => console.log('Failed to route to notification-overview', error));
+      .push({
+        name: 'notification-overview',
+        params: { pipelineId: `${pipeline.id}` },
+      })
+      .catch(error =>
+        console.log('Failed to route to notification-overview', error),
+      );
   }
 
-  private filterOnlyDisplayName(value: unknown, search: string, item: Pipeline): boolean {
+  private filterOnlyDisplayName(
+    value: unknown,
+    search: string,
+    item: Pipeline,
+  ): boolean {
     return (
       value != null &&
       search != null &&
       typeof value === 'string' &&
-      item.metadata.displayName.toLocaleLowerCase().includes(search.toLocaleLowerCase())
+      item.metadata.displayName
+        .toLocaleLowerCase()
+        .includes(search.toLocaleLowerCase())
     );
   }
 

@@ -10,11 +10,18 @@
             <v-list>
               <v-list-item>
                 <v-list-item-content>
-                  <v-list-item-title>Static Link (Latest Data)</v-list-item-title>
-                  <v-list-item-subtitle>{{ getLatestStorageItemUrl(pipelineId) }}</v-list-item-subtitle>
+                  <v-list-item-title
+                    >Static Link (Latest Data)</v-list-item-title
+                  >
+                  <v-list-item-subtitle>{{
+                    getLatestStorageItemUrl(pipelineId)
+                  }}</v-list-item-subtitle>
                 </v-list-item-content>
                 <v-list-item-action>
-                  <v-btn icon @click="clipUrl(getLatestStorageItemUrl(pipelineId))">
+                  <v-btn
+                    icon
+                    @click="clipUrl(getLatestStorageItemUrl(pipelineId))"
+                  >
                     <v-icon color="grey lighten-1">mdi mdi-content-copy</v-icon>
                   </v-btn>
                 </v-list-item-action>
@@ -43,7 +50,10 @@
                   </div>
                 </v-expansion-panel-header>
                 <v-expansion-panel-content>
-                  <storage-item-view :pipeline-id="entry.pipelineId" :item-id="entry.id" />
+                  <storage-item-view
+                    :pipeline-id="entry.pipelineId"
+                    :item-id="entry.id"
+                  />
                 </v-expansion-panel-content>
               </v-expansion-panel>
             </v-expansion-panels>

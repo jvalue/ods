@@ -1,6 +1,10 @@
 <template>
   <v-form v-model="isValid">
-    <v-text-field v-model="parameters.url" label="URL to trigger the Webhook at" :rules="[validURL]" />
+    <v-text-field
+      v-model="parameters.url"
+      label="URL to trigger the Webhook at"
+      :rules="[validURL]"
+    />
   </v-form>
 </template>
 
@@ -60,7 +64,11 @@ export default class WebhookNotificationForm extends Vue {
       'i',
     ); // Fragment locator
 
-    if (!isNullOrUndefined(url) && typeof url === 'string' && urlRegex.test(url)) {
+    if (
+      !isNullOrUndefined(url) &&
+      typeof url === 'string' &&
+      urlRegex.test(url)
+    ) {
       return true;
     }
 

@@ -1,8 +1,20 @@
 <template>
   <v-form v-model="validForm">
-    <v-text-field v-model="metadataConfig.description" label="Pipeline Description" @keyup="formChanged" />
-    <v-text-field v-model="metadataConfig.author" label="Author" @keyup="formChanged" />
-    <v-text-field v-model="metadataConfig.license" label="License" @keyup="formChanged" />
+    <v-text-field
+      v-model="metadataConfig.description"
+      label="Pipeline Description"
+      @keyup="formChanged"
+    />
+    <v-text-field
+      v-model="metadataConfig.author"
+      label="Author"
+      @keyup="formChanged"
+    />
+    <v-text-field
+      v-model="metadataConfig.license"
+      label="License"
+      @keyup="formChanged"
+    />
   </v-form>
 </template>
 

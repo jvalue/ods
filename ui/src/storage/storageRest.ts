@@ -8,12 +8,19 @@ const http = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-export async function getStoredItems(pipelineId: number): Promise<StorageItemMetaData[]> {
-  const response = await http.get(`/${pipelineId}?select=id,timestamp,pipelineId`);
+export async function getStoredItems(
+  pipelineId: number,
+): Promise<StorageItemMetaData[]> {
+  const response = await http.get(
+    `/${pipelineId}?select=id,timestamp,pipelineId`,
+  );
   return response.data as StorageItemMetaData[];
 }
 
-export async function getStoredItem(pipelineId: number, storageItemId: number): Promise<StorageItem> {
+export async function getStoredItem(
+  pipelineId: number,
+  storageItemId: number,
+): Promise<StorageItem> {
   const response = await http.get(`/${pipelineId}?id=eq.${storageItemId}`);
   return (response.data as StorageItem[])[0];
 }

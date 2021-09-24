@@ -54,7 +54,9 @@ export default class PipelineModule extends VuexModule {
     this.context.commit('setIsLoadingPipelineStates', true);
     const pipelineStates = new Map<number, string>();
     for (const element of this.pipelines) {
-      const transformedData: TransformedDataMetaData = await RestTransService.getLatestTransformedData(element.id);
+      const transformedData: TransformedDataMetaData = await RestTransService.getLatestTransformedData(
+        element.id,
+      );
 
       let healthStatus: string;
       if (transformedData.healthStatus === HealthStatus.OK) {

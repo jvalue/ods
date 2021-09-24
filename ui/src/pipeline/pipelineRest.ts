@@ -29,17 +29,25 @@ export class PipelineRest {
   }
 
   async getPipelineByDatasourceId(datasourceId: number): Promise<Pipeline> {
-    const response = await this.httpPipelineConfigs.get(`?datasourceId=${datasourceId}`);
+    const response = await this.httpPipelineConfigs.get(
+      `?datasourceId=${datasourceId}`,
+    );
     return JSON.parse(response.data) as Pipeline;
   }
 
   async createPipeline(pipeline: Pipeline): Promise<Pipeline> {
-    const response = await this.httpPipelineConfigs.post('/', JSON.stringify(pipeline));
+    const response = await this.httpPipelineConfigs.post(
+      '/',
+      JSON.stringify(pipeline),
+    );
     return JSON.parse(response.data) as Pipeline;
   }
 
   async updatePipeline(pipeline: Pipeline): Promise<AxiosResponse> {
-    return await this.httpPipelineConfigs.put(`/${pipeline.id}`, JSON.stringify(pipeline));
+    return await this.httpPipelineConfigs.put(
+      `/${pipeline.id}`,
+      JSON.stringify(pipeline),
+    );
   }
 
   async deletePipeline(id: number): Promise<AxiosResponse> {

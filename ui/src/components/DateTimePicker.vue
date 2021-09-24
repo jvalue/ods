@@ -1,7 +1,17 @@
 <template>
-  <v-dialog ref="dateDialog" v-model="pickDateTimeModal" width="290px" persistant>
+  <v-dialog
+    ref="dateDialog"
+    v-model="pickDateTimeModal"
+    width="290px"
+    persistant
+  >
     <template #activator="{ on }">
-      <v-text-field v-model="dateTimeString" label="Time for First Execution" readonly v-on="on" />
+      <v-text-field
+        v-model="dateTimeString"
+        label="Time for First Execution"
+        readonly
+        v-on="on"
+      />
     </template>
     <v-date-picker v-if="pickDateModal" v-model="date" full-width>
       <v-spacer />
@@ -68,7 +78,10 @@ export default class DateTimePicker extends Vue {
     }
 
     if (!(value instanceof Date)) {
-      console.error('[DateTimePicker] Expected type of argument "value" to be Date, but got: ', value);
+      console.error(
+        '[DateTimePicker] Expected type of argument "value" to be Date, but got: ',
+        value,
+      );
     } else {
       this.reset();
     }

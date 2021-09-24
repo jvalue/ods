@@ -11,7 +11,9 @@ const http = axios.create({
   },
 });
 
-export async function transformData(request: TransformationRequest): Promise<JobResult> {
+export async function transformData(
+  request: TransformationRequest,
+): Promise<JobResult> {
   const response = await http.post('/job', request, {
     validateStatus: status => status >= 200 && status <= 400,
   });

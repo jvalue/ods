@@ -99,7 +99,12 @@ export default class CodeEditor extends Vue {
     }
     const endPosition: number = lines[lineNumber - 1].length;
 
-    return new monaco.Range(lineNumber, error.position, lineNumber, endPosition);
+    return new monaco.Range(
+      lineNumber,
+      error.position,
+      lineNumber,
+      endPosition,
+    );
   }
 
   /**
@@ -109,7 +114,9 @@ export default class CodeEditor extends Vue {
    * @param {JobError | undefined} error the error from the JobResult
    * @returns {monaco.editor.IModelDeltaDecoration[]} a list of decorations (normally 0 or 1 entries)
    */
-  private buildDecorations(error: JobError | undefined): monaco.editor.IModelDeltaDecoration[] {
+  private buildDecorations(
+    error: JobError | undefined,
+  ): monaco.editor.IModelDeltaDecoration[] {
     if (error === undefined) {
       return [];
     }
@@ -144,7 +151,10 @@ export default class CodeEditor extends Vue {
 
     const newDecorations = this.buildDecorations(error);
 
-    this.decorations = editor.deltaDecorations(this.decorations, newDecorations);
+    this.decorations = editor.deltaDecorations(
+      this.decorations,
+      newDecorations,
+    );
   }
 
   @Watch('data')

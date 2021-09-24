@@ -20,7 +20,13 @@ export async function getIsAlive(): Promise<string> {
   return response.data;
 }
 
-export async function getSchema(schema: string, precision: string): Promise<Record<string, unknown>> {
-  const response = await httpSchema.post<string>('/suggestion', { data: schema, precision: precision });
+export async function getSchema(
+  schema: string,
+  precision: string,
+): Promise<Record<string, unknown>> {
+  const response = await httpSchema.post<string>('/suggestion', {
+    data: schema,
+    precision: precision,
+  });
   return JSON.parse(response.data) as Record<string, unknown>;
 }

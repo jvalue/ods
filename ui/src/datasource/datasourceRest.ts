@@ -1,6 +1,10 @@
 import axios, { AxiosResponse } from 'axios';
 
-import Datasource, { Data, DataLocation, DataimportMetaData } from './datasource';
+import Datasource, {
+  Data,
+  DataLocation,
+  DataimportMetaData,
+} from './datasource';
 
 import { ADAPTER_SERVICE_URL } from '@/env';
 
@@ -37,14 +41,21 @@ export async function getDatasourceById(id: number): Promise<Datasource> {
   return JSON.parse(response.data, reviver) as Datasource;
 }
 
-export async function createDatasource(datasource: Datasource): Promise<Datasource> {
+export async function createDatasource(
+  datasource: Datasource,
+): Promise<Datasource> {
   const { ...creationDTO } = datasource;
   const response = await http.post('/datasources', JSON.stringify(creationDTO));
   return JSON.parse(response.data, reviver) as Datasource;
 }
 
-export async function updateDatasource(datasource: Datasource): Promise<AxiosResponse> {
-  return await http.put(`/datasources/${datasource.id}`, JSON.stringify(datasource));
+export async function updateDatasource(
+  datasource: Datasource,
+): Promise<AxiosResponse> {
+  return await http.put(
+    `/datasources/${datasource.id}`,
+    JSON.stringify(datasource),
+  );
 }
 
 export async function deleteDatasource(id: number): Promise<AxiosResponse> {
@@ -59,8 +70,12 @@ export async function getDatasourceData(id: number): Promise<Data> {
   return JSON.parse(dataResponse.data) as Data;
 }
 
-export async function getLatestDataimport(id: number): Promise<DataimportMetaData> {
-  const importResponse = await http.get<string>(`/datasources/${id}/imports/latest`);
+export async function getLatestDataimport(
+  id: number,
+): Promise<DataimportMetaData> {
+  const importResponse = await http.get<string>(
+    `/datasources/${id}/imports/latest`,
+  );
   const jsonResponse = JSON.parse(importResponse.data) as DataimportMetaData;
   return jsonResponse;
 }

@@ -7,7 +7,11 @@
       </v-stepper-step>
       <v-stepper-content step="1">
         <v-form v-model="validStep1">
-          <v-text-field v-model="datasource.metadata.displayName" label="Datasource Name" :rules="[required]" />
+          <v-text-field
+            v-model="datasource.metadata.displayName"
+            label="Datasource Name"
+            :rules="[required]"
+          />
         </v-form>
         <stepper-button-group
           :step="1"
@@ -22,7 +26,10 @@
         <small>Configure the data import</small>
       </v-stepper-step>
       <v-stepper-content step="2">
-        <adapter-config v-model="datasource" @validityChanged="validStep2 = isSchemaAlive ? $event : $event + 1" />
+        <adapter-config
+          v-model="datasource"
+          @validityChanged="validStep2 = isSchemaAlive ? $event : $event + 1"
+        />
         <stepper-button-group
           :step="2"
           :next-enabled="validStep2"
@@ -34,16 +41,30 @@
         <small>Customize the generated schema </small>
       </v-stepper-step>
       <v-stepper-content v-if="isSchemaAlive" step="3">
-        <datasource-schema-edit v-model="datasource" @validityChanged="validStep3 = $event" />
-        <stepper-button-group :step="3" :next-enabled="validStep3" @stepChanged="dialogStep = $event" />
+        <datasource-schema-edit
+          v-model="datasource"
+          @validityChanged="validStep3 = $event"
+        />
+        <stepper-button-group
+          :step="3"
+          :next-enabled="validStep3"
+          @stepChanged="dialogStep = $event"
+        />
       </v-stepper-content>
 
       <v-stepper-step :complete="dialogStep > 4" step="4">
         Meta-Data
       </v-stepper-step>
       <v-stepper-content step="4">
-        <datasource-metadata-config v-model="datasource.metadata" @validityChanged="validStep4 = $event" />
-        <stepper-button-group :step="4" :next-enabled="validStep4" @stepChanged="dialogStep = $event" />
+        <datasource-metadata-config
+          v-model="datasource.metadata"
+          @validityChanged="validStep4 = $event"
+        />
+        <stepper-button-group
+          :step="4"
+          :next-enabled="validStep4"
+          @stepChanged="dialogStep = $event"
+        />
       </v-stepper-content>
 
       <v-stepper-step :complete="dialogStep > 5" step="5">
@@ -51,7 +72,10 @@
         <small>Configure Execution Details</small>
       </v-stepper-step>
       <v-stepper-content step="5">
-        <trigger-config v-model="datasource.trigger" @validityChanged="validStep5 = $event" />
+        <trigger-config
+          v-model="datasource.trigger"
+          @validityChanged="validStep5 = $event"
+        />
         <stepper-button-group
           :step="5"
           :next-enabled="validStep5"
@@ -79,7 +103,13 @@ import TriggerConfig from './edit/TriggerConfig.vue';
 import * as SchemaSuggestionREST from './schemaSuggestionRest';
 
 @Component({
-  components: { AdapterConfig, StepperButtonGroup, DatasourceMetadataConfig, TriggerConfig, DatasourceSchemaEdit },
+  components: {
+    AdapterConfig,
+    StepperButtonGroup,
+    DatasourceMetadataConfig,
+    TriggerConfig,
+    DatasourceSchemaEdit,
+  },
 })
 export default class DatasourceForm extends Vue {
   private dialogStep = 1;
@@ -108,7 +138,13 @@ export default class DatasourceForm extends Vue {
   }
 
   get isValid(): boolean {
-    return this.validStep1 && this.validStep2 && this.validStep3 && this.validStep4 && this.validStep5;
+    return (
+      this.validStep1 &&
+      this.validStep2 &&
+      this.validStep3 &&
+      this.validStep4 &&
+      this.validStep5
+    );
   }
 
   @Emit('validityChanged')

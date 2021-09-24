@@ -1,6 +1,12 @@
 <template>
   <div>
-    <MonacoEditor v-model="text" class="jsonEditor" :options="editorOptions" language="json" @change="onChange" />
+    <MonacoEditor
+      v-model="text"
+      class="jsonEditor"
+      :options="editorOptions"
+      language="json"
+      @change="onChange"
+    />
     <span v-if="error" class="red--text">{{ error }}</span>
   </div>
 </template>

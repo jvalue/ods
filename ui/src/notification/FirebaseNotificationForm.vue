@@ -1,9 +1,25 @@
 <template>
   <v-form v-model="isValid">
-    <v-text-field v-model="parameters.projectId" label="Id of your firebase project" :rules="[required]" />
-    <v-text-field v-model="parameters.clientEmail" label="Email of the service account to use" :rules="[required]" />
-    <v-text-field v-model="parameters.topic" label="notification topic" :rules="[required]" />
-    <v-textarea v-model="parameters.privateKey" label="private key of the service account" :rules="[required]" />
+    <v-text-field
+      v-model="parameters.projectId"
+      label="Id of your firebase project"
+      :rules="[required]"
+    />
+    <v-text-field
+      v-model="parameters.clientEmail"
+      label="Email of the service account to use"
+      :rules="[required]"
+    />
+    <v-text-field
+      v-model="parameters.topic"
+      label="notification topic"
+      :rules="[required]"
+    />
+    <v-textarea
+      v-model="parameters.privateKey"
+      label="private key of the service account"
+      :rules="[required]"
+    />
   </v-form>
 </template>
 

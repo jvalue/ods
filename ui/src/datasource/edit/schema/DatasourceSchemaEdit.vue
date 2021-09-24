@@ -14,7 +14,11 @@
         Generate schema
       </v-btn>
     </v-card-actions>
-    <v-textarea v-model="schemaAsText" label="Datasource schema suggestion" @keyup="formChanged" />
+    <v-textarea
+      v-model="schemaAsText"
+      label="Datasource schema suggestion"
+      @keyup="formChanged"
+    />
   </v-form>
 </template>
 
@@ -67,7 +71,10 @@ export default class DatasourceSchemaEdit extends Vue {
 
   private async onGenerate(): Promise<void> {
     const preview = await PreviewClient.getPreview(this.dataSource);
-    this.dataSource.schema = await SchemaSuggestionREST.getSchema(JSON.stringify(preview), this.currentSliderValue);
+    this.dataSource.schema = await SchemaSuggestionREST.getSchema(
+      JSON.stringify(preview),
+      this.currentSliderValue,
+    );
     this.schemaAsText = JSON.stringify(this.dataSource.schema);
   }
 }

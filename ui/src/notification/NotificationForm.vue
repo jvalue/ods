@@ -2,7 +2,12 @@
   <v-container>
     <v-form v-model="isBaseValid">
       <v-row cols="30" sm="6" md="4">
-        <v-select v-model="notification.type" :items="notificationTypes" label="Type" @change="resetParameters()" />
+        <v-select
+          v-model="notification.type"
+          :items="notificationTypes"
+          label="Type"
+          @change="resetParameters()"
+        />
       </v-row>
       <v-row cols="20" sm="6" md="4">
         <v-text-field v-model="notification.condition" label="Condition" />
@@ -37,12 +42,18 @@ import Component from 'vue-class-component';
 import { Emit, PropSync, Watch } from 'vue-property-decorator';
 
 import FirebaseNotificationForm from '@/notification/FirebaseNotificationForm.vue';
-import NotificationConfig, { NotificationType } from '@/notification/notificationConfig';
+import NotificationConfig, {
+  NotificationType,
+} from '@/notification/notificationConfig';
 import SlackNotificationForm from '@/notification/SlackNotificationForm.vue';
 import WebhookNotificationForm from '@/notification/WebhookNotificationForm.vue';
 
 @Component({
-  components: { WebhookNotificationForm, FirebaseNotificationForm, SlackNotificationForm },
+  components: {
+    WebhookNotificationForm,
+    FirebaseNotificationForm,
+    SlackNotificationForm,
+  },
 })
 export default class NotificationForm extends Vue {
   private notificationTypes = Object.values(NotificationType); // Convert NotificationTypeS to list

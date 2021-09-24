@@ -3,7 +3,13 @@
     <v-btn v-if="previousVisible" class="ma-2" @click="previousStep">
       Back
     </v-btn>
-    <v-btn v-if="nextVisible" :disabled="!nextEnabled" color="primary" class="ma-2" @click="nextStep">
+    <v-btn
+      v-if="nextVisible"
+      :disabled="!nextEnabled"
+      color="primary"
+      class="ma-2"
+      @click="nextStep"
+    >
       Next
     </v-btn>
   </div>

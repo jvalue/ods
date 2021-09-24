@@ -12,7 +12,13 @@
         Create Datasource
       </v-btn>
     </header>
-    <v-text-field v-model="search" class="mb-4" label="Search name" prepend-icon="mdi-magnify" hide-details />
+    <v-text-field
+      v-model="search"
+      class="mb-4"
+      label="Search name"
+      prepend-icon="mdi-magnify"
+      hide-details
+    />
 
     <v-data-table
       :headers="headers"
@@ -39,7 +45,13 @@
       <template #[`item.action`]="{ item }">
         <v-tooltip top>
           <template #activator="{ on, attrs }">
-            <v-icon v-bind="attrs" small class="mr-2" v-on="on" @click="onCreatePipeline(item)">
+            <v-icon
+              v-bind="attrs"
+              small
+              class="mr-2"
+              v-on="on"
+              @click="onCreatePipeline(item)"
+            >
               mdi-pipe
             </v-icon>
           </template>
@@ -47,7 +59,13 @@
         </v-tooltip>
         <v-tooltip top>
           <template #activator="{ on, attrs }">
-            <v-icon v-bind="attrs" small class="mr-2" v-on="on" @click="onEdit(item)">
+            <v-icon
+              v-bind="attrs"
+              small
+              class="mr-2"
+              v-on="on"
+              @click="onEdit(item)"
+            >
               mdi-pencil
             </v-icon>
           </template>
@@ -96,7 +114,11 @@ export default class DatsourceOverview extends Vue {
     { text: 'Id', value: 'id' },
     { text: 'Name', value: 'metadata.displayName', sortable: false },
     { text: 'Author', value: 'metadata.author', sortable: false },
-    { text: 'Location (URL)', value: 'protocol.parameters.location', sortable: false },
+    {
+      text: 'Location (URL)',
+      value: 'protocol.parameters.location',
+      sortable: false,
+    },
     { text: 'Periodic', value: 'trigger.periodic', sortable: false },
     { text: 'Actions', value: 'action', sortable: false },
     { text: 'Status', value: 'health', sortable: false },
@@ -106,8 +128,12 @@ export default class DatsourceOverview extends Vue {
   private search = '';
 
   private async mounted(): Promise<void> {
-    await this.loadDataSources().catch(error => console.error('Failed to load datasource', error));
-    await this.loadDataSourcesStatus().catch(error => console.error('Failed to load datasource status', error));
+    await this.loadDataSources().catch(error =>
+      console.error('Failed to load datasource', error),
+    );
+    await this.loadDataSourcesStatus().catch(error =>
+      console.error('Failed to load datasource status', error),
+    );
   }
 
   private getHealthColor(status: HealthStatus): string {
@@ -148,12 +174,18 @@ export default class DatsourceOverview extends Vue {
       .catch(error => console.log('Failed to route to pipeline-new', error));
   }
 
-  private filterOnlyDisplayName(value: unknown, search: string, item: Datasource): boolean {
+  private filterOnlyDisplayName(
+    value: unknown,
+    search: string,
+    item: Datasource,
+  ): boolean {
     return (
       value != null &&
       search != null &&
       typeof value === 'string' &&
-      item.metadata.displayName.toLocaleLowerCase().includes(search.toLocaleLowerCase())
+      item.metadata.displayName
+        .toLocaleLowerCase()
+        .includes(search.toLocaleLowerCase())
     );
   }
 
@@ -168,7 +200,9 @@ export default class DatsourceOverview extends Vue {
     const datasourcesStatus: Map<number, string> = new Map<number, string>();
 
     for (const element of this.datasources) {
-      const dataImport: DataimportMetaData = await DatasourceREST.getLatestDataimport(element.id);
+      const dataImport: DataimportMetaData = await DatasourceREST.getLatestDataimport(
+        element.id,
+      );
       datasourcesStatus.set(element.id, this.getHealthColor(dataImport.health));
     }
 

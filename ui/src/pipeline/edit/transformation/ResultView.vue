@@ -4,7 +4,9 @@
       <div v-if="result.data">
         <v-subheader>Transformed Data</v-subheader>
         <v-card-text class="text-left">
-          <pre style="max-height: 400px; overflow:auto; text-align: left">{{ result.data }}</pre>
+          <pre style="max-height: 400px; overflow:auto; text-align: left">{{
+            result.data
+          }}</pre>
         </v-card-text>
       </div>
 
@@ -13,7 +15,9 @@
           Error
         </v-subheader>
         <v-card-text class="text-left">
-          <pre style="max-height: 400px; overflow:auto; text-align: left">{{ result.error }}</pre>
+          <pre style="max-height: 400px; overflow:auto; text-align: left">{{
+            result.error
+          }}</pre>
         </v-card-text>
       </div>
 
@@ -22,7 +26,8 @@
         <p>
           start: {{ formatTimestamp(result.stats.startTimestamp) }}<br />
           end: {{ formatTimestamp(result.stats.endTimestamp) }}<br />
-          job duration: {{ formatDuration(result.stats.durationInMilliSeconds) }}
+          job duration:
+          {{ formatDuration(result.stats.durationInMilliSeconds) }}
         </p>
       </v-card-text>
     </div>

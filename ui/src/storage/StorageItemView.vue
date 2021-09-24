@@ -3,7 +3,9 @@
     <div v-if="item !== null">
       <v-card class="grey lighten-3">
         <v-container fluid>
-          <pre style="max-height: 400px; overflow:auto; text-align: left">{{ item.data }}</pre>
+          <pre style="max-height: 400px; overflow:auto; text-align: left">{{
+            item.data
+          }}</pre>
         </v-container>
 
         <v-divider />

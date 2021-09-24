@@ -1,8 +1,20 @@
 <template>
   <v-form v-model="isValid">
-    <v-text-field v-model="parameters.workspaceId" label="Id of your slack workspace" :rules="[required]" />
-    <v-text-field v-model="parameters.channelId" label="Id of the channel" :rules="[required]" />
-    <v-text-field v-model="parameters.secret" label="Incoming webhook secret" :rules="[required]" />
+    <v-text-field
+      v-model="parameters.workspaceId"
+      label="Id of your slack workspace"
+      :rules="[required]"
+    />
+    <v-text-field
+      v-model="parameters.channelId"
+      label="Id of the channel"
+      :rules="[required]"
+    />
+    <v-text-field
+      v-model="parameters.secret"
+      label="Incoming webhook secret"
+      :rules="[required]"
+    />
   </v-form>
 </template>
 

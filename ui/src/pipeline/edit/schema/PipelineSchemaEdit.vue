@@ -14,7 +14,11 @@
         Generate schema
       </v-btn>
     </v-card-actions>
-    <v-textarea v-model="schemaAsText" label="Pipeline schema suggestion" @keyup="formChanged" />
+    <v-textarea
+      v-model="schemaAsText"
+      label="Pipeline schema suggestion"
+      @keyup="formChanged"
+    />
   </v-form>
 </template>
 
@@ -30,7 +34,10 @@ import Pipeline from '../../pipeline';
 
 import * as DatasourceRest from './../../../datasource/datasourceRest';
 import * as SchemaSuggestionREST from './../../../datasource/schemaSuggestionRest';
-import { JobResult, TransformationRequest } from './../transformation/transformation';
+import {
+  JobResult,
+  TransformationRequest,
+} from './../transformation/transformation';
 import * as TransformationRest from './../transformation/transformationRest';
 import { SliderConfig } from './slider/config';
 
@@ -67,10 +74,18 @@ export default class PipelineSchemaEdit extends Vue {
   }
 
   private async onGenerate(): Promise<void> {
-    const data = await DatasourceRest.getDatasourceData(this.pipeline.datasourceId);
-    const request: TransformationRequest = { data: data, func: this.pipeline.transformation.func };
+    const data = await DatasourceRest.getDatasourceData(
+      this.pipeline.datasourceId,
+    );
+    const request: TransformationRequest = {
+      data: data,
+      func: this.pipeline.transformation.func,
+    };
     const result: JobResult = await TransformationRest.transformData(request);
-    this.pipeline.schema = await SchemaSuggestionREST.getSchema(JSON.stringify(result.data), this.currentSliderValue);
+    this.pipeline.schema = await SchemaSuggestionREST.getSchema(
+      JSON.stringify(result.data),
+      this.currentSliderValue,
+    );
     this.schemaAsText = JSON.stringify(this.pipeline.schema);
   }
 }

@@ -16,8 +16,12 @@ const http = axios.create({
   transformResponse: [],
 });
 
-export async function getLatestTransformedData(id: number): Promise<TransformedDataMetaData> {
+export async function getLatestTransformedData(
+  id: number,
+): Promise<TransformedDataMetaData> {
   const importResponse = await http.get<string>(`/${id}/transforms/latest`);
-  const jsonResponse = JSON.parse(importResponse.data) as TransformedDataMetaData;
+  const jsonResponse = JSON.parse(
+    importResponse.data,
+  ) as TransformedDataMetaData;
   return jsonResponse;
 }

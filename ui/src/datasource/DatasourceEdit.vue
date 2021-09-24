@@ -7,14 +7,22 @@
         </v-toolbar-title>
       </v-toolbar>
       <v-card-text>
-        <datasource-form v-model="datasource" @validityChanged="e => (isValid = e)" />
+        <datasource-form
+          v-model="datasource"
+          @validityChanged="e => (isValid = e)"
+        />
       </v-card-text>
       <v-card-actions>
         <v-spacer />
         <v-btn color="error" class="ma-2" @click="onCancel">
           Cancel
         </v-btn>
-        <v-btn :disabled="!isValid" color="primary" class="ma-2" @click="onEdit()">
+        <v-btn
+          :disabled="!isValid"
+          color="primary"
+          class="ma-2"
+          @click="onEdit()"
+        >
           Update
         </v-btn>
       </v-card-actions>
@@ -64,7 +72,9 @@ export default class DatasourceEdit extends Vue {
   private routeToOverview(): void {
     this.$router
       .push({ name: 'datasource-overview' })
-      .catch(error => console.log('Failed to route to datasource-overview', error));
+      .catch(error =>
+        console.log('Failed to route to datasource-overview', error),
+      );
   }
 }
 </script>

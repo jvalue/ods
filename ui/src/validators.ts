@@ -18,6 +18,8 @@ export const requiredRule: InputValidationRule = value => {
   return true;
 };
 
-export function isNullOrUndefined(value: unknown | null | undefined): value is null | undefined {
+export function isNullOrUndefined(
+  value: unknown | null | undefined,
+): value is null | undefined {
   return value == null || value === undefined;
 }

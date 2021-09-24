@@ -84,7 +84,10 @@ export default class TransformationModule extends VuexModule {
     this.context.commit('setIsLoadingResult', true);
     // Reset timeout handle
     this.context.commit('setTimeoutHandle', null);
-    const request: TransformationRequest = { data: this.data, func: this.function };
+    const request: TransformationRequest = {
+      data: this.data,
+      func: this.function,
+    };
     const result = await TransformationRest.transformData(request);
     // Save the result in the module state
     this.context.commit('setResult', result);

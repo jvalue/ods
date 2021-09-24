@@ -6,7 +6,11 @@ export default [
     path: '/pipelines/new/:datasourceId?',
     name: 'pipeline-new',
     component: PipelineEdit,
-    meta: { title: 'Create new Pipeline', requiresAuth: true, isEditMode: false },
+    meta: {
+      title: 'Create new Pipeline',
+      requiresAuth: true,
+      isEditMode: false,
+    },
   },
   {
     path: '/pipelines/',

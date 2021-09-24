@@ -7,7 +7,12 @@
       </v-icon>
     </v-btn>
 
-    <v-menu v-model="menu" :close-on-content-click="false" :nudge-width="200" offset-x>
+    <v-menu
+      v-model="menu"
+      :close-on-content-click="false"
+      :nudge-width="200"
+      offset-x
+    >
       <template #activator="{ on }">
         <v-btn v-show="isAuthenticated" text to="/" v-on="on">
           {{ userProfile.firstName }}
@@ -20,8 +25,13 @@
       <v-list>
         <v-list-item avatar>
           <v-list-item-content>
-            <v-list-item-title>{{ userProfile.firstName }} {{ userProfile.lastName }}</v-list-item-title>
-            <v-list-item-sub-title>{{ userProfile.email }}</v-list-item-sub-title>
+            <v-list-item-title
+              >{{ userProfile.firstName }}
+              {{ userProfile.lastName }}</v-list-item-title
+            >
+            <v-list-item-sub-title>{{
+              userProfile.email
+            }}</v-list-item-sub-title>
           </v-list-item-content>
         </v-list-item>
 

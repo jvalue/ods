@@ -7,14 +7,22 @@
         </v-toolbar-title>
       </v-toolbar>
       <v-card-text>
-        <datasource-form v-model="datasource" @validityChanged="e => (isValid = e)" />
+        <datasource-form
+          v-model="datasource"
+          @validityChanged="e => (isValid = e)"
+        />
       </v-card-text>
       <v-card-actions>
         <v-spacer />
         <v-btn color="error" class="ma-2" @click="onCancel">
           Cancel
         </v-btn>
-        <v-btn :disabled="!isValid" color="primary" class="ma-2" @click="onSave()">
+        <v-btn
+          :disabled="!isValid"
+          color="primary"
+          class="ma-2"
+          @click="onSave()"
+        >
           Save
         </v-btn>
       </v-card-actions>
@@ -42,7 +50,8 @@ export default class DatasourceCreate extends Vue {
     protocol: {
       type: 'HTTP',
       parameters: {
-        location: 'https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json',
+        location:
+          'https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json',
         encoding: 'UTF-8',
       },
     },
@@ -78,7 +87,9 @@ export default class DatasourceCreate extends Vue {
   private routeToOverview(): void {
     this.$router
       .push({ name: 'datasource-overview' })
-      .catch(error => console.log('Failed to route to datasource-overview', error));
+      .catch(error =>
+        console.log('Failed to route to datasource-overview', error),
+      );
   }
 }
 </script>

@@ -7,7 +7,12 @@
         label="Protocol"
         :rules="[required]"
       />
-      <v-text-field v-model="adapterConfig.protocol.parameters.location" label="URL" class="pl-7" :rules="[required]" />
+      <v-text-field
+        v-model="adapterConfig.protocol.parameters.location"
+        label="URL"
+        class="pl-7"
+        :rules="[required]"
+      />
       <v-select
         v-model="adapterConfig.protocol.parameters.encoding"
         :items="availableEncodings"
@@ -31,7 +36,10 @@
     </v-form>
     <h2>Configuration Preview</h2>
     <v-container>
-      <pre style="height: 500px; overflow: scroll; background: lightgray" class="py-3">
+      <pre
+        style="height: 500px; overflow: scroll; background: lightgray"
+        class="py-3"
+      >
         {{ preview }}
       </pre>
     </v-container>
@@ -73,7 +81,8 @@ export default class AdapterConfig extends Vue {
   }
 
   private async updatePreview(): Promise<void> {
-    const fallback = 'No preview available. Datasource might not be configured right!';
+    const fallback =
+      'No preview available. Datasource might not be configured right!';
     if (!this.isValid) {
       this.preview = fallback;
       return;
