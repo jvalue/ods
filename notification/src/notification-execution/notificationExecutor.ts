@@ -18,7 +18,8 @@ import App = firebase.app.App;
 
 const VERSION = '0.0.1';
 
-const SLACK_BASE_URL = process.env.SLACK_BASE_URL ?? 'https://hooks.slack.com/services';
+const SLACK_BASE_URL =
+  process.env.SLACK_BASE_URL ?? 'https://hooks.slack.com/services';
 
 export default class NotificationExecutor {
   executor: SandboxExecutor;
@@ -40,7 +41,9 @@ export default class NotificationExecutor {
     const conditionHolds = this.executor.evaluate(config.condition, data);
     if (!conditionHolds) {
       // No need to trigger notification
-      console.debug(`Notification ${config.id} for pipeline ${config.pipelineId} not sent: Condition does not hold`);
+      console.debug(
+        `Notification ${config.id} for pipeline ${config.pipelineId} not sent: Condition does not hold`,
+      );
       return;
     }
 
@@ -69,13 +72,23 @@ export default class NotificationExecutor {
 
     try {
       const response = await axios.post(configParameter.url, payload);
-      console.debug(`Triggered notification (webhook) with status ${response.status} on ${configParameter.url}`);
+      console.debug(
+        `Triggered notification (webhook) with status ${response.status} on ${configParameter.url}`,
+      );
     } catch (e: unknown) {
-      console.info(`Notification (webhook) on ${configParameter.url} failed: ${JSON.stringify(e)}`);
+      console.info(
+        `Notification (webhook) on ${
+          configParameter.url
+        } failed: ${JSON.stringify(e)}`,
+      );
     }
   }
 
-  private async executeSlack(configParameter: SlackParameter, dataLocation: string, message: string): Promise<void> {
+  private async executeSlack(
+    configParameter: SlackParameter,
+    dataLocation: string,
+    message: string,
+  ): Promise<void> {
     const payload: SlackCallback = {
       text: message,
     };
@@ -83,13 +96,21 @@ export default class NotificationExecutor {
 
     try {
       const response = await axios.post(url, payload);
-      console.debug(`Triggered notification (slack) with status ${response.status} on ${url}`);
+      console.debug(
+        `Triggered notification (slack) with status ${response.status} on ${url}`,
+      );
     } catch (e: unknown) {
-      console.info(`Notification (slack) on ${url} failed: ${JSON.stringify(e)}`);
+      console.info(
+        `Notification (slack) on ${url} failed: ${JSON.stringify(e)}`,
+      );
     }
   }
 
-  private async executeFCM(configParameter: FirebaseParameter, dataLocation: string, message: string): Promise<void> {
+  private async executeFCM(
+    configParameter: FirebaseParameter,
+    dataLocation: string,
+    message: string,
+  ): Promise<void> {
     let app: App;
     try {
       app = firebase.app(configParameter.clientEmail);
@@ -120,9 +141,15 @@ export default class NotificationExecutor {
 
     try {
       await firebase.messaging(app).send(firebaseMessage);
-      console.debug(`Triggered notification (firebase) successfully on project ${configParameter.projectId}`);
+      console.debug(
+        `Triggered notification (firebase) successfully on project ${configParameter.projectId}`,
+      );
     } catch (e: unknown) {
-      console.info(`Notification (firebase) on project ${configParameter.projectId} failed: ${JSON.stringify(e)}`);
+      console.info(
+        `Notification (firebase) on project ${
+          configParameter.projectId
+        } failed: ${JSON.stringify(e)}`,
+      );
     }
   }
 }

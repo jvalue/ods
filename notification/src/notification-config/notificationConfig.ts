@@ -43,8 +43,14 @@ export interface FirebaseParameter {
   privateKey: string;
   topic: string;
 }
-export type NotificationParameter = SlackParameter | WebhookParameter | FirebaseParameter;
-export type NotificationConfig = SlackNotification | WebhookNotification | FirebaseNotification;
+export type NotificationParameter =
+  | SlackParameter
+  | WebhookParameter
+  | FirebaseParameter;
+export type NotificationConfig =
+  | SlackNotification
+  | WebhookNotification
+  | FirebaseNotification;
 
 /**
  * Evaluates the validity of the NotificationConfig (provided by argument),
@@ -52,7 +58,9 @@ export type NotificationConfig = SlackNotification | WebhookNotification | Fireb
  * @param config NotificationConfig to be validated
  * @returns true, if conf is a valid, false else
  */
-export const isValidNotificationConfig = (config: unknown): config is NotificationConfig => {
+export const isValidNotificationConfig = (
+  config: unknown,
+): config is NotificationConfig => {
   const baseIsValid =
     validators.isObject(config) &&
     validators.hasProperty(config, 'pipelineId') &&
@@ -80,8 +88,12 @@ export const isValidNotificationConfig = (config: unknown): config is Notificati
  * @param parameters WebhookParameter to be validated
  * @returns true, if object is a valid, false else
  */
-export const isValidWebhookParameter = (parameters: unknown): parameters is WebhookParameter => {
-  return validators.isObject(parameters) && validators.hasProperty(parameters, 'url');
+export const isValidWebhookParameter = (
+  parameters: unknown,
+): parameters is WebhookParameter => {
+  return (
+    validators.isObject(parameters) && validators.hasProperty(parameters, 'url')
+  );
 };
 
 /**
@@ -90,7 +102,9 @@ export const isValidWebhookParameter = (parameters: unknown): parameters is Webh
  * @param parameters SlackParameter to be validated
  * @returns true, if object is a valid, false else
  */
-export const isValidSlackParameter = (parameters: unknown): parameters is SlackParameter => {
+export const isValidSlackParameter = (
+  parameters: unknown,
+): parameters is SlackParameter => {
   return (
     validators.isObject(parameters) &&
     validators.hasProperty(parameters, 'channelId') &&
@@ -105,7 +119,9 @@ export const isValidSlackParameter = (parameters: unknown): parameters is SlackP
  * @param parameters FirebaseParameter to be validated
  * @returns true, if object is a valid, false else
  */
-export const isValidFirebaseParameter = (parameters: unknown): parameters is FirebaseParameter => {
+export const isValidFirebaseParameter = (
+  parameters: unknown,
+): parameters is FirebaseParameter => {
   return (
     validators.isObject(parameters) &&
     validators.hasProperty(parameters, 'clientEmail') &&

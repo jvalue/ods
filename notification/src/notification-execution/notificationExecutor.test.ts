@@ -55,7 +55,12 @@ describe('JSNotificationService', () => {
 
       const message = 'message';
       const dataLocation = 'location';
-      await notificationService.execute(notificationConfig, dataLocation, message, undefined);
+      await notificationService.execute(
+        notificationConfig,
+        dataLocation,
+        message,
+        undefined,
+      );
 
       expect(post).toHaveBeenCalledTimes(1);
       // Check arguments for axios post (expect.objectContaining due to additional timestamp attribute)
@@ -81,7 +86,12 @@ describe('JSNotificationService', () => {
 
       const message = 'message';
       const dataLocation = 'location';
-      await notificationService.execute(notificationConfig, dataLocation, message, undefined);
+      await notificationService.execute(
+        notificationConfig,
+        dataLocation,
+        message,
+        undefined,
+      );
 
       expect(post).toHaveBeenCalledTimes(1);
       // Check arguments for axios post (expect.objectContaining due to additional timestamp attribute)
@@ -107,7 +117,12 @@ describe('JSNotificationService', () => {
 
       const message = 'message';
       const dataLocation = 'location';
-      await notificationService.execute(notificationConfig, dataLocation, message, data);
+      await notificationService.execute(
+        notificationConfig,
+        dataLocation,
+        message,
+        data,
+      );
 
       expect(post).toHaveBeenCalledTimes(1);
       // Check arguments for axios post (expect.objectContaining due to additional timestamp attribute)
@@ -132,12 +147,18 @@ describe('JSNotificationService', () => {
       try {
         const message = 'message';
         const dataLocation = 'location';
-        await notificationService.execute(notificationConfig, dataLocation, message, data);
+        await notificationService.execute(
+          notificationConfig,
+          dataLocation,
+          message,
+          data,
+        );
         throw new Error('Fail test');
       } catch (err) {
         expect(err).toHaveProperty(
           'message',
-          'Malformed expression received: asdfa;\n Error message: ' + 'ReferenceError: asdfa is not defined',
+          'Malformed expression received: asdfa;\n Error message: ' +
+            'ReferenceError: asdfa is not defined',
         );
       }
 

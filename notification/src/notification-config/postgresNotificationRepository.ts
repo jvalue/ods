@@ -1,9 +1,19 @@
 import { PostgresClient } from '@jvalue/node-dry-pg';
 import { PoolConfig, QueryResult } from 'pg';
 
-import { POSTGRES_DB, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_PW, POSTGRES_SSL, POSTGRES_USER } from '../env';
+import {
+  POSTGRES_DB,
+  POSTGRES_HOST,
+  POSTGRES_PORT,
+  POSTGRES_PW,
+  POSTGRES_SSL,
+  POSTGRES_USER,
+} from '../env';
 
-import { NotificationConfig, isValidNotificationConfig } from './notificationConfig';
+import {
+  NotificationConfig,
+  isValidNotificationConfig,
+} from './notificationConfig';
 import { NotificationRepository } from './notificationRepository';
 
 const TABLE_NAME = 'Notification';
@@ -59,16 +69,18 @@ export class PostgresNotificationRepository implements NotificationRepository {
   }
 
   async getForPipeline(pipelineId: number): Promise<NotificationConfig[]> {
-    const resultSet = (await this.postgresClient.executeQuery(GET_NOTIFICATION_BY_PIPELINEID_STATEMENT, [
-      pipelineId,
-    ])) as QueryResult<DatabaseNotification>;
+    const resultSet = (await this.postgresClient.executeQuery(
+      GET_NOTIFICATION_BY_PIPELINEID_STATEMENT,
+      [pipelineId],
+    )) as QueryResult<DatabaseNotification>;
     return this.deserializeNotifications(resultSet);
   }
 
   async getById(id: number): Promise<NotificationConfig | undefined> {
-    const resultSet = (await this.postgresClient.executeQuery(GET_NOTIFICATION_STATEMENT, [
-      id,
-    ])) as QueryResult<DatabaseNotification>;
+    const resultSet = (await this.postgresClient.executeQuery(
+      GET_NOTIFICATION_STATEMENT,
+      [id],
+    )) as QueryResult<DatabaseNotification>;
     return this.deserializeNotifications(resultSet)[0];
   }
 
@@ -81,7 +93,12 @@ export class PostgresNotificationRepository implements NotificationRepository {
 
   async create(config: NotificationConfig): Promise<NotificationConfig> {
     const parameter = this.escapeQuotes(config.parameter);
-    const values = [config.pipelineId, config.condition, config.type, parameter];
+    const values = [
+      config.pipelineId,
+      config.condition,
+      config.type,
+      parameter,
+    ];
 
     const resultSet = (await this.postgresClient.executeQuery(
       INSERT_NOTIFICATION_STATEMENT,
@@ -89,15 +106,26 @@ export class PostgresNotificationRepository implements NotificationRepository {
     )) as QueryResult<DatabaseNotification>;
     const notifications = this.deserializeNotifications(resultSet);
     if (notifications.length === 0) {
-      throw Error(`Could not create notification config: ${JSON.stringify(config)}`);
+      throw Error(
+        `Could not create notification config: ${JSON.stringify(config)}`,
+      );
     }
 
     return notifications[0];
   }
 
-  async update(id: number, config: NotificationConfig): Promise<NotificationConfig> {
+  async update(
+    id: number,
+    config: NotificationConfig,
+  ): Promise<NotificationConfig> {
     const parameter = this.escapeQuotes(config.parameter);
-    const values = [id, config.pipelineId, config.condition, config.type, parameter];
+    const values = [
+      id,
+      config.pipelineId,
+      config.condition,
+      config.type,
+      parameter,
+    ];
 
     const resultSet = (await this.postgresClient.executeQuery(
       UPDATE_NOTIFICATION_STATEMENT,
@@ -105,16 +133,19 @@ export class PostgresNotificationRepository implements NotificationRepository {
     )) as QueryResult<DatabaseNotification>;
     const notifications = this.deserializeNotifications(resultSet);
     if (notifications.length === 0) {
-      throw Error(`Could not update notification config: ${JSON.stringify(config)}`);
+      throw Error(
+        `Could not update notification config: ${JSON.stringify(config)}`,
+      );
     }
 
     return notifications[0];
   }
 
   async delete(id: number): Promise<void> {
-    const resultSet = (await this.postgresClient.executeQuery(DELETE_NOTIFICATION_STATEMENT, [
-      id,
-    ])) as QueryResult<DatabaseNotification>;
+    const resultSet = (await this.postgresClient.executeQuery(
+      DELETE_NOTIFICATION_STATEMENT,
+      [id],
+    )) as QueryResult<DatabaseNotification>;
 
     if (resultSet.rowCount === 0) {
       throw Error(`Could not delete notification config with id ${id}`);
@@ -125,7 +156,9 @@ export class PostgresNotificationRepository implements NotificationRepository {
     return JSON.stringify(data).replace("'", "''");
   }
 
-  private deserializeNotifications(resultSet: QueryResult<DatabaseNotification>): NotificationConfig[] {
+  private deserializeNotifications(
+    resultSet: QueryResult<DatabaseNotification>,
+  ): NotificationConfig[] {
     const contents: DatabaseNotification[] = resultSet.rows;
     const notificationsUntyped = contents.map((x) => {
       return {
@@ -137,7 +170,11 @@ export class PostgresNotificationRepository implements NotificationRepository {
 
     return notificationsUntyped.map((x) => {
       if (!isValidNotificationConfig(x)) {
-        throw new Error(`Could not parse notification config from database: ${JSON.stringify(x)}`);
+        throw new Error(
+          `Could not parse notification config from database: ${JSON.stringify(
+            x,
+          )}`,
+        );
       }
       return x;
     });
@@ -148,7 +185,8 @@ export const initNotificationRepository = async (
   retries: number,
   backkoffMs: number,
 ): Promise<NotificationRepository> => {
-  const notificationRepository: PostgresNotificationRepository = new PostgresNotificationRepository();
+  const notificationRepository: PostgresNotificationRepository =
+    new PostgresNotificationRepository();
   await notificationRepository.init(retries, backkoffMs);
   return notificationRepository;
 };

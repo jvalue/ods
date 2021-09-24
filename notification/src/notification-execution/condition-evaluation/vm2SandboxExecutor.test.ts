@@ -38,14 +38,16 @@ describe('VM2SandboxExecutor', () => {
       } catch (err) {
         expect(err).toHaveProperty(
           'message',
-          'Malformed expression received: 1 + 1\n Error message: ' + 'Expected result to be a boolean expression!',
+          'Malformed expression received: 1 + 1\n Error message: ' +
+            'Expected result to be a boolean expression!',
         );
       }
     });
 
     it('should evaluate complex expression', () => {
       const object = { value1: 5, value2: 10, stringval: 'text' };
-      const expression = 'data.value1 + data.value2 === 15 && data.stringval === "text"';
+      const expression =
+        'data.value1 + data.value2 === 15 && data.stringval === "text"';
 
       const result = e.evaluate(expression, object);
 

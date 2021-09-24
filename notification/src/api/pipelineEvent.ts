@@ -13,7 +13,9 @@ export interface PipelineSuccessEvent {
  *
  * @returns     true, if param event is a PipelineSuccessEvent, else false
  */
-export function isValidPipelineSuccessEvent(event: unknown): event is PipelineSuccessEvent {
+export function isValidPipelineSuccessEvent(
+  event: unknown,
+): event is PipelineSuccessEvent {
   return (
     validators.isObject(event) &&
     validators.hasProperty(event, 'pipelineId') &&

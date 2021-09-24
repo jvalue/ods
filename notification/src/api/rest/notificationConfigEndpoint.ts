@@ -1,6 +1,9 @@
 import express from 'express';
 
-import { NotificationConfig, isValidNotificationConfig } from '../../notification-config/notificationConfig';
+import {
+  NotificationConfig,
+  isValidNotificationConfig,
+} from '../../notification-config/notificationConfig';
 import { NotificationRepository } from '../../notification-config/notificationRepository';
 
 import { asyncHandler } from './utils';
@@ -20,7 +23,10 @@ export class NotificationConfigEndpoint {
    * Gets all Configs corresponding to Pipeline-ID
    * (identified by param id) as json list
    */
-  handleConfigsByPipelineRetrieve = async (req: express.Request, res: express.Response): Promise<void> => {
+  handleConfigsByPipelineRetrieve = async (
+    req: express.Request,
+    res: express.Response,
+  ): Promise<void> => {
     const pipelineId = Number.parseInt(String(req.query.pipelineId), 10);
     if (isNaN(pipelineId)) {
       res.status(400).send('Pipeline id is not set.');
@@ -32,7 +38,10 @@ export class NotificationConfigEndpoint {
     res.status(200).send(configs);
   };
 
-  handleAllConfigRetrieve = async (req: express.Request, res: express.Response): Promise<void> => {
+  handleAllConfigRetrieve = async (
+    req: express.Request,
+    res: express.Response,
+  ): Promise<void> => {
     if (req.query.pipelineId !== undefined) {
       return await this.handleConfigsByPipelineRetrieve(req, res);
     }
@@ -44,7 +53,10 @@ export class NotificationConfigEndpoint {
   /**
    * Gets config corresponding to id
    */
-  handleConfigRetrieve = async (req: express.Request, res: express.Response): Promise<void> => {
+  handleConfigRetrieve = async (
+    req: express.Request,
+    res: express.Response,
+  ): Promise<void> => {
     const id = Number.parseInt(req.params.id, 10);
     if (isNaN(id)) {
       res.status(400).send('Notification id is not set.');
@@ -68,7 +80,10 @@ export class NotificationConfigEndpoint {
    * This is done by checking the validity of the config and then save
    * it to the database on success
    */
-  handleConfigCreation = async (req: express.Request, res: express.Response): Promise<void> => {
+  handleConfigCreation = async (
+    req: express.Request,
+    res: express.Response,
+  ): Promise<void> => {
     const config = req.body as NotificationConfig;
 
     if (!isValidNotificationConfig(config)) {
@@ -88,7 +103,10 @@ export class NotificationConfigEndpoint {
   /**
    * Handles config  deletion requests.
    */
-  handleConfigDeletion = async (req: express.Request, res: express.Response): Promise<void> => {
+  handleConfigDeletion = async (
+    req: express.Request,
+    res: express.Response,
+  ): Promise<void> => {
     const configId = Number.parseInt(req.params.id, 10);
 
     if (isNaN(configId)) {
@@ -106,7 +124,10 @@ export class NotificationConfigEndpoint {
    * This is done by checking the validity of the config and then save
    * it to the database on success
    */
-  handleConfigUpdate = async (req: express.Request, res: express.Response): Promise<void> => {
+  handleConfigUpdate = async (
+    req: express.Request,
+    res: express.Response,
+  ): Promise<void> => {
     const id = Number.parseInt(req.params.id, 10);
     const config = req.body as NotificationConfig;
 
@@ -121,7 +142,8 @@ export class NotificationConfigEndpoint {
     }
 
     try {
-      const updatedConfig: NotificationConfig = await this.storageHandler.update(id, config);
+      const updatedConfig: NotificationConfig =
+        await this.storageHandler.update(id, config);
       res.status(200).send(updatedConfig);
     } catch (e) {
       res.status(404).send(`Could not find config with id ${id}`);

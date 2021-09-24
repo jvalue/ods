@@ -20,14 +20,29 @@ function onAmqpConnectionLoss(error: unknown): never {
 }
 
 async function main(): Promise<void> {
-  const notificationRepository = await initNotificationRepository(CONNECTION_RETRIES, CONNECTION_BACKOFF);
+  const notificationRepository = await initNotificationRepository(
+    CONNECTION_RETRIES,
+    CONNECTION_BACKOFF,
+  );
   const sandboxExecutor = new VM2SandboxExecutor();
   const notificationExecutor = new NotificationExecutor(sandboxExecutor);
-  const triggerEventHandler = new TriggerEventHandler(notificationRepository, notificationExecutor);
-  const notificationConfigEndpoint = new NotificationConfigEndpoint(notificationRepository);
-  const notificationExecutionEndpoint = new NotificationExecutionEndpoint(triggerEventHandler);
+  const triggerEventHandler = new TriggerEventHandler(
+    notificationRepository,
+    notificationExecutor,
+  );
+  const notificationConfigEndpoint = new NotificationConfigEndpoint(
+    notificationRepository,
+  );
+  const notificationExecutionEndpoint = new NotificationExecutionEndpoint(
+    triggerEventHandler,
+  );
 
-  const amqpConnection = new AmqpConnection(AMQP_URL, CONNECTION_RETRIES, CONNECTION_BACKOFF, onAmqpConnectionLoss);
+  const amqpConnection = new AmqpConnection(
+    AMQP_URL,
+    CONNECTION_RETRIES,
+    CONNECTION_BACKOFF,
+    onAmqpConnectionLoss,
+  );
   await createPipelineSuccessConsumer(amqpConnection, triggerEventHandler);
 
   const app = express();
