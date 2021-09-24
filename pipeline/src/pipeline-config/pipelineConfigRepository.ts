@@ -51,11 +51,16 @@ interface DatabasePipeline {
   schema: Record<string, unknown>; // Fix @typescript-eslint/ban-types for object type
 }
 
-export async function createPipelineConfigTable(client: ClientBase): Promise<void> {
+export async function createPipelineConfigTable(
+  client: ClientBase,
+): Promise<void> {
   await client.query(CREATE_CONFIG_TABLE_STATEMENT);
 }
 
-export async function create(client: ClientBase, config: PipelineConfigDTO): Promise<PipelineConfig> {
+export async function create(
+  client: ClientBase,
+  config: PipelineConfigDTO,
+): Promise<PipelineConfig> {
   const values = [
     config.datasourceId,
     config.transformation.func,
@@ -70,7 +75,10 @@ export async function create(client: ClientBase, config: PipelineConfigDTO): Pro
   return toPipelineConfig(rows[0]);
 }
 
-export async function get(client: ClientBase, id: number): Promise<PipelineConfig | undefined> {
+export async function get(
+  client: ClientBase,
+  id: number,
+): Promise<PipelineConfig | undefined> {
   const resultSet = await client.query(GET_CONFIG_STATEMENT, [id]);
   if (resultSet.rowCount === 0) {
     return undefined;
@@ -84,12 +92,22 @@ export async function getAll(client: ClientBase): Promise<PipelineConfig[]> {
   return toPipelineConfigs(resultSet);
 }
 
-export async function getByDatasourceId(client: ClientBase, datasourceId: number): Promise<PipelineConfig[]> {
-  const resultSet = await client.query(GET_ALL_CONFIGS_BY_DATASOURCE_ID_STATEMENT, [datasourceId]);
+export async function getByDatasourceId(
+  client: ClientBase,
+  datasourceId: number,
+): Promise<PipelineConfig[]> {
+  const resultSet = await client.query(
+    GET_ALL_CONFIGS_BY_DATASOURCE_ID_STATEMENT,
+    [datasourceId],
+  );
   return toPipelineConfigs(resultSet);
 }
 
-export async function update(client: ClientBase, id: number, config: PipelineConfigDTO): Promise<void> {
+export async function update(
+  client: ClientBase,
+  id: number,
+  config: PipelineConfigDTO,
+): Promise<void> {
   const values = [
     id,
     config.datasourceId,
@@ -106,7 +124,10 @@ export async function update(client: ClientBase, id: number, config: PipelineCon
   }
 }
 
-export async function deleteById(client: ClientBase, id: number): Promise<PipelineConfig> {
+export async function deleteById(
+  client: ClientBase,
+  id: number,
+): Promise<PipelineConfig> {
   const result = await client.query(DELETE_CONFIG_STATEMENT, [id]);
   if (result.rowCount === 0) {
     throw new Error(`Could not find config with ${id} to delete`);
@@ -138,7 +159,9 @@ function toPipelineConfig(dbResult: DatabasePipeline): PipelineConfig {
   };
 }
 
-function toPipelineConfigs(resultSet: QueryResult<DatabasePipeline>): PipelineConfig[] {
+function toPipelineConfigs(
+  resultSet: QueryResult<DatabasePipeline>,
+): PipelineConfig[] {
   const configs: PipelineConfig[] = [];
   for (const row of resultSet.rows) {
     const config = toPipelineConfig(row);

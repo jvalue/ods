@@ -10,7 +10,11 @@ import {
 
 import { insertEvent } from './pipelineEventRepository';
 
-export async function publishCreation(client: ClientBase, pipelineId: number, pipelineName: string): Promise<string> {
+export async function publishCreation(
+  client: ClientBase,
+  pipelineId: number,
+  pipelineName: string,
+): Promise<string> {
   const content = {
     pipelineId: pipelineId,
     pipelineName: pipelineName,
@@ -18,7 +22,11 @@ export async function publishCreation(client: ClientBase, pipelineId: number, pi
   return await insertEvent(client, AMQP_PIPELINE_CONFIG_CREATED_TOPIC, content);
 }
 
-export async function publishUpdate(client: ClientBase, pipelineId: number, pipelineName: string): Promise<string> {
+export async function publishUpdate(
+  client: ClientBase,
+  pipelineId: number,
+  pipelineName: string,
+): Promise<string> {
   const content = {
     pipelineId: pipelineId,
     pipelineName: pipelineName,
@@ -26,7 +34,11 @@ export async function publishUpdate(client: ClientBase, pipelineId: number, pipe
   return await insertEvent(client, AMQP_PIPELINE_CONFIG_UPDATED_TOPIC, content);
 }
 
-export async function publishDeletion(client: ClientBase, pipelineId: number, pipelineName: string): Promise<string> {
+export async function publishDeletion(
+  client: ClientBase,
+  pipelineId: number,
+  pipelineName: string,
+): Promise<string> {
   const content = {
     pipelineId: pipelineId,
     pipelineName: pipelineName,
@@ -45,7 +57,11 @@ export async function publishError(
     pipelineName: pipelineName,
     error: errorMsg,
   };
-  return await insertEvent(client, AMQP_PIPELINE_EXECUTION_ERROR_TOPIC, content);
+  return await insertEvent(
+    client,
+    AMQP_PIPELINE_EXECUTION_ERROR_TOPIC,
+    content,
+  );
 }
 
 export async function publishSuccess(
@@ -61,5 +77,9 @@ export async function publishSuccess(
     data: result,
     schema: schema != null ? schema : undefined,
   };
-  return await insertEvent(client, AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC, content);
+  return await insertEvent(
+    client,
+    AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC,
+    content,
+  );
 }

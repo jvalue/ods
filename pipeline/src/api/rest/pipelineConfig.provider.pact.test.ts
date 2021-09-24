@@ -41,7 +41,9 @@ describe('Pact Provider Verification', () => {
     const verifier = new Verifier({
       provider: 'Pipeline',
       providerBaseUrl: `http://localhost:${port}`,
-      pactUrls: [path.resolve(process.cwd(), '..', 'pacts', 'ui-pipeline.json')],
+      pactUrls: [
+        path.resolve(process.cwd(), '..', 'pacts', 'ui-pipeline.json'),
+      ],
       stateHandlers: {
         // eslint-disable-next-line @typescript-eslint/require-await
         'no pipelines registered': async (): Promise<void> => {

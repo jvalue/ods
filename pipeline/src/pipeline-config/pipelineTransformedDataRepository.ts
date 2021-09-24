@@ -3,7 +3,10 @@ import { ClientBase, QueryResult } from 'pg';
 import { POSTGRES_SCHEMA } from '../env';
 
 import { HealthStatus } from './model/pipelineConfig';
-import { PipelineTransformedData, PipelineTransformedDataDTO } from './model/pipelineTransformedData';
+import {
+  PipelineTransformedData,
+  PipelineTransformedDataDTO,
+} from './model/pipelineTransformedData';
 
 const TRANSFORMED_DATA_TABLE_NAME = 'transformedData';
 
@@ -54,7 +57,9 @@ interface DatabaseTransformedData {
   createdAt?: string;
 }
 
-export async function createPipelineTransormDataTable(client: ClientBase): Promise<void> {
+export async function createPipelineTransormDataTable(
+  client: ClientBase,
+): Promise<void> {
   await client.query(CREATE_TRANSFORMED_DATA_TABLE_STATEMENT);
 }
 
@@ -72,11 +77,17 @@ export async function insertTransformedData(
     transformedData.schema,
     new Date(),
   ];
-  const { rows } = await client.query(INSERT_TRANSFORMED_DATA_STATEMENT, values);
+  const { rows } = await client.query(
+    INSERT_TRANSFORMED_DATA_STATEMENT,
+    values,
+  );
   return toPipelineTransformedData(rows[0]);
 }
 
-export async function get(client: ClientBase, id: number): Promise<PipelineTransformedData | undefined> {
+export async function get(
+  client: ClientBase,
+  id: number,
+): Promise<PipelineTransformedData | undefined> {
   const resultSet = await client.query(GET_TRANSFORMED_DATA_STATEMENT, [id]);
   if (resultSet.rowCount === 0) {
     return undefined;
@@ -85,13 +96,21 @@ export async function get(client: ClientBase, id: number): Promise<PipelineTrans
   return content[0];
 }
 
-export async function getAll(client: ClientBase): Promise<PipelineTransformedData[]> {
+export async function getAll(
+  client: ClientBase,
+): Promise<PipelineTransformedData[]> {
   const resultSet = await client.query(GET_ALL_TRANSFORMED_DATAS_STATEMENT, []);
   return toPipelineTransformedDatas(resultSet);
 }
 
-export async function getLatest(client: ClientBase, pipelineId: number): Promise<PipelineTransformedData | undefined> {
-  const resultSet = await client.query(GET_LATEST_TRANSFORMED_DATA_BY_PIPELINE_ID_STATEMENT, [pipelineId]);
+export async function getLatest(
+  client: ClientBase,
+  pipelineId: number,
+): Promise<PipelineTransformedData | undefined> {
+  const resultSet = await client.query(
+    GET_LATEST_TRANSFORMED_DATA_BY_PIPELINE_ID_STATEMENT,
+    [pipelineId],
+  );
   if (resultSet.rowCount === 0) {
     return undefined;
   }
@@ -99,8 +118,14 @@ export async function getLatest(client: ClientBase, pipelineId: number): Promise
   return content[0];
 }
 
-export async function getByPipelineId(client: ClientBase, pipelineId: number): Promise<PipelineTransformedData[]> {
-  const resultSet = await client.query(GET_ALL_TRANSFORMED_DATAS_BY_PIPELINE_ID_STATEMENT, [pipelineId]);
+export async function getByPipelineId(
+  client: ClientBase,
+  pipelineId: number,
+): Promise<PipelineTransformedData[]> {
+  const resultSet = await client.query(
+    GET_ALL_TRANSFORMED_DATAS_BY_PIPELINE_ID_STATEMENT,
+    [pipelineId],
+  );
   return toPipelineTransformedDatas(resultSet);
 }
 
@@ -122,7 +147,10 @@ export async function update(
   }
 }
 
-export async function deleteById(client: ClientBase, id: number): Promise<PipelineTransformedData> {
+export async function deleteById(
+  client: ClientBase,
+  id: number,
+): Promise<PipelineTransformedData> {
   const result = await client.query(DELETE_TRANSFORMED_DATA_STATEMENT, [id]);
   if (result.rowCount === 0) {
     throw new Error(`Could not find TRANSFORMED_DATA with ${id} to delete`);
@@ -131,12 +159,16 @@ export async function deleteById(client: ClientBase, id: number): Promise<Pipeli
   return content[0];
 }
 
-export async function deleteAll(client: ClientBase): Promise<PipelineTransformedData[]> {
+export async function deleteAll(
+  client: ClientBase,
+): Promise<PipelineTransformedData[]> {
   const result = await client.query(DELETE_ALL_TRANSFORMED_DATAS_STATEMENT, []);
   return toPipelineTransformedDatas(result);
 }
 
-function toPipelineTransformedData(dbResult: DatabaseTransformedData): PipelineTransformedData {
+function toPipelineTransformedData(
+  dbResult: DatabaseTransformedData,
+): PipelineTransformedData {
   return {
     id: +dbResult.id,
     pipelineId: +dbResult.pipelineId,
@@ -147,7 +179,9 @@ function toPipelineTransformedData(dbResult: DatabaseTransformedData): PipelineT
   };
 }
 
-function toPipelineTransformedDatas(resultSet: QueryResult<DatabaseTransformedData>): PipelineTransformedData[] {
+function toPipelineTransformedDatas(
+  resultSet: QueryResult<DatabaseTransformedData>,
+): PipelineTransformedData[] {
   const transformedDates: PipelineTransformedData[] = [];
   for (const row of resultSet.rows) {
     const transformedData = toPipelineTransformedData(row);

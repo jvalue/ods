@@ -61,7 +61,9 @@ export class PipelineConfigDTOValidator {
 
     if (!validators.hasProperty(pipelineConfig, 'transformation')) {
       // Missing transformation is not an error, assume identity transformation
-      (pipelineConfig as PipelineConfigDTO).transformation = { func: 'return data;' };
+      (pipelineConfig as PipelineConfigDTO).transformation = {
+        func: 'return data;',
+      };
     } else if (!validators.isObject(pipelineConfig.transformation)) {
       this.errors.push("'transformation' property must be an object");
     } else {

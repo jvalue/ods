@@ -16,7 +16,8 @@ jest.mock('@jvalue/node-dry-pg', () => {
   return {
     PostgresClient: jest.fn().mockImplementation(() => {
       return {
-        transaction: async (fn: () => Promise<void>): Promise<void> => await fn(),
+        transaction: async (fn: () => Promise<void>): Promise<void> =>
+          await fn(),
       };
     }),
   };
@@ -30,13 +31,17 @@ jest.mock('./../pipeline-validator/jsonSchemaValidator');
 
 jest.mock('./pipelineConfigRepository', () => {
   return {
-    create: jest.fn().mockImplementation((_, config) => config as PipelineConfig),
+    create: jest
+      .fn()
+      .mockImplementation((_, config) => config as PipelineConfig),
     get: jest.fn(),
     getAll: jest.fn().mockResolvedValue([generateConfig(), generateConfig()]),
     getByDatasourceId: jest.fn(),
     update: jest.fn(),
     deleteById: jest.fn().mockResolvedValue(generateConfig()),
-    deleteAll: jest.fn().mockResolvedValue([generateConfig(), generateConfig()]),
+    deleteAll: jest
+      .fn()
+      .mockResolvedValue([generateConfig(), generateConfig()]),
   };
 });
 
@@ -116,7 +121,10 @@ test('Should call create and publish event', async () => {
   );
   await manager.create(config);
 
-  expect(pipelineConfigRepositoryMock.create).toHaveBeenCalledWith(undefined, config);
+  expect(pipelineConfigRepositoryMock.create).toHaveBeenCalledWith(
+    undefined,
+    config,
+  );
   expect(outboxEventPublisherMock.publishCreation).toHaveBeenCalledTimes(1);
 });
 
@@ -131,7 +139,11 @@ test('Should call update and publish event', async () => {
   );
   await manager.update(123, config);
 
-  expect(pipelineConfigRepositoryMock.update).toHaveBeenCalledWith(undefined, 123, config);
+  expect(pipelineConfigRepositoryMock.update).toHaveBeenCalledWith(
+    undefined,
+    123,
+    config,
+  );
   expect(outboxEventPublisherMock.publishUpdate).toHaveBeenCalledTimes(1);
 });
 
@@ -144,7 +156,10 @@ test('Should call delete and publish event', async () => {
   );
   await manager.delete(1234);
 
-  expect(pipelineConfigRepositoryMock.deleteById).toHaveBeenCalledWith(undefined, 1234);
+  expect(pipelineConfigRepositoryMock.deleteById).toHaveBeenCalledWith(
+    undefined,
+    1234,
+  );
   expect(outboxEventPublisherMock.publishDeletion).toHaveBeenCalledTimes(1);
 });
 

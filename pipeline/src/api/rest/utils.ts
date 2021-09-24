@@ -6,7 +6,11 @@ import type { NextFunction, Request, RequestHandler, Response } from 'express';
  * @param handler request handler to wrap
  */
 export function asyncHandler(
-  handler: (req: Request, res: Response, next?: NextFunction) => void | Promise<void>,
+  handler: (
+    req: Request,
+    res: Response,
+    next?: NextFunction,
+  ) => void | Promise<void>,
 ): RequestHandler {
   return (req: Request, res: Response, next: NextFunction): void => {
     const handlerResult = handler(req, res, next);

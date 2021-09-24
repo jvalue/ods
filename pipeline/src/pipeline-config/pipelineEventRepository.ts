@@ -18,11 +18,20 @@ INSERT INTO "${POSTGRES_SCHEMA}"."${OUTBOX_TABLE_NAME}"
   RETURNING id
 `;
 
-export async function createPipelineEventTable(client: ClientBase): Promise<void> {
+export async function createPipelineEventTable(
+  client: ClientBase,
+): Promise<void> {
   await client.query(CREATE_OUTBOX_TABLE_STATEMENT);
 }
 
-export async function insertEvent(client: ClientBase, routingKey: string, payload: unknown): Promise<string> {
-  const { rows } = await client.query(INSERT_EVENT_STATEMENT, [routingKey, payload]);
+export async function insertEvent(
+  client: ClientBase,
+  routingKey: string,
+  payload: unknown,
+): Promise<string> {
+  const { rows } = await client.query(INSERT_EVENT_STATEMENT, [
+    routingKey,
+    payload,
+  ]);
   return (rows as Array<{ id: string }>)[0].id;
 }

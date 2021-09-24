@@ -26,7 +26,9 @@ describe('PipelineExecutor', () => {
     it('should return an object with stats', () => {
       const jobResult = pipelineExecutor.executeJob('return 1;', {});
       expect(jobResult.stats.durationInMilliSeconds).toBeGreaterThan(0);
-      expect(jobResult.stats.endTimestamp).toBeGreaterThanOrEqual(jobResult.stats.startTimestamp);
+      expect(jobResult.stats.endTimestamp).toBeGreaterThanOrEqual(
+        jobResult.stats.startTimestamp,
+      );
     });
   });
 
@@ -35,13 +37,17 @@ describe('PipelineExecutor', () => {
     let sandboxExecutorMock: SandboxExecutor;
 
     beforeEach(() => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      sandboxExecutorMock = { execute: (_code, _data): { data: unknown } => ({ data: null }) };
+      sandboxExecutorMock = {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        execute: (_code, _data): { data: unknown } => ({ data: null }),
+      };
       transformationService = new PipelineExecutor(sandboxExecutorMock);
     });
 
     it('should return an error if no return clause is included', () => {
-      const jobResult = transformationService.executeJob('data.a = 1;', { a: 2 });
+      const jobResult = transformationService.executeJob('data.a = 1;', {
+        a: 2,
+      });
       expect(jobResult).not.toHaveProperty('data');
       expect(jobResult).toHaveProperty('error');
       if ('data' in jobResult) {

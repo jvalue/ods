@@ -20,7 +20,10 @@ export class PipelineConfigEndpoint {
 
   // The following methods need arrow syntax because of javascript 'this' shenanigans
 
-  delete = async (req: express.Request, res: express.Response): Promise<void> => {
+  delete = async (
+    req: express.Request,
+    res: express.Response,
+  ): Promise<void> => {
     const configId = Number.parseInt(req.params.id, 10);
     if (Number.isNaN(configId)) {
       res.status(400).send('Path parameter id is missing or is incorrect');
@@ -30,12 +33,18 @@ export class PipelineConfigEndpoint {
     res.status(204).send();
   };
 
-  deleteAll = async (req: express.Request, res: express.Response): Promise<void> => {
+  deleteAll = async (
+    req: express.Request,
+    res: express.Response,
+  ): Promise<void> => {
     await this.pipelineConfigManager.deleteAll();
     res.status(204).send();
   };
 
-  update = async (req: express.Request, res: express.Response): Promise<void> => {
+  update = async (
+    req: express.Request,
+    res: express.Response,
+  ): Promise<void> => {
     const configId = Number.parseInt(req.params.id, 10);
     if (Number.isNaN(configId)) {
       res.status(400).send('Path parameter id is missing or is incorrect');
@@ -50,13 +59,18 @@ export class PipelineConfigEndpoint {
     try {
       await this.pipelineConfigManager.update(configId, config);
     } catch (e) {
-      res.status(404).send(`Could not find config with id ${configId}: ${String(e)}`);
+      res
+        .status(404)
+        .send(`Could not find config with id ${configId}: ${String(e)}`);
       return;
     }
     res.status(204).send();
   };
 
-  create = async (req: express.Request, res: express.Response): Promise<void> => {
+  create = async (
+    req: express.Request,
+    res: express.Response,
+  ): Promise<void> => {
     const validator = new PipelineConfigDTOValidator();
     if (!validator.validate(req.body)) {
       res.status(400).json({ errors: validator.getErrors() });
@@ -67,7 +81,10 @@ export class PipelineConfigEndpoint {
     res.status(201).location(`/configs/${savedConfig.id}`).json(savedConfig);
   };
 
-  getOne = async (req: express.Request, res: express.Response): Promise<void> => {
+  getOne = async (
+    req: express.Request,
+    res: express.Response,
+  ): Promise<void> => {
     const configId = Number.parseInt(req.params.id, 10);
     if (Number.isNaN(configId)) {
       res.status(400).send('Path parameter id is missing or is incorrect');
@@ -81,14 +98,22 @@ export class PipelineConfigEndpoint {
     res.status(200).json(config);
   };
 
-  getAll = async (req: express.Request, res: express.Response): Promise<void> => {
-    const datasourceId = Number.parseInt(this.getQueryParameter(req, 'datasourceId'), 10);
+  getAll = async (
+    req: express.Request,
+    res: express.Response,
+  ): Promise<void> => {
+    const datasourceId = Number.parseInt(
+      this.getQueryParameter(req, 'datasourceId'),
+      10,
+    );
     if (Number.isNaN(datasourceId)) {
       const configs = await this.pipelineConfigManager.getAll();
       res.status(200).json(configs);
       return;
     }
-    const configs = await this.pipelineConfigManager.getByDatasourceId(datasourceId);
+    const configs = await this.pipelineConfigManager.getByDatasourceId(
+      datasourceId,
+    );
     res.status(200).json(configs);
   };
 

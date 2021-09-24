@@ -21,7 +21,10 @@ export class PipelineExecutionEndpoint {
       return;
     }
 
-    const result: JobResult = this.pipelineExecutor.executeJob(req.body.func, req.body.data);
+    const result: JobResult = this.pipelineExecutor.executeJob(
+      req.body.func,
+      req.body.data,
+    );
     if ('error' in result) {
       res.status(400).json(result);
       return;

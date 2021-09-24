@@ -34,11 +34,16 @@ async function main(): Promise<void> {
   const sandboxExecutor = new VM2SandboxExecutor();
   const pipelineExecutor = new PipelineExecutor(sandboxExecutor);
 
-  const postgresClient = await initDatabase(CONNECTION_RETRIES, CONNECTION_BACKOFF);
+  const postgresClient = await initDatabase(
+    CONNECTION_RETRIES,
+    CONNECTION_BACKOFF,
+  );
 
   const validator = new JsonSchemaValidator();
 
-  const pipelineTransformedDataManager = new PipelineTransformedDataManager(postgresClient);
+  const pipelineTransformedDataManager = new PipelineTransformedDataManager(
+    postgresClient,
+  );
 
   const pipelineConfigManager = new PipelineConfigManager(
     postgresClient,
@@ -47,12 +52,26 @@ async function main(): Promise<void> {
     validator,
   );
 
-  const amqpConnection = new AmqpConnection(AMQP_URL, CONNECTION_RETRIES, CONNECTION_BACKOFF, onAmqpConnectionLoss);
-  await createDatasourceExecutionConsumer(amqpConnection, pipelineConfigManager);
+  const amqpConnection = new AmqpConnection(
+    AMQP_URL,
+    CONNECTION_RETRIES,
+    CONNECTION_BACKOFF,
+    onAmqpConnectionLoss,
+  );
+  await createDatasourceExecutionConsumer(
+    amqpConnection,
+    pipelineConfigManager,
+  );
 
-  const pipelineExecutionEndpoint = new PipelineExecutionEndpoint(pipelineExecutor);
-  const pipelineConfigEndpoint = new PipelineConfigEndpoint(pipelineConfigManager);
-  const pipelineTransformedDataEndpoint = new PipelineTranformedDataEndpoint(pipelineTransformedDataManager);
+  const pipelineExecutionEndpoint = new PipelineExecutionEndpoint(
+    pipelineExecutor,
+  );
+  const pipelineConfigEndpoint = new PipelineConfigEndpoint(
+    pipelineConfigManager,
+  );
+  const pipelineTransformedDataEndpoint = new PipelineTranformedDataEndpoint(
+    pipelineTransformedDataManager,
+  );
 
   const app = express();
   app.use(cors());

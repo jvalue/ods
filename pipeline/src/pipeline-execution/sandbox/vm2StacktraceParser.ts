@@ -7,13 +7,20 @@ import JobError from './jobError';
  * @param line a line from a stacktrace
  * @returns a tuple of [functionName, filename, lineNumber, position]
  */
-export function parseStacktraceLine(line: string): [string, string, number, number] {
+export function parseStacktraceLine(
+  line: string,
+): [string, string, number, number] {
   const match = /^ +at (.+) \((.+):(\d+):(\d+)\)/.exec(line);
   if (match == null) {
     throw new Error(`Unexpected stacktrace line format: ${line}`);
   }
   const [, functionName, fileName, lineNumber, position] = match;
-  return [functionName, fileName, Number.parseInt(lineNumber, 10), Number.parseInt(position, 10)];
+  return [
+    functionName,
+    fileName,
+    Number.parseInt(lineNumber, 10),
+    Number.parseInt(position, 10),
+  ];
 }
 
 /**
@@ -37,10 +44,13 @@ function parseSyntaxErrorHeader(header: string): [string, number] {
  * @param oldLines the original stacktrace lines
  */
 function rewriteStacktrace(oldLines: string[], prefixLength: number): string[] {
-  const contextLine = oldLines.findIndex((line) => line.includes('Script.runInContext'));
+  const contextLine = oldLines.findIndex((line) =>
+    line.includes('Script.runInContext'),
+  );
   const newLines = oldLines.slice(0, contextLine - 1);
   const newLinesAdjusted = newLines.map((line) => {
-    const [functionName, fileName, lineNumber, position] = parseStacktraceLine(line);
+    const [functionName, fileName, lineNumber, position] =
+      parseStacktraceLine(line);
     const newLineNumber = lineNumber - prefixLength;
     return `    at ${functionName} (${fileName}:${newLineNumber}:${position})`;
   });
@@ -60,7 +70,10 @@ function rewriteStacktrace(oldLines: string[], prefixLength: number): string[] {
  *       ...
  * @param error The original javascript syntax error
  */
-export function convertSyntaxError(error: Error, prefixLength: number): JobError {
+export function convertSyntaxError(
+  error: Error,
+  prefixLength: number,
+): JobError {
   if (error.name !== 'SyntaxError') {
     throw new Error('Not a syntax error');
   }
@@ -101,7 +114,10 @@ export function convertSyntaxError(error: Error, prefixLength: number): JobError
  *       ...
  * @param error the original javascript error
  */
-export function convertRuntimeError(error: Error, prefixLength: number): JobError {
+export function convertRuntimeError(
+  error: Error,
+  prefixLength: number,
+): JobError {
   if (error.stack === undefined) {
     throw new Error('Undefined stacktrace');
   }

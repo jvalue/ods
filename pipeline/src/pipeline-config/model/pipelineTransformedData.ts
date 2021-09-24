@@ -17,12 +17,17 @@ export interface PipelineTransformedDataMetaData {
   timestamp: string;
 }
 
-export type PipelineTransformedDataDTO = Omit<PipelineTransformedData, 'id' | 'createdAt'>;
+export type PipelineTransformedDataDTO = Omit<
+  PipelineTransformedData,
+  'id' | 'createdAt'
+>;
 
 export class PipelineTransformedDataDTOValidator {
   private errors: string[] = [];
 
-  validate(pipelineTransformedData: unknown): pipelineTransformedData is PipelineTransformedDataDTO {
+  validate(
+    pipelineTransformedData: unknown,
+  ): pipelineTransformedData is PipelineTransformedDataDTO {
     this.errors = [];
     if (!validators.isObject(pipelineTransformedData)) {
       this.errors.push("'PipelineTransformedData' must be an object");

@@ -71,7 +71,10 @@ describe('PipelineConfigDTOValidator', () => {
 
   test('should reject missing or invalid datasourceId', () => {
     const missingDatasourceIdConfig: DeepPartial<
-      TestRequestType<TestRequestMetaDataType | string, TestRequestTransformationType | string>
+      TestRequestType<
+        TestRequestMetaDataType | string,
+        TestRequestTransformationType | string
+      >
     > = validPipelineConfig();
     delete missingDatasourceIdConfig.datasourceId;
     expect(validator.validate(missingDatasourceIdConfig)).toBeFalsy();
@@ -83,7 +86,10 @@ describe('PipelineConfigDTOValidator', () => {
 
   test('should reject missing or invalid metadata', () => {
     const missingMetadataConfig: DeepPartial<
-      TestRequestType<TestRequestMetaDataType | string, TestRequestTransformationType | string>
+      TestRequestType<
+        TestRequestMetaDataType | string,
+        TestRequestTransformationType | string
+      >
     > = validPipelineConfig();
     delete missingMetadataConfig.metadata;
     expect(validator.validate(missingMetadataConfig)).toBeFalsy();
@@ -93,7 +99,10 @@ describe('PipelineConfigDTOValidator', () => {
     expect(validator.validate(invalidMetadataConfig)).toBeFalsy();
 
     const missingMetadataPropertiesConfig: DeepPartial<
-      TestRequestType<TestRequestMetaDataType | string, TestRequestTransformationType | string>
+      TestRequestType<
+        TestRequestMetaDataType | string,
+        TestRequestTransformationType | string
+      >
     > = validPipelineConfig();
     missingMetadataPropertiesConfig.metadata = {};
     expect(validator.validate(missingMetadataPropertiesConfig)).toBeFalsy();
@@ -102,7 +111,8 @@ describe('PipelineConfigDTOValidator', () => {
     invalidMetadataAuthorConfig.metadata.author = 123;
     expect(validator.validate(invalidMetadataAuthorConfig)).toBeFalsy();
 
-    const invalidMetadataDisplayNameConfig = validPipelineConfigNoObjectString();
+    const invalidMetadataDisplayNameConfig =
+      validPipelineConfigNoObjectString();
     invalidMetadataDisplayNameConfig.metadata.displayName = 123;
     expect(validator.validate(invalidMetadataDisplayNameConfig)).toBeFalsy();
 
@@ -110,7 +120,8 @@ describe('PipelineConfigDTOValidator', () => {
     invalidMetadataLicenseConfig.metadata.license = 123;
     expect(validator.validate(invalidMetadataLicenseConfig)).toBeFalsy();
 
-    const invalidMetadataDescriptionConfig = validPipelineConfigNoObjectString();
+    const invalidMetadataDescriptionConfig =
+      validPipelineConfigNoObjectString();
     invalidMetadataDescriptionConfig.metadata.description = 123;
     expect(validator.validate(invalidMetadataDescriptionConfig)).toBeFalsy();
   });
@@ -133,14 +144,19 @@ describe('PipelineConfigDTOValidator', () => {
   });
 
   test('should add default identity transformation function', () => {
-    const pipelineConfig: TestRequestType<TestRequestMetaDataType, TestRequestTransformationType | undefined> =
-      validPipelineConfigNoObjectString();
+    const pipelineConfig: TestRequestType<
+      TestRequestMetaDataType,
+      TestRequestTransformationType | undefined
+    > = validPipelineConfigNoObjectString();
     delete pipelineConfig.transformation;
 
     const validationResult = validator.validate(pipelineConfig);
     expect(validationResult).toBeTruthy();
     // Changed to toHaveProperty due to otherwise type error: "func does not exists in type never" caused by delete pipelineConfig.transformation;
-    expect(pipelineConfig.transformation).toHaveProperty('func', 'return data;');
+    expect(pipelineConfig.transformation).toHaveProperty(
+      'func',
+      'return data;',
+    );
   });
 
   test('should accept valid pipeline config', () => {

@@ -12,7 +12,9 @@ export default class PipelineExecutor {
     return VERSION;
   }
 
-  private executionTimeInMillis(func: () => ExecutionResult): [number, ExecutionResult] {
+  private executionTimeInMillis(
+    func: () => ExecutionResult,
+  ): [number, ExecutionResult] {
     const start = process.hrtime();
     const result = func();
     const hrresult = process.hrtime(start);
@@ -23,7 +25,9 @@ export default class PipelineExecutor {
   executeJob(code: string, data: Record<string, unknown>): JobResult {
     const startTimestamp = Date.now();
 
-    const [time, result] = this.executionTimeInMillis(() => this.executor.execute(code, data));
+    const [time, result] = this.executionTimeInMillis(() =>
+      this.executor.execute(code, data),
+    );
 
     const endTimestamp = Date.now();
 
