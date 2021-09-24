@@ -14,9 +14,12 @@ const CREATE_BUCKET_STATEMENT = (
   "pipelineId" bigint,
   CONSTRAINT "Data_pk_${schema}_${table}" PRIMARY KEY (id)
   )`;
-const DELETE_BUCKET_STATEMENT = (schema: string, table: string): string => `DROP TABLE "${schema}"."${table}" CASCADE`;
+const DELETE_BUCKET_STATEMENT = (schema: string, table: string): string =>
+  `DROP TABLE "${schema}"."${table}" CASCADE`;
 
-export class PostgresStorageStructureRepository implements StorageStructureRepository {
+export class PostgresStorageStructureRepository
+  implements StorageStructureRepository
+{
   constructor(private readonly postgresClient: PostgresClient) {}
 
   /**
@@ -25,7 +28,9 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
    * @param tableIdentifier tableIdentifier for wich a table will be created with this name
    */
   async create(tableIdentifier: string): Promise<void> {
-    await this.postgresClient.executeQuery(CREATE_BUCKET_STATEMENT(POSTGRES_SCHEMA, tableIdentifier));
+    await this.postgresClient.executeQuery(
+      CREATE_BUCKET_STATEMENT(POSTGRES_SCHEMA, tableIdentifier),
+    );
   }
 
   /**
@@ -33,6 +38,8 @@ export class PostgresStorageStructureRepository implements StorageStructureRepos
    * @param tableIdentifier name of the table to be dropped
    */
   async delete(tableIdentifier: string): Promise<void> {
-    await this.postgresClient.executeQuery(DELETE_BUCKET_STATEMENT(POSTGRES_SCHEMA, tableIdentifier));
+    await this.postgresClient.executeQuery(
+      DELETE_BUCKET_STATEMENT(POSTGRES_SCHEMA, tableIdentifier),
+    );
   }
 }

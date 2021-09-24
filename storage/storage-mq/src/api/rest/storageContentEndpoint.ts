@@ -12,8 +12,14 @@ export class StorageContentEndpoint {
   // The following methods need arrow syntax because of javascript 'this' shenanigans
 
   registerRoutes = (app: express.Application): void => {
-    app.get('/bucket/:bucketId/content/:contentId', asyncHandler(this.handleContentRequest));
-    app.get('/bucket/:bucketId/content', asyncHandler(this.handleAllContentRequest));
+    app.get(
+      '/bucket/:bucketId/content/:contentId',
+      asyncHandler(this.handleContentRequest),
+    );
+    app.get(
+      '/bucket/:bucketId/content',
+      asyncHandler(this.handleAllContentRequest),
+    );
   };
 
   getVersion = (): string => {
@@ -25,29 +31,50 @@ export class StorageContentEndpoint {
    * @param req Request for data.
    * @param res Response containing the content with contentId from bucket bucketId
    */
-  handleContentRequest = async (req: express.Request, res: express.Response): Promise<void> => {
+  handleContentRequest = async (
+    req: express.Request,
+    res: express.Response,
+  ): Promise<void> => {
     const bucketId = Number.parseInt(req.params.bucketId, 10);
     const contentId = Number.parseInt(req.params.contentId, 10);
 
     if (isNaN(bucketId) || bucketId < 1) {
-      res.status(400).send('Cannot request content: No valid bucket id provided');
+      res
+        .status(400)
+        .send('Cannot request content: No valid bucket id provided');
       return;
     }
     if (isNaN(contentId) || contentId < 1) {
-      res.status(400).send('Cannot request content: No valid bucket id provided');
+      res
+        .status(400)
+        .send('Cannot request content: No valid bucket id provided');
       return;
     }
 
     try {
-      const content = await this.contentRepository.getContent(`${bucketId}`, `${contentId}`);
+      const content = await this.contentRepository.getContent(
+        `${bucketId}`,
+        `${contentId}`,
+      );
       if (content === undefined) {
-        res.status(404).send(`Content with id "${contentId}" not found in bucker "${bucketId}"`);
+        res
+          .status(404)
+          .send(
+            `Content with id "${contentId}" not found in bucker "${bucketId}"`,
+          );
         return;
       }
       res.status(200).send(content);
     } catch (err) {
-      console.error(`Could not get content on bucket "${bucketId}" with content id "${contentId}"\n`, err);
-      res.status(500).send(`Could not get content on bucket ${bucketId} with content id "${contentId}`);
+      console.error(
+        `Could not get content on bucket "${bucketId}" with content id "${contentId}"\n`,
+        err,
+      );
+      res
+        .status(500)
+        .send(
+          `Could not get content on bucket ${bucketId} with content id "${contentId}`,
+        );
     }
   };
 
@@ -56,11 +83,16 @@ export class StorageContentEndpoint {
    * @param req Request for data.
    * @param res Response containing  the data identified by bucketId
    */
-  handleAllContentRequest = async (req: express.Request, res: express.Response): Promise<void> => {
+  handleAllContentRequest = async (
+    req: express.Request,
+    res: express.Response,
+  ): Promise<void> => {
     const bucketId = Number.parseInt(req.params.bucketId, 10);
 
     if (isNaN(bucketId) || bucketId < 1) {
-      res.status(400).send('Cannot request content: No valid bucket id provided');
+      res
+        .status(400)
+        .send('Cannot request content: No valid bucket id provided');
       return;
     }
 

@@ -1,14 +1,24 @@
 import { StorageStructureRepository } from '../storage-structure/storageStructureRepository';
 
 export class PipelineConfigEventHandler {
-  constructor(private readonly structureRepository: StorageStructureRepository) {}
+  constructor(
+    private readonly structureRepository: StorageStructureRepository,
+  ) {}
 
-  async handleCreation(pipelineCreatedEvent: PipelineCreatedEvent): Promise<void> {
-    await this.structureRepository.create(pipelineCreatedEvent.pipelineId.toString());
+  async handleCreation(
+    pipelineCreatedEvent: PipelineCreatedEvent,
+  ): Promise<void> {
+    await this.structureRepository.create(
+      pipelineCreatedEvent.pipelineId.toString(),
+    );
   }
 
-  async handleDeletion(pipelineDeletedEvent: PipelineDeletedEvent): Promise<void> {
-    await this.structureRepository.delete(pipelineDeletedEvent.pipelineId.toString());
+  async handleDeletion(
+    pipelineDeletedEvent: PipelineDeletedEvent,
+  ): Promise<void> {
+    await this.structureRepository.delete(
+      pipelineDeletedEvent.pipelineId.toString(),
+    );
   }
 }
 

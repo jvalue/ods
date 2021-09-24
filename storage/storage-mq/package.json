@@ -7,8 +7,9 @@
     "start": "npm run transpile && npm run start:transpiled",
     "start:transpiled": "node --enable-source-maps dist/index.js",
     "transpile": "tsc",
-    "lint": "eslint src --fix",
+    "lint": "eslint src",
     "lint-ci": "eslint src --max-warnings=0",
+    "lint-fix": "eslint src --fix",
     "test": "jest --colors --verbose --passWithNoTests"
   },
   "dependencies": {

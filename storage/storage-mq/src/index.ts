@@ -52,19 +52,40 @@ function onAmqpConnectionLoss(error: unknown): never {
 
 async function main(): Promise<void> {
   const postgresClient = new PostgresClient(POOL_CONFIG);
-  const storageContentRepository = new PostgresStorageContentRepository(postgresClient);
-  const storageStructureRepository = new PostgresStorageStructureRepository(postgresClient);
+  const storageContentRepository = new PostgresStorageContentRepository(
+    postgresClient,
+  );
+  const storageStructureRepository = new PostgresStorageStructureRepository(
+    postgresClient,
+  );
 
-  const pipelineConfigEventHandler = new PipelineConfigEventHandler(storageStructureRepository);
-  const pipelineExecutionEventHandler = new PipelineExecutionEventHandler(storageContentRepository);
+  const pipelineConfigEventHandler = new PipelineConfigEventHandler(
+    storageStructureRepository,
+  );
+  const pipelineExecutionEventHandler = new PipelineExecutionEventHandler(
+    storageContentRepository,
+  );
 
-  const amqpConnection = new AmqpConnection(AMQP_URL, CONNECTION_RETRIES, CONNECTION_BACKOFF, onAmqpConnectionLoss);
+  const amqpConnection = new AmqpConnection(
+    AMQP_URL,
+    CONNECTION_RETRIES,
+    CONNECTION_BACKOFF,
+    onAmqpConnectionLoss,
+  );
   await Promise.allSettled([
-    createPipelineConfigEventConsumer(amqpConnection, pipelineConfigEventHandler),
-    createPipelineExecutionEventConsumer(amqpConnection, pipelineExecutionEventHandler),
+    createPipelineConfigEventConsumer(
+      amqpConnection,
+      pipelineConfigEventHandler,
+    ),
+    createPipelineExecutionEventConsumer(
+      amqpConnection,
+      pipelineExecutionEventHandler,
+    ),
   ]);
 
-  const storageContentEndpoint = new StorageContentEndpoint(storageContentRepository);
+  const storageContentEndpoint = new StorageContentEndpoint(
+    storageContentRepository,
+  );
 
   const app = express();
   app.use(cors());
