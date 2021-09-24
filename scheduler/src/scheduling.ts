@@ -40,7 +40,9 @@ export default class Scheduler {
 
   existsEqualJob(datasourceConfig: DatasourceConfig): boolean {
     const job = this.getJob(datasourceConfig.id);
-    return job !== undefined && deepEqual(job.datasourceConfig, datasourceConfig);
+    return (
+      job !== undefined && deepEqual(job.datasourceConfig, datasourceConfig)
+    );
   }
 
   determineExecutionDate(datasourceConfig: DatasourceConfig): Date {
@@ -56,7 +58,9 @@ export default class Scheduler {
     return new Date(executionDate);
   }
 
-  private scheduleDatasource(datasourceConfig: DatasourceConfig): SchedulingJob {
+  private scheduleDatasource(
+    datasourceConfig: DatasourceConfig,
+  ): SchedulingJob {
     const datasourceId = datasourceConfig.id;
 
     // Cancel current job for given datasource
@@ -66,10 +70,15 @@ export default class Scheduler {
     console.log(`datasource ${datasourceId} with consecutive pipelines scheduled
       for next execution at ${executionDate.toLocaleString()}.`);
 
-    const scheduledJob = schedule.scheduleJob(`Datasource ${datasourceId}`, executionDate, () =>
-      this.execute(datasourceConfig),
+    const scheduledJob = schedule.scheduleJob(
+      `Datasource ${datasourceId}`,
+      executionDate,
+      () => this.execute(datasourceConfig),
     );
-    const datasourceJob = { scheduleJob: scheduledJob, datasourceConfig: datasourceConfig };
+    const datasourceJob = {
+      scheduleJob: scheduledJob,
+      datasourceConfig: datasourceConfig,
+    };
     this.allJobs.set(datasourceId, datasourceJob);
 
     return datasourceJob;
@@ -86,9 +95,13 @@ export default class Scheduler {
     if (datasourceConfig.trigger.periodic) {
       this.scheduleDatasource(datasourceConfig);
     } else {
-      console.log(`Datasource ${datasourceConfig.id} is not periodic. Removing it from scheduling.`);
+      console.log(
+        `Datasource ${datasourceConfig.id} is not periodic. Removing it from scheduling.`,
+      );
       this.removeJob(datasourceConfig.id);
-      console.log(`Successfully removed datasource ${datasourceConfig.id} from scheduling.`);
+      console.log(
+        `Successfully removed datasource ${datasourceConfig.id} from scheduling.`,
+      );
     }
   }
 
@@ -96,7 +109,9 @@ export default class Scheduler {
     const isNewDatasource = !this.existsJob(datasourceConfig.id);
     const datasourceState = isNewDatasource ? 'New' : 'Updated';
 
-    console.log(`[${datasourceState}] datasource detected with id ${datasourceConfig.id}.`);
+    console.log(
+      `[${datasourceState}] datasource detected with id ${datasourceConfig.id}.`,
+    );
 
     return this.scheduleDatasource(datasourceConfig);
   }

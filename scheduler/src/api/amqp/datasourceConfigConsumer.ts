@@ -15,14 +15,21 @@ import DatasourceConfig from '../datasource-config';
 export class DatasourceConfigConsumer {
   private channel?: AmqpChannel;
 
-  constructor(private readonly connection: AmqpConnection, private readonly scheduler: Scheduler) {}
+  constructor(
+    private readonly connection: AmqpConnection,
+    private readonly scheduler: Scheduler,
+  ) {}
 
   async initialize(): Promise<void> {
     this.channel = await this.connection.createChannel();
 
     await this.channel.assertExchange(AMQP_SCHEDULER_EXCHANGE, 'topic');
     await this.channel.assertQueue(AMQP_SCHEDULER_QUEUE, { exclusive: false });
-    await this.channel.bindQueue(AMQP_SCHEDULER_QUEUE, AMQP_SCHEDULER_EXCHANGE, AMQP_DATASOURCE_CONFIG_TOPIC);
+    await this.channel.bindQueue(
+      AMQP_SCHEDULER_QUEUE,
+      AMQP_SCHEDULER_EXCHANGE,
+      AMQP_DATASOURCE_CONFIG_TOPIC,
+    );
   }
 
   async startEventConsumption(): Promise<void> {
@@ -33,9 +40,13 @@ export class DatasourceConfigConsumer {
     await this.channel.consume(AMQP_SCHEDULER_QUEUE, this.consumeEvent);
   }
 
-  private readonly consumeEvent = async (msg: AMQP.ConsumeMessage | null): Promise<void> => {
+  private readonly consumeEvent = async (
+    msg: AMQP.ConsumeMessage | null,
+  ): Promise<void> => {
     if (msg == null) {
-      console.debug('Received empty event when listening on datasource config events - doing nothing');
+      console.debug(
+        'Received empty event when listening on datasource config events - doing nothing',
+      );
       return;
     }
 
@@ -43,13 +54,20 @@ export class DatasourceConfigConsumer {
       // eslint does not like 'const event: DatasourceConfigEvent = JSON.parse(...)' in combination with JSON.parse
       const event = JSON.parse(msg.content.toString()) as DatasourceConfigEvent;
       const datasource = event.datasource;
-      datasource.trigger.firstExecution = new Date(event.datasource.trigger.firstExecution);
+      datasource.trigger.firstExecution = new Date(
+        event.datasource.trigger.firstExecution,
+      );
       this.scheduler.upsertJob(datasource);
     } else if (isDelete(msg)) {
-      const datasourceEvent = JSON.parse(msg.content.toString()) as DatasourceConfigEvent;
+      const datasourceEvent = JSON.parse(
+        msg.content.toString(),
+      ) as DatasourceConfigEvent;
       this.scheduler.removeJob(datasourceEvent.datasource.id);
     } else {
-      console.debug('Received unsubscribed event on topic %s - doing nothing', msg.fields.routingKey);
+      console.debug(
+        'Received unsubscribed event on topic %s - doing nothing',
+        msg.fields.routingKey,
+      );
     }
     await this.channel?.ack(msg);
   };

@@ -36,7 +36,11 @@ describe('Scheduler initializer', () => {
     };
     mockedGetAllDatasources.mockResolvedValue([config]);
 
-    await setupInitialStateWithRetry(scheduler, CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS);
+    await setupInitialStateWithRetry(
+      scheduler,
+      CONNECTION_RETRIES,
+      CONNECTION_BACKOFF_IN_MS,
+    );
     expect(scheduler.getAllJobs()).toHaveLength(1);
     expect(scheduler.getAllJobs()[0].datasourceConfig).toEqual(config);
   });

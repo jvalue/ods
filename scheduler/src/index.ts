@@ -4,7 +4,12 @@ import { AmqpConnection } from '@jvalue/node-dry-amqp';
 import express from 'express';
 
 import { DatasourceConfigConsumer } from './api/amqp/datasourceConfigConsumer';
-import { AMQP_URL, CONNECTION_BACKOFF_IN_MS, CONNECTION_RETRIES, MAX_TRIGGER_RETRIES } from './env';
+import {
+  AMQP_URL,
+  CONNECTION_BACKOFF_IN_MS,
+  CONNECTION_RETRIES,
+  MAX_TRIGGER_RETRIES,
+} from './env';
 import { setupInitialStateWithRetry } from './initializer';
 import Scheduler from './scheduling';
 
@@ -30,12 +35,24 @@ let scheduler: Scheduler | undefined;
 let amqpConnection: AmqpConnection | undefined;
 
 async function main(): Promise<void> {
-  amqpConnection = new AmqpConnection(AMQP_URL, CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS, onAmqpConnectionLoss);
+  amqpConnection = new AmqpConnection(
+    AMQP_URL,
+    CONNECTION_RETRIES,
+    CONNECTION_BACKOFF_IN_MS,
+    onAmqpConnectionLoss,
+  );
   scheduler = new Scheduler(MAX_TRIGGER_RETRIES);
-  const datasourceConfigConsumer = new DatasourceConfigConsumer(amqpConnection, scheduler);
+  const datasourceConfigConsumer = new DatasourceConfigConsumer(
+    amqpConnection,
+    scheduler,
+  );
   await datasourceConfigConsumer.initialize();
 
-  await setupInitialStateWithRetry(scheduler, CONNECTION_RETRIES, CONNECTION_BACKOFF_IN_MS);
+  await setupInitialStateWithRetry(
+    scheduler,
+    CONNECTION_RETRIES,
+    CONNECTION_BACKOFF_IN_MS,
+  );
 
   await datasourceConfigConsumer.startEventConsumption();
 

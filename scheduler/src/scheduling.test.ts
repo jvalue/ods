@@ -1,6 +1,4 @@
 /* eslint-env jest */
-import { setTimeout as sleep } from 'timers/promises';
-
 import { mocked } from 'ts-jest/utils';
 
 import DatasourceConfig from './api/datasource-config';
@@ -113,17 +111,29 @@ describe('Scheduler', () => {
 
   test('should determine correct execution date from timestamp in the future ', () => {
     const timestampInFuture = Date.now() + 6000;
-    const datasourceConfig = generateConfig(true, new Date(timestampInFuture), 6000);
-    expect(scheduler.determineExecutionDate(datasourceConfig).getTime()).toEqual(timestampInFuture);
+    const datasourceConfig = generateConfig(
+      true,
+      new Date(timestampInFuture),
+      6000,
+    );
+    expect(
+      scheduler.determineExecutionDate(datasourceConfig).getTime(),
+    ).toEqual(timestampInFuture);
   });
 
   test('should determine correct execution date from timestamp in the past', () => {
     const timestampInPast = Date.now() - 5000;
     const interval = 10000;
 
-    const datasourceConfig = generateConfig(true, new Date(timestampInPast), interval);
+    const datasourceConfig = generateConfig(
+      true,
+      new Date(timestampInPast),
+      interval,
+    );
     const expectedExecution = new Date(timestampInPast + interval);
-    expect(scheduler.determineExecutionDate(datasourceConfig)).toEqual(expectedExecution);
+    expect(scheduler.determineExecutionDate(datasourceConfig)).toEqual(
+      expectedExecution,
+    );
   });
 
   test('should determine correct execution date from timestamp in the past [> 24h]', () => {
@@ -135,14 +145,24 @@ describe('Scheduler', () => {
     const timestampInPast = now - threeDaysInMs - fiveMinutesInMs;
     const interval = oneDayhInMs;
 
-    const datasourceConfig = generateConfig(true, new Date(timestampInPast), interval);
+    const datasourceConfig = generateConfig(
+      true,
+      new Date(timestampInPast),
+      interval,
+    );
     const expectedExecution = new Date(now + interval - fiveMinutesInMs);
-    expect(scheduler.determineExecutionDate(datasourceConfig)).toEqual(expectedExecution);
+    expect(scheduler.determineExecutionDate(datasourceConfig)).toEqual(
+      expectedExecution,
+    );
   });
 
   test('should insert new datasource', () => {
     const timestampInFuture = Date.now() + 5000;
-    const datasourceConfig = generateConfig(true, new Date(timestampInFuture), 10000);
+    const datasourceConfig = generateConfig(
+      true,
+      new Date(timestampInFuture),
+      10000,
+    );
     const datasourceJob = scheduler.upsertJob(datasourceConfig);
 
     expect(datasourceJob.datasourceConfig).toEqual(datasourceConfig);
@@ -153,12 +173,20 @@ describe('Scheduler', () => {
   test('should update existing datasource', () => {
     const timestampInFuture1 = Date.now() + 5000;
     const timestampInFuture2 = Date.now() + 100000;
-    const datasourceConfig1 = generateConfig(true, new Date(timestampInFuture1), 10000);
+    const datasourceConfig1 = generateConfig(
+      true,
+      new Date(timestampInFuture1),
+      10000,
+    );
 
     const datasourceJob1 = scheduler.upsertJob(datasourceConfig1);
     expect(scheduler.existsJob(datasourceConfig1.id)).toBeTruthy();
 
-    const datasourceConfig2 = generateConfig(true, new Date(timestampInFuture2), 10000);
+    const datasourceConfig2 = generateConfig(
+      true,
+      new Date(timestampInFuture2),
+      10000,
+    );
     scheduler.upsertJob(datasourceConfig2);
 
     expect(scheduler.existsJob(datasourceConfig1.id)).toBeTruthy();
@@ -170,9 +198,17 @@ describe('Scheduler', () => {
 
   test('should be equal', () => {
     const timestampInFuture = Date.now() + 5000;
-    const datasourceConfig1 = generateConfig(true, new Date(timestampInFuture), 10000);
+    const datasourceConfig1 = generateConfig(
+      true,
+      new Date(timestampInFuture),
+      10000,
+    );
     const datasourceJob1 = scheduler.upsertJob(datasourceConfig1);
-    const datasourceConfig2 = generateConfig(true, new Date(timestampInFuture), 10000);
+    const datasourceConfig2 = generateConfig(
+      true,
+      new Date(timestampInFuture),
+      10000,
+    );
 
     expect(scheduler.existsEqualJob(datasourceConfig2)).toBeTruthy();
     expect(scheduler.existsEqualJob(datasourceConfig1)).toBeTruthy();
@@ -182,7 +218,11 @@ describe('Scheduler', () => {
 
   test('should execute datasource once', async () => {
     const timestampInFuture = Date.now() + 200;
-    const datasourceConfig = generateConfig(false, new Date(timestampInFuture), 500);
+    const datasourceConfig = generateConfig(
+      false,
+      new Date(timestampInFuture),
+      500,
+    );
     scheduler.upsertJob(datasourceConfig);
     expect(scheduler.getJob(datasourceConfig.id)).not.toBeUndefined();
     await sleep(250);
@@ -193,7 +233,11 @@ describe('Scheduler', () => {
 
   test('should execute datasource periodic', async () => {
     const timestampInFuture = Date.now() + 200;
-    const datasourceConfig = generateConfig(true, new Date(timestampInFuture), 100);
+    const datasourceConfig = generateConfig(
+      true,
+      new Date(timestampInFuture),
+      100,
+    );
     const datasourceJob1 = scheduler.upsertJob(datasourceConfig);
     const nextInvocation1: Date = datasourceJob1.scheduleJob.nextInvocation();
     await sleep(250);
@@ -202,13 +246,26 @@ describe('Scheduler', () => {
 
     expect(nextInvocation1).not.toEqual(nextInvocation2);
     expect(datasourceJob2).toBeDefined();
-    expect(datasourceJob1.datasourceConfig).toEqual(datasourceJob2?.datasourceConfig);
+    expect(datasourceJob1.datasourceConfig).toEqual(
+      datasourceJob2?.datasourceConfig,
+    );
     await sleep(250);
     expect(mockedTriggerDatasource.mock.calls.length).toBeGreaterThan(1);
   });
 });
 
-function generateConfig(periodic: boolean, firstExecution: Date, interval: number): DatasourceConfig {
+function sleep(timeout: number): Promise<void> {
+  const result = new Promise<void>((resolve) => {
+    setTimeout(resolve, timeout);
+  });
+  return result;
+}
+
+function generateConfig(
+  periodic: boolean,
+  firstExecution: Date,
+  interval: number,
+): DatasourceConfig {
   return {
     id: 123,
     trigger: {

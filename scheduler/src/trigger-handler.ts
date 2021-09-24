@@ -2,7 +2,10 @@ import { AxiosError } from 'axios';
 
 import * as AdapterClient from './api/http/adapter-client';
 
-export async function triggerDatasource(datasourceId: number, triggerRetries: number): Promise<void> {
+export async function triggerDatasource(
+  datasourceId: number,
+  triggerRetries: number,
+): Promise<void> {
   for (let i = 0; i < triggerRetries; i++) {
     try {
       await AdapterClient.triggerDatasource(datasourceId);
@@ -19,12 +22,16 @@ export async function triggerDatasource(datasourceId: number, triggerRetries: nu
         console.error(`Could not trigger datasource ${datasourceId}`);
         break;
       }
-      console.info(`Triggering datasource failed - retrying (${i}/${triggerRetries})`);
+      console.info(
+        `Triggering datasource failed - retrying (${i}/${triggerRetries})`,
+      );
     }
   }
 }
 
-function isAxiosError(error: { isAxiosError: boolean | undefined }): error is AxiosError {
+function isAxiosError(error: {
+  isAxiosError: boolean | undefined;
+}): error is AxiosError {
   return !!error.isAxiosError;
 }
 
