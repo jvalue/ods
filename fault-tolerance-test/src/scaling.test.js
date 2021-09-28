@@ -120,8 +120,8 @@ describe('Scaling test', () => {
       }
     }, 201)
 
-    const container1 = docker.getContainer('open-data-service_pipeline_1')
-    const container2 = docker.getContainer('open-data-service_pipeline_2')
+    const container1 = docker.getContainer('ods_pipeline_1')
+    const container2 = docker.getContainer('ods_pipeline_2')
 
     await expectGetPipelineSucceed(pipelineId)
 
