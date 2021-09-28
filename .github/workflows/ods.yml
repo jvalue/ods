@@ -291,7 +291,7 @@ jobs:
         
       - name: Run
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.provider.yml up pipeline pipeline-db pipeline-outboxer rabbitmq --abort-on-container-exit --exit-code-from pipeline
+          docker-compose -f docker-compose.yml -f docker-compose.provider.yml up --exit-code-from pipeline pipeline pipeline-db pipeline-outboxer rabbitmq
 
   # ----------------- SYSTEMTEST --------------------
   systemtest:
