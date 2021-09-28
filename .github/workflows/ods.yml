@@ -192,10 +192,12 @@ jobs:
 
       - name: Regular Test
         run: |
+          docker-compose -f docker-compose.yml -f docker-compose.test.yml build notification
           docker-compose -f docker-compose.yml -f docker-compose.test.yml up notification
 
       - name: Consumer-side CDC-Test
         run: |
+          docker-compose -f docker-compose.yml -f docker-compose.consumer.yml build notification
           docker-compose -f docker-compose.yml -f docker-compose.consumer.yml up notification
 
       - name: Upload contract files as artifact
@@ -243,10 +245,12 @@ jobs:
 
       - name: Regular Test
         run: |
+          docker-compose -f docker-compose.yml -f docker-compose.test.yml build ui
           docker-compose -f docker-compose.yml -f docker-compose.test.yml up ui
 
       - name: Consumer-side CDC-Test
         run: |
+          docker-compose -f docker-compose.yml -f docker-compose.consumer.yml build ui
           docker-compose -f docker-compose.yml -f docker-compose.consumer.yml up ui
 
       - name: Upload Contract files as artifact
