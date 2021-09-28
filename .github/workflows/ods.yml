@@ -309,7 +309,7 @@ jobs:
 
     needs: [systemtest]
 
-    if: github.repository == 'jvalue/open-data-service' && github.ref == 'refs/heads/main'
+    if: github.repository == 'jvalue/ods' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v2
 
@@ -343,7 +343,7 @@ jobs:
 
     needs: [systemtest]
 
-    if: github.repository == 'jvalue/open-data-service' && github.ref == 'refs/heads/main'
+    if: github.repository == 'jvalue/ods' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v2
 
@@ -376,7 +376,7 @@ jobs:
 
     needs: [systemtest]
 
-    if: github.repository == 'jvalue/open-data-service' && github.ref == 'refs/heads/main'
+    if: github.repository == 'jvalue/ods' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v2
 
@@ -434,7 +434,7 @@ jobs:
 
     needs: [systemtest]
 
-    if: github.repository == 'jvalue/open-data-service' && github.ref == 'refs/heads/main'
+    if: github.repository == 'jvalue/ods' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v2
 
@@ -467,7 +467,7 @@ jobs:
 
     needs: [systemtest]
 
-    if: github.repository == 'jvalue/open-data-service' && github.ref == 'refs/heads/main'
+    if: github.repository == 'jvalue/ods' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v2
 
@@ -500,7 +500,7 @@ jobs:
 
     needs: [systemtest]
 
-    if: github.repository == 'jvalue/open-data-service' && github.ref == 'refs/heads/main'
+    if: github.repository == 'jvalue/ods' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v2
 
