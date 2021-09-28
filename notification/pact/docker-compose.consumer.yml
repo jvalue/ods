@@ -1,9 +1,0 @@
-version: "3.7"
-
-services:
-  notification-consumer:
-    build:
-      context: ..
-      dockerfile: ./pact/Dockerfile.consumer
-    volumes:
-      - ../../pacts:/app/pacts

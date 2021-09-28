@@ -1,7 +1,7 @@
-#---------------------------------------------#
-# First stage: image to build vue application #
-#---------------------------------------------#
-FROM node:15-alpine as builder
+#----------------------------------------------------------#
+# First stage: base image for further building and testing #
+#----------------------------------------------------------#
+FROM node:15-alpine as base
 
 ARG UI_BASE_URL
 ARG STORAGE_SERVICE_URL
@@ -10,6 +10,12 @@ ARG PIPELINE_SERVICE_URL
 ARG NOTIFICATION_SERVICE_URL
 ARG SCHEMA_SERVICE_URL
 
+# install dependencies for pact (https://docs.pact.io/docker/)
+RUN apk add --no-cache --virtual build-dependencies build-base
+RUN apk --no-cache add ca-certificates wget bash \
+  && wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
+  && wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.29-r0/glibc-2.29-r0.apk \
+  && apk add glibc-2.29-r0.apk
 
 WORKDIR /app
 
@@ -36,19 +42,21 @@ RUN echo "VUE_APP_BASE_URL=$UI_BASE_URL" > .env \
 # lint project
 RUN npm run lint-ci
 
-# test project
-RUN npm run test
+#----------------------------------------------#
+# Second stage: image to build vue application #
+#----------------------------------------------#
+FROM base as build
 
 # build vue.js production bundle to ./dist
 RUN npm run build
 
-#---------------------------------------------------------#
-# Second stage: serve static html and js files with nginx #
-#---------------------------------------------------------#
+#--------------------------------------------------------#
+# Third stage: serve static html and js files with nginx #
+#--------------------------------------------------------#
 FROM nginx:1-alpine
 
 # copy static result of builder to the standard nginx webroot
-COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=build /app/dist /usr/share/nginx/html
 
 # use custom nginx config
 COPY default.conf /etc/nginx/conf.d/
