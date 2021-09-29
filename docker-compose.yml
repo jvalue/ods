@@ -117,6 +117,7 @@ services:
       POSTGRES_USER: storagemq
       POSTGRES_PW: storagemq-pw
       POSTGRES_SCHEMA: 'storage'
+      POSTGRES_SSL: "false"
 
       AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
 
