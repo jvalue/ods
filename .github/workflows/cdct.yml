@@ -17,16 +17,32 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build Consumer-Driven Contract Test
+      - name: Build Consumer-Side Test for UI
         run: |
-          docker-compose -f docker-compose.pact.yml build
+          docker-compose -f ui/pact/docker-compose.consumer.yml build
 
-      - name: Run Consumer-Driven Contract Test
+      - name: Build Consumer-Side Test for Notification
         run: |
-          docker-compose -f docker-compose.pact.yml up
+          docker-compose -f notification/pact/docker-compose.consumer.yml build
+
+      - name: Run Consumer-Side Test for UI
+        run: |
+          docker-compose -f ui/pact/docker-compose.consumer.yml up
+
+      - name: Run Consumer-Side Test for Notification
+        run: |
+          docker-compose -f notification/pact/docker-compose.consumer.yml up
       
       - name: Commit latest contracts
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Update auto-generated contracts
           file_pattern: pacts/*.json
+      
+      - name: Build Provider-Side Test
+        run: |
+          docker-compose -f docker-compose.provider.yml build
+
+      - name: Run Provider-Side Test
+        run: |
+          docker-compose -f docker-compose.provider.yml up --abort-on-container-exit --exit-code-from pipeline-provider
