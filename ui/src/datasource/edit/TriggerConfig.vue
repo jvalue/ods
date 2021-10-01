@@ -1,7 +1,5 @@
 <template>
-  <v-form
-    v-model="isValid"
-  >
+  <v-form v-model="isValid">
     <v-switch
       v-model="triggerConfig.periodic"
       label="Periodic execution"
@@ -32,7 +30,10 @@
       <template #prepend>
         <v-icon
           color="error"
-          @click="dialogIntervalHours--; formChanged()"
+          @click="
+            dialogIntervalHours--;
+            formChanged();
+          "
         >
           mdi-minus
         </v-icon>
@@ -41,7 +42,10 @@
       <template #append>
         <v-icon
           color="primary"
-          @click="dialogIntervalHours++; formChanged()"
+          @click="
+            dialogIntervalHours++;
+            formChanged();
+          "
         >
           mdi-plus
         </v-icon>
@@ -64,7 +68,10 @@
       <template #prepend>
         <v-icon
           color="error"
-          @click="dialogIntervalMinutes--; formChanged()"
+          @click="
+            dialogIntervalMinutes--;
+            formChanged();
+          "
         >
           mdi-minus
         </v-icon>
@@ -73,7 +80,10 @@
       <template #append>
         <v-icon
           color="primary"
-          @click="dialogIntervalMinutes++; formChanged()"
+          @click="
+            dialogIntervalMinutes++;
+            formChanged();
+          "
         >
           mdi-plus
         </v-icon>
@@ -83,91 +93,111 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import Component from 'vue-class-component'
+import Vue from 'vue';
+import Component from 'vue-class-component';
+import { Emit, PropSync, Watch } from 'vue-property-decorator';
 
-import { Emit, PropSync, Watch } from 'vue-property-decorator'
-import DateTimePicker from '@/components/DateTimePicker.vue'
+import { Trigger } from '../datasource';
 
-import { Trigger } from '../datasource'
+import DateTimePicker from '@/components/DateTimePicker.vue';
 
-const ONE_HOUR_IN_MS = 3600 * 1000
-const ONE_MINUTE_IN_MS = 60 * 1000
+const ONE_HOUR_IN_MS = 3600 * 1000;
+const ONE_MINUTE_IN_MS = 60 * 1000;
 
 @Component({ components: { DateTimePicker } })
 export default class TriggerConfig extends Vue {
-  private isValid = true
+  private isValid = true;
 
-  private dialogIntervalHours = 1
-  private dialogIntervalMinutes = 0
+  private dialogIntervalHours = 1;
+  private dialogIntervalMinutes = 0;
 
   private hoursTickLabels = [
-    '0h', '', '', '', '', '',
-    '6h', '', '', '', '', '',
-    '12h', '', '', '', '', '',
-    '18h', '', '', '', '', '',
-    '24h'
-  ]
-
-  private minutesTickLabels (): string[] {
-    const ticks = new Array(61)
-    ticks[0] = '0m'
-    ticks[15] = '15m'
-    ticks[30] = '30m'
-    ticks[45] = '45m'
-    ticks[60] = '60m'
-    return ticks
-  }
+    '0h',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '6h',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '12h',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '18h',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '24h',
+  ];
 
   @PropSync('value')
-  private triggerConfig!: Trigger
+  private triggerConfig!: Trigger;
+
+  private minutesTickLabels(): string[] {
+    const ticks = new Array<string>(61);
+    ticks[0] = '0m';
+    ticks[15] = '15m';
+    ticks[30] = '30m';
+    ticks[45] = '45m';
+    ticks[60] = '60m';
+    return ticks;
+  }
 
   @Watch('triggerConfig')
-  private triggerConfigChanged (): void {
-    this.loadDialogIntervalForSlider()
+  private triggerConfigChanged(): void {
+    this.loadDialogIntervalForSlider();
   }
 
   @Emit('value')
-  emitValue (): Trigger {
-    return this.triggerConfig
+  emitValue(): Trigger {
+    return this.triggerConfig;
   }
 
   @Emit('validityChanged')
-  emitValid (): boolean {
-    return this.isValid
+  emitValid(): boolean {
+    return this.isValid;
   }
 
-  formChanged (): void {
-    this.setTriggerInterval()
+  formChanged(): void {
+    this.setTriggerInterval();
 
-    this.emitValue()
-    this.emitValid()
+    this.emitValue();
+    this.emitValid();
   }
 
-  private setTriggerInterval (): void {
-    const hoursInMS = this.dialogIntervalHours * ONE_HOUR_IN_MS
-    const minutesInMS = this.dialogIntervalMinutes * ONE_MINUTE_IN_MS
-    this.triggerConfig.interval = hoursInMS + minutesInMS
+  private setTriggerInterval(): void {
+    const hoursInMS = this.dialogIntervalHours * ONE_HOUR_IN_MS;
+    const minutesInMS = this.dialogIntervalMinutes * ONE_MINUTE_IN_MS;
+    this.triggerConfig.interval = hoursInMS + minutesInMS;
   }
 
-  private loadDialogIntervalForSlider (): void {
+  private loadDialogIntervalForSlider(): void {
     if (this.triggerConfig.interval <= 1) {
-      this.dialogIntervalHours = 0
-      this.dialogIntervalMinutes = 0
-      return
+      this.dialogIntervalHours = 0;
+      this.dialogIntervalMinutes = 0;
+      return;
     }
 
-    const intervalInMS = this.triggerConfig.interval
-    this.dialogIntervalHours = this.getHoursFromMS(intervalInMS)
-    this.dialogIntervalMinutes = this.getMinutesFromMS(intervalInMS)
+    const intervalInMS = this.triggerConfig.interval;
+    this.dialogIntervalHours = this.getHoursFromMS(intervalInMS);
+    this.dialogIntervalMinutes = this.getMinutesFromMS(intervalInMS);
   }
 
-  private getHoursFromMS (intervalInMS: number): number {
-    return Math.floor(intervalInMS / ONE_HOUR_IN_MS)
+  private getHoursFromMS(intervalInMS: number): number {
+    return Math.floor(intervalInMS / ONE_HOUR_IN_MS);
   }
 
-  private getMinutesFromMS (intervalInMS: number): number {
-    return Math.floor((intervalInMS % ONE_HOUR_IN_MS) / ONE_MINUTE_IN_MS)
+  private getMinutesFromMS(intervalInMS: number): number {
+    return Math.floor((intervalInMS % ONE_HOUR_IN_MS) / ONE_MINUTE_IN_MS);
   }
 }
 </script>

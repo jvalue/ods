@@ -1,46 +1,46 @@
 export default interface Datasource {
-  id: number
+  id: number;
   format: {
-    type: string
-    parameters: object
-  }
+    type: string;
+    parameters: Record<string, unknown>;
+  };
   protocol: {
-    type: string
-    parameters: object
-  }
-  schema?: object
-  metadata: DatasourceMetaData
-  trigger: Trigger
+    type: string;
+    parameters: Record<string, unknown>;
+  };
+  schema?: Record<string, unknown>;
+  metadata: DatasourceMetaData;
+  trigger: Trigger;
 }
 
 export interface DataimportMetaData {
-  id: number
-  health: HealthStatus
-  timestamp: string
+  id: number;
+  health: HealthStatus;
+  timestamp: string;
 }
 
 export interface DatasourceMetaData {
-  displayName: string
-  description: string
-  author: string
-  license: string
+  displayName: string;
+  description: string;
+  author: string;
+  license: string;
 }
 
 export interface Trigger {
-  periodic: boolean
-  interval: number
-  firstExecution: Date
+  periodic: boolean;
+  interval: number;
+  firstExecution: Date;
 }
 
 export interface DataLocation {
-  id: number
-  location: string
+  id: number;
+  location: string;
 }
 
-export type Data = object
+export type Data = Record<string, unknown>;
 
 export enum HealthStatus {
   OK = 'OK',
   WARINING = 'WARNING',
-  FAILED = 'FAILED'
+  FAILED = 'FAILED',
 }

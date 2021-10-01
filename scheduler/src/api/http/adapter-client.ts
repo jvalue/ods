@@ -1,19 +1,18 @@
-import axios from 'axios'
+import axios from 'axios';
 
-import type DatasourceConfig from '../datasource-config'
-
-import { ADAPTER_SERVICE_URL } from '../../env'
+import { ADAPTER_SERVICE_URL } from '../../env';
+import type DatasourceConfig from '../datasource-config';
 
 const http = axios.create({
   baseURL: ADAPTER_SERVICE_URL,
-  headers: { 'Content-Type': 'application/json' }
-})
+  headers: { 'Content-Type': 'application/json' },
+});
 
-export async function getAllDatasources (): Promise<DatasourceConfig[]> {
-  const response = await http.get('/datasources')
-  return response.data
+export async function getAllDatasources(): Promise<DatasourceConfig[]> {
+  const response = await http.get('/datasources');
+  return response.data as DatasourceConfig[];
 }
 
-export async function triggerDatasource (datasourceId: number): Promise<void> {
-  return await http.post(`/datasources/${datasourceId}/trigger`)
+export async function triggerDatasource(datasourceId: number): Promise<void> {
+  return await http.post(`/datasources/${datasourceId}/trigger`);
 }

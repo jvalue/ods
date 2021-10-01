@@ -13,6 +13,7 @@ RUN npm ci
 COPY ./tsconfig.json ./
 COPY ./.eslintrc.js ./
 COPY ./jest.config.js ./
+COPY ./.prettierrc.js ./
 COPY ./src ./src
 
 # build and test

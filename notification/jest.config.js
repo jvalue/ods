@@ -8,4 +8,4 @@ module.exports = {
     ...defaults.testPathIgnorePatterns,
     '.*\\.pact\\.test\\.ts$'
   ]
-}
+};

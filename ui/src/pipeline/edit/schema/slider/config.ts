@@ -1,20 +1,26 @@
 const sliderData = [
   {
-    name: '1'
-  }, {
-    name: '2'
-  }, {
-    name: '4'
-  }, {
-    name: '8'
-  }, {
-    name: '16'
-  }, {
-    name: '32'
-  }, {
-    name: '64'
-  }
-]
+    name: '1',
+  },
+  {
+    name: '2',
+  },
+  {
+    name: '4',
+  },
+  {
+    name: '8',
+  },
+  {
+    name: '16',
+  },
+  {
+    name: '32',
+  },
+  {
+    name: '64',
+  },
+];
 
 const options = {
   dotSize: 14,
@@ -54,7 +60,7 @@ const options = {
   stepStyle: 0,
   stepActiveStyle: 0,
   labelStyle: 0,
-  labelActiveStyle: 0
-}
+  labelActiveStyle: 0,
+};
 
-export const SliderConfig = { sliderData: sliderData, options: options }
+export const SliderConfig = { sliderData: sliderData, options: options };

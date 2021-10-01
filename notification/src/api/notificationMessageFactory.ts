@@ -1,4 +1,4 @@
-import { PipelineSuccessEvent } from './pipelineEvent'
+import { PipelineSuccessEvent } from './pipelineEvent';
 
 /**
  * Builds the notification message to be sent,
@@ -9,7 +9,12 @@ import { PipelineSuccessEvent } from './pipelineEvent'
  * @param dataLocation the location of the data
  * @returns message to be sent as notification
  */
-export const buildMessage = (event: PipelineSuccessEvent, dataLocation: string): string => {
-  return `Pipeline ${event.pipelineName} (Pipeline id:${event.pipelineId}) ` +
-      `has new data available. Fetch at ${dataLocation}.`
-}
+export const buildMessage = (
+  event: PipelineSuccessEvent,
+  dataLocation: string,
+): string => {
+  return (
+    `Pipeline ${event.pipelineName} (Pipeline id:${event.pipelineId}) ` +
+    `has new data available. Fetch at ${dataLocation}.`
+  );
+};

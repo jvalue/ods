@@ -1,10 +1,10 @@
 export default interface DatasourceConfig {
-  id: number
-  trigger: DatasourceTrigger
+  id: number;
+  trigger: DatasourceTrigger;
 }
 
 export interface DatasourceTrigger {
-  periodic: boolean
-  firstExecution: Date
-  interval: number
+  periodic: boolean;
+  firstExecution: Date;
+  interval: number;
 }
