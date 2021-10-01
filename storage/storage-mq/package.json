@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Event-driven consumer to fill the database for querying services",
   "main": "dis/index.js",
+  "prettier": "@jvalue/eslint-config-jvalue/.prettierrc.js",
   "scripts": {
     "start": "npm run transpile && npm run start:transpiled",
     "start:transpiled": "node --enable-source-maps dist/index.js",
