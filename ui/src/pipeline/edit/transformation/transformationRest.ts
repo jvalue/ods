@@ -19,6 +19,6 @@ export class TransformationRest {
       validateStatus: status => status >= 200 && status <= 400,
     });
 
-    return response.data;
+    return response.data as JobResult;
   }
 }
