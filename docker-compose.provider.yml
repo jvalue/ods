@@ -20,6 +20,7 @@ services:
       POSTGRES_PW: "pw"
       POSTGRES_DB: "ods-pipelines"
       POSTGRES_SCHEMA: "public"
+      POSTGRES_SSL: "false"
 
       AMQP_URL: "amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq-provider:5672"
 
