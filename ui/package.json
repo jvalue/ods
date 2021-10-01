@@ -1,6 +1,7 @@
 {
   "name": "webclient",
   "version": "0.1.0",
+  "prettier": "@jvalue/eslint-config-jvalue/.prettierrc.js",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",

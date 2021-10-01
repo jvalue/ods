@@ -16,7 +16,6 @@ COPY ./src ./src
 COPY ./tsconfig.json ./
 COPY ./jest.config.js ./
 COPY ./.eslintrc.js ./
-COPY ./.prettierrc.js ./
 
 # lint project
 RUN npm run lint-ci
