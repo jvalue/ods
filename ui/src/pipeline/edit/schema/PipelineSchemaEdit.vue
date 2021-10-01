@@ -23,11 +23,14 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { Emit, PropSync } from 'vue-property-decorator';
-import VueSlider from 'vue-slider-component';
-import 'vue-slider-component/theme/default.css';
+import Vue from 'vue'
+import Component from 'vue-class-component'
+import * as SchemaSuggestionREST from './../../../datasource/schemaSuggestionRest'
+import * as DatasourceRest from './../../../datasource/datasourceRest'
+import { TransformationRest } from './../transformation/transformationRest'
+import { PIPELINE_SERVICE_URL } from './../../../env'
+import VueSlider from 'vue-slider-component'
+import 'vue-slider-component/theme/default.css'
 
 import { requiredRule } from '../../../validators';
 import Pipeline from '../../pipeline';
@@ -73,20 +76,13 @@ export default class PipelineSchemaEdit extends Vue {
     this.emitValid();
   }
 
-  private async onGenerate(): Promise<void> {
-    const data = await DatasourceRest.getDatasourceData(
-      this.pipeline.datasourceId,
-    );
-    const request: TransformationRequest = {
-      data: data,
-      func: this.pipeline.transformation.func,
-    };
-    const result: JobResult = await TransformationRest.transformData(request);
-    this.pipeline.schema = await SchemaSuggestionREST.getSchema(
-      JSON.stringify(result.data),
-      this.currentSliderValue,
-    );
-    this.schemaAsText = JSON.stringify(this.pipeline.schema);
+  private async onGenerate (): Promise<void> {
+    const data = await DatasourceRest.getDatasourceData(this.pipeline.datasourceId)
+    const request: TransformationRequest = { data: data, func: this.pipeline.transformation.func }
+    const result: JobResult = await new TransformationRest(PIPELINE_SERVICE_URL).transformData(request)
+    this.pipeline.schema =
+      await SchemaSuggestionREST.getSchema(JSON.stringify(result.data), this.currentSliderValue)
+    this.schemaAsText = JSON.stringify(this.pipeline.schema)
   }
 }
 </script>

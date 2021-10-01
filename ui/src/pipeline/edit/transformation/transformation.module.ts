@@ -1,10 +1,11 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 
 import { JobResult, TransformationRequest } from './transformation';
-import * as TransformationRest from './transformationRest';
+import { TransformationRest } from './transformationRest';
 
 import { Data } from '@/datasource/datasource';
 import * as DatasourceRest from '@/datasource/datasourceRest';
+import { PIPELINE_SERVICE_URL } from '@/env';
 
 @Module({ namespaced: true })
 export default class TransformationModule extends VuexModule {
@@ -16,6 +17,10 @@ export default class TransformationModule extends VuexModule {
   private isLoadingData = false;
 
   private timeoutHandle: number | null = null;
+
+  private readonly transformationRest = new TransformationRest(
+    PIPELINE_SERVICE_URL,
+  );
 
   @Mutation setData(value: Data): void {
     this.data = value;
@@ -88,7 +93,7 @@ export default class TransformationModule extends VuexModule {
       data: this.data,
       func: this.function,
     };
-    const result = await TransformationRest.transformData(request);
+    const result = await this.transformationRest.transformData(request);
     // Save the result in the module state
     this.context.commit('setResult', result);
   }

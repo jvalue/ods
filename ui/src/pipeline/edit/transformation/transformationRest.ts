@@ -1,22 +1,24 @@
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 
 import { JobResult, TransformationRequest } from './transformation';
 
-import { PIPELINE_SERVICE_URL } from '@/env';
+export class TransformationRest {
+  private readonly http: AxiosInstance;
 
-const http = axios.create({
-  baseURL: PIPELINE_SERVICE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+  constructor(pipelineServiceUrl: string) {
+    this.http = axios.create({
+      baseURL: pipelineServiceUrl,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+  }
 
-export async function transformData(
-  request: TransformationRequest,
-): Promise<JobResult> {
-  const response = await http.post('/job', request, {
-    validateStatus: status => status >= 200 && status <= 400,
-  });
+  async transformData(request: TransformationRequest): Promise<JobResult> {
+    const response = await this.http.post('/job', request, {
+      validateStatus: status => status >= 200 && status <= 400,
+    });
 
-  return response.data as JobResult;
+    return response.data;
+  }
 }

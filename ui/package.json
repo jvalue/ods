@@ -6,9 +6,8 @@
     "build": "vue-cli-service build",
     "lint": "eslint src",
     "lint-ci": "eslint src --max-warnings=0",
-    "lint-fix": "eslint src --fix",
-    "test": "jest --colors --verbose --passWithNoTests --testPathIgnorePatterns \".*\\.pact\\.test\\.ts$\"",
-    "test:pact-consumer": "jest --colors --verbose --testTimeout 30000 --testPathPattern \".*\\.consumer\\.pact\\.test\\.ts$\""
+    "test": "jest --colors --verbose --passWithNoTests",
+    "test:pact-consumer": "jest --config ./pact/consumer.jest.config.js --colors --verbose"
   },
   "dependencies": {
     "axios": "^0.21.1",
