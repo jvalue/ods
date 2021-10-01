@@ -21,7 +21,7 @@
     "node-schedule": "^2.0.0"
   },
   "devDependencies": {
-    "@jvalue/eslint-config-jvalue": "^1.0.0",
+    "@jvalue/eslint-config-jvalue": "^1.1.0",
     "@types/deep-equal": "^1.0.1",
     "@types/express": "^4.17.12",
     "@types/jest": "^26.0.23",
