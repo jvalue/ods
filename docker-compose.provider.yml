@@ -1,0 +1,81 @@
+version: "3.7"
+
+services:
+  # ----------------- PIPELINE SERVICE Provider --------------------
+  pipeline-provider:
+    build:
+      context: .
+      dockerfile: ./pipeline/pact/Dockerfile.provider
+    depends_on:
+      - rabbitmq-provider
+      - pipeline-db-provider
+      - pipeline-outboxer-provider
+    environment:
+      CONNECTION_RETRIES: '30'
+      CONNECTION_BACKOFF_IN_MS: '2000'
+
+      POSTGRES_HOST: "pipeline-db-provider"
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: "pipeline-service"
+      POSTGRES_PW: "pw"
+      POSTGRES_DB: "ods-pipelines"
+      POSTGRES_SCHEMA: "public"
+      POSTGRES_SSL: "false"
+
+      AMQP_URL: "amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq-provider:5672"
+
+      AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC: 'pipeline.execution.success'
+      AMQP_PIPELINE_EXECUTION_ERROR_TOPIC: 'pipeline.execution.error'
+      AMQP_PIPELINE_CONFIG_CREATED_TOPIC: 'pipeline.config.created'
+      AMQP_PIPELINE_CONFIG_UPDATED_TOPIC: 'pipeline.config.updated'
+      AMQP_PIPELINE_CONFIG_DELETED_TOPIC: 'pipeline.config.deleted'
+
+      AMQP_DATASOURCE_EXECUTION_EXCHANGE: 'ods_global'
+      AMQP_DATASOURCE_EXECUTION_QUEUE: 'pipeline.datasource-execution'
+      AMQP_DATASOURCE_EXECUTION_QUEUE_TOPIC: 'datasource.execution.success'
+      AMQP_DATASOURCE_EXECUTION_SUCCESS_TOPIC: 'datasource.execution.success'
+
+      AMQP_PIPELINE_EXECUTION_EXCHANGE: 'ods_global'
+      AMQP_PIPELINE_EXECUTION_QUEUE: 'notification.pipeline-execution'
+    volumes:
+      - ./pacts:/app/pacts
+
+  pipeline-db-provider:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_USER: 'pipeline-service'
+      POSTGRES_PASSWORD: 'pw'
+      POSTGRES_DB: 'ods-pipelines'
+    command:
+      # This enables and configures Postgres logical decoding feature that is needed for outboxer/debezium to work
+      - '-cwal_level=logical'
+      - '-cmax_wal_senders=1'
+      - '-cmax_replication_slots=1'
+
+  pipeline-outboxer-provider:
+    image: ghcr.io/jvalue/outboxer-postgres2rabbitmq
+    environment:
+      - OUTBOXER_DATABASE_HOSTNAME=pipeline-db-provider
+      - OUTBOXER_DATABASE_PORT=5432
+      - OUTBOXER_DATABASE_USER=pipeline-service
+      - OUTBOXER_DATABASE_PASSWORD=pw
+      - OUTBOXER_DATABASE_DBNAME=ods-pipelines
+      - OUTBOXER_DATABASE_SERVER_NAME=pipeline-outboxer
+      - OUTBOXER_PUBLISHER_AMQP_URL=amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq-provider:5672
+      - OUTBOXER_PUBLISHER_AMQP_EXCHANGE=ods_global
+      - OUTBOXER_PUBLISHER_AMQP_RETRIES=30
+      - OUTBOXER_PUBLISHER_AMQP_RETRY_DELAY_MS=2000
+    depends_on:
+      - pipeline-db-provider
+      - rabbitmq-provider
+
+# -------------------- RABBIT-MQ -------------------------------------------
+  rabbitmq-provider:
+    image:  rabbitmq:3.8-management-alpine
+    environment:
+      RABBITMQ_ERLANG_COOKIE: 'S0m3_R4bBi7_C0ok13'
+      RABBITMQ_DEFAULT_USER: 'rabbit_adm'
+      RABBITMQ_DEFAULT_PASS: 'R4bb!7_4DM_p4SS'
+    ports:
+      - "15672:15672"
+      - "5672:5672"

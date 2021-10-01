@@ -10,8 +10,8 @@
     "lint": "eslint src",
     "lint-ci": "eslint src --max-warnings=0",
     "lint-fix": "eslint src --fix",
-    "test": "jest --colors --verbose --testPathIgnorePatterns \".*\\.pact\\.test\\.ts$\"",
-    "test:pact-provider": "jest --colors --verbose --testTimeout 30000 --testPathPattern \".*\\.provider\\.pact\\.test\\.ts$\""
+    "test": "jest --colors --verbose",
+    "test:pact-provider": "jest --config ./pact/provider.jest.config.js --colors --verbose"
   },
   "dependencies": {
     "@jvalue/node-dry-amqp": "0.1.2",

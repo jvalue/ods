@@ -7,18 +7,19 @@ RUN apk --no-cache add ca-certificates wget bash \
   && wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.29-r0/glibc-2.29-r0.apk \
   && apk add glibc-2.29-r0.apk
 
-WORKDIR /app/pipeline
+WORKDIR /app/ui
 
 # Copy package*.json files first in order to make best use of docker layer caching
-COPY ./pipeline/package*.json ./
+COPY package*.json ./
 
 # npm clean slate install to get reproducible builds and quicker installs
 RUN npm ci
 
 # copy rest of the files
-COPY ./pipeline/src ./src
-COPY ./pipeline/*.js ./
-COPY ./pipeline/*.json ./
+COPY ./src ./src
+COPY ./*.js ./
+COPY ./*.json ./
+COPY ./pact ./pact
 
-# run provider tests
-CMD ["npm", "run", "test:pact-provider"]
+# run consumer tests
+CMD ["npm", "run", "test:pact-consumer"]
