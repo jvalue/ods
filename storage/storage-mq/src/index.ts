@@ -19,6 +19,7 @@ import {
   POSTGRES_DB,
   POSTGRES_HOST,
   POSTGRES_PORT,
+  POSTGRES_PW,
   POSTGRES_SSL,
   POSTGRES_USER,
 } from './env';
