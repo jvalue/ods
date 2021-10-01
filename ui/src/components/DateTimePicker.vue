@@ -13,45 +13,28 @@
         v-on="on"
       />
     </template>
-    <v-date-picker
-      v-if="pickDateModal"
-      v-model="date"
-      full-width
-    >
+    <v-date-picker v-if="pickDateModal" v-model="date" full-width>
       <v-spacer />
-      <v-btn
-        text
-        color="primary"
-        @click="reset()"
-      >
+      <v-btn text color="primary" @click="reset()">
         Cancel
       </v-btn>
       <v-btn
         text
         color="primary"
-        @click="pickDateModal = false; pickTimeModal = true;"
+        @click="
+          pickDateModal = false;
+          pickTimeModal = true;
+        "
       >
         Next
       </v-btn>
     </v-date-picker>
-    <v-time-picker
-      v-if="pickTimeModal"
-      v-model="time"
-      full-width
-    >
+    <v-time-picker v-if="pickTimeModal" v-model="time" full-width>
       <v-spacer />
-      <v-btn
-        text
-        color="primary"
-        @click="reset()"
-      >
+      <v-btn text color="primary" @click="reset()">
         Cancel
       </v-btn>
-      <v-btn
-        text
-        color="primary"
-        @click="onSave()"
-      >
+      <v-btn text color="primary" @click="onSave()">
         OK
       </v-btn>
     </v-time-picker>
@@ -59,10 +42,11 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import Component from 'vue-class-component'
-import { Prop, Watch } from 'vue-property-decorator'
-import { getISODateString, getISOTimeString } from '../helpers/date-helpers'
+import Vue from 'vue';
+import Component from 'vue-class-component';
+import { Prop, Watch } from 'vue-property-decorator';
+
+import { getISODateString, getISOTimeString } from '../helpers/date-helpers';
 
 /**
  * DateTimePicker takes a Date via v-model as input and lets the user select it.
@@ -72,55 +56,58 @@ import { getISODateString, getISOTimeString } from '../helpers/date-helpers'
 @Component
 export default class DateTimePicker extends Vue {
   @Prop({ default: new Date() })
-  private value!: Date
+  private value!: Date;
 
-  private dateTimeString = ''
+  private dateTimeString = '';
 
-  private date = ''
-  private time = ''
+  private date = '';
+  private time = '';
 
-  private pickDateTimeModal = false
-  private pickDateModal = true
-  private pickTimeModal = false
+  private pickDateTimeModal = false;
+  private pickDateModal = true;
+  private pickTimeModal = false;
 
-  created (): void {
-    this.reset()
+  created(): void {
+    this.reset();
   }
 
   @Watch('value')
-  onPropertyChanged (value: Date): void {
-    if (value === null) {
-      return
+  onPropertyChanged(value: Date): void {
+    if (value == null) {
+      return;
     }
 
     if (!(value instanceof Date)) {
-      console.error('[DateTimePicker] Expected type of argument "value" to be Date, but got: ', value)
+      console.error(
+        '[DateTimePicker] Expected type of argument "value" to be Date, but got: ',
+        value,
+      );
     } else {
-      this.reset()
+      this.reset();
     }
   }
 
-  private reset (): void {
-    this.resetValues()
-    this.resetDialogs()
+  private reset(): void {
+    this.resetValues();
+    this.resetDialogs();
   }
 
-  private resetValues (): void {
-    this.date = getISODateString(this.value)
-    this.time = getISOTimeString(this.value)
-    this.dateTimeString = `${this.date} ${this.time}`
+  private resetValues(): void {
+    this.date = getISODateString(this.value);
+    this.time = getISOTimeString(this.value);
+    this.dateTimeString = `${this.date} ${this.time}`;
   }
 
-  private resetDialogs (): void {
-    this.pickDateTimeModal = false
-    this.pickDateModal = true
-    this.pickTimeModal = false
+  private resetDialogs(): void {
+    this.pickDateTimeModal = false;
+    this.pickDateModal = true;
+    this.pickTimeModal = false;
   }
 
-  private onSave (): void {
-    const selectedDate = new Date(`${this.date} ${this.time}`)
-    
-    this.$emit('input', selectedDate)
+  private onSave(): void {
+    const selectedDate = new Date(`${this.date} ${this.time}`);
+
+    this.$emit('input', selectedDate);
   }
 }
 </script>

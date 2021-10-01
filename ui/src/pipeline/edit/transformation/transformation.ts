@@ -1,24 +1,24 @@
 export interface TransformationRequest {
-  func: string
-  data: object
+  func: string;
+  data: Record<string, unknown>;
 }
 
 export interface JobResult {
-  data?: object
-  error?: JobError
-  stats: Stats
+  data?: Record<string, unknown>;
+  error?: JobError;
+  stats: Stats;
 }
 
 export interface JobError {
-  name: string
-  message: string
-  lineNumber: number
-  position: number
-  stacktrace: string[]
+  name: string;
+  message: string;
+  lineNumber: number;
+  position: number;
+  stacktrace: string[];
 }
 
 interface Stats {
-  durationInMilliSeconds: number
-  startTimestamp: number
-  endTimestamp: number
+  durationInMilliSeconds: number;
+  startTimestamp: number;
+  endTimestamp: number;
 }

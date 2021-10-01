@@ -2,34 +2,18 @@
   <div class="notification">
     <v-card>
       <v-card-title>
-        <v-btn
-          class="ma-2"
-          @click="onNavigateBack()"
-        >
-          <v-icon
-            dark
-            right
-          >
+        <v-btn class="ma-2" @click="onNavigateBack()">
+          <v-icon dark right>
             mdi mdi-arrow-left
           </v-icon>
         </v-btn>
-        <v-btn
-          class="ma-2"
-          color="success"
-          @click="onCreateNotification()"
-        >
+        <v-btn class="ma-2" color="success" @click="onCreateNotification()">
           Add notification
-          <v-icon
-            dark
-            right
-          >
+          <v-icon dark right>
             mdi mdi-alarm
           </v-icon>
         </v-btn>
-        <v-btn
-          class="ma-2"
-          @click="loadNotifications()"
-        >
+        <v-btn class="ma-2" @click="loadNotifications()">
           <v-icon dark>
             mdi mdi-sync
           </v-icon>
@@ -42,10 +26,9 @@
         :loading="isLoading"
         class="elevation-1"
       >
-        <v-progress-linear
-          slot="progress"
-          indeterminate
-        />
+        <template v-slot:progress>
+          <v-progress-linear indeterminate />
+        </template>
         <template #[`item.id`]="{ item }">
           {{ item.id }}
         </template>
@@ -63,10 +46,7 @@
             @click="onEditNotification(item.id)"
           >
             Edit
-            <v-icon
-              dark
-              right
-            >
+            <v-icon dark right>
               mdi-pencil
             </v-icon>
           </v-btn>
@@ -77,10 +57,7 @@
             @click="onDeleteNotification(item)"
           >
             Delete
-            <v-icon
-              dark
-              right
-            >
+            <v-icon dark right>
               mdi-delete
             </v-icon>
           </v-btn>
@@ -91,11 +68,12 @@
 </template>
 
 <script lang="ts">
-import Component from 'vue-class-component'
-import Vue from 'vue'
+import Vue from 'vue';
+import Component from 'vue-class-component';
 
-import NotificationConfig from '@/notification/notificationConfig'
-import * as NotificaitonREST from './notificationRest'
+import * as NotificaitonREST from './notificationRest';
+
+import NotificationConfig from '@/notification/notificationConfig';
 
 @Component({})
 export default class PipelineNotifications extends Vue {
@@ -103,46 +81,66 @@ export default class PipelineNotifications extends Vue {
     { text: 'Id', value: 'id' },
     { text: 'Type', value: 'type' },
     { text: 'Condition', value: 'condition' },
-    { text: 'Actions', value: 'action' }
-  ]
+    { text: 'Actions', value: 'action' },
+  ];
 
-  private pipelineId = -1
-  private notifications: NotificationConfig[] = []
-  private isLoading = false
+  private pipelineId = -1;
+  private notifications: NotificationConfig[] = [];
+  private isLoading = false;
 
-  mounted (): void {
-    this.pipelineId = parseInt(this.$route.params.pipelineId)
-    this.loadNotifications()
-      .catch(error => console.error('Failed to load notification', error))
+  mounted(): void {
+    this.pipelineId = Number.parseInt(this.$route.params.pipelineId, 10);
+    this.loadNotifications().catch(error =>
+      console.error('Failed to load notification', error),
+    );
   }
 
-  private onCreateNotification (): void {
-    this.$router.push({ name: 'notification-create', params: { pipelineId: `${this.pipelineId}` } })
-      .catch(error => console.log('Failed to route to notification-create', error))
+  private onCreateNotification(): void {
+    this.$router
+      .push({
+        name: 'notification-create',
+        params: { pipelineId: `${this.pipelineId}` },
+      })
+      .catch(error =>
+        console.log('Failed to route to notification-create', error),
+      );
   }
 
-  private onEditNotification (notificationId: string): void {
-    this.$router.push({
-      name: 'notification-edit',
-      params: { pipelineId: `${this.pipelineId}`, notificationId: `${notificationId}` }
-    })
-      .catch(error => console.log('Failed to route to notification-edit', error))
+  private onEditNotification(notificationId: string): void {
+    this.$router
+      .push({
+        name: 'notification-edit',
+        params: {
+          pipelineId: `${this.pipelineId}`,
+          notificationId: `${notificationId}`,
+        },
+      })
+      .catch(error =>
+        console.log('Failed to route to notification-edit', error),
+      );
   }
 
-  private async onDeleteNotification (notification: NotificationConfig): Promise<void> {
-    await NotificaitonREST.remove(notification)
-    await this.loadNotifications()
+  private async onDeleteNotification(
+    notification: NotificationConfig,
+  ): Promise<void> {
+    await NotificaitonREST.remove(notification);
+    await this.loadNotifications();
   }
 
-  private async loadNotifications (): Promise<void> {
-    this.isLoading = true
-    this.notifications = await NotificaitonREST.getAllByPipelineId(this.pipelineId)
-    this.isLoading = false
+  private async loadNotifications(): Promise<void> {
+    this.isLoading = true;
+    this.notifications = await NotificaitonREST.getAllByPipelineId(
+      this.pipelineId,
+    );
+    this.isLoading = false;
   }
 
-  private onNavigateBack (): void {
-    this.$router.push({ name: 'pipeline-overview' })
-      .catch(error => console.log('Failed to route to notification-overview', error))
+  private onNavigateBack(): void {
+    this.$router
+      .push({ name: 'pipeline-overview' })
+      .catch(error =>
+        console.log('Failed to route to notification-overview', error),
+      );
   }
 }
 </script>

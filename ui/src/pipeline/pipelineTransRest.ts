@@ -1,10 +1,11 @@
-import axios, { AxiosInstance } from 'axios'
-import { TransformedDataMetaData } from './pipeline'
+import axios, { AxiosInstance } from 'axios';
+
+import { TransformedDataMetaData } from './pipeline';
 
 export class PipelineTransRest {
-  private readonly http: AxiosInstance
+  private readonly http: AxiosInstance;
 
-  constructor (pipelineServiceUrl: string) {
+  constructor(pipelineServiceUrl: string) {
     /**
      * Axios instances with default headers and base url.
      * The option transformResponse is set to an empty array
@@ -13,13 +14,17 @@ export class PipelineTransRest {
     this.http = axios.create({
       baseURL: `${pipelineServiceUrl}/transdata`,
       headers: { 'Content-Type': 'application/json' },
-      transformResponse: []
-    })
+      transformResponse: [],
+    });
   }
 
-  async getLatestTransformedData (id: number): Promise<TransformedDataMetaData> {
-    const importResponse = await this.http.get<string>(`/${id}/transforms/latest`)
-    const jsonResponse: TransformedDataMetaData = JSON.parse(importResponse.data)
-    return jsonResponse
+  async getLatestTransformedData(id: number): Promise<TransformedDataMetaData> {
+    const importResponse = await this.http.get<string>(
+      `/${id}/transforms/latest`,
+    );
+    const jsonResponse = JSON.parse(
+      importResponse.data,
+    ) as TransformedDataMetaData;
+    return jsonResponse;
   }
 }

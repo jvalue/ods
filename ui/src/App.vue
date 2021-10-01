@@ -1,16 +1,8 @@
 <template>
   <v-app id="app">
-    <v-navigation-drawer
-      v-model="drawer"
-      clipped
-      app
-    >
+    <v-navigation-drawer v-model="drawer" clipped app>
       <v-list>
-        <v-list-item
-          v-for="item in items"
-          :key="item.title"
-          :to="item.route"
-        >
+        <v-list-item v-for="item in items" :key="item.title" :to="item.route">
           <v-list-item-content>
             <v-list-item-title>{{ item.title }}</v-list-item-title>
           </v-list-item-content>
@@ -18,13 +10,7 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-app-bar
-      app
-      dense
-      dark
-      clipped-left
-      color="primary"
-    >
+    <v-app-bar app dense dark clipped-left color="primary">
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
       <v-toolbar-title>{{ title }}</v-toolbar-title>
       <v-spacer />
@@ -42,36 +28,39 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import Component from 'vue-class-component'
-import Login from '@/components/Login.vue'
-import Router from '@/router'
+import Vue from 'vue';
+import Component from 'vue-class-component';
+
+import RouterMeta from './routerMeta';
+
+import Login from '@/components/Login.vue';
+import Router from '@/router';
 
 @Component({
   components: {
-    login: Login
-  }
+    login: Login,
+  },
 })
 export default class App extends Vue {
-  private title = 'Open-Data-Service'
+  private title = 'Open-Data-Service';
 
-  private routerTitle = ''
+  private routerTitle = '';
 
-  private drawer = null
+  private drawer = null;
 
   private items = [
     { title: 'Dashboard', route: '/' },
     { title: 'Datasources', route: '/datasources' },
     { title: 'Pipelines', route: '/pipelines' },
-    { title: 'About', route: '/about' }
-  ]
+    { title: 'About', route: '/about' },
+  ];
 
-  private created (): void {
-    this.routerTitle = Router.currentRoute.meta.title ?? ''
+  private created(): void {
+    this.routerTitle = (Router.currentRoute.meta as RouterMeta).title ?? '';
 
-    Router.afterEach((to) => {
-      this.routerTitle = to.meta.title ?? ''
-    })
+    Router.afterEach(to => {
+      this.routerTitle = (to.meta as RouterMeta).title ?? '';
+    });
   }
 }
 </script>
