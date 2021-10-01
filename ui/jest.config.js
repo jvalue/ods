@@ -1,3 +1,5 @@
+const {defaults} = require('jest-config')
+
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
@@ -31,6 +33,11 @@ module.exports = {
 
   testMatch: [
     '**/*.test.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)'
+  ],
+
+  testPathIgnorePatterns: [
+    ...defaults.testPathIgnorePatterns,
+    '.*\\.pact\\.test\\.ts$'
   ],
 
   testURL: 'http://localhost/',

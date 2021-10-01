@@ -19,6 +19,7 @@ RUN npm ci
 COPY ./src ./src
 COPY ./*.js ./
 COPY ./*.json ./
+COPY ./pact ./pact
 
 # run consumer tests
 CMD ["npm", "run", "test:pact-consumer"]
