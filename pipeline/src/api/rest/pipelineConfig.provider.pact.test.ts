@@ -1,7 +1,6 @@
 import path from 'path';
 
 import { Verifier } from '@pact-foundation/pact';
-import { PipelineTransformedData } from 'src/pipeline-config/model/pipelineTransformedData';
 
 import { port, server } from '../../index'; // The main method is automatically called due to this import
 import {
@@ -9,6 +8,7 @@ import {
   PipelineConfig,
   PipelineConfigDTO,
 } from '../../pipeline-config/model/pipelineConfig';
+import { PipelineTransformedData } from '../../pipeline-config/model/pipelineTransformedData';
 
 const pipelineConfigs: PipelineConfig[] = [];
 let nextPipelineConfigId: number;
@@ -48,14 +48,14 @@ jest.mock('../../pipeline-config/pipelineConfigManager', () => {
             return await Promise.resolve(result);
           }),
 
-        update: jest.fn(async (id: number, config: PipelineConfigDTO) => {
+        update: jest.fn((id: number, config: PipelineConfigDTO) => {
           const configToUpdate = pipelineConfigs.find(
             (config) => config.id === id,
           );
           Object.assign(configToUpdate, config);
         }),
 
-        delete: jest.fn(async (id: number) => {
+        delete: jest.fn((id: number) => {
           const indexOfConfigToDelete = pipelineConfigs.findIndex(
             (config) => config.id === id,
           );
@@ -127,10 +127,12 @@ describe('Pact Provider Verification', () => {
   });
 });
 
+// eslint-disable-next-line @typescript-eslint/require-await
 async function setupEmptyState(): Promise<void> {
   clearState();
 }
 
+// eslint-disable-next-line @typescript-eslint/require-await
 async function setupSomePipelineConfigs(): Promise<void> {
   clearState();
   addSamplePipelineConfig(++nextPipelineConfigId, 2, true);
@@ -138,6 +140,7 @@ async function setupSomePipelineConfigs(): Promise<void> {
   addSamplePipelineConfig(++nextPipelineConfigId, 2, false);
 }
 
+// eslint-disable-next-line @typescript-eslint/require-await
 async function setupSomePipelineTransformedData(): Promise<void> {
   clearState();
   addSamplePipelineTransformedData(1);
