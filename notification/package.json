@@ -11,7 +11,7 @@
     "lint-ci": "eslint src --max-warnings=0",
     "lint-fix": "eslint src --fix",
     "test": "jest --colors --verbose",
-    "test:pact-consumer": "jest --config ./pact/consumer.jest.config.js --colors --verbose"
+    "test:consumer": "jest --config consumer.jest.config.js --colors --verbose"
   },
   "dependencies": {
     "@jvalue/node-dry-amqp": "0.1.2",

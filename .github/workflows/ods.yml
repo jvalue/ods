@@ -176,7 +176,8 @@ jobs:
           name: pipeline-artifact
           path: pipeline.tar
 
-    # ----------------- NOTIFICATION SERVICE --------------------
+
+  # ----------------- NOTIFICATION SERVICE --------------------
 
   notification-build:
     name: Notification Build & Test
@@ -185,13 +186,30 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build and Test
+      - name: Build
         run: |
           docker-compose -f docker-compose.yml build notification
 
+      - name: Regular Test
+        run: |
+          docker-compose -f docker-compose.yml -f docker-compose.test.yml build notification
+          docker-compose -f docker-compose.yml -f docker-compose.test.yml up notification
+
+      - name: Consumer-side CDC-Test
+        run: |
+          docker-compose -f docker-compose.yml -f docker-compose.consumer.yml build notification
+          docker-compose -f docker-compose.yml -f docker-compose.consumer.yml up notification
+
+      - name: Upload contract files as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: contracts
+          path: ./pacts/*.json
+          if-no-files-found: error
+
       - name: Build Integration-test
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml build notification-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml build notification notification-it
 
       - name: Run Integration-test
         # Only the logs from the services listed in the `docker-compose up` command are going to be printed to stdout
@@ -221,9 +239,26 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build and Test
+      - name: Build
         run: |
           docker-compose -f docker-compose.yml build ui
+
+      - name: Regular Test
+        run: |
+          docker-compose -f docker-compose.yml -f docker-compose.test.yml build ui
+          docker-compose -f docker-compose.yml -f docker-compose.test.yml up ui
+
+      - name: Consumer-side CDC-Test
+        run: |
+          docker-compose -f docker-compose.yml -f docker-compose.consumer.yml build ui
+          docker-compose -f docker-compose.yml -f docker-compose.consumer.yml up ui
+
+      - name: Upload Contract files as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: contracts
+          path: ./pacts/*.json
+          if-no-files-found: error
 
       - name: Save Docker image as artifact
         run: |
@@ -235,6 +270,28 @@ jobs:
         with:
           name: ui-artifact
           path: ui.tar
+
+  # ----------------- Pipeline Provider-side CDC-Test -----------------
+  pipeline-provider:
+    name: Pipeline Provider-side CDC-Test
+    runs-on: ubuntu-18.04
+    needs: [notification-build, pipeline-build, ui-build]
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download contract files from artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: contracts
+          path: ./pacts
+
+      - name: Build
+        run: |
+          docker-compose -f docker-compose.yml -f docker-compose.provider.yml build pipeline pipeline-db pipeline-outboxer rabbitmq
+        
+      - name: Run
+        run: |
+          docker-compose -f docker-compose.yml -f docker-compose.provider.yml up --exit-code-from pipeline pipeline pipeline-db pipeline-outboxer rabbitmq
 
   # ----------------- SYSTEMTEST --------------------
   systemtest:
