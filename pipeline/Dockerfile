@@ -21,12 +21,7 @@ RUN npm ci
 # copy rest of the files
 COPY ./src ./src
 COPY ./tsconfig.json ./
-<<<<<<< HEAD
 COPY ./*.js ./
-=======
-COPY ./.eslintrc.js ./
-COPY ./jest.config.js ./
->>>>>>> 8fdc1c1034ba7493b5f5fca2d4b5e374667bd433
 
 # lint project
 RUN npm run lint-ci
