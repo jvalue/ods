@@ -24,7 +24,6 @@ COPY ./src ./src
 COPY ./public ./public
 COPY ./*.js ./
 COPY ./*.json ./
-COPY ./.prettierrc.js ./
 
 RUN echo "VUE_APP_BASE_URL=$UI_BASE_URL" > .env \
     && echo "VUE_APP_ADAPTER_SERVICE_URL=$ADAPTER_SERVICE_URL" >> .env \
