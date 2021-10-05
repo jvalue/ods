@@ -44,7 +44,9 @@ export async function getDatasourceById(id: number): Promise<Datasource> {
 export async function createDatasource(
   datasource: Datasource,
 ): Promise<Datasource> {
-  const { ...creationDTO } = datasource;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { id, ...creationDTO } = datasource;
+
   const response = await http.post('/datasources', JSON.stringify(creationDTO));
   return JSON.parse(response.data, reviver) as Datasource;
 }
