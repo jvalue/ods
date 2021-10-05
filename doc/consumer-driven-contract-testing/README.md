@@ -14,9 +14,17 @@ In the ODS project, the open source tool **Pact** is used for implementing the C
 
 If you have never worked with Pact before, please read the explanation of how Pact works in the Pact Docs: [How Pact works](https://docs.pact.io/getting_started/how_pact_works)
 
+### Comparison to Integration Testing
+
+In the context of microservices, Integration Testing usually means verifying the collaboration of a microservice with its external dependent systems, like other microservices or database systems. For the execution of such a test, the dependent system(s) needs to be deployed to a test environment. Then the microservice under test has to be invoked in a way, such that it initiates the interaction that should be tested.
+
+Opposed to that, CDCT tests integrations between pairs of consuming and providing services. During test execution, usually just a single service needs to be deployed at a time because Consumer and Provider are tested independent of each other.
+
+Note, that CDCT solely focuses on the communication between services. It ensures that the services are compatible, but it does not focus on testing their functionality. Therefore, Consumer-Driven Contract Tests should always be complemented with functional tests. See [Contract Tests vs Functional Tests](https://docs.pact.io/consumer/contract_tests_not_functional_tests) in the Pact Docs for more information on that topic.
+
 ## Running Consumer-Driven Contract Tests locally
 
-The Consumer-Driven Contract Tests of all services are automatically run in the CI. However, if you want to execute the tests locally, make sure that `docker` and `docker-compose` is installed on your computer. In the `src` directories of those services, that have implemented CDCT, there are bash scripts that can execute those tests. The script files have the following naming convention:
+The Consumer-Driven Contract Tests of all services are automatically run in the CI. However, if you want to execute the tests locally, make sure that `docker` and `docker-compose` is installed on your computer. In the directories of those services, that have implemented CDCT, there are bash scripts that can execute those tests. The script files have the following naming convention:
 
 - `cdct-consumer.sh` for **Consumer testing**
 - `cdct-provider.sh` for **Provider verification**
