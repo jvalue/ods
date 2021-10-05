@@ -37,9 +37,9 @@ import {
   updateRequestTitle,
   updateSuccessResponse
 } from './pipeline.consumer.pact.fixtures'
-import { PipelineRest } from './pipelineRest'
-import { PipelineTransRest } from './pipelineTransRest'
-import { TransformationRest } from './edit/transformation/transformationRest'
+import { PipelineRest } from './pipeline/pipelineRest'
+import { PipelineTransRest } from './pipeline/pipelineTransRest'
+import { TransformationRest } from './pipeline/edit/transformation/transformationRest'
 import path from 'path'
 
 const options: JestPactOptions = {

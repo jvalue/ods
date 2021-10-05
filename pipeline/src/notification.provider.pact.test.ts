@@ -1,10 +1,10 @@
 import * as AMQP from 'amqplib'
 import path from 'path'
-import * as EventPublisher from '../../pipeline-config/outboxEventPublisher'
+import * as EventPublisher from './pipeline-config/outboxEventPublisher'
 import { MessageProviderPact } from '@pact-foundation/pact'
-import { init } from '../../pipeline-config/pipelineDatabase'
+import { init } from './pipeline-config/pipelineDatabase'
 import { AmqpConnection } from '@jvalue/node-dry-amqp'
-import { AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC, AMQP_URL, CONNECTION_BACKOFF, CONNECTION_RETRIES } from '../../env'
+import { AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC, AMQP_URL, CONNECTION_BACKOFF, CONNECTION_RETRIES } from './env'
 import { readEnvOrDie } from '@jvalue/node-dry-basics'
 import { PostgresClient } from '@jvalue/node-dry-pg'
 

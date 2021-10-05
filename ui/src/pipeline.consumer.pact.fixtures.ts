@@ -1,8 +1,8 @@
 import { RequestOptions, ResponseOptions } from '@pact-foundation/pact'
 import { eachLike, like } from '@pact-foundation/pact/src/dsl/matchers'
-import Pipeline, { HealthStatus, TransformedDataMetaData } from './pipeline'
+import Pipeline, { HealthStatus, TransformedDataMetaData } from './pipeline/pipeline'
 
-import { JobResult, TransformationRequest } from './edit/transformation/transformation'
+import { JobResult, TransformationRequest } from './pipeline/edit/transformation/transformation'
 
 export const examplePipeline: Pipeline = {
   id: 1,

@@ -1,10 +1,10 @@
 import { asynchronousBodyHandler, Matchers } from '@pact-foundation/pact'
 import { JestMessageConsumerOptions, messagePactWith } from 'jest-pact'
 import path from 'path'
-import { PostgresNotificationRepository } from '../notification-config/postgresNotificationRepository'
-import NotificationExecutor from '../notification-execution/notificationExecutor'
-import { PipelineSuccessEvent } from './pipelineEvent'
-import { TriggerEventHandler } from './triggerEventHandler'
+import { PostgresNotificationRepository } from './notification-config/postgresNotificationRepository'
+import NotificationExecutor from './notification-execution/notificationExecutor'
+import { PipelineSuccessEvent } from './api/pipelineEvent'
+import { TriggerEventHandler } from './api/triggerEventHandler'
 import * as fs from 'fs'
 
 const pactsDir = path.resolve(process.cwd(), '..', 'pacts')
@@ -28,9 +28,9 @@ const examplePipelineSuccessEvent: PipelineSuccessEvent = {
   data: {}
 }
 
-jest.mock('../env', () => ({ }))
+jest.mock('./env', () => ({ }))
 
-jest.mock('../notification-config/postgresNotificationRepository', () => {
+jest.mock('./notification-config/postgresNotificationRepository', () => {
   return {
     PostgresNotificationRepository: jest.fn().mockImplementation(() => {
       return {
@@ -41,7 +41,7 @@ jest.mock('../notification-config/postgresNotificationRepository', () => {
 })
 const mockPostgresNotificationRepository = PostgresNotificationRepository as jest.Mock<PostgresNotificationRepository>
 
-jest.mock('../notification-execution/notificationExecutor')
+jest.mock('./notification-execution/notificationExecutor')
 const mockNotificationExecutor = NotificationExecutor as jest.Mock<NotificationExecutor>
 
 messagePactWith(options, (messagePact) => {

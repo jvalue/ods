@@ -1,15 +1,15 @@
 import { Verifier } from '@pact-foundation/pact'
 import path from 'path'
-import { HealthStatus, PipelineConfig, PipelineConfigDTO } from '../../pipeline-config/model/pipelineConfig'
-import { port, server } from '../../index' // the main method is automatically called due to this import
+import { HealthStatus, PipelineConfig, PipelineConfigDTO } from './pipeline-config/model/pipelineConfig'
+import { port, server } from './index' // the main method is automatically called due to this import
 import { PipelineTransformedData } from 'src/pipeline-config/model/pipelineTransformedData'
 
-jest.mock('../../env', () => ({ }))
+jest.mock('./env', () => ({ }))
 
 const pipelineConfigs: PipelineConfig[] = []
 let nextPipelineConfigId: number
 
-jest.mock('../../pipeline-config/pipelineConfigManager', () => {
+jest.mock('./pipeline-config/pipelineConfigManager', () => {
   return {
     PipelineConfigManager: jest.fn().mockImplementation(() => {
       return {
@@ -56,7 +56,7 @@ jest.mock('../../pipeline-config/pipelineConfigManager', () => {
 
 const pipelineTransformedData: PipelineTransformedData[] = []
 
-jest.mock('../../pipeline-config/pipelineTransformedDataManager', () => {
+jest.mock('./pipeline-config/pipelineTransformedDataManager', () => {
   return {
     PipelineTransformedDataManager: jest.fn().mockImplementation(() => {
       return {
@@ -70,7 +70,7 @@ jest.mock('../../pipeline-config/pipelineTransformedDataManager', () => {
 })
 
 // the following mocks are needed for propper execution of the main function
-jest.mock('../../pipeline-config/pipelineDatabase', () => {
+jest.mock('./pipeline-config/pipelineDatabase', () => {
   return {
     init: jest.fn()
   }
@@ -80,7 +80,7 @@ jest.mock('@jvalue/node-dry-amqp', () => {
     AmqpConnection: jest.fn()
   }
 })
-jest.mock('../amqp/datasourceExecutionConsumer', () => {
+jest.mock('./api/amqp/datasourceExecutionConsumer', () => {
   return {
     createDatasourceExecutionConsumer: jest.fn()
   }
