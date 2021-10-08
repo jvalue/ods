@@ -20,6 +20,19 @@ export const examplePipeline: Pipeline = {
     func: 'some function',
   },
 };
+export const examplePipeline2: Pipeline = {
+  id: 2,
+  datasourceId: 3,
+  metadata: {
+    author: 'some other author',
+    description: 'some other description',
+    displayName: 'some other display name',
+    license: 'some other license',
+  },
+  transformation: {
+    func: 'some other function',
+  },
+};
 
 export const getAllRequestTitle = 'a request for getting all pipelines';
 export const getAllRequest: RequestOptions = {
@@ -76,6 +89,28 @@ export function getByDatasourceIdRequest(datasourceId: number): RequestOptions {
     query: `datasourceId=${datasourceId}`,
   };
 }
+
+export const getByDatasourceIdEmptyResponse: ResponseOptions = {
+  // TODO any success status code is actually acceptable (i.e. 2xx)
+  status: 200,
+  headers: {
+    'Content-Type': 'application/json; charset=utf-8',
+  },
+  body: [],
+};
+
+export const getByDatasourceIdGetAllResponse: ResponseOptions = {
+  // TODO any success status code is actually acceptable (i.e. 2xx)
+  status: 200,
+  headers: {
+    'Content-Type': 'application/json; charset=utf-8',
+  },
+  body: [
+    like(examplePipeline),
+    like(examplePipeline2),
+    like(Object.assign({}, examplePipeline, { id: 3 })),
+  ],
+};
 
 export const getByDatasourceIdSuccessResponse: ResponseOptions = {
   // TODO any success status code is actually acceptable (i.e. 2xx)

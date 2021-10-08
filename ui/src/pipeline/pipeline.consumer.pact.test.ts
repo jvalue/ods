@@ -14,6 +14,7 @@ import {
   exampleErrorThrownJobResult,
   exampleInvalidSyntaxJobResult,
   examplePipeline,
+  examplePipeline2,
   exampleSuccessJobResult,
   exampleTransformationRequestWithErrorThrowingFunction,
   exampleTransformationRequestWithInvalidSyntax,
@@ -23,6 +24,8 @@ import {
   getAllRequest,
   getAllRequestTitle,
   getAllSuccessResponse,
+  getByDatasourceIdEmptyResponse,
+  getByDatasourceIdGetAllResponse,
   getByDatasourceIdRequest,
   getByDatasourceIdRequestTitle,
   getByDatasourceIdSuccessResponse,
@@ -179,31 +182,36 @@ pactWith(options, provider => {
             state: `pipelines with datasource id ${id} do not exist`,
             uponReceiving: getByDatasourceIdRequestTitle(id),
             withRequest: getByDatasourceIdRequest(id),
-            willRespondWith: notFoundResponse,
+            willRespondWith: getByDatasourceIdEmptyResponse,
           });
         });
 
-        it('throws an error', async () => {
-          await expect(
-            restService.getPipelineByDatasourceId(id),
-          ).rejects.toThrow(Error);
+        it('returns an empty pipeline array', async () => {
+          const pipelines = await restService.getPipelineByDatasourceId(id);
+
+          expect(pipelines).toStrictEqual([]);
         });
       });
 
       describe('with NaN as requested datasource id', () => {
         beforeEach(async () => {
           await provider.addInteraction({
-            state: 'any state',
+            state: 'pipelines with datasource id NaN return all pipelines',
             uponReceiving: getByDatasourceIdRequestTitle(NaN),
             withRequest: getByDatasourceIdRequest(NaN),
-            willRespondWith: badRequestResponse,
+            willRespondWith: getByDatasourceIdGetAllResponse,
           });
         });
 
-        it('throws an error', async () => {
-          await expect(
-            restService.getPipelineByDatasourceId(NaN),
-          ).rejects.toThrow(Error);
+        it('returns pipeline array containing all pipelines', async () => {
+          const pipelines = await restService.getPipelineByDatasourceId(NaN);
+
+          expect(pipelines).toHaveLength(3);
+          expect(pipelines[0]).toStrictEqual(examplePipeline);
+          expect(pipelines[1]).toStrictEqual(examplePipeline2);
+          expect(pipelines[2]).toStrictEqual(
+            Object.assign({}, examplePipeline, { id: 3 }),
+          );
         });
       });
     });
