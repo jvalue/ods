@@ -23,7 +23,7 @@ export default class PipelineModule extends VuexModule {
     PIPELINE_SERVICE_URL,
   );
 
-  get getPipelinesByDatasourceId(): (datasourceId: number) => Pipeline[] {
+  get pipelinesByDatasourceId(): (datasourceId: number) => Pipeline[] {
     return (datasourceId: number): Pipeline[] => {
       return this.pipelines.filter(el => el.datasourceId === datasourceId);
     };
