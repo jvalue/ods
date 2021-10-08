@@ -119,6 +119,72 @@
       }
     },
     {
+      "description": "a request for getting pipelines with datasource id 2",
+      "providerState": "pipelines with datasource id 2 exist",
+      "request": {
+        "method": "GET",
+        "path": "/configs/",
+        "query": "datasourceId=2"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "body": [
+          {
+            "id": 1,
+            "datasourceId": 2,
+            "metadata": {
+              "author": "some author",
+              "description": "some description",
+              "displayName": "some display name",
+              "license": "some license"
+            },
+            "transformation": {
+              "func": "some function"
+            }
+          }
+        ],
+        "matchingRules": {
+          "$.body": {
+            "min": 1
+          },
+          "$.body[*].*": {
+            "match": "type"
+          }
+        }
+      }
+    },
+    {
+      "description": "a request for getting pipelines with datasource id 2",
+      "providerState": "pipelines with datasource id 2 do not exist",
+      "request": {
+        "method": "GET",
+        "path": "/configs/",
+        "query": "datasourceId=2"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+        }
+      }
+    },
+    {
+      "description": "a request for getting pipelines with datasource id NaN",
+      "providerState": "any state",
+      "request": {
+        "method": "GET",
+        "path": "/configs/",
+        "query": "datasourceId=NaN"
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+        }
+      }
+    },
+    {
       "description": "a request for creating a pipeline",
       "providerState": "any state",
       "request": {

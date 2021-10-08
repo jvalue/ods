@@ -150,8 +150,7 @@ pactWith(options, provider => {
       });
     });
 
-    // TODO do not skip these tests anymore as soon as issue #353 is solved
-    describe.skip('getting a pipeline by datasource id', () => {
+    describe('getting pipelines by datasource id', () => {
       describe('when a pipeline with the requested datasource id exist', () => {
         const id = examplePipeline.datasourceId;
 
@@ -164,10 +163,11 @@ pactWith(options, provider => {
           });
         });
 
-        it('returns the requested pipeline', async () => {
-          const pipeline = await restService.getPipelineByDatasourceId(id);
+        it('returns the requested pipelines', async () => {
+          const pipelines = await restService.getPipelineByDatasourceId(id);
 
-          expect(pipeline).toStrictEqual(examplePipeline);
+          expect(pipelines).toHaveLength(1);
+          expect(pipelines[0]).toStrictEqual(examplePipeline);
         });
       });
 

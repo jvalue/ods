@@ -83,7 +83,7 @@ export const getByDatasourceIdSuccessResponse: ResponseOptions = {
   headers: {
     'Content-Type': 'application/json; charset=utf-8',
   },
-  body: like(examplePipeline),
+  body: eachLike(examplePipeline),
 };
 
 export const createRequestTitle = 'a request for creating a pipeline';
