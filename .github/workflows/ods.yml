@@ -192,8 +192,7 @@ jobs:
 
       - name: Consumer-side CDC-Test
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.consumer.yml build notification
-          docker-compose -f docker-compose.yml -f docker-compose.consumer.yml up notification
+          bash ./notification/cdct-consumer.sh
 
       - name: Upload contract files as artifact
         uses: actions/upload-artifact@v2
@@ -240,8 +239,7 @@ jobs:
 
       - name: Consumer-side CDC-Test
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.consumer.yml build ui
-          docker-compose -f docker-compose.yml -f docker-compose.consumer.yml up ui
+          bash ./ui/cdct-consumer.sh
 
       - name: Upload Contract files as artifact
         uses: actions/upload-artifact@v2
@@ -275,13 +273,9 @@ jobs:
           name: contracts
           path: ./pacts
 
-      - name: Build
+      - name: Build and Run
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.provider.yml build pipeline pipeline-db pipeline-outboxer rabbitmq
-        
-      - name: Run
-        run: |
-          docker-compose -f docker-compose.yml -f docker-compose.provider.yml up --exit-code-from pipeline pipeline pipeline-db pipeline-outboxer rabbitmq
+          bash ./pipeline/cdct-provider.sh
 
   # ----------------- SYSTEMTEST --------------------
   systemtest:
