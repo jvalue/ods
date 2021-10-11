@@ -21,14 +21,17 @@ COPY ./tsconfig.json ./
 COPY ./*.js ./
 COPY ./src ./src
 
+# Second stage: image to build and test node application
+FROM base as build
+
 # lint project
 RUN npm run lint-ci
 
-# Second stage: image to build node application
-FROM base as build
-
 # build
 RUN npm run transpile
+
+# run unit test
+RUN npm run test
 
 # Third stage: image to run node application
 FROM node:16-alpine

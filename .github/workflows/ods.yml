@@ -186,14 +186,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build
+      - name: Build and Test
         run: |
           docker-compose -f docker-compose.yml build notification
-
-      - name: Regular Test
-        run: |
-          docker-compose -f docker-compose.yml -f docker-compose.test.yml build notification
-          docker-compose -f docker-compose.yml -f docker-compose.test.yml up notification
 
       - name: Consumer-side CDC-Test
         run: |
@@ -239,14 +234,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build
+      - name: Build and Test
         run: |
           docker-compose -f docker-compose.yml build ui
-
-      - name: Regular Test
-        run: |
-          docker-compose -f docker-compose.yml -f docker-compose.test.yml build ui
-          docker-compose -f docker-compose.yml -f docker-compose.test.yml up ui
 
       - name: Consumer-side CDC-Test
         run: |

@@ -39,16 +39,19 @@ RUN echo "VUE_APP_BASE_URL=$UI_BASE_URL" > .env \
     && echo "VUE_APP_SCHEMA_SERVICE_URL=$SCHEMA_SERVICE_URL" >> .env \
     && cat .env
 
+#-------------------------------------------------------#
+# Second stage: image to build and test vue application #
+#-------------------------------------------------------#
+FROM base as build
+
 # lint project
 RUN npm run lint-ci
 
-#----------------------------------------------#
-# Second stage: image to build vue application #
-#----------------------------------------------#
-FROM base as build
-
 # build vue.js production bundle to ./dist
 RUN npm run build
+
+# run unit test
+RUN npm run test
 
 #--------------------------------------------------------#
 # Third stage: serve static html and js files with nginx #
