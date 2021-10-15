@@ -8,10 +8,12 @@ const { jsonDateAfter } = require('./testHelper')
 const { createMockAdapter, getTriggeredRequests } = require('./mock.adapter')
 
 const AMQP_EXCHANGE = 'ods_global'
+const AMQP_IT_QUEUE = 'scheduler_it'
 const AMQP_DATASOURCE_CONFIG_TOPIC = 'datasource.config.*'
 const AMQP_DATASOURCE_CONFIG_CREATED_TOPIC = 'datasource.config.created'
 const AMQP_DATASOURCE_CONFIG_UPDATED_TOPIC = 'datasource.config.updated'
 const AMQP_DATASOURCE_CONFIG_DELETED_TOPIC = 'datasource.config.deleted'
+const AMQP_DATASOURCE_IMPORT_TRIGGER_CREATED_TOPIC = 'datasource.import-trigger.created'
 
 let amqpConnection
 let mockAdapterServer
@@ -29,9 +31,9 @@ describe('Scheduler-IT', () => {
   beforeAll(async () => {
     logConfigs()
     try {
-      [amqpConnection, mockAdapterServer] = await Promise.all([
-        AmqpConnector.connect(AMQP_URL, AMQP_CONNECTION_RETRIES, AMQP_CONNECTION_BACKOFF),
-        createMockAdapter(),
+      amqpConnection = await AmqpConnector.connect(AMQP_URL, AMQP_CONNECTION_RETRIES, AMQP_CONNECTION_BACKOFF);
+      [mockAdapterServer] = await Promise.all([
+        createMockAdapter(amqpConnection, AMQP_EXCHANGE, AMQP_IT_QUEUE, AMQP_DATASOURCE_IMPORT_TRIGGER_CREATED_TOPIC),
         waitOn({ resources: [`${SCHEDULER_URL}/`], timeout: 50000, log: false })
       ])
     } catch (err) {
@@ -136,6 +138,7 @@ const logConfigs = () => {
   AMQP_DATASOURCE_CONFIG_CREATED_TOPIC: ${AMQP_DATASOURCE_CONFIG_CREATED_TOPIC}
   AMQP_DATASOURCE_CONFIG_UPDATED_TOPIC: ${AMQP_DATASOURCE_CONFIG_UPDATED_TOPIC}
   AMQP_DATASOURCE_CONFIG_DELETED_TOPIC: ${AMQP_DATASOURCE_CONFIG_DELETED_TOPIC}
+  AMQP_DATASOURCE_IMPORT_TRIGGER_CREATED_TOPIC: ${AMQP_DATASOURCE_IMPORT_TRIGGER_CREATED_TOPIC}
 
   [Environment Variable] SCHEDULER_URL = ${SCHEDULER_URL}
   [Environment Variable] AMQP_URL = ${AMQP_URL}
