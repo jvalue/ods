@@ -1,9 +1,21 @@
 /* eslint-env jest */
+import { PostgresClient } from '@jvalue/node-dry-pg';
 import { mocked } from 'ts-jest/utils';
 
 import { getAllDatasources } from './api/http/adapter-client';
 import { setupInitialStateWithRetry } from './initializer';
 import Scheduler from './scheduling';
+
+jest.mock('@jvalue/node-dry-pg', () => {
+  return {
+    PostgresClient: jest.fn().mockImplementation(() => {
+      return {
+        transaction: async (fn: () => Promise<void>): Promise<void> =>
+          await fn(),
+      };
+    }),
+  };
+});
 
 jest.mock('./api/http/adapter-client');
 const mockedGetAllDatasources = mocked(getAllDatasources);
@@ -13,12 +25,13 @@ jest.mock('./env', () => ({ MAX_TRIGGER_RETRIES: 2 }));
 const CONNECTION_RETRIES = 2;
 const CONNECTION_BACKOFF_IN_MS = 1000;
 const TRIGGER_RETRIES = 3;
+const postgresClient = new PostgresClient();
 
 let scheduler: Scheduler;
 
 describe('Scheduler initializer', () => {
   beforeEach(() => {
-    scheduler = new Scheduler(TRIGGER_RETRIES);
+    scheduler = new Scheduler(postgresClient, TRIGGER_RETRIES);
   });
 
   afterEach(() => {
