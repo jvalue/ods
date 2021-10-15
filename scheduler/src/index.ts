@@ -4,6 +4,7 @@ import { AmqpConnection } from '@jvalue/node-dry-amqp';
 import express from 'express';
 
 import { DatasourceConfigConsumer } from './api/amqp/datasourceConfigConsumer';
+import { init as initDatabase } from './datasource-trigger/outboxDatabase';
 import {
   AMQP_URL,
   CONNECTION_BACKOFF_IN_MS,
@@ -41,7 +42,11 @@ async function main(): Promise<void> {
     CONNECTION_BACKOFF_IN_MS,
     onAmqpConnectionLoss,
   );
-  scheduler = new Scheduler(MAX_TRIGGER_RETRIES);
+  const postgresClient = await initDatabase(
+    CONNECTION_RETRIES,
+    CONNECTION_BACKOFF_IN_MS,
+  );
+  scheduler = new Scheduler(postgresClient, MAX_TRIGGER_RETRIES);
   const datasourceConfigConsumer = new DatasourceConfigConsumer(
     amqpConnection,
     scheduler,

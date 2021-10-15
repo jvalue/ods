@@ -1,3 +1,4 @@
+import { PostgresClient } from '@jvalue/node-dry-pg';
 import deepEqual from 'deep-equal';
 import schedule from 'node-schedule';
 
@@ -7,7 +8,10 @@ import { triggerDatasource } from './trigger-handler';
 export default class Scheduler {
   private readonly allJobs: Map<number, SchedulingJob> = new Map(); // DatasourceId -> job
 
-  constructor(private readonly triggerRetries: number) {}
+  constructor(
+    private readonly pgClient: PostgresClient,
+    private readonly triggerRetries: number,
+  ) {}
 
   getJob(datasourceId: number): SchedulingJob | undefined {
     return this.allJobs.get(datasourceId);
@@ -86,7 +90,7 @@ export default class Scheduler {
 
   private execute(datasourceConfig: DatasourceConfig): void {
     const datasourceId = datasourceConfig.id;
-    triggerDatasource(datasourceId, this.triggerRetries)
+    triggerDatasource(this.pgClient, datasourceId, this.triggerRetries)
       .catch((error) => console.log('Failed to execute job:', error))
       .finally(() => this.reschedule(datasourceConfig));
   }

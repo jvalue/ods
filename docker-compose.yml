@@ -86,6 +86,15 @@ services:
       CONNECTION_RETRIES: 20
       CONNECTION_BACKOFF_IN_MS: 5000
 
+      # TODO values
+      POSTGRES_HOST: "scheduler-db"
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: "scheduler-service"
+      POSTGRES_PW: "pw"
+      POSTGRES_DB: "ods-schedulers"
+      POSTGRES_SCHEMA: "public" # other schemas have to be created somewhere before use!
+      POSTGRES_SSL: "false"
+
       AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
       AMQP_SCHEDULER_EXCHANGE: 'ods_global'
       AMQP_SCHEDULER_QUEUE: 'scheduler.datasource-config'
@@ -93,6 +102,8 @@ services:
       AMQP_DATASOURCE_CONFIG_CREATED_TOPIC: 'datasource.config.created'
       AMQP_DATASOURCE_CONFIG_UPDATED_TOPIC: 'datasource.config.updated'
       AMQP_DATASOURCE_CONFIG_DELETED_TOPIC: 'datasource.config.deleted'
+      AMQP_DATASOURCE_IMPORT_TRIGGER_TOPIC: 'datasource.import-trigger.*'
+      AMQP_DATASOURCE_IMPORT_TRIGGER_CREATED_TOPIC: 'datasource.import-trigger.created'
     build:
       context: ./scheduler/
     labels:
@@ -101,6 +112,39 @@ services:
       - "traefik.http.routers.to-scheduler.middlewares=scheduler-stripprefix@docker"
       - "traefik.http.middlewares.scheduler-stripprefix.stripprefix.prefixes=/api/scheduler"
     depends_on:
+      - rabbitmq
+      - scheduler-db
+      - scheduler-outboxer
+
+  scheduler-db:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_USER: 'scheduler-service'
+      POSTGRES_PASSWORD: 'pw'
+      POSTGRES_DB: 'ods-schedulers'
+    command:
+      # This enables and configures Postgres logical decoding feature that is needed for outboxer/debezium to work
+      - '-cwal_level=logical'
+      - '-cmax_wal_senders=1'
+      - '-cmax_replication_slots=1'
+
+  scheduler-outboxer:
+    image: ghcr.io/jvalue/outboxer-postgres2rabbitmq
+    environment:
+      - OUTBOXER_DATABASE_HOSTNAME=scheduler-db
+      - OUTBOXER_DATABASE_PORT=5432
+      - OUTBOXER_DATABASE_USER=scheduler-service
+      - OUTBOXER_DATABASE_PASSWORD=pw
+      - OUTBOXER_DATABASE_DBNAME=ods-schedulers
+      - OUTBOXER_DATABASE_SERVER_NAME=scheduler-outboxer
+      - OUTBOXER_PUBLISHER_AMQP_URL=amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672
+      - OUTBOXER_PUBLISHER_AMQP_EXCHANGE=ods_global
+      - OUTBOXER_PUBLISHER_AMQP_RETRIES=5
+      - OUTBOXER_PUBLISHER_AMQP_RETRY_DELAY_MS=1000
+      # In production this file should be storage outside of the container, so it does survive outboxer restarts.
+      #- OUTBOXER_OFFSET_STORAGE_FILE_FILENAME=/data/offset.dat
+    depends_on:
+      - scheduler-db
       - rabbitmq
   # ----------------- STORAGE SERVICE (/storage) --------------------
 
