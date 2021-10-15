@@ -16,7 +16,7 @@ const initialSources = [
   }
 ]
 
-function createMockAdapter () {
+async function createMockAdapter (amqpConnection, exchange, queue, topic) {
   const router = new Router()
 
   router.get('/datasources', async ctx => {
@@ -24,16 +24,28 @@ function createMockAdapter () {
     ctx.body = initialSources
   })
 
-  router.post('/datasources/:datasourceId/trigger', async ctx => {
-    const id = Number(ctx.params.datasourceId)
-    console.log(`Trigger pulled for datasource ${id}`)
-    const calls = triggerRequests.get(id)
-    if (calls === undefined) {
-      triggerRequests.set(id, 1)
+  /* Init AMQP datasource.import-trigger consumption */
+  const channel = await amqpConnection.createChannel()
+  await channel.assertExchange(exchange, 'topic')
+
+  await channel.assertQueue(queue)
+  await channel.bindQueue(queue, exchange, topic)
+
+  await channel.consume(queue, msg => {
+    const event = JSON.parse(msg.content.toString())
+    const routingKey = msg.fields.routingKey
+    console.log(`Event received on topic "${routingKey}": ${JSON.stringify(event)}`)
+    const id = Number(event.datasourceId)
+    if (id) {
+      const calls = triggerRequests.get(id)
+      if (calls === undefined) {
+        triggerRequests.set(id, 1)
+      } else {
+        triggerRequests.set(id, triggerRequests.get(id) + 1)
+      }
     } else {
-      triggerRequests.set(id, triggerRequests.get(id) + 1)
+      console.log('Failed to extract datasourceId from event!')
     }
-    ctx.status = 201
   })
 
   const app = new Koa()
