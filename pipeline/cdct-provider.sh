@@ -4,5 +4,6 @@
 set -e
 
 dir=$(dirname "$0")
-docker-compose -f "${dir}/../docker-compose.yml" -f "${dir}/../docker-compose.provider.yml" build pipeline pipeline-db pipeline-outboxer rabbitmq
-docker-compose -f "${dir}/../docker-compose.yml" -f "${dir}/../docker-compose.provider.yml" up --exit-code-from pipeline pipeline pipeline-db pipeline-outboxer rabbitmq
+cd ${dir}/..
+docker-compose -f docker-compose.yml -f docker-compose.provider.yml build pipeline pipeline-db pipeline-outboxer rabbitmq
+docker-compose -f docker-compose.yml -f docker-compose.provider.yml up --exit-code-from pipeline pipeline pipeline-db pipeline-outboxer rabbitmq

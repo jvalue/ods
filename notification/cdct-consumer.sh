@@ -4,5 +4,6 @@
 set -e
 
 dir=$(dirname "$0")
-docker-compose -f "${dir}/../docker-compose.yml" -f "${dir}/../docker-compose.consumer.yml" build notification
-docker-compose -f "${dir}/../docker-compose.yml" -f "${dir}/../docker-compose.consumer.yml" up --exit-code-from notification --no-deps notification
+cd ${dir}/..
+docker-compose -f docker-compose.yml -f docker-compose.consumer.yml build notification
+docker-compose -f docker-compose.yml -f docker-compose.consumer.yml up --exit-code-from notification --no-deps notification
