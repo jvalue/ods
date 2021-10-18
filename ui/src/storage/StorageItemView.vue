@@ -39,14 +39,18 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 
+import { STORAGE_SERVICE_URL } from '../env';
+
 import { StorageItem } from './storage-item';
-import * as StorageREST from './storageRest';
+import { StorageRest } from './storageRest';
 
 @Component({})
 export default class PipelineStorageOverview extends Vue {
   private item: StorageItem | null = null;
 
   private clipUrl = clipboardCopy;
+
+  private readonly storageRest = new StorageRest(STORAGE_SERVICE_URL);
 
   @Prop()
   private readonly pipelineId!: number;
@@ -55,19 +59,20 @@ export default class PipelineStorageOverview extends Vue {
   private readonly itemId!: number;
 
   private mounted(): void {
-    StorageREST.getStoredItem(this.pipelineId, this.itemId)
+    this.storageRest
+      .getStoredItem(this.pipelineId, this.itemId)
       .then(item => (this.item = item))
       .catch(error => console.error('Failed to fetch stored items', error));
   }
 
   private get storageItemUrl(): string {
-    let url = StorageREST.createUrlForItem(this.pipelineId, this.itemId);
+    let url = this.storageRest.createUrlForItem(this.pipelineId, this.itemId);
     url = this.ensureOriginUrlPrefix(url);
     return url;
   }
 
   private get latestStorageItemUrl(): string {
-    let url = StorageREST.createUrlForLatestItem(this.pipelineId);
+    let url = this.storageRest.createUrlForLatestItem(this.pipelineId);
     url = this.ensureOriginUrlPrefix(url);
     return url;
   }

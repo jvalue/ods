@@ -41,7 +41,6 @@
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-promise": "^5.1.0",
     "jest": "^27.0.5",
-    "jest-pact": "^0.9.1",
     "prettier": "^2.3.2",
     "ts-jest": "^27.0.3",
     "tslib": "^2.3.0",

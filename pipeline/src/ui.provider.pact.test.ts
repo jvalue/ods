@@ -128,25 +128,28 @@ describe('Pact Provider Verification', () => {
   });
 });
 
-// eslint-disable-next-line @typescript-eslint/require-await
 async function setupEmptyState(): Promise<void> {
   clearState();
+
+  return Promise.resolve();
 }
 
-// eslint-disable-next-line @typescript-eslint/require-await
 async function setupSomePipelineConfigs(): Promise<void> {
   clearState();
   addSamplePipelineConfig(++nextPipelineConfigId, 2, true);
   addSamplePipelineConfig(++nextPipelineConfigId, 3, false);
   addSamplePipelineConfig(++nextPipelineConfigId, 2, false);
+
+  return Promise.resolve();
 }
 
-// eslint-disable-next-line @typescript-eslint/require-await
 async function setupSomePipelineTransformedData(): Promise<void> {
   clearState();
   addSamplePipelineTransformedData(1);
   addSamplePipelineTransformedData(2);
   addSamplePipelineTransformedData(3);
+
+  return Promise.resolve();
 }
 
 function clearState(): void {

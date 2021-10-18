@@ -13,3 +13,11 @@ services:
   pipeline-outboxer:
     environment:
       - OUTBOXER_PUBLISHER_AMQP_RETRIES=30
+  storage-mq:
+    build:
+      target: base
+    command: npm run test:provider
+    environment:
+      POSTGREST_URL: 'storage'
+    volumes:
+      - ./pacts:/pacts
