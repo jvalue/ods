@@ -277,24 +277,6 @@ jobs:
         run: |
           bash ./pipeline/cdct-provider.sh
 
-  # ----------------- Pipeline Provider-side CDC-Test -----------------
-  pipeline-provider:
-    name: Pipeline Provider-side CDC-Test
-    runs-on: ubuntu-18.04
-    needs: [notification-build, pipeline-build, ui-build]
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Download contract files from artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: contracts
-          path: ./pacts
-
-      - name: Build and Run
-        run: |
-          bash ./pipeline/cdct-provider.sh
-
   # ----------------- SYSTEMTEST --------------------
   systemtest:
     name: Systemtest
