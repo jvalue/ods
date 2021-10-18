@@ -212,6 +212,8 @@ jobs:
           name: notification-artifact
           path: notification.tar
 
+      # The CDC-Test builds a cut-down image that would override the previously built production image
+      # Therefore it is executed after uploading the production image
       - name: Consumer-side CDC-Test
         run: |
           bash ./notification/cdct-consumer.sh
@@ -248,6 +250,8 @@ jobs:
           name: ui-artifact
           path: ui.tar
       
+      # The CDC-Test builds a cut-down image that would override the previously built production image
+      # Therefore it is executed after uploading the production image
       - name: Consumer-side CDC-Test
         run: |
           bash ./ui/cdct-consumer.sh
