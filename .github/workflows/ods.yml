@@ -190,6 +190,17 @@ jobs:
         run: |
           docker-compose -f docker-compose.yml build notification
 
+      - name: Consumer-side CDC-Test
+        run: |
+          bash ./notification/cdct-consumer.sh
+
+      - name: Upload contract files as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: contracts
+          path: ./pacts/*.json
+          if-no-files-found: error
+
       - name: Build Integration-test
         run: |
           docker-compose -f docker-compose.yml -f docker-compose.it.yml build notification notification-it
@@ -237,6 +248,17 @@ jobs:
         run: |
           docker-compose -f docker-compose.yml build ui
 
+      - name: Consumer-side CDC-Test
+        run: |
+          bash ./ui/cdct-consumer.sh
+
+      - name: Upload Contract files as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: contracts
+          path: ./pacts/*.json
+          if-no-files-found: error
+
       - name: Save Docker image as artifact
         run: |
           IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/ui
@@ -258,6 +280,24 @@ jobs:
           name: contracts
           path: ./pacts/*.json
           if-no-files-found: error
+
+  # ----------------- Pipeline Provider-side CDC-Test -----------------
+  pipeline-provider:
+    name: Pipeline Provider-side CDC-Test
+    runs-on: ubuntu-18.04
+    needs: [notification-build, pipeline-build, ui-build]
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download contract files from artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: contracts
+          path: ./pacts
+
+      - name: Build and Run
+        run: |
+          bash ./pipeline/cdct-provider.sh
 
   # ----------------- Pipeline Provider-side CDC-Test -----------------
   pipeline-provider:
