@@ -190,20 +190,9 @@ jobs:
         run: |
           docker-compose -f docker-compose.yml build notification
 
-      - name: Consumer-side CDC-Test
-        run: |
-          bash ./notification/cdct-consumer.sh
-
-      - name: Upload contract files as artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: contracts
-          path: ./pacts/*.json
-          if-no-files-found: error
-
       - name: Build Integration-test
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml build notification notification-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml build notification-it
 
       - name: Run Integration-test
         # Only the logs from the services listed in the `docker-compose up` command are going to be printed to stdout
@@ -223,6 +212,19 @@ jobs:
           name: notification-artifact
           path: notification.tar
 
+      # The CDC-Test builds a cut-down image that would override the previously built production image
+      # Therefore it is executed after uploading the production image
+      - name: Consumer-side CDC-Test
+        run: |
+          bash ./notification/cdct-consumer.sh
+
+      - name: Upload contract files as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: contracts
+          path: ./pacts/*.json
+          if-no-files-found: error
+
 
   # ----------------- UI SERVICE --------------------
 
@@ -237,17 +239,6 @@ jobs:
         run: |
           docker-compose -f docker-compose.yml build ui
 
-      - name: Consumer-side CDC-Test
-        run: |
-          bash ./ui/cdct-consumer.sh
-
-      - name: Upload Contract files as artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: contracts
-          path: ./pacts/*.json
-          if-no-files-found: error
-
       - name: Save Docker image as artifact
         run: |
           IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/ui
@@ -258,6 +249,19 @@ jobs:
         with:
           name: ui-artifact
           path: ui.tar
+      
+      # The CDC-Test builds a cut-down image that would override the previously built production image
+      # Therefore it is executed after uploading the production image
+      - name: Consumer-side CDC-Test
+        run: |
+          bash ./ui/cdct-consumer.sh
+
+      - name: Upload Contract files as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: contracts
+          path: ./pacts/*.json
+          if-no-files-found: error
 
   # ----------------- Pipeline Provider-side CDC-Test -----------------
   pipeline-provider:
