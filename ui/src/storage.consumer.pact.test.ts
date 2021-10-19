@@ -140,10 +140,10 @@ pactWith(options, provider => {
         });
       });
 
-      it('returns null', async () => {
+      it('returns undefined', async () => {
         const item = await restService.getStoredItem(pipelineId, storageItemId);
 
-        expect(item).toBeNull();
+        expect(item).toBeUndefined();
       });
     });
 
