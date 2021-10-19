@@ -93,7 +93,7 @@ describe('Pact Provider Verification', () => {
     );
   });
 
-  it('validates the expectations of the notification service', async () => {
+  it('validates the expectations of the consuming services', async () => {
     await pact.verify();
   });
 
@@ -103,7 +103,6 @@ describe('Pact Provider Verification', () => {
   });
 
   async function provideSuccessEvent(): Promise<unknown> {
-    console.log(`Expecting a success event...`);
     await pgClient.transaction(async (client) => {
       await EventPublisher.publishSuccess(
         client,
@@ -117,7 +116,6 @@ describe('Pact Provider Verification', () => {
   }
 
   async function provideCreationEvent(): Promise<unknown> {
-    console.log(`Expecting a creation event...`);
     await pgClient.transaction(async (client) => {
       await EventPublisher.publishCreation(client, 1, 'some pipeline name');
     });
@@ -125,7 +123,6 @@ describe('Pact Provider Verification', () => {
   }
 
   async function provideDeletionEvent(): Promise<unknown> {
-    console.log(`Expecting a deletion event...`);
     await pgClient.transaction(async (client) => {
       await EventPublisher.publishDeletion(client, 1, 'some pipeline name');
     });
@@ -146,7 +143,7 @@ async function createAmqpConsumer(
   await amqpChannel.assertQueue(queue, {
     exclusive: false,
   });
-  await amqpChannel.bindQueue(queue, exchange, queue);
+  await amqpChannel.bindQueue(queue, exchange, topic);
 
   // Consumes the message by pushing it into the passed message buffer
   await amqpChannel.consume(
