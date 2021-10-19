@@ -1,9 +1,12 @@
 import path from 'path';
 
-import { AmqpConnection } from '@jvalue/node-dry-amqp';
+import { AmqpChannel, AmqpConnection } from '@jvalue/node-dry-amqp';
 import { readEnvOrDie } from '@jvalue/node-dry-basics';
 import { PostgresClient } from '@jvalue/node-dry-pg';
-import { MessageProviderPact } from '@pact-foundation/pact';
+import {
+  MessageProviderPact,
+  PactMessageProviderOptions,
+} from '@pact-foundation/pact';
 import * as AMQP from 'amqplib';
 
 import {
@@ -30,32 +33,12 @@ const AMQP_PIPELINE_CONFIG_EXCHANGE = readEnvOrDie(
 const AMQP_PIPELINE_CONFIG_QUEUE = readEnvOrDie('AMQP_PIPELINE_CONFIG_QUEUE');
 
 describe('Pact Provider Verification', () => {
-  const pact = new MessageProviderPact({
-    provider: 'Provider Service',
-    pactUrls: [
-      path.resolve(process.cwd(), '..', 'pacts', 'notification-pipeline.json'),
-      path.resolve(process.cwd(), '..', 'pacts', 'storage-pipeline.json'),
-    ],
-    logDir: path.resolve(process.cwd(), '..', 'pacts', 'logs'),
-    stateHandlers: {
-      'any state': async (): Promise<void> => Promise.resolve(),
-    },
-    messageProviders: {
-      'a success event': provideSuccessEvent,
-      'a creation event': provideCreationEvent,
-      'a deletion event': provideDeletionEvent,
-    },
-  });
-
   let pgClient: PostgresClient;
   let amqpConnection: AmqpConnection;
 
   const successMessages: unknown[] = [];
-  const creationMessages: unknown[] = [];
-  const deletionMessages: unknown[] = [];
 
   beforeAll(async () => {
-    // Setup amqp consumer to collect the messages that are published to the message-broker by the pipeline outboxer
     pgClient = await init(CONNECTION_RETRIES, CONNECTION_BACKOFF);
 
     amqpConnection = new AmqpConnection(
@@ -75,32 +58,18 @@ describe('Pact Provider Verification', () => {
       AMQP_PIPELINE_EXECUTION_SUCCESS_TOPIC,
       successMessages,
     );
-
-    await createAmqpConsumer(
-      amqpConnection,
-      AMQP_PIPELINE_CONFIG_EXCHANGE,
-      AMQP_PIPELINE_CONFIG_QUEUE,
-      AMQP_PIPELINE_CONFIG_CREATED_TOPIC,
-      creationMessages,
-    );
-
-    await createAmqpConsumer(
-      amqpConnection,
-      AMQP_PIPELINE_CONFIG_EXCHANGE,
-      AMQP_PIPELINE_CONFIG_QUEUE,
-      AMQP_PIPELINE_CONFIG_DELETED_TOPIC,
-      deletionMessages,
-    );
   });
 
-  it('validates the expectations of the consuming services', async () => {
-    await pact.verify();
-  });
-
-  afterAll(async () => {
-    await pgClient.close();
-    await amqpConnection.close();
-  });
+  const commonProviderOptions: PactMessageProviderOptions = {
+    provider: 'Pipeline',
+    logDir: path.resolve(process.cwd(), '..', 'pacts', 'logs'),
+    stateHandlers: {
+      'any state': async (): Promise<void> => Promise.resolve(),
+    },
+    messageProviders: {
+      'a success event': provideSuccessEvent,
+    },
+  };
 
   async function provideSuccessEvent(): Promise<unknown> {
     await pgClient.transaction(async (client) => {
@@ -115,28 +84,99 @@ describe('Pact Provider Verification', () => {
     return await waitForMessage(successMessages);
   }
 
-  async function provideCreationEvent(): Promise<unknown> {
-    await pgClient.transaction(async (client) => {
-      await EventPublisher.publishCreation(client, 1, 'some pipeline name');
-    });
-    return await waitForMessage(creationMessages);
-  }
+  describe('with Notification as consumer', () => {
+    it('validates the expectations of the notification service', async () => {
+      const notificationPact = new MessageProviderPact({
+        ...commonProviderOptions,
+        pactUrls: [
+          path.resolve(
+            process.cwd(),
+            '..',
+            'pacts',
+            'notification-pipeline.json',
+          ),
+        ],
+      });
 
-  async function provideDeletionEvent(): Promise<unknown> {
-    await pgClient.transaction(async (client) => {
-      await EventPublisher.publishDeletion(client, 1, 'some pipeline name');
+      await notificationPact.verify();
     });
-    return await waitForMessage(deletionMessages);
-  }
+  });
+
+  describe('with Storage as consumer', () => {
+    let creationConsumer: AmqpChannel;
+    const creationMessages: unknown[] = [];
+
+    let deletionConsumer: AmqpChannel;
+    const deletionMessages: unknown[] = [];
+
+    beforeAll(async () => {
+      creationConsumer = await createAmqpConsumer(
+        amqpConnection,
+        AMQP_PIPELINE_CONFIG_EXCHANGE,
+        AMQP_PIPELINE_CONFIG_QUEUE,
+        AMQP_PIPELINE_CONFIG_CREATED_TOPIC,
+        creationMessages,
+      );
+
+      deletionConsumer = await createAmqpConsumer(
+        amqpConnection,
+        AMQP_PIPELINE_CONFIG_EXCHANGE,
+        AMQP_PIPELINE_CONFIG_QUEUE,
+        AMQP_PIPELINE_CONFIG_DELETED_TOPIC,
+        deletionMessages,
+      );
+    });
+
+    it('validates the expectations of the storage service', async () => {
+      const storagePact = new MessageProviderPact({
+        ...commonProviderOptions,
+        pactUrls: [
+          path.resolve(process.cwd(), '..', 'pacts', 'storage-pipeline.json'),
+        ],
+        messageProviders: {
+          ...commonProviderOptions.messageProviders,
+          'a creation event': provideCreationEvent,
+          'a deletion event': provideDeletionEvent,
+        },
+      });
+
+      await storagePact.verify();
+    });
+
+    afterAll(async () => {
+      await creationConsumer.close();
+      await deletionConsumer.close();
+    });
+
+    async function provideCreationEvent(): Promise<unknown> {
+      await pgClient.transaction(async (client) => {
+        await EventPublisher.publishCreation(client, 1, 'some pipeline name');
+      });
+      return await waitForMessage(creationMessages);
+    }
+
+    async function provideDeletionEvent(): Promise<unknown> {
+      await pgClient.transaction(async (client) => {
+        await EventPublisher.publishDeletion(client, 1, 'some pipeline name');
+      });
+      return await waitForMessage(deletionMessages);
+    }
+  });
+
+  afterAll(async () => {
+    await pgClient.close();
+    await amqpConnection.close();
+  });
 });
 
+// Sets up an amqp consumer to collect the messages that are published to the message-broker by the pipeline outboxer
 async function createAmqpConsumer(
   amqpConnection: AmqpConnection,
   exchange: string,
   queue: string,
   topic: string,
   messageBuffer: unknown[],
-): Promise<void> {
+): Promise<AmqpChannel> {
   const amqpChannel = await amqpConnection.createChannel();
 
   await amqpChannel.assertExchange(exchange, 'topic');
@@ -161,6 +201,8 @@ async function createAmqpConsumer(
       await amqpChannel.ack(msg);
     },
   );
+
+  return amqpChannel;
 }
 
 // Waits until the passed message buffer contains a message
