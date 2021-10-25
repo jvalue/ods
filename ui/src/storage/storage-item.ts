@@ -1,5 +1,5 @@
 export type StorageItem = StorageItemMetaData & {
-  data: Record<string, unknown>;
+  data: unknown;
 };
 
 export interface StorageItemMetaData {

@@ -69,9 +69,11 @@ import clipboardCopy from 'clipboard-copy';
 import Vue from 'vue';
 import Component from 'vue-class-component';
 
+import { STORAGE_SERVICE_URL } from '../env';
+
 import { StorageItemMetaData } from './storage-item';
 import StorageItemView from './StorageItemView.vue';
-import * as StorageREST from './storageRest';
+import { StorageRest } from './storageRest';
 
 @Component({
   components: { StorageItemView },
@@ -83,8 +85,10 @@ export default class PipelineStorageOverview extends Vue {
 
   private clipUrl = clipboardCopy;
 
+  private readonly storageRest = new StorageRest(STORAGE_SERVICE_URL);
+
   private getStorageItemUrl(pipelineId: number, itemId: number): string {
-    let url = StorageREST.createUrlForItem(pipelineId, itemId);
+    let url = this.storageRest.createUrlForItem(pipelineId, itemId);
     if (url.startsWith('/')) {
       url = window.location.origin + url;
     }
@@ -92,7 +96,7 @@ export default class PipelineStorageOverview extends Vue {
   }
 
   private getLatestStorageItemUrl(pipelineId: number): string {
-    let url = StorageREST.createUrlForLatestItem(pipelineId);
+    let url = this.storageRest.createUrlForLatestItem(pipelineId);
     if (url.startsWith('/')) {
       url = window.location.origin + url;
     }
@@ -105,7 +109,7 @@ export default class PipelineStorageOverview extends Vue {
   }
 
   private async fetchData(pipelineId: number): Promise<void> {
-    this.data = await StorageREST.getStoredItems(pipelineId);
+    this.data = await this.storageRest.getStoredItems(pipelineId);
   }
 }
 </script>

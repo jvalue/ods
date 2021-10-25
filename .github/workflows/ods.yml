@@ -281,6 +281,25 @@ jobs:
         run: |
           bash ./pipeline/cdct-provider.sh
 
+
+  # ----------------- Storage Provider-side CDC-Test -----------------
+  storage-provider:
+    name: Storage Provider-side CDC-Test
+    runs-on: ubuntu-18.04
+    needs: [storage-build, ui-build]
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download contract files from artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: contracts
+          path: ./pacts
+
+      - name: Build and Run
+        run: |
+          bash ./storage/storage-mq/cdct-provider.sh
+
   # ----------------- SYSTEMTEST --------------------
   systemtest:
     name: Systemtest
@@ -419,7 +438,7 @@ jobs:
     name: Storage Publish
     runs-on: ubuntu-18.04
 
-    needs: [systemtest]
+    needs: [systemtest, storage-provider]
 
     if: github.repository == 'jvalue/ods' && github.ref == 'refs/heads/main'
     steps:
@@ -477,7 +496,7 @@ jobs:
     name: Pipeline Publish
     runs-on: ubuntu-18.04
 
-    needs: [systemtest]
+    needs: [systemtest, pipeline-provider]
 
     if: github.repository == 'jvalue/ods' && github.ref == 'refs/heads/main'
     steps:
