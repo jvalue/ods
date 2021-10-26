@@ -46,7 +46,7 @@ import { StorageRest } from './storageRest';
 
 @Component({})
 export default class PipelineStorageOverview extends Vue {
-  private item: StorageItem | null = null;
+  private item: StorageItem | undefined = undefined;
 
   private clipUrl = clipboardCopy;
 
