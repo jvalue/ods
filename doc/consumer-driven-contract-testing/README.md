@@ -38,7 +38,7 @@ If you want to run the tests without `docker` and `docker-compose`, you may try 
 The files containing the source code of the Consumer-Driven Contract Tests are found in the `src` directories of those services, that have implemented CDCT. Regarding services implemented in TypeScript, the test files all share a common naming convention:
 
 - `*.consumer.pact.test.ts` for **Consumer testing**, where `*` is the name of the corresponding Provider
-- `*.provider.pact.test.ts` for **Provider verification**, where `*` is the name of the corresponding Consumer
+- `*.provider.pact.test.ts` for **Provider verification**, where `*` is the name of the corresponding Consumer or a more general term if multiple Consumers are involved
 
 ## Writing Consumer-Driven Contract Tests
 
