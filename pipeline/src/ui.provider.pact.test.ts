@@ -2,18 +2,19 @@ import path from 'path';
 
 import { Verifier } from '@pact-foundation/pact';
 
-import { port, server } from '../../index'; // The main method is automatically called due to this import
 import {
   HealthStatus,
   PipelineConfig,
   PipelineConfigDTO,
-} from '../../pipeline-config/model/pipelineConfig';
-import { PipelineTransformedData } from '../../pipeline-config/model/pipelineTransformedData';
+} from './pipeline-config/model/pipelineConfig';
+import { PipelineTransformedData } from './pipeline-config/model/pipelineTransformedData';
+
+import { port, server } from './index'; // The main method is automatically called due to this import
 
 const pipelineConfigs: PipelineConfig[] = [];
 let nextPipelineConfigId: number;
 
-jest.mock('../../pipeline-config/pipelineConfigManager', () => {
+jest.mock('./pipeline-config/pipelineConfigManager', () => {
   return {
     PipelineConfigManager: jest.fn().mockImplementation(() => {
       return {
@@ -70,7 +71,7 @@ jest.mock('../../pipeline-config/pipelineConfigManager', () => {
 
 const pipelineTransformedData: PipelineTransformedData[] = [];
 
-jest.mock('../../pipeline-config/pipelineTransformedDataManager', () => {
+jest.mock('./pipeline-config/pipelineTransformedDataManager', () => {
   return {
     PipelineTransformedDataManager: jest.fn().mockImplementation(() => {
       return {
@@ -84,7 +85,7 @@ jest.mock('../../pipeline-config/pipelineTransformedDataManager', () => {
 });
 
 // The following mocks are needed for propper execution of the main function
-jest.mock('../../pipeline-config/pipelineDatabase', () => {
+jest.mock('./pipeline-config/pipelineDatabase', () => {
   return {
     init: jest.fn(),
   };
@@ -94,7 +95,7 @@ jest.mock('@jvalue/node-dry-amqp', () => {
     AmqpConnection: jest.fn(),
   };
 });
-jest.mock('../amqp/datasourceExecutionConsumer', () => {
+jest.mock('./api/amqp/datasourceExecutionConsumer', () => {
   return {
     createDatasourceExecutionConsumer: jest.fn(),
   };
@@ -127,25 +128,28 @@ describe('Pact Provider Verification', () => {
   });
 });
 
-// eslint-disable-next-line @typescript-eslint/require-await
 async function setupEmptyState(): Promise<void> {
   clearState();
+
+  return Promise.resolve();
 }
 
-// eslint-disable-next-line @typescript-eslint/require-await
 async function setupSomePipelineConfigs(): Promise<void> {
   clearState();
   addSamplePipelineConfig(++nextPipelineConfigId, 2, true);
   addSamplePipelineConfig(++nextPipelineConfigId, 3, false);
   addSamplePipelineConfig(++nextPipelineConfigId, 2, false);
+
+  return Promise.resolve();
 }
 
-// eslint-disable-next-line @typescript-eslint/require-await
 async function setupSomePipelineTransformedData(): Promise<void> {
   clearState();
   addSamplePipelineTransformedData(1);
   addSamplePipelineTransformedData(2);
   addSamplePipelineTransformedData(3);
+
+  return Promise.resolve();
 }
 
 function clearState(): void {

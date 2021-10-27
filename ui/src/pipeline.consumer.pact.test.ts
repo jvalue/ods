@@ -2,7 +2,6 @@ import path from 'path';
 
 import { JestPactOptions, pactWith } from 'jest-pact';
 
-import { TransformationRest } from './edit/transformation/transformationRest';
 import {
   badRequestResponse,
   createRequest,
@@ -41,8 +40,9 @@ import {
   updateRequestTitle,
   updateSuccessResponse,
 } from './pipeline.consumer.pact.fixtures';
-import { PipelineRest } from './pipelineRest';
-import { PipelineTransRest } from './pipelineTransRest';
+import { TransformationRest } from './pipeline/edit/transformation/transformationRest';
+import { PipelineRest } from './pipeline/pipelineRest';
+import { PipelineTransRest } from './pipeline/pipelineTransRest';
 
 const options: JestPactOptions = {
   consumer: 'UI',
