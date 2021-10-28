@@ -20,19 +20,6 @@ export const examplePipeline: Pipeline = {
     func: 'some function',
   },
 };
-export const examplePipeline2: Pipeline = {
-  id: 2,
-  datasourceId: 3,
-  metadata: {
-    author: 'some other author',
-    description: 'some other description',
-    displayName: 'some other display name',
-    license: 'some other license',
-  },
-  transformation: {
-    func: 'some other function',
-  },
-};
 
 export const getAllRequestTitle = 'a request for getting all pipelines';
 export const getAllRequest: RequestOptions = {
@@ -107,8 +94,8 @@ export const getByDatasourceIdGetAllResponse: ResponseOptions = {
   },
   body: [
     like(examplePipeline),
-    like(examplePipeline2),
-    like(Object.assign({}, examplePipeline, { id: 3 })),
+    like(Object.assign({}, examplePipeline, { datasourceId: 3 })),
+    like(examplePipeline),
   ],
 };
 

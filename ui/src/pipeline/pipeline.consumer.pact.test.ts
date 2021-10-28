@@ -14,7 +14,6 @@ import {
   exampleErrorThrownJobResult,
   exampleInvalidSyntaxJobResult,
   examplePipeline,
-  examplePipeline2,
   exampleSuccessJobResult,
   exampleTransformationRequestWithErrorThrowingFunction,
   exampleTransformationRequestWithInvalidSyntax,
@@ -154,7 +153,7 @@ pactWith(options, provider => {
     });
 
     describe('getting pipelines by datasource id', () => {
-      describe('when a pipeline with the requested datasource id exist', () => {
+      describe('when a pipeline with the requested datasource id exists', () => {
         const id = examplePipeline.datasourceId;
 
         beforeEach(async () => {
@@ -169,8 +168,7 @@ pactWith(options, provider => {
         it('returns the requested pipelines', async () => {
           const pipelines = await restService.getPipelineByDatasourceId(id);
 
-          expect(pipelines).toHaveLength(1);
-          expect(pipelines[0]).toStrictEqual(examplePipeline);
+          expect(pipelines).toStrictEqual([examplePipeline]);
         });
       });
 
@@ -196,7 +194,7 @@ pactWith(options, provider => {
       describe('with NaN as requested datasource id', () => {
         beforeEach(async () => {
           await provider.addInteraction({
-            state: 'pipelines with datasource id NaN return all pipelines',
+            state: 'pipelines with datasource id NaN do not exist',
             uponReceiving: getByDatasourceIdRequestTitle(NaN),
             withRequest: getByDatasourceIdRequest(NaN),
             willRespondWith: getByDatasourceIdGetAllResponse,
@@ -206,12 +204,11 @@ pactWith(options, provider => {
         it('returns pipeline array containing all pipelines', async () => {
           const pipelines = await restService.getPipelineByDatasourceId(NaN);
 
-          expect(pipelines).toHaveLength(3);
-          expect(pipelines[0]).toStrictEqual(examplePipeline);
-          expect(pipelines[1]).toStrictEqual(examplePipeline2);
-          expect(pipelines[2]).toStrictEqual(
-            Object.assign({}, examplePipeline, { id: 3 }),
-          );
+          expect(pipelines).toStrictEqual([
+            examplePipeline,
+            Object.assign({}, examplePipeline, { datasourceId: 3 }),
+            examplePipeline,
+          ]);
         });
       });
     });

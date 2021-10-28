@@ -176,7 +176,7 @@
     },
     {
       "description": "a request for getting pipelines with datasource id NaN",
-      "providerState": "pipelines with datasource id NaN return all pipelines",
+      "providerState": "pipelines with datasource id NaN do not exist",
       "request": {
         "method": "GET",
         "path": "/configs/",
@@ -202,20 +202,20 @@
             }
           },
           {
-            "id": 2,
+            "id": 1,
             "datasourceId": 3,
             "metadata": {
-              "author": "some other author",
-              "description": "some other description",
-              "displayName": "some other display name",
-              "license": "some other license"
+              "author": "some author",
+              "description": "some description",
+              "displayName": "some display name",
+              "license": "some license"
             },
             "transformation": {
-              "func": "some other function"
+              "func": "some function"
             }
           },
           {
-            "id": 3,
+            "id": 1,
             "datasourceId": 2,
             "metadata": {
               "author": "some author",
