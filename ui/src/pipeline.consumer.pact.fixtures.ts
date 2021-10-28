@@ -4,8 +4,11 @@ import { eachLike, like } from '@pact-foundation/pact/src/dsl/matchers';
 import {
   JobResult,
   TransformationRequest,
-} from './edit/transformation/transformation';
-import Pipeline, { HealthStatus, TransformedDataMetaData } from './pipeline';
+} from './pipeline/edit/transformation/transformation';
+import Pipeline, {
+  HealthStatus,
+  TransformedDataMetaData,
+} from './pipeline/pipeline';
 
 export const examplePipeline: Pipeline = {
   id: 1,

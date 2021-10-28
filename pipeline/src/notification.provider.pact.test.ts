@@ -11,9 +11,9 @@ import {
   AMQP_URL,
   CONNECTION_BACKOFF,
   CONNECTION_RETRIES,
-} from '../../env';
-import * as EventPublisher from '../../pipeline-config/outboxEventPublisher';
-import { init } from '../../pipeline-config/pipelineDatabase';
+} from './env';
+import * as EventPublisher from './pipeline-config/outboxEventPublisher';
+import { init } from './pipeline-config/pipelineDatabase';
 
 const AMQP_PIPELINE_EXECUTION_EXCHANGE = readEnvOrDie(
   'AMQP_PIPELINE_EXECUTION_EXCHANGE',
