@@ -20,7 +20,6 @@ export interface TransformationConfig {
 export interface TransformedDataMetaData {
   id: number;
   healthStatus: HealthStatus;
-  timestamp: string;
 }
 
 export enum HealthStatus {

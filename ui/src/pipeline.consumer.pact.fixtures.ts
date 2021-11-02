@@ -151,7 +151,6 @@ export const deleteSuccessResponse: ResponseOptions = {
 export const exampleTransformedData: TransformedDataMetaData = {
   id: 1,
   healthStatus: HealthStatus.OK,
-  timestamp: 'some timestamp', // TODO is this attribute required anywhere?
 };
 
 export function getLatestTransformedDataRequestTitle(id: number): string {

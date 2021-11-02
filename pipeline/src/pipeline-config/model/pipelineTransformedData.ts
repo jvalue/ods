@@ -14,7 +14,7 @@ export interface PipelineTransformedData {
 export interface PipelineTransformedDataMetaData {
   id: number;
   healthStatus: string;
-  timestamp: string;
+  timestamp?: string;
 }
 
 export type PipelineTransformedDataDTO = Omit<
