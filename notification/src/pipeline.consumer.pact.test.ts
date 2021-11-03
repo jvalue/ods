@@ -57,7 +57,6 @@ const mockNotificationExecutor =
 
 messagePactWith(options, (messagePact) => {
   describe('receiving an amqp message', () => {
-    
     const triggerEventHandler = new TriggerEventHandler(
       mockPostgresNotificationRepository(),
       mockNotificationExecutor(),
