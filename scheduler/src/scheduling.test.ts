@@ -69,7 +69,7 @@ describe('Scheduler', () => {
     console.log(
       '######################################### STRANGE TEST AFTER ISSUE ################################################',
     );
-  });
+  }, 10000);
 
   test('should schedule new periodic datasource and trigger multiple times', async () => {
     const config = generateConfig(true, new Date(Date.now() + 500), 1000);
