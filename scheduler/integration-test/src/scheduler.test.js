@@ -15,6 +15,8 @@ const AMQP_DATASOURCE_CONFIG_UPDATED_TOPIC = 'datasource.config.updated'
 const AMQP_DATASOURCE_CONFIG_DELETED_TOPIC = 'datasource.config.deleted'
 const AMQP_DATASOURCE_IMPORT_TRIGGER_CREATED_TOPIC = 'datasource.import-trigger.created'
 
+const PUBLICATION_DELAY = 5000
+
 let amqpConnection
 let mockAdapterServer
 
@@ -66,7 +68,7 @@ describe('Scheduler-IT', () => {
 
     channel.publish(AMQP_EXCHANGE, AMQP_DATASOURCE_CONFIG_CREATED_TOPIC, creationEvent)
 
-    await sleep(3000)
+    await sleep(PUBLICATION_DELAY)
 
     expect(getTriggeredRequests(1)).toBe(1)
   }, TIMEOUT)
@@ -80,7 +82,7 @@ describe('Scheduler-IT', () => {
     channel.publish(AMQP_EXCHANGE, AMQP_DATASOURCE_CONFIG_CREATED_TOPIC, creationEvent)
     channel.publish(AMQP_EXCHANGE, AMQP_DATASOURCE_CONFIG_DELETED_TOPIC, deletionEvent)
 
-    await sleep(3000)
+    await sleep(PUBLICATION_DELAY)
 
     expect(getTriggeredRequests(2)).toBe(0)
   }, TIMEOUT)
@@ -96,7 +98,7 @@ describe('Scheduler-IT', () => {
     await sleep(200)
     channel.publish(AMQP_EXCHANGE, AMQP_DATASOURCE_CONFIG_UPDATED_TOPIC, updateEvent)
 
-    await sleep(4500)
+    await sleep(PUBLICATION_DELAY)
 
     expect(getTriggeredRequests(3)).toBeGreaterThan(1)
   }, TIMEOUT)
