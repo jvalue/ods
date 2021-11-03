@@ -56,7 +56,7 @@ describe('Scheduler', () => {
     console.log(
       '######################################### STRANGE TEST BEFORE SLEEP ################################################',
     );
-    await sleep(3000);
+    await sleep(5000);
 
     expect(scheduler.getAllJobs()).toHaveLength(1);
     expect(scheduler.getAllJobs()[0].datasourceConfig).toEqual(config);
