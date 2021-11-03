@@ -19,7 +19,11 @@ jest.mock('@jvalue/node-dry-pg', () => {
 
 jest.mock('./datasource-trigger/outboxEventPublisher', () => {
   return {
-    publishDatasourceTrigger: jest.fn(),
+    publishDatasourceTrigger: jest.fn(() => {
+      console.log(
+        "######################################### CALLED 'publishDatasourceTrigger' MOCK #########################################",
+      );
+    }),
   };
 });
 
@@ -37,9 +41,6 @@ describe('Scheduler', () => {
   });
 
   afterEach(() => {
-    console.log(
-      '######################################### AFTER EACH ################################################',
-    );
     outboxEventPublisherMock.publishDatasourceTrigger.mockClear();
     scheduler.removeAllJobs();
   });
@@ -55,7 +56,7 @@ describe('Scheduler', () => {
     console.log(
       '######################################### STRANGE TEST BEFORE SLEEP ################################################',
     );
-    await sleep(2500);
+    await sleep(3000);
 
     expect(scheduler.getAllJobs()).toHaveLength(1);
     expect(scheduler.getAllJobs()[0].datasourceConfig).toEqual(config);
