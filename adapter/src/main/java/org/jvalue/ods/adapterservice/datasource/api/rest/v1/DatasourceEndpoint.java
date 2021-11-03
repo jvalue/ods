@@ -2,6 +2,7 @@ package org.jvalue.ods.adapterservice.datasource.api.rest.v1;
 
 import lombok.AllArgsConstructor;
 
+import org.jvalue.ods.adapterservice.adapter.model.exceptions.AdapterException;
 import org.jvalue.ods.adapterservice.datasource.DatasourceManager;
 import org.jvalue.ods.adapterservice.datasource.model.*;
 import org.jvalue.ods.adapterservice.datasource.model.exceptions.DatasourceNotFoundException;
@@ -12,6 +13,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 
+import java.io.IOException;
 import java.net.URI;
 
 @AllArgsConstructor
@@ -56,5 +58,12 @@ public class DatasourceEndpoint {
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void deleteAllDatasources() {
     datasourceManager.deleteAllDatasources();
+  }
+
+  @PostMapping("/{id}/trigger")
+  public DataImport.MetaData getData(@PathVariable Long id,
+      @Valid @RequestBody(required = false) RuntimeParameters runtimeParameters) throws AdapterException, IOException {
+    datasourceManager.getDatasource(id);
+    return datasourceManager.trigger(id, runtimeParameters);
   }
 }
