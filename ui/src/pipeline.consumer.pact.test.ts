@@ -23,7 +23,6 @@ import {
   getAllRequestTitle,
   getAllSuccessResponse,
   getByDatasourceIdEmptyResponse,
-  getByDatasourceIdGetAllResponse,
   getByDatasourceIdRequest,
   getByDatasourceIdRequestTitle,
   getByDatasourceIdSuccessResponse,
@@ -194,21 +193,17 @@ pactWith(options, provider => {
       describe('with NaN as requested datasource id', () => {
         beforeEach(async () => {
           await provider.addInteraction({
-            state: 'pipelines with datasource id NaN do not exist',
+            state: 'any state',
             uponReceiving: getByDatasourceIdRequestTitle(NaN),
             withRequest: getByDatasourceIdRequest(NaN),
-            willRespondWith: getByDatasourceIdGetAllResponse,
+            willRespondWith: badRequestResponse,
           });
         });
 
-        it('returns pipeline array containing all pipelines', async () => {
-          const pipelines = await restService.getPipelineByDatasourceId(NaN);
-
-          expect(pipelines).toStrictEqual([
-            examplePipeline,
-            Object.assign({}, examplePipeline, { datasourceId: 3 }),
-            examplePipeline,
-          ]);
+        it('throws an error', async () => {
+          await expect(
+            restService.getPipelineByDatasourceId(NaN),
+          ).rejects.toThrow(Error);
         });
       });
     });

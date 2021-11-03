@@ -118,8 +118,6 @@ describe('Pact Provider Verification', () => {
         'pipeline with id 1 does not exist': setupEmptyState,
         'pipelines with datasource id 2 exist': setupSomePipelineConfigs,
         'pipelines with datasource id 2 do not exist': setupEmptyState,
-        'pipelines with datasource id NaN do not exist':
-          setupSomePipelineConfigs,
         'transformed data with id 1 exists': setupSomePipelineTransformedData,
         'transformed data with id 1 does not exist': setupEmptyState,
       },

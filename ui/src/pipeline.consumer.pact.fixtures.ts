@@ -89,19 +89,6 @@ export const getByDatasourceIdEmptyResponse: ResponseOptions = {
   body: [],
 };
 
-export const getByDatasourceIdGetAllResponse: ResponseOptions = {
-  // TODO any success status code is actually acceptable (i.e. 2xx)
-  status: 200,
-  headers: {
-    'Content-Type': 'application/json; charset=utf-8',
-  },
-  body: [
-    like(examplePipeline),
-    like(Object.assign({}, examplePipeline, { datasourceId: 3 })),
-    like(examplePipeline),
-  ],
-};
-
 export const getByDatasourceIdSuccessResponse: ResponseOptions = {
   // TODO any success status code is actually acceptable (i.e. 2xx)
   status: 200,
