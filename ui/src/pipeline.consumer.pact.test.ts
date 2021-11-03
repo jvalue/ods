@@ -10,9 +10,12 @@ import {
   deleteRequest,
   deleteRequestTitle,
   deleteSuccessResponse,
+  exampleDatasourceId,
   exampleErrorThrownJobResult,
   exampleInvalidSyntaxJobResult,
-  examplePipeline,
+  examplePipelineId,
+  examplePipelineWithSchema,
+  examplePipelineWithoutSchema,
   exampleSuccessJobResult,
   exampleTransformationRequestWithErrorThrowingFunction,
   exampleTransformationRequestWithInvalidSyntax,
@@ -62,20 +65,37 @@ pactWith(options, provider => {
     });
 
     describe('getting all pipelines', () => {
-      describe('when some pipelines exist', () => {
+      describe('when some pipelines without schemas exist', () => {
         beforeEach(async () => {
           await provider.addInteraction({
-            state: 'some pipelines exist',
+            state: 'some pipelines without schemas exist',
             uponReceiving: getAllRequestTitle,
             withRequest: getAllRequest,
-            willRespondWith: getAllSuccessResponse,
+            willRespondWith: getAllSuccessResponse(false),
           });
         });
 
         it('returns a non-empty pipeline array', async () => {
           const pipelines = await restService.getAllPipelines();
 
-          expect(pipelines).toStrictEqual([examplePipeline]);
+          expect(pipelines).toStrictEqual([examplePipelineWithoutSchema]);
+        });
+      });
+
+      describe('when some pipelines with schemas exist', () => {
+        beforeEach(async () => {
+          await provider.addInteraction({
+            state: 'some pipelines with schemas exist',
+            uponReceiving: getAllRequestTitle,
+            withRequest: getAllRequest,
+            willRespondWith: getAllSuccessResponse(true),
+          });
+        });
+
+        it('returns a non-empty pipeline array', async () => {
+          const pipelines = await restService.getAllPipelines();
+
+          expect(pipelines).toStrictEqual([examplePipelineWithSchema]);
         });
       });
 
@@ -98,27 +118,46 @@ pactWith(options, provider => {
     });
 
     describe('getting a pipeline by id', () => {
-      describe('when the requested pipeline exists', () => {
-        const id = examplePipeline.id;
+      describe('when the requested pipeline exists and has no schema', () => {
+        const id = examplePipelineId;
 
         beforeEach(async () => {
           await provider.addInteraction({
-            state: `pipeline with id ${id} exists`,
+            state: `pipeline with id ${id} exists and has no schema`,
             uponReceiving: getByIdRequestTitle(id),
             withRequest: getByIdRequest(id),
-            willRespondWith: getByIdSuccessResponse,
+            willRespondWith: getByIdSuccessResponse(false),
           });
         });
 
         it('returns the requested pipeline', async () => {
           const pipeline = await restService.getPipelineById(id);
 
-          expect(pipeline).toStrictEqual(examplePipeline);
+          expect(pipeline).toStrictEqual(examplePipelineWithoutSchema);
+        });
+      });
+
+      describe('when the requested pipeline exists and has a schema', () => {
+        const id = examplePipelineId;
+
+        beforeEach(async () => {
+          await provider.addInteraction({
+            state: `pipeline with id ${id} exists and has a schema`,
+            uponReceiving: getByIdRequestTitle(id),
+            withRequest: getByIdRequest(id),
+            willRespondWith: getByIdSuccessResponse(true),
+          });
+        });
+
+        it('returns the requested pipeline', async () => {
+          const pipeline = await restService.getPipelineById(id);
+
+          expect(pipeline).toStrictEqual(examplePipelineWithSchema);
         });
       });
 
       describe('when the requested pipeline does not exist', () => {
-        const id = examplePipeline.id;
+        const id = examplePipelineId;
 
         beforeEach(async () => {
           await provider.addInteraction({
@@ -153,7 +192,7 @@ pactWith(options, provider => {
     // TODO do not skip these tests anymore as soon as issue #353 is solved
     describe.skip('getting a pipeline by datasource id', () => {
       describe('when a pipeline with the requested datasource id exist', () => {
-        const id = examplePipeline.datasourceId;
+        const id = exampleDatasourceId;
 
         beforeEach(async () => {
           await provider.addInteraction({
@@ -167,12 +206,12 @@ pactWith(options, provider => {
         it('returns the requested pipeline', async () => {
           const pipeline = await restService.getPipelineByDatasourceId(id);
 
-          expect(pipeline).toStrictEqual(examplePipeline);
+          expect(pipeline).toStrictEqual(examplePipelineWithoutSchema);
         });
       });
 
       describe('when no pipelines with the requested datasource id exist', () => {
-        const id = examplePipeline.datasourceId;
+        const id = exampleDatasourceId;
 
         beforeEach(async () => {
           await provider.addInteraction({
@@ -209,90 +248,133 @@ pactWith(options, provider => {
     });
 
     describe('creating a pipeline', () => {
-      beforeEach(async () => {
-        await provider.addInteraction({
-          state: 'any state',
-          uponReceiving: createRequestTitle,
-          withRequest: createRequest,
-          willRespondWith: createSuccessResponse,
+      describe('that has no schema', () => {
+        const pipeline = examplePipelineWithoutSchema;
+
+        beforeEach(async () => {
+          await provider.addInteraction({
+            state: 'any state',
+            uponReceiving: createRequestTitle(false),
+            withRequest: createRequest(pipeline),
+            willRespondWith: createSuccessResponse(pipeline),
+          });
+        });
+
+        it('returns the created pipeline', async () => {
+          const createdPipeline = await restService.createPipeline(pipeline);
+
+          const expectedPipeline = {
+            ...pipeline,
+            id: createdPipeline.id,
+          };
+          expect(createdPipeline).toStrictEqual(expectedPipeline);
         });
       });
 
-      it('returns the created pipeline', async () => {
-        const createdPipeline = await restService.createPipeline(
-          examplePipeline,
-        );
+      describe('that has a schema', () => {
+        const pipeline = examplePipelineWithSchema;
 
-        const expectedPipeline = {
-          ...examplePipeline,
-          id: createdPipeline.id,
-        };
-        expect(createdPipeline).toStrictEqual(expectedPipeline);
+        beforeEach(async () => {
+          await provider.addInteraction({
+            state: 'any state',
+            uponReceiving: createRequestTitle(true),
+            withRequest: createRequest(pipeline),
+            willRespondWith: createSuccessResponse(pipeline),
+          });
+        });
+
+        it('returns the created pipeline', async () => {
+          const createdPipeline = await restService.createPipeline(pipeline);
+
+          const expectedPipeline = {
+            ...pipeline,
+            id: createdPipeline.id,
+          };
+          expect(createdPipeline).toStrictEqual(expectedPipeline);
+        });
       });
     });
 
     describe('updating a pipeline', () => {
-      describe('when the pipeline to update exists', () => {
-        const id = examplePipeline.id;
+      describe('when the pipeline to update exists and its schema is not updated', () => {
+        const pipeline = examplePipelineWithoutSchema;
 
         beforeEach(async () => {
           await provider.addInteraction({
-            state: `pipeline with id ${id} exists`,
-            uponReceiving: updateRequestTitle(id),
-            withRequest: updateRequest(id),
+            state: `pipeline with id ${pipeline.id} exists`,
+            uponReceiving: updateRequestTitle(pipeline.id, false),
+            withRequest: updateRequest(pipeline),
             willRespondWith: updateSuccessResponse,
           });
         });
 
         it('succeeds', async () => {
-          await restService.updatePipeline(examplePipeline);
+          await restService.updatePipeline(pipeline);
+        });
+      });
+
+      describe('when the pipeline to update exists and its schema is updated', () => {
+        const pipeline = examplePipelineWithSchema;
+
+        beforeEach(async () => {
+          await provider.addInteraction({
+            state: `pipeline with id ${pipeline.id} exists`,
+            uponReceiving: updateRequestTitle(pipeline.id, true),
+            withRequest: updateRequest(pipeline),
+            willRespondWith: updateSuccessResponse,
+          });
+        });
+
+        it('succeeds', async () => {
+          await restService.updatePipeline(pipeline);
         });
       });
 
       describe('when the pipeline to update does not exist', () => {
-        const id = examplePipeline.id;
+        const pipeline = examplePipelineWithoutSchema;
 
         beforeEach(async () => {
           await provider.addInteraction({
-            state: `pipeline with id ${id} does not exist`,
-            uponReceiving: updateRequestTitle(id),
-            withRequest: updateRequest(id),
+            state: `pipeline with id ${pipeline.id} does not exist`,
+            uponReceiving: updateRequestTitle(pipeline.id, false),
+            withRequest: updateRequest(pipeline),
             willRespondWith: notFoundResponse,
           });
         });
 
         it('throws an error', async () => {
-          await expect(
-            restService.updatePipeline(examplePipeline),
-          ).rejects.toThrow(Error);
+          await expect(restService.updatePipeline(pipeline)).rejects.toThrow(
+            Error,
+          );
         });
       });
 
       describe('with NaN as id for the pipline to update', () => {
+        const pipeline = {
+          ...examplePipelineWithoutSchema,
+          id: NaN,
+        };
+
         beforeEach(async () => {
           await provider.addInteraction({
             state: 'any state',
-            uponReceiving: updateRequestTitle(NaN),
-            withRequest: updateRequest(NaN),
+            uponReceiving: updateRequestTitle(pipeline.id, false),
+            withRequest: updateRequest(pipeline),
             willRespondWith: badRequestResponse,
           });
         });
 
         it('throws an error', async () => {
-          const pipelineToUpdate = {
-            ...examplePipeline,
-            id: NaN,
-          };
-          await expect(
-            restService.updatePipeline(pipelineToUpdate),
-          ).rejects.toThrow(Error);
+          await expect(restService.updatePipeline(pipeline)).rejects.toThrow(
+            Error,
+          );
         });
       });
     });
 
     describe('deleting a pipeline', () => {
       describe('when the pipeline to delete exists', () => {
-        const id = examplePipeline.id;
+        const id = examplePipelineId;
 
         beforeEach(async () => {
           await provider.addInteraction({
@@ -309,7 +391,7 @@ pactWith(options, provider => {
       });
 
       describe('when the pipeline to delete does not exist', () => {
-        const id = examplePipeline.id;
+        const id = examplePipelineId;
 
         beforeEach(async () => {
           await provider.addInteraction({

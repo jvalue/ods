@@ -113,10 +113,18 @@ describe('Pact Provider Verification', () => {
       stateHandlers: {
         'any state': setupEmptyState,
         'no pipelines exist': setupEmptyState,
-        'some pipelines exist': setupSomePipelineConfigs,
-        'pipeline with id 1 exists': setupSomePipelineConfigs,
+        'some pipelines without schemas exist':
+          setupSomePipelineConfigsWithoutSchemas,
+        'some pipelines with schemas exist':
+          setupSomePipelineConfigsWithSchemas,
+        'pipeline with id 1 exists': setupSomePipelineConfigsWithoutSchemas,
+        'pipeline with id 1 exists and has no schema':
+          setupSomePipelineConfigsWithoutSchemas,
+        'pipeline with id 1 exists and has a schema':
+          setupSomePipelineConfigsWithSchemas,
         'pipeline with id 1 does not exist': setupEmptyState,
-        'pipelines with datasource id 2 exist': setupSomePipelineConfigs,
+        'pipelines with datasource id 2 exist':
+          setupSomePipelineConfigsWithoutSchemas,
         'pipelines with datasource id 2 do not exist': setupEmptyState,
         'transformed data with id 1 exists': setupSomePipelineTransformedData,
         'transformed data with id 1 does not exist': setupEmptyState,
@@ -134,11 +142,18 @@ async function setupEmptyState(): Promise<void> {
   return Promise.resolve();
 }
 
-async function setupSomePipelineConfigs(): Promise<void> {
+async function setupSomePipelineConfigsWithoutSchemas(): Promise<void> {
+  await setupSomePipelineConfigs(false);
+}
+
+async function setupSomePipelineConfigsWithSchemas(): Promise<void> {
+  await setupSomePipelineConfigs(true);
+}
+
+async function setupSomePipelineConfigs(withSchemas: boolean): Promise<void> {
   clearState();
-  addSamplePipelineConfig(++nextPipelineConfigId, 2, true);
-  addSamplePipelineConfig(++nextPipelineConfigId, 3, false);
-  addSamplePipelineConfig(++nextPipelineConfigId, 2, false);
+  addSamplePipelineConfig(++nextPipelineConfigId, 2, withSchemas);
+  addSamplePipelineConfig(++nextPipelineConfigId, 3, withSchemas);
 
   return Promise.resolve();
 }

@@ -10,9 +10,13 @@ import Pipeline, {
   TransformedDataMetaData,
 } from './pipeline/pipeline';
 
-export const examplePipeline: Pipeline = {
-  id: 1,
-  datasourceId: 2,
+export const examplePipelineId = 1;
+
+export const exampleDatasourceId = 2;
+
+export const examplePipelineWithoutSchema: Pipeline = {
+  id: examplePipelineId,
+  datasourceId: exampleDatasourceId,
   metadata: {
     author: 'some author',
     description: 'some description',
@@ -22,6 +26,11 @@ export const examplePipeline: Pipeline = {
   transformation: {
     func: 'some function',
   },
+};
+
+export const examplePipelineWithSchema: Pipeline = {
+  ...examplePipelineWithoutSchema,
+  schema: {},
 };
 
 export const getAllRequestTitle = 'a request for getting all pipelines';
@@ -39,14 +48,18 @@ export const getAllEmptyResponse: ResponseOptions = {
   body: [],
 };
 
-export const getAllSuccessResponse: ResponseOptions = {
-  // TODO any success status code is actually acceptable (i.e. 2xx)
-  status: 200,
-  headers: {
-    'Content-Type': 'application/json; charset=utf-8',
-  },
-  body: eachLike(examplePipeline),
-};
+export function getAllSuccessResponse(withSchema: boolean): ResponseOptions {
+  return {
+    // TODO any success status code is actually acceptable (i.e. 2xx)
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+    },
+    body: eachLike(
+      withSchema ? examplePipelineWithSchema : examplePipelineWithoutSchema,
+    ),
+  };
+}
 
 export function getByIdRequestTitle(id: number): string {
   return `a request for getting the pipeline with id ${id}`;
@@ -59,14 +72,18 @@ export function getByIdRequest(id: number): RequestOptions {
   };
 }
 
-export const getByIdSuccessResponse: ResponseOptions = {
-  // TODO any success status code is actually acceptable (i.e. 2xx)
-  status: 200,
-  headers: {
-    'Content-Type': 'application/json; charset=utf-8',
-  },
-  body: like(examplePipeline),
-};
+export function getByIdSuccessResponse(withSchema: boolean): ResponseOptions {
+  return {
+    // TODO any success status code is actually acceptable (i.e. 2xx)
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+    },
+    body: like(
+      withSchema ? examplePipelineWithSchema : examplePipelineWithoutSchema,
+    ),
+  };
+}
 
 export function getByDatasourceIdRequestTitle(datasourceId: number): string {
   return `a request for getting pipelines with datasource id ${datasourceId}`;
@@ -86,44 +103,51 @@ export const getByDatasourceIdSuccessResponse: ResponseOptions = {
   headers: {
     'Content-Type': 'application/json; charset=utf-8',
   },
-  body: like(examplePipeline),
+  body: like(examplePipelineWithoutSchema),
 };
 
-export const createRequestTitle = 'a request for creating a pipeline';
-
-export const createRequest: RequestOptions = {
-  method: 'POST',
-  path: '/configs/',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: examplePipeline,
-};
-
-export const createSuccessResponse: ResponseOptions = {
-  // TODO any success status code is actually acceptable (i.e. 2xx)
-  status: 201,
-  headers: {
-    'Content-Type': 'application/json; charset=utf-8',
-  },
-  body: like(examplePipeline),
-};
-
-export function updateRequestTitle(id: number): string {
-  return `a request for updating the pipeline with id ${id}`;
+export function createRequestTitle(withSchema: boolean): string {
+  return `a request for creating a pipeline ${
+    withSchema ? 'with' : 'without'
+  } schema`;
 }
 
-export function updateRequest(id: number): RequestOptions {
+export function createRequest(pipeline: Pipeline): RequestOptions {
   return {
-    method: 'PUT',
-    path: `/configs/${id}`,
+    method: 'POST',
+    path: '/configs/',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: {
-      ...examplePipeline,
-      id,
+    body: pipeline,
+  };
+}
+
+export function createSuccessResponse(pipeline: Pipeline): ResponseOptions {
+  return {
+    // TODO any success status code is actually acceptable (i.e. 2xx)
+    status: 201,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
     },
+    body: like(pipeline),
+  };
+}
+
+export function updateRequestTitle(id: number, withSchema: boolean): string {
+  return `a request for updating the pipeline with id ${id} ${
+    withSchema ? 'including' : 'excluding'
+  } its schema`;
+}
+
+export function updateRequest(pipeline: Pipeline): RequestOptions {
+  return {
+    method: 'PUT',
+    path: `/configs/${pipeline.id}`,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: pipeline,
   };
 }
 
