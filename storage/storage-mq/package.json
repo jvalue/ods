@@ -12,6 +12,7 @@
     "lint-ci": "eslint src --max-warnings=0",
     "lint-fix": "eslint src --fix",
     "test": "jest --colors --verbose --passWithNoTests",
+    "test:consumer": "jest --config consumer.jest.config.js --colors --verbose",
     "test:provider": "jest --config provider.jest.config.js --colors --verbose"
   },
   "dependencies": {
@@ -37,6 +38,7 @@
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-promise": "^5.1.0",
     "jest": "^26.6.3",
+    "jest-pact": "^0.9.1",
     "ts-jest": "^26.5.2",
     "tslib": "^2.1.0",
     "typescript": "^4.4.2"
