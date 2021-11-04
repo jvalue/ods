@@ -234,10 +234,6 @@ function addSamplePipelineTransformedData(
     pipelineId: 42,
     healthStatus: healthStatus,
     data: {},
-
-    /* TODO without this 'createdAt' field, the UI would not be able to fully interpret the response
-       because it expects the 'timestamp' field to be present which is derived from 'createdAt' */
-    createdAt: 'some creation date',
   };
   pipelineTransformedData.push(data);
 }
