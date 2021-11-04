@@ -8,6 +8,8 @@ services:
     environment:
       AMQP_PIPELINE_EXECUTION_EXCHANGE: 'ods_global'
       AMQP_PIPELINE_EXECUTION_QUEUE: 'notification.pipeline-execution'
+      AMQP_PIPELINE_CONFIG_EXCHANGE: 'ods_global'
+      AMQP_PIPELINE_CONFIG_QUEUE: 'storage-mq.pipeline-config'
     volumes:
       - ./pacts:/pacts
   pipeline-outboxer:
