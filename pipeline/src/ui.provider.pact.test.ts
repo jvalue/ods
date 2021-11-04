@@ -126,7 +126,12 @@ describe('Pact Provider Verification', () => {
         'pipelines with datasource id 2 exist':
           setupSomePipelineConfigsWithoutSchemas,
         'pipelines with datasource id 2 do not exist': setupEmptyState,
-        'transformed data with id 1 exists': setupSomePipelineTransformedData,
+        'transformed data with id 1 and health status OK exists':
+          setupSomePipelineTransformedDataWithHealthStatusOk,
+        'transformed data with id 1 and health status WARNING exists':
+          setupSomePipelineTransformedDataWithHealthStatusWarning,
+        'transformed data with id 1 and health status FAILED exists':
+          setupSomePipelineTransformedDataWithHealthStatusFailed,
         'transformed data with id 1 does not exist': setupEmptyState,
       },
     });
@@ -158,11 +163,24 @@ async function setupSomePipelineConfigs(withSchemas: boolean): Promise<void> {
   return Promise.resolve();
 }
 
-async function setupSomePipelineTransformedData(): Promise<void> {
+async function setupSomePipelineTransformedDataWithHealthStatusOk(): Promise<void> {
+  await setupSomePipelineTransformedData(HealthStatus.OK);
+}
+
+async function setupSomePipelineTransformedDataWithHealthStatusWarning(): Promise<void> {
+  await setupSomePipelineTransformedData(HealthStatus.WARNING);
+}
+
+async function setupSomePipelineTransformedDataWithHealthStatusFailed(): Promise<void> {
+  await setupSomePipelineTransformedData(HealthStatus.FAILED);
+}
+
+async function setupSomePipelineTransformedData(
+  healthStatus: HealthStatus,
+): Promise<void> {
   clearState();
-  addSamplePipelineTransformedData(1);
-  addSamplePipelineTransformedData(2);
-  addSamplePipelineTransformedData(3);
+  addSamplePipelineTransformedData(1, healthStatus);
+  addSamplePipelineTransformedData(2, healthStatus);
 
   return Promise.resolve();
 }
@@ -207,11 +225,14 @@ function clearPipelineTransformedData(): void {
   pipelineTransformedData.splice(0, pipelineTransformedData.length);
 }
 
-function addSamplePipelineTransformedData(id: number): void {
+function addSamplePipelineTransformedData(
+  id: number,
+  healthStatus: HealthStatus,
+): void {
   const data: PipelineTransformedData = {
     id: id,
     pipelineId: 42,
-    healthStatus: HealthStatus.OK,
+    healthStatus: healthStatus,
     data: {},
 
     /* TODO without this 'createdAt' field, the UI would not be able to fully interpret the response

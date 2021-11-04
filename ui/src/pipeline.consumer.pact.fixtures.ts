@@ -5,10 +5,7 @@ import {
   JobResult,
   TransformationRequest,
 } from './pipeline/edit/transformation/transformation';
-import Pipeline, {
-  HealthStatus,
-  TransformedDataMetaData,
-} from './pipeline/pipeline';
+import Pipeline, { HealthStatus } from './pipeline/pipeline';
 
 export const examplePipelineId = 1;
 
@@ -172,10 +169,7 @@ export const deleteSuccessResponse: ResponseOptions = {
   status: 204,
 };
 
-export const exampleTransformedData: TransformedDataMetaData = {
-  id: 1,
-  healthStatus: HealthStatus.OK,
-};
+export const exampleTransformedDataId = 1;
 
 export function getLatestTransformedDataRequestTitle(id: number): string {
   return `a request for getting latest transformed data with id ${id}`;
@@ -188,14 +182,21 @@ export function getLatestTransformedDataRequest(id: number): RequestOptions {
   };
 }
 
-export const getLatestTransformedDataSuccessResponse: ResponseOptions = {
-  // TODO any success status code is actually acceptable (i.e. 2xx)
-  status: 200,
-  headers: {
-    'Content-Type': 'application/json; charset=utf-8',
-  },
-  body: like(exampleTransformedData),
-};
+export function getLatestTransformedDataSuccessResponse(
+  healthStatus: HealthStatus,
+): ResponseOptions {
+  return {
+    // TODO any success status code is actually acceptable (i.e. 2xx)
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+    },
+    body: {
+      id: like(exampleTransformedDataId),
+      healthStatus: healthStatus,
+    },
+  };
+}
 
 export const exampleValidTransformationRequest: TransformationRequest = {
   func: 'data.value = 42; return data;',
@@ -203,9 +204,7 @@ export const exampleValidTransformationRequest: TransformationRequest = {
 };
 
 export const exampleSuccessJobResult: JobResult = {
-  data: {
-    value: 42,
-  },
+  data: {},
   stats: {
     durationInMilliSeconds: 3.14,
     startTimestamp: 123,

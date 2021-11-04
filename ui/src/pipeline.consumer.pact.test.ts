@@ -19,7 +19,7 @@ import {
   exampleSuccessJobResult,
   exampleTransformationRequestWithErrorThrowingFunction,
   exampleTransformationRequestWithInvalidSyntax,
-  exampleTransformedData,
+  exampleTransformedDataId,
   exampleValidTransformationRequest,
   getAllEmptyResponse,
   getAllRequest,
@@ -44,6 +44,7 @@ import {
   updateSuccessResponse,
 } from './pipeline.consumer.pact.fixtures';
 import { TransformationRest } from './pipeline/edit/transformation/transformationRest';
+import { HealthStatus } from './pipeline/pipeline';
 import { PipelineRest } from './pipeline/pipelineRest';
 import { PipelineTransRest } from './pipeline/pipelineTransRest';
 
@@ -434,28 +435,41 @@ pactWith(options, provider => {
 
     describe('getting latest transformed data', () => {
       describe('when the requested transformed data exists', () => {
-        const id = exampleTransformedData.id;
+        const id = exampleTransformedDataId;
 
-        beforeEach(async () => {
-          await provider.addInteraction({
-            state: `transformed data with id ${id} exists`,
-            uponReceiving: getLatestTransformedDataRequestTitle(id),
-            withRequest: getLatestTransformedDataRequest(id),
-            willRespondWith: getLatestTransformedDataSuccessResponse,
+        // eslint-disable-next-line guard-for-in
+        for (const healthStatusKey in HealthStatus) {
+          const healthStatus =
+            HealthStatus[healthStatusKey as keyof typeof HealthStatus];
+
+          describe(`with health status ${healthStatus}`, () => {
+            beforeEach(async () => {
+              await provider.addInteraction({
+                state: `transformed data with id ${id} and health status ${healthStatus} exists`,
+                uponReceiving: getLatestTransformedDataRequestTitle(id),
+                withRequest: getLatestTransformedDataRequest(id),
+                willRespondWith: getLatestTransformedDataSuccessResponse(
+                  healthStatus,
+                ),
+              });
+            });
+
+            it('returns the requested transformed data', async () => {
+              const transformedData = await restService.getLatestTransformedData(
+                id,
+              );
+
+              expect(transformedData).toStrictEqual({
+                id: exampleTransformedDataId,
+                healthStatus: healthStatus,
+              });
+            });
           });
-        });
-
-        it('returns the requested transformed data', async () => {
-          const transformedData = await restService.getLatestTransformedData(
-            id,
-          );
-
-          expect(transformedData).toStrictEqual(exampleTransformedData);
-        });
+        }
       });
 
       describe('when the requested transformed data does not exist', () => {
-        const id = exampleTransformedData.id;
+        const id = exampleTransformedDataId;
 
         beforeEach(async () => {
           await provider.addInteraction({
