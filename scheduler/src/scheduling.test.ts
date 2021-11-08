@@ -26,11 +26,15 @@ describe('Scheduler', () => {
   });
 
   test('should schedule new periodic datasource and trigger once', async () => {
-    const config = generateConfig(true, new Date(Date.now() + 500), 6000);
+    /**
+     * The first test case seems to required increased first execution date
+     * at the generated config for CI due to some warm-up period of the scheduler.
+     */
+    const config = generateConfig(true, new Date(Date.now() + 1000), 6000);
     const job = scheduler.upsertJob(config);
     expect(job.datasourceConfig).toEqual(config);
 
-    await sleep(1000);
+    await sleep(1500);
 
     expect(scheduler.getAllJobs()).toHaveLength(1);
     expect(scheduler.getAllJobs()[0].datasourceConfig).toEqual(config);
