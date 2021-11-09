@@ -23,7 +23,7 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "firebase-admin": "^9.9.0",
-    "vm2": "^3.9.3"
+    "vm2": "^3.9.5"
   },
   "devDependencies": {
     "@jvalue/eslint-config-jvalue": "^1.1.0",
