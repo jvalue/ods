@@ -1,27 +1,43 @@
 /* eslint-env jest */
+import { PostgresClient } from '@jvalue/node-dry-pg';
 import { mocked } from 'ts-jest/utils';
 
 import DatasourceConfig from './api/datasource-config';
-import { triggerDatasource } from './api/http/adapter-client';
+import * as OutboxEventPublisher from './datasource-trigger/outboxEventPublisher';
 import Scheduler from './scheduling';
 
-jest.mock('./api/http/adapter-client');
-const mockedTriggerDatasource = mocked(triggerDatasource);
-mockedTriggerDatasource.mockReturnValue(Promise.resolve());
+jest.mock('@jvalue/node-dry-pg', () => {
+  return {
+    PostgresClient: jest.fn().mockImplementation(() => {
+      return {
+        transaction: async (fn: () => Promise<void>): Promise<void> =>
+          await fn(),
+      };
+    }),
+  };
+});
+
+jest.mock('./datasource-trigger/outboxEventPublisher', () => {
+  return {
+    publishDatasourceTrigger: jest.fn(),
+  };
+});
 
 jest.mock('./env', () => ({ MAX_TRIGGER_RETRIES: 2 }));
 
 const TRIGGER_RETRIES = 3;
+const outboxEventPublisherMock = mocked(OutboxEventPublisher, true);
+const postgresClient = new PostgresClient();
 
 let scheduler: Scheduler;
 
 describe('Scheduler', () => {
   beforeEach(() => {
-    scheduler = new Scheduler(TRIGGER_RETRIES);
+    scheduler = new Scheduler(postgresClient, TRIGGER_RETRIES);
   });
 
   afterEach(() => {
-    mockedTriggerDatasource.mockClear();
+    outboxEventPublisherMock.publishDatasourceTrigger.mockClear();
     scheduler.removeAllJobs();
   });
 
@@ -38,8 +54,10 @@ describe('Scheduler', () => {
 
     expect(scheduler.getAllJobs()).toHaveLength(1);
     expect(scheduler.getAllJobs()[0].datasourceConfig).toEqual(config);
-    expect(mockedTriggerDatasource).toHaveBeenCalledTimes(1);
-  });
+    expect(
+      outboxEventPublisherMock.publishDatasourceTrigger,
+    ).toHaveBeenCalledTimes(1);
+  }, 10000);
 
   test('should schedule new periodic datasource and trigger multiple times', async () => {
     const config = generateConfig(true, new Date(Date.now() + 500), 1000);
@@ -50,7 +68,9 @@ describe('Scheduler', () => {
 
     expect(scheduler.getAllJobs()).toHaveLength(1);
     expect(scheduler.getAllJobs()[0].datasourceConfig).toEqual(config);
-    expect(mockedTriggerDatasource).toHaveBeenCalledTimes(2);
+    expect(
+      outboxEventPublisherMock.publishDatasourceTrigger,
+    ).toHaveBeenCalledTimes(2);
   });
 
   test('should schedule new periodic datasource with past execution date and trigger once', async () => {
@@ -62,7 +82,9 @@ describe('Scheduler', () => {
 
     expect(scheduler.getAllJobs()).toHaveLength(1);
     expect(scheduler.getAllJobs()[0].datasourceConfig).toEqual(config);
-    expect(mockedTriggerDatasource).toHaveBeenCalledTimes(1);
+    expect(
+      outboxEventPublisherMock.publishDatasourceTrigger,
+    ).toHaveBeenCalledTimes(1);
   });
 
   test('should schedule new non periodic datasource and trigger', async () => {
@@ -75,7 +97,9 @@ describe('Scheduler', () => {
     await sleep(1500);
 
     expect(scheduler.getAllJobs()).toHaveLength(0);
-    expect(mockedTriggerDatasource).toHaveBeenCalledTimes(1);
+    expect(
+      outboxEventPublisherMock.publishDatasourceTrigger,
+    ).toHaveBeenCalledTimes(1);
   });
 
   test('should schedule new non periodic datasource with past execution date and trigger', async () => {
@@ -88,7 +112,9 @@ describe('Scheduler', () => {
     await sleep(1500);
 
     expect(scheduler.getAllJobs()).toHaveLength(0);
-    expect(mockedTriggerDatasource).toHaveBeenCalledTimes(1);
+    expect(
+      outboxEventPublisherMock.publishDatasourceTrigger,
+    ).toHaveBeenCalledTimes(1);
   });
 
   test('should delete job', async () => {
@@ -100,7 +126,9 @@ describe('Scheduler', () => {
     await sleep(1000);
 
     expect(scheduler.getAllJobs()).toHaveLength(0);
-    expect(mockedTriggerDatasource).toHaveBeenCalledTimes(0);
+    expect(
+      outboxEventPublisherMock.publishDatasourceTrigger,
+    ).toHaveBeenCalledTimes(0);
   });
 
   test('should apply update event', () => {
@@ -232,7 +260,9 @@ describe('Scheduler', () => {
     await sleep(250);
 
     expect(scheduler.getJob(datasourceConfig.id)).toBeUndefined(); // Executed once and not rescheduled
-    expect(mockedTriggerDatasource).toHaveBeenCalledTimes(1);
+    expect(
+      outboxEventPublisherMock.publishDatasourceTrigger,
+    ).toHaveBeenCalledTimes(1);
   });
 
   test('should execute datasource periodic', async () => {
@@ -254,7 +284,9 @@ describe('Scheduler', () => {
       datasourceJob2?.datasourceConfig,
     );
     await sleep(250);
-    expect(mockedTriggerDatasource.mock.calls.length).toBeGreaterThan(1);
+    expect(
+      outboxEventPublisherMock.publishDatasourceTrigger.mock.calls.length,
+    ).toBeGreaterThan(1);
   });
 });
 
