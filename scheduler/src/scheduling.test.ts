@@ -19,11 +19,7 @@ jest.mock('@jvalue/node-dry-pg', () => {
 
 jest.mock('./datasource-trigger/outboxEventPublisher', () => {
   return {
-    publishDatasourceTrigger: jest.fn(() => {
-      console.log(
-        "######################################### CALLED 'publishDatasourceTrigger' MOCK #########################################",
-      );
-    }),
+    publishDatasourceTrigger: jest.fn(),
   };
 });
 
@@ -46,29 +42,17 @@ describe('Scheduler', () => {
   });
 
   test('should schedule new periodic datasource and trigger once', async () => {
-    console.log(
-      '######################################### STRANGE TEST START ################################################',
-    );
     const config = generateConfig(true, new Date(Date.now() + 500), 6000);
     const job = scheduler.upsertJob(config);
     expect(job.datasourceConfig).toEqual(config);
 
-    console.log(
-      '######################################### STRANGE TEST BEFORE SLEEP ################################################',
-    );
     await sleep(5000);
 
     expect(scheduler.getAllJobs()).toHaveLength(1);
     expect(scheduler.getAllJobs()[0].datasourceConfig).toEqual(config);
-    console.log(
-      '######################################### STRANGE TEST BEFORE ISSUE ################################################',
-    );
     expect(
       outboxEventPublisherMock.publishDatasourceTrigger,
     ).toHaveBeenCalledTimes(1);
-    console.log(
-      '######################################### STRANGE TEST AFTER ISSUE ################################################',
-    );
   }, 10000);
 
   test('should schedule new periodic datasource and trigger multiple times', async () => {
