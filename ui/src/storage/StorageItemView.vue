@@ -1,10 +1,10 @@
 <template>
   <div>
-    <div v-if="item !== null">
+    <div v-if="item != null">
       <v-card class="grey lighten-3">
-        <v-container fluid :key="updateKey">
+        <v-container fluid>
           <pre
-            v-if="item && item.data"
+            v-if="item.data !== undefined"
             style="max-height: 400px; overflow:auto; text-align: left"
           >
             {{ item.data }}
@@ -54,9 +54,8 @@ import { StorageItem } from './storage-item';
 import { StorageRest } from './storageRest';
 
 @Component({})
-export default class PipelineStorageOverview extends Vue {
-  private item: StorageItem | undefined = undefined;
-  private updateKey = -1;
+export default class StorageItemView extends Vue {
+  private item: StorageItem | null = null;
 
   private clipUrl = clipboardCopy;
 
@@ -68,14 +67,11 @@ export default class PipelineStorageOverview extends Vue {
   @Prop()
   private readonly itemId!: number;
 
-  private async mounted(): Promise<void> {
+  async mounted(): Promise<void> {
     try {
-      this.item = await this.storageRest.getStoredItem(
-        this.pipelineId,
-        this.itemId,
-      );
-      // Trigger key update in case item is not undefined (thus trigger rerender of the display)
-      this.updateKey = this.item?.id || -1;
+      this.item =
+        (await this.storageRest.getStoredItem(this.pipelineId, this.itemId)) ||
+        null;
     } catch (error) {
       console.error('Failed to fetch stored items', error);
     }
