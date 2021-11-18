@@ -129,11 +129,14 @@ describe('Pact Provider Verification', () => {
           setupSomePipelineConfigsWithoutSchemas,
         'pipelines with datasource id 2 do not exist': setupEmptyState,
         'transformed data with id 1 and health status OK exists':
-          setupSomePipelineTransformedDataWithHealthStatusOk,
+          async (): Promise<void> =>
+            setupSomePipelineTransformedData(HealthStatus.OK),
         'transformed data with id 1 and health status WARNING exists':
-          setupSomePipelineTransformedDataWithHealthStatusWarning,
+          async (): Promise<void> =>
+            setupSomePipelineTransformedData(HealthStatus.WARNING),
         'transformed data with id 1 and health status FAILED exists':
-          setupSomePipelineTransformedDataWithHealthStatusFailed,
+          async (): Promise<void> =>
+            setupSomePipelineTransformedData(HealthStatus.FAILED),
         'transformed data with id 1 does not exist': setupEmptyState,
       },
     });
@@ -164,18 +167,6 @@ async function setupSomePipelineConfigs(withSchemas: boolean): Promise<void> {
   addSamplePipelineConfig(2, withSchemas);
 
   return Promise.resolve();
-}
-
-async function setupSomePipelineTransformedDataWithHealthStatusOk(): Promise<void> {
-  await setupSomePipelineTransformedData(HealthStatus.OK);
-}
-
-async function setupSomePipelineTransformedDataWithHealthStatusWarning(): Promise<void> {
-  await setupSomePipelineTransformedData(HealthStatus.WARNING);
-}
-
-async function setupSomePipelineTransformedDataWithHealthStatusFailed(): Promise<void> {
-  await setupSomePipelineTransformedData(HealthStatus.FAILED);
 }
 
 async function setupSomePipelineTransformedData(
