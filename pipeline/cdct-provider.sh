@@ -7,10 +7,10 @@ dir=$(dirname "$0")
 cd ${dir}/..
 
 # remove containers that already exist which may distort the initial state of the service
-containersToRemove=( "ods_rabbitmq" "ods_pipeline-db" )
+containersToRemove=( "rabbitmq" "pipeline-db" )
 for containerName in ${containersToRemove[@]}
 do
-  containerIds=$(docker ps -a -q --filter name=$containerName)
+  containerIds=$(docker ps -a -q --filter name=$(basename $PWD)_$containerName)
   [[ -n $containerIds ]] && docker rm -f -v $containerIds
 done
 
