@@ -105,7 +105,7 @@ export default class PipelineModule extends VuexModule {
   async loadPipelinesByDatasourceId(
     datasourceId: number,
   ): Promise<PipelinesByDatasourcePayload> {
-    const pipelines: Pipeline[] = await this.restService.getPipelineByDatasourceId(
+    const pipelines: Pipeline[] = await this.restService.getPipelinesByDatasourceId(
       datasourceId,
     );
     return {

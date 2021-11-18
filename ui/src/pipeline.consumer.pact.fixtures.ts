@@ -103,14 +103,20 @@ export const getByDatasourceIdEmptyResponse: ResponseOptions = {
   body: [],
 };
 
-export const getByDatasourceIdSuccessResponse: ResponseOptions = {
-  // TODO any success status code is actually acceptable (i.e. 2xx)
-  status: 200,
-  headers: {
-    'Content-Type': 'application/json; charset=utf-8',
-  },
-  body: eachLike(examplePipelineWithoutSchema),
-};
+export function getByDatasourceIdSuccessResponse(
+  withSchema: boolean,
+): ResponseOptions {
+  return {
+    // TODO any success status code is actually acceptable (i.e. 2xx)
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+    },
+    body: eachLike(
+      withSchema ? examplePipelineWithSchema : examplePipelineWithoutSchema,
+    ),
+  };
+}
 
 export function createRequestTitle(withSchema: boolean): string {
   return `a request for creating a pipeline ${

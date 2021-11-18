@@ -123,7 +123,9 @@ describe('Pact Provider Verification', () => {
         'pipeline with id 1 exists and has a schema':
           setupSomePipelineConfigsWithSchemas,
         'pipeline with id 1 does not exist': setupEmptyState,
-        'pipelines with datasource id 2 exist':
+        'pipelines with datasource id 2 exist and have schemas':
+          setupSomePipelineConfigsWithSchemas,
+        'pipelines with datasource id 2 exist and have no schemas':
           setupSomePipelineConfigsWithoutSchemas,
         'pipelines with datasource id 2 do not exist': setupEmptyState,
         'transformed data with id 1 and health status OK exists':
@@ -157,8 +159,9 @@ async function setupSomePipelineConfigsWithSchemas(): Promise<void> {
 
 async function setupSomePipelineConfigs(withSchemas: boolean): Promise<void> {
   clearState();
-  addSamplePipelineConfig(++nextPipelineConfigId, 2, withSchemas);
-  addSamplePipelineConfig(++nextPipelineConfigId, 3, withSchemas);
+  addSamplePipelineConfig(2, withSchemas);
+  addSamplePipelineConfig(3, withSchemas);
+  addSamplePipelineConfig(2, withSchemas);
 
   return Promise.resolve();
 }
@@ -197,12 +200,11 @@ function clearPipelineConfigs(): void {
 }
 
 function addSamplePipelineConfig(
-  id: number,
   datasourceId: number,
   withSchema: boolean,
 ): void {
   const pipelineConfig: PipelineConfig = {
-    id: id,
+    id: ++nextPipelineConfigId,
     datasourceId: datasourceId,
     metadata: {
       author: 'some author',

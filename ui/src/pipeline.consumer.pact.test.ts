@@ -192,22 +192,41 @@ pactWith(options, provider => {
     });
 
     describe('getting pipelines by datasource id', () => {
-      describe('when a pipeline with the requested datasource id exists', () => {
+      describe('when pipelines with the requested datasource id exist and have no schemas', () => {
         const id = exampleDatasourceId;
 
         beforeEach(async () => {
           await provider.addInteraction({
-            state: `pipelines with datasource id ${id} exist`,
+            state: `pipelines with datasource id ${id} exist and have no schemas`,
             uponReceiving: getByDatasourceIdRequestTitle(id),
             withRequest: getByDatasourceIdRequest(id),
-            willRespondWith: getByDatasourceIdSuccessResponse,
+            willRespondWith: getByDatasourceIdSuccessResponse(false),
           });
         });
 
         it('returns the requested pipelines', async () => {
-          const pipelines = await restService.getPipelineByDatasourceId(id);
+          const pipelines = await restService.getPipelinesByDatasourceId(id);
 
           expect(pipelines).toStrictEqual([examplePipelineWithoutSchema]);
+        });
+      });
+
+      describe('when pipelines with the requested datasource id exist and have schemas', () => {
+        const id = exampleDatasourceId;
+
+        beforeEach(async () => {
+          await provider.addInteraction({
+            state: `pipelines with datasource id ${id} exist and have schemas`,
+            uponReceiving: getByDatasourceIdRequestTitle(id),
+            withRequest: getByDatasourceIdRequest(id),
+            willRespondWith: getByDatasourceIdSuccessResponse(true),
+          });
+        });
+
+        it('returns the requested pipelines', async () => {
+          const pipelines = await restService.getPipelinesByDatasourceId(id);
+
+          expect(pipelines).toStrictEqual([examplePipelineWithSchema]);
         });
       });
 
@@ -224,7 +243,7 @@ pactWith(options, provider => {
         });
 
         it('returns an empty pipeline array', async () => {
-          const pipelines = await restService.getPipelineByDatasourceId(id);
+          const pipelines = await restService.getPipelinesByDatasourceId(id);
 
           expect(pipelines).toStrictEqual([]);
         });
@@ -242,7 +261,7 @@ pactWith(options, provider => {
 
         it('throws an error', async () => {
           await expect(
-            restService.getPipelineByDatasourceId(NaN),
+            restService.getPipelinesByDatasourceId(NaN),
           ).rejects.toThrow(Error);
         });
       });
