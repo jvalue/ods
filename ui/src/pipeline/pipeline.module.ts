@@ -6,6 +6,11 @@ import { PipelineTransRest } from './pipelineTransRest';
 
 import { PIPELINE_SERVICE_URL } from '@/env';
 
+interface PipelinesByDatasourcePayload {
+  datasourceId: number;
+  pipelines: Pipeline[];
+}
+
 @Module({ namespaced: true })
 export default class PipelineModule extends VuexModule {
   private pipelines: Pipeline[] = [];
@@ -21,6 +26,21 @@ export default class PipelineModule extends VuexModule {
   @Mutation
   setPipelines(pipelines: Pipeline[]): void {
     this.pipelines = pipelines;
+    this.isLoadingPipelines = false;
+  }
+
+  @Mutation
+  setPipelinesByDatasourceId(payload: PipelinesByDatasourcePayload): void {
+    for (const newPipeline of payload.pipelines) {
+      const index = this.pipelines.findIndex(el => el.id === newPipeline.id);
+      if (index >= 0) {
+        // Already part of array -> replace
+        this.pipelines[index] = newPipeline;
+      } else {
+        // Not found -> insert
+        this.pipelines.push(newPipeline);
+      }
+    }
     this.isLoadingPipelines = false;
   }
 
@@ -81,9 +101,17 @@ export default class PipelineModule extends VuexModule {
     return await this.restService.getPipelineById(id);
   }
 
-  @Action({ commit: 'setSelectedPipeline', rawError: true })
-  async loadPipelineByDatasourceId(datasourceId: number): Promise<Pipeline> {
-    return await this.restService.getPipelineByDatasourceId(datasourceId);
+  @Action({ commit: 'setPipelinesByDatasourceId', rawError: true })
+  async loadPipelinesByDatasourceId(
+    datasourceId: number,
+  ): Promise<PipelinesByDatasourcePayload> {
+    const pipelines: Pipeline[] = await this.restService.getPipelineByDatasourceId(
+      datasourceId,
+    );
+    return {
+      datasourceId: datasourceId,
+      pipelines: pipelines,
+    };
   }
 
   @Action({ commit: 'setPipelines', rawError: true })

@@ -12,7 +12,3 @@ export async function getAllDatasources(): Promise<DatasourceConfig[]> {
   const response = await http.get('/datasources');
   return response.data as DatasourceConfig[];
 }
-
-export async function triggerDatasource(datasourceId: number): Promise<void> {
-  return await http.post(`/datasources/${datasourceId}/trigger`);
-}

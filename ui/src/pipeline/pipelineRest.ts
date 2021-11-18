@@ -28,11 +28,11 @@ export class PipelineRest {
     return JSON.parse(response.data) as Pipeline;
   }
 
-  async getPipelineByDatasourceId(datasourceId: number): Promise<Pipeline> {
+  async getPipelineByDatasourceId(datasourceId: number): Promise<Pipeline[]> {
     const response = await this.httpPipelineConfigs.get(
       `?datasourceId=${datasourceId}`,
     );
-    return JSON.parse(response.data) as Pipeline;
+    return JSON.parse(response.data) as Pipeline[];
   }
 
   async createPipeline(pipeline: Pipeline): Promise<Pipeline> {
