@@ -80,13 +80,22 @@ export function getByDatasourceIdRequest(datasourceId: number): RequestOptions {
   };
 }
 
+export const getByDatasourceIdEmptyResponse: ResponseOptions = {
+  // TODO any success status code is actually acceptable (i.e. 2xx)
+  status: 200,
+  headers: {
+    'Content-Type': 'application/json; charset=utf-8',
+  },
+  body: [],
+};
+
 export const getByDatasourceIdSuccessResponse: ResponseOptions = {
   // TODO any success status code is actually acceptable (i.e. 2xx)
   status: 200,
   headers: {
     'Content-Type': 'application/json; charset=utf-8',
   },
-  body: like(examplePipeline),
+  body: eachLike(examplePipeline),
 };
 
 export const createRequestTitle = 'a request for creating a pipeline';

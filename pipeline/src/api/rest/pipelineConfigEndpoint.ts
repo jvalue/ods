@@ -102,13 +102,18 @@ export class PipelineConfigEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    const datasourceId = Number.parseInt(
-      this.getQueryParameter(req, 'datasourceId'),
-      10,
-    );
-    if (Number.isNaN(datasourceId)) {
+    const datasourceIdParameter = this.getQueryParameter(req, 'datasourceId');
+    // Check if datasourceId query parameter was given
+    if (!datasourceIdParameter) {
+      // No datasourceId parameter given -> return all
       const configs = await this.pipelineConfigManager.getAll();
       res.status(200).json(configs);
+      return;
+    }
+    // DatasourceId parameter given -> check on NaN
+    const datasourceId = Number.parseInt(datasourceIdParameter, 10);
+    if (Number.isNaN(datasourceId)) {
+      res.status(400).send('Invalid query parameter datasourceId');
       return;
     }
     const configs = await this.pipelineConfigManager.getByDatasourceId(

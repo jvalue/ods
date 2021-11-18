@@ -22,6 +22,7 @@ import {
   getAllRequest,
   getAllRequestTitle,
   getAllSuccessResponse,
+  getByDatasourceIdEmptyResponse,
   getByDatasourceIdRequest,
   getByDatasourceIdRequestTitle,
   getByDatasourceIdSuccessResponse,
@@ -150,9 +151,8 @@ pactWith(options, provider => {
       });
     });
 
-    // TODO do not skip these tests anymore as soon as issue #353 is solved
-    describe.skip('getting a pipeline by datasource id', () => {
-      describe('when a pipeline with the requested datasource id exist', () => {
+    describe('getting pipelines by datasource id', () => {
+      describe('when a pipeline with the requested datasource id exists', () => {
         const id = examplePipeline.datasourceId;
 
         beforeEach(async () => {
@@ -164,10 +164,10 @@ pactWith(options, provider => {
           });
         });
 
-        it('returns the requested pipeline', async () => {
-          const pipeline = await restService.getPipelineByDatasourceId(id);
+        it('returns the requested pipelines', async () => {
+          const pipelines = await restService.getPipelineByDatasourceId(id);
 
-          expect(pipeline).toStrictEqual(examplePipeline);
+          expect(pipelines).toStrictEqual([examplePipeline]);
         });
       });
 
@@ -179,14 +179,14 @@ pactWith(options, provider => {
             state: `pipelines with datasource id ${id} do not exist`,
             uponReceiving: getByDatasourceIdRequestTitle(id),
             withRequest: getByDatasourceIdRequest(id),
-            willRespondWith: notFoundResponse,
+            willRespondWith: getByDatasourceIdEmptyResponse,
           });
         });
 
-        it('throws an error', async () => {
-          await expect(
-            restService.getPipelineByDatasourceId(id),
-          ).rejects.toThrow(Error);
+        it('returns an empty pipeline array', async () => {
+          const pipelines = await restService.getPipelineByDatasourceId(id);
+
+          expect(pipelines).toStrictEqual([]);
         });
       });
 
