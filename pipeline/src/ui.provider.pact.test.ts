@@ -113,12 +113,30 @@ describe('Pact Provider Verification', () => {
       stateHandlers: {
         'any state': setupEmptyState,
         'no pipelines exist': setupEmptyState,
-        'some pipelines exist': setupSomePipelineConfigs,
-        'pipeline with id 1 exists': setupSomePipelineConfigs,
+        'some pipelines without schemas exist':
+          setupSomePipelineConfigsWithoutSchemas,
+        'some pipelines with schemas exist':
+          setupSomePipelineConfigsWithSchemas,
+        'pipeline with id 1 exists': setupSomePipelineConfigsWithoutSchemas,
+        'pipeline with id 1 exists and has no schema':
+          setupSomePipelineConfigsWithoutSchemas,
+        'pipeline with id 1 exists and has a schema':
+          setupSomePipelineConfigsWithSchemas,
         'pipeline with id 1 does not exist': setupEmptyState,
-        'pipelines with datasource id 2 exist': setupSomePipelineConfigs,
+        'pipelines with datasource id 2 exist and have schemas':
+          setupSomePipelineConfigsWithSchemas,
+        'pipelines with datasource id 2 exist and have no schemas':
+          setupSomePipelineConfigsWithoutSchemas,
         'pipelines with datasource id 2 do not exist': setupEmptyState,
-        'transformed data with id 1 exists': setupSomePipelineTransformedData,
+        'transformed data with id 1 and health status OK exists':
+          async (): Promise<void> =>
+            setupSomePipelineTransformedData(HealthStatus.OK),
+        'transformed data with id 1 and health status WARNING exists':
+          async (): Promise<void> =>
+            setupSomePipelineTransformedData(HealthStatus.WARNING),
+        'transformed data with id 1 and health status FAILED exists':
+          async (): Promise<void> =>
+            setupSomePipelineTransformedData(HealthStatus.FAILED),
         'transformed data with id 1 does not exist': setupEmptyState,
       },
     });
@@ -134,20 +152,29 @@ async function setupEmptyState(): Promise<void> {
   return Promise.resolve();
 }
 
-async function setupSomePipelineConfigs(): Promise<void> {
+async function setupSomePipelineConfigsWithoutSchemas(): Promise<void> {
+  await setupSomePipelineConfigs(false);
+}
+
+async function setupSomePipelineConfigsWithSchemas(): Promise<void> {
+  await setupSomePipelineConfigs(true);
+}
+
+async function setupSomePipelineConfigs(withSchemas: boolean): Promise<void> {
   clearState();
-  addSamplePipelineConfig(++nextPipelineConfigId, 2, true);
-  addSamplePipelineConfig(++nextPipelineConfigId, 3, false);
-  addSamplePipelineConfig(++nextPipelineConfigId, 2, false);
+  addSamplePipelineConfig(2, withSchemas);
+  addSamplePipelineConfig(3, withSchemas);
+  addSamplePipelineConfig(2, withSchemas);
 
   return Promise.resolve();
 }
 
-async function setupSomePipelineTransformedData(): Promise<void> {
+async function setupSomePipelineTransformedData(
+  healthStatus: HealthStatus,
+): Promise<void> {
   clearState();
-  addSamplePipelineTransformedData(1);
-  addSamplePipelineTransformedData(2);
-  addSamplePipelineTransformedData(3);
+  addSamplePipelineTransformedData(1, healthStatus);
+  addSamplePipelineTransformedData(2, healthStatus);
 
   return Promise.resolve();
 }
@@ -164,12 +191,11 @@ function clearPipelineConfigs(): void {
 }
 
 function addSamplePipelineConfig(
-  id: number,
   datasourceId: number,
   withSchema: boolean,
 ): void {
   const pipelineConfig: PipelineConfig = {
-    id: id,
+    id: ++nextPipelineConfigId,
     datasourceId: datasourceId,
     metadata: {
       author: 'some author',
@@ -192,16 +218,15 @@ function clearPipelineTransformedData(): void {
   pipelineTransformedData.splice(0, pipelineTransformedData.length);
 }
 
-function addSamplePipelineTransformedData(id: number): void {
+function addSamplePipelineTransformedData(
+  id: number,
+  healthStatus: HealthStatus,
+): void {
   const data: PipelineTransformedData = {
     id: id,
     pipelineId: 42,
-    healthStatus: HealthStatus.OK,
+    healthStatus: healthStatus,
     data: {},
-
-    /* TODO without this 'createdAt' field, the UI would not be able to fully interpret the response
-       because it expects the 'timestamp' field to be present which is derived from 'createdAt' */
-    createdAt: 'some creation date',
   };
   pipelineTransformedData.push(data);
 }

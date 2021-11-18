@@ -26,10 +26,15 @@ if (fs.existsSync(contractPath)) {
   fs.unlinkSync(contractPath);
 }
 
-const examplePipelineSuccessEvent: PipelineSuccessEvent = {
+const examplePipelineSuccessEventWithoutSchema: PipelineSuccessEvent = {
   pipelineId: 1,
   pipelineName: 'some pipeline name',
   data: {},
+};
+
+const examplePipelineSuccessEventWithSchema: PipelineSuccessEvent = {
+  ...examplePipelineSuccessEventWithoutSchema,
+  schema: {},
 };
 
 jest.mock('./env', () => ({}));
@@ -52,16 +57,28 @@ const mockNotificationExecutor =
 
 messagePactWith(options, (messagePact) => {
   describe('receiving an amqp message', () => {
-    it('handles a success event', async () => {
-      const triggerEventHandler = new TriggerEventHandler(
-        mockPostgresNotificationRepository(),
-        mockNotificationExecutor(),
-      );
+    const triggerEventHandler = new TriggerEventHandler(
+      mockPostgresNotificationRepository(),
+      mockNotificationExecutor(),
+    );
 
+    it('handles a success event without schema', async () => {
       await messagePact
         .given('any state')
-        .expectsToReceive('a success event')
-        .withContent(Matchers.like(examplePipelineSuccessEvent))
+        .expectsToReceive('a success event without schema')
+        .withContent(Matchers.like(examplePipelineSuccessEventWithoutSchema))
+        .verify(
+          asynchronousBodyHandler(
+            async (body) => await triggerEventHandler.handleEvent(body),
+          ),
+        );
+    });
+
+    it('handles a success event with schema', async () => {
+      await messagePact
+        .given('any state')
+        .expectsToReceive('a success event with schema')
+        .withContent(Matchers.like(examplePipelineSuccessEventWithSchema))
         .verify(
           asynchronousBodyHandler(
             async (body) => await triggerEventHandler.handleEvent(body),

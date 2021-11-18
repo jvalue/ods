@@ -5,14 +5,15 @@ import {
   JobResult,
   TransformationRequest,
 } from './pipeline/edit/transformation/transformation';
-import Pipeline, {
-  HealthStatus,
-  TransformedDataMetaData,
-} from './pipeline/pipeline';
+import Pipeline, { HealthStatus } from './pipeline/pipeline';
 
-export const examplePipeline: Pipeline = {
-  id: 1,
-  datasourceId: 2,
+export const examplePipelineId = 1;
+
+export const exampleDatasourceId = 2;
+
+export const examplePipelineWithoutSchema: Pipeline = {
+  id: examplePipelineId,
+  datasourceId: exampleDatasourceId,
   metadata: {
     author: 'some author',
     description: 'some description',
@@ -22,6 +23,11 @@ export const examplePipeline: Pipeline = {
   transformation: {
     func: 'some function',
   },
+};
+
+export const examplePipelineWithSchema: Pipeline = {
+  ...examplePipelineWithoutSchema,
+  schema: {},
 };
 
 export const getAllRequestTitle = 'a request for getting all pipelines';
@@ -39,14 +45,18 @@ export const getAllEmptyResponse: ResponseOptions = {
   body: [],
 };
 
-export const getAllSuccessResponse: ResponseOptions = {
-  // TODO any success status code is actually acceptable (i.e. 2xx)
-  status: 200,
-  headers: {
-    'Content-Type': 'application/json; charset=utf-8',
-  },
-  body: eachLike(examplePipeline),
-};
+export function getAllSuccessResponse(withSchema: boolean): ResponseOptions {
+  return {
+    // TODO any success status code is actually acceptable (i.e. 2xx)
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+    },
+    body: eachLike(
+      withSchema ? examplePipelineWithSchema : examplePipelineWithoutSchema,
+    ),
+  };
+}
 
 export function getByIdRequestTitle(id: number): string {
   return `a request for getting the pipeline with id ${id}`;
@@ -59,14 +69,18 @@ export function getByIdRequest(id: number): RequestOptions {
   };
 }
 
-export const getByIdSuccessResponse: ResponseOptions = {
-  // TODO any success status code is actually acceptable (i.e. 2xx)
-  status: 200,
-  headers: {
-    'Content-Type': 'application/json; charset=utf-8',
-  },
-  body: like(examplePipeline),
-};
+export function getByIdSuccessResponse(withSchema: boolean): ResponseOptions {
+  return {
+    // TODO any success status code is actually acceptable (i.e. 2xx)
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+    },
+    body: like(
+      withSchema ? examplePipelineWithSchema : examplePipelineWithoutSchema,
+    ),
+  };
+}
 
 export function getByDatasourceIdRequestTitle(datasourceId: number): string {
   return `a request for getting pipelines with datasource id ${datasourceId}`;
@@ -89,50 +103,63 @@ export const getByDatasourceIdEmptyResponse: ResponseOptions = {
   body: [],
 };
 
-export const getByDatasourceIdSuccessResponse: ResponseOptions = {
-  // TODO any success status code is actually acceptable (i.e. 2xx)
-  status: 200,
-  headers: {
-    'Content-Type': 'application/json; charset=utf-8',
-  },
-  body: eachLike(examplePipeline),
-};
-
-export const createRequestTitle = 'a request for creating a pipeline';
-
-export const createRequest: RequestOptions = {
-  method: 'POST',
-  path: '/configs/',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: examplePipeline,
-};
-
-export const createSuccessResponse: ResponseOptions = {
-  // TODO any success status code is actually acceptable (i.e. 2xx)
-  status: 201,
-  headers: {
-    'Content-Type': 'application/json; charset=utf-8',
-  },
-  body: like(examplePipeline),
-};
-
-export function updateRequestTitle(id: number): string {
-  return `a request for updating the pipeline with id ${id}`;
+export function getByDatasourceIdSuccessResponse(
+  withSchema: boolean,
+): ResponseOptions {
+  return {
+    // TODO any success status code is actually acceptable (i.e. 2xx)
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+    },
+    body: eachLike(
+      withSchema ? examplePipelineWithSchema : examplePipelineWithoutSchema,
+    ),
+  };
 }
 
-export function updateRequest(id: number): RequestOptions {
+export function createRequestTitle(withSchema: boolean): string {
+  return `a request for creating a pipeline ${
+    withSchema ? 'with' : 'without'
+  } schema`;
+}
+
+export function createRequest(pipeline: Pipeline): RequestOptions {
   return {
-    method: 'PUT',
-    path: `/configs/${id}`,
+    method: 'POST',
+    path: '/configs/',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: {
-      ...examplePipeline,
-      id,
+    body: pipeline,
+  };
+}
+
+export function createSuccessResponse(pipeline: Pipeline): ResponseOptions {
+  return {
+    // TODO any success status code is actually acceptable (i.e. 2xx)
+    status: 201,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
     },
+    body: like(pipeline),
+  };
+}
+
+export function updateRequestTitle(id: number, withSchema: boolean): string {
+  return `a request for updating the pipeline with id ${id} ${
+    withSchema ? 'including' : 'excluding'
+  } its schema`;
+}
+
+export function updateRequest(pipeline: Pipeline): RequestOptions {
+  return {
+    method: 'PUT',
+    path: `/configs/${pipeline.id}`,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: pipeline,
   };
 }
 
@@ -157,11 +184,7 @@ export const deleteSuccessResponse: ResponseOptions = {
   status: 204,
 };
 
-export const exampleTransformedData: TransformedDataMetaData = {
-  id: 1,
-  healthStatus: HealthStatus.OK,
-  timestamp: 'some timestamp', // TODO is this attribute required anywhere?
-};
+export const exampleTransformedDataId = 1;
 
 export function getLatestTransformedDataRequestTitle(id: number): string {
   return `a request for getting latest transformed data with id ${id}`;
@@ -174,14 +197,21 @@ export function getLatestTransformedDataRequest(id: number): RequestOptions {
   };
 }
 
-export const getLatestTransformedDataSuccessResponse: ResponseOptions = {
-  // TODO any success status code is actually acceptable (i.e. 2xx)
-  status: 200,
-  headers: {
-    'Content-Type': 'application/json; charset=utf-8',
-  },
-  body: like(exampleTransformedData),
-};
+export function getLatestTransformedDataSuccessResponse(
+  healthStatus: HealthStatus,
+): ResponseOptions {
+  return {
+    // TODO any success status code is actually acceptable (i.e. 2xx)
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+    },
+    body: {
+      id: like(exampleTransformedDataId),
+      healthStatus: healthStatus,
+    },
+  };
+}
 
 export const exampleValidTransformationRequest: TransformationRequest = {
   func: 'data.value = 42; return data;',
@@ -189,9 +219,7 @@ export const exampleValidTransformationRequest: TransformationRequest = {
 };
 
 export const exampleSuccessJobResult: JobResult = {
-  data: {
-    value: 42,
-  },
+  data: {},
   stats: {
     durationInMilliSeconds: 3.14,
     startTimestamp: 123,

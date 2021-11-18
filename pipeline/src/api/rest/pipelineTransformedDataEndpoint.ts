@@ -39,7 +39,7 @@ export class PipelineTranformedDataEndpoint {
     const transformedDataMetaData: PipelineTransformedDataMetaData = {
       id: transformedData.id,
       healthStatus: transformedData.healthStatus,
-      timestamp: transformedData.createdAt as string,
+      timestamp: transformedData.createdAt,
     };
     res.status(200).json(transformedDataMetaData);
   };

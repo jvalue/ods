@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 
 import Pipeline from './pipeline';
 
@@ -28,7 +28,7 @@ export class PipelineRest {
     return JSON.parse(response.data) as Pipeline;
   }
 
-  async getPipelineByDatasourceId(datasourceId: number): Promise<Pipeline[]> {
+  async getPipelinesByDatasourceId(datasourceId: number): Promise<Pipeline[]> {
     const response = await this.httpPipelineConfigs.get(
       `?datasourceId=${datasourceId}`,
     );
@@ -43,14 +43,14 @@ export class PipelineRest {
     return JSON.parse(response.data) as Pipeline;
   }
 
-  async updatePipeline(pipeline: Pipeline): Promise<AxiosResponse> {
-    return await this.httpPipelineConfigs.put(
+  async updatePipeline(pipeline: Pipeline): Promise<void> {
+    await this.httpPipelineConfigs.put(
       `/${pipeline.id}`,
       JSON.stringify(pipeline),
     );
   }
 
-  async deletePipeline(id: number): Promise<AxiosResponse> {
-    return await this.httpPipelineConfigs.delete(`/${id}`);
+  async deletePipeline(id: number): Promise<void> {
+    await this.httpPipelineConfigs.delete(`/${id}`);
   }
 }
