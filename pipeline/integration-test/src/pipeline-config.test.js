@@ -79,7 +79,14 @@ describe('Pipeline Config Test', () => {
       .delete('/configs/' + configId)
       .send()
 
-    expect(delResponse.status).toEqual(204)
+    expect(delResponse.status).toEqual(200)
+    expect(delResponse.body).toEqual(
+      expect.objectContaining({
+        ...pipelineConfig,
+        id: configId,
+        metadata: expect.objectContaining(pipelineConfig.metadata)
+      })
+    )
 
     await sleep(PUBLICATION_WAIT_TIME_MS)
     expect(getPublishedEvent(AMQP_PIPELINE_CONFIG_CREATED_TOPIC)).toContainEqual({
@@ -108,7 +115,14 @@ describe('Pipeline Config Test', () => {
       .put('/configs/' + configId)
       .send(updatedConfig)
 
-    expect(putResponse.status).toEqual(204)
+    expect(putResponse.status).toEqual(200)
+    expect(putResponse.body).toEqual(
+      expect.objectContaining({
+        ...updatedConfig,
+        id: configId,
+        metadata: expect.objectContaining(updatedConfig.metadata)
+      })
+    )
 
     const updatedGetResponse = await request(URL)
       .get('/configs/' + configId)
@@ -122,7 +136,14 @@ describe('Pipeline Config Test', () => {
       .delete('/configs/' + configId)
       .send()
 
-    expect(delResponse.status).toEqual(204)
+    expect(delResponse.status).toEqual(200)
+    expect(delResponse.body).toEqual(
+      expect.objectContaining({
+        ...updatedConfig,
+        id: configId,
+        metadata: expect.objectContaining(updatedConfig.metadata)
+      })
+    )
 
     await sleep(PUBLICATION_WAIT_TIME_MS)
     expect(getPublishedEvent(AMQP_PIPELINE_CONFIG_CREATED_TOPIC)).toContainEqual({
