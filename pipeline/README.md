@@ -37,8 +37,8 @@ Use `npm test` to run the unit tests. There is also `nrm run watch-test` availab
 | *base_url*/configs | GET | - | PipelineConfig[] | Get all pipeline configs |
 | *base_url*/configs/:id | GET | - | PipelineConfig | Get pipeline config by id |
 | *base_url*/configs | POST | PipelineConfigDTO | PipelineConfig | Create a pipeline config |
-| *base_url*/configs/:id | PUT | PipelineConfigDTO | text | Update a pipeline config |
-| *base_url*/configs/:id | DELETE | - | text | Delete a pipeline config by id |
+| *base_url*/configs/:id | PUT | PipelineConfigDTO | PipelineConfig | Update a pipeline config |
+| *base_url*/configs/:id | DELETE | - | PipelineConfig | Delete a pipeline config by id |
 | *base_url*/configs | DELETE | - | text | Delete all pipeline configs |
 
 ### PipelineExecutionRequest

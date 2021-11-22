@@ -47,28 +47,41 @@ export class PipelineConfigManager {
     );
   }
 
-  async update(id: number, config: PipelineConfigDTO): Promise<void> {
+  async update(
+    id: number,
+    config: PipelineConfigDTO,
+  ): Promise<PipelineConfig | undefined> {
     return await this.pgClient.transaction(async (client) => {
-      await PipelineConfigRepository.update(client, id, config);
-      await EventPublisher.publishUpdate(
+      const updatedPipeline = await PipelineConfigRepository.update(
         client,
         id,
-        config.metadata.displayName,
+        config,
       );
+      if (updatedPipeline !== undefined) {
+        await EventPublisher.publishUpdate(
+          client,
+          id,
+          config.metadata.displayName,
+        );
+      }
+      return updatedPipeline;
     });
   }
 
-  async delete(id: number): Promise<void> {
+  async delete(id: number): Promise<PipelineConfig | undefined> {
     return await this.pgClient.transaction(async (client) => {
       const deletedPipeline = await PipelineConfigRepository.deleteById(
         client,
         id,
       );
-      await EventPublisher.publishDeletion(
-        client,
-        id,
-        deletedPipeline.metadata.displayName,
-      );
+      if (deletedPipeline !== undefined) {
+        await EventPublisher.publishDeletion(
+          client,
+          id,
+          deletedPipeline.metadata.displayName,
+        );
+      }
+      return deletedPipeline;
     });
   }
 
