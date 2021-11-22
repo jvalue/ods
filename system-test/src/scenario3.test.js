@@ -99,7 +99,9 @@ describe('Test 3: Create non-periodic pipeline with transformation', () => {
 
   test('Delete pipeline config', async () => {
     const response = await request(PIPELINE_URL).delete(`/configs/${pipelineId}`).send()
-    expect(response.status).toEqual(204)
+    expect(response.status).toEqual(200)
+    expect(response.type).toEqual('application/json')
+    expect(response.body.id).toEqual(pipelineId)
   }, TEST_TIMEOUT)
 
   test('Delete adapter config', async () => {
