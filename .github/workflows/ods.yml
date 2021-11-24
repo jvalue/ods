@@ -139,6 +139,19 @@ jobs:
         with:
           name: storagemq-artifact
           path: storage_mq.tar
+      
+      # The CDC-Test builds a cut-down image that would override the previously built production image
+      # Therefore it is executed after uploading the production image
+      - name: Consumer-side CDC-Test
+        run: |
+          bash ./storage/storage-mq/cdct-consumer.sh
+
+      - name: Upload contract files as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: contracts
+          path: ./pacts/*.json
+          if-no-files-found: error
 
 
   # ----------------- PIPELINE SERVICE --------------------
@@ -176,7 +189,8 @@ jobs:
           name: pipeline-artifact
           path: pipeline.tar
 
-    # ----------------- NOTIFICATION SERVICE --------------------
+
+  # ----------------- NOTIFICATION SERVICE --------------------
 
   notification-build:
     name: Notification Build & Test
@@ -211,6 +225,19 @@ jobs:
           name: notification-artifact
           path: notification.tar
 
+      # The CDC-Test builds a cut-down image that would override the previously built production image
+      # Therefore it is executed after uploading the production image
+      - name: Consumer-side CDC-Test
+        run: |
+          bash ./notification/cdct-consumer.sh
+
+      - name: Upload contract files as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: contracts
+          path: ./pacts/*.json
+          if-no-files-found: error
+
 
   # ----------------- UI SERVICE --------------------
 
@@ -235,6 +262,56 @@ jobs:
         with:
           name: ui-artifact
           path: ui.tar
+      
+      # The CDC-Test builds a cut-down image that would override the previously built production image
+      # Therefore it is executed after uploading the production image
+      - name: Consumer-side CDC-Test
+        run: |
+          bash ./ui/cdct-consumer.sh
+
+      - name: Upload Contract files as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: contracts
+          path: ./pacts/*.json
+          if-no-files-found: error
+
+  # ----------------- Pipeline Provider-side CDC-Test -----------------
+  pipeline-provider:
+    name: Pipeline Provider-side CDC-Test
+    runs-on: ubuntu-18.04
+    needs: [pipeline-build, ui-build, notification-build, storage-build]
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download contract files from artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: contracts
+          path: ./pacts
+
+      - name: Build and Run
+        run: |
+          bash ./pipeline/cdct-provider.sh
+
+
+  # ----------------- Storage Provider-side CDC-Test -----------------
+  storage-provider:
+    name: Storage Provider-side CDC-Test
+    runs-on: ubuntu-18.04
+    needs: [storage-build, ui-build]
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download contract files from artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: contracts
+          path: ./pacts
+
+      - name: Build and Run
+        run: |
+          bash ./storage/storage-mq/cdct-provider.sh
 
   # ----------------- SYSTEMTEST --------------------
   systemtest:
@@ -374,7 +451,7 @@ jobs:
     name: Storage Publish
     runs-on: ubuntu-18.04
 
-    needs: [systemtest]
+    needs: [systemtest, storage-provider]
 
     if: github.repository == 'jvalue/ods' && github.ref == 'refs/heads/main'
     steps:
@@ -432,7 +509,7 @@ jobs:
     name: Pipeline Publish
     runs-on: ubuntu-18.04
 
-    needs: [systemtest]
+    needs: [systemtest, pipeline-provider]
 
     if: github.repository == 'jvalue/ods' && github.ref == 'refs/heads/main'
     steps:

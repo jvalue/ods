@@ -1,37 +1,30 @@
-import { AxiosError } from 'axios'
+import { PostgresClient } from '@jvalue/node-dry-pg';
 
-import * as AdapterClient from './api/http/adapter-client'
+import * as EventPublisher from './datasource-trigger/outboxEventPublisher';
 
-export async function triggerDatasource (datasourceId: number, triggerRetries: number): Promise<void> {
+export async function triggerDatasource(
+  pgClient: PostgresClient,
+  datasourceId: number,
+  triggerRetries: number,
+): Promise<void> {
   for (let i = 0; i < triggerRetries; i++) {
     try {
-      await AdapterClient.triggerDatasource(datasourceId)
-      console.log(`Datasource ${datasourceId} triggered.`)
-      break
-    } catch (error) {
-      if (isAxiosError(error)) {
-        handleAxiosError(error)
+      await pgClient.transaction(
+        async (client) =>
+          await EventPublisher.publishDatasourceTrigger(client, datasourceId),
+      );
+      console.log(`Datasource ${datasourceId} triggered.`);
+      break;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      if (i === triggerRetries - 1) {
+        // Last retry
+        console.error(`Could not trigger datasource ${datasourceId}`);
+        break;
       }
-      if (i === triggerRetries - 1) { // last retry
-        console.error(`Could not trigger datasource ${datasourceId}`)
-        break
-      }
-      console.info(`Triggering datasource failed - retrying (${i}/${triggerRetries})`)
+      console.info(
+        `Triggering datasource failed - retrying (${i}/${triggerRetries})`,
+      );
     }
   }
-}
-
-function isAxiosError (error: any): error is AxiosError {
-  return error.isAxiosError
-}
-
-function handleAxiosError (error: AxiosError): void {
-  const baseMsg = 'Error during datasource triggering:'
-
-  if (error.response !== undefined) {
-    console.error(`${baseMsg} ${error.response.status}: ${error.response.data}`)
-    return
-  }
-
-  console.error(`${baseMsg}:`, error.message)
 }

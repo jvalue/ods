@@ -1,6 +1,7 @@
 package org.jvalue.ods.adapterservice.datasource.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.springframework.lang.Nullable;
 
@@ -16,7 +17,7 @@ public class RuntimeParameters {
   private final Map<String, String> parameters;
 
   @JsonCreator
-  public RuntimeParameters(Map<String, String> parameters) {
+  public RuntimeParameters(@JsonProperty("parameters") Map<String, String> parameters) {
     this.parameters = parameters;
   }
 }

@@ -1,5 +1,5 @@
 export const duration = (milliseconds: number): string =>
-  `${milliseconds.toFixed(1)} ms`
+  `${milliseconds.toFixed(1)} ms`;
 
 export const timestamp = (timestamp: number): string =>
   new Date(timestamp).toLocaleString('en-GB', {
@@ -8,5 +8,5 @@ export const timestamp = (timestamp: number): string =>
     year: 'numeric',
     hour: 'numeric',
     minute: 'numeric',
-    second: 'numeric'
-  })
+    second: 'numeric',
+  });

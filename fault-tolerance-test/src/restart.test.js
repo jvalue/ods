@@ -24,6 +24,8 @@ const ALL_SERVICES = [
   'pipeline-outboxer',
   'rabbitmq',
   'scheduler',
+  'scheduler-db',
+  'scheduler-outboxer',
   'storage',
   'storage-db',
   // 'storage-db-liquibase', //Only creates the database schema and then exits, therefore ignore
@@ -41,6 +43,8 @@ const SERVICES_TO_KILL = [
   ['pipeline-outboxer', undefined, undefined],
   // rabbitmq has separate test method
   ['scheduler', undefined, undefined],
+  ['scheduler-db', undefined, undefined],
+  ['scheduler-outboxer', undefined, undefined],
   ['storage', initStorage, testStorage],
   ['storage-db', initStorage, testStorage],
   ['storage-mq', initStorage, testStorage]

@@ -1,7 +1,5 @@
 <template>
-  <v-form
-    v-model="isFormValid"
-  >
+  <v-form v-model="isFormValid">
     <v-switch
       v-model="csvConfig.firstRowAsHeader"
       label="Use first row as header"
@@ -26,51 +24,51 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import Component from 'vue-class-component'
+import Vue from 'vue';
+import Component from 'vue-class-component';
+import { Emit, PropSync, Watch } from 'vue-property-decorator';
 
-import { Emit, PropSync, Watch } from 'vue-property-decorator'
-import { requiredRule } from '../../../validators'
+import { requiredRule } from '../../../validators';
 
 interface CsvConfig {
-  lineSeparator: string
-  columnSeparator: string
-  firstRowAsHeader: boolean
-  skipFirstDataRow: boolean
+  lineSeparator: string;
+  columnSeparator: string;
+  firstRowAsHeader: boolean;
+  skipFirstDataRow: boolean;
 }
 
-@Component({ })
+@Component({})
 export default class CsvAdapterConfig extends Vue {
-  private isFormValid = false
+  private isFormValid = false;
   private availableLineSeparators = [
     { value: '\n', text: '\\n' },
     { value: '\r', text: '\\r' },
-    { value: '\r\n', text: '\\r\\n' }
-  ]
+    { value: '\r\n', text: '\\r\\n' },
+  ];
 
   @PropSync('value')
-  private csvConfig!: CsvConfig
+  private csvConfig!: CsvConfig;
 
-  private required = requiredRule
+  private required = requiredRule;
 
   @Emit('value')
-  emitValue (): CsvConfig {
-    return this.csvConfig
+  emitValue(): CsvConfig {
+    return this.csvConfig;
   }
 
   @Emit('validityChanged')
-  emitValid (): boolean {
-    return this.isFormValid
+  emitValid(): boolean {
+    return this.isFormValid;
   }
 
   @Watch('csvConfig', { deep: true })
-  formChanged (): void {
-    this.emitValue()
+  formChanged(): void {
+    this.emitValue();
   }
 
   @Watch('isFormValid')
-  validityChanged (): void {
-    this.emitValid()
+  validityChanged(): void {
+    this.emitValid();
   }
 }
 </script>
