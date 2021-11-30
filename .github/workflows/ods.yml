@@ -139,7 +139,7 @@ jobs:
         with:
           name: storagemq-artifact
           path: storage_mq.tar
-      
+
       # The CDC-Test builds a cut-down image that would override the previously built production image
       # Therefore it is executed after uploading the production image
       - name: Consumer-side CDC-Test
@@ -262,7 +262,7 @@ jobs:
         with:
           name: ui-artifact
           path: ui.tar
-      
+
       # The CDC-Test builds a cut-down image that would override the previously built production image
       # Therefore it is executed after uploading the production image
       - name: Consumer-side CDC-Test
@@ -407,6 +407,10 @@ jobs:
           IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/adapter
 
           ADAPTER_VERSION=$(grep "version" ./adapter/src/main/resources/application.properties | sed "s/^app.version=//g")
+          if [[ "${{ github.ref }}" != refs/tags/* ]]
+          then
+            ADAPTER_VERSION=${ADAPTER_VERSION}-$(git rev-parse --short HEAD)
+          fi
 
           docker tag $IMAGE_ID $IMAGE_ID:$ADAPTER_VERSION
           docker tag $IMAGE_ID $IMAGE_ID:latest
@@ -440,6 +444,10 @@ jobs:
           IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/scheduler
 
           SCHEDULER_VERSION=$(grep "version" scheduler/package.json | awk '{print $2}' | sed 's/[,"]//g')
+          if [[ "${{ github.ref }}" != refs/tags/* ]]
+          then
+            SCHEDULER_VERSION=${SCHEDULER_VERSION}-$(git rev-parse --short HEAD)
+          fi
 
           docker tag $IMAGE_ID $IMAGE_ID:$SCHEDULER_VERSION
           docker tag $IMAGE_ID $IMAGE_ID:latest
@@ -482,6 +490,10 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
 
           STORAGE_VERSION=$(grep "VERSION" ./storage/version.txt | awk '{print $3}' | sed 's/[,"]//g')
+          if [[ "${{ github.ref }}" != refs/tags/* ]]
+          then
+            STORAGE_VERSION=${STORAGE_VERSION}-$(git rev-parse --short HEAD)
+          fi
 
           IMAGE_ID_STORAGE=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/storage
           IMAGE_ID_LIQUIBASE=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/storage-db-liquibase
@@ -531,6 +543,10 @@ jobs:
           IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/pipeline
 
           PIPELINE_VERSION=$(grep "version" ./pipeline/package.json | awk '{print $2}' | sed 's/[,"]//g')
+          if [[ "${{ github.ref }}" != refs/tags/* ]]
+          then
+            PIPELINE_VERSION=${PIPELINE_VERSION}-$(git rev-parse --short HEAD)
+          fi
 
           docker tag $IMAGE_ID $IMAGE_ID:$PIPELINE_VERSION
           docker tag $IMAGE_ID $IMAGE_ID:latest
@@ -564,6 +580,10 @@ jobs:
           IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/notification
 
           NOTIFICATION_VERSION=$(grep "version" ./notification/package.json | awk '{print $2}' | sed 's/[,"]//g')
+          if [[ "${{ github.ref }}" != refs/tags/* ]]
+          then
+            NOTIFICATION_VERSION=${NOTIFICATION_VERSION}-$(git rev-parse --short HEAD)
+          fi
 
           docker tag $IMAGE_ID $IMAGE_ID:$NOTIFICATION_VERSION
           docker tag $IMAGE_ID $IMAGE_ID:latest
@@ -597,6 +617,11 @@ jobs:
           IMAGE_ID=$(sed -n 's/^DOCKER_REGISTRY=//p' .env)/ui
 
           UI_VERSION=$(grep "version" ./ui/package.json | awk '{print $2}' | sed 's/[,"]//g')
+          if [[ "${{ github.ref }}" != refs/tags/* ]]
+          then
+            UI_VERSION=${UI_VERSION}-$(git rev-parse --short HEAD)
+          fi
+          echo $UI_VERSION
 
           docker tag $IMAGE_ID $IMAGE_ID:$UI_VERSION
           docker tag $IMAGE_ID $IMAGE_ID:latest
