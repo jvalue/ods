@@ -50,7 +50,7 @@ describe('Scheduler', () => {
     const job = scheduler.upsertJob(config);
     expect(job.datasourceConfig).toEqual(config);
 
-    await sleep(1500);
+    await sleep(1700);
 
     expect(scheduler.getAllJobs()).toHaveLength(1);
     expect(scheduler.getAllJobs()[0].datasourceConfig).toEqual(config);
