@@ -35,7 +35,6 @@ import {
   getLatestTransformedDataRequest,
   getLatestTransformedDataRequestTitle,
   getLatestTransformedDataSuccessResponse,
-  noContentResponse,
   notFoundResponse,
   transformDataErrorThrownResponse,
   transformDataInvalidSyntaxResponse,
@@ -442,12 +441,12 @@ pactWith(options, provider => {
             state: `pipeline with id ${id} does not exist`,
             uponReceiving: deleteRequestTitle(id),
             withRequest: deleteRequest(id),
-            willRespondWith: noContentResponse,
+            willRespondWith: notFoundResponse,
           });
         });
 
-        it('returns undefined', async () => {
-          expect(await restService.deletePipeline(id)).toBeUndefined();
+        it('throws an error', async () => {
+          await expect(restService.deletePipeline(id)).rejects.toThrow(Error);
         });
       });
 

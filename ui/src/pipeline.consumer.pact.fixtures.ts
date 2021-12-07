@@ -340,10 +340,6 @@ export const transformDataErrorThrownResponse: ResponseOptions = {
   }),
 };
 
-export const noContentResponse: ResponseOptions = {
-  status: 204,
-};
-
 export const notFoundResponse: ResponseOptions = {
   // TODO any status code that results in throwing an error is actually acceptable (i.e. 4xx, 5xx)
   status: 404,

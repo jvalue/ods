@@ -31,7 +31,8 @@ export class PipelineConfigEndpoint {
     }
     const deletedPipeline = await this.pipelineConfigManager.delete(configId);
     if (deletedPipeline === undefined) {
-      res.status(204).send();
+      res.status(404).send(`Could not find config with id ${configId}`);
+      return;
     }
     res.status(200).json(deletedPipeline);
   };

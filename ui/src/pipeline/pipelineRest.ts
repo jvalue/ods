@@ -51,13 +51,8 @@ export class PipelineRest {
     return JSON.parse(response.data) as Pipeline;
   }
 
-  async deletePipeline(id: number): Promise<Pipeline | undefined> {
+  async deletePipeline(id: number): Promise<Pipeline> {
     const response = await this.httpPipelineConfigs.delete(`/${id}`);
-
-    if (response.status === 204) {
-      return undefined;
-    }
-
     return JSON.parse(response.data) as Pipeline;
   }
 }
