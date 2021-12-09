@@ -20,5 +20,9 @@ public class AdapterProperties {
     private String datasourceCreatedTopic;
     private String datasourceUpdatedTopic;
     private String datasourceDeletedTopic;
+    private String adapterExchange;
+    private String datasourceImportTriggerQueue;
+    private String datasourceImportTriggerQueueTopic;
+    private String datasourceImportTriggerCreatedTopic;
   }
 }

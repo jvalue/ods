@@ -1,0 +1,21 @@
+version: '3.7'
+
+services:
+  ui:
+    build:
+      target: base
+    command: npm run test:consumer
+    volumes:
+      - ./pacts:/pacts
+  notification:
+    build:
+      target: base
+    command: npm run test:consumer
+    volumes:
+      - ./pacts:/pacts
+  storage-mq:
+    build:
+      target: base
+    command: npm run test:consumer
+    volumes:
+      - ./pacts:/pacts

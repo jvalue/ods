@@ -1,63 +1,64 @@
-import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
+import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
+
 import {
   UserProfile,
-  login,
+  editUserProfile,
   getUserProfile,
-  isAuthenticated,
   initAuthentication,
-  editUserProfile
-} from '@/authentication'
+  isAuthenticated,
+  login,
+} from '@/authentication';
 
 @Module({ namespaced: true })
 export default class AuthModule extends VuexModule {
-  private isAuth = false
+  private isAuth = false;
 
-  private userProfile: UserProfile = {}
+  private userProfile: UserProfile = {};
 
   @Action({ commit: 'setAuth' })
-  public async init (): Promise<boolean> {
-    await initAuthentication()
-    const isAuth = isAuthenticated()
+  async init(): Promise<boolean> {
+    await initAuthentication();
+    const isAuth = isAuthenticated();
 
     if (isAuth) {
-      await this.context.dispatch('loadUserProfile')
+      await this.context.dispatch('loadUserProfile');
     }
-    return isAuth
+    return isAuth;
   }
 
   @Action({ commit: 'setAuth' })
-  public async login (): Promise<boolean> {
-    const isSuccessful: boolean = await login()
+  async login(): Promise<boolean> {
+    const isSuccessful: boolean = await login();
 
     if (isSuccessful) {
-      await this.context.dispatch('loadUserProfile')
+      await this.context.dispatch('loadUserProfile');
     }
 
-    return isSuccessful
+    return isSuccessful;
   }
 
   @Action({ commit: 'setAuth' })
-  public logout (): boolean {
-    this.context.commit('setUserProfile', {})
-    return false
+  logout(): boolean {
+    this.context.commit('setUserProfile', {});
+    return false;
   }
 
   @Action
-  public async editProfile (): Promise<boolean> {
-    return await editUserProfile()
+  async editProfile(): Promise<boolean> {
+    return await editUserProfile();
   }
 
   @Action({ commit: 'setUserProfile' })
-  public async loadUserProfile (): Promise<UserProfile> {
-    return await getUserProfile()
+  async loadUserProfile(): Promise<UserProfile> {
+    return await getUserProfile();
   }
 
   @Mutation
-  private setAuth (value: boolean): void {
-    this.isAuth = value
+  private setAuth(value: boolean): void {
+    this.isAuth = value;
   }
 
-  @Mutation private setUserProfile (value: UserProfile): void {
-    this.userProfile = value
+  @Mutation private setUserProfile(value: UserProfile): void {
+    this.userProfile = value;
   }
 }

@@ -1,4 +1,4 @@
-import JobError from './jobError'
+import JobError from './jobError';
 
 /**
  * Splits a line from a stacktrace into functionName, fileName, lineNumber and position.
@@ -7,13 +7,20 @@ import JobError from './jobError'
  * @param line a line from a stacktrace
  * @returns a tuple of [functionName, filename, lineNumber, position]
  */
-export function parseStacktraceLine (line: string): [string, string, number, number] {
-  const match = line.match(/^ +at (.+) \((.+):(\d+):(\d+)\)/)
-  if (match === null) {
-    throw new Error(`Unexpected stacktrace line format: ${line}`)
+export function parseStacktraceLine(
+  line: string,
+): [string, string, number, number] {
+  const match = /^ +at (.+) \((.+):(\d+):(\d+)\)/.exec(line);
+  if (match == null) {
+    throw new Error(`Unexpected stacktrace line format: ${line}`);
   }
-  const [, functionName, fileName, lineNumber, position] = match
-  return [functionName, fileName, parseInt(lineNumber), parseInt(position)]
+  const [, functionName, fileName, lineNumber, position] = match;
+  return [
+    functionName,
+    fileName,
+    Number.parseInt(lineNumber, 10),
+    Number.parseInt(position, 10),
+  ];
 }
 
 /**
@@ -21,13 +28,13 @@ export function parseStacktraceLine (line: string): [string, string, number, num
  * It normally looks like this:
  *   main:2
  */
-function parseSyntaxErrorHeader (header: string): [string, number] {
-  const match = header.match(/^(.+):(\d+)/)
-  if (match === null) {
-    throw new Error(`Unexpected stacktrace format: ${header}`)
+function parseSyntaxErrorHeader(header: string): [string, number] {
+  const match = /^(.+):(\d+)/.exec(header);
+  if (match == null) {
+    throw new Error(`Unexpected stacktrace format: ${header}`);
   }
-  const [, fileName, lineNumber] = match
-  return [fileName, parseInt(lineNumber)]
+  const [, fileName, lineNumber] = match;
+  return [fileName, Number.parseInt(lineNumber, 10)];
 }
 
 /**
@@ -36,15 +43,18 @@ function parseSyntaxErrorHeader (header: string): [string, number] {
  * - rewrites line numbers to hide the function wrapping
  * @param oldLines the original stacktrace lines
  */
-function rewriteStacktrace (oldLines: string[], prefixLength: number): string[] {
-  const contextLine = oldLines.findIndex(line => line.includes('Script.runInContext'))
-  const newLines = oldLines.slice(0, contextLine - 1)
-  const newLinesAdjusted = newLines.map(line => {
-    const [functionName, fileName, lineNumber, position] = parseStacktraceLine(line)
-    const newLineNumber = lineNumber - prefixLength
-    return `    at ${functionName} (${fileName}:${newLineNumber}:${position})`
-  })
-  return newLinesAdjusted
+function rewriteStacktrace(oldLines: string[], prefixLength: number): string[] {
+  const contextLine = oldLines.findIndex((line) =>
+    line.includes('Script.runInContext'),
+  );
+  const newLines = oldLines.slice(0, contextLine - 1);
+  const newLinesAdjusted = newLines.map((line) => {
+    const [functionName, fileName, lineNumber, position] =
+      parseStacktraceLine(line);
+    const newLineNumber = lineNumber - prefixLength;
+    return `    at ${functionName} (${fileName}:${newLineNumber}:${position})`;
+  });
+  return newLinesAdjusted;
 }
 
 /**
@@ -60,33 +70,36 @@ function rewriteStacktrace (oldLines: string[], prefixLength: number): string[] 
  *       ...
  * @param error The original javascript syntax error
  */
-export function convertSyntaxError (error: Error, prefixLength: number): JobError {
+export function convertSyntaxError(
+  error: Error,
+  prefixLength: number,
+): JobError {
   if (error.name !== 'SyntaxError') {
-    throw new Error('Not a syntax error')
+    throw new Error('Not a syntax error');
   }
   if (error.stack === undefined) {
-    throw new Error('Undefined stacktrace')
+    throw new Error('Undefined stacktrace');
   }
 
-  const lines = error.stack.split('\n')
+  const lines = error.stack.split('\n');
 
-  const header = lines[0]
-  const [, lineNumber] = parseSyntaxErrorHeader(header)
-  const lineNumberAdjusted = lineNumber - prefixLength
+  const header = lines[0];
+  const [, lineNumber] = parseSyntaxErrorHeader(header);
+  const lineNumberAdjusted = lineNumber - prefixLength;
 
-  const markers = lines[2]
-  const markerIndex = markers.indexOf('^')
-  const position = markerIndex > 0 ? markerIndex : 0
+  const markers = lines[2];
+  const markerIndex = markers.indexOf('^');
+  const position = markerIndex > 0 ? markerIndex : 0;
 
-  const message = lines[4]
+  const message = lines[4];
 
   return {
     name: error.name,
     message,
     position,
     lineNumber: lineNumberAdjusted,
-    stacktrace: []
-  }
+    stacktrace: [],
+  };
 }
 
 /**
@@ -101,9 +114,12 @@ export function convertSyntaxError (error: Error, prefixLength: number): JobErro
  *       ...
  * @param error the original javascript error
  */
-export function convertRuntimeError (error: Error, prefixLength: number): JobError {
+export function convertRuntimeError(
+  error: Error,
+  prefixLength: number,
+): JobError {
   if (error.stack === undefined) {
-    throw new Error('Undefined stacktrace')
+    throw new Error('Undefined stacktrace');
   }
 
   if (error.message.startsWith('Script execution timed out')) {
@@ -112,24 +128,24 @@ export function convertRuntimeError (error: Error, prefixLength: number): JobErr
       message: error.message,
       lineNumber: 0,
       position: 0,
-      stacktrace: []
-    }
+      stacktrace: [],
+    };
   }
-  const lines = error.stack.split('\n')
+  const lines = error.stack.split('\n');
 
-  const message = lines[0]
+  const message = lines[0];
 
-  const topFrame = lines[1]
-  const [, , lineNumber, position] = parseStacktraceLine(topFrame)
-  const lineNumberAdjusted = lineNumber - prefixLength
+  const topFrame = lines[1];
+  const [, , lineNumber, position] = parseStacktraceLine(topFrame);
+  const lineNumberAdjusted = lineNumber - prefixLength;
 
-  const newLines = rewriteStacktrace(lines.slice(1), prefixLength)
+  const newLines = rewriteStacktrace(lines.slice(1), prefixLength);
 
   return {
     name: error.name,
     message,
     lineNumber: lineNumberAdjusted,
     position,
-    stacktrace: newLines
-  }
+    stacktrace: newLines,
+  };
 }

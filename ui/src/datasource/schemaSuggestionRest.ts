@@ -1,5 +1,6 @@
-import axios from 'axios'
-import { SCHEMA_SERVICE_URL } from '@/env'
+import axios from 'axios';
+
+import { SCHEMA_SERVICE_URL } from '@/env';
 
 /**
  * Axios instance with default headers and base url.
@@ -11,15 +12,21 @@ const httpSchema = axios.create({
   headers: { 'Content-Type': 'application/json' },
   maxContentLength: 100000000,
   maxBodyLength: 1000000000,
-  transformResponse: []
-})
+  transformResponse: [],
+});
 
-export async function getIsAlive (): Promise<string> {
-  const response = await httpSchema.get<string>('/check')
-  return response.data
+export async function getIsAlive(): Promise<string> {
+  const response = await httpSchema.get<string>('/check');
+  return response.data;
 }
 
-export async function getSchema (schema: string, precision: string): Promise<object> {
-  const response = await httpSchema.post<string>('/suggestion', { data: schema, precision: precision })
-  return JSON.parse(response.data)
+export async function getSchema(
+  schema: string,
+  precision: string,
+): Promise<Record<string, unknown>> {
+  const response = await httpSchema.post<string>('/suggestion', {
+    data: schema,
+    precision: precision,
+  });
+  return JSON.parse(response.data) as Record<string, unknown>;
 }

@@ -1,9 +1,10 @@
-import { ClientBase, QueryResult } from 'pg'
+import { ClientBase, QueryResult } from 'pg';
 
-import { POSTGRES_SCHEMA } from '../env'
-import { PipelineConfig, PipelineConfigDTO } from './model/pipelineConfig'
+import { POSTGRES_SCHEMA } from '../env';
 
-const CONFIG_TABLE_NAME = 'PipelineConfigs'
+import { PipelineConfig, PipelineConfigDTO } from './model/pipelineConfig';
+
+const CONFIG_TABLE_NAME = 'PipelineConfigs';
 
 const CREATE_CONFIG_TABLE_STATEMENT = `
   CREATE TABLE IF NOT EXISTS "${POSTGRES_SCHEMA}"."${CONFIG_TABLE_NAME}" (
@@ -17,44 +18,49 @@ const CREATE_CONFIG_TABLE_STATEMENT = `
   "description" varchar,
   "createdAt" timestamp,
   CONSTRAINT "Data_pk_${POSTGRES_SCHEMA}_${CONFIG_TABLE_NAME}" PRIMARY KEY (id)
-)`
+)`;
 const INSERT_CONFIG_STATEMENT = `
   INSERT INTO "${POSTGRES_SCHEMA}"."${CONFIG_TABLE_NAME}"
   ("datasourceId", "func", "author", "displayName", "license", "description", "createdAt", "schema")
   VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-  RETURNING *`
+  RETURNING *`;
 const UPDATE_CONFIG_STATEMENT = `
   UPDATE "${POSTGRES_SCHEMA}"."${CONFIG_TABLE_NAME}"
   SET "datasourceId"=$2, "func"=$3, "author"=$4, "displayName"=$5, "license"=$6, "description"=$7, "schema"=$8
-  WHERE id=$1`
+  WHERE id=$1`;
 const GET_CONFIG_STATEMENT = `
-  SELECT * FROM "${POSTGRES_SCHEMA}"."${CONFIG_TABLE_NAME}" WHERE "id" = $1`
+  SELECT * FROM "${POSTGRES_SCHEMA}"."${CONFIG_TABLE_NAME}" WHERE "id" = $1`;
 const GET_ALL_CONFIGS_STATEMENT = `
-  SELECT * FROM "${POSTGRES_SCHEMA}"."${CONFIG_TABLE_NAME}"`
+  SELECT * FROM "${POSTGRES_SCHEMA}"."${CONFIG_TABLE_NAME}"`;
 const GET_ALL_CONFIGS_BY_DATASOURCE_ID_STATEMENT = `
-  SELECT * FROM "${POSTGRES_SCHEMA}"."${CONFIG_TABLE_NAME}" WHERE "datasourceId" = $1`
+  SELECT * FROM "${POSTGRES_SCHEMA}"."${CONFIG_TABLE_NAME}" WHERE "datasourceId" = $1`;
 const DELETE_CONFIG_STATEMENT = `
-  DELETE FROM "${POSTGRES_SCHEMA}"."${CONFIG_TABLE_NAME}" WHERE "id" = $1 RETURNING *`
+  DELETE FROM "${POSTGRES_SCHEMA}"."${CONFIG_TABLE_NAME}" WHERE "id" = $1 RETURNING *`;
 const DELETE_ALL_CONFIGS_STATEMENT = `
-  DELETE FROM "${POSTGRES_SCHEMA}"."${CONFIG_TABLE_NAME}" RETURNING *`
+  DELETE FROM "${POSTGRES_SCHEMA}"."${CONFIG_TABLE_NAME}" RETURNING *`;
 
 interface DatabasePipeline {
-  id: string
-  datasourceId: string
-  func: string
-  author: string
-  displayName: string
-  license: string
-  description: string
-  createdAt: Date
-  schema: object
+  id: string;
+  datasourceId: string;
+  func: string;
+  author: string;
+  displayName: string;
+  license: string;
+  description: string;
+  createdAt: Date;
+  schema: Record<string, unknown>; // Fix @typescript-eslint/ban-types for object type
 }
 
-export async function createPipelineConfigTable (client: ClientBase): Promise<void> {
-  await client.query(CREATE_CONFIG_TABLE_STATEMENT)
+export async function createPipelineConfigTable(
+  client: ClientBase,
+): Promise<void> {
+  await client.query(CREATE_CONFIG_TABLE_STATEMENT);
 }
 
-export async function create (client: ClientBase, config: PipelineConfigDTO): Promise<PipelineConfig> {
+export async function create(
+  client: ClientBase,
+  config: PipelineConfigDTO,
+): Promise<PipelineConfig> {
   const values = [
     config.datasourceId,
     config.transformation.func,
@@ -63,32 +69,45 @@ export async function create (client: ClientBase, config: PipelineConfigDTO): Pr
     config.metadata.license,
     config.metadata.description,
     new Date(),
-    config.schema
-  ]
-  const { rows } = await client.query(INSERT_CONFIG_STATEMENT, values)
-  return toPipelineConfig(rows[0])
+    config.schema,
+  ];
+  const { rows } = await client.query(INSERT_CONFIG_STATEMENT, values);
+  return toPipelineConfig(rows[0]);
 }
 
-export async function get (client: ClientBase, id: number): Promise<PipelineConfig | undefined> {
-  const resultSet = await client.query(GET_CONFIG_STATEMENT, [id])
+export async function get(
+  client: ClientBase,
+  id: number,
+): Promise<PipelineConfig | undefined> {
+  const resultSet = await client.query(GET_CONFIG_STATEMENT, [id]);
   if (resultSet.rowCount === 0) {
-    return undefined
+    return undefined;
   }
-  const content = toPipelineConfigs(resultSet)
-  return content[0]
+  const content = toPipelineConfigs(resultSet);
+  return content[0];
 }
 
-export async function getAll (client: ClientBase): Promise<PipelineConfig[]> {
-  const resultSet = await client.query(GET_ALL_CONFIGS_STATEMENT, [])
-  return toPipelineConfigs(resultSet)
+export async function getAll(client: ClientBase): Promise<PipelineConfig[]> {
+  const resultSet = await client.query(GET_ALL_CONFIGS_STATEMENT, []);
+  return toPipelineConfigs(resultSet);
 }
 
-export async function getByDatasourceId (client: ClientBase, datasourceId: number): Promise<PipelineConfig[]> {
-  const resultSet = await client.query(GET_ALL_CONFIGS_BY_DATASOURCE_ID_STATEMENT, [datasourceId])
-  return toPipelineConfigs(resultSet)
+export async function getByDatasourceId(
+  client: ClientBase,
+  datasourceId: number,
+): Promise<PipelineConfig[]> {
+  const resultSet = await client.query(
+    GET_ALL_CONFIGS_BY_DATASOURCE_ID_STATEMENT,
+    [datasourceId],
+  );
+  return toPipelineConfigs(resultSet);
 }
 
-export async function update (client: ClientBase, id: number, config: PipelineConfigDTO): Promise<void> {
+export async function update(
+  client: ClientBase,
+  id: number,
+  config: PipelineConfigDTO,
+): Promise<void> {
   const values = [
     id,
     config.datasourceId,
@@ -97,51 +116,56 @@ export async function update (client: ClientBase, id: number, config: PipelineCo
     config.metadata.displayName,
     config.metadata.license,
     config.metadata.description,
-    config.schema
-  ]
-  const result = await client.query(UPDATE_CONFIG_STATEMENT, values)
+    config.schema,
+  ];
+  const result = await client.query(UPDATE_CONFIG_STATEMENT, values);
   if (result.rowCount === 0) {
-    throw new Error(`Could not find config with ${id} to update`)
+    throw new Error(`Could not find config with ${id} to update`);
   }
 }
 
-export async function deleteById (client: ClientBase, id: number): Promise<PipelineConfig> {
-  const result = await client.query(DELETE_CONFIG_STATEMENT, [id])
+export async function deleteById(
+  client: ClientBase,
+  id: number,
+): Promise<PipelineConfig> {
+  const result = await client.query(DELETE_CONFIG_STATEMENT, [id]);
   if (result.rowCount === 0) {
-    throw new Error(`Could not find config with ${id} to delete`)
+    throw new Error(`Could not find config with ${id} to delete`);
   }
-  const content = toPipelineConfigs(result)
-  return content[0]
+  const content = toPipelineConfigs(result);
+  return content[0];
 }
 
-export async function deleteAll (client: ClientBase): Promise<PipelineConfig[]> {
-  const result = await client.query(DELETE_ALL_CONFIGS_STATEMENT, [])
-  return toPipelineConfigs(result)
+export async function deleteAll(client: ClientBase): Promise<PipelineConfig[]> {
+  const result = await client.query(DELETE_ALL_CONFIGS_STATEMENT, []);
+  return toPipelineConfigs(result);
 }
 
-function toPipelineConfig (dbResult: DatabasePipeline): PipelineConfig {
+function toPipelineConfig(dbResult: DatabasePipeline): PipelineConfig {
   return {
     id: +dbResult.id,
     datasourceId: +dbResult.datasourceId,
     schema: dbResult.schema,
     transformation: {
-      func: dbResult.func
+      func: dbResult.func,
     },
     metadata: {
       author: dbResult.author,
       displayName: dbResult.displayName,
       license: dbResult.license,
       description: dbResult.description,
-      creationTimestamp: dbResult.createdAt
-    }
-  }
+      creationTimestamp: dbResult.createdAt,
+    },
+  };
 }
 
-function toPipelineConfigs (resultSet: QueryResult<DatabasePipeline>): PipelineConfig[] {
-  const configs: PipelineConfig[] = []
+function toPipelineConfigs(
+  resultSet: QueryResult<DatabasePipeline>,
+): PipelineConfig[] {
+  const configs: PipelineConfig[] = [];
   for (const row of resultSet.rows) {
-    const config = toPipelineConfig(row)
-    configs.push(config)
+    const config = toPipelineConfig(row);
+    configs.push(config);
   }
-  return configs
+  return configs;
 }

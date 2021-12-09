@@ -1,30 +1,44 @@
-import { StorageStructureRepository } from '../storage-structure/storageStructureRepository'
+import { StorageStructureRepository } from '../storage-structure/storageStructureRepository';
 
 export class PipelineConfigEventHandler {
-  constructor (private readonly structureRepository: StorageStructureRepository) {}
+  constructor(
+    private readonly structureRepository: StorageStructureRepository,
+  ) {}
 
-  async handleCreation (pipelineCreatedEvent: PipelineCreatedEvent): Promise<void> {
-    await this.structureRepository.create(pipelineCreatedEvent.pipelineId.toString())
-    if (pipelineCreatedEvent.schema !== undefined && pipelineCreatedEvent.schema !== null) {
+  async handleCreation(
+    pipelineCreatedEvent: PipelineCreatedEvent,
+  ): Promise<void> {
+    await this.structureRepository.create(
+      pipelineCreatedEvent.pipelineId.toString(),
+    );
+    if (
+      pipelineCreatedEvent.schema !== undefined &&
+      pipelineCreatedEvent.schema != null
+    ) {
       await this.structureRepository.createForSchema(
-        pipelineCreatedEvent.schema as object,
-        pipelineCreatedEvent.pipelineName + pipelineCreatedEvent.pipelineId.toString()
-      )
+        pipelineCreatedEvent.schema,
+        pipelineCreatedEvent.pipelineName +
+          pipelineCreatedEvent.pipelineId.toString(),
+      );
     }
   }
 
-  async handleDeletion (pipelineDeletedEvent: PipelineDeletedEvent): Promise<void> {
-    await this.structureRepository.delete(pipelineDeletedEvent.pipelineId.toString())
+  async handleDeletion(
+    pipelineDeletedEvent: PipelineDeletedEvent,
+  ): Promise<void> {
+    await this.structureRepository.delete(
+      pipelineDeletedEvent.pipelineId.toString(),
+    );
   }
 }
 
 export interface PipelineCreatedEvent {
-  pipelineId: number
-  pipelineName: string
-  schema?: any
+  pipelineId: number;
+  pipelineName: string;
+  schema?: Record<string, unknown>;
 }
 
 export interface PipelineDeletedEvent {
-  pipelineId: number
-  pipelineName: string
+  pipelineId: number;
+  pipelineName: string;
 }

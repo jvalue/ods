@@ -1,26 +1,40 @@
-import axios from 'axios'
-import { StorageItem, StorageItemMetaData } from '@/storage/storage-item'
-import { STORAGE_SERVICE_URL } from '@/env'
+import axios, { AxiosInstance } from 'axios';
 
-const http = axios.create({
-  baseURL: STORAGE_SERVICE_URL,
-  headers: { 'Content-Type': 'application/json' }
-})
+import { StorageItem, StorageItemMetaData } from '@/storage/storage-item';
 
-export async function getStoredItems (pipelineId: number): Promise<StorageItemMetaData[]> {
-  const response = await http.get(`/${pipelineId}?select=id,timestamp,pipelineId`)
-  return response.data
-}
+export class StorageRest {
+  private readonly http: AxiosInstance;
 
-export async function getStoredItem (pipelineId: number, storageItemId: number): Promise<StorageItem> {
-  const response = await http.get(`/${pipelineId}?id=eq.${storageItemId}`)
-  return response.data[0]
-}
+  constructor(private readonly storageServiceUrl: string) {
+    this.http = axios.create({
+      baseURL: storageServiceUrl,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
 
-export function createUrlForItem (pipelineId: number, itemId: number): string {
-  return `${STORAGE_SERVICE_URL}/${pipelineId}?id=eq.${itemId}`
-}
+  async getStoredItems(pipelineId: number): Promise<StorageItemMetaData[]> {
+    const response = await this.http.get(
+      `/${pipelineId}?select=id,timestamp,pipelineId`,
+    );
+    return response.data as StorageItemMetaData[];
+  }
 
-export function createUrlForLatestItem (pipelineId: number): string {
-  return `${STORAGE_SERVICE_URL}/${pipelineId}?order=id.desc&limit=1`
+  async getStoredItem(
+    pipelineId: number,
+    storageItemId: number,
+  ): Promise<StorageItem | undefined> {
+    const response = await this.http.get(
+      `/${pipelineId}?id=eq.${storageItemId}`,
+    );
+    // Returns undefined in case the array is empty
+    return (response.data as StorageItem[])[0];
+  }
+
+  createUrlForItem(pipelineId: number, itemId: number): string {
+    return `${this.storageServiceUrl}/${pipelineId}?id=eq.${itemId}`;
+  }
+
+  createUrlForLatestItem(pipelineId: number): string {
+    return `${this.storageServiceUrl}/${pipelineId}?order=id.desc&limit=1`;
+  }
 }

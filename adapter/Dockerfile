@@ -6,8 +6,16 @@ FROM gradle:6.7-jdk15-openj9 as builder
 
 WORKDIR /builder
 
-# Copy project files
+# Copy gradle files
 COPY *.gradle /builder/
+
+# Required when downloading the dependencies:
+COPY src/main/resources/application.properties /builder/src/main/resources/application.properties
+
+# Download dependencies
+RUN gradle dependencies --refresh-dependencies --info
+
+# Copy remaining source files
 COPY src /builder/src
 
 # Build project and run unit tests

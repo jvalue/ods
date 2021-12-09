@@ -1,36 +1,38 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
-import App from './App.vue'
-import router from './router'
-import Vuetify from 'vuetify'
-import 'vuetify/dist/vuetify.min.css'
-import '@mdi/font/css/materialdesignicons.css'
-import TransformationModule from '@/pipeline/edit/transformation/transformation.module'
-import AuthModule from '@/components/auth/module'
-import PipelineModule from '@/pipeline/pipeline.module'
+import Vue, { VNode } from 'vue';
+import Vuetify from 'vuetify';
+import Vuex from 'vuex';
 
-Vue.use(Vuetify)
+import App from './App.vue';
+import router from './router';
+
+import 'vuetify/dist/vuetify.min.css';
+import '@mdi/font/css/materialdesignicons.css';
+import AuthModule from '@/components/auth/module';
+import TransformationModule from '@/pipeline/edit/transformation/transformation.module';
+import PipelineModule from '@/pipeline/pipeline.module';
+
+Vue.use(Vuetify);
 const vuetify = new Vuetify({
   icons: {
-    iconfont: 'mdi'
-  }
-})
+    iconfont: 'mdi',
+  },
+});
 
-Vue.use(Vuex)
+Vue.use(Vuex);
 
-Vue.config.productionTip = false
+Vue.config.productionTip = false;
 
 export const store = new Vuex.Store({
   modules: {
     auth: AuthModule,
     transformation: TransformationModule,
-    pipeline: PipelineModule
-  }
-})
+    pipeline: PipelineModule,
+  },
+});
 
 new Vue({
   vuetify,
   router,
   store,
-  render: h => h(App)
-}).$mount('#app')
+  render: (h): VNode => h(App),
+}).$mount('#app');

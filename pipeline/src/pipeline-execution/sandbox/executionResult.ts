@@ -1,11 +1,11 @@
-import JobError from './jobError'
+import JobError from './jobError';
 
-export type ExecutionResult = SuccessExecutionResult | ErrorExecutionResult
+export type ExecutionResult = SuccessExecutionResult | ErrorExecutionResult;
 
 export interface SuccessExecutionResult {
-  data: unknown
+  data: unknown;
 }
 
 export interface ErrorExecutionResult {
-  error: JobError
+  error: JobError;
 }

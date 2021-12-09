@@ -1,30 +1,29 @@
 export default interface Pipeline {
-  id: number
-  datasourceId: number
-  metadata: PipelineMetaData
-  transformation: TransformationConfig
-  schema?: object
+  id: number;
+  datasourceId: number;
+  metadata: PipelineMetaData;
+  transformation: TransformationConfig;
+  schema?: Record<string, unknown>;
 }
 
 export interface PipelineMetaData {
-  displayName: string
-  description: string
-  author: string
-  license: string
+  displayName: string;
+  description: string;
+  author: string;
+  license: string;
 }
 
 export interface TransformationConfig {
-  func: string
+  func: string;
 }
 
 export interface TransformedDataMetaData {
-  id: number
-  healthStatus: HealthStatus
-  timestamp: string
+  id: number;
+  healthStatus: HealthStatus;
 }
 
 export enum HealthStatus {
   OK = 'OK',
   WARINING = 'WARNING',
-  FAILED = 'FAILED'
+  FAILED = 'FAILED',
 }
