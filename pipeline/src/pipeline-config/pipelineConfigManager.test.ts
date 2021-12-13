@@ -37,7 +37,7 @@ jest.mock('./pipelineConfigRepository', () => {
     get: jest.fn(),
     getAll: jest.fn().mockResolvedValue([generateConfig(), generateConfig()]),
     getByDatasourceId: jest.fn(),
-    update: jest.fn(),
+    update: jest.fn().mockResolvedValue(generateConfig()),
     deleteById: jest.fn().mockResolvedValue(generateConfig()),
     deleteAll: jest
       .fn()

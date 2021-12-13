@@ -29,8 +29,12 @@ export class PipelineConfigEndpoint {
       res.status(400).send('Path parameter id is missing or is incorrect');
       return;
     }
-    await this.pipelineConfigManager.delete(configId);
-    res.status(204).send();
+    const deletedPipeline = await this.pipelineConfigManager.delete(configId);
+    if (deletedPipeline === undefined) {
+      res.status(404).send(`Could not find config with id ${configId}`);
+      return;
+    }
+    res.status(200).json(deletedPipeline);
   };
 
   deleteAll = async (
@@ -56,15 +60,16 @@ export class PipelineConfigEndpoint {
       return;
     }
     const config = req.body;
-    try {
-      await this.pipelineConfigManager.update(configId, config);
-    } catch (e) {
-      res
-        .status(404)
-        .send(`Could not find config with id ${configId}: ${String(e)}`);
+
+    const updatedPipeline = await this.pipelineConfigManager.update(
+      configId,
+      config,
+    );
+    if (updatedPipeline === undefined) {
+      res.status(404).send(`Could not find config with id ${configId}`);
       return;
     }
-    res.status(204).send();
+    res.status(200).json(updatedPipeline);
   };
 
   create = async (

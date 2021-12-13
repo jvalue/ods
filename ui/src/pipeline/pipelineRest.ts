@@ -43,14 +43,16 @@ export class PipelineRest {
     return JSON.parse(response.data) as Pipeline;
   }
 
-  async updatePipeline(pipeline: Pipeline): Promise<void> {
-    await this.httpPipelineConfigs.put(
+  async updatePipeline(pipeline: Pipeline): Promise<Pipeline> {
+    const response = await this.httpPipelineConfigs.put(
       `/${pipeline.id}`,
       JSON.stringify(pipeline),
     );
+    return JSON.parse(response.data) as Pipeline;
   }
 
-  async deletePipeline(id: number): Promise<void> {
-    await this.httpPipelineConfigs.delete(`/${id}`);
+  async deletePipeline(id: number): Promise<Pipeline> {
+    const response = await this.httpPipelineConfigs.delete(`/${id}`);
+    return JSON.parse(response.data) as Pipeline;
   }
 }

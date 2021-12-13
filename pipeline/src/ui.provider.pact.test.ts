@@ -20,49 +20,72 @@ jest.mock('./pipeline-config/pipelineConfigManager', () => {
       return {
         getAll: jest.fn().mockResolvedValue(pipelineConfigs),
 
-        get: jest.fn().mockImplementation(async (id: number) => {
-          const result = pipelineConfigs.find((config) => config.id === id);
-          return Promise.resolve(result);
-        }),
+        get: jest
+          .fn()
+          .mockImplementation(
+            async (id: number): Promise<PipelineConfig | undefined> => {
+              const result = pipelineConfigs.find((config) => config.id === id);
+              return Promise.resolve(result);
+            },
+          ),
 
         getByDatasourceId: jest
           .fn()
-          .mockImplementation(async (datasourceId: number) => {
-            const result = pipelineConfigs.filter(
-              (config) => config.datasourceId === datasourceId,
-            );
-            return Promise.resolve(result);
-          }),
+          .mockImplementation(
+            async (datasourceId: number): Promise<PipelineConfig[]> => {
+              const result = pipelineConfigs.filter(
+                (config) => config.datasourceId === datasourceId,
+              );
+              return Promise.resolve(result);
+            },
+          ),
 
         create: jest
           .fn()
-          .mockImplementation(async (config: PipelineConfigDTO) => {
-            const result: PipelineConfig = {
-              ...config,
-              metadata: {
-                ...config.metadata,
-                creationTimestamp: new Date(2022, 1),
-              },
-              id: ++nextPipelineConfigId,
-            };
-            pipelineConfigs.push(result);
-            return await Promise.resolve(result);
-          }),
+          .mockImplementation(
+            async (config: PipelineConfigDTO): Promise<PipelineConfig> => {
+              const result: PipelineConfig = {
+                ...config,
+                metadata: {
+                  ...config.metadata,
+                  creationTimestamp: new Date(2022, 1),
+                },
+                id: ++nextPipelineConfigId,
+              };
+              pipelineConfigs.push(result);
+              return Promise.resolve(result);
+            },
+          ),
 
-        update: jest.fn((id: number, config: PipelineConfigDTO) => {
-          const configToUpdate = pipelineConfigs.find(
-            (config) => config.id === id,
-          );
-          Object.assign(configToUpdate, config);
-        }),
+        update: jest.fn(
+          (
+            id: number,
+            config: PipelineConfigDTO,
+          ): Promise<PipelineConfig | undefined> => {
+            const configToUpdate = pipelineConfigs.find(
+              (config) => config.id === id,
+            );
 
-        delete: jest.fn((id: number) => {
+            if (configToUpdate === undefined) {
+              return Promise.resolve(undefined);
+            }
+            Object.assign(configToUpdate, config);
+            return Promise.resolve(configToUpdate);
+          },
+        ),
+
+        delete: jest.fn((id: number): Promise<PipelineConfig | undefined> => {
           const indexOfConfigToDelete = pipelineConfigs.findIndex(
             (config) => config.id === id,
           );
-          if (indexOfConfigToDelete !== -1) {
-            pipelineConfigs.splice(indexOfConfigToDelete, 1);
+
+          if (indexOfConfigToDelete === -1) {
+            return Promise.resolve(undefined);
           }
+
+          const configToDelete = pipelineConfigs[indexOfConfigToDelete];
+          pipelineConfigs.splice(indexOfConfigToDelete, 1);
+          return Promise.resolve(configToDelete);
         }),
       };
     }),

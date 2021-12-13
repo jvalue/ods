@@ -163,10 +163,18 @@ export function updateRequest(pipeline: Pipeline): RequestOptions {
   };
 }
 
-export const updateSuccessResponse: ResponseOptions = {
-  // TODO any success status code is actually acceptable (i.e. 2xx)
-  status: 204,
-};
+export function updateSuccessResponse(withSchema: boolean): ResponseOptions {
+  return {
+    // TODO any success status code is actually acceptable (i.e. 2xx)
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+    },
+    body: like(
+      withSchema ? examplePipelineWithSchema : examplePipelineWithoutSchema,
+    ),
+  };
+}
 
 export function deleteRequestTitle(id: number): string {
   return `a request for deleting the pipeline with id ${id}`;
@@ -179,10 +187,18 @@ export function deleteRequest(id: number): RequestOptions {
   };
 }
 
-export const deleteSuccessResponse: ResponseOptions = {
-  // TODO any success status code is actually acceptable (i.e. 2xx)
-  status: 204,
-};
+export function deleteSuccessResponse(withSchema: boolean): ResponseOptions {
+  return {
+    // TODO any success status code except 204 is actually acceptable (i.e. 2xx)
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+    },
+    body: like(
+      withSchema ? examplePipelineWithSchema : examplePipelineWithoutSchema,
+    ),
+  };
+}
 
 export const exampleTransformedDataId = 1;
 

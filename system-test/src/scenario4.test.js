@@ -112,7 +112,15 @@ describe('Test 4: Update periodic datasource with pipeline', () => {
     pipelineConfig.id = pipelineId
 
     const updateResponse = await request(PIPELINE_URL).put(`/configs/${pipelineId}`).send(pipelineConfig)
-    expect(updateResponse.status).toEqual(204)
+    expect(updateResponse.status).toEqual(200)
+    expect(updateResponse.type).toEqual('application/json')
+    expect(updateResponse.body).toEqual(
+      expect.objectContaining({
+        id: pipelineId,
+        datasourceId: pipelineConfig.datasourceId,
+        metadata: expect.objectContaining(pipelineConfig.metadata)
+      })
+    )
   })
 
   test('Add second notification', async () => {
@@ -138,7 +146,9 @@ describe('Test 4: Update periodic datasource with pipeline', () => {
 
   test('Delete pipeline config', async () => {
     const response = await request(PIPELINE_URL).delete(`/configs/${pipelineId}`).send()
-    expect(response.status).toEqual(204)
+    expect(response.status).toEqual(200)
+    expect(response.type).toEqual('application/json')
+    expect(response.body.id).toEqual(pipelineId)
   }, TEST_TIMEOUT)
 
   test('Delete adapter config', async () => {

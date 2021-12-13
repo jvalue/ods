@@ -27,7 +27,7 @@ const INSERT_CONFIG_STATEMENT = `
 const UPDATE_CONFIG_STATEMENT = `
   UPDATE "${POSTGRES_SCHEMA}"."${CONFIG_TABLE_NAME}"
   SET "datasourceId"=$2, "func"=$3, "author"=$4, "displayName"=$5, "license"=$6, "description"=$7, "schema"=$8
-  WHERE id=$1`;
+  WHERE id=$1 RETURNING *`;
 const GET_CONFIG_STATEMENT = `
   SELECT * FROM "${POSTGRES_SCHEMA}"."${CONFIG_TABLE_NAME}" WHERE "id" = $1`;
 const GET_ALL_CONFIGS_STATEMENT = `
@@ -107,7 +107,7 @@ export async function update(
   client: ClientBase,
   id: number,
   config: PipelineConfigDTO,
-): Promise<void> {
+): Promise<PipelineConfig | undefined> {
   const values = [
     id,
     config.datasourceId,
@@ -119,20 +119,18 @@ export async function update(
     config.schema,
   ];
   const result = await client.query(UPDATE_CONFIG_STATEMENT, values);
-  if (result.rowCount === 0) {
-    throw new Error(`Could not find config with ${id} to update`);
-  }
+  const content = toPipelineConfigs(result);
+  // Returns undefined if the array is empty
+  return content[0];
 }
 
 export async function deleteById(
   client: ClientBase,
   id: number,
-): Promise<PipelineConfig> {
+): Promise<PipelineConfig | undefined> {
   const result = await client.query(DELETE_CONFIG_STATEMENT, [id]);
-  if (result.rowCount === 0) {
-    throw new Error(`Could not find config with ${id} to delete`);
-  }
   const content = toPipelineConfigs(result);
+  // Returns undefined if the array is empty
   return content[0];
 }
 

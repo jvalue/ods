@@ -324,7 +324,7 @@ pactWith(options, provider => {
             state: `pipeline with id ${pipeline.id} exists`,
             uponReceiving: updateRequestTitle(pipeline.id, false),
             withRequest: updateRequest(pipeline),
-            willRespondWith: updateSuccessResponse,
+            willRespondWith: updateSuccessResponse(false),
           });
         });
 
@@ -341,12 +341,14 @@ pactWith(options, provider => {
             state: `pipeline with id ${pipeline.id} exists`,
             uponReceiving: updateRequestTitle(pipeline.id, true),
             withRequest: updateRequest(pipeline),
-            willRespondWith: updateSuccessResponse,
+            willRespondWith: updateSuccessResponse(true),
           });
         });
 
-        it('succeeds', async () => {
-          await restService.updatePipeline(pipeline);
+        it('returns the updated pipeline', async () => {
+          const updatedPipeline = await restService.updatePipeline(pipeline);
+
+          expect(updatedPipeline).toStrictEqual(pipeline);
         });
       });
 
@@ -393,20 +395,41 @@ pactWith(options, provider => {
     });
 
     describe('deleting a pipeline', () => {
-      describe('when the pipeline to delete exists', () => {
-        const id = examplePipelineId;
+      describe('when the pipeline to delete exists and has no schema', () => {
+        const pipeline = examplePipelineWithoutSchema;
 
         beforeEach(async () => {
           await provider.addInteraction({
-            state: `pipeline with id ${id} exists`,
-            uponReceiving: deleteRequestTitle(id),
-            withRequest: deleteRequest(id),
-            willRespondWith: deleteSuccessResponse,
+            state: `pipeline with id ${pipeline.id} exists and has no schema`,
+            uponReceiving: deleteRequestTitle(pipeline.id),
+            withRequest: deleteRequest(pipeline.id),
+            willRespondWith: deleteSuccessResponse(false),
           });
         });
 
-        it('succeeds', async () => {
-          await restService.deletePipeline(id);
+        it('returns the deleted pipeline', async () => {
+          const deletedPipeline = await restService.deletePipeline(pipeline.id);
+
+          expect(deletedPipeline).toStrictEqual(pipeline);
+        });
+      });
+
+      describe('when the pipeline to delete exists and has a schema', () => {
+        const pipeline = examplePipelineWithSchema;
+
+        beforeEach(async () => {
+          await provider.addInteraction({
+            state: `pipeline with id ${pipeline.id} exists and has a schema`,
+            uponReceiving: deleteRequestTitle(pipeline.id),
+            withRequest: deleteRequest(pipeline.id),
+            willRespondWith: deleteSuccessResponse(true),
+          });
+        });
+
+        it('returns the deleted pipeline', async () => {
+          const deletedPipeline = await restService.deletePipeline(pipeline.id);
+
+          expect(deletedPipeline).toStrictEqual(pipeline);
         });
       });
 
@@ -418,16 +441,16 @@ pactWith(options, provider => {
             state: `pipeline with id ${id} does not exist`,
             uponReceiving: deleteRequestTitle(id),
             withRequest: deleteRequest(id),
-            willRespondWith: deleteSuccessResponse,
+            willRespondWith: notFoundResponse,
           });
         });
 
-        it('succeeds', async () => {
-          await restService.deletePipeline(id);
+        it('throws an error', async () => {
+          await expect(restService.deletePipeline(id)).rejects.toThrow(Error);
         });
       });
 
-      describe('with NaN as id for the pipline to update', () => {
+      describe('with NaN as id for the pipline to delete', () => {
         beforeEach(async () => {
           await provider.addInteraction({
             state: 'any state',
