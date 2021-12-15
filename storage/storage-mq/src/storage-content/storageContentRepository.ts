@@ -1,3 +1,5 @@
+import { JsonSchemaElementBase } from '../service/sharedHelper';
+
 export interface StorageContentRepository {
   getAllContent: (
     tableIdentifier: string,
@@ -27,5 +29,5 @@ export interface InsertStorageContent {
   pipelineId: number;
   timestamp: Date;
   data: unknown;
-  schema?: Record<string, unknown>;
+  schema?: JsonSchemaElementBase;
 }

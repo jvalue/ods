@@ -3,6 +3,7 @@ import { PostgresClient } from '@jvalue/node-dry-pg';
 import { POSTGRES_SCHEMA } from '../env';
 import JsonSchemaParser from '../service/jsonSchemaParser';
 import PostgresParser from '../service/postgresParser';
+import { JsonSchemaElementBase } from '../service/sharedHelper';
 
 import { StorageStructureRepository } from './storageStructureRepository';
 
@@ -36,7 +37,7 @@ export class PostgresStorageStructureRepository
   }
 
   async createForSchema(
-    schema: Record<string, unknown>,
+    schema: JsonSchemaElementBase,
     tableName: string,
   ): Promise<void> {
     const jsonSchemaParser: PostgresParser = new JsonSchemaParser();

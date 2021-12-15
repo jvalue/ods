@@ -1,3 +1,4 @@
+import { JsonSchemaElementBase, isDefined } from '../service/sharedHelper';
 import { StorageStructureRepository } from '../storage-structure/storageStructureRepository';
 
 export class PipelineConfigEventHandler {
@@ -11,10 +12,7 @@ export class PipelineConfigEventHandler {
     await this.structureRepository.create(
       pipelineCreatedEvent.pipelineId.toString(),
     );
-    if (
-      pipelineCreatedEvent.schema !== undefined &&
-      pipelineCreatedEvent.schema != null
-    ) {
+    if (isDefined(pipelineCreatedEvent.schema)) {
       await this.structureRepository.createForSchema(
         pipelineCreatedEvent.schema,
         pipelineCreatedEvent.pipelineName +
@@ -35,7 +33,7 @@ export class PipelineConfigEventHandler {
 export interface PipelineCreatedEvent {
   pipelineId: number;
   pipelineName: string;
-  schema?: Record<string, unknown>;
+  schema?: JsonSchemaElementBase;
 }
 
 export interface PipelineDeletedEvent {

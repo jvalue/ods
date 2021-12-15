@@ -1,19 +1,21 @@
+import { JsonSchemaElementBase } from './sharedHelper';
+
 export default interface PostgresParser {
   parseCreateStatement: (
-    schema: any,
+    schema: JsonSchemaElementBase,
     pgSchemaName: string,
     tableName: string,
     index?: number,
-    parentName?: string
-  ) => Promise<string[]>
+    parentName?: string,
+  ) => Promise<string[]>;
 
   parseInsertStatement: (
-    schema: any,
-    data: any,
+    schema: JsonSchemaElementBase,
+    data: unknown,
     pgSchemaName: string,
     tableName: string,
     parentId: number,
     index?: number,
-    parentName?: string
-  ) => Promise<string>
+    parentName?: string,
+  ) => Promise<string>;
 }

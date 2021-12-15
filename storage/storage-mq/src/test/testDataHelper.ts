@@ -1,55 +1,47 @@
+import { JsonSchemaElementArray } from '../service/sharedHelper';
+
 export const JSONSchemaOrdngungsamtComplete = {
   $schema: 'schema-recommendation/jsonschema/parser',
   $id: '#/root',
   type: 'object',
   additionalProperties: true,
-  required: [
-    'messages',
-    'results',
-    'index'
-  ],
+  required: ['messages', 'results', 'index'],
   properties: {
     messages: {
       $id: '#/root/messages',
       type: 'object',
       additionalProperties: true,
-      required: [
-        'messages',
-        'success'
-      ],
+      required: ['messages', 'success'],
       properties: {
         messages: {
           $id: '#/root/messages/messages',
           type: 'array',
           additionalItems: true,
           items: {
-            $id: '#/root/messages/messages/items'
-          }
+            $id: '#/root/messages/messages/items',
+          },
         },
         success: {
           $id: '#/root/messages/success',
-          type: 'boolean'
-        }
-      }
+          type: 'boolean',
+        },
+      },
     },
     results: {
       $id: '#/root/results',
       type: 'object',
       additionalProperties: true,
-      required: [
-        'count',
-        'itemsPerPage'
-      ],
+      required: ['count', 'itemsPerPage'],
       properties: {
         count: {
           $id: '#/root/results/count',
-          type: 'number'
+          type: 'number',
         },
         itemsPerPage: {
           $id: '#/root/results/itemsPerPage',
-          type: 'number'
-        }
-      }
+          type: 'number',
+        },
+      },
     },
     index: {
       $id: '#/root/index',
@@ -65,7 +57,7 @@ export const JSONSchemaOrdngungsamtComplete = {
           'betreff',
           'erstellungsDatum',
           'status',
-          'sachverhalt'
+          'sachverhalt',
         ],
         properties: {
           meldungsNummern: {
@@ -74,36 +66,36 @@ export const JSONSchemaOrdngungsamtComplete = {
             additionalItems: true,
             items: {
               $id: '#/root/index/items/meldungsNummern/items',
-              type: 'string'
-            }
+              type: 'string',
+            },
           },
           bezirk: {
             $id: '#/root/index/items/bezirk',
-            type: 'string'
+            type: 'string',
           },
           betreff: {
             $id: '#/root/index/items/betreff',
-            type: 'string'
+            type: 'string',
           },
           erstellungsDatum: {
             $id: '#/root/index/items/erstellungsDatum',
-            type: 'string'
+            type: 'string',
           },
           status: {
             $id: '#/root/index/items/status',
-            type: 'string'
+            type: 'string',
           },
           sachverhalt: {
             $id: '#/root/index/items/sachverhalt',
-            type: 'string'
-          }
-        }
-      }
-    }
-  }
-}
+            type: 'string',
+          },
+        },
+      },
+    },
+  },
+};
 
-export const JSONSchemaPegelComplete = {
+export const JSONSchemaPegelComplete: JsonSchemaElementArray = {
   $schema: 'schema-recommendation/jsonschema/parser',
   $id: '#/root',
   type: 'array',
@@ -121,71 +113,68 @@ export const JSONSchemaPegelComplete = {
       'agency',
       'longitude',
       'latitude',
-      'water'
+      'water',
     ],
     properties: {
       uuid: {
         $id: '#/root/items/uuid',
-        type: 'string'
+        type: 'string',
       },
       number: {
         $id: '#/root/items/number',
-        type: 'string'
+        type: 'string',
       },
       shortname: {
         $id: '#/root/items/shortname',
-        type: 'string'
+        type: 'string',
       },
       longname: {
         $id: '#/root/items/longname',
-        type: 'string'
+        type: 'string',
       },
       km: {
         $id: '#/root/items/km',
-        type: 'number'
+        type: 'number',
       },
       agency: {
         $id: '#/root/items/agency',
-        type: 'string'
+        type: 'string',
       },
       longitude: {
         $id: '#/root/items/longitude',
-        type: 'number'
+        type: 'number',
       },
       latitude: {
         $id: '#/root/items/latitude',
-        type: 'number'
+        type: 'number',
       },
       water: {
         $id: '#/root/items/water',
         type: 'object',
         additionalProperties: true,
-        required: [
-          'shortname',
-          'longname'
-        ],
+        required: ['shortname', 'longname'],
         properties: {
           shortname: {
             $id: '#/root/items/water/shortname',
-            type: 'string'
+            type: 'string',
           },
           longname: {
             $id: '#/root/items/water/longname',
-            type: 'string'
-          }
-        }
-      }
-    }
-  }
-}
+            type: 'string',
+          },
+        },
+      },
+    },
+  },
+};
 
 export const MultiCompleteOrdnungsamt = {
   messages: {
-    success: true
+    success: true,
   },
   results: {
     count: 1,
-    itemsPerPage: 2
+    itemsPerPage: 2,
   },
   index: [
     {
@@ -194,7 +183,7 @@ export const MultiCompleteOrdnungsamt = {
       betreff: 'FIRST',
       erstellungsDatum: 'FIRST',
       status: '9.56',
-      sachverhalt: 'WSA VERDEN'
+      sachverhalt: 'WSA VERDEN',
     },
     {
       meldungsNummern: ['Hallo', 'Welt'],
@@ -202,10 +191,10 @@ export const MultiCompleteOrdnungsamt = {
       betreff: 'SECOND',
       erstellungsDatum: 'SECOND',
       status: '9.56',
-      sachverhalt: 'WSA VERDEN'
-    }
-  ]
-}
+      sachverhalt: 'WSA VERDEN',
+    },
+  ],
+};
 
 export const MultiCompletePegel = [
   {
@@ -219,8 +208,8 @@ export const MultiCompletePegel = [
     latitude: 52.90406541008721,
     water: {
       shortname: 'FIRST',
-      longname: 'FIRST'
-    }
+      longname: 'FIRST',
+    },
   },
   {
     uuid: '2',
@@ -233,10 +222,10 @@ export const MultiCompletePegel = [
     latitude: 52.90406541008721,
     water: {
       shortname: 'SECOND',
-      longname: 'SECOND'
-    }
-  }
-]
+      longname: 'SECOND',
+    },
+  },
+];
 
 export const PostgresSchemaPegelCreate = [
   'CREATE TABLE IF NOT EXISTS "TESTSCHEMA"."TESTTABLE" (' +
@@ -245,18 +234,18 @@ export const PostgresSchemaPegelCreate = [
     '"uuid" text, "number" text, "shortname" text, "longname" text, ' +
     '"km" integer, "agency" text, "longitude" integer, "latitude" integer, ' +
     'CONSTRAINT "Data_pk_TESTSCHEMA_TESTTABLE" PRIMARY KEY (id)' +
-  ')',
+    ')',
   'CREATE TABLE IF NOT EXISTS "TESTSCHEMA"."TESTTABLE_water" (' +
     '"id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY, ' +
     '"createdAt" timestamp not null default CURRENT_TIMESTAMP, ' +
     '"shortname" text, "longname" text, "TESTTABLEid" bigint NOT NULL, ' +
     'CONSTRAINT "Data_fk_TESTSCHEMA_TESTTABLE_water" FOREIGN KEY (TESTTABLEid) ' +
-      'REFERENCES TESTSCHEMA.TESTTABLE(id), ' +
+    'REFERENCES TESTSCHEMA.TESTTABLE(id), ' +
     'CONSTRAINT "Data_pk_TESTSCHEMA_TESTTABLE_water" PRIMARY KEY (id)' +
-  ')'
-]
+    ')',
+];
 
-/* export const PostgresSchemaMultiPegelInsert =
+/* Export const PostgresSchemaMultiPegelInsert =
   'INSERT INTO "TESTSCHEMA"."TESTTABLE" (' +
   '"uuid","number","shortname","longname","km","agency","longitude","latitude")' +
   ' VALUES ('1','48900237','FIRST','FIRST',9.56,'WSA VERDEN',9.27676943537587,52.90406541008721)` +

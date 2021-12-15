@@ -1,3 +1,4 @@
+import { JsonSchemaElementBase, isDefined } from '../service/sharedHelper';
 import { StorageContentRepository } from '../storage-content/storageContentRepository';
 
 export class PipelineExecutionEventHandler {
@@ -14,10 +15,7 @@ export class PipelineExecutionEventHandler {
         data: pipelineExecutedEvent.data,
       },
     );
-    if (
-      pipelineExecutedEvent.schema !== undefined &&
-      pipelineExecutedEvent.schema != null
-    ) {
+    if (isDefined(pipelineExecutedEvent.schema)) {
       await this.contentRepository.saveContentForSchema(
         pipelineExecutedEvent.pipelineName +
           pipelineExecutedEvent.pipelineId.toString(),
@@ -36,6 +34,6 @@ export interface PipelineExecutedEvent {
   pipelineId: number;
   pipelineName: string;
   data: unknown;
-  schema?: Record<string, unknown>;
+  schema?: JsonSchemaElementBase;
   timestamp?: Date;
 }
