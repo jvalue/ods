@@ -73,6 +73,20 @@
         </v-tooltip>
         <v-tooltip top>
           <template #activator="{ on, attrs }">
+            <v-icon
+              v-bind="attrs"
+              small
+              v-on="on"
+              @click="onTrigger(item)"
+              :disabled="isManualTriggering"
+            >
+              mdi-lightning-bolt
+            </v-icon>
+          </template>
+          <span>Trigger datasource</span>
+        </v-tooltip>
+        <v-tooltip top>
+          <template #activator="{ on, attrs }">
             <v-icon v-bind="attrs" small v-on="on" @click="onDelete(item)">
               mdi-delete
             </v-icon>
@@ -107,6 +121,7 @@ import * as DatasourceREST from './datasourceRest';
 export default class DatsourceOverview extends Vue {
   private isLoadingDatasources = false;
   private isLoadingDatasourcesStatus = false;
+  private isManualTriggering = false;
   private datasources: Datasource[] = [];
   private datasourcesStatus: Map<number, string> = new Map<number, string>();
 
@@ -165,6 +180,30 @@ export default class DatsourceOverview extends Vue {
     await this.loadDataSources();
   }
 
+  private async onTrigger(datasource: Datasource): Promise<void> {
+    this.isManualTriggering = true;
+    this.isLoadingDatasourcesStatus = true;
+    const dataImport: DataimportMetaData | null = await DatasourceREST.triggerDatasource(
+      datasource.id,
+    ).catch(() => null);
+    // Update status
+    if (dataImport != null) {
+      // This cloneing and updateing is necessary in order for Vue to detect the changes
+      const datasourcesStatus: Map<number, string> = new Map<number, string>(
+        this.datasourcesStatus,
+      );
+
+      datasourcesStatus.set(
+        datasource.id,
+        this.getHealthColor(dataImport.health),
+      );
+
+      this.datasourcesStatus = datasourcesStatus;
+    }
+    this.isLoadingDatasourcesStatus = false;
+    this.isManualTriggering = false;
+  }
+
   private onCreatePipeline(datasource: Datasource): void {
     this.$router
       .push({
@@ -200,10 +239,15 @@ export default class DatsourceOverview extends Vue {
     const datasourcesStatus: Map<number, string> = new Map<number, string>();
 
     for (const element of this.datasources) {
-      const dataImport: DataimportMetaData = await DatasourceREST.getLatestDataimport(
+      const dataImport: DataimportMetaData | null = await DatasourceREST.getLatestDataimport(
         element.id,
-      );
-      datasourcesStatus.set(element.id, this.getHealthColor(dataImport.health));
+      ).catch(() => null);
+      if (dataImport != null) {
+        datasourcesStatus.set(
+          element.id,
+          this.getHealthColor(dataImport.health),
+        );
+      }
     }
 
     this.datasourcesStatus = datasourcesStatus;
