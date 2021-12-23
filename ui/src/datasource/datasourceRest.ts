@@ -81,3 +81,10 @@ export async function getLatestDataimport(
   const jsonResponse = JSON.parse(importResponse.data) as DataimportMetaData;
   return jsonResponse;
 }
+
+export async function triggerDatasource(
+  id: number,
+): Promise<DataimportMetaData> {
+  const triggerResponse = await http.post(`/datasources/${id}/trigger`);
+  return JSON.parse(triggerResponse.data) as DataimportMetaData;
+}
