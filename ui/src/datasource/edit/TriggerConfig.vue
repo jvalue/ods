@@ -142,6 +142,12 @@ export default class TriggerConfig extends Vue {
   @PropSync('value')
   private triggerConfig!: Trigger;
 
+  private mounted(): void {
+    if (this.triggerConfig !== undefined) {
+      this.loadDialogIntervalForSlider();
+    }
+  }
+
   private minutesTickLabels(): string[] {
     const ticks = new Array<string>(61);
     ticks[0] = '0m';
