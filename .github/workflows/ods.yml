@@ -45,6 +45,7 @@ jobs:
         with:
           name: adapter-artifact
           path: adapter.tar
+          retention-days: 1
 
 
   # ----------------- SCHEDULER SERVICE --------------------
@@ -81,6 +82,7 @@ jobs:
         with:
           name: scheduler-artifact
           path: scheduler.tar
+          retention-days: 1
 
 
   # ----------------- STORAGE SERVICE --------------------
@@ -127,18 +129,21 @@ jobs:
         with:
           name: storage-artifact
           path: storage_postgrest.tar
+          retention-days: 1
 
       - name: Upload Liquibase Docker image as artifact
         uses: actions/upload-artifact@v1
         with:
           name: liquibase-artifact
           path: storage_liquibase.tar
+          retention-days: 1
 
       - name: Upload Storage-MQ Docker image as artifact
         uses: actions/upload-artifact@v1
         with:
           name: storagemq-artifact
           path: storage_mq.tar
+          retention-days: 1
 
       # The CDC-Test builds a cut-down image that would override the previously built production image
       # Therefore it is executed after uploading the production image
@@ -188,6 +193,7 @@ jobs:
         with:
           name: pipeline-artifact
           path: pipeline.tar
+          retention-days: 1
 
 
   # ----------------- NOTIFICATION SERVICE --------------------
@@ -224,6 +230,7 @@ jobs:
         with:
           name: notification-artifact
           path: notification.tar
+          retention-days: 1
 
       # The CDC-Test builds a cut-down image that would override the previously built production image
       # Therefore it is executed after uploading the production image
@@ -262,6 +269,7 @@ jobs:
         with:
           name: ui-artifact
           path: ui.tar
+          retention-days: 1
 
       # The CDC-Test builds a cut-down image that would override the previously built production image
       # Therefore it is executed after uploading the production image
@@ -620,7 +628,7 @@ jobs:
           if [[ "${{ github.ref }}" != refs/tags/* ]]
           then
             UI_VERSION=${UI_VERSION}-$(git rev-parse --short HEAD)
-          fi
+          figit
           echo $UI_VERSION
 
           docker tag $IMAGE_ID $IMAGE_ID:$UI_VERSION
