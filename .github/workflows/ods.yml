@@ -628,7 +628,7 @@ jobs:
           if [[ "${{ github.ref }}" != refs/tags/* ]]
           then
             UI_VERSION=${UI_VERSION}-$(git rev-parse --short HEAD)
-          figit
+          fi
           echo $UI_VERSION
 
           docker tag $IMAGE_ID $IMAGE_ID:$UI_VERSION
