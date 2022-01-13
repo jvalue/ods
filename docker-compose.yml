@@ -31,14 +31,18 @@ services:
       - adapter-db
       - adapter-outboxer
     environment:
-      SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: rabbit_adm
-      SPRING_RABBITMQ_PASSWORD: R4bb!7_4DM_p4SS
-      SPRING_DATASOURCE_URL: jdbc:postgresql://adapter-db:5432/adapterservice
-      SPRING_DATASOURCE_USERNAME: adapterservice
-      SPRING_DATASOURCE_PASSWORD: admin
+      CONNECTION_RETRIES: 20
+      CONNECTION_BACKOFF_IN_MS: 5000
 
+      POSTGRES_HOST: "adapter-db"
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: "adapterservice"
+      POSTGRES_PW: "admin"
+      POSTGRES_DB: "adapterservice"
+      POSTGRES_SCHEMA: "public" # other schemas have to be created somewhere before use!
+      POSTGRES_SSL: "false"
+
+      AMQP_URL: 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
       ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC: 'datasource.execution.success'
       ADAPTER_AMQP_IMPORT_FAILED_TOPIC: 'datasource.execution.failed'
       ADAPTER_AMQP_DATASOURCE_CREATED_TOPIC: 'datasource.config.created'
