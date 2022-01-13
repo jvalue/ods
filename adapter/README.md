@@ -18,16 +18,32 @@ Planned protocols:
 
 Planned formats:
 
-## Getting Started
+## Build
 
-* Build with `./gradlew build`
-* Run unit tests with `./gradlew test`
-* Run integration test with `./gradlew integrationTest` (note that a instance of the adapterService needs to be up).
-* Start with `./gradlew bootRun`  - <b>not recommended</b>
-* Use Docker-Compose: `docker-compose -f ../docker-compose.yml --env-file ../.env up adapter` builds Docker images and starts them up. 
-Note that you need to delete existing docker images from your local docker daemon to have recent changes integrated. 
-* For integration testing run `docker-compose -f ../docker-compose.yml -f ../docker-compose.it.yml --env-file ../.env up adapter-it`
-* To analyze the logs of the service under test we recommend using lazydocker. Alternatively, you can attach manually to the adapter container using the docker cli. 
+`npm install`
+
+`npm run tsc`
+
+## Run
+
+`npm start`
+
+## Running in watch mode
+
+Use `npm run watch` to concurrently start the `tsc` compiler as well as run the service. It automatically reloads after file changes.
+
+## Running unit tests
+
+Use `npm test` to run the unit tests.
+
+## Linting
+
+Use `npm run lint` to run the linter and `npm run lint-fix` to run the linter with the `--fix` paramter, thus fixing simple formatting issues.
+
+## Running end-to-end tests
+
+* For integration testing run `docker-compose -f ../docker-compose.yml -f ../docker-compose.it.yml --env-file ../.env up adapter-it`.
+* To analyze the logs of the service under test we recommend using lazydocker. Alternatively, you can attach manually to the pipeline container using the docker cli. 
 * After running integration tests dependant services (e.g. rabbit-mq) keep running. In order to stop all services and return to a clean, initial state run `docker-compose -f ../docker-compose.yml -f ../docker-compose.it.yml down`. 
 
 ## Architecture
