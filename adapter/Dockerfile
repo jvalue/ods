@@ -1,40 +1,53 @@
-#-------------------------------------------------------#
-# First stage: image to build and test Java application #
-#-------------------------------------------------------#
-# The gradle version here should match the gradle version in gradle/wrapper/gradle-wrapper.properties
-FROM gradle:6.7-jdk15-openj9 as builder
+#----------------------------------------------------------#
+# First stage: base image for further building and testing #
+#----------------------------------------------------------#
+FROM node:16-alpine as base
 
-WORKDIR /builder
+# install dependencies for pact (https://docs.pact.io/docker/)
+RUN apk add --no-cache --virtual build-dependencies build-base
+RUN apk --no-cache add ca-certificates wget bash \
+  && wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
+  && wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.29-r0/glibc-2.29-r0.apk \
+  && apk add glibc-2.29-r0.apk
 
-# Copy gradle files
-COPY *.gradle /builder/
+WORKDIR /build
 
-# Required when downloading the dependencies:
-COPY src/main/resources/application.properties /builder/src/main/resources/application.properties
+# Copy package*.json files first in order to make best use of docker layer caching
+COPY ./package*.json ./
 
-# Download dependencies
-RUN gradle dependencies --refresh-dependencies --info
+# npm clean slate install to get reproducible builds and quicker installs
+RUN npm ci
 
-# Copy remaining source files
-COPY src /builder/src
+# copy rest of the files
+COPY ./src ./src
+COPY ./tsconfig.json ./
+COPY ./*.js ./
 
-# Build project and run unit tests
-RUN gradle assemble
-RUN gradle test
+#--------------------------------------------------------#
+# Second stage: image to build and test node application #
+#--------------------------------------------------------#
+FROM base as build
 
-#-------------------------------------------------------#
-# Second stage: image to run Java application           #
-#-------------------------------------------------------#
-FROM adoptopenjdk/openjdk15-openj9:alpine-slim
+# lint project
+RUN npm run lint-ci
 
-RUN mkdir /app
+# build
+RUN npm run transpile
+
+# run unit test
+RUN npm run test
+
+#--------------------------------------------#
+# Third stage: image to run node application #
+#--------------------------------------------#
+FROM node:16-alpine
+
 WORKDIR /app
 
-ENV SPRING_PROFILES_ACTIVE prod
+COPY --from=build /build/dist/ ./dist/
+COPY --from=build /build/package*.json ./
 
-# Pull the dist files from the builder container
-COPY --from=builder /builder/build/libs/* app.jar
-
-# Run app
+RUN npm ci --only=production
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+CMD [ "npm", "run", "start:transpiled" ]

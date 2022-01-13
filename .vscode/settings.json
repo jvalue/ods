@@ -10,7 +10,8 @@
     "./scheduler/integration-test",
     "./storage/integration-test",
     "./pipeline/integration-test",
-    "./notification"
+    "./notification",
+    "./adapter"
   ],
   "eslint.validate": ["typescript"],
   "typescript.preferences.importModuleSpecifier": "relative",
