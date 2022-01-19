@@ -28,12 +28,12 @@
       <v-stepper-content step="2">
         <adapter-config
           v-model="datasource"
-          @validityChanged="validStep2 = isSchemaAlive ? $event : $event + 1"
+          @validityChanged="validStep2 = $event"
         />
         <stepper-button-group
           :step="2"
           :next-enabled="validStep2"
-          @stepChanged="dialogStep = isSchemaAlive ? $event : $event + 1"
+          @stepChanged="dialogStep = $event"
         />
       </v-stepper-content>
       <v-stepper-step v-if="isSchemaAlive" :complete="dialogStep > 3" step="3">
@@ -52,32 +52,38 @@
         />
       </v-stepper-content>
 
-      <v-stepper-step :complete="dialogStep > 4" step="4">
+      <v-stepper-step
+        :complete="dialogStep > metaDataStepNumber"
+        :step="metaDataStepNumber"
+      >
         Meta-Data
       </v-stepper-step>
-      <v-stepper-content step="4">
+      <v-stepper-content :step="metaDataStepNumber">
         <datasource-metadata-config
           v-model="datasource.metadata"
           @validityChanged="validStep4 = $event"
         />
         <stepper-button-group
-          :step="4"
+          :step="metaDataStepNumber"
           :next-enabled="validStep4"
           @stepChanged="dialogStep = $event"
         />
       </v-stepper-content>
 
-      <v-stepper-step :complete="dialogStep > 5" step="5">
+      <v-stepper-step
+        :complete="dialogStep > triggerConfigurationStepNumber"
+        :step="triggerConfigurationStepNumber"
+      >
         Trigger Configuration
         <small>Configure Execution Details</small>
       </v-stepper-step>
-      <v-stepper-content step="5">
+      <v-stepper-content :step="triggerConfigurationStepNumber">
         <trigger-config
           v-model="datasource.trigger"
           @validityChanged="validStep5 = $event"
         />
         <stepper-button-group
-          :step="5"
+          :step="triggerConfigurationStepNumber"
           :next-enabled="validStep5"
           :next-visible="false"
           @stepChanged="dialogStep = $event"
@@ -145,6 +151,14 @@ export default class DatasourceForm extends Vue {
       this.validStep4 &&
       this.validStep5
     );
+  }
+
+  get metaDataStepNumber(): number {
+    return this.isSchemaAlive ? 4 : 3;
+  }
+
+  get triggerConfigurationStepNumber(): number {
+    return this.isSchemaAlive ? 5 : 4;
   }
 
   @Emit('validityChanged')
