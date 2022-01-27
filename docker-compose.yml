@@ -203,6 +203,7 @@ services:
       DATABASE_PORT: 5432
       DATABASE_NAME: ods
       DATABASE_USER: postgrest
+      DATABASE_SCHEMA: storage
       DATABASE_PW: postgres-wrapper-pw
       DATABASE_ANON: web_anon
     depends_on:
