@@ -3,10 +3,10 @@ import express from 'express';
 import { asyncHandler } from './utils';
 
 const adapterService = require( "../../services/AdapterService" );
-
+const APP_VERSION = "0.0.1"
 export class AdapterEndpoint {
   constructor() {}
-  
+
   registerRoutes = (app: express.Application): void => {
     app.post('/preview', asyncHandler(this.handleExecuteDataImport));
     app.post('/preview/raw', asyncHandler(this.handleExecuteRawPreview));
@@ -40,75 +40,57 @@ export class AdapterEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    res.status(200).send();
+    // TODO check if valid config
+    let adapterConfig = req.params.config
+    let returnDataImportResponse = adapterService.executeJob(adapterConfig);
+    res.status(200).send(returnDataImportResponse);
   };
 
   handleExecuteRawPreview = async (
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    res.status(200).send();
+    // TODO check if valid config
+    let protocolConfig = req.params.config
+    let returnDataImportResponse = adapterService.executeRawImport(protocolConfig);
+    res.status(200).send(returnDataImportResponse);
   };
 
-  // Format Endpoint
   /*
-    @RestController
-  @AllArgsConstructor
-  public class FormatEndpoint {
-    private final Adapter adapter;
-
-    @GetMapping(Mappings.FORMAT_PATH)
-    public Collection<Interpreter> getFormats() {
-      return adapter.getAllFormats();
-    }
+    returns Collection of Importer
   } */
 
   handleGetFormat = async (
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    let interpreters = adapterService.getAllFormats();
-    res.status(200).json(interpreters);
+    try {
+      let interpreters = adapterService.getAllFormats();
+      res.status(200).json(interpreters);
+    } catch (e) {
+      res.status(500).send('Error finding formats');
+    }
   };
 
-  // Protocol Endpoint
   /*
-    @RestController
-    @AllArgsConstructor
-  public class ProtocolEndpoint {
-    private final Adapter adapter;
-
-    @GetMapping(Mappings.PROTOCOL_PATH)
-    public Collection<Importer> getProtocols() {
-      return adapter.getAllProtocols();
-    }
-  }
+    returns Collection of Importer
   */
-  // Version Endpoint
-
   handleGetProtocols = async (
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    res.status(200).send();
+    try {
+          let protocols = adapterService.getAllProtocols();
+          res.status(200).json(protocols);
+        } catch (e) {
+          res.status(500).send('Error finding protocols');
+        }
   };
-  /*
-  @RestController
-  public class VersionEndpoint {
 
-    @Value("${app.version}")
-    private String VERSION;
-
-    @GetMapping(Mappings.VERSION_PATH)
-    public String getApplicationVersion() {
-      return VERSION;
-    }
-  }
-  */
   handleGetApplicationVersion = async (
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    res.status(200).send();
+    res.status(200).send(APP_VERSION);
   };
 };
