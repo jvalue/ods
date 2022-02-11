@@ -2,18 +2,11 @@ import express from 'express';
 
 import { asyncHandler } from './utils';
 
+const adapterService = require( "../../services/AdapterService" );
+
 export class AdapterEndpoint {
-  //constructor(private readonly storageHandler: NotificationRepository) {}
   constructor() {}
-
-  /*registerRoutes = (app: express.Application): void => {
-    app.post('/configs', asyncHandler(this.handleConfigCreation));
-    app.put('/configs/:id', asyncHandler(this.handleConfigUpdate));
-    app.delete('/configs/:id', asyncHandler(this.handleConfigDeletion));
-    app.get('/configs/:id', asyncHandler(this.handleConfigRetrieve));
-    app.get('/configs', asyncHandler(this.handleAllConfigRetrieve));
-  };*/
-
+  
   registerRoutes = (app: express.Application): void => {
     app.post('/preview', asyncHandler(this.handleExecuteDataImport));
     app.post('/preview/raw', asyncHandler(this.handleExecuteRawPreview));
@@ -74,7 +67,8 @@ export class AdapterEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    res.status(200).send("im alive");
+    let interpreters = adapterService.getAllFormats();
+    res.status(200).json(interpreters);
   };
 
   // Protocol Endpoint
@@ -117,14 +111,4 @@ export class AdapterEndpoint {
   ): Promise<void> => {
     res.status(200).send();
   };
-
-
-
-
-  /**
-   * Gets all Configs corresponding to Pipeline-ID
-   * (identified by param id) as json list
-   */
-
-
 };

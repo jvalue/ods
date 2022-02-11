@@ -20,7 +20,6 @@ async function main(): Promise<void> {
   app.get('/', (req: express.Request, res: express.Response): void => {
     res.status(200).send('I am alive!');
   });
-
   const adapterEndpoint = new AdapterEndpoint();
 
   adapterEndpoint.registerRoutes(app);
