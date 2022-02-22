@@ -1,4 +1,4 @@
-import { Interpreter } from "../interpreter/interpreter";
+import { Interpreter } from "../interpreter/Interpreter";
 import { AdapterConfig } from "../model/AdapterConfig";
 import { DataImportResponse } from "../model/DataImportResponse";
 
@@ -14,8 +14,8 @@ export class AdapterService {
     // To Implement
     static getAllFormats(): Array<Interpreter> {
       try {
-        let interpreters: Interpreter[] = [new Interpreter("TYPE_TEST", "Dies ist eine BeschreibungTestPV")]
-        return interpreters
+        // TODO implement interpreter
+        return []
       } catch (err) {
         throw err
       }
@@ -23,8 +23,8 @@ export class AdapterService {
 
     static getAllProtocols(): Array<Interpreter> {
         try {
-          let protocols: Interpreter[] = [new Interpreter("TYPE_TEST", "Dies ist eine BeschreibungTestPV")]
-          return protocols
+          // TODO implement interpreter
+          return []
         } catch (err) {
           throw err
         }
