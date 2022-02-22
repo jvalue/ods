@@ -1,6 +1,7 @@
+import { Interpreter } from "../interpreter/interpreter";
 import { AdapterConfig } from "../model/AdapterConfig";
 import { DataImportResponse } from "../model/DataImportResponse";
-import { Interpreter } from "../model/interpreter";
+
 import { ProtocolConfig } from "../model/ProtocolConfig";
 
 export class AdapterService {

@@ -6,17 +6,15 @@ export enum Protocol {
 }
 
 /*
-JSON(new JsonInterpreter()),
-  XML(new XmlInterpreter()),
-  CSV(new CsvInterpreter());
+ HTTP(new HttpImporter(new RestTemplate()));
 
-  private final Interpreter interpreter;
+  private final Importer importer;
 
-  Format(Interpreter interpreter) {
-    this.interpreter = interpreter;
+  Protocol(Importer importer) {
+    this.importer = importer;
   }
 
-  Interpreter getInterpreter() {
-    return interpreter;
+  Importer getImporter() {
+    return importer;
   }
 */
