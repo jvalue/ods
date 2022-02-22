@@ -93,8 +93,6 @@ export class AdapterEndpoint {
     res: express.Response,
   ): Promise<void> => {
     try {
-          let test = Format.JSON
-          console.log(typeof(test))
           let protocols = adapterService.getAllProtocols();
           res.status(200).json(protocols);
         } catch (e) {

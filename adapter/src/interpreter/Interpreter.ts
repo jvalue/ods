@@ -1,6 +1,6 @@
 export abstract class Interpreter {
-  type: string;
-  description: string;
+  type: string | undefined;
+  description: string | undefined;
   parameters: Map<string, any> | undefined;
 
   /*

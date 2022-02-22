@@ -1,8 +1,15 @@
-export enum Protocol {
-  Up = 1,
-  Down,
-  Left,
-  Right,
+export class Protocol {
+  //static readonly HTTP  = new HttpImporter(new Resttemplate);
+  
+
+  // private to disallow creating other instances of this type
+  private constructor(private readonly key: string, public readonly value: any) {
+  }
+
+  toString() {
+    return this.key;
+  }
+  
 }
 
 /*
