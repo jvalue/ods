@@ -1,6 +1,6 @@
 export class FormatConfig {
-    
-    //format:Format;
+
+    format:Format;
     parameters: Map<string, any> | undefined;
     //TODO JSON CREATER FROM JAVA
     /*
@@ -12,9 +12,8 @@ export class FormatConfig {
     this.parameters = parameters;
   }
     */
-    constructor(/*format: Format,*/ parameters: Map<string, any>) {
-      //this.format = format;
+    constructor(format: Format, parameters: Map<string, any>) {
+      this.format = format;
       this.parameters = parameters;
     }
   }
-  
