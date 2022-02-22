@@ -1,5 +1,8 @@
+import { Format } from './enum/Format';
+
 export class FormatConfig {
 
+    
     format:Format;
     parameters: Map<string, any> | undefined;
     //TODO JSON CREATER FROM JAVA

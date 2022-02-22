@@ -1,4 +1,5 @@
 import express from 'express';
+import { AdapterConfigValidator } from '../../model/AdapterConfig';
 
 import { asyncHandler } from './utils';
 
@@ -41,6 +42,12 @@ export class AdapterEndpoint {
     res: express.Response,
   ): Promise<void> => {
     // TODO check if valid config
+    const validator = new AdapterConfigValidator();
+    if (!validator.validate(req.body)) {
+      res.status(400).json({ errors: validator.getErrors() });
+      return;
+    }
+
     let adapterConfig = req.params.config
     let returnDataImportResponse = adapterService.executeJob(adapterConfig);
     res.status(200).send(returnDataImportResponse);
