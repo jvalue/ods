@@ -1,7 +1,6 @@
 import {Interpreter} from "./Interpreter";
 
 
-
 export class CsvInterpreter extends Interpreter {
 
   /*

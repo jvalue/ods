@@ -4,6 +4,7 @@ import { AdapterConfigValidator } from '../../model/AdapterConfig';
 
 import { asyncHandler } from './utils';
 import {ProtocolConfigValidator} from "../../model/ProtocolConfig";
+import { Format } from '../../model/enum/Format';
 
 const adapterService = require( "../../services/AdapterService" );
 const APP_VERSION = "0.0.1"
@@ -92,6 +93,8 @@ export class AdapterEndpoint {
     res: express.Response,
   ): Promise<void> => {
     try {
+          let test = Format.JSON
+          console.log(typeof(test))
           let protocols = adapterService.getAllProtocols();
           res.status(200).json(protocols);
         } catch (e) {
