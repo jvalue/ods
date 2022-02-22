@@ -2,6 +2,7 @@ import express from 'express';
 import { AdapterConfigValidator } from '../../model/AdapterConfig';
 
 import { asyncHandler } from './utils';
+import {ProtocolConfigValidator} from "../../model/ProtocolConfig";
 
 const adapterService = require( "../../services/AdapterService" );
 const APP_VERSION = "0.0.1"
@@ -41,7 +42,6 @@ export class AdapterEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    // TODO check if valid config
     const validator = new AdapterConfigValidator();
     if (!validator.validate(req.body)) {
       res.status(400).json({ errors: validator.getErrors() });
@@ -57,7 +57,11 @@ export class AdapterEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    // TODO check if valid config
+    const validator = new ProtocolConfigValidator();
+    if (!validator.validate(req.body)) {
+      res.status(400).json({ errors: validator.getErrors() });
+      return;
+    }
     let protocolConfig = req.params.config
     let returnDataImportResponse = adapterService.executeRawImport(protocolConfig);
     res.status(200).send(returnDataImportResponse);
