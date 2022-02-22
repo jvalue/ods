@@ -1,6 +1,6 @@
 import {Interpreter} from "./Interpreter";
 
-class JsonInterpreter extends Interpreter {
+export class JsonInterpreter extends Interpreter {
 
   /*
   private final List<InterpreterParameterDescription> parameters = List.of();

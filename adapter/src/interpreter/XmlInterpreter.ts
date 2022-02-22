@@ -1,6 +1,6 @@
 import {Interpreter} from "./Interpreter";
 
-class XmlInterpreter extends Interpreter{
+export class XmlInterpreter extends Interpreter{
 
   /*
   private final List<InterpreterParameterDescription> parameters = List.of();

@@ -1,8 +1,7 @@
+import { JsonInterpreter } from "../../interpreter/JsonInterpreter";
+
 export enum Format {
-  Up = 1,
-  Down,
-  Left,
-  Right,
+  JSON(new JsonInterpreter());
 }
 
 /*

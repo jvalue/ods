@@ -2,7 +2,7 @@ import {Interpreter} from "./Interpreter";
 
 
 
-class CsvInterpreter extends Interpreter {
+export class CsvInterpreter extends Interpreter {
 
   /*
   private final List<InterpreterParameterDescription> parameters = List.of(
