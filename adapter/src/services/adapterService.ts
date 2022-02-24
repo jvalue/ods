@@ -1,3 +1,4 @@
+import { Importer } from "../importer/Importer";
 import { Interpreter } from "../interpreter/Interpreter";
 import { AdapterConfig } from "../model/AdapterConfig";
 import { DataImportResponse } from "../model/DataImportResponse";
@@ -19,7 +20,7 @@ export class AdapterService {
     }
 
 
-    static getAllProtocols(): Array<Interpreter> {
+    static getAllProtocols(): Array<Importer> {
       return [Protocol.HTTP]
      }
 
