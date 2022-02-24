@@ -1,6 +1,13 @@
 import { Importer } from "./Importer";
+import { ImporterParameterDescription } from "./ImporterParameterDescription";
 
 export class HttpImporter extends Importer {
+    getAvailableParameters(): ImporterParameterDescription[] {
+        throw new Error("Method not implemented.");
+    }
+    doFetch(parameters: Record<string, unknown>): string {
+        throw new Error("Method not implemented.");
+    }
     /**
      * 
      * private final List<ImporterParameterDescription> parameters = List.of(

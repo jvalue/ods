@@ -1,6 +1,9 @@
 import {Interpreter} from "./Interpreter";
 
 export class JsonInterpreter extends Interpreter {
+  doInterpret(data: string, parameters: Record<string, unknown>): string {
+    throw new Error("Method not implemented.");
+  }
 
   /*
   private final List<InterpreterParameterDescription> parameters = List.of();
