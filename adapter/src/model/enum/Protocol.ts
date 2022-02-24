@@ -1,5 +1,5 @@
 export class Protocol {
-  //static readonly HTTP  = new HttpImporter(new Resttemplate);
+  static readonly HTTP  = null//new HttpImporter(new Resttemplate);
   
   //importer: Importer;
   
