@@ -1,8 +1,8 @@
 export class Protocol {
   //static readonly HTTP  = new HttpImporter(new Resttemplate);
   
-
-  // private to disallow creating other instances of this type
+  //importer: Importer;
+  
   private constructor(private readonly key: string, public readonly value: any) {
   }
 

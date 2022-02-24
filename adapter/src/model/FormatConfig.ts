@@ -1,21 +1,9 @@
-import { Format } from './enum/Format';
+import { Format } from "./enum/Format";
 
 export class FormatConfig {
-
-    
     format:Format;
-    parameters: Map<string, any> | undefined;
-    //TODO JSON CREATER FROM JAVA
-    /*
-    @JsonCreator
-  public FormatConfig(
-    @JsonProperty("type") Format format,
-    @JsonProperty("parameters") Map<String, Object> parameters) {
-    this.format = format;
-    this.parameters = parameters;
-  }
-    */
-    constructor(format: Format, parameters: Map<string, any>) {
+    parameters: Record<string, unknown> | undefined;
+    constructor(format: Format, parameters: Record<string, unknown>) {
       this.format = format;
       this.parameters = parameters;
     }

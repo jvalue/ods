@@ -2,7 +2,6 @@ import { Protocol } from "./enum/Protocol";
 import { validators } from '@jvalue/node-dry-basics';
 
 export interface ProtocolConfig {
-
     protocol:Protocol;
     parameters: Map<string, any> | undefined;
 }
