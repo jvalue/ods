@@ -1,7 +1,7 @@
+import { HttpImporter } from "../../importer/HttpImporter";
+
 export class Protocol {
-  static readonly HTTP  = null//new HttpImporter(new Resttemplate);
-  
-  //importer: Importer;
+  static readonly HTTP  = new HttpImporter();
   
   private constructor(private readonly key: string, public readonly value: any) {
   }
@@ -9,19 +9,5 @@ export class Protocol {
   toString() {
     return this.key;
   }
-  
+ 
 }
-
-/*
- HTTP(new HttpImporter(new RestTemplate()));
-
-  private final Importer importer;
-
-  Protocol(Importer importer) {
-    this.importer = importer;
-  }
-
-  Importer getImporter() {
-    return importer;
-  }
-*/
