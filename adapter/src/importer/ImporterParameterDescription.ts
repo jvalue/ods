@@ -1,6 +1,6 @@
 export class ImporterParameterDescription {
-    name: string | undefined;
-    description: string | undefined;
+    name: string;
+    description: string;
     required: boolean | undefined;
     type: unknown;
 

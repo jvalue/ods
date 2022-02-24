@@ -1,7 +1,7 @@
 export abstract class Interpreter {
   type: string | undefined;
   description: string | undefined;
-  parameters: Map<string, any> | undefined;
+  parameters: Record<string, unknown> | undefined;
 
   /*
     interpret(data: string, parameters: Map<string, any>): JsonNode { //throws IOException

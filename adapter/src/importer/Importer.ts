@@ -1,7 +1,26 @@
+import { ImporterParameterDescription } from "./ImporterParameterDescription";
+
 export abstract class Importer {
   type: string | undefined;
   description: string | undefined;
   parameters: Record<string, unknown> | undefined;
+
+  getRequiredParameters(): Array<ImporterParameterDescription> {
+    return []
+  }
+
+  abstract getAvailableParameters() :Array<ImporterParameterDescription>;
+
+  fetch(parameters:Record<string, unknown> ): string { //throws ImporterParameterException
+      this.validateParameters(parameters);
+      return this.doFetch(parameters);
+  }
+
+  abstract doFetch(parameters: Record<string, unknown>): string; //throws ImporterParameterException
+
+  validateParameters(inputParameters: Record<string, unknown>) { //throws ImporterParameterException;
+
+  }
 /**
  * 
  *  public abstract String getType();
