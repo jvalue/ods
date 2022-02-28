@@ -3,7 +3,7 @@ export abstract class Interpreter {
   description: string | undefined;
   parameters: Record<string, unknown> | undefined;
 
-  
+
   interpret(data: string, parameters: Record<string, unknown>): string { //throws IOException
     this.validateParameters(parameters);
     return this.doInterpret(data, parameters);
@@ -12,7 +12,7 @@ export abstract class Interpreter {
   abstract doInterpret(data: string, parameters: Record<string, unknown>): string //throws IOException;
 
   validateParameters(inputParameters: Record<string, unknown>) { //throws InterpreterParameterException
-      /*boolean illegalArguments = false;
+    /*boolean illegalArguments = false;
       String illegalArgumentsMessage = "";
 
       for (InterpreterParameterDescription requiredParameter : getAvailableParameters()) {
