@@ -1,9 +1,10 @@
 import { ImporterParameterDescription } from "./ImporterParameterDescription";
+import { ImporterParameterError } from "../model/exceptions/ImporterParameterError";
 
 export abstract class Importer {
   type: string | undefined;
   description: string | undefined;
-  parameters: Record<string, unknown> | undefined;
+  parameters: Map<string, unknown> | undefined;
 
   getRequiredParameters(): Array<ImporterParameterDescription> {
     return []
@@ -11,68 +12,41 @@ export abstract class Importer {
 
   abstract getAvailableParameters() :Array<ImporterParameterDescription>;
 
-  fetch(parameters:Record<string, unknown> ): string { //throws ImporterParameterException
+  fetch(parameters:Map<string, unknown> ): string { //throws ImporterParameterException
       this.validateParameters(parameters);
       return this.doFetch(parameters);
   }
 
-  abstract doFetch(parameters: Record<string, unknown>): string; //throws ImporterParameterException
+  abstract doFetch(parameters: Map<string, unknown>): string; //throws ImporterParameterException
 
-  validateParameters(inputParameters: Record<string, unknown>) { //throws ImporterParameterException;
+  validateParameters(inputParameters: Map<string, unknown>) { //throws ImporterParameterException;
 
-  }
-/**
- * 
- *  public abstract String getType();
+    let illegalArguments: boolean = false;
+    let illegalArgumentsMessage: string = "";
 
-  public abstract String getDescription();
-
-  @JsonProperty("parameters")
-  public abstract List<ImporterParameterDescription> getAvailableParameters();
-
-  protected List<ImporterParameterDescription> getRequiredParameters() {
-    return getAvailableParameters().stream()
-      .filter(ImporterParameterDescription::isRequired).collect(Collectors.toList());
-  }
-
-  public final String fetch(Map<String, Object> parameters) throws ImporterParameterException {
-    validateParameters(parameters);
-    return doFetch(parameters);
-  }
-
-  protected abstract String doFetch(Map<String, Object> parameters) throws ImporterParameterException;
-
-  protected void validateParameters(Map<String, Object> inputParameters) throws ImporterParameterException {
-    boolean illegalArguments = false;
-    String illegalArgumentsMessage = "";
-
-
-    List<String> possibleParameters = getAvailableParameters().stream()
-      .map(ImporterParameterDescription::getName).collect(Collectors.toList());
-    var unnecessaryArguments = inputParameters.keySet().stream()
-      .filter(o -> !possibleParameters.contains(o)).collect(Collectors.toList());
-    if (unnecessaryArguments.size() > 0) {
+    let possibleParameters: Array<ImporterParameterDescription> = this.getAvailableParameters();
+    // TODO is that OK?
+    let unnecessaryArguments = Array.from(inputParameters.values()).filter((item: any) => possibleParameters.includes(item))
+    if(unnecessaryArguments.length > 0){
       illegalArguments = true;
-      for (var argument :
-        unnecessaryArguments) {
-        illegalArgumentsMessage += argument + " is not needed by importer \n";
+      for(let argument of unnecessaryArguments){
+        illegalArgumentsMessage += argument + " is not needed by importer \n"
       }
     }
-
-    for (ImporterParameterDescription requiredParameter : getRequiredParameters()) {
-      if (inputParameters.get(requiredParameter.getName()) == null) {
+    for (let requiredParameter of this.getRequiredParameters()){
+      if (inputParameters.get(requiredParameter.name) == null){
         illegalArguments = true;
-        illegalArgumentsMessage = illegalArgumentsMessage + getType() + " importer requires parameter "
-          + requiredParameter.getName() + "/n";
-
-      } else if (inputParameters.get(requiredParameter.getName()).getClass() != requiredParameter.getType()) {
+        illegalArgumentsMessage = illegalArgumentsMessage + this.type + "importer requires parameter " + requiredParameter.name + "\n";
+      }
+      // TODO is that OK?
+      else if((inputParameters.get(requiredParameter.name) as any).constructor.name != requiredParameter.type){
         illegalArguments = true;
-        illegalArgumentsMessage = illegalArgumentsMessage + getType() + " importer requires parameter "
-          + requiredParameter.getName() + " to be type " + requiredParameter.getType().toString() + "/n";
+        illegalArgumentsMessage = illegalArgumentsMessage + this.type + " importer requires parameter "
+            + requiredParameter.name + " to be type " + (requiredParameter.type as string) + "\n";
       }
     }
-    if (illegalArguments) {
-      throw new ImporterParameterException(illegalArgumentsMessage);
+    if(illegalArguments){
+      throw new ImporterParameterError(illegalArgumentsMessage);
     }
-     */
+  }
 }
