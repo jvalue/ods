@@ -1,7 +1,11 @@
 import {Interpreter} from "./Interpreter";
+import { InterpreterParameterDescription } from "./InterpreterParameterDescription";
 
 export class XmlInterpreter extends Interpreter{
-  doInterpret(data: string, parameters: Record<string, unknown>): string {
+  getAvailableParameters(): InterpreterParameterDescription[] {
+    throw new Error("Method not implemented.");
+  }
+  doInterpret(data: string, parameters: Map<string, unknown>): string {
     throw new Error("Method not implemented.");
   }
 

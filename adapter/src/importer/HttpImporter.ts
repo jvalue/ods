@@ -5,7 +5,7 @@ export class HttpImporter extends Importer {
     getAvailableParameters(): ImporterParameterDescription[] {
         throw new Error("Method not implemented.");
     }
-    doFetch(parameters: Record<string, unknown>): string {
+    doFetch(parameters: Map<string, unknown>): string {
         throw new Error("Method not implemented.");
     }
     /**

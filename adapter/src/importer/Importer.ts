@@ -7,7 +7,7 @@ export abstract class Importer {
   parameters: Map<string, unknown> | undefined;
 
   getRequiredParameters(): Array<ImporterParameterDescription> {
-    return []
+    return this.getAvailableParameters().filter((item: any) => item.required) as Array<ImporterParameterDescription>
   }
 
   abstract getAvailableParameters() :Array<ImporterParameterDescription>;
