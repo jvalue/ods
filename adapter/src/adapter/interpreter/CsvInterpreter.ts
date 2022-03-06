@@ -3,6 +3,12 @@ import { InterpreterParameterDescription } from "./InterpreterParameterDescripti
 
 
 export class CsvInterpreter extends Interpreter {
+  getType(): string {
+    return "CSV"
+  }
+  getDescription(): string {
+    return "Interpret data as CSV data";
+  }
   getAvailableParameters(): InterpreterParameterDescription[] {
     throw new Error("Method not implemented.");
   }
@@ -19,16 +25,6 @@ export class CsvInterpreter extends Interpreter {
   );
   private final CsvMapper mapper = new CsvMapper().enable(CsvParser.Feature.WRAP_AS_ARRAY);
   private final ObjectMapper jsonMapper = new ObjectMapper();
-
-  @Override
-  public String getType() {
-    return "CSV";
-  }
-
-  @Override
-  public String getDescription() {
-    return "Interpret data as CSV data";
-  }
 
   @Override
   public List<InterpreterParameterDescription> getAvailableParameters() {

@@ -2,6 +2,12 @@ import {Interpreter} from "./Interpreter";
 import { InterpreterParameterDescription } from "./InterpreterParameterDescription";
 
 export class XmlInterpreter extends Interpreter{
+  getType(): string {
+    return "XML";
+  }
+  getDescription(): string {
+    return "Interpret data as XML data";
+  }
   getAvailableParameters(): InterpreterParameterDescription[] {
     throw new Error("Method not implemented.");
   }
@@ -15,16 +21,6 @@ export class XmlInterpreter extends Interpreter{
 
   public XmlInterpreter() {
     mapper.registerModule(new SimpleModule().addDeserializer(Object.class, new UntypedXMLArrayDeserializer()));
-  }
-
-  @Override
-  public String getType() {
-    return "XML";
-  }
-
-  @Override
-  public String getDescription() {
-    return "Interpret data as XML data";
   }
 
   @Override

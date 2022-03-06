@@ -5,7 +5,6 @@ import { InterpreterParameterDescription } from "./InterpreterParameterDescripti
 export abstract class Interpreter {
   type: string | undefined;
   description: string | undefined;
-  parameters: Map<string, unknown> | undefined;
 
 
   interpret(data: string, parameters: Map<string, unknown>): string { //throws IOException
@@ -13,6 +12,8 @@ export abstract class Interpreter {
     return this.doInterpret(data, parameters);
   }
 
+  abstract getType(): string;
+  abstract getDescription(): string;
   abstract doInterpret(data: string, parameters: Map<string, unknown>): string //throws IOException;
   abstract getAvailableParameters(): Array<InterpreterParameterDescription>;
 

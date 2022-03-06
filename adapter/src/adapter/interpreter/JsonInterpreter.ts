@@ -2,6 +2,12 @@ import {Interpreter} from "./Interpreter";
 import { InterpreterParameterDescription } from "./InterpreterParameterDescription";
 
 export class JsonInterpreter extends Interpreter {
+  getType(): string {
+    return "JSON";
+  }
+  getDescription(): string {
+    return "Interpret data as JSON data";
+  }
   getAvailableParameters(): InterpreterParameterDescription[] {
     throw new Error("Method not implemented.");
   }
@@ -12,16 +18,6 @@ export class JsonInterpreter extends Interpreter {
   /*
   private final List<InterpreterParameterDescription> parameters = List.of();
   private final ObjectMapper mapper = new ObjectMapper();
-
-  @Override
-  public String getType() {
-    return "JSON";
-  }
-
-  @Override
-  public String getDescription() {
-    return "Interpret data as JSON data";
-  }
 
   @Override
   public List<InterpreterParameterDescription> getAvailableParameters() {
