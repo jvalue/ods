@@ -3,16 +3,17 @@ import { InterpreterParameterDescription } from "./InterpreterParameterDescripti
 
 
 export class CsvInterpreter extends Interpreter {
-  getType(): string {
+
+  override getType(): string {
     return "CSV"
   }
-  getDescription(): string {
+  override getDescription(): string {
     return "Interpret data as CSV data";
   }
-  getAvailableParameters(): InterpreterParameterDescription[] {
+  override getAvailableParameters(): InterpreterParameterDescription[] {
     throw new Error("Method not implemented.");
   }
-  doInterpret(data: string, parameters: Map<string, unknown>): string {
+  override doInterpret(data: string, parameters: Map<string, unknown>): string {
     throw new Error("Method not implemented.");
   }
 
