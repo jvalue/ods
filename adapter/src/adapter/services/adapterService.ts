@@ -26,13 +26,14 @@ export class AdapterService {
      }
 
     static executeJob(_adapterConfig: AdapterConfig): DataImportResponse {
-      // TODO IMPLEMENT
-      return new DataImportResponse("Data_test")
+      var rawData = this.executeProtocol(_adapterConfig.protocolConfig);
+      var result = this.executeFormat(rawData, _adapterConfig.formatConfig);
+      return new DataImportResponse(result.toString());
     }
 
     static executeRawJob(_protocolConfig: ProtocolConfig): DataImportResponse {
-      // TODO IMPLEMENT
-      return new DataImportResponse("Data_test")
+      var rawData = this.executeProtocol(_protocolConfig);
+      return new DataImportResponse(rawData);
     }
 
     static executeProtocol (config: ProtocolConfig): string{
