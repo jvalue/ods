@@ -17,6 +17,9 @@ export abstract class Importer {
       return this.doFetch(parameters);
   }
 
+  abstract getType(): string;
+  abstract getDescription(): string;
+  
   abstract doFetch(parameters: Map<string, unknown>): string; //throws ImporterParameterException
 
   validateParameters(inputParameters: Map<string, unknown>) { //throws ImporterParameterException;

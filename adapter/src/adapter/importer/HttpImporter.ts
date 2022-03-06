@@ -2,10 +2,20 @@ import { Importer } from "./Importer";
 import { ImporterParameterDescription } from "./ImporterParameterDescription";
 
 export class HttpImporter extends Importer {
-    getAvailableParameters(): ImporterParameterDescription[] {
+
+    // Override annotation is not necessary, but will be used for a better understanding of the code
+    override getType(): string {
+      return "HTTP";
+    }
+    
+    override getDescription(): string {
+      return "Plain HTTP";
+    }
+    
+    override getAvailableParameters(): ImporterParameterDescription[] {
         throw new Error("Method not implemented.");
     }
-    doFetch(parameters: Map<string, unknown>): string {
+    override doFetch(parameters: Map<string, unknown>): string {
         throw new Error("Method not implemented.");
     }
     /**
@@ -17,16 +27,6 @@ export class HttpImporter extends Importer {
       new ImporterParameterDescription("defaultParameters", "Default values for open parameters in the URI", false,
           RuntimeParameters.class));
   private final RestTemplate restTemplate;
-
-  @Override
-  public String getType() {
-    return "HTTP";
-  }
-
-  @Override
-  public String getDescription() {
-    return "Plain HTTP";
-  }
 
   @Override
   protected void validateParameters(Map<String, Object> inputParameters) throws ImporterParameterException {
