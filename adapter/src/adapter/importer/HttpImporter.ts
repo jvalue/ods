@@ -3,18 +3,11 @@ import { ImporterParameterDescription } from "./ImporterParameterDescription";
 
 export class HttpImporter extends Importer {
 
+  //TODO RuntimeParameters type is probably wrong
   parameters = [new ImporterParameterDescription({name:"location", description:"String of the URI for the HTTP call", type:"string"}), 
                 new ImporterParameterDescription({name:"encoding", description:"Encoding of the source. Available encodings: ISO-8859-1, US-ASCII, UTF-8", type:"string"}),
-                new ImporterParameterDescription({name:"defaultParameters", description:"Default values for open parameters in the URI", required:false, type:"string"})]
-  /**
-     * 
-     * private final List<ImporterParameterDescription> parameters = List.of(
-      new ImporterParameterDescription("location", "String of the URI for the HTTP call", String.class),
-      new ImporterParameterDescription("encoding",
-          "Encoding of the source. Available encodings: ISO-8859-1, US-ASCII, UTF-8", String.class),
-      new ImporterParameterDescription("defaultParameters", "Default values for open parameters in the URI", false,
-          RuntimeParameters.class));
-          **/
+                new ImporterParameterDescription({name:"defaultParameters", description:"Default values for open parameters in the URI", required:false, type:"RuntimeParameters"})]
+
     // Override annotation is not necessary, but will be used for a better understanding of the code
     override getType(): string {
       return "HTTP";
@@ -30,16 +23,8 @@ export class HttpImporter extends Importer {
     override doFetch(parameters: Map<string, unknown>): string {
         throw new Error("Method not implemented.");
     }
-    /**
-     * 
-     * private final List<ImporterParameterDescription> parameters = List.of(
-      new ImporterParameterDescription("location", "String of the URI for the HTTP call", String.class),
-      new ImporterParameterDescription("encoding",
-          "Encoding of the source. Available encodings: ISO-8859-1, US-ASCII, UTF-8", String.class),
-      new ImporterParameterDescription("defaultParameters", "Default values for open parameters in the URI", false,
-          RuntimeParameters.class));
-  private final RestTemplate restTemplate;
 
+    /*
   @Override
   protected void validateParameters(Map<String, Object> inputParameters) throws ImporterParameterException {
     super.validateParameters(inputParameters);
