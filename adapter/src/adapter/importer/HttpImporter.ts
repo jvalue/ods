@@ -3,6 +3,18 @@ import { ImporterParameterDescription } from "./ImporterParameterDescription";
 
 export class HttpImporter extends Importer {
 
+  parameters = [new ImporterParameterDescription({name:"location", description:"String of the URI for the HTTP call", type:"string"}), 
+                new ImporterParameterDescription({name:"encoding", description:"Encoding of the source. Available encodings: ISO-8859-1, US-ASCII, UTF-8", type:"string"}),
+                new ImporterParameterDescription({name:"defaultParameters", description:"Default values for open parameters in the URI", required:false, type:"string"})]
+  /**
+     * 
+     * private final List<ImporterParameterDescription> parameters = List.of(
+      new ImporterParameterDescription("location", "String of the URI for the HTTP call", String.class),
+      new ImporterParameterDescription("encoding",
+          "Encoding of the source. Available encodings: ISO-8859-1, US-ASCII, UTF-8", String.class),
+      new ImporterParameterDescription("defaultParameters", "Default values for open parameters in the URI", false,
+          RuntimeParameters.class));
+          **/
     // Override annotation is not necessary, but will be used for a better understanding of the code
     override getType(): string {
       return "HTTP";
@@ -13,7 +25,7 @@ export class HttpImporter extends Importer {
     }
     
     override getAvailableParameters(): ImporterParameterDescription[] {
-        throw new Error("Method not implemented.");
+        return this.parameters;
     }
     override doFetch(parameters: Map<string, unknown>): string {
         throw new Error("Method not implemented.");

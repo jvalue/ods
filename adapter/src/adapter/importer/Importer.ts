@@ -4,12 +4,12 @@ import { ImporterParameterError } from "../model/exceptions/ImporterParameterErr
 export abstract class Importer {
   type: string | undefined;
   description: string | undefined;
-  parameters: Map<string, unknown> | undefined;
 
   getRequiredParameters(): Array<ImporterParameterDescription> {
     return this.getAvailableParameters().filter((item: any) => item.required) as Array<ImporterParameterDescription>
   }
 
+  //@JsonProperty("parameters")
   abstract getAvailableParameters() :Array<ImporterParameterDescription>;
 
   fetch(parameters:Map<string, unknown> ): string { //throws ImporterParameterException
@@ -19,7 +19,7 @@ export abstract class Importer {
 
   abstract getType(): string;
   abstract getDescription(): string;
-  
+
   abstract doFetch(parameters: Map<string, unknown>): string; //throws ImporterParameterException
 
   validateParameters(inputParameters: Map<string, unknown>) { //throws ImporterParameterException;
