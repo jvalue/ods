@@ -9,6 +9,8 @@ export class CsvInterpreter extends Interpreter {
                                                   new InterpreterParameterDescription("skipFirstDataRow", "Skip first data row (after header)", "boolean"),
                                                   new InterpreterParameterDescription("firstRowAsHeader", "Interpret first row as header for columns", "boolean")]
 
+                                                  
+
   override getType(): string {
     return "CSV"
   }
@@ -18,26 +20,47 @@ export class CsvInterpreter extends Interpreter {
   override getAvailableParameters(): InterpreterParameterDescription[] {
     return this.parameters;
   }
+  /*
+    @Override
+  protected JsonNode doInterpret(String data, Map<String, Object> parameters) throws IOException {
+    CsvSchema csvSchema = createSchema(parameters);
+    if ((boolean) parameters.get("firstRowAsHeader")) {
+      return parseWithHeader(data, csvSchema);
+    } else {
+      return parseWithoutHeader(data, csvSchema);
+    }
+  }
+  */
   override doInterpret(data: string, parameters: Map<string, unknown>): string {
-    throw new Error("Method not implemented.");
+    let columnSeparator = (parameters.get("columnSeparator") as string).charAt(0)
+    let lineSeparator: string = parameters.get("lineSeparator") as string;
+    let skipFirstDataRow: boolean = parameters.get("skipFirstDataRow") as boolean;
+
+    var result = [];
+    var lines = data.split(lineSeparator);
+    var headers = lines[0].split(",");
+
+    for(var i=1; i<lines.length; i++) {
+
+      var obj = {};
+      var currentline = lines[i].split(lineSeparator);
+  
+      for(var j=0; j<headers.length; j++){
+        obj [headers[j]] = currentline[j];
+        obj["asdasd"] = currentline[j]
+      }
+  
+      result.push(obj);
+    }
+    
+
+   
+
+    return JSON.stringify(result);
   }
 
   /*
-  private final List<InterpreterParameterDescription> parameters = List.of(
-    new InterpreterParameterDescription("columnSeparator", "Column delimiter character, only one character supported", String.class),
-    new InterpreterParameterDescription("lineSeparator", "Line delimiter character, only \\r, \\r\\n, and \\n supported", String.class),
-    new InterpreterParameterDescription("skipFirstDataRow", "Skip first data row (after header)", Boolean.class),
-    new InterpreterParameterDescription("firstRowAsHeader", "Interpret first row as header for columns", Boolean.class)
-  );
-  private final CsvMapper mapper = new CsvMapper().enable(CsvParser.Feature.WRAP_AS_ARRAY);
-  private final ObjectMapper jsonMapper = new ObjectMapper();
-
-  @Override
-  public List<InterpreterParameterDescription> getAvailableParameters() {
-    return parameters;
-  }
-
-  @Override
+    @Override
   protected void validateParameters(Map<String, Object> inputParameters) throws InterpreterParameterException {
     super.validateParameters(inputParameters);
 
@@ -53,17 +76,24 @@ export class CsvInterpreter extends Interpreter {
         " length 1. Your given value " + columnSeparator + " is invalid!");
     }
   }
+  */
+  override validateParameters(inputParameters: Map<string, unknown>): void {
+      super.validateParameters(inputParameters);
+      let lineSeparator: string = inputParameters.get("lineSeparator") as string;
 
-  @Override
-  protected JsonNode doInterpret(String data, Map<String, Object> parameters) throws IOException {
-    CsvSchema csvSchema = createSchema(parameters);
-    if ((boolean) parameters.get("firstRowAsHeader")) {
-      return parseWithHeader(data, csvSchema);
-    } else {
-      return parseWithoutHeader(data, csvSchema);
+      if (lineSeparator !== "\n" && lineSeparator !== "\r" && lineSeparator !== "\r\n") {
+        throw new Error(this.getType() + " interpreter requires parameter lineSeparator to have" +
+          " value \\n, \\r, or \\r\\n. Your given value " + lineSeparator + " is invalid!");
+      }
+
+      var columnSeparator: string = inputParameters.get("columnSeparator") as string;
+      if (columnSeparator.length !== 1) {
+      throw new Error(this.getType() + " interpreter requires parameter columnSeparator to have" +
+        " length 1. Your given value " + columnSeparator + " is invalid!");
     }
   }
 
+  /*  
   private CsvSchema createSchema(Map<String, Object> parameters) {
     CsvSchema csvSchema = CsvSchema
       .emptySchema()

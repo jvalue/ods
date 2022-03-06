@@ -20,8 +20,10 @@
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    // TODO MIT License für die folgenden 3 Pakete -> @Georg ist das in Ordnung?
     "axios": "^0.26.0",
-    "xml2js": "^0.4.23"
+    "xml2js": "^0.4.23",
+    "csvtojson": "^2.0.10"
   },
   "devDependencies": {
     "@jvalue/eslint-config-jvalue": "^1.1.0",
