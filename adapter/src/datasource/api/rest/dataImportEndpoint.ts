@@ -1,5 +1,5 @@
 import express, {Express} from "express";
-import {asyncHandler} from "../../../api/rest/utils";
+import {asyncHandler} from "../../../adapter/api/rest/utils";
 
 export class DataImportEndpoint {
 

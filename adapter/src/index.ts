@@ -3,7 +3,7 @@ import { Server } from 'http';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
-import { AdapterEndpoint } from './api/rest/adapterEndpoint';
+import { AdapterEndpoint } from './adapter/api/rest/adapterEndpoint';
 import { DataImportEndpoint } from './datasource/api/rest/dataImportEndpoint';
 
 export const port = 8080;
