@@ -1,9 +1,13 @@
 import { Protocol } from "./enum/Protocol";
 import { validators } from '@jvalue/node-dry-basics';
 
-export interface ProtocolConfig {
+export class ProtocolConfig {
     protocol:Protocol;
-    parameters: Map<string, any> | undefined;
+    parameters: Map<string, unknown>;
+    constructor(protocol: Protocol, parameters: Map<string, unknown>) {
+      this.protocol = protocol;
+      this.parameters = parameters;
+    }
 }
 
 export class ProtocolConfigValidator {

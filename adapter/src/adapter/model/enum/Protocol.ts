@@ -1,13 +1,15 @@
 import { HttpImporter } from "../../importer/HttpImporter";
+import { Importer } from "../../importer/Importer";
 
 export class Protocol {
   static readonly HTTP  = new HttpImporter();
   
-  private constructor(private readonly key: string, public readonly value: any) {
+  importer: Importer;
+  private constructor(importer: Importer) {
+    this.importer = importer;
   }
 
-  toString() {
-    return this.key;
+  getImporter() {
+    return this.importer
   }
- 
 }

@@ -4,6 +4,7 @@ import { AdapterConfig } from "../model/AdapterConfig";
 import { DataImportResponse } from "../model/DataImportResponse";
 import { Format } from "../model/enum/Format";
 import { Protocol } from "../model/enum/Protocol";
+import { FormatConfig } from "../model/FormatConfig";
 
 import { ProtocolConfig } from "../model/ProtocolConfig";
 
@@ -34,6 +35,15 @@ export class AdapterService {
       return new DataImportResponse("Data_test")
     }
 
+    static executeProtocol (config: ProtocolConfig): string{
+      var importer = config.protocol.getImporter();
+      return importer.fetch(config.parameters);
+    }
+  
+    static executeFormat(rawData: string, config: FormatConfig): string {
+      var interpreter = config.format.getInterpreter();
+      return interpreter.interpret(rawData, config.parameters);
+    }
 }
 
-  module.exports = AdapterService;
+module.exports = AdapterService;
