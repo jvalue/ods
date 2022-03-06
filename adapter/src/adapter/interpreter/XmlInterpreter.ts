@@ -1,5 +1,6 @@
 import {Interpreter} from "./Interpreter";
 import { InterpreterParameterDescription } from "./InterpreterParameterDescription";
+const xml2js = require('xml2js');
 
 export class XmlInterpreter extends Interpreter{
 
@@ -18,7 +19,17 @@ export class XmlInterpreter extends Interpreter{
   }
 
   override doInterpret(data: string, parameters: Map<string, unknown>): string {
-    return JSON.parse(data);
+    xml2js.parseString(data, (err: any, result: any) => {
+      if(err) {
+          throw err;
+      }
+  
+      // `result` is a JavaScript object
+      // convert it to a JSON string
+      const json = JSON.stringify(result);
+      return json;
+    });
+    throw Error("could not convert data into json");
   }
  
 
