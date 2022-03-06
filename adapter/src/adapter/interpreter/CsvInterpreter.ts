@@ -4,6 +4,11 @@ import { InterpreterParameterDescription } from "./InterpreterParameterDescripti
 
 export class CsvInterpreter extends Interpreter {
 
+  parameters: InterpreterParameterDescription[] = [new InterpreterParameterDescription("columnSeparator", "Column delimiter character, only one character supported", "string"),
+                                                  new InterpreterParameterDescription("lineSeparator", "Line delimiter character, only \\r, \\r\\n, and \\n supported", "string",),
+                                                  new InterpreterParameterDescription("skipFirstDataRow", "Skip first data row (after header)", "boolean"),
+                                                  new InterpreterParameterDescription("firstRowAsHeader", "Interpret first row as header for columns", "boolean")]
+
   override getType(): string {
     return "CSV"
   }
@@ -11,7 +16,7 @@ export class CsvInterpreter extends Interpreter {
     return "Interpret data as CSV data";
   }
   override getAvailableParameters(): InterpreterParameterDescription[] {
-    throw new Error("Method not implemented.");
+    return this.parameters;
   }
   override doInterpret(data: string, parameters: Map<string, unknown>): string {
     throw new Error("Method not implemented.");

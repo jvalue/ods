@@ -7,17 +7,17 @@ export abstract class Interpreter {
   description: string | undefined;
 
 
-  interpret(data: string, parameters: Map<string, unknown>): string { //throws IOException
+  interpret(data: string, parameters: Map<string, unknown>): string {
     this.validateParameters(parameters);
     return this.doInterpret(data, parameters);
   }
 
   abstract getType(): string;
   abstract getDescription(): string;
-  abstract doInterpret(data: string, parameters: Map<string, unknown>): string //throws IOException;
+  abstract doInterpret(data: string, parameters: Map<string, unknown>): string
   abstract getAvailableParameters(): Array<InterpreterParameterDescription>;
 
-  validateParameters(inputParameters: Map<string, unknown>) { //throws InterpreterParameterException
+  validateParameters(inputParameters: Map<string, unknown>) { 
     let illegalArguments: boolean = false;
     let illegalArgumentsMessage: string = "";
     

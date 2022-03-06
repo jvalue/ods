@@ -18,6 +18,7 @@ export class XmlInterpreter extends Interpreter{
     return this.parameters;
   }
 
+  // TODO @Georg check if this package can be used..
   override doInterpret(data: string, parameters: Map<string, unknown>): string {
     xml2js.parseString(data, (err: any, result: any) => {
       if(err) {
@@ -31,17 +32,4 @@ export class XmlInterpreter extends Interpreter{
     });
     throw Error("could not convert data into json");
   }
- 
-
-  /*
-  public XmlInterpreter() {
-    mapper.registerModule(new SimpleModule().addDeserializer(Object.class, new UntypedXMLArrayDeserializer()));
-  }
-
-  @Override
-  public JsonNode doInterpret(String data, Map<String, Object> parameters) throws IOException {
-    Object result = mapper.readValue(data, Object.class);
-    return mapper.valueToTree(result);
-  }
-   */
 }
