@@ -20,7 +20,8 @@
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
-    "axios": "^0.26.0"
+    "axios": "^0.26.0",
+    "xml2js": "^0.4.23"
   },
   "devDependencies": {
     "@jvalue/eslint-config-jvalue": "^1.1.0",

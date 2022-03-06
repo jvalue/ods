@@ -6,7 +6,7 @@ const axios = require('axios');
 export class HttpImporter extends Importer {
 
   //TODO RuntimeParameters type is probably wrong
-  parameters = [new ImporterParameterDescription({name:"location", description:"String of the URI for the HTTP call", type:"string"}), 
+  parameters:ImporterParameterDescription[] = [new ImporterParameterDescription({name:"location", description:"String of the URI for the HTTP call", type:"string"}), 
                 new ImporterParameterDescription({name:"encoding", description:"Encoding of the source. Available encodings: ISO-8859-1, US-ASCII, UTF-8", type:"string"}),
                 new ImporterParameterDescription({name:"defaultParameters", description:"Default values for open parameters in the URI", required:false, type:"RuntimeParameters"})]
 

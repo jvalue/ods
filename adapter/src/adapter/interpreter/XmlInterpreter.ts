@@ -3,32 +3,28 @@ import { InterpreterParameterDescription } from "./InterpreterParameterDescripti
 
 export class XmlInterpreter extends Interpreter{
 
+  parameters: InterpreterParameterDescription[] = []
+
   override getType(): string {
     return "XML";
   }
+
   override getDescription(): string {
     return "Interpret data as XML data";
   }
+
   override getAvailableParameters(): InterpreterParameterDescription[] {
-    throw new Error("Method not implemented.");
+    return this.parameters;
   }
+
   override doInterpret(data: string, parameters: Map<string, unknown>): string {
-    throw new Error("Method not implemented.");
+    return JSON.parse(data);
   }
  
 
   /*
-  private final List<InterpreterParameterDescription> parameters = List.of();
-  private final XmlMapper mapper = new XmlMapper();
-
   public XmlInterpreter() {
     mapper.registerModule(new SimpleModule().addDeserializer(Object.class, new UntypedXMLArrayDeserializer()));
-  }
-
-  @Override
-  public List<InterpreterParameterDescription> getAvailableParameters() {
-    return parameters;
-
   }
 
   @Override
