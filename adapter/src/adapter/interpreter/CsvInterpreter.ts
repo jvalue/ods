@@ -37,7 +37,8 @@ export class CsvInterpreter extends Interpreter {
       eol: lineSeparator
     })
     .fromString(data)
-    .then((csvRow: any)=>{ 
+    .then((csvRow: any)=>{
+      // Todo need to test if this works 
       if(skipFirstDataRow && ((count == 0 && !firstRowAsHeader) || (count == 1 && firstRowAsHeader))) {
         // Skip First Row
       }
