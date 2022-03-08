@@ -13,7 +13,7 @@ const knex = require('knex')({
     asyncStackTraces: true
   }
 });
-export class DataImportEndpoint {
+export class DataSourceAndImportEndpoint {
 
   registerRoutes = (app: express.Application): void => {
     app.get('/datasources/:datasourceId/imports', asyncHandler(this.getMetaDataImportsForDatasource));

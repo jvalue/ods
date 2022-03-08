@@ -4,7 +4,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
 import { AdapterEndpoint } from './adapter/api/rest/adapterEndpoint';
-import { DataImportEndpoint } from './datasource/api/rest/dataImportEndpoint';
+import { DataSourceAndImportEndpoint } from './datasource/api/rest/dataSourceAndImportEndpoint';
 
 export const port = 8080;
 const API_VERSION = '0.0.1';
@@ -24,7 +24,7 @@ async function main(): Promise<void> {
 
   const adapterEndpoint = new AdapterEndpoint();
   adapterEndpoint.registerRoutes(app);
-  const dataImportEndpoint = new DataImportEndpoint();
+  const dataImportEndpoint = new DataSourceAndImportEndpoint();
   dataImportEndpoint.registerRoutes(app);
 
   server = app.listen(port, () => {
