@@ -21,8 +21,107 @@ export class DataImportEndpoint {
     app.get('/datasources/:datasourceId/imports/latest/data', asyncHandler(this.getLatestDataImportForDatasource));
     app.get('/datasources/:datasourceId/imports/:dataImportId', asyncHandler(this.getMetadataForDataImport));
     app.get('/datasources/:datasourceId/imports/:dataImportId/data', asyncHandler(this.getDataFromDataImport));
+    app.get('/datasources', asyncHandler(this.getAllDataSources));
+    app.get('/datasources/:datasourceId', asyncHandler(this.getDataSource));
+    app.post('/datasources', asyncHandler(this.addDatasource));
+    app.put('/datasources/:datasourceId', asyncHandler(this.updateDatasource));
+    app.delete('/datasources/', asyncHandler(this.deleteAllDatasources));
+    app.delete('/datasources/:datasourceId', asyncHandler(this.deleteDatasource));
+    app.post('/datasources/:datasourceId/trigger', asyncHandler(this.triggerDataImportForDatasource));
+  };
+  getAllDataSources = async (
+    req: express.Request,
+    res: express.Response,
+  ): Promise<void> => {
+    const result = await knex
+      .select()
+      .from('public.datasource')
+    let datasource = await this.createDatasourceFromResultArray(result);
+    res.status(200).send(datasource);
   };
 
+  getDataSource = async (
+    req: express.Request,
+    res: express.Response,
+  ): Promise<void> => {
+
+    console.log(req.params.datasourceId)
+    const result = await knex
+      .select('id','timestamp','health','error_messages')
+      .from('public.datasource')
+      .where('datasource_id',req.params.datasourceId)
+    res.status(200).send(result);
+  };
+  addDatasource = async (
+    req: express.Request,
+    res: express.Response,
+  ): Promise<void> => {
+    console.log(req.params.datasourceId)
+    let result = await knex
+      .select('id','timestamp','health','error_messages')
+      .from('public.datasource')
+      .where('datasource_id',req.params.datasourceId)
+      .orderBy('timestamp','desc')
+    res.status(200).send(result[0]);
+
+  };
+  updateDatasource = async (
+    req: express.Request,
+    res: express.Response,
+  ): Promise<void> => {
+    console.log(req.params.datasourceId)
+    let result = await knex
+      .select('data')
+      .from('public.datasource')
+      .where('datasource_id',req.params.datasourceId)
+      .orderBy('timestamp','desc')
+    // console.log(result.data)
+    const stringFromUTF8Array1 = this.stringFromUTF8Array(result[0].data)
+    res.status(200).send(stringFromUTF8Array1);
+  };
+
+
+  deleteDatasource = async (
+    req: express.Request,
+    res: express.Response,
+  ): Promise<void> => {
+    //  access param :
+    //  res.send('profile with id' + req.params.id)
+    let result = await knex
+      .select('id','timestamp','health','error_messages')
+      .from('public.datasource')
+      .where('datasource_id',req.params.datasourceId)
+      .andWhere('id',req.params.dataImportId)
+    res.status(200).send(result[0]);
+  };
+  deleteAllDatasources = async (
+    req: express.Request,
+    res: express.Response,
+  ): Promise<void> => {
+    //  access param :
+    //  res.send('profile with id' + req.params.id)
+    let result = await knex
+      .select('id','timestamp','health','error_messages')
+      .from('public.datasource')
+      .where('datasource_id',req.params.datasourceId)
+      .andWhere('id',req.params.dataImportId)
+    res.status(200).send(result[0]);
+  };
+
+
+  triggerDataImportForDatasource = async (
+    req: express.Request,
+    res: express.Response,
+  ): Promise<void> => {
+    let result = await knex
+      .select('data')
+      .from('public.datasource')
+      .where('datasource_id',req.params.datasourceId)
+      .andWhere('id',req.params.dataImportId)
+    const stringFromUTF8Array = this.stringFromUTF8Array(result[0].data)
+    res.status(200).send(stringFromUTF8Array);
+
+  };
   getMetaDataImportsForDatasource = async (
     req: express.Request,
     res: express.Response,
@@ -124,7 +223,45 @@ export class DataImportEndpoint {
 
     return str;
   }
+  private createDatasourceFromResultArray(result: any) {
+    var test=[];
+    for(var i in result){
+      var el=result[i];
+      let x ={"protocol": {
+          "type": el.protocol_type,
+          "parameters":
+          el.protocol_parameters
 
+        },
+        "format": {
+          "type": el.format_type,
+          "parameters": el.format_parameters
+        },
+        "metadata": {
+          "author": el.author,
+          "license": el.license,
+          "displayName": el.display_name,
+          "description": el.description,
+          "creationTimestamp": el.creation_timestamp
+        },
+        "trigger": {
+          "periodic": el.periodic,
+          "firstExecution": el.first_execution,
+          "interval": el.interval
+        },
+        "schema": el.schema,
+        "id": el.id
+      }
+      console.log(x);
+      test.push(x)
+    }
+
+    console.log("durch")
+    console.log(test)
+
+
+    return test;
+  }
 
 
 }
