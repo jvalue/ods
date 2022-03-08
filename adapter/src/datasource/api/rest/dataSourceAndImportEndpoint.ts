@@ -1,18 +1,20 @@
 import express, {Express, json} from "express";
 import {asyncHandler} from "../../../adapter/api/rest/utils";
-const dataSourceManager = require( "../../DataSourceManager" );
+
+const dataSourceManager = require("../../DataSourceManager");
 //TODO replace with env vars
 const knex = require('knex')({
   client: 'pg',
   connection: {
-    host : 'localhost',
-    port : '5432',
-    user : 'adapterservice',
-    password : 'admin',
-    database : 'adapterservice',
+    host: 'localhost',
+    port: '5432',
+    user: 'adapterservice',
+    password: 'admin',
+    database: 'adapterservice',
     asyncStackTraces: true
   }
 });
+
 export class DataSourceAndImportEndpoint {
 
   registerRoutes = (app: express.Application): void => {
@@ -47,37 +49,24 @@ export class DataSourceAndImportEndpoint {
 
     console.log(req.params.datasourceId)
     const result = await knex
-      .select('id','timestamp','health','error_messages')
+      .select()
       .from('public.datasource')
-      .where('datasource_id',req.params.datasourceId)
-    res.status(200).send(result);
+      .where('id', req.params.datasourceId)
+    let datasource = await this.createDatasourceFromResult(result);
+    res.status(200).send(datasource);
   };
   addDatasource = async (
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    console.log(req.params.datasourceId)
-    let result = await knex
-      .select('id','timestamp','health','error_messages')
-      .from('public.datasource')
-      .where('datasource_id',req.params.datasourceId)
-      .orderBy('timestamp','desc')
-    res.status(200).send(result[0]);
+    //TODO
 
   };
   updateDatasource = async (
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    console.log(req.params.datasourceId)
-    let result = await knex
-      .select('data')
-      .from('public.datasource')
-      .where('datasource_id',req.params.datasourceId)
-      .orderBy('timestamp','desc')
-    // console.log(result.data)
-    const stringFromUTF8Array1 = this.stringFromUTF8Array(result[0].data)
-    res.status(200).send(stringFromUTF8Array1);
+    //TODO
   };
 
 
@@ -85,27 +74,13 @@ export class DataSourceAndImportEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    //  access param :
-    //  res.send('profile with id' + req.params.id)
-    let result = await knex
-      .select('id','timestamp','health','error_messages')
-      .from('public.datasource')
-      .where('datasource_id',req.params.datasourceId)
-      .andWhere('id',req.params.dataImportId)
-    res.status(200).send(result[0]);
+    //TODO
   };
   deleteAllDatasources = async (
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    //  access param :
-    //  res.send('profile with id' + req.params.id)
-    let result = await knex
-      .select('id','timestamp','health','error_messages')
-      .from('public.datasource')
-      .where('datasource_id',req.params.datasourceId)
-      .andWhere('id',req.params.dataImportId)
-    res.status(200).send(result[0]);
+    //TODO
   };
 
 
@@ -113,13 +88,7 @@ export class DataSourceAndImportEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    let result = await knex
-      .select('data')
-      .from('public.datasource')
-      .where('datasource_id',req.params.datasourceId)
-      .andWhere('id',req.params.dataImportId)
-    const stringFromUTF8Array = this.stringFromUTF8Array(result[0].data)
-    res.status(200).send(stringFromUTF8Array);
+    //TODO
 
   };
   getMetaDataImportsForDatasource = async (
@@ -129,24 +98,24 @@ export class DataSourceAndImportEndpoint {
     //TODO add locations to every answer
     console.log(req.params.datasourceId)
     const result = await knex
-      .select('id','timestamp','health','error_messages')
+      .select('id', 'timestamp', 'health', 'error_messages')
       .from('public.data_import')
-      .where('datasource_id',req.params.datasourceId)
+      .where('datasource_id', req.params.datasourceId)
     res.status(200).send(result);
   };
-   getLatestMetaDataImportForDatasource = async (
+  getLatestMetaDataImportForDatasource = async (
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-     console.log(req.params.datasourceId)
-     let result = await knex
-       .select('id','timestamp','health','error_messages')
-       .from('public.data_import')
-       .where('datasource_id',req.params.datasourceId)
-       .orderBy('timestamp','desc')
-     res.status(200).send(result[0]);
+    console.log(req.params.datasourceId)
+    let result = await knex
+      .select('id', 'timestamp', 'health', 'error_messages')
+      .from('public.data_import')
+      .where('datasource_id', req.params.datasourceId)
+      .orderBy('timestamp', 'desc')
+    res.status(200).send(result[0]);
 
-};
+  };
   getLatestDataImportForDatasource = async (
     req: express.Request,
     res: express.Response,
@@ -155,27 +124,27 @@ export class DataSourceAndImportEndpoint {
     let result = await knex
       .select('data')
       .from('public.data_import')
-      .where('datasource_id',req.params.datasourceId)
-      .orderBy('timestamp','desc')
-   // console.log(result.data)
+      .where('datasource_id', req.params.datasourceId)
+      .orderBy('timestamp', 'desc')
+    // console.log(result.data)
     const stringFromUTF8Array1 = this.stringFromUTF8Array(result[0].data)
     res.status(200).send(stringFromUTF8Array1);
   };
 
 
-   getMetadataForDataImport = async (
-     req: express.Request,
-     res: express.Response,
-   ): Promise<void> => {
-     //  access param :
-     //  res.send('profile with id' + req.params.id)
-     let result = await knex
-       .select('id','timestamp','health','error_messages')
-       .from('public.data_import')
-       .where('datasource_id',req.params.datasourceId)
-       .andWhere('id',req.params.dataImportId)
-     res.status(200).send(result[0]);
-   };
+  getMetadataForDataImport = async (
+    req: express.Request,
+    res: express.Response,
+  ): Promise<void> => {
+    //  access param :
+    //  res.send('profile with id' + req.params.id)
+    let result = await knex
+      .select('id', 'timestamp', 'health', 'error_messages')
+      .from('public.data_import')
+      .where('datasource_id', req.params.datasourceId)
+      .andWhere('id', req.params.dataImportId)
+    res.status(200).send(result[0]);
+  };
 
 
   getDataFromDataImport = async (
@@ -185,31 +154,28 @@ export class DataSourceAndImportEndpoint {
     let result = await knex
       .select('data')
       .from('public.data_import')
-      .where('datasource_id',req.params.datasourceId)
-      .andWhere('id',req.params.dataImportId)
+      .where('datasource_id', req.params.datasourceId)
+      .andWhere('id', req.params.dataImportId)
     const stringFromUTF8Array = this.stringFromUTF8Array(result[0].data)
     res.status(200).send(stringFromUTF8Array);
 
   };
+
 //from: https://weblog.rogueamoeba.com/2017/02/27/javascript-correctly-converting-a-byte-array-to-a-utf-8-string/
-  stringFromUTF8Array(data:any)
-  {
-    const extraByteMap = [ 1, 1, 1, 1, 2, 2, 3, 0 ];
+  stringFromUTF8Array(data: any) {
+    const extraByteMap = [1, 1, 1, 1, 2, 2, 3, 0];
     var count = data.length;
     var str = "";
 
-    for (var index = 0;index < count;)
-    {
+    for (var index = 0; index < count;) {
       var ch = data[index++];
-      if (ch & 0x80)
-      {
+      if (ch & 0x80) {
         var extra = extraByteMap[(ch >> 3) & 0x07];
         if (!(ch & 0x40) || !extra || ((index + extra) > count))
           return null;
 
         ch = ch & (0x3F >> extra);
-        for (;extra > 0;extra -= 1)
-        {
+        for (; extra > 0; extra -= 1) {
           var chx = data[index++];
           if ((chx & 0xC0) != 0x80)
             return null;
@@ -223,11 +189,13 @@ export class DataSourceAndImportEndpoint {
 
     return str;
   }
+
   private createDatasourceFromResultArray(result: any) {
-    var test=[];
-    for(var i in result){
-      var el=result[i];
-      let x ={"protocol": {
+    var test = [];
+    for (var i in result) {
+      var el = result[i];
+      let x = {
+        "protocol": {
           "type": el.protocol_type,
           "parameters":
           el.protocol_parameters
@@ -261,6 +229,40 @@ export class DataSourceAndImportEndpoint {
 
 
     return test;
+  }
+
+  private createDatasourceFromResult(result: any) {
+
+    let x = {
+      "protocol": {
+        "type": result[0].protocol_type,
+        "parameters":
+        result[0].protocol_parameters
+
+      },
+      "format": {
+        "type": result[0].format_type,
+        "parameters": result[0].format_parameters
+      },
+      "metadata": {
+        "author": result[0].author,
+        "license": result[0].license,
+        "displayName": result[0].display_name,
+        "description": result[0].description,
+        "creationTimestamp": result[0].creation_timestamp
+      },
+      "trigger": {
+        "periodic": result[0].periodic,
+        "firstExecution": result[0].first_execution,
+        "interval": result[0].interval
+      },
+      "schema": result[0].schema,
+      "id": result[0].id
+    }
+    console.log(x);
+
+
+    return x;
   }
 
 
