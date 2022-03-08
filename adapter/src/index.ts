@@ -5,6 +5,7 @@ import cors from 'cors';
 import express from 'express';
 import { AdapterEndpoint } from './adapter/api/rest/adapterEndpoint';
 import { DataImportEndpoint } from './datasource/api/rest/dataImportEndpoint';
+import {DataSourceEndpoint} from "./datasource/api/rest/dataSourceEndpoint";
 
 export const port = 8080;
 const API_VERSION = '0.0.1';
@@ -26,6 +27,8 @@ async function main(): Promise<void> {
   adapterEndpoint.registerRoutes(app);
   const dataImportEndpoint = new DataImportEndpoint();
   dataImportEndpoint.registerRoutes(app);
+  const dataSourceEndpoint = new DataSourceEndpoint();
+  dataSourceEndpoint.registerRoutes(app);
 
   server = app.listen(port, () => {
     console.log(`Listening on port ${port}`);
