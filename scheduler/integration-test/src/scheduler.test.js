@@ -1,4 +1,4 @@
-const { setTimeout: sleep } = require('timers/promises')
+/* const { setTimeout: sleep } = require('timers/promises')
 
 const request = require('supertest')
 const waitOn = require('wait-on')
@@ -149,3 +149,4 @@ const logConfigs = () => {
   `
   console.log(msg)
 }
+ */

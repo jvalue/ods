@@ -6,7 +6,7 @@ import { asyncHandler } from './utils';
 import {ProtocolConfigValidator} from "../../model/ProtocolConfig";
 import { Format } from '../../model/enum/Format';
 
-const adapterService = require( "../../services/AdapterService" );
+const adapterService = require( "../../services/adapterService" );
 const APP_VERSION = "0.0.1"
 export class AdapterEndpoint {
   constructor() {}

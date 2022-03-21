@@ -16,32 +16,32 @@ export class AdapterService {
     }
 
     // To Implement
-    static getAllFormats(): Array<Interpreter> {
+    getAllFormats(): Array<Interpreter> {
       return [Format.CSV, Format.JSON, Format.XML]
     }
 
 
-    static getAllProtocols(): Array<Importer> {
+    getAllProtocols(): Array<Importer> {
       return [Protocol.HTTP]
      }
 
-    static executeJob(_adapterConfig: AdapterConfig): DataImportResponse {
+    executeJob(_adapterConfig: AdapterConfig): DataImportResponse {
       var rawData = this.executeProtocol(_adapterConfig.protocolConfig);
       var result = this.executeFormat(rawData, _adapterConfig.formatConfig);
       return new DataImportResponse(result.toString());
     }
 
-    static executeRawJob(_protocolConfig: ProtocolConfig): DataImportResponse {
+    executeRawJob(_protocolConfig: ProtocolConfig): DataImportResponse {
       var rawData = this.executeProtocol(_protocolConfig);
       return new DataImportResponse(rawData);
     }
 
-    static executeProtocol (config: ProtocolConfig): string{
+    executeProtocol (config: ProtocolConfig): string{
       var importer = config.protocol.getImporter();
       return importer.fetch(config.parameters);
     }
   
-    static executeFormat(rawData: string, config: FormatConfig): string {
+    executeFormat(rawData: string, config: FormatConfig): string {
       var interpreter = config.format.getInterpreter();
       return interpreter.interpret(rawData, config.parameters);
     }
