@@ -3,14 +3,16 @@ import { InterpreterParameterDescription } from "./InterpreterParameterDescripti
 
 export class JsonInterpreter extends Interpreter {
 
+  type: string = "JSON"
+  description: string = "Interpret data as JSON data"
   parameters: InterpreterParameterDescription[] = []
 
   override getType(): string {
-    return "JSON";
+    return this.type
   }
   
   override getDescription(): string {
-    return "Interpret data as JSON data";
+    return this.description
   }
 
   override getAvailableParameters(): InterpreterParameterDescription[] {

@@ -5,18 +5,21 @@ const csv=require('csvtojson')
 
 export class CsvInterpreter extends Interpreter {
 
+  type: string = "CSV"
+  description: string = "Interpret data as CSV data"
   parameters: InterpreterParameterDescription[] = [new InterpreterParameterDescription("columnSeparator", "Column delimiter character, only one character supported", "string"),
                                                   new InterpreterParameterDescription("lineSeparator", "Line delimiter character, only \\r, \\r\\n, and \\n supported", "string",),
                                                   new InterpreterParameterDescription("skipFirstDataRow", "Skip first data row (after header)", "boolean"),
                                                   new InterpreterParameterDescription("firstRowAsHeader", "Interpret first row as header for columns", "boolean")]
 
                                                   
+  
 
   override getType(): string {
-    return "CSV"
+    return this.type
   }
   override getDescription(): string {
-    return "Interpret data as CSV data";
+    return this.description
   }
   override getAvailableParameters(): InterpreterParameterDescription[] {
     return this.parameters;
