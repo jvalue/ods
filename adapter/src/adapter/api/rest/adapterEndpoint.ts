@@ -1,12 +1,13 @@
 import express from 'express';
-import { AdapterConfigValidator } from '../../model/AdapterConfig';
+import { AdapterConfig, AdapterConfigValidator } from '../../model/AdapterConfig';
 
 
 import { asyncHandler } from './utils';
-import {ProtocolConfigValidator} from "../../model/ProtocolConfig";
+import {ProtocolConfig, ProtocolConfigValidator} from "../../model/ProtocolConfig";
 import { Format } from '../../model/enum/Format';
+import { AdapterService } from '../../services/adapterService';
 
-const adapterService = require( "../../services/adapterService" );
+//const adapterService = require( "../../services/adapterService" );
 const APP_VERSION = "0.0.1"
 export class AdapterEndpoint {
   constructor() {}
@@ -50,8 +51,8 @@ export class AdapterEndpoint {
       return;
     }
 
-    let adapterConfig = req.params.config
-    let returnDataImportResponse = adapterService.executeJob(adapterConfig);
+    let adapterConfig = req.params.config as unknown as AdapterConfig
+    let returnDataImportResponse = AdapterService.getInstance().executeJob(adapterConfig);
     res.status(200).send(returnDataImportResponse);
   };
 
@@ -64,8 +65,8 @@ export class AdapterEndpoint {
       res.status(400).json({ errors: validator.getErrors() });
       return;
     }
-    let protocolConfig = req.params.config
-    let returnDataImportResponse = adapterService.executeRawImport(protocolConfig);
+    let protocolConfig = req.params.config as unknown as ProtocolConfig
+    let returnDataImportResponse = AdapterService.getInstance().executeRawJob(protocolConfig);
     res.status(200).send(returnDataImportResponse);
   };
 
@@ -78,10 +79,12 @@ export class AdapterEndpoint {
     res: express.Response,
   ): Promise<void> => {
     try {
-      let interpreters = adapterService.getAllFormats();
+      let interpreters = AdapterService.getInstance().getAllFormats();
+      res.setHeader("Content-Type", "application/json")
       res.status(200).json(interpreters);
     } catch (e) {
-      res.status(500).send('Error finding formats');
+      //res.status(500).send('Error finding formats');
+      throw e
     }
   };
 
@@ -93,7 +96,7 @@ export class AdapterEndpoint {
     res: express.Response,
   ): Promise<void> => {
     try {
-          let protocols = adapterService.getAllProtocols();
+          let protocols = AdapterService.getInstance().getAllProtocols();
           res.status(200).json(protocols);
         } catch (e) {
           res.status(500).send('Error finding protocols');
@@ -104,6 +107,7 @@ export class AdapterEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
+    res.setHeader("Content-Type", "text/plain");
     res.status(200).send(APP_VERSION);
   };
 };
