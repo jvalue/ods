@@ -5,7 +5,7 @@ export class Protocol {
   static readonly HTTP  = new HttpImporter();
   
   importer: Importer;
-  private constructor(importer: Importer) {
+  constructor(importer: Importer) {
     this.importer = importer;
   }
 

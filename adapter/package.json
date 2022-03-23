@@ -24,7 +24,8 @@
     "express": "^4.17.1",
     "knex": "^1.0.4",
     "prisma": "^3.10.0",
-    "xml2js": "^0.4.23"
+    "xml2js": "^0.4.23",
+    "jackson-js": "^1.1.0"
   },
   "devDependencies": {
     "@jvalue/eslint-config-jvalue": "^1.1.0",

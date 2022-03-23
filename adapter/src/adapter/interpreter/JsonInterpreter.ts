@@ -19,7 +19,7 @@ export class JsonInterpreter extends Interpreter {
     return this.parameters;
   }
 
-  override doInterpret(data: string, parameters: Map<string, unknown>): string {
+  override doInterpret(data: string, parameters: Record<string, unknown>): string {
     return JSON.parse(data);
   }
 }

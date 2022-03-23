@@ -56,10 +56,5 @@ export class AdapterService {
       var interpreter = config.format.getInterpreter();
       return interpreter.interpret(rawData, config.parameters);
     }
-
-
-    
 }
-
-
-//module.exports = AdapterService;
+export const adapterService = AdapterService.getInstance();

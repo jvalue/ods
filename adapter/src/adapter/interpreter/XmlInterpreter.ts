@@ -21,7 +21,7 @@ export class XmlInterpreter extends Interpreter{
   }
 
   // TODO @Georg check if this package can be used..
-  override doInterpret(data: string, parameters: Map<string, unknown>): string {
+  override doInterpret(data: string, parameters: Record<string, unknown>): string {
     xml2js.parseString(data, (err: any, result: any) => {
       if(err) {
           throw err;

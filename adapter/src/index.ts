@@ -5,6 +5,7 @@ import cors from 'cors';
 import express from 'express';
 import { AdapterEndpoint } from './adapter/api/rest/adapterEndpoint';
 import { DataSourceAndImportEndpoint } from './datasource/api/rest/dataSourceAndImportEndpoint';
+import { AdapterService } from './adapter/services/adapterService';
 
 export const port = 8080;
 const API_VERSION = '0.0.1';

@@ -25,9 +25,9 @@ export class HttpImporter extends Importer {
         return this.parameters;
     }
 
-    override validateParameters(inputParameters: Map<string, unknown>): void {
+    override validateParameters(inputParameters: Record<string, unknown>): void {
         super.validateParameters(inputParameters);
-        let encoding: string = inputParameters.get("encoding") as string;
+        let encoding: string = inputParameters.encoding as string;
 
         // TODO CHECK IF ENCODING ARE WRITTEN CORRECT
         if (encoding !== "ISO-8859-1" && encoding !== "US-ASCII"  && encoding !== "UTF-8") {
@@ -52,9 +52,9 @@ export class HttpImporter extends Importer {
       }
     } 
      */
-    override doFetch(parameters: Map<string, unknown>): string {
-        let uri = parameters.get("location")
-        let encoding = parameters.get("encoding")
+    override doFetch(parameters: Record<string, unknown>): string {
+        let uri = parameters.location
+        let encoding = parameters.encoding
         // TODO see if encoding from response is good
         axios({
           method: 'get',
