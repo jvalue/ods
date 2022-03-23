@@ -6,17 +6,19 @@ const axios = require('axios');
 export class HttpImporter extends Importer {
 
   //TODO RuntimeParameters type is probably wrong
+  type: string = "HTTP"
+  description: string = "Plain HTTP"
   parameters:ImporterParameterDescription[] = [new ImporterParameterDescription({name:"location", description:"String of the URI for the HTTP call", type:"string"}), 
                 new ImporterParameterDescription({name:"encoding", description:"Encoding of the source. Available encodings: ISO-8859-1, US-ASCII, UTF-8", type:"string"}),
                 new ImporterParameterDescription({name:"defaultParameters", description:"Default values for open parameters in the URI", required:false, type:"RuntimeParameters"})]
 
     // Override annotation is not necessary, but will be used for a better understanding of the code
     override getType(): string {
-      return "HTTP";
+      return this.type
     }
     
     override getDescription(): string {
-      return "Plain HTTP";
+      return this.description
     }
     
     override getAvailableParameters(): ImporterParameterDescription[] {

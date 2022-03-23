@@ -6,6 +6,7 @@ import { asyncHandler } from './utils';
 import {ProtocolConfig, ProtocolConfigValidator} from "../../model/ProtocolConfig";
 import { Format } from '../../model/enum/Format';
 import { AdapterService } from '../../services/adapterService';
+import { FormatConfig } from '../../model/FormatConfig';
 
 //const adapterService = require( "../../services/adapterService" );
 const APP_VERSION = "0.0.1"
@@ -50,8 +51,8 @@ export class AdapterEndpoint {
       res.status(400).json({ errors: validator.getErrors() });
       return;
     }
-
-    let adapterConfig = req.params.config as unknown as AdapterConfig
+    
+    let adapterConfig = req.body
     let returnDataImportResponse = AdapterService.getInstance().executeJob(adapterConfig);
     res.status(200).send(returnDataImportResponse);
   };
