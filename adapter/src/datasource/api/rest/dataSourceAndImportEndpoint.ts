@@ -38,7 +38,7 @@ export class DataSourceAndImportEndpoint {
     const result = await knex
       .select()
       .from('public.datasource')
-    let datasource = await this.createDatasourceFromResultArray(result);
+    let datasource = await DataSourceAndImportEndpoint.createDatasourceFromResultArray(result);
     res.status(200).send(datasource);
   };
 
@@ -52,7 +52,7 @@ export class DataSourceAndImportEndpoint {
       .select()
       .from('public.datasource')
       .where('id', req.params.datasourceId)
-    let datasource = await this.createDatasourceFromResult(result);
+    let datasource = await DataSourceAndImportEndpoint.createDatasourceFromResult(result);
     res.status(200).send(datasource);
   };
   addDatasource = async (
@@ -74,13 +74,21 @@ export class DataSourceAndImportEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    //TODO
+    const result = await knex
+      .delete()
+      .from('public.datasource')
+      .where('id', req.params.datasourceId)
+    res.status(204).send();
   };
   deleteAllDatasources = async (
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    //TODO
+    const result = await knex
+      .delete()
+      .from('public.datasource')
+      .where('id', '!=',"null")
+    res.status(204).send();
   };
 
 
@@ -190,7 +198,7 @@ export class DataSourceAndImportEndpoint {
     return str;
   }
 
-  private createDatasourceFromResultArray(result: any) {
+  private static createDatasourceFromResultArray(result: any) {
     var test = [];
     for (var i in result) {
       var el = result[i];
@@ -231,7 +239,7 @@ export class DataSourceAndImportEndpoint {
     return test;
   }
 
-  private createDatasourceFromResult(result: any) {
+  private static createDatasourceFromResult(result: any) {
 
     let x = {
       "protocol": {
