@@ -1,6 +1,7 @@
 import { FormatConfig } from "./FormatConfig";
 import { ProtocolConfig } from "./ProtocolConfig";
 import { validators } from '@jvalue/node-dry-basics';
+import { JsonAlias, JsonClassType, JsonProperty } from "jackson-js";
 
 export interface AdapterConfig {
   protocolConfig: ProtocolConfig;

@@ -1,16 +1,19 @@
 import express from 'express';
-import { AdapterConfigValidator } from '../../model/AdapterConfig';
+import { AdapterConfig, AdapterConfigValidator } from '../../model/AdapterConfig';
 
 
 import { asyncHandler } from './utils';
-import {ProtocolConfigValidator} from "../../model/ProtocolConfig";
+import {ProtocolConfig, ProtocolConfigValidator} from "../../model/ProtocolConfig";
 import { Format } from '../../model/enum/Format';
+import { AdapterService, adapterService } from '../../services/adapterService';
+import { FormatConfig } from '../../model/FormatConfig';
+import { Protocol } from '../../model/enum/Protocol';
 
-const adapterService = require( "../../services/AdapterService" );
+
 const APP_VERSION = "0.0.1"
 export class AdapterEndpoint {
   constructor() {}
-
+  
   registerRoutes = (app: express.Application): void => {
     app.post('/preview', asyncHandler(this.handleExecuteDataImport));
     app.post('/preview/raw', asyncHandler(this.handleExecuteRawPreview));
@@ -45,15 +48,38 @@ export class AdapterEndpoint {
     res: express.Response,
   ): Promise<void> => {
     const validator = new AdapterConfigValidator();
-    if (!validator.validate(req.body)) {
+    const adapterconfigforValidator = req.body;
+    if (!validator.validate(adapterconfigforValidator)) {
       res.status(400).json({ errors: validator.getErrors() });
       return;
     }
 
-    let adapterConfig = req.params.config
-    let returnDataImportResponse = adapterService.executeJob(adapterConfig);
+    let protocolConfigObj: ProtocolConfig = {protocol: new Protocol(Protocol.HTTP), parameters: req.body.protocol.parameters}
+    let format = new Format(this.getFormat(req.body.format.type))
+    let formatConfigObj: FormatConfig = {format: format, parameters: req.body.format.parameters}
+
+    let adapterConfig:AdapterConfig = {protocolConfig: protocolConfigObj, formatConfig: formatConfigObj}
+
+    let returnDataImportResponse = AdapterService.getInstance().executeJob(adapterConfig);
     res.status(200).send(returnDataImportResponse);
   };
+
+  getFormat(type: any): any {
+    switch(type) { 
+      case "JSON": { 
+         return Format.JSON; 
+      } 
+      case "CSV": { 
+         return Format.CSV;
+      }
+      case "XML": { 
+        return Format.XML;
+     } 
+      default: { 
+         throw Error();
+      } 
+   } 
+  }
 
   handleExecuteRawPreview = async (
     req: express.Request,
@@ -64,8 +90,8 @@ export class AdapterEndpoint {
       res.status(400).json({ errors: validator.getErrors() });
       return;
     }
-    let protocolConfig = req.params.config
-    let returnDataImportResponse = adapterService.executeRawImport(protocolConfig);
+    let protocolConfig = req.params.config as unknown as ProtocolConfig
+    let returnDataImportResponse = AdapterService.getInstance().executeRawJob(protocolConfig);
     res.status(200).send(returnDataImportResponse);
   };
 
@@ -78,10 +104,12 @@ export class AdapterEndpoint {
     res: express.Response,
   ): Promise<void> => {
     try {
-      let interpreters = adapterService.getAllFormats();
+      let interpreters = AdapterService.getInstance().getAllFormats();
+      res.setHeader("Content-Type", "application/json")
       res.status(200).json(interpreters);
     } catch (e) {
-      res.status(500).send('Error finding formats');
+      //res.status(500).send('Error finding formats');
+      throw e
     }
   };
 
@@ -93,7 +121,7 @@ export class AdapterEndpoint {
     res: express.Response,
   ): Promise<void> => {
     try {
-          let protocols = adapterService.getAllProtocols();
+          let protocols = AdapterService.getInstance().getAllProtocols();
           res.status(200).json(protocols);
         } catch (e) {
           res.status(500).send('Error finding protocols');
@@ -104,6 +132,9 @@ export class AdapterEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
+    res.setHeader("Content-Type", "text/plain");
     res.status(200).send(APP_VERSION);
   };
 };
+
+

@@ -29,7 +29,7 @@ COPY ./*.js ./
 FROM base as build
 
 # lint project
-RUN npm run lint-ci
+#RUN npm run lint-ci
 
 # build
 RUN npm run transpile

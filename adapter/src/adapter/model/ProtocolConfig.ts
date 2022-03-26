@@ -1,13 +1,11 @@
 import { Protocol } from "./enum/Protocol";
 import { validators } from '@jvalue/node-dry-basics';
+import { stringify } from "querystring";
+import { JsonAlias, JsonClassType, JsonProperty } from "jackson-js";
 
-export class ProtocolConfig {
+export interface ProtocolConfig {
     protocol:Protocol;
-    parameters: Map<string, unknown>;
-    constructor(protocol: Protocol, parameters: Map<string, unknown>) {
-      this.protocol = protocol;
-      this.parameters = parameters;
-    }
+    parameters: Record<string, unknown>;
 }
 
 export class ProtocolConfigValidator {

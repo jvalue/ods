@@ -12,39 +12,49 @@ export class AdapterService {
     /**
      * @description Create an instance of AdapterService
      */
+    private static instance: AdapterService;
+
     constructor () {
     }
 
+    public static getInstance(): AdapterService {
+      if (!AdapterService.instance) {
+          AdapterService.instance = new AdapterService();
+      }
+
+      return AdapterService.instance;
+    }
+
+
     // To Implement
-    static getAllFormats(): Array<Interpreter> {
+    public getAllFormats(): Array<Interpreter> {
       return [Format.CSV, Format.JSON, Format.XML]
     }
 
 
-    static getAllProtocols(): Array<Importer> {
+    public getAllProtocols(): Array<Importer> {
       return [Protocol.HTTP]
      }
 
-    static executeJob(_adapterConfig: AdapterConfig): DataImportResponse {
+    public executeJob(_adapterConfig: AdapterConfig): DataImportResponse {
       var rawData = this.executeProtocol(_adapterConfig.protocolConfig);
       var result = this.executeFormat(rawData, _adapterConfig.formatConfig);
       return new DataImportResponse(result.toString());
     }
 
-    static executeRawJob(_protocolConfig: ProtocolConfig): DataImportResponse {
+    public executeRawJob(_protocolConfig: ProtocolConfig): DataImportResponse {
       var rawData = this.executeProtocol(_protocolConfig);
       return new DataImportResponse(rawData);
     }
 
-    static executeProtocol (config: ProtocolConfig): string{
+    public executeProtocol (config: ProtocolConfig): string{
       var importer = config.protocol.getImporter();
       return importer.fetch(config.parameters);
     }
   
-    static executeFormat(rawData: string, config: FormatConfig): string {
+    public executeFormat(rawData: string, config: FormatConfig): string {
       var interpreter = config.format.getInterpreter();
       return interpreter.interpret(rawData, config.parameters);
     }
 }
-
-module.exports = AdapterService;
+export const adapterService = AdapterService.getInstance();

@@ -9,7 +9,7 @@ export class Format {
   static readonly CSV  = new CsvInterpreter();
 
   interpreter: Interpreter;
-  private constructor(interpreter: Interpreter) {
+  constructor(interpreter: Interpreter) {
     this.interpreter = interpreter;
   }
 

@@ -1,7 +1,6 @@
 import express, {Express, json} from "express";
 import {asyncHandler} from "../../../adapter/api/rest/utils";
 
-const dataSourceManager = require("../../DataSourceManager");
 //TODO replace with env vars
 const knex = require('knex')({
   client: 'pg',
