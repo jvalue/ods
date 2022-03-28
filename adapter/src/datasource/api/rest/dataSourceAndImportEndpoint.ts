@@ -58,51 +58,53 @@ export class DataSourceAndImportEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    let insertStatement = {
-      format_parameters: req.body.format.parameters,
-      format_type: req.body.format.type,
-      author: req.body.metadata.author,
-      creation_timestamp: new Date(Date.now()).toLocaleString(),
-      description: req.body.metadata.description,
-      display_name: req.body.metadata.displayName,
-      license: req.body.metadata.license,
-      protocol_parameters: req.body.protocol.parameters,
-      protocol_type: req.body.protocol.type,
-      first_execution: req.body.trigger.firstExecution,
-      interval: req.body.trigger.interval,
-      periodic: req.body.trigger.periodic
-    }
+    let insertStatement = this.getInsertStatement(req)
     // res.status(200).send(insertStatement)
-     const id = await knex('public.datasource')
-       .insert(insertStatement)
-       .returning('id')
-       .then(function (id:any ) {
-         console.log(id)
-         const result =  knex
-           .select()
-           .from('public.datasource')
-           .where('id', id[0].id)
-           .then(function (result:any) {
-             console.log(result)
-             let datasource =  DataSourceAndImportEndpoint.createDatasourceFromResult(result);
-             res.status(200).send(datasource);
-           })
-
-
-
-       })
-       .catch(function (err:any) {
-
-         console.log(err)
-       })
-
-
+    const id = await knex('public.datasource')
+      .insert(insertStatement)
+      .returning('id')
+      .then(function (id: any) {
+        console.log(id)
+        const result = knex
+          .select()
+          .from('public.datasource')
+          .where('id', id[0].id)
+          .then(function (result: any) {
+            console.log(result)
+            let datasource = DataSourceAndImportEndpoint.createDatasourceFromResult(result);
+            res.status(200).send(datasource);
+          })
+      })
+      .catch(function (err: any) {
+        console.log(err)
+      })
   };
+
+
+
   updateDatasource = async (
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    //TODO
+    let insertStatement = this.getInsertStatement(req)
+    // res.status(200).send(insertStatement)
+    const id = await knex('public.datasource')
+      .where('id',req.params.datasourceId)
+      .update(insertStatement)
+      .then(function () {
+        const result = knex
+          .select()
+          .from('public.datasource')
+          .where('id', req.params.datasourceId)
+          .then(function (result: any) {
+            console.log(result)
+            let datasource = DataSourceAndImportEndpoint.createDatasourceFromResult(result);
+            res.status(200).send(datasource);
+          })
+      })
+      .catch(function (err: any) {
+        console.log(err)
+      })
   };
 
 
@@ -309,6 +311,21 @@ export class DataSourceAndImportEndpoint {
 
     return x;
   }
-
+  private getInsertStatement(req: any) {
+    return {
+      format_parameters: req.body.format.parameters,
+      format_type: req.body.format.type,
+      author: req.body.metadata.author,
+      creation_timestamp: new Date(Date.now()).toLocaleString(),
+      description: req.body.metadata.description,
+      display_name: req.body.metadata.displayName,
+      license: req.body.metadata.license,
+      protocol_parameters: req.body.protocol.parameters,
+      protocol_type: req.body.protocol.type,
+      first_execution: req.body.trigger.firstExecution,
+      interval: req.body.trigger.interval,
+      periodic: req.body.trigger.periodic
+    };
+  }
 
 }
