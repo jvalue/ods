@@ -58,7 +58,44 @@ export class DataSourceAndImportEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    //TODO
+    let insertStatement = {
+      format_parameters: req.body.format.parameters,
+      format_type: req.body.format.type,
+      author: req.body.metadata.author,
+      creation_timestamp: new Date(Date.now()).toLocaleString(),
+      description: req.body.metadata.description,
+      display_name: req.body.metadata.displayName,
+      license: req.body.metadata.license,
+      protocol_parameters: req.body.protocol.parameters,
+      protocol_type: req.body.protocol.type,
+      first_execution: req.body.trigger.firstExecution,
+      interval: req.body.trigger.interval,
+      periodic: req.body.trigger.periodic
+    }
+    // res.status(200).send(insertStatement)
+     const id = await knex('public.datasource')
+       .insert(insertStatement)
+       .returning('id')
+       .then(function (id:any ) {
+         console.log(id)
+         const result =  knex
+           .select()
+           .from('public.datasource')
+           .where('id', id[0].id)
+           .then(function (result:any) {
+             console.log(result)
+             let datasource =  DataSourceAndImportEndpoint.createDatasourceFromResult(result);
+             res.status(200).send(datasource);
+           })
+
+
+
+       })
+       .catch(function (err:any) {
+
+         console.log(err)
+       })
+
 
   };
   updateDatasource = async (
@@ -86,7 +123,7 @@ export class DataSourceAndImportEndpoint {
     const result = await knex
       .delete()
       .from('public.datasource')
-      .where('id', '!=',"null")
+      .where('id', '!=', "null")
     res.status(204).send();
   };
 
@@ -201,16 +238,18 @@ export class DataSourceAndImportEndpoint {
     var test = [];
     for (var i in result) {
       var el = result[i];
+      let protocolParameters = JSON.parse(el.protocol_parameters);
+      let formatParameters = JSON.parse(el.format_parameters);
       let x = {
         "protocol": {
           "type": el.protocol_type,
           "parameters":
-          el.protocol_parameters
+          protocolParameters
 
         },
         "format": {
           "type": el.format_type,
-          "parameters": el.format_parameters
+          "parameters": formatParameters
         },
         "metadata": {
           "author": el.author,
@@ -239,17 +278,16 @@ export class DataSourceAndImportEndpoint {
   }
 
   private static createDatasourceFromResult(result: any) {
-
+    let protocolParameters = JSON.parse(result[0].protocol_parameters);
+    let formatParameters = JSON.parse(result[0].format_parameters);
     let x = {
       "protocol": {
         "type": result[0].protocol_type,
-        "parameters":
-        result[0].protocol_parameters
-
+        "parameters": protocolParameters
       },
       "format": {
         "type": result[0].format_type,
-        "parameters": result[0].format_parameters
+        "parameters": formatParameters
       },
       "metadata": {
         "author": result[0].author,
