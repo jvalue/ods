@@ -13,15 +13,16 @@ export abstract class Importer {
   //@JsonProperty("parameters")
   abstract getAvailableParameters() :Array<ImporterParameterDescription>;
 
-  fetch(parameters:Record<string, unknown> ): string { //throws ImporterParameterException
+  async fetch(parameters:Record<string, unknown> ): Promise<string> { //throws ImporterParameterException
       this.validateParameters(parameters);
-      return this.doFetch(parameters);
+      let x = await this.doFetch(parameters);
+      return JSON.stringify(x);
   }
 
   abstract getType(): string;
   abstract getDescription(): string;
 
-  abstract doFetch(parameters: Record<string, unknown>): string; //throws ImporterParameterException
+  abstract doFetch(parameters: Record<string, unknown>): Promise<string>; //throws ImporterParameterException
 
   validateParameters(inputParameters: Record<string, unknown>) { //throws ImporterParameterException;
 

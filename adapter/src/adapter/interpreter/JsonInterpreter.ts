@@ -20,6 +20,6 @@ export class JsonInterpreter extends Interpreter {
   }
 
   override doInterpret(data: string, parameters: Record<string, unknown>): string {
-    return JSON.parse(data);
+    return data;
   }
 }

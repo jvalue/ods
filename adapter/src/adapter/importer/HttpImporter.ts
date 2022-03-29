@@ -52,11 +52,12 @@ export class HttpImporter extends Importer {
       }
     } 
      */
-    override doFetch(parameters: Record<string, unknown>): string {
+    override async doFetch(parameters: Record<string, unknown>): Promise<string> {
         let uri = parameters.location
+        console.log(parameters)
         let encoding = parameters.encoding
         // TODO see if encoding from response is good
-        axios({
+        return axios({
           method: 'get',
           url: uri,
           responseEncoding: encoding
@@ -67,7 +68,6 @@ export class HttpImporter extends Importer {
           console.error(error)
           throw new ImporterParameterError("Could not Fetch from URI:" + uri)
         });
-        throw new ImporterParameterError("Could not Fetch from URI:" + uri)
     }
 
     /*

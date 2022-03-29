@@ -60,7 +60,7 @@ export class AdapterEndpoint {
 
     let adapterConfig:AdapterConfig = {protocolConfig: protocolConfigObj, formatConfig: formatConfigObj}
     console.log(adapterConfig)
-    let returnDataImportResponse = AdapterService.getInstance().executeJob(adapterConfig);
+    let returnDataImportResponse = await AdapterService.getInstance().executeJob(adapterConfig);
     res.status(200).send(returnDataImportResponse);
   };
 

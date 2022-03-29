@@ -38,6 +38,15 @@ describe('Scheduler initializer', () => {
     scheduler.removeAllJobs();
   });
 
+  describe('dummy', () => {
+    test('dummy test', () => {
+      console.log(
+        'Dummy test - please remove after first real test implemented!',
+      );
+      expect(true).toBeTruthy();
+    });
+  });
+
   // test('should initialize jobs correctly', async () => {
   //   const config = {
   //     id: 123,
@@ -57,4 +66,4 @@ describe('Scheduler initializer', () => {
   //   expect(scheduler.getAllJobs()).toHaveLength(1);
   //   expect(scheduler.getAllJobs()[0].datasourceConfig).toEqual(config);
   // });
-});
+})

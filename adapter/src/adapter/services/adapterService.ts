@@ -1,3 +1,4 @@
+import { JsonRawValue } from "jackson-js";
 import { Importer } from "../importer/Importer";
 import { Interpreter } from "../interpreter/Interpreter";
 import { AdapterConfig } from "../model/AdapterConfig";
@@ -36,20 +37,22 @@ export class AdapterService {
       return [Protocol.HTTP]
      }
 
-    public executeJob(_adapterConfig: AdapterConfig): DataImportResponse {
-      var rawData = this.executeProtocol(_adapterConfig.protocolConfig);
+    public async executeJob(_adapterConfig: AdapterConfig): Promise<DataImportResponse> {
+      var rawData = await this.executeProtocol(_adapterConfig.protocolConfig);
       var result = this.executeFormat(rawData, _adapterConfig.formatConfig);
-      return new DataImportResponse(result.toString());
+      let returnValue: DataImportResponse = {data: result};
+      return returnValue;
     }
 
-    public executeRawJob(_protocolConfig: ProtocolConfig): DataImportResponse {
-      var rawData = this.executeProtocol(_protocolConfig);
-      return new DataImportResponse(rawData);
+    public async executeRawJob(_protocolConfig: ProtocolConfig): Promise<DataImportResponse> {
+      let value = await this.executeProtocol(_protocolConfig)
+      let returnValue: DataImportResponse = {data: value};
+      return returnValue;
     }
 
-    public executeProtocol (config: ProtocolConfig): string{
+    public async executeProtocol (config: ProtocolConfig): Promise<string> {
       var importer = config.protocol.getImporter();
-      return importer.fetch(config.parameters);
+      return await importer.fetch(config.parameters)
     }
   
     public executeFormat(rawData: string, config: FormatConfig): string {
