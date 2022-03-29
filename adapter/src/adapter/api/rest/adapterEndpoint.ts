@@ -13,7 +13,7 @@ import { Protocol } from '../../model/enum/Protocol';
 const APP_VERSION = "0.0.1"
 export class AdapterEndpoint {
   constructor() {}
-  
+
   registerRoutes = (app: express.Application): void => {
     app.post('/preview', asyncHandler(this.handleExecuteDataImport));
     app.post('/preview/raw', asyncHandler(this.handleExecuteRawPreview));
@@ -55,30 +55,30 @@ export class AdapterEndpoint {
     }
 
     let protocolConfigObj: ProtocolConfig = {protocol: new Protocol(Protocol.HTTP), parameters: req.body.protocol.parameters}
-    let format = new Format(this.getFormat(req.body.format.type))
+    let format = new Format(AdapterEndpoint.getFormat(req.body.format.type))
     let formatConfigObj: FormatConfig = {format: format, parameters: req.body.format.parameters}
 
     let adapterConfig:AdapterConfig = {protocolConfig: protocolConfigObj, formatConfig: formatConfigObj}
-
+    console.log(adapterConfig)
     let returnDataImportResponse = AdapterService.getInstance().executeJob(adapterConfig);
     res.status(200).send(returnDataImportResponse);
   };
 
-  getFormat(type: any): any {
-    switch(type) { 
-      case "JSON": { 
-         return Format.JSON; 
-      } 
-      case "CSV": { 
+  static getFormat(type: any): any {
+    switch(type) {
+      case "JSON": {
+         return Format.JSON;
+      }
+      case "CSV": {
          return Format.CSV;
       }
-      case "XML": { 
+      case "XML": {
         return Format.XML;
-     } 
-      default: { 
+     }
+      default: {
          throw Error();
-      } 
-   } 
+      }
+   }
   }
 
   handleExecuteRawPreview = async (
@@ -135,6 +135,8 @@ export class AdapterEndpoint {
     res.setHeader("Content-Type", "text/plain");
     res.status(200).send(APP_VERSION);
   };
+
+
 };
 
 
