@@ -142,25 +142,6 @@ export class DataSourceAndImportEndpoint {
     res: express.Response,
   ): Promise<void> => {
     //TODO add parameters from request to trigger
-    //TODO wait for adapterService fix
-        // Error: Could not Fetch from URI:https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json
-        //   at HttpImporter.doFetch (C:\Users\Christoff\DEV\ods_nodejsrefactoring\ods\adapter\dist\adapter\importer\HttpImporter.js:83:15)
-        // at HttpImporter.fetch (C:\Users\Christoff\DEV\ods_nodejsrefactoring\ods\adapter\dist\adapter\importer\Importer.js:11:21)
-        // at AdapterService.executeProtocol (C:\Users\Christoff\DEV\ods_nodejsrefactoring\ods\adapter\dist\adapter\services\adapterService.js:34:25)
-        // at AdapterService.executeJob (C:\Users\Christoff\DEV\ods_nodejsrefactoring\ods\adapter\dist\adapter\services\adapterService.js:24:28)
-        // at AdapterEndpoint.handleExecuteDataImport (C:\Users\Christoff\DEV\ods_nodejsrefactoring\ods\adapter\dist\adapter\api\rest\adapterEndpoint.js:52:90)
-        // at C:\Users\Christoff\DEV\ods_nodejsrefactoring\ods\adapter\dist\adapter\api\rest\utils.js:11:31
-        // at Layer.handle [as handle_request] (C:\Users\Christoff\DEV\ods_nodejsrefactoring\ods\adapter\node_modules\express\lib\router\layer.js:95:5)
-        // at next (C:\Users\Christoff\DEV\ods_nodejsrefactoring\ods\adapter\node_modules\express\lib\router\route.js:137:13)
-        // at Route.dispatch (C:\Users\Christoff\DEV\ods_nodejsrefactoring\ods\adapter\node_modules\express\lib\router\route.js:112:3)
-        // at Layer.handle [as handle_request] (C:\Users\Christoff\DEV\ods_nodejsrefactoring\ods\adapter\node_modules\express\lib\router\layer.js:95:5)
-        // at C:\Users\Christoff\DEV\ods_nodejsrefactoring\ods\adapter\node_modules\express\lib\router\index.js:281:22
-        // at Function.process_params (C:\Users\Christoff\DEV\ods_nodejsrefactoring\ods\adapter\node_modules\express\lib\router\index.js:335:12)
-        // at next (C:\Users\Christoff\DEV\ods_nodejsrefactoring\ods\adapter\node_modules\express\lib\router\index.js:275:10)
-        // at urlencodedParser (C:\Users\Christoff\DEV\ods_nodejsrefactoring\ods\adapter\node_modules\body-parser\lib\types\urlencoded.js:82:7)
-        // at Layer.handle [as handle_request] (C:\Users\Christoff\DEV\ods_nodejsrefactoring\ods\adapter\node_modules\express\lib\router\layer.js:95:5)
-        // at trim_prefix (C:\Users\Christoff\DEV\ods_nodejsrefactoring\ods\adapter\node_modules\express\lib\router\index.js:317:13)
-
     let id = req.params.datasourceId;
     const result = await knex
       .select()
@@ -173,7 +154,7 @@ export class DataSourceAndImportEndpoint {
     let formatConfigObj: FormatConfig = {format: format, parameters: datasource.format.parameters}
     let adapterConfig:AdapterConfig = {protocolConfig: protocolConfigObj, formatConfig: formatConfigObj}
     console.log(adapterConfig)
-    let returnDataImportResponse = AdapterService.getInstance().executeJob(adapterConfig);
+    let returnDataImportResponse = await AdapterService.getInstance().executeJob(adapterConfig);
     //TODO save response in dataimport
     res.status(200).send(returnDataImportResponse);
 
