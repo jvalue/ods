@@ -86,17 +86,18 @@ export class AdapterEndpoint {
     res: express.Response,
   ): Promise<void> => {
     const validator = new ProtocolConfigValidator();
-    if (!validator.validate(req.body)) {
+    const protcolConfigForValidator = req.body.protocol;
+    if (!validator.validate(protcolConfigForValidator)) {
       res.status(400).json({ errors: validator.getErrors() });
       return;
     }
-    let protocolConfig = req.params.config as unknown as ProtocolConfig
-    let returnDataImportResponse = AdapterService.getInstance().executeRawJob(protocolConfig);
+    let protocolConfigObj: ProtocolConfig = {protocol: new Protocol(Protocol.HTTP), parameters: req.body.protocol.parameters}
+    let returnDataImportResponse = await AdapterService.getInstance().executeRawJob(protocolConfigObj);
     res.status(200).send(returnDataImportResponse);
   };
 
   /*
-    returns Collection of Importer
+    returns Collection of Importerj
   } */
 
   handleGetFormat = async (

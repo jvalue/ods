@@ -19,7 +19,7 @@ export class ProtocolConfigValidator {
     }
     if (!validators.hasProperty(request, 'type')) {
       this.errors.push("'type' property is missing");
-    } else if (!validators.isObject(request.type)) {
+    } else if (!validators.isString(request.type)) {
       this.errors.push("'type' must be a string");
     }
     if (!validators.hasProperty(request, 'parameters')) {
