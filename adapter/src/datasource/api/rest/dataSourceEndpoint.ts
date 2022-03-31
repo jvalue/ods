@@ -44,6 +44,7 @@ export class DataSourceEndpoint {
     let datasource = KnexHelper.createDatasourceFromResult(result);
     res.status(200).send(datasource);
   };
+
   addDatasource = async (
     req: express.Request,
     res: express.Response,
@@ -52,7 +53,6 @@ export class DataSourceEndpoint {
     let datasource = await datasourceRepository.addDatasource(insertStatement);
     res.status(201).send(datasource);
   };
-
 
   updateDatasource = async (
     req: express.Request,
@@ -63,7 +63,6 @@ export class DataSourceEndpoint {
     res.status(200).send(datasource);
   };
 
-
   deleteDatasource = async (
     req: express.Request,
     res: express.Response,
@@ -71,6 +70,7 @@ export class DataSourceEndpoint {
     await datasourceRepository.deleteDatasourceById(req.params.datasourceId);
     res.status(204).send();
   };
+
   deleteAllDatasources = async (
     req: express.Request,
     res: express.Response,
@@ -99,7 +99,6 @@ export class DataSourceEndpoint {
     // //TODO save response in dataimport table
     //TODO check correct response
     res.status(200).send(returnDataImportResponse);
-
   };
 
 

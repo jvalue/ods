@@ -7,6 +7,7 @@ const dataImportRepository: DataImportRepository = new DataImportRepository();
 
 
 export class DataImportEndpoint {
+
   registerRoutes = (app: express.Application): void => {
     app.get('/datasources/:datasourceId/imports', asyncHandler(this.getMetaDataImportsForDatasource));
     app.get('/datasources/:datasourceId/imports/latest', asyncHandler(this.getLatestMetaDataImportForDatasource));
@@ -14,6 +15,7 @@ export class DataImportEndpoint {
     app.get('/datasources/:datasourceId/imports/:dataImportId', asyncHandler(this.getMetadataForDataImport));
     app.get('/datasources/:datasourceId/imports/:dataImportId/data', asyncHandler(this.getDataFromDataImport));
   };
+
   getMetaDataImportsForDatasource = async (
     req: express.Request,
     res: express.Response,
@@ -28,6 +30,7 @@ export class DataImportEndpoint {
 
     res.status(200).send(result);
   };
+
   getLatestMetaDataImportForDatasource = async (
     req: express.Request,
     res: express.Response,
@@ -37,8 +40,8 @@ export class DataImportEndpoint {
     let dataImportId = result[0].id;
     result[0]["location"] = "/datasources/" + req.params.datasourceId + "/imports/" + dataImportId + "/data";
     res.status(200).send(result[0]);
-
   };
+
   getLatestDataImportForDatasource = async (
     req: express.Request,
     res: express.Response,
@@ -48,7 +51,6 @@ export class DataImportEndpoint {
     const stringResult = KnexHelper.stringFromUTF8Array(result[0].data)
     res.status(200).send(stringResult);
   };
-
 
   getMetadataForDataImport = async (
     req: express.Request,
@@ -60,7 +62,6 @@ export class DataImportEndpoint {
     res.status(200).send(result[0]);
   };
 
-
   getDataFromDataImport = async (
     req: express.Request,
     res: express.Response,
@@ -71,6 +72,5 @@ export class DataImportEndpoint {
     const stringFromUTF8Array = KnexHelper.stringFromUTF8Array(result[0].data)
     res.status(200).send(stringFromUTF8Array);
   };
-
 
 }
