@@ -11,8 +11,8 @@ const knex = require('knex')({
     asyncStackTraces: true
   }
 });
-export class DatasourceRepository {
 
+export class DatasourceRepository {
 
 
   async getAllDataSources() {
@@ -20,7 +20,8 @@ export class DatasourceRepository {
       .select()
       .from('public.datasource')
   }
-  async  getDataSourceForDataSourceId(id:any) {
+
+  async getDataSourceById(id: any) {
     return await knex
       .select()
       .from('public.datasource')
@@ -46,4 +47,39 @@ export class DatasourceRepository {
         console.log(err)
       })
   }
+
+  async updateDatasource(insertStatement: InsertStatement, datasourceId: string) {
+    return await knex('public.datasource')
+      .where('id', datasourceId)
+      .update(insertStatement)
+      .then(function () {
+        return knex
+          .select()
+          .from('public.datasource')
+          .where('id', datasourceId)
+          .then(function (result: any) {
+            console.log(result)
+            return DataSourceAndImportEndpoint.createDatasourceFromResult(result);
+          })
+      })
+      .catch(function (err: any) {
+        console.log(err)
+      })
+  }
+
+  async deleteDatasourceById(datasourceId: string) {
+    return await knex
+      .delete()
+      .from('public.datasource')
+      .where('id', datasourceId);
+  }
+
+  async deleteAllDatasources() {
+    return await knex
+      .delete()
+      .from('public.datasource')
+      .where('id', '!=', "-1")
+  }
+
+
 }
