@@ -1,4 +1,4 @@
-import {DataSourceAndImportEndpoint, InsertStatement} from "../api/rest/dataSourceAndImportEndpoint";
+import {DataSourceEndpoint, InsertStatement} from "../api/rest/dataSourceEndpoint";
 
 const knex = require('knex')({
   client: 'pg',
@@ -40,7 +40,7 @@ export class DatasourceRepository {
           .from('public.datasource')
           .where('id', id[0].id)
           .then(function (result: any) {
-            return DataSourceAndImportEndpoint.createDatasourceFromResult(result);
+            return DataSourceEndpoint.createDatasourceFromResult(result);
           })
       })
       .catch(function (err: any) {
@@ -59,7 +59,7 @@ export class DatasourceRepository {
           .where('id', datasourceId)
           .then(function (result: any) {
             console.log(result)
-            return DataSourceAndImportEndpoint.createDatasourceFromResult(result);
+            return DataSourceEndpoint.createDatasourceFromResult(result);
           })
       })
       .catch(function (err: any) {
