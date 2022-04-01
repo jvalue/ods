@@ -26,14 +26,17 @@ export default class VM2SandboxExecutor implements SandboxExecutor {
 
     const json = JSON.stringify(data);
 
-    const script = new VMScript(code, 'main');
-    script.wrap('function main(data) {\n', `\n}\nmain(${json});`);
+    const wrappedCode =
+      'function main(data) {\n' + `${code}\n` + '}\n' + `main(${json})`;
+    const script = new VMScript(wrappedCode, 'main');
 
     try {
       script.compile();
     } catch (err) {
       const error = err as Error;
-      return { error: convertSyntaxError(error, FUNCTION_WRAP_PREFIX_LENGTH) };
+      return {
+        error: convertSyntaxError(error, FUNCTION_WRAP_PREFIX_LENGTH, code),
+      };
     }
 
     try {
@@ -41,7 +44,9 @@ export default class VM2SandboxExecutor implements SandboxExecutor {
       return { data: result };
     } catch (err) {
       const error = err as Error;
-      return { error: convertRuntimeError(error, FUNCTION_WRAP_PREFIX_LENGTH) };
+      return {
+        error: convertRuntimeError(error, FUNCTION_WRAP_PREFIX_LENGTH),
+      };
     }
   }
 }
