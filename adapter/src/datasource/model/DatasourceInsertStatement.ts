@@ -1,4 +1,4 @@
-export interface InsertStatement {
+export interface DatasourceInsertStatement {
   format_parameters: any;
   format_type: any;
   author: any;

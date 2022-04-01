@@ -1,4 +1,4 @@
-import express, {Express, json} from "express";
+import express from "express";
 import {asyncHandler} from "../../../adapter/api/rest/utils";
 import {AdapterConfig} from "../../../adapter/model/AdapterConfig";
 import {AdapterService} from "../../../adapter/services/adapterService";
@@ -9,9 +9,13 @@ import {FormatConfig} from "../../../adapter/model/FormatConfig";
 import {AdapterEndpoint} from "../../../adapter/api/rest/adapterEndpoint";
 import {DatasourceRepository} from "../../repository/datasourceRepository";
 import {KnexHelper} from "../../repository/knexHelper";
+import {OutboxRepository} from "../../repository/outboxRepository";
+import {DatasourceModelForAmqp} from "../../model/datasourceModelForAmqp";
+import {ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC} from "../../../env";
 
 
 const datasourceRepository: DatasourceRepository = new DatasourceRepository();
+const outboxRepository: OutboxRepository = new OutboxRepository();
 
 
 export class DataSourceEndpoint {
@@ -49,8 +53,16 @@ export class DataSourceEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    let insertStatement = KnexHelper.getInsertStatement(req)
+    //routingkey == topic
+    //TODO typisierung Datasource & Dataimport
+    let insertStatement = KnexHelper.getInsertStatementForDataSource(req)
     let datasource = await datasourceRepository.addDatasource(insertStatement);
+    let datasouceModelForAmqp:DatasourceModelForAmqp={
+      datasource:datasource
+    }
+    // let routingKey=ADAPTER_AMQP_DATASOURCE_CREATED_TOPIC;
+    let routingKey="datasource.config.created";
+    await outboxRepository.publishToOutbox(datasouceModelForAmqp,routingKey);
     res.status(201).send(datasource);
   };
 
@@ -58,8 +70,15 @@ export class DataSourceEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    let insertStatement = KnexHelper.getInsertStatement(req)
+    //TODO check response 204 with no body ?!
+    let insertStatement = KnexHelper.getInsertStatementForDataSource(req)
     let datasource = await datasourceRepository.updateDatasource(insertStatement, req.params.datasourceId);
+    let datasourceModelForAmqp:DatasourceModelForAmqp ={
+      datasource:datasource
+    }
+    // let routingKey=ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC;
+    let routingKey="datasource.config.updated";
+    await outboxRepository.publishToOutbox(datasourceModelForAmqp,routingKey)
     res.status(200).send(datasource);
   };
 

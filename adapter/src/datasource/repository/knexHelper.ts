@@ -1,4 +1,4 @@
-import {InsertStatement} from "./InsertStatement";
+import {DatasourceInsertStatement} from "../model/DatasourceInsertStatement";
 
 
 export class KnexHelper {
@@ -78,7 +78,7 @@ export class KnexHelper {
     return x;
   }
 
-  static getInsertStatement(req: any): InsertStatement {
+  static getInsertStatementForDataSource(req: any): DatasourceInsertStatement {
     return {
       format_parameters: req.body.format.parameters,
       format_type: req.body.format.type,

@@ -15,7 +15,7 @@ export class DataImportEndpoint {
     app.get('/datasources/:datasourceId/imports/:dataImportId', asyncHandler(this.getMetadataForDataImport));
     app.get('/datasources/:datasourceId/imports/:dataImportId/data', asyncHandler(this.getDataFromDataImport));
   };
-
+//TODO Transactional bei gets???
   getMetaDataImportsForDatasource = async (
     req: express.Request,
     res: express.Response,

@@ -1,4 +1,5 @@
-import {DataSourceEndpoint, InsertStatement} from "../api/rest/dataSourceEndpoint";
+import {KnexHelper} from "./knexHelper";
+import {DatasourceInsertStatement} from "../model/DatasourceInsertStatement";
 
 const knex = require('knex')({
   client: 'pg',
@@ -28,7 +29,7 @@ export class DatasourceRepository {
       .where('id', id);
   }
 
-  async addDatasource(insertStatement: InsertStatement) {
+  async addDatasource(insertStatement: DatasourceInsertStatement) {
     return await knex('public.datasource')
       .insert(insertStatement)
       .returning('id')
@@ -40,7 +41,7 @@ export class DatasourceRepository {
           .from('public.datasource')
           .where('id', id[0].id)
           .then(function (result: any) {
-            return DataSourceEndpoint.createDatasourceFromResult(result);
+            return KnexHelper.createDatasourceFromResult(result);
           })
       })
       .catch(function (err: any) {
@@ -48,7 +49,7 @@ export class DatasourceRepository {
       })
   }
 
-  async updateDatasource(insertStatement: InsertStatement, datasourceId: string) {
+  async updateDatasource(insertStatement: DatasourceInsertStatement, datasourceId: string) {
     return await knex('public.datasource')
       .where('id', datasourceId)
       .update(insertStatement)
@@ -59,7 +60,7 @@ export class DatasourceRepository {
           .where('id', datasourceId)
           .then(function (result: any) {
             console.log(result)
-            return DataSourceEndpoint.createDatasourceFromResult(result);
+            return KnexHelper.createDatasourceFromResult(result);
           })
       })
       .catch(function (err: any) {
