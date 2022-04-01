@@ -92,7 +92,7 @@ export function convertSyntaxError(
 
   const codeSnippetLines = originalCode.split('\n').length;
   const errorProjectedToWrappingMain =
-  lineNumberAdjusted === codeSnippetLines + 1;
+    lineNumberAdjusted === codeSnippetLines + 1;
   if (errorProjectedToWrappingMain) {
     // Special case: the error concerns the wrapping main function
     const lastCodeLine = originalCode.split('\n')[codeSnippetLines - 1];
