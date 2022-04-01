@@ -69,10 +69,12 @@ function rewriteStacktrace(oldLines: string[], prefixLength: number): string[] {
  *       at VMScript.compile (/home/ods-main/pipeline/node_modules/vm2/lib/main.js:80:20)
  *       ...
  * @param error The original javascript syntax error
+ * @param codeSnippet The original executed code snippet
  */
 export function convertSyntaxError(
   error: Error,
   prefixLength: number,
+  originalCode: string,
 ): JobError {
   if (error.name !== 'SyntaxError') {
     throw new Error('Not a syntax error');
@@ -86,12 +88,27 @@ export function convertSyntaxError(
   const header = lines[0];
   const [, lineNumber] = parseSyntaxErrorHeader(header);
   const lineNumberAdjusted = lineNumber - prefixLength;
+  const message = lines[4];
+
+  const codeSnippetLines = originalCode.split('\n').length;
+  const errorProjectedToWrappingMain =
+    lineNumberAdjusted === codeSnippetLines + 1;
+  if (errorProjectedToWrappingMain) {
+    // Special case: the error concerns the wrapping main function
+    const lastCodeLine = originalCode.split('\n')[codeSnippetLines - 1];
+    const lastPositionInLastCodeLine = lastCodeLine.length - 1;
+    return {
+      name: error.name,
+      message,
+      position: +lastPositionInLastCodeLine,
+      lineNumber: codeSnippetLines,
+      stacktrace: [],
+    };
+  }
 
   const markers = lines[2];
   const markerIndex = markers.indexOf('^');
   const position = markerIndex > 0 ? markerIndex : 0;
-
-  const message = lines[4];
 
   return {
     name: error.name,
