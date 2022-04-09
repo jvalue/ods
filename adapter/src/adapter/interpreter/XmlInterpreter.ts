@@ -24,7 +24,10 @@ export class XmlInterpreter extends Interpreter{
   override doInterpret(data: string, parameters: Record<string, unknown>): Promise<string> {
     data = '<?xml version="1.0" encoding="UTF-8"?>' +
     '<root><from>Rick</from><to>Morty</to></root>'
-    return xml2js.parseStringPromise(data).then(function (result:any) {
+
+    var parser = new xml2js.Parser({explicitArray: false});
+     
+    return parser.parseStringPromise(data).then(function (result:any) {
        // `result` is a JavaScript object
       // convert it to a JSON string
       return result.root
