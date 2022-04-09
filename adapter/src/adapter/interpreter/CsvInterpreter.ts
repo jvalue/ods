@@ -52,7 +52,7 @@ export class CsvInterpreter extends Interpreter {
       count = count+1;
     })
     return new Promise(function(resolve, reject){
-        return JSON.stringify(json);
+        resolve(JSON.stringify(json));
       });
   }
 
