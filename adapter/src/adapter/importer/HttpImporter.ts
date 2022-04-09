@@ -60,8 +60,7 @@ export class HttpImporter extends Importer {
         return axios({
           method: 'get',
           url: uri,
-          responseEncoding: encoding,
-          responseType: 'text'
+          responseEncoding: encoding
         }).then(function (response: any) {
           console.log(response.data)
           return response.data
