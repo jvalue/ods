@@ -16,7 +16,8 @@ export abstract class Importer {
   async fetch(parameters:Record<string, unknown> ): Promise<string> { //throws ImporterParameterException
       this.validateParameters(parameters);
       let x = await this.doFetch(parameters);
-      return JSON.stringify(x);
+      return x;
+      //return JSON.stringify(x);
   }
 
   abstract getType(): string;
