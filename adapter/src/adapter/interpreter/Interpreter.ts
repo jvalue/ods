@@ -22,7 +22,8 @@ export abstract class Interpreter {
     let illegalArgumentsMessage: string = "";
     
     for (let requiredParameter of this.getAvailableParameters()){
-      if ((inputParameters.requiredParameter as InterpreterParameterDescription).name == null){
+      let param = (inputParameters[requiredParameter.name] as InterpreterParameterDescription)
+      if (param == null){
         illegalArguments = true;
         illegalArgumentsMessage = illegalArgumentsMessage + this.type + "interpreter requires parameter " + requiredParameter.name + "\n";
       }
