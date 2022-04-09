@@ -22,11 +22,10 @@ export class XmlInterpreter extends Interpreter{
 
   // TODO @Georg check if this package can be used..
   override doInterpret(data: string, parameters: Record<string, unknown>): Promise<string> {
-
     return xml2js.parseStringPromise(data).then(function (result:any) {
        // `result` is a JavaScript object
       // convert it to a JSON string
-      return result.root
+      return result
       //const json = JSON.stringify(result.root);
       //return json;
     })
