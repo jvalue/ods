@@ -25,7 +25,7 @@ export class CsvInterpreter extends Interpreter {
     return this.parameters;
   }
 
-  override doInterpret(data: string, parameters: Record<string, unknown>): string {
+  override doInterpret(data: string, parameters: Record<string, unknown>): Promise<string> {
     let columnSeparator = (parameters.columnSeparator as string).charAt(0)
     let lineSeparator: string = parameters.lineSeparator as string;
     let firstRowAsHeader: boolean = parameters.firstRowAsHeader as boolean; // True = With header, False = WithoutHeader
@@ -51,8 +51,9 @@ export class CsvInterpreter extends Interpreter {
 
       count = count+1;
     })
-    
-    return JSON.stringify(json);
+    return new Promise(function(resolve, reject){
+        return JSON.stringify(json);
+      });
   }
 
   override validateParameters(inputParameters: Record<string, unknown>): void {

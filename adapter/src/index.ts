@@ -12,6 +12,7 @@ export const port = 8080;
 const API_VERSION = '0.0.1';
 export let server: Server | undefined;
 
+
 // Await will be needed in the future, so for now ignore this linter issue and remove the disable later
 // eslint-disable-next-line @typescript-eslint/require-await
 async function main(): Promise<void> {

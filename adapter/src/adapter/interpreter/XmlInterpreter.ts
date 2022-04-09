@@ -21,17 +21,17 @@ export class XmlInterpreter extends Interpreter{
   }
 
   // TODO @Georg check if this package can be used..
-  override doInterpret(data: string, parameters: Record<string, unknown>): string {
-    xml2js.parseString(data, (err: any, result: any) => {
-      if(err) {
-          throw err;
-      }
-  
-      // `result` is a JavaScript object
+  override doInterpret(data: string, parameters: Record<string, unknown>): Promise<string> {
+
+    return xml2js.parseStringPromise(data).then(function (result:any) {
+       // `result` is a JavaScript object
       // convert it to a JSON string
-      const json = JSON.stringify(result);
-      return json;
-    });
-    throw Error("could not convert data into json");
+      return result.root
+      //const json = JSON.stringify(result.root);
+      //return json;
+    })
+    .catch(function (err:any) {
+      throw err
+    }); 
   }
 }

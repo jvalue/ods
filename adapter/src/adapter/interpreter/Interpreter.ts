@@ -7,14 +7,14 @@ export abstract class Interpreter {
   description: string | undefined;
 
 
-  interpret(data: string, parameters: Record<string, unknown>): string {
+  async interpret(data: string, parameters: Record<string, unknown>): Promise<string> {
     this.validateParameters(parameters);
-    return this.doInterpret(data, parameters);
+    return await this.doInterpret(data, parameters);
   }
 
   abstract getType(): string;
   abstract getDescription(): string;
-  abstract doInterpret(data: string, parameters: Record<string, unknown>): string
+  abstract doInterpret(data: string, parameters: Record<string, unknown>): Promise<string>
   abstract getAvailableParameters(): Array<InterpreterParameterDescription>;
 
   validateParameters(inputParameters: Record<string, unknown>) { 

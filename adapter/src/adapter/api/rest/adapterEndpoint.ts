@@ -64,23 +64,6 @@ export class AdapterEndpoint {
     res.status(200).send(returnDataImportResponse);
   };
 
-  static getFormat(type: any): any {
-    switch(type) {
-      case "JSON": {
-         return Format.JSON;
-      }
-      case "CSV": {
-         return Format.CSV;
-      }
-      case "XML": {
-        return Format.XML;
-     }
-      default: {
-         throw Error();
-      }
-   }
-  }
-
   handleExecuteRawPreview = async (
     req: express.Request,
     res: express.Response,
@@ -137,6 +120,22 @@ export class AdapterEndpoint {
     res.status(200).send(APP_VERSION);
   };
 
+  static getFormat(type: any): any {
+    switch(type) {
+      case "JSON": {
+         return Format.JSON;
+      }
+      case "CSV": {
+         return Format.CSV;
+      }
+      case "XML": {
+        return Format.XML;
+     }
+      default: {
+         throw Error();
+      }
+   }
+  }
 
 };
 

@@ -19,7 +19,9 @@ export class JsonInterpreter extends Interpreter {
     return this.parameters;
   }
 
-  override doInterpret(data: string, parameters: Record<string, unknown>): string {
-    return data;
+  override doInterpret(data: string, parameters: Record<string, unknown>): Promise<string> {
+    return new Promise(function(resolve, reject){
+        return data;
+      });
   }
 }

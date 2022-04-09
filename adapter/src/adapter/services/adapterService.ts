@@ -39,7 +39,7 @@ export class AdapterService {
 
     public async executeJob(_adapterConfig: AdapterConfig): Promise<DataImportResponse> {
       var rawData = await this.executeProtocol(_adapterConfig.protocolConfig);
-      var result = this.executeFormat(rawData, _adapterConfig.formatConfig);
+      var result = await this.executeFormat(rawData, _adapterConfig.formatConfig);
       let returnValue: DataImportResponse = {data: result};
       return returnValue;
     }
@@ -55,9 +55,9 @@ export class AdapterService {
       return await importer.fetch(config.parameters)
     }
   
-    public executeFormat(rawData: string, config: FormatConfig): string {
+    public async executeFormat(rawData: string, config: FormatConfig): Promise<string> {
       var interpreter = config.format.getInterpreter();
-      return interpreter.interpret(rawData, config.parameters);
+      return await interpreter.interpret(rawData, config.parameters);
     }
 }
 export const adapterService = AdapterService.getInstance();
