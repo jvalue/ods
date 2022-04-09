@@ -1,3 +1,4 @@
+const { execPath } = require('process')
 const request = require('supertest')
 
 const {
@@ -65,16 +66,17 @@ describe('Stateless data import', () => {
       .send(reqBody)
     expect(response.status).toEqual(200)
     const importedData = response.body.data
-
-    expect(JSON.parse(importedData)).toEqual({ whateverwillbe: 'willbe', quesera: 'sera' })
+    expect(importedData).toEqual({ whateverwillbe: 'willbe', quesera: 'sera' })
   }, TIMEOUT)
 
   test('Should import raw xml data', async () => {
     const reqBody = {
-      type: 'HTTP',
-      parameters: {
-        location: MOCK_SERVER_URL + '/xml',
-        encoding: 'UTF-8'
+      protocol: {
+        type: 'HTTP',
+        parameters: {
+          location: MOCK_SERVER_URL + '/xml',
+          encoding: 'UTF-8'
+        }
       }
     }
 
@@ -108,8 +110,7 @@ describe('Stateless data import', () => {
       .send(reqBody)
     expect(response.status).toEqual(200)
     const importedData = response.body.data
-
-    expect(JSON.parse(importedData)).toEqual({ from: 'Rick', to: 'Morty' })
+    expect(importedData).toEqual({ from: 'Rick', to: 'Morty' })
   }, TIMEOUT)
 
   test('Should import and format csv data', async () => {
@@ -147,7 +148,7 @@ describe('Stateless data import', () => {
         col3: 'val23'
       }]
 
-    expect(JSON.parse(importedData)).toEqual(expected)
+    expect(importedData).toEqual(expected)
   }, TIMEOUT)
 
   test('Should return 400 BAD_REQUEST for unsupported protocol [POST /preview]', async () => {
