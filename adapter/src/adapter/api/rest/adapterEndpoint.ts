@@ -8,6 +8,7 @@ import { Format } from '../../model/enum/Format';
 import { AdapterService, adapterService } from '../../services/adapterService';
 import { FormatConfig } from '../../model/FormatConfig';
 import { Protocol } from '../../model/enum/Protocol';
+import { ImporterParameterError } from '../../model/exceptions/ImporterParameterError';
 
 
 const APP_VERSION = "0.0.1"
@@ -53,14 +54,38 @@ export class AdapterEndpoint {
       res.status(400).json({ errors: validator.getErrors() });
       return;
     }
+    // Check protocol type
+    let protocolType = AdapterEndpoint.getProtocol(req.body.protocol.type)
+    if(protocolType === "unsupported"){
+      res.status(400).send("Protocol " + req.body.protocol.type + " not supported")
+      return;
+    }
+    let protocolConfigObj: ProtocolConfig = {protocol: new Protocol(protocolType), parameters: req.body.protocol.parameters}
 
-    let protocolConfigObj: ProtocolConfig = {protocol: new Protocol(Protocol.HTTP), parameters: req.body.protocol.parameters}
-    let format = new Format(AdapterEndpoint.getFormat(req.body.format.type))
+    // Check format type
+    let formatType = AdapterEndpoint.getFormat(req.body.format.type)
+    if(formatType === "unsupported"){
+      res.status(400).send("Format " + req.body.format.type + " not supported")
+      return;
+    }
+
+    // Check location (???)
+
+    let format = new Format(formatType)
     let formatConfigObj: FormatConfig = {format: format, parameters: req.body.format.parameters}
-
     let adapterConfig:AdapterConfig = {protocolConfig: protocolConfigObj, formatConfig: formatConfigObj}
     console.log(adapterConfig)
-    let returnDataImportResponse = await AdapterService.getInstance().executeJob(adapterConfig);
+
+    let returnDataImportResponse = null
+    try{
+      returnDataImportResponse = await AdapterService.getInstance().executeJob(adapterConfig);
+    }catch(e){
+      if(e instanceof ImporterParameterError){
+        res.status(400).send(e.message)
+        return;
+      }
+    }
+
     res.status(200).send(returnDataImportResponse);
   };
 
@@ -132,7 +157,18 @@ export class AdapterEndpoint {
         return Format.XML;
      }
       default: {
-         throw Error();
+         return "unsupported";
+      }
+   }
+  }
+
+  static getProtocol(type: any): any {
+    switch(type) {
+      case "HTTP": {
+         return Protocol.HTTP;
+      }
+      default: {
+        return "unsupported"
       }
    }
   }
