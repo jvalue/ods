@@ -22,7 +22,7 @@ export class XmlInterpreter extends Interpreter{
 
   // TODO @Georg check if this package can be used..
   override doInterpret(data: string, parameters: Record<string, unknown>): Promise<string> {
-    var parser = new xml2js.Parser({explicitArray: false});
+    const parser = new xml2js.Parser({explicitArray: false});
      
     return parser.parseStringPromise(data).then(function (result:any) {
        // `result` is a JavaScript object

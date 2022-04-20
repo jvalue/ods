@@ -15,7 +15,7 @@ export abstract class Importer {
 
   async fetch(parameters:Record<string, unknown> ): Promise<string> { //throws ImporterParameterException
       this.validateParameters(parameters);
-      let x = await this.doFetch(parameters);
+      const x = await this.doFetch(parameters);
       return x;
       //return JSON.stringify(x);
   }
@@ -30,13 +30,13 @@ export abstract class Importer {
     let illegalArguments: boolean = false;
     let illegalArgumentsMessage: string = "";
 
-    let possibleParameters: Array<ImporterParameterDescription> = this.getAvailableParameters();
+    const possibleParameters: Array<ImporterParameterDescription> = this.getAvailableParameters();
 
     let unnecessaryArguments = [];
-    let names = possibleParameters.map(a => a.name);
+    const names = possibleParameters.map(a => a.name);
     const keys = Object.keys(inputParameters);
 
-    for (let entry of keys) {
+    for (const entry of keys) {
       if(!names.includes(entry)) {
         unnecessaryArguments.push(entry);
       }
@@ -44,14 +44,14 @@ export abstract class Importer {
 
     if(unnecessaryArguments.length > 0){
       illegalArguments = true;
-      for(let argument of unnecessaryArguments){
+      for(const argument of unnecessaryArguments){
         illegalArgumentsMessage += argument + " is not needed by importer \n"
       }
     }
-    let requiredParameters = this.getRequiredParameters()
-    for (let requiredParameter of requiredParameters){
+    const requiredParameters = this.getRequiredParameters()
+    for (const requiredParameter of requiredParameters){
       // TODO is that OK?
-      let checkType = (inputParameters[requiredParameter.name] as any).constructor.name
+      const checkType = (inputParameters[requiredParameter.name] as any).constructor.name
       if (inputParameters[requiredParameter.name] == null){
         illegalArguments = true;
         illegalArgumentsMessage = illegalArgumentsMessage + this.type + "importer requires parameter " + requiredParameter.name + "\n";

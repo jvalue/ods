@@ -21,8 +21,8 @@ export abstract class Interpreter {
     let illegalArguments: boolean = false;
     let illegalArgumentsMessage: string = "";
     
-    for (let requiredParameter of this.getAvailableParameters()){
-      let param = (inputParameters[requiredParameter.name] as InterpreterParameterDescription)
+    for (const requiredParameter of this.getAvailableParameters()){
+      const param = (inputParameters[requiredParameter.name] as InterpreterParameterDescription)
       if (param == null){
         illegalArguments = true;
         illegalArgumentsMessage = illegalArgumentsMessage + this.type + "interpreter requires parameter " + requiredParameter.name + "\n";

@@ -55,15 +55,15 @@ export class AdapterEndpoint {
       return;
     }
     // Check protocol type
-    let protocolType = AdapterEndpoint.getProtocol(req.body.protocol.type)
+    const protocolType = AdapterEndpoint.getProtocol(req.body.protocol.type)
     if(protocolType === "unsupported"){
       res.status(400).send("Protocol " + req.body.protocol.type + " not supported")
       return;
     }
-    let protocolConfigObj: ProtocolConfig = {protocol: new Protocol(protocolType), parameters: req.body.protocol.parameters}
+    const protocolConfigObj: ProtocolConfig = {protocol: new Protocol(protocolType), parameters: req.body.protocol.parameters}
 
     // Check format type
-    let formatType = AdapterEndpoint.getFormat(req.body.format.type)
+    const formatType = AdapterEndpoint.getFormat(req.body.format.type)
     if(formatType === "unsupported"){
       res.status(400).send("Format " + req.body.format.type + " not supported")
       return;
@@ -71,9 +71,9 @@ export class AdapterEndpoint {
 
     // Check location (???)
 
-    let format = new Format(formatType)
-    let formatConfigObj: FormatConfig = {format: format, parameters: req.body.format.parameters}
-    let adapterConfig:AdapterConfig = {protocolConfig: protocolConfigObj, formatConfig: formatConfigObj}
+    const format = new Format(formatType)
+    const formatConfigObj: FormatConfig = {format: format, parameters: req.body.format.parameters}
+    const adapterConfig:AdapterConfig = {protocolConfig: protocolConfigObj, formatConfig: formatConfigObj}
     console.log(adapterConfig)
 
     let returnDataImportResponse = null
@@ -99,8 +99,8 @@ export class AdapterEndpoint {
       res.status(400).json({ errors: validator.getErrors() });
       return;
     }
-    let protocolConfigObj: ProtocolConfig = {protocol: new Protocol(Protocol.HTTP), parameters: req.body.protocol.parameters}
-    let returnDataImportResponse = await AdapterService.getInstance().executeRawJob(protocolConfigObj);
+    const protocolConfigObj: ProtocolConfig = {protocol: new Protocol(Protocol.HTTP), parameters: req.body.protocol.parameters}
+    const returnDataImportResponse = await AdapterService.getInstance().executeRawJob(protocolConfigObj);
     res.status(200).send(returnDataImportResponse);
   };
 
@@ -113,7 +113,7 @@ export class AdapterEndpoint {
     res: express.Response,
   ): Promise<void> => {
     try {
-      let interpreters = AdapterService.getInstance().getAllFormats();
+      const interpreters = AdapterService.getInstance().getAllFormats();
       res.setHeader("Content-Type", "application/json")
       res.status(200).json(interpreters);
     } catch (e) {
@@ -130,7 +130,7 @@ export class AdapterEndpoint {
     res: express.Response,
   ): Promise<void> => {
     try {
-          let protocols = AdapterService.getInstance().getAllProtocols();
+          const protocols = AdapterService.getInstance().getAllProtocols();
           res.status(200).json(protocols);
         } catch (e) {
           res.status(500).send('Error finding protocols');

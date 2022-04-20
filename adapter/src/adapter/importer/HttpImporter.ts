@@ -27,7 +27,7 @@ export class HttpImporter extends Importer {
 
     override validateParameters(inputParameters: Record<string, unknown>): void {
         super.validateParameters(inputParameters);
-        let encoding: string = inputParameters.encoding as string;
+        const encoding: string = inputParameters.encoding as string;
 
         // TODO CHECK IF ENCODING ARE WRITTEN CORRECT
         if (encoding !== "ISO-8859-1" && encoding !== "US-ASCII"  && encoding !== "UTF-8") {

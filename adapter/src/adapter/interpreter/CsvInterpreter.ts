@@ -62,7 +62,7 @@ export class CsvInterpreter extends Interpreter {
 
   override validateParameters(inputParameters: Record<string, unknown>): void {
       super.validateParameters(inputParameters);
-      let lineSeparator: string = inputParameters.lineSeparator as string;
+      const lineSeparator: string = inputParameters.lineSeparator as string;
 
       if (lineSeparator !== "\n" && lineSeparator !== "\r" && lineSeparator !== "\r\n") {
         throw new Error(this.getType() + " interpreter requires parameter lineSeparator to have" +
