@@ -39,7 +39,8 @@ export class XmlInterpreter extends Interpreter {
       updatedResult[key] = value;
     }
     return new Promise(function (resolve) {
-      resolve(updatedResult);
+      // TODO we can not stringify here -> makes \ in the json result
+      resolve(JSON.stringify(updatedResult));
     });
   }
 
