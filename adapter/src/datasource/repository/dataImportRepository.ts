@@ -6,16 +6,15 @@ const knex = require('knex')({
     user: 'adapterservice',
     password: 'admin',
     database: 'adapterservice',
-    asyncStackTraces: true
-  }
+    asyncStackTraces: true,
+  },
 });
 export class DataImportRepository {
-
   async getMetaDataImportByDatasource(datasourceId: string) {
-    return  await knex
+    return await knex
       .select('id', 'timestamp', 'health', 'error_messages')
       .from('public.data_import')
-      .where('datasource_id', datasourceId)
+      .where('datasource_id', datasourceId);
   }
 
   async getLatestMetaDataImportByDatasourceId(id: string) {
@@ -27,11 +26,11 @@ export class DataImportRepository {
   }
 
   async getLatestDataImportByDatasourceId(id: string) {
-    return await  knex
+    return await knex
       .select('data')
       .from('public.data_import')
       .where('datasource_id', id)
-      .orderBy('timestamp', 'desc')
+      .orderBy('timestamp', 'desc');
   }
 
   async getMetadataForDataImport(datasourceId: string, dataImportId: string) {
@@ -39,14 +38,14 @@ export class DataImportRepository {
       .select('id', 'timestamp', 'health', 'error_messages')
       .from('public.data_import')
       .where('datasource_id', datasourceId)
-      .andWhere('id', dataImportId)
+      .andWhere('id', dataImportId);
   }
 
   async getDataFromDataImport(datasourceId: string, dataImportId: string) {
-   return  await knex
+    return await knex
       .select('data')
       .from('public.data_import')
       .where('datasource_id', datasourceId)
-      .andWhere('id', dataImportId)
+      .andWhere('id', dataImportId);
   }
 }

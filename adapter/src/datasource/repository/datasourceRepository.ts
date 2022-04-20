@@ -1,5 +1,6 @@
-import {KnexHelper} from "./knexHelper";
-import {DatasourceInsertStatement} from "../model/DatasourceInsertStatement";
+import { DatasourceInsertStatement } from '../model/DatasourceInsertStatement';
+
+import { KnexHelper } from './knexHelper';
 
 const knex = require('knex')({
   client: 'pg',
@@ -9,24 +10,17 @@ const knex = require('knex')({
     user: 'adapterservice',
     password: 'admin',
     database: 'adapterservice',
-    asyncStackTraces: true
-  }
+    asyncStackTraces: true,
+  },
 });
 
 export class DatasourceRepository {
-
-
   async getAllDataSources() {
-    return await knex
-      .select()
-      .from('public.datasource')
+    return await knex.select().from('public.datasource');
   }
 
   async getDataSourceById(id: any) {
-    return await knex
-      .select()
-      .from('public.datasource')
-      .where('id', id);
+    return await knex.select().from('public.datasource').where('id', id);
   }
 
   async addDatasource(insertStatement: DatasourceInsertStatement) {
@@ -34,22 +28,25 @@ export class DatasourceRepository {
       .insert(insertStatement)
       .returning('id')
       .then(function (id: any) {
-        console.log(id)
-        console.log("neuer code geht")
+        console.log(id);
+        console.log('neuer code geht');
         return knex
           .select()
           .from('public.datasource')
           .where('id', id[0].id)
           .then(function (result: any) {
             return KnexHelper.createDatasourceFromResult(result);
-          })
+          });
       })
       .catch(function (err: any) {
-        console.log(err)
-      })
+        console.log(err);
+      });
   }
 
-  async updateDatasource(insertStatement: DatasourceInsertStatement, datasourceId: string) {
+  async updateDatasource(
+    insertStatement: DatasourceInsertStatement,
+    datasourceId: string,
+  ) {
     return await knex('public.datasource')
       .where('id', datasourceId)
       .update(insertStatement)
@@ -59,13 +56,13 @@ export class DatasourceRepository {
           .from('public.datasource')
           .where('id', datasourceId)
           .then(function (result: any) {
-            console.log(result)
+            console.log(result);
             return KnexHelper.createDatasourceFromResult(result);
-          })
+          });
       })
       .catch(function (err: any) {
-        console.log(err)
-      })
+        console.log(err);
+      });
   }
 
   async deleteDatasourceById(datasourceId: string) {
@@ -79,8 +76,6 @@ export class DatasourceRepository {
     return await knex
       .delete()
       .from('public.datasource')
-      .where('id', '!=', "-1")
+      .where('id', '!=', '-1');
   }
-
-
 }

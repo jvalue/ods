@@ -1,5 +1,5 @@
 export interface OutboxEvent {
-  id:any,
-  routing_key:string,
-  payload:any
+  id: any;
+  routing_key: string;
+  payload: any;
 }

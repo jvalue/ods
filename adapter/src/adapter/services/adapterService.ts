@@ -15,8 +15,6 @@ export class AdapterService {
    */
   private static instance: AdapterService;
 
-  constructor() {}
-
   static getInstance(): AdapterService {
     if (!AdapterService.instance) {
       AdapterService.instance = new AdapterService();
