@@ -1,5 +1,3 @@
-import { generateKeySync } from 'crypto';
-
 import { ImporterParameterError } from '../model/exceptions/ImporterParameterError';
 
 import { ImporterParameterDescription } from './ImporterParameterDescription';

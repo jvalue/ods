@@ -1,10 +1,6 @@
-import { stringify } from 'querystring';
-
 import { validators } from '@jvalue/node-dry-basics';
-import { JsonAlias, JsonClassType, JsonProperty } from 'jackson-js';
 
-import { AdapterConfig } from './AdapterConfig';
-import { AdapterConfigDTO, ProtocolConfigDTO } from './EndpointDTOs';
+import { AdapterConfigDTO } from './EndpointDTOs';
 import { Protocol } from './enum/Protocol';
 
 export interface ProtocolConfig {

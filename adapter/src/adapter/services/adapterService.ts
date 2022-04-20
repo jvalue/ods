@@ -1,5 +1,3 @@
-import { JsonRawValue } from 'jackson-js';
-
 import { Importer } from '../importer/Importer';
 import { Interpreter } from '../interpreter/Interpreter';
 import { AdapterConfig } from '../model/AdapterConfig';

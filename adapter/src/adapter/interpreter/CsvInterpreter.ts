@@ -63,8 +63,8 @@ export class CsvInterpreter extends Interpreter {
         // Todo need to test if this works
         if (
           skipFirstDataRow &&
-          ((index == 0 && !firstRowAsHeader) ||
-            (index == 1 && firstRowAsHeader))
+          ((index === 0 && !firstRowAsHeader) ||
+            (index === 1 && firstRowAsHeader))
         ) {
           // Skip First Row
         } else {
