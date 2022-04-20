@@ -25,19 +25,26 @@ export class XmlInterpreter extends Interpreter {
     data: string,
     parameters: Record<string, unknown>,
   ): Promise<string> {
-    const parser = new xml2js.Parser({ explicitArray: false });
+    data =
+      '<?xml version="1.0" encoding="UTF-8"?>' +
+      '<root><from>Rick</from><to>Morty</to></root>' +
+      '<rasdasd><s>Rick</s><t>Morty</t></rasdasd>';
 
-    /* Const result: ????? = await parser.parseStringPromise(data);
-    return result.root;*/
+    const result = this.parseXmlToJson(data);
+    return new Promise(function (resolve) {
+      resolve(JSON.stringify(result));
+    });
+  }
 
-    return parser
-      .parseStringPromise(data)
-      .then(function (result: any) {
-        // `result` is a JavaScript object
-        return result.root;
-      })
-      .catch(function (err: any) {
-        throw err;
-      });
+  parseXmlToJson(xml: string): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
+    for (const res of xml.matchAll(
+      /(?:<(\w*)(?:\s[^>]*)*>)((?:(?!<\1).)*)(?:<\/\1>)|<(\w*)(?:\s*)*\/>/gm,
+    )) {
+      const key: string = res[1] || res[3];
+      const value = res[2] && this.parseXmlToJson(res[2]);
+      json[key] = (value && Object.keys(value).length ? value : res[2]) || null;
+    }
+    return json;
   }
 }

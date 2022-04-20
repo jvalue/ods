@@ -107,13 +107,10 @@ export class AdapterEndpoint {
   };
 
   /*
-    Returns Collection of Importer
+    Returns Collection of Interpreter
   } */
 
-  handleGetFormat = async (
-    req: express.Request,
-    res: express.Response,
-  ): Promise<void> => {
+  handleGetFormat = (req: express.Request, res: express.Response): void => {
     const interpreters = AdapterService.getInstance().getAllFormats();
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json(interpreters);
@@ -122,10 +119,7 @@ export class AdapterEndpoint {
   /*
     Returns Collection of Importer
   */
-  handleGetProtocols = async (
-    req: express.Request,
-    res: express.Response,
-  ): Promise<void> => {
+  handleGetProtocols = (req: express.Request, res: express.Response): void => {
     try {
       const protocols = AdapterService.getInstance().getAllProtocols();
       res.status(200).json(protocols);
@@ -134,10 +128,10 @@ export class AdapterEndpoint {
     }
   };
 
-  handleGetApplicationVersion = async (
+  handleGetApplicationVersion = (
     req: express.Request,
     res: express.Response,
-  ): Promise<void> => {
+  ): void => {
     res.setHeader('Content-Type', 'text/plain');
     res.status(200).send(APP_VERSION);
   };
