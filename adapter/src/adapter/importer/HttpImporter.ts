@@ -68,9 +68,8 @@ export class HttpImporter extends Importer {
   }
 
   override async doFetch(parameters: Record<string, unknown>): Promise<string> {
-    const uri = parameters.location;
-    console.log(parameters);
-    const encoding = parameters.encoding;
+    const uri = parameters.location as string;
+    const encoding = parameters.encoding as string;
     // TODO see if encoding from response is good
     return axios({
       method: 'get',
@@ -79,7 +78,7 @@ export class HttpImporter extends Importer {
     })
       .then(function (response: any) {
         console.log(response.data);
-        return response.data;
+        return response.data as string;
       })
       .catch(function (error: any) {
         console.error(error);

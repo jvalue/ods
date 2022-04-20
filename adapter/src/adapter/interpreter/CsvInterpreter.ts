@@ -40,7 +40,7 @@ export class CsvInterpreter extends Interpreter {
     return this.parameters;
   }
 
-  override doInterpret(
+  override async doInterpret(
     data: string,
     parameters: Record<string, unknown>,
   ): Promise<string> {
@@ -51,8 +51,12 @@ export class CsvInterpreter extends Interpreter {
     const firstRowAsHeader: boolean = parameters.firstRowAsHeader as boolean; // True = With header, False = WithoutHeader
     const skipFirstDataRow: boolean = parameters.skipFirstDataRow as boolean;
 
+    /*return new Promise(function (resolve) {
+      resolve(data);
+    });*/
+
     const json: any[] = [];
-    return csv({
+    const cssv = await csv({
       noheader: !firstRowAsHeader, // Be Careful: Need to Invert the boolean here
       output: 'json',
       delimiter: columnSeparator,
@@ -71,11 +75,15 @@ export class CsvInterpreter extends Interpreter {
           json.push(csvRow);
         }
       })
-      .on('done', (error: any) => {
+      /*.on('done', (error: any) => {
         return new Promise(function (resolve, reject) {
           resolve(JSON.stringify(json));
         });
+      });*/
+      return new Promise(function (resolve, reject) {
+        resolve(JSON.stringify(json));
       });
+
   }
 
   override validateParameters(inputParameters: Record<string, unknown>): void {
