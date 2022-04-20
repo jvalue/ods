@@ -1,8 +1,7 @@
-import { AdapterError } from "./AdapterError";
+import { AdapterError } from './AdapterError';
 
-export class InterpreterParameterError extends AdapterError{
-
-    constructor(msg: string){
-        super(msg);
-    }
+export class InterpreterParameterError extends AdapterError {
+  constructor(msg: string) {
+    super(msg);
+  }
 }

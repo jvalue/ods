@@ -33,17 +33,14 @@ export class AdapterEndpoint {
     res: express.Response,
   ): Promise<void> => {
     const validator = new AdapterConfigValidator();
-    const adapterconfigforValidator: unknown = req.body;
-    if (!validator.validate(adapterconfigforValidator)) {
+    if (!validator.validate(req.body)) {
       res.status(400).json({ errors: validator.getErrors() });
       return;
     }
     // Check protocol type
     let protocolType: Importer;
     try {
-      protocolType = AdapterEndpoint.getProtocol(
-        adapterconfigforValidator.protocol.type,
-      );
+      protocolType = AdapterEndpoint.getProtocol(req.body.protocol.type);
     } catch (e) {
       res.status(400).send('Protocol not supported');
       return;
@@ -51,15 +48,13 @@ export class AdapterEndpoint {
 
     const protocolConfigObj: ProtocolConfig = {
       protocol: new Protocol(protocolType),
-      parameters: adapterconfigforValidator.protocol.parameters,
+      parameters: req.body.protocol.parameters,
     };
 
     // Check format type
     let formatType: Interpreter;
     try {
-      formatType = AdapterEndpoint.getFormat(
-        adapterconfigforValidator.format.type,
-      );
+      formatType = AdapterEndpoint.getFormat(req.body.format.type);
     } catch (e) {
       res.status(400).send('Format not supported');
       return;
@@ -69,7 +64,7 @@ export class AdapterEndpoint {
     const format = new Format(formatType);
     const formatConfigObj: FormatConfig = {
       format: format,
-      parameters: adapterconfigforValidator.format.parameters,
+      parameters: req.body.format.parameters,
     };
 
     const adapterConfig: AdapterConfig = {
@@ -104,7 +99,7 @@ export class AdapterEndpoint {
     }
     const protocolConfigObj: ProtocolConfig = {
       protocol: new Protocol(Protocol.HTTP),
-      parameters: req.body.parameters,
+      parameters: req.body.protocol.parameters,
     };
     const returnDataImportResponse =
       await AdapterService.getInstance().executeRawJob(protocolConfigObj);
@@ -119,14 +114,9 @@ export class AdapterEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    try {
-      const interpreters = AdapterService.getInstance().getAllFormats();
-      res.setHeader('Content-Type', 'application/json');
-      res.status(200).json(interpreters);
-    } catch (e) {
-      // Res.status(500).send('Error finding formats');
-      throw e;
-    }
+    const interpreters = AdapterService.getInstance().getAllFormats();
+    res.setHeader('Content-Type', 'application/json');
+    res.status(200).json(interpreters);
   };
 
   /*

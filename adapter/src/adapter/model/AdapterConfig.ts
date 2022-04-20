@@ -12,7 +12,7 @@ export interface AdapterConfig {
 export class AdapterConfigValidator {
   private errors: string[] = [];
 
-  validate(request: unknown): request is AdapterConfigDTO {
+  validate(request: AdapterConfigDTO): request is AdapterConfigDTO {
     this.errors = [];
     if (!validators.isObject(request)) {
       this.errors.push("'AdapterConfig' must be an object");

@@ -12,13 +12,3 @@ export interface FormatConfigDTO {
   type: string;
   parameters: Record<string, unknown>;
 }
-
-/* Export interface FormatParameterDTO {
-  location: string;
-  encoding: string;
-}
-
-export interface ProtocolParameterDTO {
-  type: string;
-  parameters: Record<string, unknown>;
-}*/

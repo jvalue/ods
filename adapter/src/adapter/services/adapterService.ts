@@ -1,63 +1,65 @@
-import { JsonRawValue } from "jackson-js";
-import { Importer } from "../importer/Importer";
-import { Interpreter } from "../interpreter/Interpreter";
-import { AdapterConfig } from "../model/AdapterConfig";
-import { DataImportResponse } from "../model/DataImportResponse";
-import { Format } from "../model/enum/Format";
-import { Protocol } from "../model/enum/Protocol";
-import { FormatConfig } from "../model/FormatConfig";
+import { JsonRawValue } from 'jackson-js';
 
-import { ProtocolConfig } from "../model/ProtocolConfig";
+import { Importer } from '../importer/Importer';
+import { Interpreter } from '../interpreter/Interpreter';
+import { AdapterConfig } from '../model/AdapterConfig';
+import { DataImportResponse } from '../model/DataImportResponse';
+import { Format } from '../model/enum/Format';
+import { Protocol } from '../model/enum/Protocol';
+import { FormatConfig } from '../model/FormatConfig';
+import { ProtocolConfig } from '../model/ProtocolConfig';
 
 export class AdapterService {
-    /**
-     * @description Create an instance of AdapterService
-     */
-    private static instance: AdapterService;
+  /**
+   * @description Create an instance of AdapterService
+   */
+  private static instance: AdapterService;
 
-    constructor () {
+  constructor() {}
+
+  static getInstance(): AdapterService {
+    if (!AdapterService.instance) {
+      AdapterService.instance = new AdapterService();
     }
 
-    public static getInstance(): AdapterService {
-      if (!AdapterService.instance) {
-          AdapterService.instance = new AdapterService();
-      }
+    return AdapterService.instance;
+  }
 
-      return AdapterService.instance;
-    }
+  // To Implement
+  getAllFormats(): Array<Interpreter> {
+    return [Format.CSV, Format.JSON, Format.XML];
+  }
 
+  getAllProtocols(): Array<Importer> {
+    return [Protocol.HTTP];
+  }
 
-    // To Implement
-    public getAllFormats(): Array<Interpreter> {
-      return [Format.CSV, Format.JSON, Format.XML]
-    }
+  async executeJob(_adapterConfig: AdapterConfig): Promise<DataImportResponse> {
+    const rawData = await this.executeProtocol(_adapterConfig.protocolConfig);
+    const result = await this.executeFormat(
+      rawData,
+      _adapterConfig.formatConfig,
+    );
+    const returnValue: DataImportResponse = { data: result };
+    return returnValue;
+  }
 
+  async executeRawJob(
+    _protocolConfig: ProtocolConfig,
+  ): Promise<DataImportResponse> {
+    const value = await this.executeProtocol(_protocolConfig);
+    const returnValue: DataImportResponse = { data: value };
+    return returnValue;
+  }
 
-    public getAllProtocols(): Array<Importer> {
-      return [Protocol.HTTP]
-     }
+  async executeProtocol(config: ProtocolConfig): Promise<string> {
+    const importer = config.protocol.getImporter();
+    return await importer.fetch(config.parameters);
+  }
 
-    public async executeJob(_adapterConfig: AdapterConfig): Promise<DataImportResponse> {
-      const rawData = await this.executeProtocol(_adapterConfig.protocolConfig);
-      const result = await this.executeFormat(rawData, _adapterConfig.formatConfig);
-      const returnValue: DataImportResponse = {data: result};
-      return returnValue;
-    }
-
-    public async executeRawJob(_protocolConfig: ProtocolConfig): Promise<DataImportResponse> {
-      const value = await this.executeProtocol(_protocolConfig)
-      const returnValue: DataImportResponse = {data: value};
-      return returnValue;
-    }
-
-    public async executeProtocol (config: ProtocolConfig): Promise<string> {
-      const importer = config.protocol.getImporter();
-      return await importer.fetch(config.parameters)
-    }
-  
-    public async executeFormat(rawData: string, config: FormatConfig): Promise<string> {
-      const interpreter = config.format.getInterpreter();
-      return await interpreter.interpret(rawData, config.parameters);
-    }
+  async executeFormat(rawData: string, config: FormatConfig): Promise<string> {
+    const interpreter = config.format.getInterpreter();
+    return await interpreter.interpret(rawData, config.parameters);
+  }
 }
 export const adapterService = AdapterService.getInstance();
