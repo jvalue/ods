@@ -3,15 +3,14 @@ import { Server } from 'http';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
+
 import { AdapterEndpoint } from './adapter/api/rest/adapterEndpoint';
+import { DataImportEndpoint } from './datasource/api/rest/dataImportEndpoint';
 import { DataSourceEndpoint } from './datasource/api/rest/dataSourceEndpoint';
-import { AdapterService } from './adapter/services/adapterService';
-import {DataImportEndpoint} from "./datasource/api/rest/dataImportEndpoint";
 
 export const port = 8080;
 const API_VERSION = '0.0.1';
 export let server: Server | undefined;
-
 
 // Await will be needed in the future, so for now ignore this linter issue and remove the disable later
 // eslint-disable-next-line @typescript-eslint/require-await
