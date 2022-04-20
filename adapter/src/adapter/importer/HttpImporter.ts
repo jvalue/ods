@@ -71,18 +71,12 @@ export class HttpImporter extends Importer {
     const uri = parameters.location as string;
     const encoding = parameters.encoding as string;
     // TODO see if encoding from response is good
-    return axios({
-      method: 'get',
-      url: uri,
-      responseEncoding: encoding,
-    })
-      .then(function (response: any) {
-        console.log(response.data);
-        return response.data as string;
-      })
-      .catch(function (error: any) {
-        console.error(error);
-        throw new ImporterParameterError('Could not Fetch from URI:' + uri);
-      });
+    try {
+      const result = await axios.get(uri, { responseEncoding: encoding });
+      return result.data as string;
+    } catch (e) {
+      console.error(e);
+      throw new ImporterParameterError('Could not Fetch from URI:' + uri);
+    }
   }
 }

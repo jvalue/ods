@@ -27,14 +27,14 @@ export class XmlInterpreter extends Interpreter {
   ): Promise<string> {
     const parser = new xml2js.Parser({ explicitArray: false });
 
+    /* Const result: ????? = await parser.parseStringPromise(data);
+    return result.root;*/
+
     return parser
       .parseStringPromise(data)
       .then(function (result: any) {
         // `result` is a JavaScript object
-        // Convert it to a JSON string
         return result.root;
-        // Const json = JSON.stringify(result.root);
-        // Return json;
       })
       .catch(function (err: any) {
         throw err;

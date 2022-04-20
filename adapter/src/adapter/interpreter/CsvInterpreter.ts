@@ -44,26 +44,22 @@ export class CsvInterpreter extends Interpreter {
     data: string,
     parameters: Record<string, unknown>,
   ): Promise<string> {
-    data = 'col1,col2,col3\n' + 'val11,val12,val13\n' + 'val21,val22,val23';
+    // Data = 'col1,col2,col3\n' + 'val11,val12,val13\n' + 'val21,val22,val23';
 
     const columnSeparator = (parameters.columnSeparator as string).charAt(0);
     const lineSeparator: string = parameters.lineSeparator as string;
     const firstRowAsHeader: boolean = parameters.firstRowAsHeader as boolean; // True = With header, False = WithoutHeader
     const skipFirstDataRow: boolean = parameters.skipFirstDataRow as boolean;
 
-    /*return new Promise(function (resolve) {
-      resolve(data);
-    });*/
-
-    const json: any[] = [];
-    const cssv = await csv({
+    const json: string[] = [];
+    await csv({
       noheader: !firstRowAsHeader, // Be Careful: Need to Invert the boolean here
       output: 'json',
       delimiter: columnSeparator,
       eol: lineSeparator,
     })
       .fromString(data)
-      .subscribe((csvRow: any, index: any) => {
+      .subscribe((csvRow: string, index: number) => {
         // Todo need to test if this works
         if (
           skipFirstDataRow &&
@@ -74,16 +70,10 @@ export class CsvInterpreter extends Interpreter {
         } else {
           json.push(csvRow);
         }
-      })
-      /*.on('done', (error: any) => {
-        return new Promise(function (resolve, reject) {
-          resolve(JSON.stringify(json));
-        });
-      });*/
-      return new Promise(function (resolve, reject) {
-        resolve(JSON.stringify(json));
       });
-
+    return new Promise(function (resolve) {
+      resolve(JSON.stringify(json));
+    });
   }
 
   override validateParameters(inputParameters: Record<string, unknown>): void {
