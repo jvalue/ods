@@ -110,7 +110,7 @@ describe('Stateless data import', () => {
       .send(reqBody)
     expect(response.status).toEqual(200)
     const importedData = response.body.data
-    expect(importedData).toEqual({ from: 'Rick', to: 'Morty' })
+    expect(JSON.parse(importedData)).toEqual({ from: 'Rick', to: 'Morty' })
   }, TIMEOUT)
 
   test('Should import and format csv data', async () => {
@@ -148,7 +148,7 @@ describe('Stateless data import', () => {
         col3: 'val23'
       }]
 
-    expect(importedData).toEqual(expected)
+    expect(JSON.parse(importedData)).toEqual(expected)
   }, TIMEOUT)
 
   test('Should return 400 BAD_REQUEST for unsupported protocol [POST /preview]', async () => {
