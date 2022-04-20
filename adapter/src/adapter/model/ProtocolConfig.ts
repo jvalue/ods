@@ -1,18 +1,22 @@
-import { Protocol } from "./enum/Protocol";
+import { stringify } from 'querystring';
+
 import { validators } from '@jvalue/node-dry-basics';
-import { stringify } from "querystring";
-import { JsonAlias, JsonClassType, JsonProperty } from "jackson-js";
+import { JsonAlias, JsonClassType, JsonProperty } from 'jackson-js';
+
+import { ProtocolConfigDTO } from './EndpointDTOs';
+import { Protocol } from './enum/Protocol';
 
 export interface ProtocolConfig {
-    protocol:Protocol;
-    parameters: Record<string, unknown>;
+  protocol: Protocol;
+  parameters: Record<string, unknown>;
 }
 
 export class ProtocolConfigValidator {
   private errors: string[] = [];
 
-  validate(request: unknown): request is ProtocolConfig {
+  validate(request: ProtocolConfigDTO): request is ProtocolConfigDTO {
     this.errors = [];
+
     if (!validators.isObject(request)) {
       this.errors.push("'ProtocolConfig' must be an object");
       return false;

@@ -71,7 +71,7 @@ export class AdapterEndpoint {
       format: format,
       parameters: adapterconfigforValidator.format.parameters,
     };
-    
+
     const adapterConfig: AdapterConfig = {
       protocolConfig: protocolConfigObj,
       formatConfig: formatConfigObj,
@@ -98,15 +98,13 @@ export class AdapterEndpoint {
     res: express.Response,
   ): Promise<void> => {
     const validator = new ProtocolConfigValidator();
-    const protcolConfigForValidator = req.body.protocol;
-
-    if (!validator.validate(protcolConfigForValidator)) {
+    if (!validator.validate(req.body)) {
       res.status(400).json({ errors: validator.getErrors() });
       return;
     }
     const protocolConfigObj: ProtocolConfig = {
       protocol: new Protocol(Protocol.HTTP),
-      parameters: req.body.protocol.parameters,
+      parameters: req.body.parameters,
     };
     const returnDataImportResponse =
       await AdapterService.getInstance().executeRawJob(protocolConfigObj);
