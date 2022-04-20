@@ -13,7 +13,6 @@ import { ImporterParameterError } from '../../model/exceptions/ImporterParameter
 
 const APP_VERSION = "0.0.1"
 export class AdapterEndpoint {
-  constructor() {}
 
   registerRoutes = (app: express.Application): void => {
     app.post('/preview', asyncHandler(this.handleExecuteDataImport));
@@ -56,7 +55,7 @@ export class AdapterEndpoint {
     }
     // Check protocol type
     const protocolType = AdapterEndpoint.getProtocol(req.body.protocol.type)
-    if(protocolType === "unsupported"){
+    if(protocolType === undefined){
       res.status(400).send("Protocol " + req.body.protocol.type + " not supported")
       return;
     }
@@ -64,7 +63,7 @@ export class AdapterEndpoint {
 
     // Check format type
     const formatType = AdapterEndpoint.getFormat(req.body.format.type)
-    if(formatType === "unsupported"){
+    if(formatType === undefined){
       res.status(400).send("Format " + req.body.format.type + " not supported")
       return;
     }
@@ -105,7 +104,7 @@ export class AdapterEndpoint {
   };
 
   /*
-    returns Collection of Importerj
+    returns Collection of Importer
   } */
 
   handleGetFormat = async (
@@ -157,7 +156,7 @@ export class AdapterEndpoint {
         return Format.XML;
      }
       default: {
-         return "unsupported";
+         return undefined;
       }
    }
   }
@@ -168,7 +167,7 @@ export class AdapterEndpoint {
          return Protocol.HTTP;
       }
       default: {
-        return "unsupported"
+        return undefined;
       }
    }
   }
