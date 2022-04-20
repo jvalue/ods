@@ -27,12 +27,19 @@ export class XmlInterpreter extends Interpreter {
   ): Promise<string> {
     data =
       '<?xml version="1.0" encoding="UTF-8"?>' +
-      '<root><from>Rick</from><to>Morty</to></root>' +
-      '<rasdasd><s>Rick</s><t>Morty</t></rasdasd>';
+      '<root><from>Rick</from><to>Morty</to>' +
+      '<rasdasd><s>Rick</s><t>Morty</t></rasdasd></root>';
 
     const result = this.parseXmlToJson(data);
+    const updatedResult: Record<string, unknown> = {};
+    const resultKey: Record<string, unknown> = result[
+      Object.keys(result)[0]
+    ] as Record<string, unknown>;
+    for (const [key, value] of Object.entries(resultKey)) {
+      updatedResult[key] = value;
+    }
     return new Promise(function (resolve) {
-      resolve(JSON.stringify(result));
+      resolve(updatedResult);
     });
   }
 
