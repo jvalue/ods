@@ -1,5 +1,3 @@
-import xml2js from 'xml2js';
-
 import { Interpreter } from './Interpreter';
 import { InterpreterParameterDescription } from './InterpreterParameterDescription';
 
@@ -29,7 +27,7 @@ export class XmlInterpreter extends Interpreter {
       '<root><from>Rick</from><to>Morty</to>' +
       '<rasdasd><s>Rick</s><t>Morty</t></rasdasd></root>';*/
 
-    const result = this.parseXmlToJson(data);
+    const result = this.convertXmlToJson(data);
     const updatedResult: Record<string, unknown> = {};
     const resultKey: Record<string, unknown> = result[
       Object.keys(result)[0]
@@ -42,15 +40,16 @@ export class XmlInterpreter extends Interpreter {
     });
   }
 
-  parseXmlToJson(xml: string): Record<string, unknown> {
-    const json: Record<string, unknown> = {};
-    for (const res of xml.matchAll(
+  convertXmlToJson(inputData: string): Record<string, unknown> {
+    const returnJson: Record<string, unknown> = {};
+    for (const result of inputData.matchAll(
       /(?:<(\w*)(?:\s[^>]*)*>)((?:(?!<\1).)*)(?:<\/\1>)|<(\w*)(?:\s*)*\/>/gm,
     )) {
-      const key: string = res[1] || res[3];
-      const value = res[2] && this.parseXmlToJson(res[2]);
-      json[key] = (value && Object.keys(value).length ? value : res[2]) || null;
+      const key: string = result[1] || result[3];
+      const value = result[2] && this.convertXmlToJson(result[2]);
+      returnJson[key] =
+        (value && Object.keys(value).length ? value : result[2]) || null;
     }
-    return json;
+    return returnJson;
   }
 }
