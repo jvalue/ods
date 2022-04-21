@@ -1,13 +1,17 @@
 import { Format } from './adapter/model/enum/Format';
 
-describe('doInterpretJsonFormatReturnsValidJSON', () => {
+describe('doInterpretXMLFormatReturnsValidJSON', () => {
   test('getFormat test', () => {
-    const jsonFormat = Format.JSON;
+    const xmlFormat = Format.XML;
     const data =
-      '"{"uuid":"47174d8f-1b8e-4599-8a59-b580dd55bc87","number":"48900237","shortname":"EITZE","longname":"EITZE","km":9.56,"agency":"VERDEN",' +
-      '"longitude":9.276769435375872,"latitude":52.90406544743417,"water":{"shortname":"ALLER","longname":"ALLER"}},"';
-    return jsonFormat.doInterpret(data, {}).then((res) => {
-      expect(res).toBe(data);
+      '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don\'t forget me this weekend!</body></note>';
+    return xmlFormat.doInterpret(data, {}).then((res) => {
+      expect(JSON.parse(res)).toEqual({
+        to: 'Tove',
+        from: 'Jani',
+        heading: 'Reminder',
+        body: "Don't forget me this weekend!",
+      });
     });
   });
 });
