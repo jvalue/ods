@@ -20,15 +20,14 @@ export class XmlInterpreter extends Interpreter {
     return this.parameters;
   }
 
-  // TODO @Georg check if this package can be used..
   override doInterpret(
     data: string,
     parameters: Record<string, unknown>,
   ): Promise<string> {
-    data =
+    /* Data =
       '<?xml version="1.0" encoding="UTF-8"?>' +
       '<root><from>Rick</from><to>Morty</to>' +
-      '<rasdasd><s>Rick</s><t>Morty</t></rasdasd></root>';
+      '<rasdasd><s>Rick</s><t>Morty</t></rasdasd></root>';*/
 
     const result = this.parseXmlToJson(data);
     const updatedResult: Record<string, unknown> = {};
@@ -39,7 +38,6 @@ export class XmlInterpreter extends Interpreter {
       updatedResult[key] = value;
     }
     return new Promise(function (resolve) {
-      // TODO we can not stringify here -> makes \ in the json result
       resolve(JSON.stringify(updatedResult));
     });
   }
