@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { Axios, AxiosError } from 'axios';
 
 import { ImporterParameterError } from '../model/exceptions/ImporterParameterError';
 
@@ -71,12 +71,16 @@ export class HttpImporter extends Importer {
     const uri = parameters.location as string;
     const encoding = parameters.encoding as string;
     // TODO see if encoding from response is good
-    try {
-      const result = await axios.get(uri, { responseEncoding: encoding });
-      return result.data as string;
-    } catch (e) {
-      console.error(e);
-      throw new ImporterParameterError('Could not Fetch from URI:' + uri);
-    }
+
+    const result = await axios
+      .get(uri, { responseEncoding: encoding })
+      .catch((error: AxiosError) => {
+        if (error.response) {
+          console.log(error.response);
+          throw new Error('Could not Fetch from URI:' + uri);
+        }
+        throw new ImporterParameterError('Could not Fetch from URI:' + uri);
+      });
+    return result.data as string;
   }
 }

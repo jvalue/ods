@@ -73,19 +73,19 @@ export class AdapterEndpoint {
     };
     console.log(adapterConfig);
 
-    let returnDataImportResponse = null;
     try {
-      returnDataImportResponse = await AdapterService.getInstance().executeJob(
-        adapterConfig,
-      );
+      const returnDataImportResponse =
+        await AdapterService.getInstance().executeJob(adapterConfig);
+      res.status(200).send(returnDataImportResponse);
     } catch (e) {
       if (e instanceof ImporterParameterError) {
         res.status(400).send(e.message);
         return;
       }
+      if (e instanceof Error) {
+        res.status(500).send(e.message);
+      }
     }
-
-    res.status(200).send(returnDataImportResponse);
   };
 
   handleExecuteRawPreview = async (
@@ -101,9 +101,19 @@ export class AdapterEndpoint {
       protocol: new Protocol(Protocol.HTTP),
       parameters: req.body.protocol.parameters,
     };
-    const returnDataImportResponse =
-      await AdapterService.getInstance().executeRawJob(protocolConfigObj);
-    res.status(200).send(returnDataImportResponse);
+    try {
+      const returnDataImportResponse =
+        await AdapterService.getInstance().executeRawJob(protocolConfigObj);
+      res.status(200).send(returnDataImportResponse);
+    } catch (e) {
+      if (e instanceof ImporterParameterError) {
+        res.status(400).send(e.message);
+        return;
+      }
+      if (e instanceof Error) {
+        res.status(500).send(e.message);
+      }
+    }
   };
 
   /*
