@@ -60,7 +60,6 @@ export class AdapterEndpoint {
       return;
     }
 
-    // Check location (???)
     const format = new Format(formatType);
     const formatConfigObj: FormatConfig = {
       format: format,
@@ -158,7 +157,7 @@ export class AdapterEndpoint {
         return Format.XML;
       }
       default: {
-        throw new Error('asdasd');
+        throw new Error('Format not found');
       }
     }
   }
@@ -169,7 +168,7 @@ export class AdapterEndpoint {
         return Protocol.HTTP;
       }
       default: {
-        throw new Error('asdasd');
+        throw new Error('Protocol not found');
       }
     }
   }

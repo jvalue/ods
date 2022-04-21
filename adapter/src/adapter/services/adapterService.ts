@@ -21,7 +21,6 @@ export class AdapterService {
     return AdapterService.instance;
   }
 
-  // To Implement
   getAllFormats(): Array<Interpreter> {
     return [Format.CSV, Format.JSON, Format.XML];
   }
