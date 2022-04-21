@@ -25,7 +25,7 @@ export class XmlInterpreter extends Interpreter {
     /* Data =
       '<?xml version="1.0" encoding="UTF-8"?>' +
       '<root><from>Rick</from><to>Morty</to>' +
-      '<rasdasd><s>Rick</s><t>Morty</t></rasdasd></root>';*/
+      '<rasdasd><s>Rick</s><t>Morty</t></rasdasd></root>';s*/
 
     const result = this.convertXmlToJson(data);
     const updatedResult: Record<string, unknown> = {};
