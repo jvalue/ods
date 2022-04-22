@@ -45,8 +45,8 @@ export abstract class Interpreter {
         illegalArgumentsMessage += argument + ' is not needed by importer \n';
       }
     }
-
-    for (const requiredParameter of this.getAvailableParameters()) {
+    const requiredParameters = this.getAvailableParameters();
+    for (const requiredParameter of requiredParameters) {
       const param = inputParameters[
         requiredParameter.name
       ] as InterpreterParameterDescription;
@@ -57,6 +57,18 @@ export abstract class Interpreter {
         illegalArgumentsMessage += 'interpreter requires parameter ';
         illegalArgumentsMessage += requiredParameter.name;
         illegalArgumentsMessage += '\n';
+        break;
+      }
+      const checkType = param.constructor.name;
+      if (checkType.toLowerCase() !== requiredParameter.type) {
+        illegalArguments = true;
+        illegalArgumentsMessage += this.type;
+        illegalArgumentsMessage += ' interpreter requires parameter ';
+        illegalArgumentsMessage += requiredParameter.name;
+        illegalArgumentsMessage += ' to be type ';
+        illegalArgumentsMessage += requiredParameter.type;
+        illegalArgumentsMessage += '\n';
+        break;
       }
     }
     if (illegalArguments) {

@@ -201,6 +201,54 @@ describe('validateParameters from CSV Interpreter', () => {
     interpreter.validateParameters(parameters);
   });
 
+  test('validateParameters with Parameter misses columnSeperator throws Exception', () => {
+    const interpreter: Interpreter = Format.CSV;
+    const parameters = {
+      lineSeparator: '\n',
+      skipFirstDataRow: true,
+      firstRowAsHeader: false,
+    };
+    expect(() => {
+      interpreter.validateParameters(parameters);
+    }).toThrow(InterpreterParameterError);
+  });
+
+  test('validateParameters with Parameter misses lineSeperator throws Exception', () => {
+    const interpreter: Interpreter = Format.CSV;
+    const parameters = {
+      columnSeparator: ',',
+      skipFirstDataRow: true,
+      firstRowAsHeader: false,
+    };
+    expect(() => {
+      interpreter.validateParameters(parameters);
+    }).toThrow(InterpreterParameterError);
+  });
+
+  test('validateParameters with Parameter misses skipFirstDataRow throws Exception', () => {
+    const interpreter: Interpreter = Format.CSV;
+    const parameters = {
+      columnSeparator: ',',
+      lineSeparator: '\n',
+      firstRowAsHeader: false,
+    };
+    expect(() => {
+      interpreter.validateParameters(parameters);
+    }).toThrow(InterpreterParameterError);
+  });
+
+  test('validateParameters with Parameter misses firstRowAsHeader throws Exception', () => {
+    const interpreter: Interpreter = Format.CSV;
+    const parameters = {
+      columnSeparator: ',',
+      lineSeparator: '\n',
+      skipFirstDataRow: true,
+    };
+    expect(() => {
+      interpreter.validateParameters(parameters);
+    }).toThrow(InterpreterParameterError);
+  });
+
   test('validateParameters with too many Parameters throws Error', () => {
     const interpreter: Interpreter = Format.CSV;
     const parameters = {

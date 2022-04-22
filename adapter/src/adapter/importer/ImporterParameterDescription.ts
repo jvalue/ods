@@ -2,8 +2,6 @@ export class ImporterParameterDescription {
   name: string;
   description: string;
   required: boolean;
-
-  // TODO @Georg: need to check how to store the class in typescript, can use instance.constructor.name to get the name probably -> is stored as string
   type: unknown;
 
   constructor({

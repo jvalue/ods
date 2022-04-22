@@ -51,22 +51,24 @@ export abstract class Importer {
 
     const requiredParameters = this.getRequiredParameters();
     for (const requiredParameter of requiredParameters) {
-      const name = requiredParameter.name;
-      if (inputParameters[name] === undefined) {
+      const param = inputParameters[
+        requiredParameter.name
+      ] as ImporterParameterDescription;
+
+      if (param === undefined) {
         illegalArguments = true;
         illegalArgumentsMessage += this.type;
         illegalArgumentsMessage += 'importer requires parameter ';
-        illegalArgumentsMessage += name;
+        illegalArgumentsMessage += requiredParameter.name;
         illegalArgumentsMessage += '\n';
         break;
       }
-      const checkType = (inputParameters[name] as Record<string, unknown>)
-        .constructor.name;
+      const checkType = param.constructor.name;
       if (checkType.toLowerCase() !== requiredParameter.type) {
         illegalArguments = true;
         illegalArgumentsMessage += this.type;
         illegalArgumentsMessage += ' importer requires parameter ';
-        illegalArgumentsMessage += name;
+        illegalArgumentsMessage += requiredParameter.name;
         illegalArgumentsMessage += ' to be type ';
         illegalArgumentsMessage += requiredParameter.type;
         illegalArgumentsMessage += '\n';
