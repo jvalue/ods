@@ -26,11 +26,32 @@ export abstract class Interpreter {
     let illegalArguments = false;
     let illegalArgumentsMessage = '';
 
+    const possibleParameters: Array<InterpreterParameterDescription> =
+      this.getAvailableParameters();
+
+    const unnecessaryArguments = [];
+    const names = possibleParameters.map((a) => a.name);
+    const keys = Object.keys(inputParameters);
+
+    for (const entry of keys) {
+      if (!names.includes(entry)) {
+        unnecessaryArguments.push(entry);
+      }
+    }
+
+    if (unnecessaryArguments.length > 0) {
+      illegalArguments = true;
+      for (const argument of unnecessaryArguments) {
+        illegalArgumentsMessage += argument + ' is not needed by importer \n';
+      }
+    }
+
     for (const requiredParameter of this.getAvailableParameters()) {
       const param = inputParameters[
         requiredParameter.name
       ] as InterpreterParameterDescription;
-      if (param == null) {
+
+      if (param === undefined) {
         illegalArguments = true;
         illegalArgumentsMessage += this.type;
         illegalArgumentsMessage += 'interpreter requires parameter ';

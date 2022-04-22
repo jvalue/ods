@@ -13,7 +13,7 @@ describe('getAvaialbleParameters Tests', () => {
     expect(availableParameters[1].type).toBe('string');
   });
 
-  test('getAvailableParameters is of Type ImporterParameterDescription', () => {
+  test('getAvailableParameters is of Type Array', () => {
     const importer: Importer = Protocol.HTTP;
     const availableParameters = importer.getAvailableParameters();
     expect(availableParameters).toBeInstanceOf(Array);

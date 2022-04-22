@@ -1,4 +1,7 @@
+import { Interpreter } from '../../adapter/interpreter/Interpreter';
+import { InterpreterParameterDescription } from '../../adapter/interpreter/InterpreterParameterDescription';
 import { Format } from '../../adapter/model/enum/Format';
+import { InterpreterParameterError } from '../../adapter/model/exceptions/InterpreterParameterError';
 
 describe('doInterpret CSV Format returns valid JSON', () => {
   test('convert standard CSV to JSON with lineSeperator \n and Column Seperator ,', async () => {
@@ -164,5 +167,51 @@ describe('doInterpret CSV Format with FirstRowAsHeader = FALSE returns valid JSO
     ];
     const res = await csvFormat.doInterpret(data, parameters);
     expect(JSON.parse(res)).toEqual(expected);
+  });
+});
+
+describe('getAvaialbleParameters Tests', () => {
+  test('getAvaiableParameters are of type string', () => {
+    const interpreter: Interpreter = Format.CSV;
+    const availableParameters: InterpreterParameterDescription[] =
+      interpreter.getAvailableParameters();
+    expect(availableParameters[0].type).toBe('string');
+    expect(availableParameters[1].type).toBe('string');
+    expect(availableParameters[2].type).toBe('boolean');
+    expect(availableParameters[3].type).toBe('boolean');
+  });
+
+  test('getAvailableParameters is of Type Array', () => {
+    const interpreter: Interpreter = Format.CSV;
+    const availableParameters: InterpreterParameterDescription[] =
+      interpreter.getAvailableParameters();
+    expect(availableParameters).toBeInstanceOf(Array);
+  });
+});
+
+describe('validateParameters from CSV Interpreter', () => {
+  test('validateParameters with valid Parameters works', () => {
+    const interpreter: Interpreter = Format.CSV;
+    const parameters = {
+      columnSeparator: ',',
+      lineSeparator: '\n',
+      skipFirstDataRow: true,
+      firstRowAsHeader: false,
+    };
+    interpreter.validateParameters(parameters);
+  });
+
+  test('validateParameters with too many Parameters throws Error', () => {
+    const interpreter: Interpreter = Format.CSV;
+    const parameters = {
+      columnSeparator: ',',
+      lineSeparator: '\n',
+      skipFirstDataRow: true,
+      firstRowAsHeader: false,
+      extraParameter: false,
+    };
+    expect(() => {
+      interpreter.validateParameters(parameters);
+    }).toThrow(InterpreterParameterError);
   });
 });
