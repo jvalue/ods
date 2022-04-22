@@ -1,6 +1,6 @@
 import { Format } from '../../adapter/model/enum/Format';
 
-describe('doInterpretJsonFormatReturnsValidJSON', () => {
+describe('doInterpret Json Format returns valid JSON', () => {
   test('doInterpret JSON data test', () => {
     const jsonFormat = Format.JSON;
     const data =

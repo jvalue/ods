@@ -46,24 +46,27 @@ export class CsvInterpreter extends Interpreter {
   ): Promise<string> {
     const columnSeparator = (parameters.columnSeparator as string).charAt(0);
     const lineSeparator: string = parameters.lineSeparator as string;
-    const firstRowAsHeader: boolean = parameters.firstRowAsHeader as boolean; // True = With header, False = WithoutHeader
+    // Be Careful: Need to Invert the boolean here
+    // True = With header, False = WithoutHeader
+    const firstRowAsHeader = !parameters.firstRowAsHeader;
     const skipFirstDataRow: boolean = parameters.skipFirstDataRow as boolean;
+
+    data =
+      'id,first_name,last_name,email,gender,ip_address\n' +
+      '1,Ewell,Mathwin,emathwin0@hibu.com,Male,226.172.125.251\n' +
+      '2,Fayth,Blampy,fblampy1@hubpages.com,Female,212.76.208.25\n' +
+      '3,Kelli,Cornock,kcornock2@boston.com,Female,171.5.66.30\n';
 
     const json: string[] = [];
     await csv({
-      noheader: !firstRowAsHeader, // Be Careful: Need to Invert the boolean here
+      noheader: firstRowAsHeader,
       output: 'json',
       delimiter: columnSeparator,
       eol: lineSeparator,
     })
       .fromString(data)
       .subscribe((csvRow: string, index: number) => {
-        // Todo need to test if this works
-        if (
-          skipFirstDataRow &&
-          ((index === 0 && !firstRowAsHeader) ||
-            (index === 1 && firstRowAsHeader))
-        ) {
+        if (skipFirstDataRow && index === 0) {
           // Skip First Row
         } else {
           json.push(csvRow);

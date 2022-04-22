@@ -1,6 +1,6 @@
 import { Format } from '../../adapter/model/enum/Format';
 
-describe('doInterpretCSVFormatReturnsValidJSON', () => {
+describe('doInterpret CSV Format returns valid JSON', () => {
   test('convert standard CSV to JSON', async () => {
     const csvFormat = Format.CSV;
     const data =
@@ -23,6 +23,43 @@ describe('doInterpretCSVFormatReturnsValidJSON', () => {
         gender: 'Male',
         ip_address: '226.172.125.251',
       },
+      {
+        id: '2',
+        first_name: 'Fayth',
+        last_name: 'Blampy',
+        email: 'fblampy1@hubpages.com',
+        gender: 'Female',
+        ip_address: '212.76.208.25',
+      },
+      {
+        id: '3',
+        first_name: 'Kelli',
+        last_name: 'Cornock',
+        email: 'kcornock2@boston.com',
+        gender: 'Female',
+        ip_address: '171.5.66.30',
+      },
+    ];
+    const res = await csvFormat.doInterpret(data, parameters);
+    expect(JSON.parse(res)).toEqual(expected);
+  });
+});
+
+describe('doInterpret CSV Format with SkipFirstRow = TRUE returns valid JSON with missing first Row', () => {
+  test('convert standard CSV to JSON with skipFirstRow', async () => {
+    const csvFormat = Format.CSV;
+    const data =
+      'id,first_name,last_name,email,gender,ip_address\n' +
+      '1,Ewell,Mathwin,emathwin0@hibu.com,Male,226.172.125.251\n' +
+      '2,Fayth,Blampy,fblampy1@hubpages.com,Female,212.76.208.25\n' +
+      '3,Kelli,Cornock,kcornock2@boston.com,Female,171.5.66.30\n';
+    const parameters = {
+      columnSeparator: ',',
+      lineSeparator: '\n',
+      skipFirstDataRow: true,
+      firstRowAsHeader: true,
+    };
+    const expected = [
       {
         id: '2',
         first_name: 'Fayth',

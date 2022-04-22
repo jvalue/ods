@@ -3,7 +3,7 @@ import { Format } from '../../adapter/model/enum/Format';
 import { Protocol } from '../../adapter/model/enum/Protocol';
 
 /* eslint-env jest */
-describe('getFormatShouldReturnCorrectResult', () => {
+describe('getFormat should return correct Result', () => {
   test('getFormat test throws exception for not existing format', () => {
     expect(() => {
       AdapterEndpoint.getFormat('not here');
@@ -23,7 +23,7 @@ describe('getFormatShouldReturnCorrectResult', () => {
   });
 });
 
-describe('getProtocolShouldReturnCorrectResult', () => {
+describe('getProtocol should return correct Result', () => {
   test('getProtocol test for HTTP', () => {
     const result = AdapterEndpoint.getProtocol('HTTP');
     expect(result).toBe(Protocol.HTTP);
