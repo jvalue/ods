@@ -31,15 +31,8 @@ export class XmlInterpreter extends Interpreter {
 
     const parser = new XMLParser(options);
     const result = parser.parse(data) as Record<string, unknown>;
-    const updatedResult: Record<string, unknown> = {};
-    const resultKey: Record<string, unknown> = result[
-      Object.keys(result)[0]
-    ] as Record<string, unknown>;
-    for (const [key, value] of Object.entries(resultKey)) {
-      updatedResult[key] = value;
-    }
     return new Promise(function (resolve) {
-      resolve(JSON.stringify(updatedResult));
+      resolve(JSON.stringify(result));
     });
   }
 }
