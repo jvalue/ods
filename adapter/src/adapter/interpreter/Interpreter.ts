@@ -23,14 +23,15 @@ export abstract class Interpreter {
   abstract getAvailableParameters(): Array<InterpreterParameterDescription>;
 
   validateParameters(inputParameters: Record<string, unknown>): void {
-    if (inputParameters === undefined) {
-      return;
-    }
     let illegalArguments = false;
     let illegalArgumentsMessage = '';
 
     const possibleParameters: Array<InterpreterParameterDescription> =
       this.getAvailableParameters();
+
+    if (possibleParameters.length === 0) {
+      return;
+    }
 
     const unnecessaryArguments = [];
     const names = possibleParameters.map((a) => a.name);
