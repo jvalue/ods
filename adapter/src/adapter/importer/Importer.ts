@@ -15,7 +15,6 @@ export abstract class Importer {
   abstract getAvailableParameters(): Array<ImporterParameterDescription>;
 
   async fetch(parameters: Record<string, unknown>): Promise<string> {
-    // Throws ImporterParameterException
     this.validateParameters(parameters);
     const x = await this.doFetch(parameters);
     return x;
@@ -24,11 +23,9 @@ export abstract class Importer {
   abstract getType(): string;
   abstract getDescription(): string;
 
-  abstract doFetch(parameters: Record<string, unknown>): Promise<string>; // Throws ImporterParameterException
+  abstract doFetch(parameters: Record<string, unknown>): Promise<string>;
 
   validateParameters(inputParameters: Record<string, unknown>): void {
-    // Throws ImporterParameterException;
-
     let illegalArguments = false;
     let illegalArgumentsMessage = '';
 

@@ -6,7 +6,6 @@ import { Importer } from './Importer';
 import { ImporterParameterDescription } from './ImporterParameterDescription';
 
 export class HttpImporter extends Importer {
-  // TODO RuntimeParameters type is probably wrong
   type = 'HTTP';
   description = 'Plain HTTP';
   parameters: ImporterParameterDescription[] = [
@@ -21,6 +20,7 @@ export class HttpImporter extends Importer {
         'Encoding of the source. Available encodings: ISO-8859-1, US-ASCII, UTF-8',
       type: 'string',
     }),
+    // TODO RuntimeParameters type is probably wrong
     new ImporterParameterDescription({
       name: 'defaultParameters',
       description: 'Default values for open parameters in the URI',
@@ -29,7 +29,6 @@ export class HttpImporter extends Importer {
     }),
   ];
 
-  // Override annotation is not necessary, but will be used for a better understanding of the code
   override getType(): string {
     return this.type;
   }
@@ -46,7 +45,6 @@ export class HttpImporter extends Importer {
     super.validateParameters(inputParameters);
     const encoding: string = inputParameters.encoding as string;
 
-    // TODO CHECK IF ENCODING ARE WRITTEN CORRECT
     if (
       encoding !== 'ISO-8859-1' &&
       encoding !== 'US-ASCII' &&
@@ -70,7 +68,6 @@ export class HttpImporter extends Importer {
   override async doFetch(parameters: Record<string, unknown>): Promise<string> {
     const uri = parameters.location as string;
     const encoding = parameters.encoding as string;
-    // TODO see if encoding from response is good
 
     const result = await axios
       .get(uri, { responseEncoding: encoding })
