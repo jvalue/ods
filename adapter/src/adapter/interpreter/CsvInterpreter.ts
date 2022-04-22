@@ -44,8 +44,6 @@ export class CsvInterpreter extends Interpreter {
     data: string,
     parameters: Record<string, unknown>,
   ): Promise<string> {
-    // Data = 'col1,col2,col3\n' + 'val11,val12,val13\n' + 'val21,val22,val23';
-
     const columnSeparator = (parameters.columnSeparator as string).charAt(0);
     const lineSeparator: string = parameters.lineSeparator as string;
     const firstRowAsHeader: boolean = parameters.firstRowAsHeader as boolean; // True = With header, False = WithoutHeader

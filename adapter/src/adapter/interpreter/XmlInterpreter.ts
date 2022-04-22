@@ -20,13 +20,9 @@ export class XmlInterpreter extends Interpreter {
 
   override doInterpret(
     data: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     parameters: Record<string, unknown>,
   ): Promise<string> {
-    /* Data =
-      '<?xml version="1.0" encoding="UTF-8"?>' +
-      '<root><from>Rick</from><to>Morty</to>' +
-      '<rasdasd><s>Rick</s><t>Morty</t></rasdasd></root>';s*/
-
     const result = this.convertXmlToJson(data);
     const updatedResult: Record<string, unknown> = {};
     const resultKey: Record<string, unknown> = result[
@@ -45,8 +41,8 @@ export class XmlInterpreter extends Interpreter {
     for (const result of inputData.matchAll(
       /(?:<(\w*)(?:\s[^>]*)*>)((?:(?!<\1).)*)(?:<\/\1>)|<(\w*)(?:\s*)*\/>/gm,
     )) {
-      const key: string = result[1] || result[3];
       const value = result[2] && this.convertXmlToJson(result[2]);
+      const key: string = result[1] || result[3];
       returnJson[key] =
         (value && Object.keys(value).length ? value : result[2]) || null;
     }

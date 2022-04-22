@@ -20,6 +20,7 @@ export class JsonInterpreter extends Interpreter {
 
   override doInterpret(
     data: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _parameters: Record<string, unknown>,
   ): Promise<string> {
     return new Promise(function (resolve) {

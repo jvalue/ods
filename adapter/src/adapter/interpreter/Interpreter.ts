@@ -18,7 +18,7 @@ export abstract class Interpreter {
   abstract getDescription(): string;
   abstract doInterpret(
     data: string,
-    parameters: Record<string, unknown>,
+    parameters?: Record<string, unknown>,
   ): Promise<string>;
   abstract getAvailableParameters(): Array<InterpreterParameterDescription>;
 
