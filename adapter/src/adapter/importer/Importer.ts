@@ -48,19 +48,21 @@ export abstract class Importer {
         illegalArgumentsMessage += argument + ' is not needed by importer \n';
       }
     }
+
     const requiredParameters = this.getRequiredParameters();
     for (const requiredParameter of requiredParameters) {
-      // TODO is that OK?
       const name = requiredParameter.name;
-      const checkType = (inputParameters[name] as Record<string, unknown>)
-        .constructor.name;
-      if (inputParameters[requiredParameter.name] == null) {
+      if (inputParameters[name] === undefined) {
         illegalArguments = true;
         illegalArgumentsMessage += this.type;
         illegalArgumentsMessage += 'importer requires parameter ';
         illegalArgumentsMessage += name;
         illegalArgumentsMessage += '\n';
-      } else if (checkType.toLowerCase() !== requiredParameter.type) {
+        break;
+      }
+      const checkType = (inputParameters[name] as Record<string, unknown>)
+        .constructor.name;
+      if (checkType.toLowerCase() !== requiredParameter.type) {
         illegalArguments = true;
         illegalArgumentsMessage += this.type;
         illegalArgumentsMessage += ' importer requires parameter ';
@@ -68,6 +70,7 @@ export abstract class Importer {
         illegalArgumentsMessage += ' to be type ';
         illegalArgumentsMessage += requiredParameter.type;
         illegalArgumentsMessage += '\n';
+        break;
       }
     }
     if (illegalArguments) {

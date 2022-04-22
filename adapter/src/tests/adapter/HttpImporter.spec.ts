@@ -1,10 +1,11 @@
 import { Importer } from '../../adapter/importer/Importer';
 import { ImporterParameterDescription } from '../../adapter/importer/ImporterParameterDescription';
 import { Protocol } from '../../adapter/model/enum/Protocol';
+import { ImporterParameterError } from '../../adapter/model/exceptions/ImporterParameterError';
 
 /* eslint-env jest */
 describe('getAvaialbleParameters Tests', () => {
-  test('getFormat test throws exception for not existing format', () => {
+  test('getAvaiableParameters are of type string', () => {
     const importer: Importer = Protocol.HTTP;
     const availableParameters: ImporterParameterDescription[] =
       importer.getAvailableParameters();
@@ -16,6 +17,52 @@ describe('getAvaialbleParameters Tests', () => {
     const importer: Importer = Protocol.HTTP;
     const availableParameters = importer.getAvailableParameters();
     expect(availableParameters).toBeInstanceOf(Array);
+  });
+});
+
+describe('validateParameters from Abstract Parent Class Tests', () => {
+  test('validateParameters with valid Parameters works', () => {
+    const importer: Importer = Protocol.HTTP;
+    const parameters = {
+      location:
+        'https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json',
+      encoding: 'UTF-8',
+    };
+    importer.validateParameters(parameters);
+  });
+
+  test('validateParameters finds unavailable Parameter', () => {
+    const importer: Importer = Protocol.HTTP;
+    const wrongParameters = {
+      location:
+        'https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json',
+      encoding: 'UTF-8',
+      parameter3: 'komischer parameter',
+    };
+    expect(() => {
+      importer.validateParameters(wrongParameters);
+    }).toThrow(ImporterParameterError);
+  });
+
+  test('validateParameters is missing encoding Parameter', () => {
+    const importer: Importer = Protocol.HTTP;
+    const wrongParameters = {
+      location:
+        'https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json',
+    };
+    expect(() => {
+      importer.validateParameters(wrongParameters);
+    }).toThrow(ImporterParameterError);
+  });
+
+  test('validateParameters is missing location Parameter', () => {
+    const importer: Importer = Protocol.HTTP;
+    const wrongParameters = {
+      encoding: 'UTF-8',
+    };
+    expect(() => {
+      importer.validateParameters(wrongParameters);
+    }).toThrow(ImporterParameterError);
   });
 });
 
