@@ -51,12 +51,6 @@ export class CsvInterpreter extends Interpreter {
     const firstRowAsHeader = !parameters.firstRowAsHeader;
     const skipFirstDataRow: boolean = parameters.skipFirstDataRow as boolean;
 
-    data =
-      'id,first_name,last_name,email,gender,ip_address\n' +
-      '1,Ewell,Mathwin,emathwin0@hibu.com,Male,226.172.125.251\n' +
-      '2,Fayth,Blampy,fblampy1@hubpages.com,Female,212.76.208.25\n' +
-      '3,Kelli,Cornock,kcornock2@boston.com,Female,171.5.66.30\n';
-
     const json: string[] = [];
     await csv({
       noheader: firstRowAsHeader,
