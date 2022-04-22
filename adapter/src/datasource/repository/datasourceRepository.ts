@@ -20,7 +20,8 @@ export class DatasourceRepository {
   }
 
   async getDataSourceById(id: any) {
-    return await knex.select().from('public.datasource').where('id', id);
+    const result = await knex.select().from('public.datasource').where('id', id);
+    return KnexHelper.createDatasourceFromResult(result);
   }
 
   async addDatasource(insertStatement: DatasourceInsertStatement) {

@@ -47,10 +47,9 @@ export class DataSourceEndpoint {
     res: express.Response,
   ): Promise<void> => {
     console.log(req.params.datasourceId);
-    const result = await datasourceRepository.getDataSourceById(
+    const datasource = await datasourceRepository.getDataSourceById(
       req.params.datasourceId,
     );
-    const datasource = KnexHelper.createDatasourceFromResult(result);
     res.status(200).send(datasource);
   };
 
@@ -96,7 +95,14 @@ export class DataSourceEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    await datasourceRepository.deleteDatasourceById(req.params.datasourceId);
+    let id = req.params.datasourceId;
+    const datasource = await datasourceRepository.getDataSourceById(id);
+    await datasourceRepository.deleteDatasourceById(id);
+    const datasourceModelForAmqp: DatasourceModelForAmqp = {
+      datasource: datasource,
+    };
+    const routingKey = 'datasource.config.deleted';
+    await outboxRepository.publishToOutbox(datasourceModelForAmqp, routingKey);
     res.status(204).send();
   };
 
@@ -105,6 +111,7 @@ export class DataSourceEndpoint {
     res: express.Response,
   ): Promise<void> => {
     await datasourceRepository.deleteAllDatasources();
+    //TODO publish all Deletions
     res.status(204).send();
   };
 
@@ -115,8 +122,7 @@ export class DataSourceEndpoint {
     // TODO add parameters from request to trigger
     // TODO Error Handling general here when datasource == null
     const id = req.params.datasourceId;
-    const result = await datasourceRepository.getDataSourceById(id);
-    const datasource = KnexHelper.createDatasourceFromResult(result);
+    const datasource = await datasourceRepository.getDataSourceById(id);
     const protocolConfigObj: ProtocolConfig = {
       protocol: new Protocol(Protocol.HTTP),
       parameters: datasource.protocol.parameters,
@@ -136,6 +142,7 @@ export class DataSourceEndpoint {
       await AdapterService.getInstance().executeJob(adapterConfig);
     // //TODO save response in dataimport table
     // TODO check correct response
+    //TODO publish Imports
     res.status(200).send(returnDataImportResponse);
   };
 }
