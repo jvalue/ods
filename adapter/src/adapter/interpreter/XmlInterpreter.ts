@@ -1,3 +1,5 @@
+import { XMLParser } from 'fast-xml-parser';
+
 import { Interpreter } from './Interpreter';
 import { InterpreterParameterDescription } from './InterpreterParameterDescription';
 
@@ -23,7 +25,12 @@ export class XmlInterpreter extends Interpreter {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     parameters: Record<string, unknown>,
   ): Promise<string> {
-    const result = this.convertXmlToJson(data);
+    const options = {
+      ignoreDeclaration: true,
+    };
+
+    const parser = new XMLParser(options);
+    const result = parser.parse(data) as Record<string, unknown>;
     const updatedResult: Record<string, unknown> = {};
     const resultKey: Record<string, unknown> = result[
       Object.keys(result)[0]
@@ -34,9 +41,20 @@ export class XmlInterpreter extends Interpreter {
     return new Promise(function (resolve) {
       resolve(JSON.stringify(updatedResult));
     });
+    /* Const result = this.convertXmlToJson(data);
+    const updatedResult: Record<string, unknown> = {};
+    const resultKey: Record<string, unknown> = result[
+      Object.keys(result)[0]
+    ] as Record<string, unknown>;
+    for (const [key, value] of Object.entries(resultKey)) {
+      updatedResult[key] = value;
+    }
+    return new Promise(function (resolve) {
+      resolve(JSON.stringify(updatedResult));
+    });*/
   }
 
-  convertXmlToJson(inputData: string): Record<string, unknown> {
+  /* ConvertXmlToJson(inputData: string): Record<string, unknown> {
     const returnJson: Record<string, unknown> = {};
     for (const result of inputData.matchAll(
       /(?:<(\w*)(?:\s[^>]*)*>)((?:(?!<\1).)*)(?:<\/\1>)|<(\w*)(?:\s*)*\/>/gm,
@@ -47,5 +65,5 @@ export class XmlInterpreter extends Interpreter {
         (value && Object.keys(value).length ? value : result[2]) || null;
     }
     return returnJson;
-  }
+  }*/
 }

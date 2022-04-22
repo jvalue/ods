@@ -4,7 +4,7 @@ describe('doInterpret XML Format Returns valid JSON', () => {
   test('convert standard XML to JSON test', () => {
     const xmlFormat = Format.XML;
     const data =
-      '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don\'t forget me this weekend!</body></note>';
+      '<?xml version="1.0" encoding="UTF-8"?><root><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don\'t forget me this weekend!</body></root>';
     return xmlFormat.doInterpret(data, {}).then((res) => {
       expect(JSON.parse(res)).toEqual({
         to: 'Tove',
@@ -14,10 +14,11 @@ describe('doInterpret XML Format Returns valid JSON', () => {
       });
     });
   });
+
   test('convert nested XML to JSON test', () => {
     const xmlFormat = Format.XML;
     const data =
-      '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading><subheading>ReminderSubheading</subheading><Reminder>Reminder</Reminder></heading><body>Don\'t forget me this weekend!</body></note>';
+      '<?xml version="1.0" encoding="UTF-8"?><root><to>Tove</to><from>Jani</from><heading><subheading>ReminderSubheading</subheading><Reminder>Reminder</Reminder></heading><body>Don\'t forget me this weekend!</body></root>';
     return xmlFormat.doInterpret(data, {}).then((res) => {
       expect(JSON.parse(res)).toEqual({
         to: 'Tove',
@@ -31,7 +32,7 @@ describe('doInterpret XML Format Returns valid JSON', () => {
   test('convert nested XML to JSON test', () => {
     const xmlFormat = Format.XML;
     const data =
-      '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading><subheading>ReminderSubheading</subheading><Reminder>Reminder1</Reminder><Reminder>Reminder2</Reminder><Reminder>Reminder3</Reminder></heading><body>Don\'t forget me this weekend!</body></note>';
+      '<?xml version="1.0" encoding="UTF-8"?><root><to>Tove</to><from>Jani</from><heading><subheading>ReminderSubheading</subheading><Reminder>Reminder1</Reminder><Reminder>Reminder2</Reminder><Reminder>Reminder3</Reminder></heading><body>Don\'t forget me this weekend!</body></root>';
     return xmlFormat.doInterpret(data, {}).then((res) => {
       expect(JSON.parse(res)).toEqual({
         to: 'Tove',
