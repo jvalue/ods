@@ -1,6 +1,6 @@
-import { AdapterEndpoint } from './adapter/api/rest/adapterEndpoint';
-import { Format } from './adapter/model/enum/Format';
-import { Protocol } from './adapter/model/enum/Protocol';
+import { AdapterEndpoint } from '../../adapter/api/rest/adapterEndpoint';
+import { Format } from '../../adapter/model/enum/Format';
+import { Protocol } from '../../adapter/model/enum/Protocol';
 
 /* eslint-env jest */
 describe('getFormatShouldReturnCorrectResult', () => {

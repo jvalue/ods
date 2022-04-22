@@ -1,4 +1,4 @@
-import { Format } from './adapter/model/enum/Format';
+import { Format } from '../../adapter/model/enum/Format';
 
 describe('doInterpretCSVFormatReturnsValidJSON', () => {
   test('convert standard CSV to JSON', async () => {

@@ -1,4 +1,4 @@
-import { Format } from './adapter/model/enum/Format';
+import { Format } from '../../adapter/model/enum/Format';
 
 describe('doInterpretJsonFormatReturnsValidJSON', () => {
   test('doInterpret JSON data test', () => {
