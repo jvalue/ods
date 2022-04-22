@@ -41,29 +41,5 @@ export class XmlInterpreter extends Interpreter {
     return new Promise(function (resolve) {
       resolve(JSON.stringify(updatedResult));
     });
-    /* Const result = this.convertXmlToJson(data);
-    const updatedResult: Record<string, unknown> = {};
-    const resultKey: Record<string, unknown> = result[
-      Object.keys(result)[0]
-    ] as Record<string, unknown>;
-    for (const [key, value] of Object.entries(resultKey)) {
-      updatedResult[key] = value;
-    }
-    return new Promise(function (resolve) {
-      resolve(JSON.stringify(updatedResult));
-    });*/
   }
-
-  /* ConvertXmlToJson(inputData: string): Record<string, unknown> {
-    const returnJson: Record<string, unknown> = {};
-    for (const result of inputData.matchAll(
-      /(?:<(\w*)(?:\s[^>]*)*>)((?:(?!<\1).)*)(?:<\/\1>)|<(\w*)(?:\s*)*\/>/gm,
-    )) {
-      const value = result[2] && this.convertXmlToJson(result[2]);
-      const key: string = result[1] || result[3];
-      returnJson[key] =
-        (value && Object.keys(value).length ? value : result[2]) || null;
-    }
-    return returnJson;
-  }*/
 }
