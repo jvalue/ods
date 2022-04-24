@@ -9,7 +9,7 @@ import { ProtocolConfig } from '../model/ProtocolConfig';
 
 export class AdapterService {
   /**
-   * @description Create an instance of AdapterService
+   * @description Create a singleton instance of AdapterService
    */
   private static instance: AdapterService;
 
@@ -33,7 +33,7 @@ export class AdapterService {
    * Executes an adapter configuration
    *
    * @param _adapterConfig the adapter configuration
-   * @return the imported and interpreted data
+   * @returns the imported and interpreted data
    * @throws ImporterParameterError    on errors in the interpreter config (e.g. missing parameters, ...)
    * @throws InterpreterParameterError on errors in the interpreter config (e.g. missing parameters, ...)
    * @throws Error                   on response errors when importing the data
@@ -52,7 +52,7 @@ export class AdapterService {
    * Executes an protocol configuration
    *
    * @param _protocolConfig the protocol configuration
-   * @return the imported and interpreted data
+   * @returns the imported and interpreted data
    * @throws ImporterParameterError    on errors in the interpreter config (e.g. missing parameters, ...)
    * @throws Error                   on response errors when importing the data
    */
