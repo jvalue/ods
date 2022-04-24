@@ -29,6 +29,15 @@ export class AdapterService {
     return [Protocol.HTTP];
   }
 
+  /**
+   * Executes an adapter configuration
+   *
+   * @param _adapterConfig the adapter configuration
+   * @return the imported and interpreted data
+   * @throws ImporterParameterError    on errors in the interpreter config (e.g. missing parameters, ...)
+   * @throws InterpreterParameterError on errors in the interpreter config (e.g. missing parameters, ...)
+   * @throws Error                   on response errors when importing the data
+   */
   async executeJob(_adapterConfig: AdapterConfig): Promise<DataImportResponse> {
     const rawData = await this.executeProtocol(_adapterConfig.protocolConfig);
     const result = await this.executeFormat(
@@ -39,6 +48,14 @@ export class AdapterService {
     return returnValue;
   }
 
+  /**
+   * Executes an protocol configuration
+   *
+   * @param _protocolConfig the protocol configuration
+   * @return the imported and interpreted data
+   * @throws ImporterParameterError    on errors in the interpreter config (e.g. missing parameters, ...)
+   * @throws Error                   on response errors when importing the data
+   */
   async executeRawJob(
     _protocolConfig: ProtocolConfig,
   ): Promise<DataImportResponse> {
