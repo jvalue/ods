@@ -2,6 +2,9 @@ import { InterpreterParameterError } from '../model/exceptions/InterpreterParame
 
 import { InterpreterParameterDescription } from './InterpreterParameterDescription';
 
+/**
+ * @description Abstract class for interpreters (currently supporting CSVInterpreter, JSONInterpreter and XmlInterpreter)
+ */
 export abstract class Interpreter {
   type: string | undefined;
   description: string | undefined;
@@ -22,6 +25,15 @@ export abstract class Interpreter {
   ): Promise<string>;
   abstract getAvailableParameters(): Array<InterpreterParameterDescription>;
 
+  /**
+   * Validates the input parameters (Generic function, used in the derived classes)
+   *
+   * @param inputParameters the parameters to be validated. Checks if there are all required parameters provided and the type is correct.
+   * Also checks if there are unnecessary arguments provided.
+   *
+   * @returns void
+   * @throws InterpreterParameterError, if an error is found
+   */
   validateParameters(inputParameters: Record<string, unknown>): void {
     let illegalArguments = false;
     let illegalArgumentsMessage = '';

@@ -40,6 +40,14 @@ export class CsvInterpreter extends Interpreter {
     return this.parameters;
   }
 
+  /**
+   * Interpretes the csv data
+   * Uses csvtojson library to convert the csv to corresponding json object
+   *
+   * @param data string representation of the csv data
+   * @param parameters options, for interpreting the data: Possible options: columnSeparator, lineSeparator, firstRowAsHeader, skipFirstDataRow
+   * @returns JSON string representation as Promise
+   */
   override async doInterpret(
     data: string,
     parameters: Record<string, unknown>,
@@ -71,6 +79,13 @@ export class CsvInterpreter extends Interpreter {
     });
   }
 
+  /**
+   * Validates the input parameters (options).
+   *
+   * @param inputParameters option parameters. Possible options: columnSeparator, lineSeparator, firstRowAsHeader, skipFirstDataRow
+   * @returns void
+   * @throws Error, if lineSeperator or columnSeparator is invalid
+   */
   override validateParameters(inputParameters: Record<string, unknown>): void {
     super.validateParameters(inputParameters);
     const lineSeparator: string = inputParameters.lineSeparator as string;

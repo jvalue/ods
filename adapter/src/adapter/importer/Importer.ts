@@ -25,6 +25,15 @@ export abstract class Importer {
 
   abstract doFetch(parameters: Record<string, unknown>): Promise<string>;
 
+  /**
+   * Validates the input parameters (Generic function, used in the derived classes)
+   *
+   * @param inputParameters the parameters to be validated. Checks if there are all required parameters provided and the type is correct.
+   * Also checks if there are unnecessary arguments provided.
+   *
+   * @returns void
+   * @throws InterpreterParameterError, if an error is found
+   */
   validateParameters(inputParameters: Record<string, unknown>): void {
     let illegalArguments = false;
     let illegalArgumentsMessage = '';
