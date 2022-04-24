@@ -20,7 +20,6 @@ export class HttpImporter extends Importer {
         'Encoding of the source. Available encodings: ISO-8859-1, US-ASCII, UTF-8',
       type: 'string',
     }),
-    // TODO RuntimeParameters type is probably wrong
     new ImporterParameterDescription({
       name: 'defaultParameters',
       description: 'Default values for open parameters in the URI',
