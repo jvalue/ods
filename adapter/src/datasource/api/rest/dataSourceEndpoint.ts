@@ -1,21 +1,25 @@
 import express from 'express';
 
-import { AdapterEndpoint } from '../../../adapter/api/rest/adapterEndpoint';
-import { asyncHandler } from '../../../adapter/api/rest/utils';
-import { AdapterConfig } from '../../../adapter/model/AdapterConfig';
-import { Format } from '../../../adapter/model/enum/Format';
-import { Protocol } from '../../../adapter/model/enum/Protocol';
-import { FormatConfig } from '../../../adapter/model/FormatConfig';
-import { ProtocolConfig } from '../../../adapter/model/ProtocolConfig';
-import { AdapterService } from '../../../adapter/services/adapterService';
-import { ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC } from '../../../env';
-import { DatasourceModelForAmqp } from '../../model/datasourceModelForAmqp';
-import { DatasourceRepository } from '../../repository/datasourceRepository';
-import { KnexHelper } from '../../repository/knexHelper';
-import { OutboxRepository } from '../../repository/outboxRepository';
+import {AdapterEndpoint} from '../../../adapter/api/rest/adapterEndpoint';
+import {asyncHandler} from '../../../adapter/api/rest/utils';
+import {AdapterConfig} from '../../../adapter/model/AdapterConfig';
+import {Format} from '../../../adapter/model/enum/Format';
+import {Protocol} from '../../../adapter/model/enum/Protocol';
+import {FormatConfig} from '../../../adapter/model/FormatConfig';
+import {ProtocolConfig} from '../../../adapter/model/ProtocolConfig';
+import {AdapterService} from '../../../adapter/services/adapterService';
+import {ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC} from '../../../env';
+import {DatasourceModelForAmqp} from '../../model/datasourceModelForAmqp';
+import {DatasourceRepository} from '../../repository/datasourceRepository';
+import {KnexHelper} from '../../repository/knexHelper';
+import {OutboxRepository} from '../../repository/outboxRepository';
 
 const datasourceRepository: DatasourceRepository = new DatasourceRepository();
 const outboxRepository: OutboxRepository = new OutboxRepository();
+
+// export interface RuntimeParamters {
+//   parameters: KeyValuePair[];
+// }
 
 export class DataSourceEndpoint {
   registerRoutes = (app: express.Application): void => {
@@ -113,7 +117,7 @@ export class DataSourceEndpoint {
     await datasourceRepository.deleteAllDatasources();
     const routingKey = 'datasource.config.deleted';
     //TODO fix wrong entry in outbox database
-    for (const dataSourceDeleted in datasourcesToDelete){
+    for (const dataSourceDeleted in datasourcesToDelete) {
       let datasourceModelForAmqp: DatasourceModelForAmqp = {
         datasource: datasourcesToDelete[dataSourceDeleted],
       };
@@ -126,13 +130,31 @@ export class DataSourceEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    // TODO add parameters from request to trigger
     // TODO Error Handling general here when datasource == null
     const id = req.params.datasourceId;
     const datasource = await datasourceRepository.getDataSourceById(id);
+    const runtimeParameters = req.body;
+    const adapterConfig: AdapterConfig = await this.getAdapterConfigWithRuntimeParameters(datasource, runtimeParameters);
+
+    const returnDataImportResponse =
+      await AdapterService.getInstance().executeJob(adapterConfig);
+
+    // //TODO save response in dataimport table
+    // TODO check correct response
+    //TODO publish Imports
+    res.status(200).send(returnDataImportResponse);
+  };
+
+  private getAdapterConfigWithRuntimeParameters(datasource: any, runtimeParameters: any) {
+
+    const parameters= {
+      ...datasource.protocol.parameters,
+      ...runtimeParameters.parameters
+    }
+
     const protocolConfigObj: ProtocolConfig = {
       protocol: new Protocol(Protocol.HTTP),
-      parameters: datasource.protocol.parameters,
+      parameters: parameters,
     };
     const format = new Format(
       AdapterEndpoint.getFormat(datasource.format.type),
@@ -145,14 +167,10 @@ export class DataSourceEndpoint {
       protocolConfig: protocolConfigObj,
       formatConfig: formatConfigObj,
     };
-    const returnDataImportResponse =
-      await AdapterService.getInstance().executeJob(adapterConfig);
-    // //TODO save response in dataimport table
-    // TODO check correct response
-    //TODO publish Imports
-    res.status(200).send(returnDataImportResponse);
-  };
+    return adapterConfig;
+  }
 }
+
 //TODO check datasource return values for exact matching
 // {
 //   "datasource": {
