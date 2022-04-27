@@ -20,7 +20,6 @@ export class HttpImporter extends Importer {
         'Encoding of the source. Available encodings: ISO-8859-1, US-ASCII, UTF-8',
       type: 'string',
     }),
-    // TODO RuntimeParameters type is probably wrong
     new ImporterParameterDescription({
       name: 'defaultParameters',
       description: 'Default values for open parameters in the URI',
@@ -41,6 +40,13 @@ export class HttpImporter extends Importer {
     return this.parameters;
   }
 
+  /**
+   * Validates the input parameters (options).
+   *
+   * @param inputParameters option parameters. Checks if the encoding format is correct.
+   * @returns void
+   * @throws Error, if encoding is invalid
+   */
   override validateParameters(inputParameters: Record<string, unknown>): void {
     super.validateParameters(inputParameters);
     const encoding: string = inputParameters.encoding as string;
@@ -65,6 +71,15 @@ export class HttpImporter extends Importer {
     }
   }
 
+  /**
+   * Retrieves the data via HTTP, provided in the "location" parameter
+   * Uses axios to perform the HTTP GET method
+   *
+   * @param parameters Parameters necessary for executing the HTTP GET
+   * @returns data as a string representation in a promise object
+   * @throws ImporterParameterError, if location is invalid
+   * @throws Error if Location-URI returns 404 status code
+   */
   override async doFetch(parameters: Record<string, unknown>): Promise<string> {
     const uri = parameters.location as string;
     const encoding = parameters.encoding as string;

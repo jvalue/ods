@@ -12,6 +12,13 @@ export interface AdapterConfig {
 export class AdapterConfigValidator {
   private errors: string[] = [];
 
+  /**
+   * Validates the format configuration (guard function)
+   *
+   * @param request the adapter configuration data object
+   * @returns false, if an error is found
+   * @returns true if no error is found
+   */
   validate(request: AdapterConfigDTO): request is AdapterConfigDTO {
     this.errors = [];
     if (!validators.isObject(request)) {

@@ -28,6 +28,17 @@ export class AdapterEndpoint {
     app.get('/version', asyncHandler(this.handleGetApplicationVersion));
   };
 
+  /**
+   * Endpoint for /preview
+   * Validates adapter configuration. Retrieves Protocol and Format from HTTP body.
+   * Executes the provided protocol and format.
+   * If an error in validation or in HTTP GET occurs, Status code 400 is retransmitted.
+   * If the server for the HTTP request returns status Code 404 - Status code 500 is retransmitted
+   *
+   * @param req HTTP request containing adapter configuration in body
+   * @param res HTTP response
+   * @returns Promise<void>
+   */
   handleExecuteDataImport = async (
     req: express.Request,
     res: express.Response,
@@ -87,6 +98,17 @@ export class AdapterEndpoint {
     }
   };
 
+  /**
+   * Endpoint for /preview/raw
+   * Validates adapter configuration. Retrieves Protocol
+   * Executes the provided protocol
+   * If an error in validation or in HTTP GET occurs, Status code 400 is retransmitted.
+   * If the server for the HTTP request returns status Code 404 - Status code 500 is retransmitted
+   *
+   * @param req HTTP request containing adapter configuration in body
+   * @param res HTTP response
+   * @returns Promise<void>
+   */
   handleExecuteRawPreview = async (
     req: express.Request,
     res: express.Response,
@@ -117,8 +139,7 @@ export class AdapterEndpoint {
 
   /*
     Returns Collection of Interpreter
-  } */
-
+  */
   handleGetFormat = (req: express.Request, res: express.Response): void => {
     const interpreters = AdapterService.getInstance().getAllFormats();
     res.setHeader('Content-Type', 'application/json');
@@ -137,6 +158,9 @@ export class AdapterEndpoint {
     }
   };
 
+  /*
+    Returns Application Version
+  */
   handleGetApplicationVersion = (
     req: express.Request,
     res: express.Response,
@@ -145,6 +169,9 @@ export class AdapterEndpoint {
     res.status(200).send(APP_VERSION);
   };
 
+  /*
+    Helper function to retrieve format from user-provided input
+  */
   static getFormat(type: string): Interpreter {
     switch (type) {
       case 'JSON': {
@@ -162,6 +189,9 @@ export class AdapterEndpoint {
     }
   }
 
+  /*
+    Helper function to retrieve protocol from user-provided input
+  */
   static getProtocol(type: string): Importer {
     switch (type) {
       case 'HTTP': {

@@ -162,9 +162,11 @@ describe('Stateless data import', () => {
       expect(response.status).toEqual(200);
       const importedData = response.body.data;
       expect(JSON.parse(importedData)).toEqual({
-        from: 'Rick',
-        to: 'Morty',
-        test: { hello: 'hello', servus: 'servus' },
+        root: {
+          from: 'Rick',
+          to: 'Morty',
+          test: { hello: 'hello', servus: 'servus' },
+        },
       });
     },
     TIMEOUT,
