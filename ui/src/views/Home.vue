@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <h1>Welcome to Open-Data-Service UI</h1>
+    <h1>Welcome at the JValue Open Data Service!</h1>
   </div>
 </template>
 
