@@ -5,6 +5,6 @@ export default [
     path: '/storage/:storageId',
     name: 'pipeline-storage-overview',
     component: PipelineStorageOverview,
-    meta: { title: 'Storage Service', requiresAuth: true },
+    meta: { title: 'STORAGE', requiresAuth: true },
   },
 ];
