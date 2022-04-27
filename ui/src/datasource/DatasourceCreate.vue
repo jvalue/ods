@@ -7,7 +7,7 @@
       />
       <div class="float-right">
         <v-spacer />
-        <v-btn color="error" class="ma-2" @click="onCancel">
+        <v-btn color="error" class="ma-2" @click="onCancel()">
           Cancel
         </v-btn>
         <v-btn

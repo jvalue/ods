@@ -9,7 +9,6 @@ import 'vuetify/dist/vuetify.min.css';
 import '@mdi/font/css/materialdesignicons.css';
 import AuthModule from '@/components/auth/module';
 import TransformationModule from '@/pipeline/edit/transformation/transformation.module';
-import PipelineModule from '@/pipeline/pipeline.module';
 
 Vue.use(Vuetify);
 const vuetify = new Vuetify({
@@ -26,7 +25,6 @@ export const store = new Vuex.Store({
   modules: {
     auth: AuthModule,
     transformation: TransformationModule,
-    pipeline: PipelineModule,
   },
 });
 

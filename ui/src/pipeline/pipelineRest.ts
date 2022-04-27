@@ -2,6 +2,8 @@ import axios, { AxiosInstance } from 'axios';
 
 import Pipeline from './pipeline';
 
+import { PIPELINE_SERVICE_URL } from '@/env';
+
 export class PipelineRest {
   private readonly httpPipelineConfigs: AxiosInstance;
 
@@ -56,3 +58,5 @@ export class PipelineRest {
     return JSON.parse(response.data) as Pipeline;
   }
 }
+
+export const PipelineREST = new PipelineRest(PIPELINE_SERVICE_URL);

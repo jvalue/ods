@@ -1,3 +1,4 @@
+import PipelineCreate from './PipelineCreate.vue';
 import PipelineEdit from './PipelineEdit.vue';
 import PipelineOverview from './PipelineOverview.vue';
 
@@ -5,9 +6,9 @@ export default [
   {
     path: '/pipelines/new/:datasourceId?',
     name: 'pipeline-new',
-    component: PipelineEdit,
+    component: PipelineCreate,
     meta: {
-      title: 'Create new Pipeline',
+      title: 'CREATE PIPELINE',
       requiresAuth: true,
       isEditMode: false,
     },
@@ -16,12 +17,12 @@ export default [
     path: '/pipelines/',
     name: 'pipeline-overview',
     component: PipelineOverview,
-    meta: { title: 'Pipeline Overview', requiresAuth: true },
+    meta: { title: 'PIPELINES', requiresAuth: true },
   },
   {
     path: '/pipelines/:pipelineId',
     name: 'pipeline-edit',
     component: PipelineEdit,
-    meta: { title: 'Edit Pipeline', requiresAuth: true, isEditMode: true },
+    meta: { title: 'EDIT PIPELINE', requiresAuth: true, isEditMode: true },
   },
 ];

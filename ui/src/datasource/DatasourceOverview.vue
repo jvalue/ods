@@ -246,13 +246,19 @@ export default class DatsourceOverview extends Vue {
     const datasourcesStatus: Map<number, string> = new Map<number, string>();
 
     for (const element of this.datasources) {
-      const dataImport: DataimportMetaData | null = await DatasourceREST.getLatestDataimport(
-        element.id,
-      ).catch(() => null);
-      if (dataImport != null) {
-        datasourcesStatus.set(
+      try {
+        const dataImport: DataimportMetaData | null = await DatasourceREST.getLatestDataimport(
           element.id,
-          this.getHealthColor(dataImport.health),
+        );
+        if (dataImport != null) {
+          datasourcesStatus.set(
+            element.id,
+            this.getHealthColor(dataImport.health),
+          );
+        }
+      } catch (error) {
+        console.info(
+          `Found no transformation runs for data source ${element.id}`,
         );
       }
     }
