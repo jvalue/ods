@@ -37,8 +37,7 @@ export class DataSourceEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    const result = await datasourceRepository.getAllDataSources();
-    const datasource = KnexHelper.createDatasourceFromResultArray(result);
+    const datasource = await datasourceRepository.getAllDataSources();
     res.status(200).send(datasource);
   };
 
@@ -110,8 +109,16 @@ export class DataSourceEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
+    const datasourcesToDelete = await datasourceRepository.getAllDataSources();
     await datasourceRepository.deleteAllDatasources();
-    //TODO publish all Deletions
+    const routingKey = 'datasource.config.deleted';
+    //TODO fix wrong entry in outbox database
+    for (const dataSourceDeleted in datasourcesToDelete){
+      let datasourceModelForAmqp: DatasourceModelForAmqp = {
+        datasource: datasourcesToDelete[dataSourceDeleted],
+      };
+      await outboxRepository.publishToOutbox(datasourceModelForAmqp, routingKey);
+    }
     res.status(204).send();
   };
 
@@ -146,3 +153,62 @@ export class DataSourceEndpoint {
     res.status(200).send(returnDataImportResponse);
   };
 }
+//TODO check datasource return values for exact matching
+// {
+//   "datasource": {
+//   "id": "6",
+//     "format": {
+//     "type": "JSON",
+//       "parameters": {}
+//   },
+//   "schema": null,
+//     "trigger": {
+//     "interval": "60000",
+//       "periodic": true,
+//       "firstExecution": "2018-10-06T23:32:00.123Z"
+//   },
+//   "metadata": {
+//     "author": "icke",
+//       "license": "none",
+//       "description": null,
+//       "displayName": "pegelOnline",
+//       "creationTimestamp": "2022-04-01T06:43:07.000Z"
+//   },
+//   "protocol": {
+//     "type": "HTTP",
+//       "parameters": {
+//       "encoding": "UTF-8",
+//         "location": "https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json"
+//     }
+//   }
+// }
+// }
+// {
+//   "datasource": {
+//   "id": 10,
+//     "format": {
+//     "type": "JSON",
+//       "parameters": {}
+//   },
+//   "schema": null,
+//     "trigger": {
+//     "interval": 60000,
+//       "periodic": true,
+//       "firstExecution": "2018-10-07T01:32:00.123Z"
+//   },
+//   "metadata": {
+//     "author": "ickeUpdat2e",
+//       "license": "none",
+//       "description": null,
+//       "displayName": "pegelOnline",
+//       "creationTimestamp": "2022-04-22T14:29:45.663Z"
+//   },
+//   "protocol": {
+//     "type": "HTTP",
+//       "parameters": {
+//       "encoding": "UTF-8",
+//         "location": "https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json"
+//     }
+//   }
+// }
+// }

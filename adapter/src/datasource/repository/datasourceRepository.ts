@@ -16,7 +16,8 @@ const knex = require('knex')({
 
 export class DatasourceRepository {
   async getAllDataSources() {
-    return await knex.select().from('public.datasource');
+    const result= await knex.select().from('public.datasource');
+    return KnexHelper.createDatasourceFromResultArray(result);
   }
 
   async getDataSourceById(id: any) {
