@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading">
+  <div>
     <v-stepper v-model="dialogStep" vertical>
       <v-stepper-step :complete="dialogStep > 1" step="1">
         Datasource Name
@@ -126,17 +126,13 @@ export default class DatasourceForm extends Vue {
   private validStep5 = true; // Starts with valid default values
 
   @PropSync('value')
-  private datasource: Datasource | undefined;
+  private datasource!: Datasource;
 
   private isSchemaAlive = false;
   private required = requiredRule;
 
   mounted(): void {
     void this.updateIsSchemaAlive();
-  }
-
-  get isLoading(): boolean {
-    return this.datasource === undefined;
   }
 
   private async updateIsSchemaAlive(): Promise<void> {

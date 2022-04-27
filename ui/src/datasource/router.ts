@@ -13,7 +13,7 @@ export default [
     path: '/datasources/new',
     name: 'datasource-new',
     component: DatasourceCreate,
-    meta: { title: 'NEW DATA SOURCE', requiresAuth: true },
+    meta: { title: 'CREATE DATA SOURCE', requiresAuth: true },
   },
   {
     path: '/datasources/:datasourceId',
