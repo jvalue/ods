@@ -46,30 +46,65 @@
         </template>
 
         <template #[`item.action`]="{ item }">
-          <v-btn depressed small class="ma-2" @click="onShowPipelineData(item)">
-            Data
-            <v-icon dark right>
-              mdi mdi-database
-            </v-icon>
-          </v-btn>
-          <v-btn depressed small class="ma-2" @click="onEditPipeline(item)">
-            Edit
-            <v-icon dark right>
-              mdi mdi-pencil
-            </v-icon>
-          </v-btn>
-          <v-btn depressed small class="ma-2" @click="onDeletePipeline(item)">
-            Delete
-            <v-icon dark right>
-              mdi mdi-delete
-            </v-icon>
-          </v-btn>
-          <v-btn depressed small class="ma-2" @click="onNotifications(item)">
-            Notifications
-            <v-icon dark right>
-              mdi mdi-alarm
-            </v-icon>
-          </v-btn>
+          <v-tooltip top>
+            <template #activator="{ on, attrs }">
+              <v-icon
+                v-bind="attrs"
+                small
+                class="mr-2"
+                v-on="on"
+                @click="onShowPipelineData(item)"
+              >
+                mdi mdi-database
+              </v-icon>
+            </template>
+            <span>Data</span>
+          </v-tooltip>
+
+          <v-tooltip top>
+            <template #activator="{ on, attrs }">
+              <v-icon
+                v-bind="attrs"
+                small
+                class="mr-2"
+                v-on="on"
+                @click="onEditPipeline(item)"
+              >
+                mdi mdi-pencil
+              </v-icon>
+            </template>
+            <span>Edit</span>
+          </v-tooltip>
+
+          <v-tooltip top>
+            <template #activator="{ on, attrs }">
+              <v-icon
+                v-bind="attrs"
+                small
+                class="mr-2"
+                v-on="on"
+                @click="onEditPipeline(item)"
+              >
+                mdi mdi-delete
+              </v-icon>
+            </template>
+            <span>Delete</span>
+          </v-tooltip>
+
+          <v-tooltip top>
+            <template #activator="{ on, attrs }">
+              <v-icon
+                v-bind="attrs"
+                small
+                class="mr-2"
+                v-on="on"
+                @click="onNotifications(item)"
+              >
+                mdi mdi-alarm
+              </v-icon>
+            </template>
+            <span>Notifications</span>
+          </v-tooltip>
         </template>
 
         <template #[`item.health`]="{ item }">
