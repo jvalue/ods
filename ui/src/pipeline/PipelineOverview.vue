@@ -122,13 +122,17 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 
 import Pipeline, { HealthStatus } from './pipeline';
-import { PipelineREST } from './pipelineRest';
-import { TransformationREST } from './pipelineTransRest';
+import { PipelineRest } from './pipelineRest';
+import { PipelineTransRest } from './pipelineTransRest';
 
+import { PIPELINE_SERVICE_URL } from '@/env';
 import {
   convertMillisecondsToHours,
   convertMillisecondsToMinutes,
 } from '@/helpers/date-helpers';
+
+const PipelineREST = new PipelineRest(PIPELINE_SERVICE_URL);
+const TransformationREST = new PipelineTransRest(PIPELINE_SERVICE_URL);
 
 @Component({})
 export default class PipelineOverview extends Vue {

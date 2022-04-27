@@ -2,8 +2,6 @@ import axios, { AxiosInstance } from 'axios';
 
 import { TransformedDataMetaData } from './pipeline';
 
-import { PIPELINE_SERVICE_URL } from '@/env';
-
 export class PipelineTransRest {
   private readonly http: AxiosInstance;
 
@@ -30,5 +28,3 @@ export class PipelineTransRest {
     return jsonResponse;
   }
 }
-
-export const TransformationREST = new PipelineTransRest(PIPELINE_SERVICE_URL);

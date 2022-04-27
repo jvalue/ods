@@ -26,9 +26,12 @@ import Component from 'vue-class-component';
 
 import PipelineSchemaEdit from './edit/schema/PipelineSchemaEdit.vue';
 import PipelineForm from './PipelineForm.vue';
-import { PipelineREST } from './pipelineRest';
+import { PipelineRest } from './pipelineRest';
 
+import { PIPELINE_SERVICE_URL } from '@/env';
 import Pipeline from '@/pipeline/pipeline';
+
+const PipelineREST = new PipelineRest(PIPELINE_SERVICE_URL);
 
 @Component({
   components: {

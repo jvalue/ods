@@ -30,9 +30,12 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 
 import PipelineForm from './PipelineForm.vue';
-import { PipelineREST } from './pipelineRest';
+import { PipelineRest } from './pipelineRest';
 
+import { PIPELINE_SERVICE_URL } from '@/env';
 import Pipeline from '@/pipeline/pipeline';
+
+const PipelineREST = new PipelineRest(PIPELINE_SERVICE_URL);
 
 @Component({
   components: { PipelineForm },
