@@ -7,18 +7,18 @@ export default [
     path: '/datasources',
     name: 'datasource-overview',
     component: DatasourceOverview,
-    meta: { title: 'Datasource Overview', requiresAuth: true },
+    meta: { title: 'DATA SOURCES', requiresAuth: true },
   },
   {
     path: '/datasources/new',
     name: 'datasource-new',
     component: DatasourceCreate,
-    meta: { title: 'Create new Datasource', requiresAuth: true },
+    meta: { title: 'NEW DATA SOURCE', requiresAuth: true },
   },
   {
     path: '/datasources/:datasourceId',
     name: 'datasource-edit',
     component: DatasourceEdit,
-    meta: { title: 'Edit Datasource', requiresAuth: true },
+    meta: { title: 'EDIT DATA SOURCE', requiresAuth: true },
   },
 ];

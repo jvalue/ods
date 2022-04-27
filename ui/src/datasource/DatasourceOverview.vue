@@ -1,112 +1,119 @@
 <template>
   <div class="datasource">
-    <header class="d-flex mb-5">
-      <h1>Datasources</h1>
-      <v-spacer />
-      <v-btn depressed @click="loadDataSources()">
-        <v-icon>
-          mdi-sync
-        </v-icon>
-      </v-btn>
-      <v-btn class="ml-2" color="primary" @click="onCreate()">
-        Create Datasource
-      </v-btn>
-    </header>
-    <v-text-field
-      v-model="search"
-      class="mb-4"
-      label="Search name"
-      prepend-icon="mdi-magnify"
-      hide-details
-    />
+    <v-card>
+      <v-card-title>
+        <v-btn class="ml-2" color="success" @click="onCreate()">
+          Create data source
+          <v-icon dark right>
+            mdi mdi-cloud-download
+          </v-icon>
+        </v-btn>
+        <v-btn class="ma-2" @click="loadDataSources()">
+          <v-icon dark>
+            mdi mdi-sync
+          </v-icon>
+        </v-btn>
+        <v-spacer />
+        <v-text-field
+          v-model="search"
+          label="Search"
+          append-icon="mdi mdi-magnify"
+          single-line
+          hide-details
+        />
+      </v-card-title>
 
-    <v-data-table
-      :headers="headers"
-      :items="datasources"
-      :single-expand="true"
-      :search="search"
-      :custom-filter="filterOnlyDisplayName"
-      :loading="isLoadingDatasources && isLoadingDatasourcesStatus"
-      show-expand
-      class="elevation-3"
-    >
-      <template v-slot:progress>
-        <v-progress-linear indeterminate />
-      </template>
+      <v-data-table
+        :headers="headers"
+        :items="datasources"
+        :single-expand="true"
+        :search="search"
+        :custom-filter="filterOnlyDisplayName"
+        :loading="isLoadingDatasources && isLoadingDatasourcesStatus"
+        show-expand
+        class="elevation-3"
+      >
+        <template v-slot:progress>
+          <v-progress-linear indeterminate />
+        </template>
 
-      <template #[`item.trigger.periodic`]="{ item }">
-        <v-simple-checkbox v-model="item.trigger.periodic" disabled />
-      </template>
+        <template #[`item.trigger.periodic`]="{ item }">
+          <v-simple-checkbox v-model="item.trigger.periodic" disabled />
+        </template>
 
-      <template #[`item.protocol.parameters.location`]="{ item }">
-        {{ trimQueryParams(item.protocol.parameters.location) }}
-      </template>
+        <template #[`item.protocol.parameters.location`]="{ item }">
+          {{ trimQueryParams(item.protocol.parameters.location) }}
+        </template>
 
-      <template #[`item.action`]="{ item }">
-        <v-tooltip top>
-          <template #activator="{ on, attrs }">
-            <v-icon
-              v-bind="attrs"
-              small
-              class="mr-2"
-              v-on="on"
-              @click="onCreatePipeline(item)"
-            >
-              mdi-pipe
-            </v-icon>
-          </template>
-          <span>Create pipeline</span>
-        </v-tooltip>
-        <v-tooltip top>
-          <template #activator="{ on, attrs }">
-            <v-icon
-              v-bind="attrs"
-              small
-              class="mr-2"
-              v-on="on"
-              @click="onEdit(item)"
-            >
-              mdi-pencil
-            </v-icon>
-          </template>
-          <span>Edit</span>
-        </v-tooltip>
-        <v-tooltip top>
-          <template #activator="{ on, attrs }">
-            <v-icon
-              v-bind="attrs"
-              small
-              v-on="on"
-              @click="onTrigger(item)"
-              :disabled="isManualTriggering"
-            >
-              mdi-lightning-bolt
-            </v-icon>
-          </template>
-          <span>Trigger datasource</span>
-        </v-tooltip>
-        <v-tooltip top>
-          <template #activator="{ on, attrs }">
-            <v-icon v-bind="attrs" small v-on="on" @click="onDelete(item)">
-              mdi-delete
-            </v-icon>
-          </template>
-          <span>Delete</span>
-        </v-tooltip>
-      </template>
+        <template #[`item.action`]="{ item }">
+          <v-tooltip top>
+            <template #activator="{ on, attrs }">
+              <v-icon
+                v-bind="attrs"
+                small
+                class="mr-2"
+                v-on="on"
+                @click="onCreatePipeline(item)"
+              >
+                mdi-pipe
+              </v-icon>
+            </template>
+            <span>Create pipeline</span>
+          </v-tooltip>
 
-      <template #[`item.health`]="{ item }">
-        <v-icon small :color="datasourcesStatus.get(item.id)">
-          mdi-water
-        </v-icon>
-      </template>
+          <v-tooltip top>
+            <template #activator="{ on, attrs }">
+              <v-icon
+                v-bind="attrs"
+                small
+                class="mr-2"
+                v-on="on"
+                @click="onEdit(item)"
+              >
+                mdi-pencil
+              </v-icon>
+            </template>
+            <span>Edit</span>
+          </v-tooltip>
 
-      <template #expanded-item="{ headers, item }">
-        <td class="pa-2" :colspan="headers.length">
-          <pre>{{ datasourceToJson(item) }}</pre>
-        </td>
-      </template>
-    </v-data-table>
+          <v-tooltip top>
+            <template #activator="{ on, attrs }">
+              <v-icon
+                v-bind="attrs"
+                small
+                v-on="on"
+                @click="onTrigger(item)"
+                :disabled="isManualTriggering"
+              >
+                mdi-lightning-bolt
+              </v-icon>
+            </template>
+            <span>Trigger data source</span>
+          </v-tooltip>
+
+          <v-tooltip top>
+            <template #activator="{ on, attrs }">
+              <v-icon v-bind="attrs" small v-on="on" @click="onDelete(item)">
+                mdi-delete
+              </v-icon>
+            </template>
+            <span>Delete</span>
+          </v-tooltip>
+        </template>
+
+        <template #[`item.health`]="{ item }">
+          <v-icon small :color="datasourcesStatus.get(item.id)">
+            mdi-water
+          </v-icon>
+        </template>
+
+        <template #expanded-item="{ headers, item }">
+          <td class="pa-2" :colspan="headers.length">
+            <pre>{{ datasourceToJson(item) }}</pre>
+          </td>
+        </template>
+      </v-data-table>
+    </v-card>
   </div>
 </template>
 
