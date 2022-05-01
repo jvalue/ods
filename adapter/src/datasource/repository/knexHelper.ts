@@ -120,4 +120,8 @@ export class KnexHelper {
 
     return str;
   }
+
+  static createDataImportFromResult(result: any) {
+    //TODO
+  }
 }

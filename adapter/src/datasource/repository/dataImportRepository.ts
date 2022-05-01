@@ -1,3 +1,7 @@
+import {DatasourceInsertStatement} from "../model/DatasourceInsertStatement";
+import {KnexHelper} from "./knexHelper";
+import {DataImportInsertStatement} from "../model/DataImportInsertStatement";
+
 const knex = require('knex')({
   client: 'pg',
   connection: {
@@ -9,6 +13,8 @@ const knex = require('knex')({
     asyncStackTraces: true,
   },
 });
+
+
 export class DataImportRepository {
   async getMetaDataImportByDatasource(datasourceId: string) {
     return await knex
@@ -47,5 +53,25 @@ export class DataImportRepository {
       .from('public.data_import')
       .where('datasource_id', datasourceId)
       .andWhere('id', dataImportId);
+  }
+
+  async addDataImport(insertStatement: DataImportInsertStatement) {
+    return await knex('public.data_import')
+      .insert(insertStatement)
+      .returning('id')
+      .then(function (id: any) {
+        console.log(id);
+        console.log('neuer code geht');
+        return knex
+          .select()
+          .from('public.data_import')
+          .where('id', id[0].id)
+          .then(function (result: any) {
+            return KnexHelper.createDataImportFromResult(result);
+          });
+      })
+      .catch(function (err: any) {
+        console.log(err);
+      });
   }
 }

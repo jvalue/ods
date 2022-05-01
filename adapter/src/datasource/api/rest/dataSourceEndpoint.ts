@@ -13,8 +13,11 @@ import {DatasourceModelForAmqp} from '../../model/datasourceModelForAmqp';
 import {DatasourceRepository} from '../../repository/datasourceRepository';
 import {KnexHelper} from '../../repository/knexHelper';
 import {OutboxRepository} from '../../repository/outboxRepository';
+import {DataImportRepository} from "../../repository/dataImportRepository";
+import {DataImportInsertStatement} from "../../model/DataImportInsertStatement";
 
 const datasourceRepository: DatasourceRepository = new DatasourceRepository();
+const dataImportRepository: DataImportRepository = new DataImportRepository();
 const outboxRepository: OutboxRepository = new OutboxRepository();
 
 // export interface RuntimeParamters {
@@ -125,12 +128,19 @@ export class DataSourceEndpoint {
     }
     res.status(204).send();
   };
-
+//example TODO delete
+// {
+//   "id": 72,
+//   "timestamp": "2022-04-27T11:11:11.648Z",
+//   "health": "OK",
+//   "errorMessages": [],
+//   "location": "/datasources/1/imports/72/data"
+// }
   triggerDataImportForDatasource = async (
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    // TODO Error Handling general here when datasource == null
+
     const id = req.params.datasourceId;
     const datasource = await datasourceRepository.getDataSourceById(id);
     const runtimeParameters = req.body;
@@ -139,15 +149,28 @@ export class DataSourceEndpoint {
     const returnDataImportResponse =
       await AdapterService.getInstance().executeJob(adapterConfig);
 
-    // //TODO save response in dataimport table
-    // TODO check correct response
-    //TODO publish Imports
-    res.status(200).send(returnDataImportResponse);
+    const latestImport = await dataImportRepository.getLatestMetaDataImportByDatasourceId(id);
+    //TODO id..
+    let insertStatement: DataImportInsertStatement = {
+      id: 667,
+      data: returnDataImportResponse,
+      error_messages: [],
+      health: 'OK',
+      timestamp: new Date(Date.now()).toLocaleString(),
+      datasource_id: id
+    };
+    const dataImport = await dataImportRepository.addDataImport(
+      insertStatement,
+    );
+
+    const routingKey = 'datasource.execution.success';
+    await outboxRepository.publishToOutbox(returnDataImportResponse, routingKey);
+    res.status(200).send(dataImport);
   };
 
   private getAdapterConfigWithRuntimeParameters(datasource: any, runtimeParameters: any) {
 
-    const parameters= {
+    const parameters = {
       ...datasource.protocol.parameters,
       ...runtimeParameters.parameters
     }
@@ -172,61 +195,5 @@ export class DataSourceEndpoint {
 }
 
 //TODO check datasource return values for exact matching
-// {
-//   "datasource": {
-//   "id": "6",
-//     "format": {
-//     "type": "JSON",
-//       "parameters": {}
-//   },
-//   "schema": null,
-//     "trigger": {
-//     "interval": "60000",
-//       "periodic": true,
-//       "firstExecution": "2018-10-06T23:32:00.123Z"
-//   },
-//   "metadata": {
-//     "author": "icke",
-//       "license": "none",
-//       "description": null,
-//       "displayName": "pegelOnline",
-//       "creationTimestamp": "2022-04-01T06:43:07.000Z"
-//   },
-//   "protocol": {
-//     "type": "HTTP",
-//       "parameters": {
-//       "encoding": "UTF-8",
-//         "location": "https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json"
-//     }
-//   }
-// }
-// }
-// {
-//   "datasource": {
-//   "id": 10,
-//     "format": {
-//     "type": "JSON",
-//       "parameters": {}
-//   },
-//   "schema": null,
-//     "trigger": {
-//     "interval": 60000,
-//       "periodic": true,
-//       "firstExecution": "2018-10-07T01:32:00.123Z"
-//   },
-//   "metadata": {
-//     "author": "ickeUpdat2e",
-//       "license": "none",
-//       "description": null,
-//       "displayName": "pegelOnline",
-//       "creationTimestamp": "2022-04-22T14:29:45.663Z"
-//   },
-//   "protocol": {
-//     "type": "HTTP",
-//       "parameters": {
-//       "encoding": "UTF-8",
-//         "location": "https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json"
-//     }
-//   }
-// }
-// }
+// TODO replace routing keys with environment variables
+// TODO Error Handling general here when datasource == null
