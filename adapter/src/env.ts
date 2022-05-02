@@ -8,6 +8,7 @@ export const POSTGRES_USER = readEnvOrDie('POSTGRES_USER');
 export const POSTGRES_PW = readEnvOrDie('POSTGRES_PW');
 export const POSTGRES_DB = readEnvOrDie('POSTGRES_DB');
 export const POSTGRES_SCHEMA = readEnvOrDie('POSTGRES_SCHEMA');
+
 export const POSTGRES_SSL =
   readEnvOrDie('POSTGRES_SSL').toLowerCase() === 'true';
 
@@ -33,10 +34,6 @@ export const ADAPTER_AMQP_ADAPTER_EXCHANGE = readEnvOrDie(
   'ADAPTER_AMQP_ADAPTER_EXCHANGE',
 );
 
-
-export const AMQP_DATASOURCE_CONFIG_CREATED_TOPIC = readEnvOrDie(
-  'AMQP_DATASOURCE_CONFIG_CREATED_TOPIC',
-);
 export const ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE = readEnvOrDie(
   'ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE',
 );

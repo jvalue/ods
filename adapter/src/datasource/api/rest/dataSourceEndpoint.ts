@@ -1,32 +1,32 @@
 import express from 'express';
 
-import {AdapterEndpoint} from '../../../adapter/api/rest/adapterEndpoint';
-import {asyncHandler} from '../../../adapter/api/rest/utils';
-import {AdapterConfig} from '../../../adapter/model/AdapterConfig';
-import {Format} from '../../../adapter/model/enum/Format';
-import {Protocol} from '../../../adapter/model/enum/Protocol';
-import {FormatConfig} from '../../../adapter/model/FormatConfig';
-import {ProtocolConfig} from '../../../adapter/model/ProtocolConfig';
-import {AdapterService} from '../../../adapter/services/adapterService';
+import { AdapterEndpoint } from '../../../adapter/api/rest/adapterEndpoint';
+import { asyncHandler } from '../../../adapter/api/rest/utils';
+import { AdapterConfig } from '../../../adapter/model/AdapterConfig';
+import { Format } from '../../../adapter/model/enum/Format';
+import { Protocol } from '../../../adapter/model/enum/Protocol';
+import { FormatConfig } from '../../../adapter/model/FormatConfig';
+import { ProtocolConfig } from '../../../adapter/model/ProtocolConfig';
+import { AdapterService } from '../../../adapter/services/adapterService';
 import {
+  ADAPTER_AMQP_DATASOURCE_CREATED_TOPIC,
   ADAPTER_AMQP_DATASOURCE_DELETED_TOPIC,
   ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC,
-  AMQP_DATASOURCE_CONFIG_CREATED_TOPIC
+  ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC,
 } from '../../../env';
-import {DatasourceModelForAmqp} from '../../model/datasourceModelForAmqp';
-import {DatasourceRepository} from '../../repository/datasourceRepository';
-import {KnexHelper} from '../../repository/knexHelper';
-import {OutboxRepository} from '../../repository/outboxRepository';
-import {DataImportRepository} from "../../repository/dataImportRepository";
-import {DataImportInsertStatement} from "../../model/DataImportInsertStatement";
-import {AMQP_DATASOURCE_EXECUTION_SUCCESS_TOPIC} from "../../../../../pipeline/src/env";
+import { DataImportInsertStatement } from '../../model/DataImportInsertStatement';
+import { DatasourceModelForAmqp } from '../../model/datasourceModelForAmqp';
+import { DataImportRepository } from '../../repository/dataImportRepository';
+import { DatasourceRepository } from '../../repository/datasourceRepository';
+import { KnexHelper } from '../../repository/knexHelper';
+import { OutboxRepository } from '../../repository/outboxRepository';
 
 const datasourceRepository: DatasourceRepository = new DatasourceRepository();
 const dataImportRepository: DataImportRepository = new DataImportRepository();
 const outboxRepository: OutboxRepository = new OutboxRepository();
 
-// export interface RuntimeParamters {
-//   parameters: KeyValuePair[];
+// Export interface RuntimeParamters {
+//   Parameters: KeyValuePair[];
 // }
 
 export class DataSourceEndpoint {
@@ -77,8 +77,8 @@ export class DataSourceEndpoint {
     const datasouceModelForAmqp: DatasourceModelForAmqp = {
       datasource: datasource,
     };
-    let routingKey=AMQP_DATASOURCE_CONFIG_CREATED_TOPIC;
-    // const routingKey = 'datasource.config.created';
+    const routingKey = ADAPTER_AMQP_DATASOURCE_CREATED_TOPIC;
+    // Const routingKey = 'datasource.config.created';
     await outboxRepository.publishToOutbox(datasouceModelForAmqp, routingKey);
     res.status(201).send(datasource);
   };
@@ -96,8 +96,8 @@ export class DataSourceEndpoint {
     const datasourceModelForAmqp: DatasourceModelForAmqp = {
       datasource: datasource,
     };
-    let routingKey=ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC;
-    // const routingKey = 'datasource.config.updated';
+    const routingKey = ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC;
+    // Const routingKey = 'datasource.config.updated';
     await outboxRepository.publishToOutbox(datasourceModelForAmqp, routingKey);
     res.status(200).send(datasource);
   };
@@ -106,13 +106,13 @@ export class DataSourceEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    let id = req.params.datasourceId;
+    const id = req.params.datasourceId;
     const datasource = await datasourceRepository.getDataSourceById(id);
     await datasourceRepository.deleteDatasourceById(id);
     const datasourceModelForAmqp: DatasourceModelForAmqp = {
       datasource: datasource,
     };
-    // const routingKey = 'datasource.config.deleted';
+    // Const routingKey = 'datasource.config.deleted';
     const routingKey = ADAPTER_AMQP_DATASOURCE_DELETED_TOPIC;
     await outboxRepository.publishToOutbox(datasourceModelForAmqp, routingKey);
     res.status(204).send();
@@ -124,64 +124,76 @@ export class DataSourceEndpoint {
   ): Promise<void> => {
     const datasourcesToDelete = await datasourceRepository.getAllDataSources();
     await datasourceRepository.deleteAllDatasources();
-    // const routingKey = 'datasource.config.deleted';
+    // Const routingKey = 'datasource.config.deleted';
     const routingKey = ADAPTER_AMQP_DATASOURCE_DELETED_TOPIC;
-    //TODO fix wrong entry in outbox database
+    // TODO fix wrong entry in outbox database
     for (const dataSourceDeleted in datasourcesToDelete) {
-      let datasourceModelForAmqp: DatasourceModelForAmqp = {
+      const datasourceModelForAmqp: DatasourceModelForAmqp = {
         datasource: datasourcesToDelete[dataSourceDeleted],
       };
-      await outboxRepository.publishToOutbox(datasourceModelForAmqp, routingKey);
+      await outboxRepository.publishToOutbox(
+        datasourceModelForAmqp,
+        routingKey,
+      );
     }
     res.status(204).send();
   };
-//example TODO delete
-// {
-//   "id": 72,
-//   "timestamp": "2022-04-27T11:11:11.648Z",
-//   "health": "OK",
-//   "errorMessages": [],
-//   "location": "/datasources/1/imports/72/data"
-// }
+  // Example TODO delete
+  // {
+  //   "id": 72,
+  //   "timestamp": "2022-04-27T11:11:11.648Z",
+  //   "health": "OK",
+  //   "errorMessages": [],
+  //   "location": "/datasources/1/imports/72/data"
+  // }
   triggerDataImportForDatasource = async (
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-
     const id = req.params.datasourceId;
     const datasource = await datasourceRepository.getDataSourceById(id);
     const runtimeParameters = req.body;
-    const adapterConfig: AdapterConfig = await this.getAdapterConfigWithRuntimeParameters(datasource, runtimeParameters);
+    const adapterConfig: AdapterConfig =
+      await this.getAdapterConfigWithRuntimeParameters(
+        datasource,
+        runtimeParameters,
+      );
 
     const returnDataImportResponse =
       await AdapterService.getInstance().executeJob(adapterConfig);
 
-    const latestImport = await dataImportRepository.getLatestMetaDataImportByDatasourceId(id);
-    //TODO id..
-    let insertStatement: DataImportInsertStatement = {
+    const latestImport =
+      await dataImportRepository.getLatestMetaDataImportByDatasourceId(id);
+    // TODO id..
+    const insertStatement: DataImportInsertStatement = {
       id: 667,
       data: returnDataImportResponse,
       error_messages: [],
       health: 'OK',
       timestamp: new Date(Date.now()).toLocaleString(),
-      datasource_id: id
+      datasource_id: id,
     };
     const dataImport = await dataImportRepository.addDataImport(
       insertStatement,
     );
 
-    const routingKey = AMQP_DATASOURCE_EXECUTION_SUCCESS_TOPIC;
-    // const routingKey = 'datasource.execution.success';
-    await outboxRepository.publishToOutbox(returnDataImportResponse, routingKey);
+    const routingKey = ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC;
+    // Const routingKey = 'datasource.execution.success';
+    await outboxRepository.publishToOutbox(
+      returnDataImportResponse,
+      routingKey,
+    );
     res.status(200).send(dataImport);
   };
 
-  private getAdapterConfigWithRuntimeParameters(datasource: any, runtimeParameters: any) {
-
+  private getAdapterConfigWithRuntimeParameters(
+    datasource: any,
+    runtimeParameters: any,
+  ) {
     const parameters = {
       ...datasource.protocol.parameters,
-      ...runtimeParameters.parameters
-    }
+      ...runtimeParameters.parameters,
+    };
 
     const protocolConfigObj: ProtocolConfig = {
       protocol: new Protocol(Protocol.HTTP),
@@ -202,6 +214,6 @@ export class DataSourceEndpoint {
   }
 }
 
-//TODO check datasource return values for exact matching
+// TODO check datasource return values for exact matching
 // TODO replace routing keys with environment variables
 // TODO Error Handling general here when datasource == null

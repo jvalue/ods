@@ -3,9 +3,8 @@ import {ConsumeMessage} from 'amqplib';
 import {
   ADAPTER_AMQP_ADAPTER_EXCHANGE,
   ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE,
-  ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE_TOPIC
+  ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE_TOPIC,
 } from "../../../env";
-import {AMQP_DATASOURCE_IMPORT_TRIGGER_TOPIC} from "../../../../../scheduler/src/env";
 export async function createDataSourceAmqpConsumer(
   amqpConnection: AmqpConnection,
 ): Promise<AmqpConsumer> {
@@ -40,7 +39,7 @@ export class AmqpConsumer {
       //'adapter.datasource-import-trigger',
        ADAPTER_AMQP_ADAPTER_EXCHANGE,
       // 'ods_global',
-      AMQP_DATASOURCE_IMPORT_TRIGGER_TOPIC,
+      ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE_TOPIC,
       // 'datasource.import-trigger.*',
     );
 

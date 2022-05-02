@@ -1,14 +1,15 @@
 import { Server } from 'http';
 
+import { AmqpConnection } from '@jvalue/node-dry-amqp';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
 
 import { AdapterEndpoint } from './adapter/api/rest/adapterEndpoint';
+import { createDataSourceAmqpConsumer } from './datasource/api/amqp/amqpConsumer';
 import { DataImportEndpoint } from './datasource/api/rest/dataImportEndpoint';
 import { DataSourceEndpoint } from './datasource/api/rest/dataSourceEndpoint';
-import {AmqpConnection} from "@jvalue/node-dry-amqp";
-import {createDataSourceAmqpConsumer} from "./datasource/api/amqp/amqpConsumer";
+import { AMQP_URL, CONNECTION_BACKOFF, CONNECTION_RETRIES } from './env';
 
 export const port = 8080;
 export let server: Server | undefined;
@@ -25,18 +26,16 @@ async function main(): Promise<void> {
     res.status(200).send('I am alive!');
   });
   const amqpConnection = new AmqpConnection(
-    // AMQP_URL,
-    // CONNECTION_RETRIES,
-    // CONNECTION_BACKOFF,
-    // onAmqpConnectionLoss,
-    "amqp://rabbit_adm:R4bb!7_4DM_p4SS@localhost:5672",
-    30,
-    2000,
-    onAmqpConnectionLoss
+    AMQP_URL,
+    CONNECTION_RETRIES,
+    CONNECTION_BACKOFF,
+    onAmqpConnectionLoss,
+    // "amqp://rabbit_adm:R4bb!7_4DM_p4SS@localhost:5672",
+    // 30,
+    // 2000,
+    // OnAmqpConnectionLoss
   );
-  await createDataSourceAmqpConsumer(
-    amqpConnection
-  );
+  await createDataSourceAmqpConsumer(amqpConnection);
 
   const adapterEndpoint = new AdapterEndpoint();
   adapterEndpoint.registerRoutes(app);
