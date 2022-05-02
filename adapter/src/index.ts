@@ -9,6 +9,7 @@ import { AdapterEndpoint } from './adapter/api/rest/adapterEndpoint';
 import { createDataSourceAmqpConsumer } from './datasource/api/amqp/amqpConsumer';
 import { DataImportEndpoint } from './datasource/api/rest/dataImportEndpoint';
 import { DataSourceEndpoint } from './datasource/api/rest/dataSourceEndpoint';
+import { init as initDatabase } from './datasource/repository/datasourceDatabase';
 import { AMQP_URL, CONNECTION_BACKOFF, CONNECTION_RETRIES } from './env';
 
 export const port = 8080;
@@ -25,6 +26,12 @@ async function main(): Promise<void> {
   app.get('/', (req: express.Request, res: express.Response): void => {
     res.status(200).send('I am alive!');
   });
+
+  const postgresClient = await initDatabase(
+    CONNECTION_RETRIES,
+    CONNECTION_BACKOFF,
+  );
+  
   const amqpConnection = new AmqpConnection(
     AMQP_URL,
     CONNECTION_RETRIES,
