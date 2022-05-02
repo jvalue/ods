@@ -8,13 +8,18 @@ import {Protocol} from '../../../adapter/model/enum/Protocol';
 import {FormatConfig} from '../../../adapter/model/FormatConfig';
 import {ProtocolConfig} from '../../../adapter/model/ProtocolConfig';
 import {AdapterService} from '../../../adapter/services/adapterService';
-import {ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC} from '../../../env';
+import {
+  ADAPTER_AMQP_DATASOURCE_DELETED_TOPIC,
+  ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC,
+  AMQP_DATASOURCE_CONFIG_CREATED_TOPIC
+} from '../../../env';
 import {DatasourceModelForAmqp} from '../../model/datasourceModelForAmqp';
 import {DatasourceRepository} from '../../repository/datasourceRepository';
 import {KnexHelper} from '../../repository/knexHelper';
 import {OutboxRepository} from '../../repository/outboxRepository';
 import {DataImportRepository} from "../../repository/dataImportRepository";
 import {DataImportInsertStatement} from "../../model/DataImportInsertStatement";
+import {AMQP_DATASOURCE_EXECUTION_SUCCESS_TOPIC} from "../../../../../pipeline/src/env";
 
 const datasourceRepository: DatasourceRepository = new DatasourceRepository();
 const dataImportRepository: DataImportRepository = new DataImportRepository();
@@ -72,8 +77,8 @@ export class DataSourceEndpoint {
     const datasouceModelForAmqp: DatasourceModelForAmqp = {
       datasource: datasource,
     };
-    // Let routingKey=ADAPTER_AMQP_DATASOURCE_CREATED_TOPIC;
-    const routingKey = 'datasource.config.created';
+    let routingKey=AMQP_DATASOURCE_CONFIG_CREATED_TOPIC;
+    // const routingKey = 'datasource.config.created';
     await outboxRepository.publishToOutbox(datasouceModelForAmqp, routingKey);
     res.status(201).send(datasource);
   };
@@ -91,8 +96,8 @@ export class DataSourceEndpoint {
     const datasourceModelForAmqp: DatasourceModelForAmqp = {
       datasource: datasource,
     };
-    // Let routingKey=ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC;
-    const routingKey = 'datasource.config.updated';
+    let routingKey=ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC;
+    // const routingKey = 'datasource.config.updated';
     await outboxRepository.publishToOutbox(datasourceModelForAmqp, routingKey);
     res.status(200).send(datasource);
   };
@@ -107,7 +112,8 @@ export class DataSourceEndpoint {
     const datasourceModelForAmqp: DatasourceModelForAmqp = {
       datasource: datasource,
     };
-    const routingKey = 'datasource.config.deleted';
+    // const routingKey = 'datasource.config.deleted';
+    const routingKey = ADAPTER_AMQP_DATASOURCE_DELETED_TOPIC;
     await outboxRepository.publishToOutbox(datasourceModelForAmqp, routingKey);
     res.status(204).send();
   };
@@ -118,7 +124,8 @@ export class DataSourceEndpoint {
   ): Promise<void> => {
     const datasourcesToDelete = await datasourceRepository.getAllDataSources();
     await datasourceRepository.deleteAllDatasources();
-    const routingKey = 'datasource.config.deleted';
+    // const routingKey = 'datasource.config.deleted';
+    const routingKey = ADAPTER_AMQP_DATASOURCE_DELETED_TOPIC;
     //TODO fix wrong entry in outbox database
     for (const dataSourceDeleted in datasourcesToDelete) {
       let datasourceModelForAmqp: DatasourceModelForAmqp = {
@@ -163,7 +170,8 @@ export class DataSourceEndpoint {
       insertStatement,
     );
 
-    const routingKey = 'datasource.execution.success';
+    const routingKey = AMQP_DATASOURCE_EXECUTION_SUCCESS_TOPIC;
+    // const routingKey = 'datasource.execution.success';
     await outboxRepository.publishToOutbox(returnDataImportResponse, routingKey);
     res.status(200).send(dataImport);
   };
