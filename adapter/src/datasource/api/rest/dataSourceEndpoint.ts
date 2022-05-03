@@ -108,9 +108,8 @@ export class DataSourceEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    // TODO check response 204 with no body ?!
     const insertStatement = KnexHelper.getInsertStatementForDataSource(req);
-    const datasource = await datasourceRepository.updateDatasource(
+    const datasource: unknown = await datasourceRepository.updateDatasource(
       insertStatement,
       req.params.datasourceId,
     );
@@ -118,9 +117,8 @@ export class DataSourceEndpoint {
       datasource: datasource,
     };
     const routingKey = ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC;
-    // Const routingKey = 'datasource.config.updated';
     await outboxRepository.publishToOutbox(datasourceModelForAmqp, routingKey);
-    res.status(200).send(datasource);
+    res.status(204).send(datasource);
   };
 
   deleteDatasource = async (
@@ -173,18 +171,15 @@ export class DataSourceEndpoint {
   ): Promise<void> => {
     const id = req.params.datasourceId;
     const datasource = await datasourceRepository.getDataSourceById(id);
-    const runtimeParameters = req.body;
+    const runtimeParameters: unknown = req.body;
     const adapterConfig: AdapterConfig =
-      await this.getAdapterConfigWithRuntimeParameters(
-        datasource,
-        runtimeParameters,
-      );
+      this.getAdapterConfigWithRuntimeParameters(datasource, runtimeParameters);
 
     const returnDataImportResponse =
       await AdapterService.getInstance().executeJob(adapterConfig);
 
-    const latestImport =
-      await dataImportRepository.getLatestMetaDataImportByDatasourceId(id);
+    /* Const latestImport: unknown =
+      await dataImportRepository.getLatestMetaDataImportByDatasourceId(id);*/
     // TODO id..
     const insertStatement: DataImportInsertStatement = {
       id: 667,
@@ -194,12 +189,11 @@ export class DataSourceEndpoint {
       timestamp: new Date(Date.now()).toLocaleString(),
       datasource_id: id,
     };
-    const dataImport = await dataImportRepository.addDataImport(
+    const dataImport: unknown = await dataImportRepository.addDataImport(
       insertStatement,
     );
 
     const routingKey = ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC;
-    // Const routingKey = 'datasource.execution.success';
     await outboxRepository.publishToOutbox(
       returnDataImportResponse,
       routingKey,
