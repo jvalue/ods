@@ -70,6 +70,8 @@ export class DataSourceEndpoint {
   ): Promise<void> => {
     // Routingkey == topic
     // TODO typisierung Datasource & Dataimport
+    if(req.body.data.id!=null)
+      res.status(400)
     const insertStatement = KnexHelper.getInsertStatementForDataSource(req);
     const datasource = await datasourceRepository.addDatasource(
       insertStatement,
