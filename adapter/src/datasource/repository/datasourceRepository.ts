@@ -17,21 +17,23 @@ const knex = require('knex')({
 });
 
 const CREATE_DATASOURCE_REPOSITORY_STATEMENT = `
-  CREATE TABLE IF NOT EXISTS public.datasource (
-  "id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
-  "format_parameters" varchar,
-  "format_type" varchar,
-  "author" varchar,
-  "creation_timestamp" timestamp,
-  "description" varchar,
-  "display_name" varchar,
-  "license" varchar,
-  "protocol_parameters" text,
-  "protocol_type" varchar,
-  "first_execution" timestamp,
-  "interval" bigint,
-  "periodic" boolean,
-  CONSTRAINT "Data_pk_public.datasource" PRIMARY KEY (id)
+  CREATE TABLE IF NOT EXISTS public.datasource
+(
+    id bigint NOT NULL DEFAULT nextval('datasource_id_seq'::regclass),
+    format_parameters character varying(255) COLLATE pg_catalog."default",
+    format_type character varying(255) COLLATE pg_catalog."default",
+    author character varying(255) COLLATE pg_catalog."default",
+    creation_timestamp timestamp without time zone,
+    description character varying(255) COLLATE pg_catalog."default",
+    display_name character varying(255) COLLATE pg_catalog."default",
+    license character varying(255) COLLATE pg_catalog."default",
+    protocol_parameters text COLLATE pg_catalog."default",
+    protocol_type character varying(255) COLLATE pg_catalog."default",
+    schema jsonb,
+    first_execution timestamp without time zone,
+    "interval" bigint,
+    periodic boolean NOT NULL,
+    CONSTRAINT datasource_pkey PRIMARY KEY (id)
 )`;
 
 export async function createDatasourceTable(client: ClientBase): Promise<void> {

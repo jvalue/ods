@@ -44,7 +44,7 @@ import { readEnvOrDie } from '@jvalue/node-dry-basics';
 //   readEnvOrDie('ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_CREATED_TOPIC');
 export const CONNECTION_RETRIES=30
 export const CONNECTION_BACKOFF=2000
-export const POSTGRES_HOST="adapter-db"
+export const POSTGRES_HOST="localhost"//"adapter-db" //localhost for local
 export const POSTGRES_PORT="5432"
 export const POSTGRES_PW="admin"
 export const POSTGRES_USER="adapterservice"
