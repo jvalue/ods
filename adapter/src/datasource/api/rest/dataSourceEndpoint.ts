@@ -15,6 +15,7 @@ import {
   ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC,
 } from '../../../env';
 import { DataImportInsertStatement } from '../../model/DataImportInsertStatement';
+import { DatasourceConfigValidator } from '../../model/DatasourceConfigValidator';
 import { DatasourceModelForAmqp } from '../../model/datasourceModelForAmqp';
 import { DataImportRepository } from '../../repository/dataImportRepository';
 import { DatasourceRepository } from '../../repository/datasourceRepository';
@@ -70,24 +71,37 @@ export class DataSourceEndpoint {
   ): Promise<void> => {
     // Routingkey == topic
     // TODO typisierung Datasource & Dataimport
-    if(req.body.id){
-      res.status(400).send()
-    }else{
-      const insertStatement = KnexHelper.getInsertStatementForDataSource(req);
-      const datasource = await datasourceRepository.addDatasource(
-        insertStatement,
-      );
-      const datasouceModelForAmqp: DatasourceModelForAmqp = {
-        datasource: datasource,
-      };
-      const routingKey = ADAPTER_AMQP_DATASOURCE_CREATED_TOPIC;
-      // Const routingKey = 'datasource.config.created';
-      await outboxRepository.publishToOutbox(datasouceModelForAmqp, routingKey);
-      res.header('location',req.headers.host+req.url+'/'+datasource.id)
-      res.status(201).send(datasource);
+    const validator = new DatasourceConfigValidator();
+    if (!validator.validate(req.body)) {
+      res.status(400).json({ errors: validator.getErrors() });
+      return;
     }
-
-
+    try {
+      const protocolType = DataSourceEndpoint.getProtocol(
+        req.body.protocol.type,
+      );
+    } catch (e) {
+      res.status(400).send('Protocol not supported');
+      return;
+    }
+    try {
+      const formatType = DataSourceEndpoint.getFormat(req.body.format.type);
+    } catch (e) {
+      res.status(400).send('Format not supported');
+      return;
+    }
+    const insertStatement = KnexHelper.getInsertStatementForDataSource(req);
+    const datasource = await datasourceRepository.addDatasource(
+      insertStatement,
+    );
+    const datasouceModelForAmqp: DatasourceModelForAmqp = {
+      datasource: datasource,
+    };
+    const routingKey = ADAPTER_AMQP_DATASOURCE_CREATED_TOPIC;
+    // Const routingKey = 'datasource.config.created';
+    await outboxRepository.publishToOutbox(datasouceModelForAmqp, routingKey);
+    res.header('location', req.headers.host + req.url + '/' + datasource.id);
+    res.status(201).send(datasource);
   };
 
   updateDatasource = async (
@@ -218,6 +232,40 @@ export class DataSourceEndpoint {
       formatConfig: formatConfigObj,
     };
     return adapterConfig;
+  }
+
+  /*
+    Helper function to retrieve format from user-provided input
+  */
+  static getFormat(type: string): string {
+    switch (type) {
+      case 'JSON': {
+        return 'JSON';
+      }
+      case 'CSV': {
+        return 'CSV';
+      }
+      case 'XML': {
+        return 'XML';
+      }
+      default: {
+        throw new Error('Format not found');
+      }
+    }
+  }
+
+  /*
+  Helper function to retrieve protocol from user-provided input
+  */
+  static getProtocol(type: string): string {
+    switch (type) {
+      case 'HTTP': {
+        return 'HTTP';
+      }
+      default: {
+        throw new Error('Protocol not found');
+      }
+    }
   }
 }
 

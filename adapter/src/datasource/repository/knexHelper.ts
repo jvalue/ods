@@ -63,12 +63,12 @@ export class KnexHelper {
       trigger: {
         periodic: result[0].periodic,
         firstExecution: result[0].first_execution,
-        interval: result[0].interval,
+        interval: Number(result[0].interval),
       },
       schema: result[0].schema,
-      id: result[0].id,
+      id: Number(result[0].id),
     };
-    console.log(x);
+    // console.log(x);
 
     return x;
   }
@@ -122,6 +122,6 @@ export class KnexHelper {
   }
 
   static createDataImportFromResult(result: any) {
-    //TODO
+    // TODO
   }
 }

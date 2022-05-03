@@ -1,3 +1,5 @@
+import { Console } from 'console';
+
 import { ClientBase } from 'pg';
 
 import {
@@ -73,6 +75,7 @@ export class DatasourceRepository {
           .from('public.datasource')
           .where('id', id[0].id)
           .then(function (result: any) {
+            console.log('DATASOURCE RESULT IM KNEX: ' + result);
             return KnexHelper.createDatasourceFromResult(result);
           });
       })
