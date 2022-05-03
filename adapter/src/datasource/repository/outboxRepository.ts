@@ -1,18 +1,25 @@
+import { ClientBase } from 'pg';
 import { v4 as uuidv4 } from 'uuid';
 
+import {
+  POSTGRES_DB,
+  POSTGRES_HOST,
+  POSTGRES_PORT,
+  POSTGRES_PW,
+  POSTGRES_USER,
+} from '../../env';
 import { OutboxEvent } from '../model/outboxEvent';
 
 import { KnexHelper } from './knexHelper';
-import {ClientBase} from "pg";
 
 const knex = require('knex')({
   client: 'pg',
   connection: {
-    host: 'localhost',
-    port: '5432',
-    user: 'adapterservice',
-    password: 'admin',
-    database: 'adapterservice',
+    host: POSTGRES_HOST,
+    port: POSTGRES_PORT,
+    user: POSTGRES_USER,
+    password: POSTGRES_PW,
+    database: POSTGRES_DB,
     asyncStackTraces: true,
   },
 });

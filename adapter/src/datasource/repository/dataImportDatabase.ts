@@ -8,8 +8,8 @@ import {
   POSTGRES_PW,
   POSTGRES_USER,
 } from '../../env';
-import {createDataImportTable} from "./dataImportRepository";
 
+import { createDataImportTable } from './dataImportRepository';
 
 const POOL_CONFIG: PoolConfig = {
   host: POSTGRES_HOST,

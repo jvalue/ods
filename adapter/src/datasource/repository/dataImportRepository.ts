@@ -1,16 +1,25 @@
-import {DatasourceInsertStatement} from "../model/DatasourceInsertStatement";
-import {KnexHelper} from "./knexHelper";
-import {DataImportInsertStatement} from "../model/DataImportInsertStatement";
-import {ClientBase} from "pg";
+import { ClientBase } from 'pg';
+
+import {
+  POSTGRES_DB,
+  POSTGRES_HOST,
+  POSTGRES_PORT,
+  POSTGRES_PW,
+  POSTGRES_USER,
+} from '../../env';
+import { DataImportInsertStatement } from '../model/DataImportInsertStatement';
+import { DatasourceInsertStatement } from '../model/DatasourceInsertStatement';
+
+import { KnexHelper } from './knexHelper';
 
 const knex = require('knex')({
   client: 'pg',
   connection: {
-    host: 'localhost',
-    port: '5432',
-    user: 'adapterservice',
-    password: 'admin',
-    database: 'adapterservice',
+    host: POSTGRES_HOST,
+    port: POSTGRES_PORT,
+    user: POSTGRES_USER,
+    password: POSTGRES_PW,
+    database: POSTGRES_DB,
     asyncStackTraces: true,
   },
 });
@@ -36,9 +45,6 @@ export async function createDataImportTable(client: ClientBase): Promise<void> {
 }
 
 export class DataImportRepository {
-
-
-
   async getMetaDataImportByDatasource(datasourceId: string) {
     return await knex
       .select('id', 'timestamp', 'health', 'error_messages')

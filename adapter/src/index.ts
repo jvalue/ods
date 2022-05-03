@@ -9,10 +9,8 @@ import { AdapterEndpoint } from './adapter/api/rest/adapterEndpoint';
 import { createDataSourceAmqpConsumer } from './datasource/api/amqp/amqpConsumer';
 import { DataImportEndpoint } from './datasource/api/rest/dataImportEndpoint';
 import { DataSourceEndpoint } from './datasource/api/rest/dataSourceEndpoint';
-import { initDatasourceDatabase } from './datasource/repository/datasourceDatabase';
+import { initDatasourceDatabases } from './datasource/repository/datasourceDatabase';
 import { AMQP_URL, CONNECTION_BACKOFF, CONNECTION_RETRIES } from './env';
-import {initDataImportDatabase} from "./datasource/repository/dataImportDatabase";
-import {initOutboxDatabase} from "./datasource/repository/outboxDatabase";
 
 export const port = 8080;
 export let server: Server | undefined;
@@ -29,19 +27,7 @@ async function main(): Promise<void> {
     res.status(200).send('I am alive!');
   });
 
-   await initDatasourceDatabase(
-    CONNECTION_RETRIES,
-    CONNECTION_BACKOFF,
-  );
-   await initDataImportDatabase(
-    CONNECTION_RETRIES,
-    CONNECTION_BACKOFF,
-  );
-   await initOutboxDatabase(
-    CONNECTION_RETRIES,
-    CONNECTION_BACKOFF,
-  );
-
+  await initDatasourceDatabases(CONNECTION_RETRIES, CONNECTION_BACKOFF);
 
   const amqpConnection = new AmqpConnection(
     AMQP_URL,

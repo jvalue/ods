@@ -9,7 +9,9 @@ import {
   POSTGRES_USER,
 } from '../../env';
 
+import { createDataImportTable } from './dataImportRepository';
 import { createDatasourceTable } from './datasourceRepository';
+import { createOutboxTable } from './outboxRepository';
 
 const POOL_CONFIG: PoolConfig = {
   host: POSTGRES_HOST,
@@ -22,7 +24,7 @@ const POOL_CONFIG: PoolConfig = {
   connectionTimeoutMillis: 2000,
 };
 
-export async function initDatasourceDatabase(
+export async function initDatasourceDatabases(
   retries: number,
   backoffMs: number,
 ): Promise<PostgresClient> {
@@ -30,6 +32,8 @@ export async function initDatasourceDatabase(
   await postgresClient.waitForConnection(retries, backoffMs);
   await postgresClient.transaction(async (client) => {
     await createDatasourceTable(client);
+    await createDataImportTable(client);
+    await createOutboxTable(client);
   });
   return postgresClient;
 }
