@@ -77,15 +77,13 @@ export class DataSourceEndpoint {
       return;
     }
     try {
-      const protocolType = DataSourceEndpoint.getProtocol(
-        req.body.protocol.type,
-      );
+      DataSourceEndpoint.getProtocol(req.body.protocol.type);
     } catch (e) {
       res.status(400).send('Protocol not supported');
       return;
     }
     try {
-      const formatType = DataSourceEndpoint.getFormat(req.body.format.type);
+      DataSourceEndpoint.getFormat(req.body.format.type);
     } catch (e) {
       res.status(400).send('Format not supported');
       return;
@@ -202,9 +200,9 @@ export class DataSourceEndpoint {
   };
 
   private getAdapterConfigWithRuntimeParameters(
-    datasource: any,
-    runtimeParameters: any,
-  ) {
+    datasource: unknown,
+    runtimeParameters: unknown,
+  ): AdapterConfig {
     const parameters = {
       ...datasource.protocol.parameters,
       ...runtimeParameters.parameters,

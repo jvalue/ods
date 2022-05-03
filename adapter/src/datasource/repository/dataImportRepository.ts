@@ -8,7 +8,6 @@ import {
   POSTGRES_USER,
 } from '../../env';
 import { DataImportInsertStatement } from '../model/DataImportInsertStatement';
-import { DatasourceInsertStatement } from '../model/DatasourceInsertStatement';
 
 import { KnexHelper } from './knexHelper';
 

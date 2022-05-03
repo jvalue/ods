@@ -1,3 +1,5 @@
+import { truncateSync } from 'fs';
+
 import express, { Express, json } from 'express';
 
 import { asyncHandler } from '../../../adapter/api/rest/utils';
@@ -34,9 +36,10 @@ export class DataImportEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    const result = await dataImportRepository.getMetaDataImportByDatasource(
-      req.params.datasourceId,
-    );
+    const result: unknown =
+      await dataImportRepository.getMetaDataImportByDatasource(
+        req.params.datasourceId,
+      );
     let i = 0;
     result.forEach(function (el: any) {
       const dataImportId = el.id;
@@ -57,8 +60,12 @@ export class DataImportEndpoint {
     res: express.Response,
   ): Promise<void> => {
     const id = req.params.datasourceId;
-    const result =
+    const result: unknown =
       await dataImportRepository.getLatestMetaDataImportByDatasourceId(id);
+    if (checkResult(result)) {
+      res.status(400).send('Protocol not supported');
+      return;
+    }
     const dataImportId = result[0].id;
     result[0].location =
       '/datasources/' +
@@ -74,9 +81,12 @@ export class DataImportEndpoint {
     res: express.Response,
   ): Promise<void> => {
     const id = req.params.datasourceId;
-    const result = await dataImportRepository.getLatestDataImportByDatasourceId(
-      id,
-    );
+    const result: unknown =
+      await dataImportRepository.getLatestDataImportByDatasourceId(id);
+    if (checkResult(result)) {
+      res.status(400).send('Protocol not supported');
+      return;
+    }
     const stringResult = KnexHelper.stringFromUTF8Array(result[0].data);
     res.status(200).send(stringResult);
   };
@@ -87,10 +97,14 @@ export class DataImportEndpoint {
   ): Promise<void> => {
     const datasourceId = req.params.datasourceId;
     const dataImportId = req.params.dataImportId;
-    const result = await dataImportRepository.getMetadataForDataImport(
+    const result: unknown = await dataImportRepository.getMetadataForDataImport(
       datasourceId,
       dataImportId,
     );
+    if (checkResult(result)) {
+      res.status(400).send('Protocol not supported');
+      return;
+    }
     res.status(200).send(result[0]);
   };
 
@@ -100,11 +114,22 @@ export class DataImportEndpoint {
   ): Promise<void> => {
     const datasourceId = req.params.datasourceId;
     const dataImportId = req.params.dataImportId;
-    const result = await dataImportRepository.getDataFromDataImport(
+    const result: unknown = await dataImportRepository.getDataFromDataImport(
       datasourceId,
       dataImportId,
     );
+    if (checkResult(result)) {
+      res.status(400).send('Protocol not supported');
+      return;
+    }
     const stringFromUTF8Array = KnexHelper.stringFromUTF8Array(result[0].data);
     res.status(200).send(stringFromUTF8Array);
   };
+}
+function checkResult(result: unknown): boolean {
+  // Will evalute to true if value is null, undefined, NaN, '', 0 , false
+  if (!result || !result[0]) {
+    return true;
+  }
+  return false;
 }
