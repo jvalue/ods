@@ -10,8 +10,6 @@ import {
 } from '../../env';
 import { OutboxEvent } from '../model/outboxEvent';
 
-import { KnexHelper } from './knexHelper';
-
 const knex = require('knex')({
   client: 'pg',
   connection: {

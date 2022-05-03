@@ -8,8 +8,8 @@ import {
   POSTGRES_PW,
   POSTGRES_USER,
 } from '../../env';
-import {createOutboxTable} from "./outboxRepository";
 
+import { createOutboxTable } from './outboxRepository';
 
 const POOL_CONFIG: PoolConfig = {
   host: POSTGRES_HOST,

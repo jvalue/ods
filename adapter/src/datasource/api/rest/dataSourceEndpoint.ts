@@ -89,7 +89,7 @@ export class DataSourceEndpoint {
       return;
     }
     const insertStatement = KnexHelper.getInsertStatementForDataSource(req);
-    const datasource = await datasourceRepository.addDatasource(
+    const datasource: unknown = await datasourceRepository.addDatasource(
       insertStatement,
     );
     const datasouceModelForAmqp: DatasourceModelForAmqp = {
@@ -203,7 +203,7 @@ export class DataSourceEndpoint {
     datasource: unknown,
     runtimeParameters: unknown,
   ): AdapterConfig {
-    const parameters = {
+    const parameters: unknown = {
       ...datasource.protocol.parameters,
       ...runtimeParameters.parameters,
     };

@@ -1,3 +1,3 @@
 export interface DatasourceModelForAmqp {
-  datasource: any;
+  datasource: unknown;
 }

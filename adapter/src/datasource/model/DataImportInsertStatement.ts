@@ -1,8 +1,8 @@
 export interface DataImportInsertStatement {
-  id:any,
-  data: any,
-  error_messages: any,
-  health: any,
-  timestamp: any,
-  datasource_id: any
+  id: unknown;
+  data: unknown;
+  error_messages: unknown;
+  health: unknown;
+  timestamp: unknown;
+  datasource_id: unknown;
 }
