@@ -91,9 +91,9 @@ export class KnexHelper {
   }
 
   // From: https://weblog.rogueamoeba.com/2017/02/27/javascript-correctly-converting-a-byte-array-to-a-utf-8-string/
-  static stringFromUTF8Array(data: unknown): string {
+  static stringFromUTF8Array(data: any): string | null {
     const extraByteMap = [1, 1, 1, 1, 2, 2, 3, 0];
-    const count: number = data.length;
+    const count = data.length;
     let str = '';
 
     for (let index = 0; index < count; ) {

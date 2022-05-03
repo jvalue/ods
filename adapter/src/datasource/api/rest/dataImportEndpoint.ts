@@ -36,10 +36,9 @@ export class DataImportEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    const result: unknown =
-      await dataImportRepository.getMetaDataImportByDatasource(
-        req.params.datasourceId,
-      );
+    const result = await dataImportRepository.getMetaDataImportByDatasource(
+      req.params.datasourceId,
+    );
     let i = 0;
     result.forEach(function (el: any) {
       const dataImportId = el.id;
@@ -60,7 +59,7 @@ export class DataImportEndpoint {
     res: express.Response,
   ): Promise<void> => {
     const id = req.params.datasourceId;
-    const result: unknown =
+    const result =
       await dataImportRepository.getLatestMetaDataImportByDatasourceId(id);
     if (checkResult(result)) {
       res.status(400).send('Protocol not supported');
@@ -81,8 +80,9 @@ export class DataImportEndpoint {
     res: express.Response,
   ): Promise<void> => {
     const id = req.params.datasourceId;
-    const result: unknown =
-      await dataImportRepository.getLatestDataImportByDatasourceId(id);
+    const result = await dataImportRepository.getLatestDataImportByDatasourceId(
+      id,
+    );
     if (checkResult(result)) {
       res.status(400).send('Protocol not supported');
       return;
@@ -97,7 +97,7 @@ export class DataImportEndpoint {
   ): Promise<void> => {
     const datasourceId = req.params.datasourceId;
     const dataImportId = req.params.dataImportId;
-    const result: unknown = await dataImportRepository.getMetadataForDataImport(
+    const result = await dataImportRepository.getMetadataForDataImport(
       datasourceId,
       dataImportId,
     );
@@ -114,7 +114,7 @@ export class DataImportEndpoint {
   ): Promise<void> => {
     const datasourceId = req.params.datasourceId;
     const dataImportId = req.params.dataImportId;
-    const result: unknown = await dataImportRepository.getDataFromDataImport(
+    const result = await dataImportRepository.getDataFromDataImport(
       datasourceId,
       dataImportId,
     );
@@ -126,7 +126,7 @@ export class DataImportEndpoint {
     res.status(200).send(stringFromUTF8Array);
   };
 }
-function checkResult(result: unknown): boolean {
+function checkResult(result: any): boolean {
   // Will evalute to true if value is null, undefined, NaN, '', 0 , false
   if (!result || !result[0]) {
     return true;

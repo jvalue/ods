@@ -89,7 +89,7 @@ export class DataSourceEndpoint {
       return;
     }
     const insertStatement = KnexHelper.getInsertStatementForDataSource(req);
-    const datasource: unknown = await datasourceRepository.addDatasource(
+    const datasource = await datasourceRepository.addDatasource(
       insertStatement,
     );
     const datasouceModelForAmqp: DatasourceModelForAmqp = {
@@ -107,7 +107,7 @@ export class DataSourceEndpoint {
     res: express.Response,
   ): Promise<void> => {
     const insertStatement = KnexHelper.getInsertStatementForDataSource(req);
-    const datasource: unknown = await datasourceRepository.updateDatasource(
+    const datasource = await datasourceRepository.updateDatasource(
       insertStatement,
       req.params.datasourceId,
     );
@@ -169,7 +169,7 @@ export class DataSourceEndpoint {
   ): Promise<void> => {
     const id = req.params.datasourceId;
     const datasource = await datasourceRepository.getDataSourceById(id);
-    const runtimeParameters: unknown = req.body;
+    const runtimeParameters = req.body;
     const adapterConfig: AdapterConfig =
       this.getAdapterConfigWithRuntimeParameters(datasource, runtimeParameters);
 
@@ -187,7 +187,7 @@ export class DataSourceEndpoint {
       timestamp: new Date(Date.now()).toLocaleString(),
       datasource_id: id,
     };
-    const dataImport: unknown = await dataImportRepository.addDataImport(
+    const dataImport = await dataImportRepository.addDataImport(
       insertStatement,
     );
 
@@ -200,10 +200,10 @@ export class DataSourceEndpoint {
   };
 
   private getAdapterConfigWithRuntimeParameters(
-    datasource: unknown,
-    runtimeParameters: unknown,
+    datasource: any,
+    runtimeParameters: any,
   ): AdapterConfig {
-    const parameters: unknown = {
+    const parameters = {
       ...datasource.protocol.parameters,
       ...runtimeParameters.parameters,
     };
