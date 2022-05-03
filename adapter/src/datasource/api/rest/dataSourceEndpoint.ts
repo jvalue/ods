@@ -70,20 +70,24 @@ export class DataSourceEndpoint {
   ): Promise<void> => {
     // Routingkey == topic
     // TODO typisierung Datasource & Dataimport
-    if(req.body.id)
-      res.status(400)
-    const insertStatement = KnexHelper.getInsertStatementForDataSource(req);
-    const datasource = await datasourceRepository.addDatasource(
-      insertStatement,
-    );
-    const datasouceModelForAmqp: DatasourceModelForAmqp = {
-      datasource: datasource,
-    };
-    const routingKey = ADAPTER_AMQP_DATASOURCE_CREATED_TOPIC;
-    // Const routingKey = 'datasource.config.created';
-    await outboxRepository.publishToOutbox(datasouceModelForAmqp, routingKey);
-    res.header('location',req.headers.host+req.url+'/'+datasource.id)
-    res.status(201).send(datasource);
+    if(req.body.id){
+      res.status(400).send()
+    }else{
+      const insertStatement = KnexHelper.getInsertStatementForDataSource(req);
+      const datasource = await datasourceRepository.addDatasource(
+        insertStatement,
+      );
+      const datasouceModelForAmqp: DatasourceModelForAmqp = {
+        datasource: datasource,
+      };
+      const routingKey = ADAPTER_AMQP_DATASOURCE_CREATED_TOPIC;
+      // Const routingKey = 'datasource.config.created';
+      await outboxRepository.publishToOutbox(datasouceModelForAmqp, routingKey);
+      res.header('location',req.headers.host+req.url+'/'+datasource.id)
+      res.status(201).send(datasource);
+    }
+
+
   };
 
   updateDatasource = async (
