@@ -1,43 +1,41 @@
-import {AmqpChannel, AmqpConnection} from '@jvalue/node-dry-amqp';
-import {ConsumeMessage} from 'amqplib';
+import { AmqpChannel, AmqpConnection } from '@jvalue/node-dry-amqp';
+import { ConsumeMessage } from 'amqplib';
+
 import {
   ADAPTER_AMQP_ADAPTER_EXCHANGE,
   ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE,
   ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE_TOPIC,
-} from "../../../env";
+} from '../../../env';
 export async function createDataSourceAmqpConsumer(
   amqpConnection: AmqpConnection,
 ): Promise<AmqpConsumer> {
   const channel = await amqpConnection.createChannel();
-  const amqpConsumer = new AmqpConsumer(
-    channel,
-  );
+  const amqpConsumer = new AmqpConsumer(channel);
   await amqpConsumer.init();
   return amqpConsumer;
 }
 
 export class AmqpConsumer {
-  constructor(
-    private readonly amqpChannel: AmqpChannel,
-  ) { }
+  constructor(private readonly amqpChannel: AmqpChannel) {}
 
   /** Initializes the datasource execution consumer */
   async init(): Promise<void> {
     await this.amqpChannel.assertExchange(
       ADAPTER_AMQP_ADAPTER_EXCHANGE,
-      //'ods_global',
+      // 'ods_global',
       'topic',
     );
     await this.amqpChannel.assertQueue(
-      ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE
-      //'adapter.datasource-import-trigger'
-      , {
+      ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE,
+      // 'adapter.datasource-import-trigger'
+      {
         exclusive: false,
-      });
+      },
+    );
     await this.amqpChannel.bindQueue(
       ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE,
-      //'adapter.datasource-import-trigger',
-       ADAPTER_AMQP_ADAPTER_EXCHANGE,
+      // 'adapter.datasource-import-trigger',
+      ADAPTER_AMQP_ADAPTER_EXCHANGE,
       // 'ods_global',
       ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE_TOPIC,
       // 'datasource.import-trigger.*',
@@ -58,11 +56,11 @@ export class AmqpConsumer {
       );
       return;
     }
-    if (msg.fields.routingKey ===
-      ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE
+    if (
+      msg.fields.routingKey === ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE
       // 'adapter.datasource-import-trigger'
-  ) {
-      console.log("received" + msg);
+    ) {
+      console.log('received' + msg);
     }
     await this.amqpChannel.ack(msg);
   };
