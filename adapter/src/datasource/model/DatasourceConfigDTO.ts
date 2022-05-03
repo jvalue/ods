@@ -4,6 +4,7 @@ import {
 } from '../../adapter/model/EndpointDTOs';
 
 export interface DatasourceConfigDTO {
+  id: number;
   protocol: ProtocolConfigDTO;
   format: FormatConfigDTO;
   trigger: TriggerConfigDTO;

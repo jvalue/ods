@@ -43,10 +43,6 @@ export class DatasourceConfigValidator {
     } else if (!validators.isObject(request.schema)) {
       this.errors.push("'schema' must be an object or array");
     }
-    if (validators.hasProperty(request, 'id')) {
-      this.errors.push("'id' property is not needed");
-    }
-
     return this.errors.length === 0;
   }
 

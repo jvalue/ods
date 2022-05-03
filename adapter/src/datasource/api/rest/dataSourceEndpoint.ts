@@ -76,6 +76,10 @@ export class DataSourceEndpoint {
       res.status(400).json({ errors: validator.getErrors() });
       return;
     }
+    if (req.body.id) {
+      res.status(400).send('Id not allowed');
+      return;
+    }
     try {
       DataSourceEndpoint.getProtocol(req.body.protocol.type);
     } catch (e) {
@@ -106,6 +110,23 @@ export class DataSourceEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
+    const validator = new DatasourceConfigValidator();
+    if (!validator.validate(req.body)) {
+      res.status(400).json({ errors: validator.getErrors() });
+      return;
+    }
+    try {
+      DataSourceEndpoint.getProtocol(req.body.protocol.type);
+    } catch (e) {
+      res.status(400).send('Protocol not supported');
+      return;
+    }
+    try {
+      DataSourceEndpoint.getFormat(req.body.format.type);
+    } catch (e) {
+      res.status(400).send('Format not supported');
+      return;
+    }
     const insertStatement = KnexHelper.getInsertStatementForDataSource(req);
     const datasource = await datasourceRepository.updateDatasource(
       insertStatement,
