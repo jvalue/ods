@@ -145,8 +145,14 @@ export class DataSourceEndpoint {
     res: express.Response,
   ): Promise<void> => {
     const id = req.params.datasourceId;
-    const datasource = await datasourceRepository.getDataSourceById(id);
-    await datasourceRepository.deleteDatasourceById(id);
+    let datasource: unknown;
+    try {
+      datasource = await datasourceRepository.getDataSourceById(id);
+      await datasourceRepository.deleteDatasourceById(id);
+    } catch {
+      res.status(404).send('No datasource for id ' + id + ' found');
+      return;
+    }
     const datasourceModelForAmqp: DatasourceModelForAmqp = {
       datasource: datasource,
     };
