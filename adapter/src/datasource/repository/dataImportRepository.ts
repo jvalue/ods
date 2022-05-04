@@ -35,8 +35,8 @@ const CREATE_DATAIMPORT_REPOSITORY_STATEMENT = `
     CONSTRAINT data_import_pkey PRIMARY KEY (id),
     CONSTRAINT fkdhr9x05byn63qfej3i1vw975a FOREIGN KEY (datasource_id)
         REFERENCES public.datasource (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
 )`;
 
 export async function createDataImportTable(client: ClientBase): Promise<void> {
