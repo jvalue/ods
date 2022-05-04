@@ -10,11 +10,11 @@ export class KnexHelper {
       const x = {
         protocol: {
           type: el.protocol_type,
-          parameters: protocolParameters,
+          parameters: JSON.parse(protocolParameters),
         },
         format: {
           type: el.format_type,
-          parameters: formatParameters,
+          parameters: JSON.parse(formatParameters),
         },
         metadata: {
           author: el.author,
@@ -47,11 +47,11 @@ export class KnexHelper {
     const x = {
       protocol: {
         type: result[0].protocol_type,
-        parameters: protocolParameters,
+        parameters: JSON.parse(protocolParameters),
       },
       format: {
         type: result[0].format_type,
-        parameters: formatParameters,
+        parameters: JSON.parse(formatParameters),
       },
       metadata: {
         author: result[0].author,

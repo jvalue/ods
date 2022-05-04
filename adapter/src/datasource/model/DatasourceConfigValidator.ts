@@ -6,7 +6,7 @@ export class DatasourceConfigValidator {
   private errors: string[] = [];
 
   /**
-   * Validates the format configuration (guard function)
+   * Validates the datasource configuration (guard function)
    *
    * @param request the adapter configuration data object
    * @returns false, if an error is found
@@ -37,11 +37,6 @@ export class DatasourceConfigValidator {
       this.errors.push("'metadata' property is missing");
     } else if (!validators.isObject(request.metadata)) {
       this.errors.push("'metadata' must be an object or array");
-    }
-    if (!validators.hasProperty(request, 'schema')) {
-      this.errors.push("'schema' property is missing");
-    } else if (!validators.isObject(request.schema)) {
-      this.errors.push("'schema' must be an object or array");
     }
     return this.errors.length === 0;
   }
