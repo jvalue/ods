@@ -5,8 +5,8 @@ export class KnexHelper {
     const test = [];
     for (const i in result) {
       const el = result[i];
-      const protocolParameters = JSON.parse(el.protocol_parameters);
-      const formatParameters = JSON.parse(el.format_parameters);
+      const protocolParameters = el.protocol_parameters;
+      const formatParameters = el.format_parameters;
       const x = {
         protocol: {
           type: el.protocol_type,
@@ -26,10 +26,10 @@ export class KnexHelper {
         trigger: {
           periodic: el.periodic,
           firstExecution: el.first_execution,
-          interval: el.interval,
+          interval: Number(el.interval),
         },
         schema: el.schema,
-        id: el.id,
+        id: Number(el.id),
       };
       console.log(x);
       test.push(x);
@@ -42,8 +42,8 @@ export class KnexHelper {
   }
 
   static createDatasourceFromResult(result: any) {
-    const protocolParameters = JSON.parse(result[0].protocol_parameters);
-    const formatParameters = JSON.parse(result[0].format_parameters);
+    const protocolParameters = result[0].protocol_parameters;
+    const formatParameters = result[0].format_parameters;
     const x = {
       protocol: {
         type: result[0].protocol_type,
