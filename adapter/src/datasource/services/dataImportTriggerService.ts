@@ -12,6 +12,7 @@ import {DataImportRepository} from "../repository/dataImportRepository";
 import {DataImportResponse} from "../../adapter/model/DataImportResponse";
 import {ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC} from "../../env";
 import {OutboxRepository} from "../repository/outboxRepository";
+import {DataSourceNotFoundException} from "./dataSourceNotFoundException";
 
 const datasourceRepository: DatasourceRepository = new DatasourceRepository();
 const dataImportRepository: DataImportRepository = new DataImportRepository();
@@ -29,8 +30,14 @@ export class DataImportTriggerService {
   }
 
   private async getDataImport() {
-
-    const datasource = await datasourceRepository.getDataSourceById(this.id);
+    let datasource;
+    try {
+      datasource = await datasourceRepository.getDataSourceById(this.id);
+    }
+    //TODO check if exception is thrown or just null value result if debugging is available...
+    catch (e) {
+      throw new DataSourceNotFoundException(this.id);
+    }
     let adapterConfig: AdapterConfig;
     if (this.runtimeParameters) {
       adapterConfig = this.getAdapterConfigWithRuntimeParameters(datasource, this.runtimeParameters);

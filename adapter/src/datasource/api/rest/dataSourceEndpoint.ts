@@ -20,10 +20,10 @@ import {DatasourceRepository} from '../../repository/datasourceRepository';
 import {KnexHelper} from '../../repository/knexHelper';
 import {OutboxRepository} from '../../repository/outboxRepository';
 import {DataImportTriggerService} from "../../services/dataImportTriggerService";
+import {DataSourceNotFoundException} from "../../services/dataSourceNotFoundException";
 
 const datasourceRepository: DatasourceRepository = new DatasourceRepository();
 const outboxRepository: OutboxRepository = new OutboxRepository();
-
 
 
 export class DataSourceEndpoint {
@@ -69,7 +69,7 @@ export class DataSourceEndpoint {
     // TODO typisierung Datasource & Dataimport
     const validator = new DatasourceConfigValidator();
     if (!validator.validate(req.body)) {
-      res.status(400).json({ errors: validator.getErrors() });
+      res.status(400).json({errors: validator.getErrors()});
       return;
     }
     if (req.body.id) {
@@ -108,7 +108,7 @@ export class DataSourceEndpoint {
   ): Promise<void> => {
     const validator = new DatasourceConfigValidator();
     if (!validator.validate(req.body)) {
-      res.status(400).json({ errors: validator.getErrors() });
+      res.status(400).json({errors: validator.getErrors()});
       return;
     }
     try {
@@ -193,11 +193,20 @@ export class DataSourceEndpoint {
     const id = req.params.datasourceId;
     const runtimeParameters = req.body;
 
-    let dataImportTriggerer:DataImportTriggerService= new DataImportTriggerService(id, runtimeParameters);
-    let dataImport= await dataImportTriggerer.triggerImport();
-    res.status(200).send(dataImport);
-  };
+    let dataImportTriggerer: DataImportTriggerService = new DataImportTriggerService(id, runtimeParameters);
+    try {
+      let dataImport = await dataImportTriggerer.triggerImport();
+      res.status(200).send(dataImport);
+    } catch (e) {
+      if (e instanceof DataSourceNotFoundException) {
+        res.status(404).send(e.message)
+      } else {
+        res.status(500).send(e)
 
+      }
+    }
+
+  };
 
 
   /*
