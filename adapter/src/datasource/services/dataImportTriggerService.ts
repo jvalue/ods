@@ -45,11 +45,7 @@ export class DataImportTriggerService {
       adapterConfig = this.getAdapterConfigWithOutRuntimeParameters(datasource);
     }
 
-    const returnDataImportResponse =
-      await AdapterService.getInstance().executeJob(adapterConfig);
-    return returnDataImportResponse;
-    /* Const latestImport: unknown =
-      await dataImportRepository.getLatestMetaDataImportByDatasourceId(id);*/
+    return await AdapterService.getInstance().executeJob(adapterConfig);
 
   }
 
@@ -63,10 +59,9 @@ export class DataImportTriggerService {
       timestamp: new Date(Date.now()).toLocaleString(),
       datasource_id: this.id,
     };
-    const dataImport = await dataImportRepository.addDataImport(
+    return await dataImportRepository.addDataImport(
       insertStatement,
     );
-    return dataImport;
   }
 
   private getAdapterConfigWithRuntimeParameters(
@@ -89,11 +84,10 @@ export class DataImportTriggerService {
       format: format,
       parameters: datasource.format.parameters,
     };
-    const adapterConfig: AdapterConfig = {
+    return {
       protocolConfig: protocolConfigObj,
       formatConfig: formatConfigObj,
     };
-    return adapterConfig;
   }
 
   private async publishResult(routingKey: string, returnDataImportResponse: DataImportResponse) {

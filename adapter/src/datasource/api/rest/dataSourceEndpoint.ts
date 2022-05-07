@@ -1,21 +1,12 @@
 import express from 'express';
-
-import {AdapterEndpoint} from '../../../adapter/api/rest/adapterEndpoint';
 import {asyncHandler} from '../../../adapter/api/rest/utils';
-import {AdapterConfig} from '../../../adapter/model/AdapterConfig';
-import {Format} from '../../../adapter/model/enum/Format';
-import {Protocol} from '../../../adapter/model/enum/Protocol';
-import {FormatConfig} from '../../../adapter/model/FormatConfig';
-import {ProtocolConfig} from '../../../adapter/model/ProtocolConfig';
 import {
   ADAPTER_AMQP_DATASOURCE_CREATED_TOPIC,
   ADAPTER_AMQP_DATASOURCE_DELETED_TOPIC,
   ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC,
-  ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC,
 } from '../../../env';
 import {DatasourceConfigValidator} from '../../model/DatasourceConfigValidator';
 import {DatasourceModelForAmqp} from '../../model/datasourceModelForAmqp';
-import {DataImportRepository} from '../../repository/dataImportRepository';
 import {DatasourceRepository} from '../../repository/datasourceRepository';
 import {KnexHelper} from '../../repository/knexHelper';
 import {OutboxRepository} from '../../repository/outboxRepository';
@@ -65,8 +56,6 @@ export class DataSourceEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    // Routingkey == topic
-    // TODO typisierung Datasource & Dataimport
     const validator = new DatasourceConfigValidator();
     if (!validator.validate(req.body)) {
       res.status(400).json({errors: validator.getErrors()});
@@ -131,8 +120,7 @@ export class DataSourceEndpoint {
     const datasourceModelForAmqp: DatasourceModelForAmqp = {
       datasource: datasource,
     };
-    const routingKey = ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC;
-    await outboxRepository.publishToOutbox(datasourceModelForAmqp, routingKey);
+    await outboxRepository.publishToOutbox(datasourceModelForAmqp, ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC);
     res.status(204).send(datasource);
   };
 
@@ -178,14 +166,6 @@ export class DataSourceEndpoint {
     }
     res.status(204).send();
   };
-  // Example TODO delete
-  // {
-  //   "id": 72,
-  //   "timestamp": "2022-04-27T11:11:11.648Z",
-  //   "health": "OK",
-  //   "errorMessages": [],
-  //   "location": "/datasources/1/imports/72/data"
-  // }
   triggerDataImportForDatasource = async (
     req: express.Request,
     res: express.Response,
@@ -247,3 +227,5 @@ export class DataSourceEndpoint {
 // TODO check datasource return values for exact matching
 // TODO replace routing keys with environment variables
 // TODO Error Handling general here when datasource == null
+// TODO typisierung Datasource & Dataimport
+
