@@ -19,7 +19,7 @@ import {DataImportRepository} from '../../repository/dataImportRepository';
 import {DatasourceRepository} from '../../repository/datasourceRepository';
 import {KnexHelper} from '../../repository/knexHelper';
 import {OutboxRepository} from '../../repository/outboxRepository';
-import {DataImportTriggerService} from "./dataImportTriggerService";
+import {DataImportTriggerService} from "../../services/dataImportTriggerService";
 
 const datasourceRepository: DatasourceRepository = new DatasourceRepository();
 const outboxRepository: OutboxRepository = new OutboxRepository();

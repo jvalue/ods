@@ -7,7 +7,7 @@ import {
   ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE_TOPIC,
 } from '../../../env';
 import {DataSourceTriggerEvent} from "../../model/DataSourceTriggerEvent";
-import {DataImportTriggerService} from "../rest/dataImportTriggerService";
+import {DataImportTriggerService} from "../../services/dataImportTriggerService";
 export async function createDataSourceAmqpConsumer(
   amqpConnection: AmqpConnection,
 ): Promise<AmqpConsumer> {
