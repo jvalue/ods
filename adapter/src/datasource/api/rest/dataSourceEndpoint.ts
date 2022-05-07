@@ -1,29 +1,27 @@
 import express from 'express';
 
-import { AdapterEndpoint } from '../../../adapter/api/rest/adapterEndpoint';
-import { asyncHandler } from '../../../adapter/api/rest/utils';
-import { AdapterConfig } from '../../../adapter/model/AdapterConfig';
-import { Format } from '../../../adapter/model/enum/Format';
-import { Protocol } from '../../../adapter/model/enum/Protocol';
-import { FormatConfig } from '../../../adapter/model/FormatConfig';
-import { ProtocolConfig } from '../../../adapter/model/ProtocolConfig';
-import { AdapterService } from '../../../adapter/services/adapterService';
+import {AdapterEndpoint} from '../../../adapter/api/rest/adapterEndpoint';
+import {asyncHandler} from '../../../adapter/api/rest/utils';
+import {AdapterConfig} from '../../../adapter/model/AdapterConfig';
+import {Format} from '../../../adapter/model/enum/Format';
+import {Protocol} from '../../../adapter/model/enum/Protocol';
+import {FormatConfig} from '../../../adapter/model/FormatConfig';
+import {ProtocolConfig} from '../../../adapter/model/ProtocolConfig';
 import {
   ADAPTER_AMQP_DATASOURCE_CREATED_TOPIC,
   ADAPTER_AMQP_DATASOURCE_DELETED_TOPIC,
   ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC,
   ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC,
 } from '../../../env';
-import { DataImportInsertStatement } from '../../model/DataImportInsertStatement';
-import { DatasourceConfigValidator } from '../../model/DatasourceConfigValidator';
-import { DatasourceModelForAmqp } from '../../model/datasourceModelForAmqp';
-import { DataImportRepository } from '../../repository/dataImportRepository';
-import { DatasourceRepository } from '../../repository/datasourceRepository';
-import { KnexHelper } from '../../repository/knexHelper';
-import { OutboxRepository } from '../../repository/outboxRepository';
+import {DatasourceConfigValidator} from '../../model/DatasourceConfigValidator';
+import {DatasourceModelForAmqp} from '../../model/datasourceModelForAmqp';
+import {DataImportRepository} from '../../repository/dataImportRepository';
+import {DatasourceRepository} from '../../repository/datasourceRepository';
+import {KnexHelper} from '../../repository/knexHelper';
+import {OutboxRepository} from '../../repository/outboxRepository';
+import {DataImportTriggerService} from "./dataImportTriggerService";
 
 const datasourceRepository: DatasourceRepository = new DatasourceRepository();
-const dataImportRepository: DataImportRepository = new DataImportRepository();
 const outboxRepository: OutboxRepository = new OutboxRepository();
 
 // Export interface RuntimeParamters {
@@ -195,28 +193,11 @@ export class DataSourceEndpoint {
     res: express.Response,
   ): Promise<void> => {
     const id = req.params.datasourceId;
-    const datasource = await datasourceRepository.getDataSourceById(id);
     const runtimeParameters = req.body;
-    const adapterConfig: AdapterConfig =
-      this.getAdapterConfigWithRuntimeParameters(datasource, runtimeParameters);
 
-    const returnDataImportResponse =
-      await AdapterService.getInstance().executeJob(adapterConfig);
-
-    /* Const latestImport: unknown =
-      await dataImportRepository.getLatestMetaDataImportByDatasourceId(id);*/
-    // TODO id..
-    const insertStatement: DataImportInsertStatement = {
-      id: 667,
-      data: returnDataImportResponse,
-      error_messages: [],
-      health: 'OK',
-      timestamp: new Date(Date.now()).toLocaleString(),
-      datasource_id: id,
-    };
-    const dataImport = await dataImportRepository.addDataImport(
-      insertStatement,
-    );
+    let dataImportTriggerer:DataImportTriggerService= new DataImportTriggerService(id, runtimeParameters);
+    let returnDataImportResponse = await dataImportTriggerer.getDataImport();
+    let dataImport= await dataImportTriggerer.saveDataimport(returnDataImportResponse);
 
     const routingKey = ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC;
     await outboxRepository.publishToOutbox(
@@ -226,32 +207,7 @@ export class DataSourceEndpoint {
     res.status(200).send(dataImport);
   };
 
-  private getAdapterConfigWithRuntimeParameters(
-    datasource: any,
-    runtimeParameters: any,
-  ): AdapterConfig {
-    const parameters = {
-      ...datasource.protocol.parameters,
-      ...runtimeParameters.parameters,
-    };
 
-    const protocolConfigObj: ProtocolConfig = {
-      protocol: new Protocol(Protocol.HTTP),
-      parameters: parameters,
-    };
-    const format = new Format(
-      AdapterEndpoint.getFormat(datasource.format.type),
-    );
-    const formatConfigObj: FormatConfig = {
-      format: format,
-      parameters: datasource.format.parameters,
-    };
-    const adapterConfig: AdapterConfig = {
-      protocolConfig: protocolConfigObj,
-      formatConfig: formatConfigObj,
-    };
-    return adapterConfig;
-  }
 
   /*
     Helper function to retrieve format from user-provided input

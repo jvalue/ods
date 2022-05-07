@@ -6,6 +6,7 @@ import {
   ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE,
   ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE_TOPIC,
 } from '../../../env';
+import {DataSourceTriggerEvent} from "../../model/DataSourceTriggerEvent";
 export async function createDataSourceAmqpConsumer(
   amqpConnection: AmqpConnection,
 ): Promise<AmqpConsumer> {
@@ -14,6 +15,8 @@ export async function createDataSourceAmqpConsumer(
   await amqpConsumer.init();
   return amqpConsumer;
 }
+
+
 
 export class AmqpConsumer {
   constructor(private readonly amqpChannel: AmqpChannel) {}
@@ -60,6 +63,11 @@ export class AmqpConsumer {
       msg.fields.routingKey === ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE_TOPIC
       // 'adapter.datasource-import-trigger'
     ) {
+      // @ts-ignore TODO check warning
+      let msgContent:DataSourceTriggerEvent = msg.content.toJSON();
+
+
+
       console.log('received' + msg);
     }
     await this.amqpChannel.ack(msg);
