@@ -26,7 +26,7 @@ export class DataImportTriggerService {
     this.runtimeParameters = runtimeParameters;
   }
 
-  async getDataImport() {
+  private async getDataImport() {
 
     const datasource = await datasourceRepository.getDataSourceById(this.id);
     const adapterConfig: AdapterConfig =
@@ -39,7 +39,7 @@ export class DataImportTriggerService {
       await dataImportRepository.getLatestMetaDataImportByDatasourceId(id);*/
 
   }
-  async saveDataimport(returnDataImportResponse:any){
+  private async saveDataimport(returnDataImportResponse:any){
     // TODO id..
     const insertStatement: DataImportInsertStatement = {
       id: 667,
@@ -81,7 +81,7 @@ export class DataImportTriggerService {
     return adapterConfig;
   }
 
-  async publishResult(routingKey: string, returnDataImportResponse: DataImportResponse) {
+  private async publishResult(routingKey: string, returnDataImportResponse: DataImportResponse) {
     await outboxRepository.publishToOutbox(
       returnDataImportResponse,
       routingKey,
