@@ -12,10 +12,12 @@ import {DataImportRepository} from "../repository/dataImportRepository";
 import {DataImportResponse} from "../../adapter/model/DataImportResponse";
 import {ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC} from "../../env";
 import {OutboxRepository} from "../repository/outboxRepository";
+
 const datasourceRepository: DatasourceRepository = new DatasourceRepository();
 const dataImportRepository: DataImportRepository = new DataImportRepository();
 const routingKey = ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC;
 const outboxRepository: OutboxRepository = new OutboxRepository();
+
 export class DataImportTriggerService {
 
   id: string;
@@ -29,8 +31,12 @@ export class DataImportTriggerService {
   private async getDataImport() {
 
     const datasource = await datasourceRepository.getDataSourceById(this.id);
-    const adapterConfig: AdapterConfig =
-      this.getAdapterConfigWithRuntimeParameters(datasource, this.runtimeParameters);
+    let adapterConfig: AdapterConfig;
+    if (this.runtimeParameters) {
+      adapterConfig = this.getAdapterConfigWithRuntimeParameters(datasource, this.runtimeParameters);
+    } else {
+      adapterConfig = this.getAdapterConfigWithOutRuntimeParameters(datasource);
+    }
 
     const returnDataImportResponse =
       await AdapterService.getInstance().executeJob(adapterConfig);
@@ -39,7 +45,8 @@ export class DataImportTriggerService {
       await dataImportRepository.getLatestMetaDataImportByDatasourceId(id);*/
 
   }
-  private async saveDataimport(returnDataImportResponse:any){
+
+  private async saveDataimport(returnDataImportResponse: any) {
     // TODO id..
     const insertStatement: DataImportInsertStatement = {
       id: 667,
@@ -54,6 +61,7 @@ export class DataImportTriggerService {
     );
     return dataImport;
   }
+
   private getAdapterConfigWithRuntimeParameters(
     datasource: any,
     runtimeParameters: any,
@@ -94,4 +102,36 @@ export class DataImportTriggerService {
     await this.publishResult(routingKey, returnDataImportResponse);
     return dataImport;
   }
+
+  private getAdapterConfigWithOutRuntimeParameters(datasource: Datasource) {
+    const parameters = {
+      ...datasource.protocol.parameters,
+    };
+
+    const protocolConfigObj: ProtocolConfig = {
+      protocol: new Protocol(Protocol.HTTP),
+      parameters: parameters,
+    };
+    const format = new Format(
+      AdapterEndpoint.getFormat(datasource.format.type),
+    );
+    const formatConfigObj: FormatConfig = {
+      format: format,
+      parameters: datasource.format.parameters,
+    };
+    const adapterConfig: AdapterConfig = {
+      protocolConfig: protocolConfigObj,
+      formatConfig: formatConfigObj,
+    };
+    return adapterConfig;
+  }
+}
+
+interface Datasource {
+  schema: any;
+  protocol: { type: any; parameters: any };
+  metadata: { license: any; author: any; displayName: any; creationTimestamp: any; description: any };
+  format: { type: any; parameters: any };
+  trigger: { periodic: any; interval: number; firstExecution: any };
+  id: number
 }
