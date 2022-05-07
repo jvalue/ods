@@ -7,6 +7,7 @@ import {
   ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE_TOPIC,
 } from '../../../env';
 import {DataSourceTriggerEvent} from "../../model/DataSourceTriggerEvent";
+import {DataImportTriggerService} from "../rest/dataImportTriggerService";
 export async function createDataSourceAmqpConsumer(
   amqpConnection: AmqpConnection,
 ): Promise<AmqpConsumer> {
@@ -65,8 +66,8 @@ export class AmqpConsumer {
     ) {
       // @ts-ignore TODO check warning
       let msgContent:DataSourceTriggerEvent = msg.content.toJSON();
-
-
+      let dataImportTriggerService:DataImportTriggerService=new DataImportTriggerService(msgContent.datasourceId.toString(),msgContent.runtimeParameters);
+      await dataImportTriggerService.triggerImport();
 
       console.log('received' + msg);
     }

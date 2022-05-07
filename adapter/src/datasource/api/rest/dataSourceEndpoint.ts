@@ -24,9 +24,7 @@ import {DataImportTriggerService} from "./dataImportTriggerService";
 const datasourceRepository: DatasourceRepository = new DatasourceRepository();
 const outboxRepository: OutboxRepository = new OutboxRepository();
 
-// Export interface RuntimeParamters {
-//   Parameters: KeyValuePair[];
-// }
+
 
 export class DataSourceEndpoint {
   registerRoutes = (app: express.Application): void => {
@@ -196,14 +194,7 @@ export class DataSourceEndpoint {
     const runtimeParameters = req.body;
 
     let dataImportTriggerer:DataImportTriggerService= new DataImportTriggerService(id, runtimeParameters);
-    let returnDataImportResponse = await dataImportTriggerer.getDataImport();
-    let dataImport= await dataImportTriggerer.saveDataimport(returnDataImportResponse);
-
-    const routingKey = ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC;
-    await outboxRepository.publishToOutbox(
-      returnDataImportResponse,
-      routingKey,
-    );
+    let dataImport= await dataImportTriggerer.triggerImport();
     res.status(200).send(dataImport);
   };
 

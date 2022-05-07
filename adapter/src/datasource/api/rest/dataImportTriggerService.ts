@@ -9,8 +9,13 @@ import {AdapterEndpoint} from "../../../adapter/api/rest/adapterEndpoint";
 import {FormatConfig} from "../../../adapter/model/FormatConfig";
 import {DatasourceRepository} from "../../repository/datasourceRepository";
 import {DataImportRepository} from "../../repository/dataImportRepository";
+import {DataImportResponse} from "../../../adapter/model/DataImportResponse";
+import {ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC} from "../../../env";
+import {OutboxRepository} from "../../repository/outboxRepository";
 const datasourceRepository: DatasourceRepository = new DatasourceRepository();
 const dataImportRepository: DataImportRepository = new DataImportRepository();
+const routingKey = ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC;
+const outboxRepository: OutboxRepository = new OutboxRepository();
 export class DataImportTriggerService {
 
   id: string;
@@ -74,5 +79,19 @@ export class DataImportTriggerService {
       formatConfig: formatConfigObj,
     };
     return adapterConfig;
+  }
+
+  async publishResult(routingKey: string, returnDataImportResponse: DataImportResponse) {
+    await outboxRepository.publishToOutbox(
+      returnDataImportResponse,
+      routingKey,
+    );
+  }
+
+  async triggerImport() {
+    let returnDataImportResponse = await this.getDataImport();
+    let dataImport = await this.saveDataimport(returnDataImportResponse);
+    await this.publishResult(routingKey, returnDataImportResponse);
+    return dataImport;
   }
 }
