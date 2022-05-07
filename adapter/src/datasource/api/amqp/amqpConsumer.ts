@@ -57,7 +57,7 @@ export class AmqpConsumer {
       return;
     }
     if (
-      msg.fields.routingKey === ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE
+      msg.fields.routingKey === ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE_TOPIC
       // 'adapter.datasource-import-trigger'
     ) {
       console.log('received' + msg);
