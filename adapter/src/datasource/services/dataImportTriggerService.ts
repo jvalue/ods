@@ -57,7 +57,7 @@ export class DataImportTriggerService {
       timestamp: new Date(Date.now()).toLocaleString(),
       datasource_id: this.id,
     };
-    return await dataImportRepository.addDataImport(
+    return await dataImportRepository.addDataImport(parseInt(this.id),
       insertStatement,
     );
   }

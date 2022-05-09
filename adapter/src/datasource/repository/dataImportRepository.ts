@@ -10,6 +10,7 @@ import {
 import { DataImportInsertStatement } from '../model/DataImportInsertStatement';
 
 import { KnexHelper } from './knexHelper';
+import datasource from "../../../../ui/src/datasource/datasource";
 
 const knex = require('knex')({
   client: 'pg',
@@ -22,7 +23,6 @@ const knex = require('knex')({
     asyncStackTraces: true,
   },
 });
-
 const CREATE_DATAIMPORT_REPOSITORY_STATEMENT = `
   CREATE TABLE IF NOT EXISTS public.data_import
 (
@@ -83,25 +83,44 @@ export class DataImportRepository {
       .andWhere('id', dataImportId);
   }
 
-  async addDataImport(insertStatement: DataImportInsertStatement) {
-    return await knex('public.data_import')
+  async addDataImport(dataSourceId:number, insertStatement: DataImportInsertStatement) {
+    console.log("vahldieks ");
+    console.log("vahldieks "+dataSourceId);
+    let result = await knex('public.data_import')
       .insert(insertStatement)
       .returning('id')
       .then(function (id: any) {
         console.log(id);
+        console.log("easdfasdfsadfsadfsadf")
         console.log('neuer code geht');
         return knex
           .select()
           .from('public.data_import')
           .where('id', id[0].id)
           .then(function (result: any) {
-            const knext = new KnexHelper();
-            const x = knext.createDataImportFromResult(result);
+            const x = DataImportRepository.createDataImportFromResult(result);
             return x;
           });
       })
       .catch(function (err: any) {
         console.log(err);
       });
+    result['location']='/datasources/'+dataSourceId+'/imports/'+ Number(result[0].id)+'/data'
+    return result;
   }
+  static createDataImportFromResult(result: any) {
+    let x = {
+      id: Number(result[0].id),
+      data: KnexHelper.stringFromUTF8Array(result[0].data),
+      error_messages:result[0].error_messages,
+      health: result[0].health,
+      timestamp: result[0].timestamp,
+      datasource_id:result[0].datasourceId,
+    }
+    return x;
+  }
+  // function location(){
+  //   const location='/datasources/'+dataSourceId+'/imports/'+ Number(result[0].id)+'/data';
+  // }
+
 }
