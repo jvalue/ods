@@ -182,7 +182,6 @@ export class DataSourceEndpoint {
         res.status(404).send(e.message)
       } else {
         res.status(500).send(e)
-
       }
     }
 

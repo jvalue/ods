@@ -95,7 +95,9 @@ export class DataImportRepository {
           .from('public.data_import')
           .where('id', id[0].id)
           .then(function (result: any) {
-            return KnexHelper.createDataImportFromResult(result);
+            const knext = new KnexHelper();
+            const x = knext.createDataImportFromResult(result);
+            return x;
           });
       })
       .catch(function (err: any) {
