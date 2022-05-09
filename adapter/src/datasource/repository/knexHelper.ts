@@ -122,6 +122,13 @@ export class KnexHelper {
   }
 
   static createDataImportFromResult(result: any) {
-    // TODO
+    return {
+      id:result.id,
+      data: KnexHelper.stringFromUTF8Array(result.data),
+      error_messages:result.error_messages,
+      health: result.health,
+      timestamp: result.timestamp,
+      datasource_id:result.datasourceId
+    }
   }
 }
