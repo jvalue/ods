@@ -66,9 +66,14 @@ export class DataImportTriggerService {
     datasource: any,
     runtimeParameters: any,
   ): AdapterConfig {
+
+    let defaultParameter=datasource.protocol.parameters.defaultParameters;
+    for(const entry in runtimeParameters.parameters){
+      defaultParameter[entry]=runtimeParameters.parameters[entry];
+    }
+    datasource.protocol.parameters.defaultParameters=defaultParameter;
     const parameters = {
       ...datasource.protocol.parameters,
-      ...runtimeParameters.parameters,
     };
 
     const protocolConfigObj: ProtocolConfig = {
