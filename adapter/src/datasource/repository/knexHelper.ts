@@ -123,7 +123,7 @@ export class KnexHelper {
 
   createDataImportFromResult(result: any) {
     let x = {
-      id:result[0].id,
+      id: Number(result[0].id),
       data: KnexHelper.stringFromUTF8Array(result[0].data),
       error_messages:result[0].error_messages,
       health: result[0].health,
