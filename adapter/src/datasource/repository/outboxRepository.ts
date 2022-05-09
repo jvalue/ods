@@ -60,7 +60,7 @@ export class OutboxRepository {
   async publishImportTriggerResults(dataSourceId: Number, returnDataImportResponse: DataImportResponse, routingKey: string) {
     const id = uuidv4();
     let payload={
-      id:dataSourceId,
+      datasourceId:dataSourceId,
       data: returnDataImportResponse.data
     }
     let importTriggerOutboxEvent:OutboxEvent={
