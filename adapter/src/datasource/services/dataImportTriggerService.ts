@@ -88,17 +88,18 @@ export class DataImportTriggerService {
     };
   }
 
-  private async publishResult(routingKey: string, returnDataImportResponse: DataImportResponse) {
-    await outboxRepository.publishToOutbox(
+  private async publishResult(dataSourceId:Number, routingKey: string, returnDataImportResponse: DataImportResponse) {
+    await outboxRepository.publishImportTriggerResults(
+      dataSourceId,
       returnDataImportResponse,
       routingKey,
     );
   }
 
-  async triggerImport() {
+  async triggerImport(dataSourceId:Number) {
     let returnDataImportResponse = await this.getDataImport();
     let dataImport = await this.saveDataimport(returnDataImportResponse);
-    await this.publishResult(routingKey, returnDataImportResponse);
+    await this.publishResult(dataSourceId,routingKey, returnDataImportResponse);
     return dataImport;
   }
 

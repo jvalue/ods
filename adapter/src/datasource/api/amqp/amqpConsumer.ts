@@ -67,7 +67,7 @@ export class AmqpConsumer {
       // @ts-ignore TODO check warning
       let msgContent:DataSourceTriggerEvent = msg.content.toJSON();
       let dataImportTriggerService:DataImportTriggerService=new DataImportTriggerService(msgContent.datasourceId.toString(),msgContent.runtimeParameters);
-      await dataImportTriggerService.triggerImport();
+      await dataImportTriggerService.triggerImport(msgContent.datasourceId);
 
       console.log('received' + msg);
     }
