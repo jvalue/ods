@@ -28,7 +28,7 @@ const knex = require('knex')({
 const CREATE_DATASOURCE_REPOSITORY_STATEMENT = `
   CREATE TABLE IF NOT EXISTS public.datasource
 (
-    id bigint NOT NULL DEFAULT nextval('datasource_id_seq'::regclass),
+    id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
     format_parameters character varying(255) COLLATE pg_catalog."default",
     format_type character varying(255) COLLATE pg_catalog."default",
     author character varying(255) COLLATE pg_catalog."default",

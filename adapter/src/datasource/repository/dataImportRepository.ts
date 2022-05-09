@@ -26,7 +26,7 @@ const knex = require('knex')({
 const CREATE_DATAIMPORT_REPOSITORY_STATEMENT = `
   CREATE TABLE IF NOT EXISTS public.data_import
 (
-    id bigint NOT NULL,
+    id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
     data bytea,
     error_messages text[] COLLATE pg_catalog."default",
     health character varying(255) COLLATE pg_catalog."default",

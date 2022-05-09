@@ -50,9 +50,7 @@ export class DataImportTriggerService {
   }
 
   private async saveDataimport(returnDataImportResponse: any) {
-    // TODO id..
     const insertStatement: DataImportInsertStatement = {
-      id: 667,
       data: returnDataImportResponse,
       error_messages: [],
       health: 'OK',
