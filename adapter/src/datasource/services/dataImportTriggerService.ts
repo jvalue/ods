@@ -104,6 +104,11 @@ export class DataImportTriggerService {
   async triggerImport(dataSourceId:Number) {
     let returnDataImportResponse = await this.getDataImport();
     let dataImport = await this.saveDataimport(returnDataImportResponse);
+    dataImport['location'] = '/datasources/' +
+    dataSourceId +
+    '/imports/' +
+    Number(dataImport.id) +
+    '/data';
     await this.publishResult(dataSourceId,routingKey, returnDataImportResponse);
     return dataImport;
   }
