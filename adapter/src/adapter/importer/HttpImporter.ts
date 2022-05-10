@@ -81,8 +81,19 @@ export class HttpImporter extends Importer {
    * @throws Error if Location-URI returns 404 status code
    */
   override async doFetch(parameters: Record<string, unknown>): Promise<string> {
-    const uri = parameters.location as string;
+    let uri = parameters.location as string;
     const encoding = parameters.encoding as string;
+    const defaultParameters = parameters.defaultParameters as Record<
+      string,
+      unknown
+    >;
+
+    const keys = Object.keys(defaultParameters);
+    for (const entry of keys) {
+      const value = defaultParameters[entry] as string;
+      const regex = new RegExp('{' + entry + '}', 'g');
+      uri = uri.replace(regex, value);
+    }
 
     const result = await axios
       .get(uri, { responseEncoding: encoding })

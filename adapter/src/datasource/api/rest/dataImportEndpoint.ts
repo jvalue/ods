@@ -114,16 +114,21 @@ export class DataImportEndpoint {
   ): Promise<void> => {
     const datasourceId = req.params.datasourceId;
     const dataImportId = req.params.dataImportId;
-    const result = await dataImportRepository.getDataFromDataImport(
+    /* Const result = await dataImportRepository.getDataFromDataImport(
       datasourceId,
       dataImportId,
     );
     if (checkResult(result)) {
       res.status(400).send('Protocol not supported');
       return;
-    }
-    const stringFromUTF8Array = KnexHelper.stringFromUTF8Array(result[0].data);
-    res.status(200).send(stringFromUTF8Array);
+    }*/
+    const returnDataImportResponse =
+      await dataImportRepository.getDataFromDataImportWithParameter(
+        datasourceId,
+        dataImportId,
+      );
+    
+    res.status(200).send(returnDataImportResponse);
   };
 }
 function checkResult(result: any): boolean {
