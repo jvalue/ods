@@ -1,21 +1,21 @@
 import express from 'express';
-import {asyncHandler} from '../../../adapter/api/rest/utils';
+
+import { asyncHandler } from '../../../adapter/api/rest/utils';
 import {
   ADAPTER_AMQP_DATASOURCE_CREATED_TOPIC,
   ADAPTER_AMQP_DATASOURCE_DELETED_TOPIC,
   ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC,
 } from '../../../env';
-import {DatasourceConfigValidator} from '../../model/DatasourceConfigValidator';
-import {DatasourceModelForAmqp} from '../../model/datasourceModelForAmqp';
-import {DatasourceRepository} from '../../repository/datasourceRepository';
-import {KnexHelper} from '../../repository/knexHelper';
-import {OutboxRepository} from '../../repository/outboxRepository';
-import {DataImportTriggerService} from "../../services/dataImportTriggerService";
-import {DataSourceNotFoundException} from "../../services/dataSourceNotFoundException";
+import { DatasourceConfigValidator } from '../../model/DatasourceConfigValidator';
+import { DatasourceModelForAmqp } from '../../model/datasourceModelForAmqp';
+import { DatasourceRepository } from '../../repository/datasourceRepository';
+import { KnexHelper } from '../../repository/knexHelper';
+import { OutboxRepository } from '../../repository/outboxRepository';
+import { DataImportTriggerService } from '../../services/dataImportTriggerService';
+import { DataSourceNotFoundException } from '../../services/dataSourceNotFoundException';
 
 const datasourceRepository: DatasourceRepository = new DatasourceRepository();
 const outboxRepository: OutboxRepository = new OutboxRepository();
-
 
 export class DataSourceEndpoint {
   registerRoutes = (app: express.Application): void => {
@@ -58,7 +58,7 @@ export class DataSourceEndpoint {
   ): Promise<void> => {
     const validator = new DatasourceConfigValidator();
     if (!validator.validate(req.body)) {
-      res.status(400).json({errors: validator.getErrors()});
+      res.status(400).json({ errors: validator.getErrors() });
       return;
     }
     if (req.body.id) {
@@ -84,11 +84,11 @@ export class DataSourceEndpoint {
     const datasouceModelForAmqp: DatasourceModelForAmqp = {
       datasource: datasource,
     };
+
     const routingKey = ADAPTER_AMQP_DATASOURCE_CREATED_TOPIC;
-    // Const routingKey = 'datasource.config.created';
     await outboxRepository.publishToOutbox(datasouceModelForAmqp, routingKey);
     res.header('location', req.headers.host + req.url + '/' + datasource.id);
-    res.status(201).send(datasource);
+    res.status(201).send(datasouceModelForAmqp);
   };
 
   updateDatasource = async (
@@ -97,7 +97,7 @@ export class DataSourceEndpoint {
   ): Promise<void> => {
     const validator = new DatasourceConfigValidator();
     if (!validator.validate(req.body)) {
-      res.status(400).json({errors: validator.getErrors()});
+      res.status(400).json({ errors: validator.getErrors() });
       return;
     }
     try {
@@ -120,7 +120,10 @@ export class DataSourceEndpoint {
     const datasourceModelForAmqp: DatasourceModelForAmqp = {
       datasource: datasource,
     };
-    await outboxRepository.publishToOutbox(datasourceModelForAmqp, ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC);
+    await outboxRepository.publishToOutbox(
+      datasourceModelForAmqp,
+      ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC,
+    );
     res.status(204).send(datasource);
   };
 
@@ -173,20 +176,19 @@ export class DataSourceEndpoint {
     const id = req.params.datasourceId;
     const runtimeParameters = req.body;
 
-    let dataImportTriggerer: DataImportTriggerService = new DataImportTriggerService(id, runtimeParameters);
+    const dataImportTriggerer: DataImportTriggerService =
+      new DataImportTriggerService(id, runtimeParameters);
     try {
-      let dataImport = await dataImportTriggerer.triggerImport(Number(id));
+      const dataImport = await dataImportTriggerer.triggerImport(Number(id));
       res.status(200).send(dataImport);
     } catch (e) {
       if (e instanceof DataSourceNotFoundException) {
-        res.status(404).send(e.message)
+        res.status(404).send(e.message);
       } else {
-        res.status(500).send(e)
+        res.status(500).send(e);
       }
     }
-
   };
-
 
   /*
     Helper function to retrieve format from user-provided input
@@ -227,4 +229,3 @@ export class DataSourceEndpoint {
 // TODO replace routing keys with environment variables
 // TODO Error Handling general here when datasource == null
 // TODO typisierung Datasource & Dataimport
-
