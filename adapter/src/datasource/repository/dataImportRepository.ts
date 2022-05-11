@@ -96,7 +96,7 @@ export class DataImportRepository {
     const dataSource = await datasourceRepository.getDataSourceById(
       datasourceId,
     );
-    let result: Record<string, unknown> = {
+    const result: Record<string, unknown> = {
       data: KnexHelper.stringFromUTF8Array(dataImport[0].data),
     };
 
@@ -112,10 +112,8 @@ export class DataImportRepository {
     dataSourceId: number,
     insertStatement: DataImportInsertStatement,
   ) {
-    let result: Record<string, any> = {};
-    console.log('vahldieks ');
-    console.log('vahldieks ' + dataSourceId);
-    result = await knex('public.data_import')
+    const result: Record<string, any> = {};
+    return await knex('public.data_import')
       .insert(insertStatement)
       .returning('id')
       .then(function (id: any) {
@@ -134,8 +132,6 @@ export class DataImportRepository {
       .catch(function (err: any) {
         console.log(err);
       });
-
-    return result;
   }
   static createDataImportFromResult(result: any) {
     const x = {

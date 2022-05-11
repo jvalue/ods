@@ -1,6 +1,7 @@
 import { ClientBase } from 'pg';
 import { v4 as uuidv4 } from 'uuid';
 
+import { DataImportResponse } from '../../adapter/model/DataImportResponse';
 import {
   POSTGRES_DB,
   POSTGRES_HOST,
@@ -9,7 +10,6 @@ import {
   POSTGRES_USER,
 } from '../../env';
 import { OutboxEvent } from '../model/outboxEvent';
-import {DataImportResponse} from "../../adapter/model/DataImportResponse";
 
 const knex = require('knex')({
   client: 'pg',
@@ -36,7 +36,6 @@ export async function createOutboxTable(client: ClientBase): Promise<void> {
   await client.query(CREATE_OUTBOX_REPOSITORY_STATEMENT);
 }
 
-
 export class OutboxRepository {
   async publishToOutbox(payload: any, routingKey: string) {
     const id = uuidv4();
@@ -57,14 +56,18 @@ export class OutboxRepository {
       });
   }
 
-  async publishImportTriggerResults(dataSourceId: Number, returnDataImportResponse: DataImportResponse, routingKey: string) {
+  async publishImportTriggerResults(
+    dataSourceId: number,
+    returnDataImportResponse: DataImportResponse,
+    routingKey: string,
+  ) {
     const id = uuidv4();
-    let payload={
-      datasourceId:dataSourceId,
-      data: returnDataImportResponse.data
-    }
-    let importTriggerOutboxEvent:OutboxEvent={
-      id:id,
+    const payload = {
+      datasourceId: dataSourceId,
+      data: JSON.stringify(returnDataImportResponse.data),
+    };
+    const importTriggerOutboxEvent: OutboxEvent = {
+      id: id,
       payload: payload,
       routing_key: routingKey,
     };

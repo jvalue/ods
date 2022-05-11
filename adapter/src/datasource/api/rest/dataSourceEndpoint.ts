@@ -179,7 +179,7 @@ export class DataSourceEndpoint {
     const dataImportTriggerer: DataImportTriggerService =
       new DataImportTriggerService(id, runtimeParameters);
     try {
-      const dataImport = await dataImportTriggerer.triggerImport(Number(id));
+      const dataImport = await dataImportTriggerer.triggerImport(parseInt(id));
       res.status(200).send(dataImport);
     } catch (e) {
       if (e instanceof DataSourceNotFoundException) {

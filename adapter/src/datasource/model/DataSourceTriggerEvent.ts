@@ -1,11 +1,11 @@
 export interface DataSourceTriggerEvent {
-  datasourceId:Number,
-  runtimeParameters: RuntimeParameters
+  datasourceId: number;
+  runtimeParameters: RuntimeParameters;
 }
 
- export interface RuntimeParameters {
-  parameters: Parameters
- }
- interface Parameters{
-  id: number
- }
+export interface RuntimeParameters {
+  parameters: Parameters;
+}
+interface Parameters {
+  id: number;
+}
