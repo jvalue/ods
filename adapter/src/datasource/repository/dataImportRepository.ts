@@ -9,8 +9,8 @@ import {
 } from '../../env';
 import { DataImportInsertStatement } from '../model/DataImportInsertStatement';
 
+import { DatasourceRepository } from './datasourceRepository';
 import { KnexHelper } from './knexHelper';
-import datasource from "../../../../ui/src/datasource/datasource";
 
 const knex = require('knex')({
   client: 'pg',
@@ -38,6 +38,8 @@ const CREATE_DATAIMPORT_REPOSITORY_STATEMENT = `
         ON UPDATE CASCADE
         ON DELETE CASCADE
 )`;
+
+const datasourceRepository: DatasourceRepository = new DatasourceRepository();
 
 export async function createDataImportTable(client: ClientBase): Promise<void> {
   await client.query(CREATE_DATAIMPORT_REPOSITORY_STATEMENT);
@@ -83,15 +85,42 @@ export class DataImportRepository {
       .andWhere('id', dataImportId);
   }
 
-  async addDataImport(dataSourceId:number, insertStatement: DataImportInsertStatement) {
-    console.log("vahldieks ");
-    console.log("vahldieks "+dataSourceId);
-    let result = await knex('public.data_import')
+  async getDataFromDataImportWithParameter(
+    datasourceId: string,
+    dataImportId: string,
+  ) {
+    const dataImport = await this.getDataFromDataImport(
+      datasourceId,
+      dataImportId,
+    );
+    const dataSource = await datasourceRepository.getDataSourceById(
+      datasourceId,
+    );
+    let result: Record<string, unknown> = {
+      data: KnexHelper.stringFromUTF8Array(dataImport[0].data),
+    };
+
+    const keys = Object.keys(dataSource.protocol.parameters.defaultParameters);
+    for (const entry of keys) {
+      result[entry] = dataSource.protocol.parameters.defaultParameters[entry];
+    }
+
+    return result;
+  }
+
+  async addDataImport(
+    dataSourceId: number,
+    insertStatement: DataImportInsertStatement,
+  ) {
+    let result: Record<string, any> = {};
+    console.log('vahldieks ');
+    console.log('vahldieks ' + dataSourceId);
+    result = await knex('public.data_import')
       .insert(insertStatement)
       .returning('id')
       .then(function (id: any) {
         console.log(id);
-        console.log("easdfasdfsadfsadfsadf")
+        console.log('easdfasdfsadfsadfsadf');
         console.log('neuer code geht');
         return knex
           .select()
@@ -105,22 +134,21 @@ export class DataImportRepository {
       .catch(function (err: any) {
         console.log(err);
       });
-    result['location']='/datasources/'+dataSourceId+'/imports/'+ Number(result[0].id)+'/data'
+
     return result;
   }
   static createDataImportFromResult(result: any) {
-    let x = {
+    const x = {
       id: Number(result[0].id),
       data: KnexHelper.stringFromUTF8Array(result[0].data),
-      error_messages:result[0].error_messages,
+      error_messages: result[0].error_messages,
       health: result[0].health,
       timestamp: result[0].timestamp,
-      datasource_id:result[0].datasourceId,
-    }
+      datasource_id: result[0].datasource_id,
+    };
     return x;
   }
-  // function location(){
-  //   const location='/datasources/'+dataSourceId+'/imports/'+ Number(result[0].id)+'/data';
+  // Function location(){
+  //   Const location='/datasources/'+dataSourceId+'/imports/'+ Number(result[0].id)+'/data';
   // }
-
 }
