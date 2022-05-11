@@ -13,12 +13,15 @@ import { KnexHelper } from '../../repository/knexHelper';
 import { OutboxRepository } from '../../repository/outboxRepository';
 import { DataImportTriggerService } from '../../services/dataImportTriggerService';
 import { DataSourceNotFoundException } from '../../services/dataSourceNotFoundException';
+import { amqpHelper } from '../amqp/amqpHelper';
 
 const datasourceRepository: DatasourceRepository = new DatasourceRepository();
 const outboxRepository: OutboxRepository = new OutboxRepository();
+let amqpConnection;
 
 export class DataSourceEndpoint {
   registerRoutes = (app: express.Application): void => {
+    app.get('/testconsumer', asyncHandler(this.testConsumer));
     app.get('/datasources', asyncHandler(this.getAllDataSources));
     app.get('/datasources/:datasourceId', asyncHandler(this.getDataSource));
     app.post('/datasources', asyncHandler(this.addDatasource));
@@ -50,6 +53,19 @@ export class DataSourceEndpoint {
       req.params.datasourceId,
     );
     res.status(200).send(datasource);
+  };
+
+  testConsumer = async (
+    req: express.Request,
+    res: express.Response,
+  ): Promise<void> => {
+    console.log(req);
+    const msg = {
+      datasourceId: '1',
+    };
+    await amqpHelper.publishAmqpMessage();
+
+    res.status(200).send();
   };
 
   addDatasource = async (

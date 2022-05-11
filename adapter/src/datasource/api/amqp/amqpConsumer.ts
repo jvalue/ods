@@ -6,8 +6,8 @@ import {
   ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE,
   ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE_TOPIC,
 } from '../../../env';
-import {DataSourceTriggerEvent} from "../../model/DataSourceTriggerEvent";
-import {DataImportTriggerService} from "../../services/dataImportTriggerService";
+import { DataSourceTriggerEvent } from '../../model/DataSourceTriggerEvent';
+import { DataImportTriggerService } from '../../services/dataImportTriggerService';
 export async function createDataSourceAmqpConsumer(
   amqpConnection: AmqpConnection,
 ): Promise<AmqpConsumer> {
@@ -16,8 +16,6 @@ export async function createDataSourceAmqpConsumer(
   await amqpConsumer.init();
   return amqpConsumer;
 }
-
-
 
 export class AmqpConsumer {
   constructor(private readonly amqpChannel: AmqpChannel) {}
@@ -52,6 +50,16 @@ export class AmqpConsumer {
     );
   }
 
+  escapeRegExp(str: any) {
+    return str.replace(/[\-\[\]\/\{\}\(\)\+\?\.\\\^\$\|]/g, '\\$&');
+  }
+
+  fuzzyComparison(str: any, mask: any) {
+    const regex = '^' + this.escapeRegExp(mask).replace(/\*/, '.*') + '$';
+    const r = new RegExp(regex);
+    return r.test(str);
+  }
+
   // Use the f = () => {} syntax to access this
   consumeEvent = async (msg: ConsumeMessage | null): Promise<void> => {
     if (msg == null) {
@@ -61,12 +69,25 @@ export class AmqpConsumer {
       return;
     }
     if (
-      msg.fields.routingKey === ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE_TOPIC
-      // 'adapter.datasource-import-trigger'
+      this.fuzzyComparison(
+        msg.fields.routingKey,
+        ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE_TOPIC,
+      )
     ) {
-      // @ts-ignore TODO check warning
-      let msgContent:DataSourceTriggerEvent = msg.content.toJSON();
-      let dataImportTriggerService:DataImportTriggerService=new DataImportTriggerService(msgContent.datasourceId.toString(),msgContent.runtimeParameters);
+      /* If (
+       Msg.fields.routingKey ===
+      ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE_TOPIC
+      msg.fields.routingKey.match()
+      // 'adapter.datasource-import-trigger'
+    )*/ // @ts-ignore TODO check warning
+      // Const msgContent: DataSourceTriggerEvent = msg.content.toJSON();
+
+      const msgContent = JSON.parse(msg.content.toString());
+      const dataImportTriggerService: DataImportTriggerService =
+        new DataImportTriggerService(
+          msgContent.datasourceId.toString(),
+          msgContent.runtimeParameters,
+        );
       await dataImportTriggerService.triggerImport(msgContent.datasourceId);
 
       console.log('received' + msg);
