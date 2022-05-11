@@ -8,7 +8,6 @@ import { ProtocolConfig } from '../../adapter/model/ProtocolConfig';
 import { AdapterService } from '../../adapter/services/adapterService';
 import { ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC } from '../../env';
 import { DataImportInsertStatement } from '../model/DataImportInsertStatement';
-import { RuntimeParameters } from '../model/DataSourceTriggerEvent';
 import { DataImportRepository } from '../repository/dataImportRepository';
 import { DatasourceRepository } from '../repository/datasourceRepository';
 import { OutboxRepository } from '../repository/outboxRepository';
@@ -22,9 +21,9 @@ const outboxRepository: OutboxRepository = new OutboxRepository();
 
 export class DataImportTriggerService {
   id: string;
-  runtimeParameters: RuntimeParameters;
+  runtimeParameters: Record<string, unknown>;
 
-  constructor(id: string, runtimeParameters: RuntimeParameters) {
+  constructor(id: string, runtimeParameters: Record<string, unknown>) {
     this.id = id;
     this.runtimeParameters = runtimeParameters;
   }
@@ -57,6 +56,7 @@ export class DataImportTriggerService {
       health: 'OK',
       timestamp: new Date(Date.now()).toLocaleString(),
       datasource_id: this.id,
+      parameters: this.runtimeParameters,
     };
     return await dataImportRepository.addDataImport(
       parseInt(this.id),
@@ -116,7 +116,9 @@ export class DataImportTriggerService {
       '/imports/' +
       parseInt(dataImport.id) +
       '/data';
-      
+
+    dataImport.parameters = this.runtimeParameters;
+
     await this.publishResult(
       dataSourceId,
       routingKey,

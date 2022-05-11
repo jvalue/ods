@@ -36,7 +36,8 @@ const CREATE_DATAIMPORT_REPOSITORY_STATEMENT = `
     CONSTRAINT fkdhr9x05byn63qfej3i1vw975a FOREIGN KEY (datasource_id)
         REFERENCES public.datasource (id) MATCH SIMPLE
         ON UPDATE CASCADE
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+    parameters character varying(255) COLLATE pg_catalog."default"
 )`;
 
 const datasourceRepository: DatasourceRepository = new DatasourceRepository();
@@ -79,7 +80,7 @@ export class DataImportRepository {
 
   async getDataFromDataImport(datasourceId: string, dataImportId: string) {
     return await knex
-      .select('data')
+      .select('*')
       .from('public.data_import')
       .where('datasource_id', datasourceId)
       .andWhere('id', dataImportId);
@@ -93,16 +94,23 @@ export class DataImportRepository {
       datasourceId,
       dataImportId,
     );
-    const dataSource = await datasourceRepository.getDataSourceById(
-      datasourceId,
-    );
     const result: Record<string, unknown> = {
       data: KnexHelper.stringFromUTF8Array(dataImport[0].data),
     };
 
+    /* Const dataSource = await datasourceRepository.getDataSourceById(
+      datasourceId,
+    );
+    
+
     const keys = Object.keys(dataSource.protocol.parameters.defaultParameters);
     for (const entry of keys) {
       result[entry] = dataSource.protocol.parameters.defaultParameters[entry];
+    }*/
+    const parameters = JSON.parse(dataImport[0].parameters).parameters;
+    const keys = Object.keys(parameters);
+    for (const entry of keys) {
+      result[entry] = parameters[entry];
     }
 
     return result;

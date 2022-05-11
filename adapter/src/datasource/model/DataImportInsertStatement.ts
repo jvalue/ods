@@ -4,4 +4,5 @@ export interface DataImportInsertStatement {
   health: unknown;
   timestamp: unknown;
   datasource_id: unknown;
+  parameters: Record<string, unknown>;
 }
