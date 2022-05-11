@@ -107,7 +107,7 @@ export class DataImportRepository {
     for (const entry of keys) {
       result[entry] = dataSource.protocol.parameters.defaultParameters[entry];
     }*/
-    if (dataImport[0].parameters) {
+    if (JSON.parse(dataImport[0].parameters).parameters) {
       const parameters = JSON.parse(dataImport[0].parameters).parameters;
       const keys = Object.keys(parameters);
       for (const entry of keys) {
