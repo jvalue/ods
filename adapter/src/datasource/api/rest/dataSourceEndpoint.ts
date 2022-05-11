@@ -88,7 +88,7 @@ export class DataSourceEndpoint {
     const routingKey = ADAPTER_AMQP_DATASOURCE_CREATED_TOPIC;
     await outboxRepository.publishToOutbox(datasouceModelForAmqp, routingKey);
     res.header('location', req.headers.host + req.url + '/' + datasource.id);
-    res.status(201).send(datasouceModelForAmqp);
+    res.status(201).send(datasource);
   };
 
   updateDatasource = async (
