@@ -80,7 +80,7 @@ export class DataImportRepository {
 
   async getDataFromDataImport(datasourceId: string, dataImportId: string) {
     return await knex
-      .select('*')
+      .select()
       .from('public.data_import')
       .where('datasource_id', datasourceId)
       .andWhere('id', dataImportId);
@@ -98,15 +98,15 @@ export class DataImportRepository {
       data: KnexHelper.stringFromUTF8Array(dataImport[0].data),
     };
 
-    /* Const dataSource = await datasourceRepository.getDataSourceById(
+    const dataSource = await datasourceRepository.getDataSourceById(
       datasourceId,
     );
-    
 
     const keys = Object.keys(dataSource.protocol.parameters.defaultParameters);
     for (const entry of keys) {
       result[entry] = dataSource.protocol.parameters.defaultParameters[entry];
-    }*/
+    }
+
     if (JSON.parse(dataImport[0].parameters).parameters) {
       const parameters = JSON.parse(dataImport[0].parameters).parameters;
       const keys = Object.keys(parameters);
