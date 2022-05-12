@@ -1,20 +1,24 @@
 import express from 'express';
 
 import { asyncHandler } from '../../../adapter/api/rest/utils';
+import { ImporterParameterError } from '../../../adapter/model/exceptions/ImporterParameterError';
 import {
   ADAPTER_AMQP_DATASOURCE_CREATED_TOPIC,
   ADAPTER_AMQP_DATASOURCE_DELETED_TOPIC,
-  ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC, ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
+  ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC,
+  ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
 } from '../../../env';
 import { DatasourceConfigValidator } from '../../model/DatasourceConfigValidator';
 import { DatasourceModelForAmqp } from '../../model/datasourceModelForAmqp';
 import { DatasourceRepository } from '../../repository/datasourceRepository';
 import { KnexHelper } from '../../repository/knexHelper';
 import { OutboxRepository } from '../../repository/outboxRepository';
-import {DataImportTriggerService, ErrorResponse} from '../../services/dataImportTriggerService';
+import {
+  DataImportTriggerService,
+  ErrorResponse,
+} from '../../services/dataImportTriggerService';
 import { DataSourceNotFoundException } from '../../services/dataSourceNotFoundException';
 import { amqpHelper } from '../amqp/amqpHelper';
-import {ImporterParameterError} from "../../../adapter/model/exceptions/ImporterParameterError";
 
 const datasourceRepository: DatasourceRepository = new DatasourceRepository();
 const outboxRepository: OutboxRepository = new OutboxRepository();
@@ -195,22 +199,31 @@ export class DataSourceEndpoint {
     const dataImportTriggerer: DataImportTriggerService =
       new DataImportTriggerService(id, runtimeParameters);
     try {
-
       const dataImport = await dataImportTriggerer.triggerImport(parseInt(id));
       res.status(200).send(dataImport);
     } catch (e) {
       if (e instanceof ImporterParameterError) {
         const msg: ErrorResponse = {
           error: 'URI is not absolute',
-        }
-        await outboxRepository.publishError(Number(id), ADAPTER_AMQP_IMPORT_FAILED_TOPIC, msg)
+        };
+        outboxRepository.publishError(
+          Number(id),
+          ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
+          msg,
+        );
         return;
       }
       if (e instanceof Error) {
         const msg: ErrorResponse = {
           error: '404 Not Found: [404 NOT FOUND Error]',
+        };
+        if (e.message.includes('Could not Fetch from URI:')) {
+          outboxRepository.publishError(
+            Number(id),
+            ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
+            msg,
+          );
         }
-        await outboxRepository.publishError(Number(id), ADAPTER_AMQP_IMPORT_FAILED_TOPIC, msg)
         return;
       }
       if (e instanceof DataSourceNotFoundException) {
