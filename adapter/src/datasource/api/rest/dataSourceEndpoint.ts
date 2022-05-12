@@ -211,7 +211,7 @@ export class DataSourceEndpoint {
           ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
           msg,
         );
-        res.status(500).send(e);
+        res.status(400).send(e);
         return;
       }
       if (e instanceof Error) {
@@ -224,7 +224,10 @@ export class DataSourceEndpoint {
             ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
             msg,
           );
+          res.status(500).send(e.message);
+          return;
         }
+        // 404 NOT_FOUND when trigger unknown datasources [POST /datasources/0/trigger]
         res.status(404).send(e.message);
         return;
       }
