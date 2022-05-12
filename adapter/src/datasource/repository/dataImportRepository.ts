@@ -105,7 +105,9 @@ export class DataImportRepository {
     const triggercount =
       await datasourceRepository.getTriggerCountFromDataSource(datasourceId);
 
-    result.id = parseInt(triggercount);
+    if (triggercount) {
+      result.id = parseInt(triggercount.triggercount);
+    }
 
     if (dataSource.protocol.parameters.defaultParameters) {
       const keys = Object.keys(
