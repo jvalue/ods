@@ -101,6 +101,7 @@ export class DataImportRepository {
     const dataSource = await datasourceRepository.getDataSourceById(
       datasourceId,
     );
+    result.id = dataImportId;
 
     if (dataSource.protocol.parameters.defaultParameters) {
       const keys = Object.keys(
