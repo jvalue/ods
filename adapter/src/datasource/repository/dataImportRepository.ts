@@ -106,7 +106,7 @@ export class DataImportRepository {
       await datasourceRepository.getTriggerCountFromDataSource(datasourceId);
 
     if (triggercount) {
-      result.id = parseInt(triggercount.triggercount);
+      result.id = triggercount.triggercount;
     }
 
     if (dataSource.protocol.parameters.defaultParameters) {
