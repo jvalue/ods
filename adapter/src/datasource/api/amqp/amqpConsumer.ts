@@ -1,13 +1,15 @@
-import { AmqpChannel, AmqpConnection } from '@jvalue/node-dry-amqp';
-import { ConsumeMessage } from 'amqplib';
+import {AmqpChannel, AmqpConnection} from '@jvalue/node-dry-amqp';
+import {ConsumeMessage} from 'amqplib';
 
 import {
   ADAPTER_AMQP_ADAPTER_EXCHANGE,
   ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE,
-  ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE_TOPIC,
+  ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE_TOPIC, ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
 } from '../../../env';
-import { DataSourceTriggerEvent } from '../../model/DataSourceTriggerEvent';
-import { DataImportTriggerService } from '../../services/dataImportTriggerService';
+import {DataImportTriggerService, ErrorResponse} from '../../services/dataImportTriggerService';
+import {ImporterParameterError} from "../../../adapter/model/exceptions/ImporterParameterError";
+import {OutboxRepository} from "../../repository/outboxRepository";
+
 export async function createDataSourceAmqpConsumer(
   amqpConnection: AmqpConnection,
 ): Promise<AmqpConsumer> {
@@ -17,8 +19,11 @@ export async function createDataSourceAmqpConsumer(
   return amqpConsumer;
 }
 
+const outboxRepository: OutboxRepository = new OutboxRepository();
+
 export class AmqpConsumer {
-  constructor(private readonly amqpChannel: AmqpChannel) {}
+  constructor(private readonly amqpChannel: AmqpChannel) {
+  }
 
   /** Initializes the datasource execution consumer */
   async init(): Promise<void> {
@@ -88,10 +93,29 @@ export class AmqpConsumer {
           msgContent.datasourceId.toString(),
           msgContent.runtimeParameters,
         );
-      await dataImportTriggerService.triggerImport(msgContent.datasourceId);
+      try {
+        await dataImportTriggerService.triggerImport(msgContent.datasourceId);
+      } catch (e) {
+        if (e instanceof ImporterParameterError) {
+          const msg: ErrorResponse = {
+            error: 'URI is not absolute',
+          }
+          outboxRepository.publishError(msgContent.datasourceId, ADAPTER_AMQP_IMPORT_FAILED_TOPIC, msg)
+          return;
+        }
+        if (e instanceof Error) {
+          const msg: ErrorResponse = {
+            error: '404 Not Found: [404 NOT FOUND Error]',
+          }
+          outboxRepository.publishError(msgContent.datasourceId, ADAPTER_AMQP_IMPORT_FAILED_TOPIC, msg)
+          return;
+        }
+      }
 
       console.log('received' + msg);
     }
     await this.amqpChannel.ack(msg);
   };
+
+
 }

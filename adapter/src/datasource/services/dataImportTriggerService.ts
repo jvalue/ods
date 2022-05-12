@@ -1,23 +1,27 @@
-import { AdapterEndpoint } from '../../adapter/api/rest/adapterEndpoint';
-import { AdapterConfig } from '../../adapter/model/AdapterConfig';
-import { DataImportResponse } from '../../adapter/model/DataImportResponse';
-import { Format } from '../../adapter/model/enum/Format';
-import { Protocol } from '../../adapter/model/enum/Protocol';
-import { FormatConfig } from '../../adapter/model/FormatConfig';
-import { ProtocolConfig } from '../../adapter/model/ProtocolConfig';
-import { AdapterService } from '../../adapter/services/adapterService';
-import { ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC } from '../../env';
-import { DataImportInsertStatement } from '../model/DataImportInsertStatement';
-import { DataImportRepository } from '../repository/dataImportRepository';
-import { DatasourceRepository } from '../repository/datasourceRepository';
-import { OutboxRepository } from '../repository/outboxRepository';
+import {AdapterEndpoint} from '../../adapter/api/rest/adapterEndpoint';
+import {AdapterConfig} from '../../adapter/model/AdapterConfig';
+import {DataImportResponse} from '../../adapter/model/DataImportResponse';
+import {Format} from '../../adapter/model/enum/Format';
+import {Protocol} from '../../adapter/model/enum/Protocol';
+import {FormatConfig} from '../../adapter/model/FormatConfig';
+import {ProtocolConfig} from '../../adapter/model/ProtocolConfig';
+import {AdapterService} from '../../adapter/services/adapterService';
+import { ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC} from '../../env';
+import {DataImportInsertStatement} from '../model/DataImportInsertStatement';
+import {DataImportRepository} from '../repository/dataImportRepository';
+import {DatasourceRepository} from '../repository/datasourceRepository';
+import {OutboxRepository} from '../repository/outboxRepository';
 
-import { DataSourceNotFoundException } from './dataSourceNotFoundException';
+import {DataSourceNotFoundException} from './dataSourceNotFoundException';
 
 const datasourceRepository: DatasourceRepository = new DatasourceRepository();
 const dataImportRepository: DataImportRepository = new DataImportRepository();
 const routingKey = ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC;
 const outboxRepository: OutboxRepository = new OutboxRepository();
+
+export interface ErrorResponse {
+  error: string
+}
 
 export class DataImportTriggerService {
   id: string;
@@ -47,6 +51,7 @@ export class DataImportTriggerService {
     }
 
     return await AdapterService.getInstance().executeJob(adapterConfig);
+
   }
 
   private async saveDataimport(returnDataImportResponse: any) {
@@ -106,8 +111,12 @@ export class DataImportTriggerService {
     );
   }
 
+
+
+
   async triggerImport(dataSourceId: number) {
-    const returnDataImportResponse = await this.getDataImport();
+    let returnDataImportResponse: any;
+      returnDataImportResponse = await this.getDataImport();
     const dataImport = await this.saveDataimport(returnDataImportResponse);
 
     // Update triggercount in datasource database
@@ -152,6 +161,8 @@ export class DataImportTriggerService {
     };
     return adapterConfig;
   }
+
+
 }
 
 interface Datasource {

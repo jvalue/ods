@@ -10,6 +10,7 @@ import {
   POSTGRES_USER,
 } from '../../env';
 import { OutboxEvent } from '../model/outboxEvent';
+import {ErrorResponse} from "../services/dataImportTriggerService";
 
 const knex = require('knex')({
   client: 'pg',
@@ -55,7 +56,17 @@ export class OutboxRepository {
         console.log(err);
       });
   }
-
+  public async publishError(
+    dataSourceId: number,
+    routingKey: string,
+    returnErrorResponse: ErrorResponse,
+  ) {
+    await this.publishErrorImportTriggerResults(
+      dataSourceId,
+      returnErrorResponse,
+      routingKey,
+    );
+  }
   async publishImportTriggerResults(
     dataSourceId: number,
     returnDataImportResponse: DataImportResponse,
@@ -78,6 +89,31 @@ export class OutboxRepository {
       .then(function (id: any) {
         console.log(id);
         console.log('neuer code geht');
+      })
+      .catch(function (err: any) {
+        console.log(err);
+      });
+  }
+
+
+  async publishErrorImportTriggerResults(dataSourceId: number, returnErrorResponse: ErrorResponse, routingKey: string) {
+    const id = uuidv4();
+    const payload = {
+      datasourceId: dataSourceId,
+      data: JSON.stringify(returnErrorResponse.error),
+    };
+    const importTriggerOutboxEvent: OutboxEvent = {
+      id: id,
+      payload: payload,
+      routing_key: routingKey,
+    };
+
+    return await knex('public.outbox')
+      .insert(importTriggerOutboxEvent)
+      .returning('id')
+      .then(function (id: any) {
+        console.log(id);
+        console.log('error send geht');
       })
       .catch(function (err: any) {
         console.log(err);
