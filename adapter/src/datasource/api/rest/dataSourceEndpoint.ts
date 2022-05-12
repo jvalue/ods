@@ -211,6 +211,7 @@ export class DataSourceEndpoint {
           ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
           msg,
         );
+        res.status(500).send(e);
         return;
       }
       if (e instanceof Error) {
@@ -224,6 +225,7 @@ export class DataSourceEndpoint {
             msg,
           );
         }
+        res.status(404).send(e.message);
         return;
       }
       if (e instanceof DataSourceNotFoundException) {
