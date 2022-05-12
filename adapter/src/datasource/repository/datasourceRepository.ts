@@ -42,6 +42,7 @@ const CREATE_DATASOURCE_REPOSITORY_STATEMENT = `
     first_execution timestamp without time zone,
     "interval" bigint,
     periodic boolean NOT NULL,
+    triggercount bigint,
     CONSTRAINT datasource_pkey PRIMARY KEY (id)
 )`;
 
@@ -61,6 +62,21 @@ export class DatasourceRepository {
       .from('public.datasource')
       .where('id', id);
     return KnexHelper.createDatasourceFromResult(result);
+  }
+
+  async updateTriggerCount(id: any) {
+    const result = await knex('public.datasource')
+      .increment('triggercount')
+      .where('id', id);
+    return result;
+  }
+
+  async getTriggerCountFromDataSource(id: any) {
+    const result = await knex
+      .select('triggercount')
+      .from('public.datasource')
+      .where('id', id);
+    return result[0];
   }
 
   async addDatasource(insertStatement: DatasourceInsertStatement) {

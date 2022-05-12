@@ -87,6 +87,7 @@ export class KnexHelper {
       first_execution: req.body.trigger.firstExecution,
       interval: req.body.trigger.interval,
       periodic: req.body.trigger.periodic,
+      triggercount: 0,
     };
   }
 
@@ -120,8 +121,4 @@ export class KnexHelper {
 
     return str;
   }
-
-
-
-
 }

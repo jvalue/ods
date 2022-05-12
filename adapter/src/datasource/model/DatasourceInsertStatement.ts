@@ -11,4 +11,5 @@ export interface DatasourceInsertStatement {
   first_execution: unknown;
   interval: unknown;
   periodic: unknown;
+  triggercount: unknown;
 }
