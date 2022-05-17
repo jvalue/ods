@@ -58,11 +58,12 @@ export class AmqpConsumer {
     );
   }
 
-  escapeRegExp(str: any) {
+  escapeRegExp(str: string): string {
+    // eslint-disable-next-line no-useless-escape
     return str.replace(/[\-\[\]\/\{\}\(\)\+\?\.\\\^\$\|]/g, '\\$&');
   }
 
-  fuzzyComparison(str: any, mask: any) {
+  fuzzyComparison(str: string, mask: string): boolean {
     const regex = '^' + this.escapeRegExp(mask).replace(/\*/, '.*') + '$';
     const r = new RegExp(regex);
     return r.test(str);
@@ -82,15 +83,10 @@ export class AmqpConsumer {
         ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE_TOPIC,
       )
     ) {
-      /* If (
-       Msg.fields.routingKey ===
-      ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE_TOPIC
-      msg.fields.routingKey.match()
-      // 'adapter.datasource-import-trigger'
-    )*/ // @ts-ignore TODO check warning
-      // Const msgContent: DataSourceTriggerEvent = msg.content.toJSON();
-
-      const msgContent = JSON.parse(msg.content.toString());
+      const stringContent: string = msg.content.toString();
+      const msgContent: DataSourceAmqpMessageContent = JSON.parse(
+        stringContent,
+      ) as DataSourceAmqpMessageContent;
       const dataImportTriggerService: DataImportTriggerService =
         new DataImportTriggerService(
           msgContent.datasourceId.toString(),
@@ -103,11 +99,20 @@ export class AmqpConsumer {
           const msg: ErrorResponse = {
             error: 'URI is not absolute',
           };
-          outboxRepository.publishError(
-            msgContent.datasourceId,
-            ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
-            msg,
-          );
+          outboxRepository
+            .publishError(
+              msgContent.datasourceId,
+              ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
+              msg,
+            )
+            .then(
+              () => {
+                console.log('resolved publishError');
+              },
+              () => {
+                console.log('reject publishError');
+              },
+            );
           return;
         }
         if (e instanceof Error) {
@@ -115,18 +120,29 @@ export class AmqpConsumer {
             error: '404 Not Found: [404 NOT FOUND Error]',
           };
           if (e.message.includes('Could not Fetch from URI:')) {
-            outboxRepository.publishError(
-              msgContent.datasourceId,
-              ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
-              msg,
-            );
+            outboxRepository
+              .publishError(
+                msgContent.datasourceId,
+                ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
+                msg,
+              )
+              .then(
+                () => {
+                  console.log('resolved publishError');
+                },
+                () => {
+                  console.log('reject publishError');
+                },
+              );
           }
           return;
         }
       }
-
-      console.log('received' + msg);
     }
     await this.amqpChannel.ack(msg);
   };
+}
+export interface DataSourceAmqpMessageContent {
+  datasourceId: number;
+  runtimeParameters: Record<string, unknown>;
 }
