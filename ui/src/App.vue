@@ -42,7 +42,7 @@ import Router from '@/router';
   },
 })
 export default class App extends Vue {
-  private title = 'Open-Data-Service';
+  private title = 'JValue ODSv2';
 
   private routerTitle = '';
 

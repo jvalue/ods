@@ -1,20 +1,13 @@
 <template>
   <div>
-    <v-card class="mx-auto">
-      <v-toolbar dense class="elevation-0">
-        <v-toolbar-title>
-          Create New Datasource
-        </v-toolbar-title>
-      </v-toolbar>
-      <v-card-text>
-        <datasource-form
-          v-model="datasource"
-          @validityChanged="e => (isValid = e)"
-        />
-      </v-card-text>
-      <v-card-actions>
+    <v-container class="mx-auto">
+      <datasource-form
+        v-model="datasource"
+        @validityChanged="e => (isValid = e)"
+      />
+      <div class="float-right">
         <v-spacer />
-        <v-btn color="error" class="ma-2" @click="onCancel">
+        <v-btn color="error" class="ma-2" @click="onCancel()">
           Cancel
         </v-btn>
         <v-btn
@@ -25,8 +18,8 @@
         >
           Save
         </v-btn>
-      </v-card-actions>
-    </v-card>
+      </div>
+    </v-container>
   </div>
 </template>
 
