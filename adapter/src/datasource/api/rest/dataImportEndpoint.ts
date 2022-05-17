@@ -34,10 +34,10 @@ export class DataImportEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    const result: Record<string, unknown> =
-      (await dataImportRepository.getMetaDataImportByDatasource(
+    const result: any =
+      await dataImportRepository.getMetaDataImportByDatasource(
         req.params.datasourceId,
-      )) as Record<string, unknown>;
+      );
     let i = 0;
     const dataSourceId: string = req.params.datasourceId;
     result.forEach(function (el: Record<string, unknown>) {

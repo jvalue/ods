@@ -6,9 +6,9 @@ import cors from 'cors';
 import express from 'express';
 
 import { AdapterEndpoint } from './adapter/api/rest/adapterEndpoint';
-import { createDataSourceAmqpConsumer } from './datasource/api/amqp/AmqpConsumer';
-import { DataImportEndpoint } from './datasource/api/rest/DataImportEndpoint';
-import { DataSourceEndpoint } from './datasource/api/rest/DataSourceEndpoint';
+import { createDataSourceAmqpConsumer } from './datasource/api/amqp/amqpConsumer';
+import { DataImportEndpoint } from './datasource/api/rest/dataImportEndpoint';
+import { DataSourceEndpoint } from './datasource/api/rest/dataSourceEndpoint';
 import { initDatasourceDatabases } from './datasource/repository/datasourceDatabase';
 import { AMQP_URL, CONNECTION_BACKOFF, CONNECTION_RETRIES } from './env';
 

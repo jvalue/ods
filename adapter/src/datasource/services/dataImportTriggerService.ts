@@ -68,7 +68,7 @@ export class DataImportTriggerService {
 
   private getAdapterConfigWithRuntimeParameters(
     datasource: any,
-    runtimeParameters: Record<string, unknown>,
+    runtimeParameters: any,
   ): AdapterConfig {
     const defaultParameter: Record<string, unknown> = datasource.protocol
       .parameters.defaultParameters as Record<string, unknown>;

@@ -16,7 +16,7 @@ import { OutboxRepository } from '../../repository/outboxRepository';
 import { DataImportTriggerService } from '../../services/dataImportTriggerService';
 import { DataSourceNotFoundException } from '../../services/dataSourceNotFoundException';
 import { ErrorResponse } from '../../services/ErrorResponse';
-import { AmqpHelper } from '../amqp/AmqpHelper';
+import { AmqpHelper } from '../amqp/amqpHelper';
 
 const datasourceRepository: DatasourceRepository = new DatasourceRepository();
 const outboxRepository: OutboxRepository = new OutboxRepository();
