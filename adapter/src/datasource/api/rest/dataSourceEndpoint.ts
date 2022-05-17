@@ -18,7 +18,7 @@ import {
   ErrorResponse,
 } from '../../services/dataImportTriggerService';
 import { DataSourceNotFoundException } from '../../services/dataSourceNotFoundException';
-import { amqpHelper } from '../amqp/amqpHelper';
+import { AmqpHelper } from '../amqp/AmqpHelper';
 
 const datasourceRepository: DatasourceRepository = new DatasourceRepository();
 const outboxRepository: OutboxRepository = new OutboxRepository();
@@ -58,7 +58,7 @@ export class DataSourceEndpoint {
     );
     res.status(200).send(datasource);
   };
-
+  // TODO only for test purposes
   testConsumer = async (
     req: express.Request,
     res: express.Response,
@@ -67,7 +67,7 @@ export class DataSourceEndpoint {
     const msg = {
       datasourceId: '1',
     };
-    await amqpHelper.publishAmqpMessage();
+    AmqpHelper.publishAmqpMessage();
 
     res.status(200).send();
   };
@@ -107,7 +107,15 @@ export class DataSourceEndpoint {
 
     const routingKey = ADAPTER_AMQP_DATASOURCE_CREATED_TOPIC;
     await outboxRepository.publishToOutbox(datasouceModelForAmqp, routingKey);
-    res.header('location', req.headers.host + req.url + '/' + datasource.id);
+    const dataSourceId: number = datasource.id as number;
+    const reqHost: string | undefined = req.headers.host;
+    const reqUrl: string = req.url;
+    if (!reqHost) {
+      res.status(400).send('No host for request available');
+    }
+    // Gets checked in line 113
+    // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+    res.header('location', reqHost + reqUrl + '/' + dataSourceId.toString());
     res.status(201).send(datasource);
   };
 
@@ -163,7 +171,6 @@ export class DataSourceEndpoint {
     const datasourceModelForAmqp: DatasourceModelForAmqp = {
       datasource: datasource,
     };
-    // Const routingKey = 'datasource.config.deleted';
     const routingKey = ADAPTER_AMQP_DATASOURCE_DELETED_TOPIC;
     await outboxRepository.publishToOutbox(datasourceModelForAmqp, routingKey);
     res.status(204).send();
@@ -178,6 +185,13 @@ export class DataSourceEndpoint {
     // Const routingKey = 'datasource.config.deleted';
     const routingKey = ADAPTER_AMQP_DATASOURCE_DELETED_TOPIC;
     // TODO fix wrong entry in outbox database
+    datasourcesToDelete.forEach((dataSourceDeleted) => {
+      const datasourceModelForAmqp: DatasourceModelForAmqp = {
+        datasource: dataSourceDeleted,
+      };
+      void outboxRepository.publishToOutbox(datasourceModelForAmqp, routingKey);
+    });
+    /* TODO check if replacementfrom 188-193 is correct
     for (const dataSourceDeleted in datasourcesToDelete) {
       const datasourceModelForAmqp: DatasourceModelForAmqp = {
         datasource: datasourcesToDelete[dataSourceDeleted],
@@ -186,7 +200,7 @@ export class DataSourceEndpoint {
         datasourceModelForAmqp,
         routingKey,
       );
-    }
+    }*/
     res.status(204).send();
   };
   triggerDataImportForDatasource = async (
@@ -194,7 +208,10 @@ export class DataSourceEndpoint {
     res: express.Response,
   ): Promise<void> => {
     const id = req.params.datasourceId;
-    const runtimeParameters = req.body;
+    const runtimeParameters: Record<string, unknown> = req.body as Record<
+      string,
+      unknown
+    >;
 
     const dataImportTriggerer: DataImportTriggerService =
       new DataImportTriggerService(id, runtimeParameters);
@@ -206,7 +223,7 @@ export class DataSourceEndpoint {
         const msg: ErrorResponse = {
           error: 'URI is not absolute',
         };
-        outboxRepository.publishError(
+        void outboxRepository.publishError(
           Number(id),
           ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
           msg,
@@ -219,7 +236,7 @@ export class DataSourceEndpoint {
           error: '404 Not Found: [404 NOT FOUND Error]',
         };
         if (e.message.includes('Could not Fetch from URI:')) {
-          outboxRepository.publishError(
+          void outboxRepository.publishError(
             Number(id),
             ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
             msg,
