@@ -1,6 +1,4 @@
-import { truncateSync } from 'fs';
-
-import express, { Express, json } from 'express';
+import express from 'express';
 
 import { asyncHandler } from '../../../adapter/api/rest/utils';
 import { DataImportRepository } from '../../repository/dataImportRepository';
@@ -36,17 +34,19 @@ export class DataImportEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    const result = await dataImportRepository.getMetaDataImportByDatasource(
-      req.params.datasourceId,
-    );
+    const result: Record<string, unknown> =
+      (await dataImportRepository.getMetaDataImportByDatasource(
+        req.params.datasourceId,
+      )) as Record<string, unknown>;
     let i = 0;
-    result.forEach(function (el: any) {
-      const dataImportId = el.id;
+    const dataSourceId: string = req.params.datasourceId;
+    result.forEach(function (el: Record<string, unknown>) {
+      const dataImportId: number = el.id as number;
       result[i].location =
         '/datasources/' +
-        req.params.datasourceId +
+        dataSourceId +
         '/imports/' +
-        dataImportId +
+        dataImportId.toString() +
         '/data';
       i++;
     });
@@ -58,20 +58,16 @@ export class DataImportEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    const id = req.params.datasourceId;
+    const id: string = req.params.datasourceId;
     const result =
       await dataImportRepository.getLatestMetaDataImportByDatasourceId(id);
     if (checkResult(result)) {
       res.status(400).send('Protocol not supported');
       return;
     }
-    const dataImportId = result[0].id;
+    const dataImportId: number = result[0].id as number;
     result[0].location =
-      '/datasources/' +
-      req.params.datasourceId +
-      '/imports/' +
-      dataImportId +
-      '/data';
+      '/datasources/' + id + '/imports/' + dataImportId.toString() + '/data';
     res.status(200).send(result[0]);
   };
 
@@ -95,8 +91,8 @@ export class DataImportEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    const datasourceId = req.params.datasourceId;
-    const dataImportId = req.params.dataImportId;
+    const datasourceId: string = req.params.datasourceId;
+    const dataImportId: string = req.params.dataImportId;
     const result = await dataImportRepository.getMetadataForDataImport(
       datasourceId,
       dataImportId,
@@ -112,22 +108,14 @@ export class DataImportEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    const datasourceId = req.params.datasourceId;
-    const dataImportId = req.params.dataImportId;
-    /* Const result = await dataImportRepository.getDataFromDataImport(
-      datasourceId,
-      dataImportId,
-    );
-    if (checkResult(result)) {
-      res.status(400).send('Protocol not supported');
-      return;
-    }*/
+    const datasourceId: string = req.params.datasourceId;
+    const dataImportId: string = req.params.dataImportId;
     const returnDataImportResponse =
       await dataImportRepository.getDataFromDataImportWithParameter(
         datasourceId,
         dataImportId,
       );
-    
+
     res.status(200).send(returnDataImportResponse);
   };
 }
