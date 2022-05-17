@@ -99,20 +99,11 @@ export class AmqpConsumer {
           const msg: ErrorResponse = {
             error: 'URI is not absolute',
           };
-          outboxRepository
-            .publishError(
-              msgContent.datasourceId,
-              ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
-              msg,
-            )
-            .then(
-              () => {
-                console.log('resolved publishError');
-              },
-              () => {
-                console.log('reject publishError');
-              },
-            );
+          void outboxRepository.publishError(
+            msgContent.datasourceId,
+            ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
+            msg,
+          );
           return;
         }
         if (e instanceof Error) {
@@ -120,20 +111,11 @@ export class AmqpConsumer {
             error: '404 Not Found: [404 NOT FOUND Error]',
           };
           if (e.message.includes('Could not Fetch from URI:')) {
-            outboxRepository
-              .publishError(
-                msgContent.datasourceId,
-                ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
-                msg,
-              )
-              .then(
-                () => {
-                  console.log('resolved publishError');
-                },
-                () => {
-                  console.log('reject publishError');
-                },
-              );
+            void outboxRepository.publishError(
+              msgContent.datasourceId,
+              ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
+              msg,
+            );
           }
           return;
         }
