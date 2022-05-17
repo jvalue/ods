@@ -6,17 +6,15 @@ import cors from 'cors';
 import express from 'express';
 
 import { AdapterEndpoint } from './adapter/api/rest/adapterEndpoint';
-import { createDataSourceAmqpConsumer } from './datasource/api/amqp/amqpConsumer';
-import { DataImportEndpoint } from './datasource/api/rest/dataImportEndpoint';
-import { DataSourceEndpoint } from './datasource/api/rest/dataSourceEndpoint';
+import { createDataSourceAmqpConsumer } from './datasource/api/amqp/AmqpConsumer';
+import { DataImportEndpoint } from './datasource/api/rest/DataImportEndpoint';
+import { DataSourceEndpoint } from './datasource/api/rest/DataSourceEndpoint';
 import { initDatasourceDatabases } from './datasource/repository/datasourceDatabase';
 import { AMQP_URL, CONNECTION_BACKOFF, CONNECTION_RETRIES } from './env';
 
 export const port = 8080;
 export let server: Server | undefined;
 
-// Await will be needed in the future, so for now ignore this linter issue and remove the disable later
-// eslint-disable-next-line @typescript-eslint/require-await
 async function main(): Promise<void> {
   const app = express();
   app.use(cors());
