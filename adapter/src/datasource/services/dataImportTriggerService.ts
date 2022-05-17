@@ -19,10 +19,6 @@ const dataImportRepository: DataImportRepository = new DataImportRepository();
 const routingKey = ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC;
 const outboxRepository: OutboxRepository = new OutboxRepository();
 
-export interface ErrorResponse {
-  error: string;
-}
-
 export class DataImportTriggerService {
   id: string;
   runtimeParameters: Record<string, unknown>;
@@ -32,7 +28,7 @@ export class DataImportTriggerService {
     this.runtimeParameters = runtimeParameters;
   }
 
-  private async getDataImport() {
+  private async getDataImport(): Promise<DataImportResponse> {
     let datasource;
     try {
       datasource = await datasourceRepository.getDataSourceById(this.id);
@@ -53,7 +49,9 @@ export class DataImportTriggerService {
     return await AdapterService.getInstance().executeJob(adapterConfig);
   }
 
-  private async saveDataimport(returnDataImportResponse: any) {
+  private async saveDataimport(
+    returnDataImportResponse: DataImportResponse,
+  ): Promise<any> {
     const insertStatement: DataImportInsertStatement = {
       data: returnDataImportResponse.data,
       error_messages: [],
@@ -70,11 +68,15 @@ export class DataImportTriggerService {
 
   private getAdapterConfigWithRuntimeParameters(
     datasource: any,
-    runtimeParameters: any,
+    runtimeParameters: Record<string, unknown>,
   ): AdapterConfig {
-    const defaultParameter = datasource.protocol.parameters.defaultParameters;
+    const defaultParameter: Record<string, unknown> = datasource.protocol
+      .parameters.defaultParameters as Record<string, unknown>;
     for (const entry in runtimeParameters.parameters) {
-      defaultParameter[entry] = runtimeParameters.parameters[entry];
+      // TODO correct?
+      if (entry) {
+        defaultParameter[entry] = runtimeParameters.parameters[entry];
+      }
     }
     datasource.protocol.parameters.defaultParameters = defaultParameter;
     const parameters = {
@@ -102,7 +104,7 @@ export class DataImportTriggerService {
     dataSourceId: number,
     routingKey: string,
     returnDataImportResponse: DataImportResponse,
-  ) {
+  ): Promise<void> {
     await outboxRepository.publishImportTriggerResults(
       dataSourceId,
       returnDataImportResponse,
@@ -117,12 +119,12 @@ export class DataImportTriggerService {
 
     // Update triggercount in datasource database
     await datasourceRepository.updateTriggerCount(dataSourceId);
-
+    const dataImportId: string = dataImport.id as string;
     dataImport.location =
       '/datasources/' +
-      dataSourceId +
+      dataSourceId.toString() +
       '/imports/' +
-      parseInt(dataImport.id) +
+      dataImportId +
       '/data';
 
     dataImport.parameters = this.runtimeParameters;
@@ -135,11 +137,16 @@ export class DataImportTriggerService {
     return dataImport;
   }
 
-  private getAdapterConfigWithOutRuntimeParameters(datasource: Datasource) {
+  private getAdapterConfigWithOutRuntimeParameters(
+    datasource: Datasource,
+  ): AdapterConfig {
     const parameters = {
       ...datasource.protocol.parameters,
-    };
-
+    } as Record<string, unknown>;
+    const datasourceFormatParameters = datasource.format.parameters as Record<
+      string,
+      unknown
+    >;
     const protocolConfigObj: ProtocolConfig = {
       protocol: new Protocol(Protocol.HTTP),
       parameters: parameters,
@@ -149,7 +156,7 @@ export class DataImportTriggerService {
     );
     const formatConfigObj: FormatConfig = {
       format: format,
-      parameters: datasource.format.parameters,
+      parameters: datasourceFormatParameters,
     };
     const adapterConfig: AdapterConfig = {
       protocolConfig: protocolConfigObj,

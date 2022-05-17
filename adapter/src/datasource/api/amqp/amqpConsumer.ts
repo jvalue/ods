@@ -9,10 +9,8 @@ import {
   ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
 } from '../../../env';
 import { OutboxRepository } from '../../repository/outboxRepository';
-import {
-  DataImportTriggerService,
-  ErrorResponse,
-} from '../../services/dataImportTriggerService';
+import { DataImportTriggerService } from '../../services/dataImportTriggerService';
+import { ErrorResponse } from '../../services/ErrorResponse';
 
 export async function createDataSourceAmqpConsumer(
   amqpConnection: AmqpConnection,

@@ -1,5 +1,3 @@
-import { Console } from 'console';
-
 import { ClientBase } from 'pg';
 
 import {

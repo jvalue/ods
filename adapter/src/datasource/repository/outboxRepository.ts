@@ -10,7 +10,7 @@ import {
   POSTGRES_USER,
 } from '../../env';
 import { OutboxEvent } from '../model/outboxEvent';
-import { ErrorResponse } from '../services/dataImportTriggerService';
+import { ErrorResponse } from '../services/ErrorResponse';
 
 const knex = require('knex')({
   client: 'pg',

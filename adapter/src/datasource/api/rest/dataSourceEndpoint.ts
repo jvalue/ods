@@ -13,11 +13,9 @@ import { DatasourceModelForAmqp } from '../../model/datasourceModelForAmqp';
 import { DatasourceRepository } from '../../repository/datasourceRepository';
 import { KnexHelper } from '../../repository/knexHelper';
 import { OutboxRepository } from '../../repository/outboxRepository';
-import {
-  DataImportTriggerService,
-  ErrorResponse,
-} from '../../services/dataImportTriggerService';
+import { DataImportTriggerService } from '../../services/dataImportTriggerService';
 import { DataSourceNotFoundException } from '../../services/dataSourceNotFoundException';
+import { ErrorResponse } from '../../services/ErrorResponse';
 import { AmqpHelper } from '../amqp/AmqpHelper';
 
 const datasourceRepository: DatasourceRepository = new DatasourceRepository();
