@@ -16,14 +16,12 @@ import { OutboxRepository } from '../../repository/outboxRepository';
 import { DataImportTriggerService } from '../../services/dataImportTriggerService';
 import { DataSourceNotFoundException } from '../../services/dataSourceNotFoundException';
 import { ErrorResponse } from '../../services/ErrorResponse';
-import { AmqpHelper } from '../amqp/amqpHelper';
 
 const datasourceRepository: DatasourceRepository = new DatasourceRepository();
 const outboxRepository: OutboxRepository = new OutboxRepository();
 
 export class DataSourceEndpoint {
   registerRoutes = (app: express.Application): void => {
-    app.get('/testconsumer', asyncHandler(this.testConsumer));
     app.get('/datasources', asyncHandler(this.getAllDataSources));
     app.get('/datasources/:datasourceId', asyncHandler(this.getDataSource));
     app.post('/datasources', asyncHandler(this.addDatasource));

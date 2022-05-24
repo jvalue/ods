@@ -116,7 +116,23 @@ export class DataImportEndpoint {
         dataImportId,
       );
 
-    res.status(200).send(returnDataImportResponse);
+    const result: Record<string, unknown> = {};
+    const keys = Object.keys(returnDataImportResponse);
+    for (const entry of keys) {
+      if (entry === 'data') {
+        continue;
+      }
+      result[entry] = returnDataImportResponse[entry];
+    }
+    const data: Record<string, unknown> = JSON.parse(
+      returnDataImportResponse.data as string,
+    ) as Record<string, unknown>;
+    const dataKeys = Object.keys(data);
+    for (const entry of dataKeys) {
+      result[entry] = data[entry];
+    }
+
+    res.status(200).send(result);
   };
 }
 function checkResult(result: any): boolean {
