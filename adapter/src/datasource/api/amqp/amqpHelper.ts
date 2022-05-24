@@ -1,4 +1,4 @@
-import * as Amqp from 'amqp-ts';
+/* Import * as Amqp from 'amqp-ts';
 export class AmqpHelper {
   static publishAmqpMessage(): void {
     const connection = new Amqp.Connection(
@@ -14,4 +14,4 @@ export class AmqpHelper {
     });
     exchange.send(msg, 'datasource.import-trigger.created');
   }
-}
+}*/

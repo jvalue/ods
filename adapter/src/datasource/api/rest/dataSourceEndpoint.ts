@@ -57,7 +57,7 @@ export class DataSourceEndpoint {
     res.status(200).send(datasource);
   };
   // TODO only for test purposes
-  testConsumer = async (
+  /* TestConsumer = async (
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
@@ -68,7 +68,7 @@ export class DataSourceEndpoint {
     AmqpHelper.publishAmqpMessage();
 
     res.status(200).send();
-  };
+  };*/
 
   addDatasource = async (
     req: express.Request,

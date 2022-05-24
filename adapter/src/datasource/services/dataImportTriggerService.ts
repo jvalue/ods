@@ -117,8 +117,6 @@ export class DataImportTriggerService {
     returnDataImportResponse = await this.getDataImport();
     const dataImport = await this.saveDataimport(returnDataImportResponse);
 
-    // Update triggercount in datasource database
-    await datasourceRepository.updateTriggerCount(dataSourceId);
     const dataImportId: string = dataImport.id as string;
     dataImport.location =
       '/datasources/' +
