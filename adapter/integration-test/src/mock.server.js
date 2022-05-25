@@ -1,64 +1,74 @@
-const Koa = require('koa')
-const Router = require('koa-router')
-const router = new Router()
+const Koa = require('koa');
+const Router = require('koa-router');
+const router = new Router();
 
-const app = new Koa()
+const app = new Koa();
 
-const { MOCK_SERVER_PORT } = require('./env')
+const { MOCK_SERVER_PORT } = require('./env');
 
-router.get('/', async ctx => {
-  ctx.type = 'text/plain'
-  ctx.body = 'ok'
-})
+router.get('/', async (ctx) => {
+  ctx.type = 'text/plain';
+  ctx.body = 'ok';
+});
 
-router.get('/not-found', async ctx => {
-  ctx.type = 'text/plain'
-  ctx.status = 404
-  ctx.body = '404 NOT FOUND Error'
-})
+router.get('/not-found', async (ctx) => {
+  ctx.type = 'text/plain';
+  ctx.status = 404;
+  ctx.body = '404 NOT FOUND Error';
+});
 
-router.get('/json', async ctx => {
-  console.log('GET /json')
-  ctx.body = { whateverwillbe: 'willbe', quesera: 'sera' }
-})
+router.get('/json', async (ctx) => {
+  console.log('GET /json');
+  ctx.body = { whateverwillbe: 'willbe', quesera: 'sera' };
+});
 
-router.get('/json/:id', async ctx => {
-  console.log('Get /json/' + ctx.params.id)
-  ctx.body = { id: ctx.params.id }
-})
+router.get('/json/:id', async (ctx) => {
+  console.log('Get /json/' + ctx.params.id);
+  ctx.body = { id: ctx.params.id };
+});
 
-router.get('/xml', async ctx => {
-  console.log('GET /xml')
+router.get('/xml', async (ctx) => {
+  console.log('GET /xml');
 
-  ctx.type = 'text/xml'
+  ctx.type = 'text/xml';
   ctx.body =
     '<?xml version="1.0" encoding="UTF-8"?>' +
-    '<root><from>Rick</from><to>Morty</to></root>'
-})
+    '<root><from>Rick</from><to>Morty</to></root>';
+});
 
-router.get('/csv', async ctx => {
-  console.log('GET /CSV')
+router.get('/xmlbigger', async (ctx) => {
+  console.log('GET /xml');
 
-  ctx.type = 'text/csv'
+  ctx.type = 'text/xml';
   ctx.body =
-    'col1,col2,col3\n' +
-    'val11,val12,val13\n' +
-    'val21,val22,val23'
-})
+    '<?xml version="1.0" encoding="UTF-8"?>' +
+    '<root><from>Rick</from><to>Morty</to>' +
+    '<test><hello>hello</hello><servus>servus</servus></test>' +
+    '</root>';
+});
 
-app.use(router.routes())
+router.get('/csv', async (ctx) => {
+  console.log('GET /CSV');
 
-const server = app.listen(MOCK_SERVER_PORT, () => console.log('Starting mock server on port ' + MOCK_SERVER_PORT))
+  ctx.type = 'text/csv';
+  ctx.body = 'col1,col2,col3\n' + 'val11,val12,val13\n' + 'val21,val22,val23';
+});
+
+app.use(router.routes());
+
+const server = app.listen(MOCK_SERVER_PORT, () =>
+  console.log('Starting mock server on port ' + MOCK_SERVER_PORT),
+);
 
 process.on('SIGTERM', async () => {
-  console.info('Mock-Server: SIGTERM signal received.')
+  console.info('Mock-Server: SIGTERM signal received.');
   try {
-    await server.close()
+    await server.close();
   } catch (e) {
-    console.error('Could not shutdown server')
-    console.error(e)
-    process.exit(-1)
+    console.error('Could not shutdown server');
+    console.error(e);
+    process.exit(-1);
   }
-})
+});
 
-module.exports = server
+module.exports = server;
