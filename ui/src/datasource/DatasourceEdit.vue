@@ -1,32 +1,27 @@
 <template>
   <div>
-    <v-card class="mx-auto">
-      <v-toolbar dense class="elevation-0">
-        <v-toolbar-title>
-          Edit Datasource
-        </v-toolbar-title>
-      </v-toolbar>
-      <v-card-text>
+    <v-container class="mx-auto">
+      <div v-if="datasource">
         <datasource-form
           v-model="datasource"
           @validityChanged="e => (isValid = e)"
         />
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer />
-        <v-btn color="error" class="ma-2" @click="onCancel">
-          Cancel
-        </v-btn>
-        <v-btn
-          :disabled="!isValid"
-          color="primary"
-          class="ma-2"
-          @click="onEdit()"
-        >
-          Update
-        </v-btn>
-      </v-card-actions>
-    </v-card>
+        <div class="float-right">
+          <v-spacer />
+          <v-btn color="error" class="ma-2" @click="onCancel">
+            Cancel
+          </v-btn>
+          <v-btn
+            :disabled="!isValid"
+            color="primary"
+            class="ma-2"
+            @click="onEdit()"
+          >
+            Update
+          </v-btn>
+        </div>
+      </div>
+    </v-container>
   </div>
 </template>
 
