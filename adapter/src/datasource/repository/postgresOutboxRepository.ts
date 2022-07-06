@@ -10,7 +10,6 @@ import {
   POSTGRES_SCHEMA,
   POSTGRES_USER,
 } from '../../env';
-import { OutboxEvent } from '../model/outboxEvent';
 import { ErrorResponse } from '../services/ErrorResponse';
 
 import { OutboxRepository } from './outboxRepository';

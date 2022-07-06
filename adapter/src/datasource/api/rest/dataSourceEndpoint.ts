@@ -118,7 +118,7 @@ export class DataSourceEndpoint {
     const dataSourceId: number = datasource.id;
     const reqHost: string | undefined = req.headers.host;
     const reqUrl: string = req.url;
-    if (!reqHost) {
+    if (reqHost === undefined) {
       res.status(400).send('No host for request available');
     }
     // Gets checked in line 113

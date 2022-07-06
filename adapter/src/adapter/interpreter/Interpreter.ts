@@ -23,7 +23,7 @@ export abstract class Interpreter {
     data: string,
     parameters?: Record<string, unknown>,
   ): Promise<string>;
-  abstract getAvailableParameters(): Array<InterpreterParameterDescription>;
+  abstract getAvailableParameters(): InterpreterParameterDescription[];
 
   /**
    * Validates the input parameters (Generic function, used in the derived classes)
@@ -38,7 +38,7 @@ export abstract class Interpreter {
     let illegalArguments = false;
     let illegalArgumentsMessage = '';
 
-    const possibleParameters: Array<InterpreterParameterDescription> =
+    const possibleParameters: InterpreterParameterDescription[] =
       this.getAvailableParameters();
 
     if (possibleParameters.length === 0) {
@@ -67,7 +67,7 @@ export abstract class Interpreter {
         requiredParameter.name
       ] as InterpreterParameterDescription;
 
-      if (param === undefined) {
+      if (inputParameters[requiredParameter.name] === undefined) {
         illegalArguments = true;
         illegalArgumentsMessage += this.type;
         illegalArgumentsMessage += 'interpreter requires parameter ';

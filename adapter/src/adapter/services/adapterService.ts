@@ -11,7 +11,7 @@ export class AdapterService {
   /**
    * @description Create a singleton instance of AdapterService
    */
-  private static instance: AdapterService;
+  private static instance: AdapterService | undefined = undefined;
 
   static getInstance(): AdapterService {
     if (!AdapterService.instance) {
@@ -21,11 +21,11 @@ export class AdapterService {
     return AdapterService.instance;
   }
 
-  getAllFormats(): Array<Interpreter> {
+  getAllFormats(): Interpreter[] {
     return [Format.CSV, Format.JSON, Format.XML];
   }
 
-  getAllProtocols(): Array<Importer> {
+  getAllProtocols(): Importer[] {
     return [Protocol.HTTP];
   }
 

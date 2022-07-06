@@ -30,7 +30,7 @@ export class DataImportTriggerService {
 
   private async getDataImport(
     datasourceId: number,
-    runtimeParameters: Record<string, unknown>,
+    runtimeParameters: Record<string, unknown> | undefined,
   ): Promise<DataImportResponse> {
     const datasourceEntity = await this.datasourceRepository.getById(
       datasourceId,

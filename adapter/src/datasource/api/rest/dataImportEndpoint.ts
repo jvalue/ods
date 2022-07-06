@@ -113,7 +113,6 @@ export class DataImportEndpoint {
     res: express.Response,
   ): Promise<void> => {
     // TODO assert int
-    const datasourceId = Number.parseInt(req.params.datasourceId, 10);
     const dataImportId = Number.parseInt(req.params.dataImportId, 10);
     /* TODO old impl got params from Datasource instead of DataImport?!?!?
     const returnDataImportResponse =
@@ -146,7 +145,7 @@ export class DataImportEndpoint {
       result[entry] = data[entry];
     }*/
     const resultData = KnexHelper.stringFromUTF8Array(dataImportEntity.data);
-    if (!resultData) {
+    if (resultData == null) {
       // TODO decide what to do in this case
       res
         .status(500)

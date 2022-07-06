@@ -56,7 +56,7 @@ export class CsvInterpreter extends Interpreter {
     const lineSeparator: string = parameters.lineSeparator as string;
     // Be Careful: Need to Invert the boolean here
     // True = With header, False = WithoutHeader
-    const firstRowAsHeader = !parameters.firstRowAsHeader;
+    const firstRowAsHeader = !(parameters.firstRowAsHeader as boolean);
     const skipFirstDataRow: boolean = parameters.skipFirstDataRow as boolean;
 
     const json: string[] = [];

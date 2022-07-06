@@ -6,13 +6,13 @@ export abstract class Importer {
   type: string | undefined;
   description: string | undefined;
 
-  getRequiredParameters(): Array<ImporterParameterDescription> {
+  getRequiredParameters(): ImporterParameterDescription[] {
     return this.getAvailableParameters().filter(
       (item: ImporterParameterDescription) => item.required,
     );
   }
 
-  abstract getAvailableParameters(): Array<ImporterParameterDescription>;
+  abstract getAvailableParameters(): ImporterParameterDescription[];
 
   async fetch(parameters: Record<string, unknown>): Promise<string> {
     this.validateParameters(parameters);
@@ -38,7 +38,7 @@ export abstract class Importer {
     let illegalArguments = false;
     let illegalArgumentsMessage = '';
 
-    const possibleParameters: Array<ImporterParameterDescription> =
+    const possibleParameters: ImporterParameterDescription[] =
       this.getAvailableParameters();
 
     const unnecessaryArguments = [];
@@ -64,7 +64,7 @@ export abstract class Importer {
         requiredParameter.name
       ] as ImporterParameterDescription;
 
-      if (param === undefined) {
+      if (inputParameters[requiredParameter.name] === undefined) {
         illegalArguments = true;
         illegalArgumentsMessage += this.type;
         illegalArgumentsMessage += 'importer requires parameter ';
