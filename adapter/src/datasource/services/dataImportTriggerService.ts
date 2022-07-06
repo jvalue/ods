@@ -7,40 +7,45 @@ import { FormatConfig } from '../../adapter/model/FormatConfig';
 import { ProtocolConfig } from '../../adapter/model/ProtocolConfig';
 import { AdapterService } from '../../adapter/services/adapterService';
 import { ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC } from '../../env';
+import { DataImportDTO, dataimportEntityToDTO } from '../model/DataImport.dto';
+import { DataImportEntity } from '../model/DataImport.entity';
 import { DataImportInsertStatement } from '../model/DataImportInsertStatement';
+import { DatasourceDTO, datasourceEntityToDTO } from '../model/Datasource.dto';
+import { DatasourceEntity } from '../model/Datasource.entity';
 import { DataImportRepository } from '../repository/dataImportRepository';
 import { DatasourceRepository } from '../repository/datasourceRepository';
 import { OutboxRepository } from '../repository/outboxRepository';
 
 import { DataSourceNotFoundException } from './dataSourceNotFoundException';
 
-const datasourceRepository: DatasourceRepository = new DatasourceRepository();
-const dataImportRepository: DataImportRepository = new DataImportRepository();
 const routingKey = ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC;
-const outboxRepository: OutboxRepository = new OutboxRepository();
 
 export class DataImportTriggerService {
-  id: string;
-  runtimeParameters: Record<string, unknown>;
+  // TODO THIS HAS TO BE COMPLETELY REWRITTEN SUCH THAT ID ETC GETS PASSED TO EACH FUNCTION
+  constructor(
+    private readonly datasourceRepository: DatasourceRepository,
+    private readonly dataImportRepository: DataImportRepository,
+    private readonly outboxRepository: OutboxRepository,
+  ) {}
 
-  constructor(id: string, runtimeParameters: Record<string, unknown>) {
-    this.id = id;
-    this.runtimeParameters = runtimeParameters;
-  }
-
-  private async getDataImport(): Promise<DataImportResponse> {
-    let datasource;
-    try {
-      datasource = await datasourceRepository.getDataSourceById(this.id);
-    } catch (e) {
-      // TODO check if exception is thrown or just null value result if debugging is available...
-      throw new DataSourceNotFoundException(this.id);
+  private async getDataImport(
+    datasourceId: number,
+    runtimeParameters: Record<string, unknown>,
+  ): Promise<DataImportResponse> {
+    const datasourceEntity = await this.datasourceRepository.getById(
+      datasourceId,
+    );
+    if (!this.validateEntity(datasourceEntity)) {
+      // TODO refactor such that toString not necessary
+      throw new DataSourceNotFoundException(datasourceId.toString());
     }
+    // Convert to DTO (relic of old impl)
+    const datasource = datasourceEntityToDTO(datasourceEntity);
     let adapterConfig: AdapterConfig;
-    if (this.runtimeParameters) {
+    if (runtimeParameters) {
       adapterConfig = this.getAdapterConfigWithRuntimeParameters(
         datasource,
-        this.runtimeParameters,
+        runtimeParameters,
       );
     } else {
       adapterConfig = this.getAdapterConfigWithOutRuntimeParameters(datasource);
@@ -50,32 +55,37 @@ export class DataImportTriggerService {
   }
 
   private async saveDataimport(
+    datasourceId: number,
+    runtimeParameters: Record<string, unknown>,
     returnDataImportResponse: DataImportResponse,
-  ): Promise<any> {
+  ): Promise<DataImportEntity> {
     const insertStatement: DataImportInsertStatement = {
       data: returnDataImportResponse.data,
       error_messages: [],
       health: 'OK',
       timestamp: new Date(Date.now()).toLocaleString(),
-      datasource_id: this.id,
-      parameters: this.runtimeParameters,
+      datasource_id: datasourceId,
+      parameters: runtimeParameters,
     };
-    return await dataImportRepository.addDataImport(
-      parseInt(this.id),
-      insertStatement,
-    );
+    return await this.dataImportRepository.create(insertStatement);
   }
 
   private getAdapterConfigWithRuntimeParameters(
-    datasource: any,
-    runtimeParameters: any,
+    datasource: DatasourceDTO,
+    runtimeParameters: Record<string, unknown>,
   ): AdapterConfig {
     const defaultParameter: Record<string, unknown> = datasource.protocol
       .parameters.defaultParameters as Record<string, unknown>;
-    for (const entry in runtimeParameters.parameters) {
+    // TODO improve such that case is not necessary (custom Type)
+    for (const entry in runtimeParameters.parameters as Record<
+      string,
+      unknown
+    >) {
       // TODO correct?
       if (entry) {
-        defaultParameter[entry] = runtimeParameters.parameters[entry];
+        defaultParameter[entry] = (
+          runtimeParameters.parameters as Record<string, unknown>
+        )[entry];
       }
     }
     datasource.protocol.parameters.defaultParameters = defaultParameter;
@@ -105,46 +115,48 @@ export class DataImportTriggerService {
     routingKey: string,
     returnDataImportResponse: DataImportResponse,
   ): Promise<void> {
-    await outboxRepository.publishImportTriggerResults(
+    await this.outboxRepository.publishImportTriggerResults(
+      routingKey,
       dataSourceId,
       returnDataImportResponse,
-      routingKey,
     );
   }
 
-  async triggerImport(dataSourceId: number) {
-    let returnDataImportResponse: any;
-    returnDataImportResponse = await this.getDataImport();
-    const dataImport = await this.saveDataimport(returnDataImportResponse);
+  async triggerImport(
+    datasourceId: number,
+    runtimeParameters: Record<string, unknown>,
+  ): Promise<DataImportDTO> {
+    const returnDataImportResponse = await this.getDataImport(
+      datasourceId,
+      runtimeParameters,
+    );
+    const dataImport = await this.saveDataimport(
+      datasourceId,
+      runtimeParameters,
+      returnDataImportResponse,
+    );
 
-    const dataImportId: string = dataImport.id as string;
-    dataImport.location =
-      '/datasources/' +
-      dataSourceId.toString() +
-      '/imports/' +
-      dataImportId +
-      '/data';
-
-    dataImport.parameters = this.runtimeParameters;
+    const dataImportDTO = dataimportEntityToDTO(
+      dataImport,
+      `/datasources/${datasourceId}/imports/${dataImport.id}/data`,
+    );
+    dataImportDTO.parameters = runtimeParameters;
 
     await this.publishResult(
-      dataSourceId,
+      datasourceId,
       routingKey,
       returnDataImportResponse,
     );
-    return dataImport;
+    return dataImportDTO;
   }
 
   private getAdapterConfigWithOutRuntimeParameters(
-    datasource: Datasource,
+    datasource: DatasourceDTO,
   ): AdapterConfig {
     const parameters = {
       ...datasource.protocol.parameters,
     } as Record<string, unknown>;
-    const datasourceFormatParameters = datasource.format.parameters as Record<
-      string,
-      unknown
-    >;
+    const datasourceFormatParameters = datasource.format.parameters;
     const protocolConfigObj: ProtocolConfig = {
       protocol: new Protocol(Protocol.HTTP),
       parameters: parameters,
@@ -162,19 +174,11 @@ export class DataImportTriggerService {
     };
     return adapterConfig;
   }
-}
 
-interface Datasource {
-  schema: any;
-  protocol: { type: any; parameters: any };
-  metadata: {
-    license: any;
-    author: any;
-    displayName: any;
-    creationTimestamp: any;
-    description: any;
-  };
-  format: { type: any; parameters: any };
-  trigger: { periodic: any; interval: number; firstExecution: any };
-  id: number;
+  private validateEntity(result: unknown): result is DatasourceEntity {
+    if (!result || result === undefined) {
+      return false;
+    }
+    return true;
+  }
 }

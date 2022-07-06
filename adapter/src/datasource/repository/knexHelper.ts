@@ -1,7 +1,13 @@
+import express from 'express';
+
 import { DatasourceInsertStatement } from '../model/DatasourceInsertStatement';
 
+// TODO rename
 export class KnexHelper {
-  static createDatasourceFromResultArray(result: any) {
+  /* TODO might be obsolete now
+  static createDatasourceFromResultArray(
+    result: Array<Record<string, unknown>>,
+  ): Array<Record<string, unknown>> {
     const test = [];
     for (const i in result) {
       const el = result[i];
@@ -41,7 +47,9 @@ export class KnexHelper {
     return test;
   }
 
-  static createDatasourceFromResult(result: any) {
+  static createDatasourceFromResult(
+    result: Record<string, unknown>,
+  ): Record<string, unknown> {
     const protocolParameters = result[0].protocol_parameters;
     const formatParameters = result[0].format_parameters;
     const x = {
@@ -71,27 +79,30 @@ export class KnexHelper {
     // Console.log(x);
 
     return x;
-  }
+  }*/
 
-  static getInsertStatementForDataSource(req: any): DatasourceInsertStatement {
+  static getInsertStatementForDataSource(
+    req: express.Request,
+  ): DatasourceInsertStatement {
+    const body = req.body as Record<string, Record<string, unknown>>;
     return {
-      format_parameters: req.body.format.parameters,
-      format_type: req.body.format.type,
-      author: req.body.metadata.author,
+      format_parameters: body.format.parameters,
+      format_type: body.format.type,
+      author: body.metadata.author,
       creation_timestamp: new Date(Date.now()).toLocaleString(),
-      description: req.body.metadata.description,
-      display_name: req.body.metadata.displayName,
-      license: req.body.metadata.license,
-      protocol_parameters: req.body.protocol.parameters,
-      protocol_type: req.body.protocol.type,
-      first_execution: req.body.trigger.firstExecution,
-      interval: req.body.trigger.interval,
-      periodic: req.body.trigger.periodic,
+      description: body.metadata.description,
+      display_name: body.metadata.displayName,
+      license: body.metadata.license,
+      protocol_parameters: body.protocol.parameters,
+      protocol_type: body.protocol.type,
+      first_execution: body.trigger.firstExecution,
+      interval: body.trigger.interval,
+      periodic: body.trigger.periodic,
     };
   }
 
   // From: https://weblog.rogueamoeba.com/2017/02/27/javascript-correctly-converting-a-byte-array-to-a-utf-8-string/
-  static stringFromUTF8Array(data: any): string | null {
+  static stringFromUTF8Array(data: Uint8Array): string | null {
     const extraByteMap = [1, 1, 1, 1, 2, 2, 3, 0];
     const count = data.length;
     let str = '';
@@ -107,7 +118,7 @@ export class KnexHelper {
         ch = ch & (0x3f >> extra);
         for (; extra > 0; extra -= 1) {
           const chx = data[index++];
-          if ((chx & 0xc0) != 0x80) {
+          if ((chx & 0xc0) !== 0x80) {
             return null;
           }
 

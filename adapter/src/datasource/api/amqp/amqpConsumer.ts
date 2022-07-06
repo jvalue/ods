@@ -14,17 +14,25 @@ import { ErrorResponse } from '../../services/ErrorResponse';
 
 export async function createDataSourceAmqpConsumer(
   amqpConnection: AmqpConnection,
+  outboxRepository: OutboxRepository,
+  dataImportTriggerService: DataImportTriggerService,
 ): Promise<AmqpConsumer> {
   const channel = await amqpConnection.createChannel();
-  const amqpConsumer = new AmqpConsumer(channel);
+  const amqpConsumer = new AmqpConsumer(
+    channel,
+    outboxRepository,
+    dataImportTriggerService,
+  );
   await amqpConsumer.init();
   return amqpConsumer;
 }
 
-const outboxRepository: OutboxRepository = new OutboxRepository();
-
 export class AmqpConsumer {
-  constructor(private readonly amqpChannel: AmqpChannel) {}
+  constructor(
+    private readonly amqpChannel: AmqpChannel,
+    private readonly outboxRepository: OutboxRepository,
+    private readonly dataImportTriggerService: DataImportTriggerService,
+  ) {}
 
   /** Initializes the datasource execution consumer */
   async init(): Promise<void> {
@@ -85,21 +93,19 @@ export class AmqpConsumer {
       const msgContent: DataSourceAmqpMessageContent = JSON.parse(
         stringContent,
       ) as DataSourceAmqpMessageContent;
-      const dataImportTriggerService: DataImportTriggerService =
-        new DataImportTriggerService(
-          msgContent.datasourceId.toString(),
+      try {
+        await this.dataImportTriggerService.triggerImport(
+          msgContent.datasourceId,
           msgContent.runtimeParameters,
         );
-      try {
-        await dataImportTriggerService.triggerImport(msgContent.datasourceId);
       } catch (e) {
         if (e instanceof ImporterParameterError) {
           const msg: ErrorResponse = {
             error: 'URI is not absolute',
           };
-          void outboxRepository.publishError(
-            msgContent.datasourceId,
+          void this.outboxRepository.publishErrorImportTriggerResults(
             ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
+            msgContent.datasourceId,
             msg,
           );
           return;
@@ -109,9 +115,9 @@ export class AmqpConsumer {
             error: '404 Not Found: [404 NOT FOUND Error]',
           };
           if (e.message.includes('Could not Fetch from URI:')) {
-            void outboxRepository.publishError(
-              msgContent.datasourceId,
+            void this.outboxRepository.publishErrorImportTriggerResults(
               ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
+              msgContent.datasourceId,
               msg,
             );
           }

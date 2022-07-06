@@ -8,6 +8,8 @@ import {
   ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC,
   ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
 } from '../../../env';
+import { datasourceEntityToDTO } from '../../model/Datasource.dto';
+import { DatasourceEntity } from '../../model/Datasource.entity';
 import { DatasourceConfigValidator } from '../../model/DatasourceConfigValidator';
 import { DatasourceModelForAmqp } from '../../model/datasourceModelForAmqp';
 import { DatasourceRepository } from '../../repository/datasourceRepository';
@@ -17,10 +19,13 @@ import { DataImportTriggerService } from '../../services/dataImportTriggerServic
 import { DataSourceNotFoundException } from '../../services/dataSourceNotFoundException';
 import { ErrorResponse } from '../../services/ErrorResponse';
 
-const datasourceRepository: DatasourceRepository = new DatasourceRepository();
-const outboxRepository: OutboxRepository = new OutboxRepository();
-
 export class DataSourceEndpoint {
+  constructor(
+    private readonly datasourceRepository: DatasourceRepository,
+    private readonly outboxRepository: OutboxRepository,
+    private readonly dataImportTriggerService: DataImportTriggerService,
+  ) {}
+
   registerRoutes = (app: express.Application): void => {
     app.get('/datasources', asyncHandler(this.getAllDataSources));
     app.get('/datasources/:datasourceId', asyncHandler(this.getDataSource));
@@ -40,19 +45,25 @@ export class DataSourceEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    const datasource = await datasourceRepository.getAllDataSources();
-    res.status(200).send(datasource);
+    const datasource = await this.datasourceRepository.getAll();
+    const datasourceDTOs = datasource.map((el: DatasourceEntity) =>
+      datasourceEntityToDTO(el),
+    );
+    res.status(200).send(datasourceDTOs);
   };
 
   getDataSource = async (
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    console.log(req.params.datasourceId);
-    const datasource = await datasourceRepository.getDataSourceById(
-      req.params.datasourceId,
-    );
-    res.status(200).send(datasource);
+    // TODO assert int
+    const datasourceId = Number.parseInt(req.params.datasourceId, 10);
+    const datasource = await this.datasourceRepository.getById(datasourceId);
+    if (!this.validateEntity(datasource)) {
+      res.status(404).send(`Datasource with ${datasourceId} not found!`);
+      return;
+    }
+    res.status(200).send(datasourceEntityToDTO(datasource));
   };
   // TODO only for test purposes
   /* TestConsumer = async (
@@ -94,16 +105,17 @@ export class DataSourceEndpoint {
       return;
     }
     const insertStatement = KnexHelper.getInsertStatementForDataSource(req);
-    const datasource = await datasourceRepository.addDatasource(
-      insertStatement,
-    );
+    const datasource = await this.datasourceRepository.create(insertStatement);
     const datasouceModelForAmqp: DatasourceModelForAmqp = {
       datasource: datasource,
     };
 
     const routingKey = ADAPTER_AMQP_DATASOURCE_CREATED_TOPIC;
-    await outboxRepository.publishToOutbox(datasouceModelForAmqp, routingKey);
-    const dataSourceId: number = datasource.id as number;
+    await this.outboxRepository.publishToOutbox(
+      routingKey,
+      datasouceModelForAmqp,
+    );
+    const dataSourceId: number = datasource.id;
     const reqHost: string | undefined = req.headers.host;
     const reqUrl: string = req.url;
     if (!reqHost) {
@@ -119,6 +131,8 @@ export class DataSourceEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
+    // TODO assert int
+    const datasourceId = Number.parseInt(req.params.datasourceId, 10);
     const validator = new DatasourceConfigValidator();
     if (!validator.validate(req.body)) {
       res.status(400).json({ errors: validator.getErrors() });
@@ -137,16 +151,16 @@ export class DataSourceEndpoint {
       return;
     }
     const insertStatement = KnexHelper.getInsertStatementForDataSource(req);
-    const datasource = await datasourceRepository.updateDatasource(
+    const datasource = await this.datasourceRepository.update(
+      datasourceId,
       insertStatement,
-      req.params.datasourceId,
     );
     const datasourceModelForAmqp: DatasourceModelForAmqp = {
       datasource: datasource,
     };
-    await outboxRepository.publishToOutbox(
-      datasourceModelForAmqp,
+    await this.outboxRepository.publishToOutbox(
       ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC,
+      datasourceModelForAmqp,
     );
     res.status(204).send(datasource);
   };
@@ -155,20 +169,24 @@ export class DataSourceEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    const id = req.params.datasourceId;
+    // TODO assert int
+    const id = Number.parseInt(req.params.datasourceId, 10);
     let datasource: unknown;
     try {
-      datasource = await datasourceRepository.getDataSourceById(id);
-      await datasourceRepository.deleteDatasourceById(id);
+      datasource = await this.datasourceRepository.getById(id);
+      await this.datasourceRepository.delete(id);
     } catch {
-      res.status(404).send('No datasource for id ' + id + ' found');
+      res.status(404).send(`No datasource for id ${id} found`);
       return;
     }
     const datasourceModelForAmqp: DatasourceModelForAmqp = {
       datasource: datasource,
     };
     const routingKey = ADAPTER_AMQP_DATASOURCE_DELETED_TOPIC;
-    await outboxRepository.publishToOutbox(datasourceModelForAmqp, routingKey);
+    await this.outboxRepository.publishToOutbox(
+      routingKey,
+      datasourceModelForAmqp,
+    );
     res.status(204).send();
   };
 
@@ -176,8 +194,8 @@ export class DataSourceEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    const datasourcesToDelete = await datasourceRepository.getAllDataSources();
-    await datasourceRepository.deleteAllDatasources();
+    const datasourcesToDelete = await this.datasourceRepository.getAll();
+    await this.datasourceRepository.deleteAll();
     // Const routingKey = 'datasource.config.deleted';
     const routingKey = ADAPTER_AMQP_DATASOURCE_DELETED_TOPIC;
     // TODO fix wrong entry in outbox database
@@ -185,7 +203,10 @@ export class DataSourceEndpoint {
       const datasourceModelForAmqp: DatasourceModelForAmqp = {
         datasource: dataSourceDeleted,
       };
-      void outboxRepository.publishToOutbox(datasourceModelForAmqp, routingKey);
+      void this.outboxRepository.publishToOutbox(
+        routingKey,
+        datasourceModelForAmqp,
+      );
     });
     /* TODO check if replacementfrom 188-193 is correct
     for (const dataSourceDeleted in datasourcesToDelete) {
@@ -203,25 +224,28 @@ export class DataSourceEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    const id = req.params.datasourceId;
+    // TODO assert int
+    const id = Number.parseInt(req.params.datasourceId, 10);
     const runtimeParameters: Record<string, unknown> = req.body as Record<
       string,
       unknown
     >;
 
-    const dataImportTriggerer: DataImportTriggerService =
-      new DataImportTriggerService(id, runtimeParameters);
     try {
-      const dataImport = await dataImportTriggerer.triggerImport(parseInt(id));
+      // TODO types
+      const dataImport = await this.dataImportTriggerService.triggerImport(
+        id,
+        runtimeParameters,
+      );
       res.status(200).send(dataImport);
     } catch (e) {
       if (e instanceof ImporterParameterError) {
         const msg: ErrorResponse = {
           error: 'URI is not absolute',
         };
-        void outboxRepository.publishError(
-          Number(id),
+        void this.outboxRepository.publishErrorImportTriggerResults(
           ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
+          Number(id),
           msg,
         );
         res.status(400).send(e);
@@ -232,9 +256,9 @@ export class DataSourceEndpoint {
           error: '404 Not Found: [404 NOT FOUND Error]',
         };
         if (e.message.includes('Could not Fetch from URI:')) {
-          void outboxRepository.publishError(
-            Number(id),
+          void this.outboxRepository.publishErrorImportTriggerResults(
             ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
+            Number(id),
             msg,
           );
           res.status(500).send(e.message);
@@ -284,6 +308,13 @@ export class DataSourceEndpoint {
         throw new Error('Protocol not found');
       }
     }
+  }
+
+  private validateEntity(result: unknown): result is DatasourceEntity {
+    if (!result || result === undefined) {
+      return false;
+    }
+    return true;
   }
 }
 

@@ -1,12 +1,17 @@
 import express from 'express';
 
 import { asyncHandler } from '../../../adapter/api/rest/utils';
+import {
+  DataImportMetaDataDTO,
+  dataImportEntityToMetaDataDTO,
+} from '../../model/DataImport.dto';
+import { DataImportEntity } from '../../model/DataImport.entity';
 import { DataImportRepository } from '../../repository/dataImportRepository';
 import { KnexHelper } from '../../repository/knexHelper';
 
-const dataImportRepository: DataImportRepository = new DataImportRepository();
-
 export class DataImportEndpoint {
+  constructor(private readonly dataImportRepository: DataImportRepository) {}
+
   registerRoutes = (app: express.Application): void => {
     app.get(
       '/datasources/:datasourceId/imports',
@@ -34,56 +39,58 @@ export class DataImportEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    const result: any =
-      await dataImportRepository.getMetaDataImportByDatasource(
-        req.params.datasourceId,
-      );
-    let i = 0;
+    // TODO assert int
+    const datasourceId = Number.parseInt(req.params.datasourceId, 10);
+    const result = await this.dataImportRepository.getByDatasourceId(
+      datasourceId,
+    );
     const dataSourceId: string = req.params.datasourceId;
-    result.forEach(function (el: Record<string, unknown>) {
-      const dataImportId: number = el.id as number;
-      result[i].location =
-        '/datasources/' +
-        dataSourceId +
-        '/imports/' +
-        dataImportId.toString() +
-        '/data';
-      i++;
-    });
+    // TODO map to metData
+    const resultDTO: DataImportMetaDataDTO[] = result.map(
+      (el: DataImportEntity) =>
+        dataImportEntityToMetaDataDTO(
+          el,
+          `/datasources/${dataSourceId}/imports/${el.id}/data`,
+        ),
+    );
 
-    res.status(200).send(result);
+    res.status(200).send(resultDTO);
   };
 
   getLatestMetaDataImportForDatasource = async (
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    const id: string = req.params.datasourceId;
-    const result =
-      await dataImportRepository.getLatestMetaDataImportByDatasourceId(id);
-    if (checkResult(result)) {
+    // TODO assert int
+    const datasourceId = Number.parseInt(req.params.datasourceId, 10);
+    const result = await this.dataImportRepository.getLatestByDatasourceId(
+      datasourceId,
+    );
+    if (!this.validateEntity(result)) {
       res.status(400).send('Protocol not supported');
       return;
     }
-    const dataImportId: number = result[0].id as number;
-    result[0].location =
-      '/datasources/' + id + '/imports/' + dataImportId.toString() + '/data';
-    res.status(200).send(result[0]);
+    const dataImportId: number = result.id;
+    const resultDTS = dataImportEntityToMetaDataDTO(
+      result,
+      `/datasources/${datasourceId}/imports/${dataImportId}/data`,
+    );
+    res.status(200).send(resultDTS);
   };
 
   getLatestDataImportForDatasource = async (
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    const id = req.params.datasourceId;
-    const result = await dataImportRepository.getLatestDataImportByDatasourceId(
-      id,
-    );
-    if (checkResult(result)) {
+    // TODO assert int
+    const id = Number.parseInt(req.params.datasourceId, 10);
+    const result = await this.dataImportRepository.getLatestByDatasourceId(id);
+    if (!this.validateEntity(result)) {
       res.status(400).send('Protocol not supported');
       return;
     }
-    const stringResult = KnexHelper.stringFromUTF8Array(result[0].data);
+    // TODO check whether KnexHelper still required
+    const stringResult = KnexHelper.stringFromUTF8Array(result.data);
     res.status(200).send(stringResult);
   };
 
@@ -91,31 +98,38 @@ export class DataImportEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    const datasourceId: string = req.params.datasourceId;
-    const dataImportId: string = req.params.dataImportId;
-    const result = await dataImportRepository.getMetadataForDataImport(
-      datasourceId,
-      dataImportId,
-    );
-    if (checkResult(result)) {
+    // TODO assert int
+    const dataImportId = Number.parseInt(req.params.dataImportId, 10);
+    const result = await this.dataImportRepository.getById(dataImportId);
+    if (!this.validateEntity(result)) {
       res.status(400).send('Protocol not supported');
       return;
     }
-    res.status(200).send(result[0]);
+    res.status(200).send(dataImportEntityToMetaDataDTO(result));
   };
 
   getDataFromDataImport = async (
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    const datasourceId: string = req.params.datasourceId;
-    const dataImportId: string = req.params.dataImportId;
+    // TODO assert int
+    const datasourceId = Number.parseInt(req.params.datasourceId, 10);
+    const dataImportId = Number.parseInt(req.params.dataImportId, 10);
+    /* TODO old impl got params from Datasource instead of DataImport?!?!?
     const returnDataImportResponse =
-      await dataImportRepository.getDataFromDataImportWithParameter(
+      await this.dataImportRepository.getDataFromDataImportWithParameter(
         datasourceId,
         dataImportId,
-      );
+      );*/
+    const dataImportEntity = await this.dataImportRepository.getById(
+      dataImportId,
+    );
+    if (!this.validateEntity(dataImportEntity)) {
+      res.status(404).send(`No DataImport found for id ${dataImportId}`);
+      return;
+    }
 
+    /* TODO no idea what exactly was done here (does not resemble original Java Spring Code)
     const result: Record<string, unknown> = {};
     const keys = Object.keys(returnDataImportResponse);
     for (const entry of keys) {
@@ -130,15 +144,23 @@ export class DataImportEndpoint {
     const dataKeys = Object.keys(data);
     for (const entry of dataKeys) {
       result[entry] = data[entry];
+    }*/
+    const resultData = KnexHelper.stringFromUTF8Array(dataImportEntity.data);
+    if (!resultData) {
+      // TODO decide what to do in this case
+      res
+        .status(500)
+        .send(`Failed to parse data for dataImport with id ${dataImportId}`);
+      return;
     }
 
-    res.status(200).send(result);
+    res.status(200).send(resultData);
   };
-}
-function checkResult(result: any): boolean {
-  // Will evalute to true if value is null, undefined, NaN, '', 0 , false
-  if (!result || !result[0]) {
+
+  private validateEntity(result: unknown): result is DataImportEntity {
+    if (!result || result === undefined) {
+      return false;
+    }
     return true;
   }
-  return false;
 }

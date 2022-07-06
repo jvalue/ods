@@ -9,7 +9,10 @@ import { AdapterEndpoint } from './adapter/api/rest/adapterEndpoint';
 import { createDataSourceAmqpConsumer } from './datasource/api/amqp/amqpConsumer';
 import { DataImportEndpoint } from './datasource/api/rest/dataImportEndpoint';
 import { DataSourceEndpoint } from './datasource/api/rest/dataSourceEndpoint';
-import { initDatasourceDatabases } from './datasource/repository/datasourceDatabase';
+import { initDataImportRepository } from './datasource/repository/postgresDataImportRepository';
+import { initDatasourceRepository } from './datasource/repository/postgresDatasourceRepository';
+import { initOutboxRepository } from './datasource/repository/postgresOutboxRepository';
+import { DataImportTriggerService } from './datasource/services/dataImportTriggerService';
 import { AMQP_URL, CONNECTION_BACKOFF, CONNECTION_RETRIES } from './env';
 
 export const port = 8080;
@@ -25,7 +28,25 @@ async function main(): Promise<void> {
     res.status(200).send('I am alive!');
   });
 
-  await initDatasourceDatabases(CONNECTION_RETRIES, CONNECTION_BACKOFF);
+  const outboxRepository = await initOutboxRepository(
+    CONNECTION_RETRIES,
+    CONNECTION_BACKOFF,
+  );
+  const datasourceRepository = await initDatasourceRepository(
+    CONNECTION_RETRIES,
+    CONNECTION_BACKOFF,
+  );
+  const dataImportRepository = await initDataImportRepository(
+    CONNECTION_RETRIES,
+    CONNECTION_BACKOFF,
+    datasourceRepository,
+  );
+
+  const dataImportTriggerService = new DataImportTriggerService(
+    datasourceRepository,
+    dataImportRepository,
+    outboxRepository,
+  );
 
   const amqpConnection = new AmqpConnection(
     AMQP_URL,
@@ -37,13 +58,21 @@ async function main(): Promise<void> {
     // 2000,
     // OnAmqpConnectionLoss
   );
-  await createDataSourceAmqpConsumer(amqpConnection);
+  await createDataSourceAmqpConsumer(
+    amqpConnection,
+    outboxRepository,
+    dataImportTriggerService,
+  );
 
   const adapterEndpoint = new AdapterEndpoint();
   adapterEndpoint.registerRoutes(app);
-  const dataSourceEndpoint = new DataSourceEndpoint();
+  const dataSourceEndpoint = new DataSourceEndpoint(
+    datasourceRepository,
+    outboxRepository,
+    dataImportTriggerService,
+  );
   dataSourceEndpoint.registerRoutes(app);
-  const dataImportEndpoint = new DataImportEndpoint();
+  const dataImportEndpoint = new DataImportEndpoint(dataImportRepository);
   dataImportEndpoint.registerRoutes(app);
 
   server = app.listen(port, () => {
