@@ -83,6 +83,8 @@ export class HttpImporter extends Importer {
   override async doFetch(parameters: Record<string, unknown>): Promise<string> {
     let uri = parameters.location as string;
     const encoding = parameters.encoding as string;
+    // TODO originally this was done in dataImportTrigger during creation of AdapterConfig
+    // -> RuntimeParameter are used, because the defaultParams are overriden during AdapterConfig instead
     if (parameters.defaultParameters !== undefined) {
       const defaultParameters = parameters.defaultParameters as Record<
         string,

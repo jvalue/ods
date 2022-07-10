@@ -44,7 +44,7 @@ describe('doInterpret CSV Format returns valid JSON', () => {
       },
     ];
     const res = await csvFormat.doInterpret(data, parameters);
-    expect(JSON.parse(res)).toEqual(expected);
+    expect(res).toEqual(expected);
   });
 
   test('convert standard CSV to JSON with lineSeperator \r and ColumnSeperator ;', async () => {
@@ -87,7 +87,7 @@ describe('doInterpret CSV Format returns valid JSON', () => {
       },
     ];
     const res = await csvFormat.doInterpret(data, parameters);
-    expect(JSON.parse(res)).toEqual(expected);
+    expect(res).toEqual(expected);
   });
 });
 
@@ -124,7 +124,7 @@ describe('doInterpret CSV Format with SkipFirstRow = TRUE returns valid JSON wit
       },
     ];
     const res = await csvFormat.doInterpret(data, parameters);
-    expect(JSON.parse(res)).toEqual(expected);
+    expect(res).toEqual(expected);
   });
 });
 
@@ -166,7 +166,7 @@ describe('doInterpret CSV Format with FirstRowAsHeader = FALSE returns valid JSO
       },
     ];
     const res = await csvFormat.doInterpret(data, parameters);
-    expect(JSON.parse(res)).toEqual(expected);
+    expect(res).toEqual(expected);
   });
 });
 

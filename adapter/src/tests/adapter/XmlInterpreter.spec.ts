@@ -6,7 +6,7 @@ describe('doInterpret XML Format Returns valid JSON', () => {
     const data =
       '<?xml version="1.0" encoding="UTF-8"?><root><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don\'t forget me this weekend!</body></root>';
     return xmlFormat.doInterpret(data, {}).then((res) => {
-      expect(JSON.parse(res)).toEqual({
+      expect(res).toEqual({
         root: {
           to: 'Tove',
           from: 'Jani',
@@ -22,7 +22,7 @@ describe('doInterpret XML Format Returns valid JSON', () => {
     const data =
       '<?xml version="1.0" encoding="UTF-8"?><root><to>Tove</to><from>Jani</from><heading><subheading>ReminderSubheading</subheading><Reminder>Reminder</Reminder></heading><body>Don\'t forget me this weekend!</body></root>';
     return xmlFormat.doInterpret(data, {}).then((res) => {
-      expect(JSON.parse(res)).toEqual({
+      expect(res).toEqual({
         root: {
           to: 'Tove',
           from: 'Jani',
@@ -38,7 +38,7 @@ describe('doInterpret XML Format Returns valid JSON', () => {
     const data =
       '<?xml version="1.0" encoding="UTF-8"?><root><to>Tove</to><from>Jani</from><heading><subheading>ReminderSubheading</subheading><Reminder>Reminder1</Reminder><Reminder>Reminder2</Reminder><Reminder>Reminder3</Reminder></heading><body>Don\'t forget me this weekend!</body></root>';
     return xmlFormat.doInterpret(data, {}).then((res) => {
-      expect(JSON.parse(res)).toEqual({
+      expect(res).toEqual({
         root: {
           to: 'Tove',
           from: 'Jani',

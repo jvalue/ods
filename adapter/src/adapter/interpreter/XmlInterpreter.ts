@@ -32,15 +32,13 @@ export class XmlInterpreter extends Interpreter {
     data: string,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     parameters: Record<string, unknown>,
-  ): Promise<string> {
+  ): Promise<Record<string, unknown> | Array<Record<string, unknown>>> {
     const options = {
       ignoreDeclaration: true,
     };
 
     const parser = new XMLParser(options);
     const result = parser.parse(data) as Record<string, unknown>;
-    return new Promise(function (resolve) {
-      resolve(JSON.stringify(result));
-    });
+    return Promise.resolve(result);
   }
 }

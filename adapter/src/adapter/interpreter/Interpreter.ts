@@ -12,7 +12,7 @@ export abstract class Interpreter {
   async interpret(
     data: string,
     parameters: Record<string, unknown>,
-  ): Promise<string> {
+  ): Promise<Record<string, unknown> | Array<Record<string, unknown>>> {
     this.validateParameters(parameters);
     return await this.doInterpret(data, parameters);
   }
@@ -22,7 +22,7 @@ export abstract class Interpreter {
   abstract doInterpret(
     data: string,
     parameters?: Record<string, unknown>,
-  ): Promise<string>;
+  ): Promise<Record<string, unknown> | Array<Record<string, unknown>>>;
   abstract getAvailableParameters(): InterpreterParameterDescription[];
 
   /**

@@ -51,7 +51,7 @@ export class CsvInterpreter extends Interpreter {
   override async doInterpret(
     data: string,
     parameters: Record<string, unknown>,
-  ): Promise<string> {
+  ): Promise<Record<string, unknown> | Array<Record<string, unknown>>> {
     const columnSeparator = (parameters.columnSeparator as string).charAt(0);
     const lineSeparator: string = parameters.lineSeparator as string;
     // Be Careful: Need to Invert the boolean here
@@ -59,24 +59,16 @@ export class CsvInterpreter extends Interpreter {
     const firstRowAsHeader = !(parameters.firstRowAsHeader as boolean);
     const skipFirstDataRow: boolean = parameters.skipFirstDataRow as boolean;
 
-    const json: string[] = [];
-    await csv({
+    const csvConverterResult = await csv({
       noheader: firstRowAsHeader,
       output: 'json',
       delimiter: columnSeparator,
       eol: lineSeparator,
-    })
-      .fromString(data)
-      .subscribe((csvRow: string, index: number) => {
-        if (skipFirstDataRow && index === 0) {
-          // Skip First Row
-        } else {
-          json.push(csvRow);
-        }
-      });
-    return new Promise(function (resolve) {
-      resolve(JSON.stringify(json));
-    });
+    }).fromString(data);
+    if (skipFirstDataRow) {
+      csvConverterResult.splice(0, 1);
+    }
+    return Promise.resolve(csvConverterResult);
   }
 
   /**
