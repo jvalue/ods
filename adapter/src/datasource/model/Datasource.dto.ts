@@ -20,17 +20,17 @@ export function datasourceEntityToDTO(entity: DatasourceEntity): DatasourceDTO {
     id: entity.id,
     protocol: {
       type: entity.protocol_type,
-      parameters: JSON.parse(entity.protocol_parameters) as Record<
-        string,
-        unknown
-      >,
+      parameters:
+        entity.protocol_parameters !== ''
+          ? (JSON.parse(entity.protocol_parameters) as Record<string, unknown>)
+          : {},
     },
     format: {
       type: entity.format_type,
-      parameters: JSON.parse(entity.format_parameters) as Record<
-        string,
-        unknown
-      >,
+      parameters:
+        entity.format_parameters !== ''
+          ? (JSON.parse(entity.format_parameters) as Record<string, unknown>)
+          : {},
     },
     metadata: {
       author: entity.author,

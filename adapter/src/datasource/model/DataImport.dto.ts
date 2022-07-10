@@ -8,13 +8,16 @@ export interface DataImportDTO {
   health: string;
   timestamp: Date;
   data: string;
-  parameters: Record<string, unknown>;
+  parameters?: Record<string, unknown>;
   location?: string;
 }
 
 export type DataImportMetaDataDTO = Omit<DataImportDTO, 'data' | 'parameters'>;
 
-export type DataImportDataDTO = Pick<DataImportDTO, 'data' | 'location'>;
+export type DataImportDataDTO = Pick<
+  DataImportDTO,
+  'data' | 'location' | 'parameters'
+>;
 
 /* Export interface DataImportMetaDataDTO extends DataImportDTO {
   id: number;
@@ -33,14 +36,18 @@ export function dataimportEntityToDTO(
   data: DataImportEntity,
   location?: string,
 ): DataImportDTO {
+  const params =
+    data.parameters !== ''
+      ? (JSON.parse(data.parameters) as Record<string, unknown>)
+      : {};
   return {
     id: data.id,
     error_messages: data.error_messages,
     health: data.health,
     timestamp: data.timestamp,
     location: location,
-    data: KnexHelper.stringFromUTF8Array(data.data) || '', // TODO error when null
-    parameters: JSON.parse(data.parameters) as Record<string, unknown>,
+    data: KnexHelper.stringFromUTF8Array(data.data) ?? '', // TODO error when null
+    parameters: params,
   };
 }
 
@@ -60,9 +67,11 @@ export function dataImportEntityToMetaDataDTO(
 export function dataImportEntityToDataDTO(
   data: DataImportEntity,
   location?: string,
+  parameters?: Record<string, unknown>,
 ): DataImportDataDTO {
   return {
-    data: KnexHelper.stringFromUTF8Array(data.data) || '', // TODO error when null
+    data: KnexHelper.stringFromUTF8Array(data.data) ?? '', // TODO error when null
     location: location,
+    parameters: parameters,
   };
 }

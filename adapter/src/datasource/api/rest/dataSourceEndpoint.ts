@@ -106,10 +106,11 @@ export class DataSourceEndpoint {
     }
     const insertStatement = KnexHelper.getInsertStatementForDataSource(req);
     const datasource = await this.datasourceRepository.create(insertStatement);
-    const datasouceModelForAmqp: DatasourceModelForAmqp = {
-      datasource: datasource,
-    };
 
+    const datasourceDTO = datasourceEntityToDTO(datasource);
+    const datasouceModelForAmqp: DatasourceModelForAmqp = {
+      datasource: datasourceDTO,
+    };
     const routingKey = ADAPTER_AMQP_DATASOURCE_CREATED_TOPIC;
     await this.outboxRepository.publishToOutbox(
       routingKey,
@@ -124,7 +125,7 @@ export class DataSourceEndpoint {
     // Gets checked in line 113
     // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
     res.header('location', reqHost + reqUrl + '/' + dataSourceId.toString());
-    res.status(201).send(datasource);
+    res.status(201).send(datasourceDTO);
   };
 
   updateDatasource = async (
@@ -155,14 +156,15 @@ export class DataSourceEndpoint {
       datasourceId,
       insertStatement,
     );
+    const datasourceDTO = datasourceEntityToDTO(datasource);
     const datasourceModelForAmqp: DatasourceModelForAmqp = {
-      datasource: datasource,
+      datasource: datasourceDTO,
     };
     await this.outboxRepository.publishToOutbox(
       ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC,
       datasourceModelForAmqp,
     );
-    res.status(204).send(datasource);
+    res.status(204).send(datasourceDTO);
   };
 
   deleteDatasource = async (
@@ -171,16 +173,16 @@ export class DataSourceEndpoint {
   ): Promise<void> => {
     // TODO assert int
     const id = Number.parseInt(req.params.datasourceId, 10);
-    let datasource: unknown;
-    try {
-      datasource = await this.datasourceRepository.getById(id);
-      await this.datasourceRepository.delete(id);
-    } catch {
+    const datasource = await this.datasourceRepository.getById(id);
+    if (datasource === undefined) {
       res.status(404).send(`No datasource for id ${id} found`);
       return;
     }
+    await this.datasourceRepository.delete(id);
+    const datasourceDTO = datasourceEntityToDTO(datasource);
+    // TODO this results into bs
     const datasourceModelForAmqp: DatasourceModelForAmqp = {
-      datasource: datasource,
+      datasource: datasourceDTO,
     };
     const routingKey = ADAPTER_AMQP_DATASOURCE_DELETED_TOPIC;
     await this.outboxRepository.publishToOutbox(

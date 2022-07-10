@@ -3,14 +3,20 @@ import express from 'express';
 import { asyncHandler } from '../../../adapter/api/rest/utils';
 import {
   DataImportMetaDataDTO,
+  dataImportEntityToDataDTO,
   dataImportEntityToMetaDataDTO,
 } from '../../model/DataImport.dto';
 import { DataImportEntity } from '../../model/DataImport.entity';
+import { datasourceEntityToDTO } from '../../model/Datasource.dto';
 import { DataImportRepository } from '../../repository/dataImportRepository';
+import { DatasourceRepository } from '../../repository/datasourceRepository';
 import { KnexHelper } from '../../repository/knexHelper';
 
 export class DataImportEndpoint {
-  constructor(private readonly dataImportRepository: DataImportRepository) {}
+  constructor(
+    private readonly dataImportRepository: DataImportRepository,
+    private readonly datasourceRepository: DatasourceRepository,
+  ) {}
 
   registerRoutes = (app: express.Application): void => {
     app.get(
@@ -45,7 +51,6 @@ export class DataImportEndpoint {
       datasourceId,
     );
     const dataSourceId: string = req.params.datasourceId;
-    // TODO map to metData
     const resultDTO: DataImportMetaDataDTO[] = result.map(
       (el: DataImportEntity) =>
         dataImportEntityToMetaDataDTO(
@@ -113,13 +118,8 @@ export class DataImportEndpoint {
     res: express.Response,
   ): Promise<void> => {
     // TODO assert int
+    const datasourceId = Number.parseInt(req.params.datasourceId, 10);
     const dataImportId = Number.parseInt(req.params.dataImportId, 10);
-    /* TODO old impl got params from Datasource instead of DataImport?!?!?
-    const returnDataImportResponse =
-      await this.dataImportRepository.getDataFromDataImportWithParameter(
-        datasourceId,
-        dataImportId,
-      );*/
     const dataImportEntity = await this.dataImportRepository.getById(
       dataImportId,
     );
@@ -127,6 +127,43 @@ export class DataImportEndpoint {
       res.status(404).send(`No DataImport found for id ${dataImportId}`);
       return;
     }
+    const datasourceEntity = await this.datasourceRepository.getById(
+      datasourceId,
+    );
+    if (!this.validateEntity(datasourceEntity)) {
+      res.status(404).send(`No Datasource found for id ${dataImportId}`);
+      return;
+    }
+    const datasourceDTO = datasourceEntityToDTO(datasourceEntity);
+
+    // Create parameters for dataImportDataDTO (use datasource default as base and overwrite with dataImport params)
+    // TODO not sure if datasource default params required
+    const dataImportDTOParams = {};
+    if (datasourceDTO.protocol.parameters.defaultParameters !== undefined) {
+      Object.assign(
+        dataImportDTOParams,
+        datasourceDTO.protocol.parameters.defaultParameters as Record<
+          string,
+          unknown
+        >,
+      );
+    }
+    const dataImportParams = JSON.parse(dataImportEntity.parameters) as Record<
+      string,
+      unknown
+    >;
+    if (dataImportParams.parameters !== undefined) {
+      Object.assign(
+        dataImportDTOParams,
+        dataImportParams.parameters as Record<string, unknown>,
+      );
+    }
+
+    const dataImportDataDTO = dataImportEntityToDataDTO(
+      dataImportEntity,
+      undefined,
+      dataImportDTOParams,
+    );
 
     /* TODO no idea what exactly was done here (does not resemble original Java Spring Code)
     const result: Record<string, unknown> = {};
@@ -144,16 +181,16 @@ export class DataImportEndpoint {
     for (const entry of dataKeys) {
       result[entry] = data[entry];
     }*/
-    const resultData = KnexHelper.stringFromUTF8Array(dataImportEntity.data);
-    if (resultData == null) {
-      // TODO decide what to do in this case
+
+    // TODO old impl returned the string, but that fails with integration tests
+    // -> maybe spring automatically converts to object, because when converting to json everything works?!?
+    if (dataImportDataDTO.data === '') {
       res
-        .status(500)
-        .send(`Failed to parse data for dataImport with id ${dataImportId}`);
+        .status(404)
+        .send(`No data found for dataImport with id ${dataImportId}`);
       return;
     }
-
-    res.status(200).send(resultData);
+    res.status(200).send(JSON.parse(dataImportDataDTO.data));
   };
 
   private validateEntity(result: unknown): result is DataImportEntity {

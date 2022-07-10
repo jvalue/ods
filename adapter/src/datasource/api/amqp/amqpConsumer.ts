@@ -124,11 +124,16 @@ export class AmqpConsumer {
           return;
         }
       }
+    } else {
+      console.debug(
+        'Received unsubscribed event on topic %s - doing nothing',
+        msg.fields.routingKey,
+      );
     }
     await this.amqpChannel.ack(msg);
   };
 }
 export interface DataSourceAmqpMessageContent {
   datasourceId: number;
-  runtimeParameters: Record<string, unknown>;
+  runtimeParameters: Record<string, unknown> | undefined;
 }

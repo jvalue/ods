@@ -72,7 +72,10 @@ async function main(): Promise<void> {
     dataImportTriggerService,
   );
   dataSourceEndpoint.registerRoutes(app);
-  const dataImportEndpoint = new DataImportEndpoint(dataImportRepository);
+  const dataImportEndpoint = new DataImportEndpoint(
+    dataImportRepository,
+    datasourceRepository,
+  );
   dataImportEndpoint.registerRoutes(app);
 
   server = app.listen(port, () => {

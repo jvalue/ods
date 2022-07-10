@@ -21,7 +21,6 @@ import { DataSourceNotFoundException } from './dataSourceNotFoundException';
 const routingKey = ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC;
 
 export class DataImportTriggerService {
-  // TODO THIS HAS TO BE COMPLETELY REWRITTEN SUCH THAT ID ETC GETS PASSED TO EACH FUNCTION
   constructor(
     private readonly datasourceRepository: DatasourceRepository,
     private readonly dataImportRepository: DataImportRepository,
@@ -36,12 +35,13 @@ export class DataImportTriggerService {
       datasourceId,
     );
     if (!this.validateEntity(datasourceEntity)) {
-      // TODO refactor such that toString not necessary
-      throw new DataSourceNotFoundException(datasourceId.toString());
+      throw new DataSourceNotFoundException(datasourceId);
     }
     // Convert to DTO (relic of old impl)
     const datasource = datasourceEntityToDTO(datasourceEntity);
     let adapterConfig: AdapterConfig;
+
+    // TODO merge getAdapterConfigWithOutRuntimeParameters and getAdapterConfigWithRuntimeParameters
     if (runtimeParameters) {
       adapterConfig = this.getAdapterConfigWithRuntimeParameters(
         datasource,
@@ -56,7 +56,7 @@ export class DataImportTriggerService {
 
   private async saveDataimport(
     datasourceId: number,
-    runtimeParameters: Record<string, unknown>,
+    runtimeParameters: Record<string, unknown> | undefined,
     returnDataImportResponse: DataImportResponse,
   ): Promise<DataImportEntity> {
     const insertStatement: DataImportInsertStatement = {
@@ -70,6 +70,66 @@ export class DataImportTriggerService {
     return await this.dataImportRepository.create(insertStatement);
   }
 
+  /* Private getAdapterConfig(
+    datasource: DatasourceDTO,
+    runtimeParameters: Record<string, unknown> | undefined,
+  ): AdapterConfig {
+    // TODO extract into fillQueryParameters (like old impl)
+    const defaultParameter = datasource.protocol.parameters
+      .defaultParameters as Record<string, unknown> | undefined;
+    const runtimeParams = runtimeParameters?.parameters as
+      | Record<string, unknown>
+      | undefined;
+    // TODO improve such that case is not necessary (custom Type)
+
+    const replacementParameters: Record<string, unknown> = {};
+    if (defaultParameter !== undefined) {
+      Object.assign(replacementParameters, defaultParameter);
+    }
+
+    if (runtimeParams !== undefined) {
+      Object.assign(replacementParameters, runtimeParams);
+    }
+
+    /* TODO seems like this was moved into HTTPImporter -> whole fillQueryParameters no longer necessary
+    let url: string = datasource.protocol.parameters.location as string;
+    for (const parameterKey in replacementParameters) {
+      // TODO check if that works (value is unknown)
+      if (
+        Object.prototype.hasOwnProperty.call(
+          replacementParameters,
+          parameterKey,
+        )
+      ) {
+        url = url.replace(
+          '{' + parameterKey + '}',
+          replacementParameters[parameterKey] as string,
+        );
+      }
+    }
+
+    const parameters = datasource.protocol.parameters;
+    parameters.location = url;/
+
+    // Start of toAdapterConfig of old impl
+    const protocolConfigObj: ProtocolConfig = {
+      protocol: new Protocol(Protocol.HTTP),
+      parameters: parameters,
+    };
+    const format = new Format(
+      AdapterEndpoint.getFormat(datasource.format.type),
+    );
+    const formatConfigObj: FormatConfig = {
+      format: format,
+      parameters: datasource.format.parameters,
+    };
+    const adapterConfig: AdapterConfig = {
+      protocolConfig: protocolConfigObj,
+      formatConfig: formatConfigObj,
+    };
+    return adapterConfig;
+  }*/
+
   private getAdapterConfigWithRuntimeParameters(
     datasource: DatasourceDTO,
     runtimeParameters: Record<string, unknown>,
@@ -77,6 +137,9 @@ export class DataImportTriggerService {
     const defaultParameter: Record<string, unknown> = datasource.protocol
       .parameters.defaultParameters as Record<string, unknown>;
     // TODO improve such that case is not necessary (custom Type)
+
+    // TODO this should merge default params with runtimeParams
+    // TODO interfaces for types (like AdapterConfig)
     for (const entry in runtimeParameters.parameters as Record<
       string,
       unknown
@@ -124,7 +187,7 @@ export class DataImportTriggerService {
 
   async triggerImport(
     datasourceId: number,
-    runtimeParameters: Record<string, unknown>,
+    runtimeParameters: Record<string, unknown> | undefined,
   ): Promise<DataImportDTO> {
     const returnDataImportResponse = await this.getDataImport(
       datasourceId,
@@ -136,11 +199,14 @@ export class DataImportTriggerService {
       returnDataImportResponse,
     );
 
+    // TODO the following line probably crashes (later logs not visible)
     const dataImportDTO = dataimportEntityToDTO(
       dataImport,
       `/datasources/${datasourceId}/imports/${dataImport.id}/data`,
     );
-    dataImportDTO.parameters = runtimeParameters;
+    if (runtimeParameters !== undefined) {
+      dataImportDTO.parameters = runtimeParameters;
+    }
 
     await this.publishResult(
       datasourceId,

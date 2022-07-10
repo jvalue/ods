@@ -94,6 +94,7 @@ export class PostgresDataImportRepository implements DataImportRepository {
     return this.deserializeQueryResult(resultSet)[0];
   }
 
+  // TODO old impl queried by both dataImportId and datasourceId -> WHY?!?!!?!? (both are unique -> only one dataImportId IN WHOLE TABLE)
   async getById(dataImportId: number): Promise<DataImportEntity | undefined> {
     const resultSet = (await this.postgresClient.executeQuery(GET_BY_ID, [
       dataImportId,
@@ -128,16 +129,16 @@ export class PostgresDataImportRepository implements DataImportRepository {
     return entities[0];
   }
 
-  // TODO not sure if needed BUT THIS GET defaultParameters OF CORRESPONDING DATASOURCE
-  /* Async getDataFromDataImportWithParameter(
+  /* TODO not sure if needed BUT THIS GET defaultParameters OF CORRESPONDING DATASOURCE
+  async getDataFromDataImportWithParameter(
     datasourceId: string,
     dataImportId: string,
-  ) {
+  ): Promise<DataImportEntity> {
     const dataImport = await this.getDataFromDataImport(
       datasourceId,
       dataImportId,
     );
-    const result: Record<string, unknown> = {
+    const result: DataImportEntity = {
       data: KnexHelper.stringFromUTF8Array(dataImport[0].data),
     };
 
@@ -146,27 +147,22 @@ export class PostgresDataImportRepository implements DataImportRepository {
     );
 
     if (dataSource.protocol.parameters.defaultParameters) {
-      const keys = Object.keys(
-        dataSource.protocol.parameters.defaultParameters,
-      );
-      for (const entry of keys) {
-        result[entry] = dataSource.protocol.parameters.defaultParameters[entry];
-      }
+      Object.assign(result, dataSource.protocol.parameters.defaultParameters);
     }
 
     if (JSON.parse(dataImport[0].parameters).parameters) {
       const parameters = JSON.parse(dataImport[0].parameters).parameters;
-      const keys = Object.keys(parameters);
-      for (const entry of keys) {
-        result[entry] = parameters[entry];
-      }
+      Object.assign(result, parameters);
     }
 
-    return result;
+    return result as DataImportEntity;
   }*/
 
   private escapeQuotes(data: unknown): string {
-    return JSON.stringify(data).replace("'", "''");
+    if (data !== undefined) {
+      return JSON.stringify(data).replace("'", "''");
+    }
+    return '';
   }
 
   private deserializeQueryResult(

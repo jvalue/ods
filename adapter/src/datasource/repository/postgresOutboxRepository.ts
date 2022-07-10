@@ -58,7 +58,7 @@ export class PostgresOutboxRepository implements OutboxRepository {
    * @param backoffMs:  Time in seconds to backoff before next connection retry
    */
   async init(retries: number, backoffMs: number): Promise<void> {
-    console.debug('Initializing PostgresDataImportRepository');
+    console.debug('Initializing PostgresOutboxRepository');
 
     await this.postgresClient.waitForConnection(retries, backoffMs);
     await this.postgresClient.executeQuery(CREATE_OUTBOX_TABLE_STATEMENT);
@@ -88,7 +88,7 @@ export class PostgresOutboxRepository implements OutboxRepository {
   ): Promise<string> {
     const payload = {
       datasourceId: datasourceId,
-      data: JSON.stringify(returnErrorResponse.error),
+      error: returnErrorResponse.error,
     };
     return this.publishToOutbox(routingKey, payload);
   }
@@ -99,7 +99,7 @@ export class PostgresOutboxRepository implements OutboxRepository {
   ): Promise<string> {
     const payload = {
       datasourceId: dataSourceId,
-      data: JSON.stringify(returnDataImportResponse.data),
+      data: returnDataImportResponse.data,
     };
     return this.publishToOutbox(routingKey, payload);
   }

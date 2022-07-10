@@ -44,7 +44,7 @@ export class AdapterService {
       rawData,
       _adapterConfig.formatConfig,
     );
-    const returnValue: DataImportResponse = { data: result };
+    const returnValue: DataImportResponse = { data: JSON.stringify(result) };
     return returnValue;
   }
 
@@ -69,7 +69,10 @@ export class AdapterService {
     return await importer.fetch(config.parameters);
   }
 
-  async executeFormat(rawData: string, config: FormatConfig): Promise<string> {
+  async executeFormat(
+    rawData: string,
+    config: FormatConfig,
+  ): Promise<Record<string, unknown> | Array<Record<string, unknown>>> {
     const interpreter = config.format.getInterpreter();
     return await interpreter.interpret(rawData, config.parameters);
   }
