@@ -194,7 +194,7 @@ export class DataImportEndpoint {
   };
 
   private validateEntity(result: unknown): result is DataImportEntity {
-    if (!result || result === undefined) {
+    if (result === undefined) {
       return false;
     }
     return true;

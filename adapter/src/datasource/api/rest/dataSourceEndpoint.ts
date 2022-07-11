@@ -313,7 +313,7 @@ export class DataSourceEndpoint {
   }
 
   private validateEntity(result: unknown): result is DatasourceEntity {
-    if (!result || result === undefined) {
+    if (result === undefined) {
       return false;
     }
     return true;
