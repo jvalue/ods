@@ -78,7 +78,7 @@ describe('Stateless data import', () => {
         .send(reqBody);
       expect(response.status).toEqual(200);
       const importedData = response.body.data;
-      expect(importedData).toEqual({
+      expect(JSON.parse(importedData)).toEqual({
         whateverwillbe: 'willbe',
         quesera: 'sera',
       });
