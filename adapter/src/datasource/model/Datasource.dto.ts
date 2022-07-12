@@ -3,7 +3,15 @@ import { DatasourceEntity } from './Datasource.entity';
 export interface DatasourceDTO {
   id: number;
   schema: Record<string, unknown>;
-  protocol: { type: string; parameters: Record<string, unknown> };
+  protocol: {
+    type: string;
+    parameters: {
+      // Record<string, unknown> with one key of specific type 'Record<string, unknown> | undefined'
+      //  -> No casting required when accessing defaultParameters
+      [key: string]: unknown;
+      defaultParameters?: Record<string, unknown>;
+    };
+  };
   metadata: {
     license: string;
     author: string;

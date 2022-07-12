@@ -137,15 +137,11 @@ export class DataImportEndpoint {
     const datasourceDTO = datasourceEntityToDTO(datasourceEntity);
 
     // Create parameters for dataImportDataDTO (use datasource default as base and overwrite with dataImport params)
-    // TODO not sure if datasource default params required
     const dataImportDTOParams = {};
     if (datasourceDTO.protocol.parameters.defaultParameters !== undefined) {
       Object.assign(
         dataImportDTOParams,
-        datasourceDTO.protocol.parameters.defaultParameters as Record<
-          string,
-          unknown
-        >,
+        datasourceDTO.protocol.parameters.defaultParameters,
       );
     }
     const dataImportParams = JSON.parse(dataImportEntity.parameters) as Record<

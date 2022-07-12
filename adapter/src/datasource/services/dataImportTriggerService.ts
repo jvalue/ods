@@ -37,19 +37,12 @@ export class DataImportTriggerService {
     if (!this.validateEntity(datasourceEntity)) {
       throw new DataSourceNotFoundException(datasourceId);
     }
-    // Convert to DTO (relic of old impl)
+    // Convert to DTO (relic of old impl, because entity has flat object structure)
     const datasource = datasourceEntityToDTO(datasourceEntity);
-    let adapterConfig: AdapterConfig;
-
-    // TODO merge getAdapterConfigWithOutRuntimeParameters and getAdapterConfigWithRuntimeParameters
-    if (runtimeParameters) {
-      adapterConfig = this.getAdapterConfigWithRuntimeParameters(
-        datasource,
-        runtimeParameters,
-      );
-    } else {
-      adapterConfig = this.getAdapterConfigWithOutRuntimeParameters(datasource);
-    }
+    const adapterConfig: AdapterConfig = this.getAdapterConfig(
+      datasource,
+      runtimeParameters,
+    );
 
     return await AdapterService.getInstance().executeJob(adapterConfig);
   }
@@ -70,17 +63,15 @@ export class DataImportTriggerService {
     return await this.dataImportRepository.create(insertStatement);
   }
 
-  /* Private getAdapterConfig(
+  private getAdapterConfig(
     datasource: DatasourceDTO,
     runtimeParameters: Record<string, unknown> | undefined,
   ): AdapterConfig {
     // TODO extract into fillQueryParameters (like old impl)
-    const defaultParameter = datasource.protocol.parameters
-      .defaultParameters as Record<string, unknown> | undefined;
+    const defaultParameter = datasource.protocol.parameters.defaultParameters;
     const runtimeParams = runtimeParameters?.parameters as
       | Record<string, unknown>
       | undefined;
-    // TODO improve such that case is not necessary (custom Type)
 
     const replacementParameters: Record<string, unknown> = {};
     if (defaultParameter !== undefined) {
@@ -101,15 +92,20 @@ export class DataImportTriggerService {
           parameterKey,
         )
       ) {
-        url = url.replace(
-          '{' + parameterKey + '}',
-          replacementParameters[parameterKey] as string,
-        );
+        const value = replacementParameters[parameterKey] as string;
+        const regex = new RegExp('{' + parameterKey + '}', 'g');
+        url = url.replace(regex, value);
       }
     }
 
     const parameters = datasource.protocol.parameters;
-    parameters.location = url;/
+    parameters.location = url;*/
+
+    // This is 'new' solution for the above (instead of overriding url -> override params here and url in importer)
+    datasource.protocol.parameters.defaultParameters = replacementParameters;
+    const parameters = {
+      ...datasource.protocol.parameters,
+    };
 
     // Start of toAdapterConfig of old impl
     const protocolConfigObj: ProtocolConfig = {
@@ -128,49 +124,6 @@ export class DataImportTriggerService {
       formatConfig: formatConfigObj,
     };
     return adapterConfig;
-  }*/
-
-  private getAdapterConfigWithRuntimeParameters(
-    datasource: DatasourceDTO,
-    runtimeParameters: Record<string, unknown>,
-  ): AdapterConfig {
-    const defaultParameter: Record<string, unknown> = datasource.protocol
-      .parameters.defaultParameters as Record<string, unknown>;
-    // TODO improve such that case is not necessary (custom Type)
-
-    // TODO this should merge default params with runtimeParams
-    // TODO interfaces for types (like AdapterConfig)
-    for (const entry in runtimeParameters.parameters as Record<
-      string,
-      unknown
-    >) {
-      // TODO correct?
-      if (entry) {
-        defaultParameter[entry] = (
-          runtimeParameters.parameters as Record<string, unknown>
-        )[entry];
-      }
-    }
-    datasource.protocol.parameters.defaultParameters = defaultParameter;
-    const parameters = {
-      ...datasource.protocol.parameters,
-    };
-
-    const protocolConfigObj: ProtocolConfig = {
-      protocol: new Protocol(Protocol.HTTP),
-      parameters: parameters,
-    };
-    const format = new Format(
-      AdapterEndpoint.getFormat(datasource.format.type),
-    );
-    const formatConfigObj: FormatConfig = {
-      format: format,
-      parameters: datasource.format.parameters,
-    };
-    return {
-      protocolConfig: protocolConfigObj,
-      formatConfig: formatConfigObj,
-    };
   }
 
   private async publishResult(
@@ -214,31 +167,6 @@ export class DataImportTriggerService {
       returnDataImportResponse,
     );
     return dataImportDTO;
-  }
-
-  private getAdapterConfigWithOutRuntimeParameters(
-    datasource: DatasourceDTO,
-  ): AdapterConfig {
-    const parameters = {
-      ...datasource.protocol.parameters,
-    } as Record<string, unknown>;
-    const datasourceFormatParameters = datasource.format.parameters;
-    const protocolConfigObj: ProtocolConfig = {
-      protocol: new Protocol(Protocol.HTTP),
-      parameters: parameters,
-    };
-    const format = new Format(
-      AdapterEndpoint.getFormat(datasource.format.type),
-    );
-    const formatConfigObj: FormatConfig = {
-      format: format,
-      parameters: datasourceFormatParameters,
-    };
-    const adapterConfig: AdapterConfig = {
-      protocolConfig: protocolConfigObj,
-      formatConfig: formatConfigObj,
-    };
-    return adapterConfig;
   }
 
   private validateEntity(result: unknown): result is DatasourceEntity {
