@@ -6,7 +6,7 @@ RUN npm ci
 COPY ./.eslintrc.json ./
 COPY ./src ./src
 
-#RUN npm run lint-ci
+RUN npm run lint-ci
 
 EXPOSE 8080
 

@@ -47,23 +47,23 @@ describe('Scheduler initializer', () => {
     });
   });
 
-  // test('should initialize jobs correctly', async () => {
-  //   const config = {
-  //     id: 123,
-  //     trigger: {
-  //       periodic: false,
-  //       firstExecution: new Date(),
-  //       interval: 60000,
-  //     },
-  //   };
-  //   mockedGetAllDatasources.mockResolvedValue([config]);
+  test('should initialize jobs correctly', async () => {
+    const config = {
+      id: 123,
+      trigger: {
+        periodic: false,
+        firstExecution: new Date(),
+        interval: 60000,
+      },
+    };
+    mockedGetAllDatasources.mockResolvedValue([config]);
 
-  //   await setupInitialStateWithRetry(
-  //     scheduler,
-  //     CONNECTION_RETRIES,
-  //     CONNECTION_BACKOFF_IN_MS,
-  //   );
-  //   expect(scheduler.getAllJobs()).toHaveLength(1);
-  //   expect(scheduler.getAllJobs()[0].datasourceConfig).toEqual(config);
-  // });
-})
+    await setupInitialStateWithRetry(
+      scheduler,
+      CONNECTION_RETRIES,
+      CONNECTION_BACKOFF_IN_MS,
+    );
+    expect(scheduler.getAllJobs()).toHaveLength(1);
+    expect(scheduler.getAllJobs()[0].datasourceConfig).toEqual(config);
+  });
+});
