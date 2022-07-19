@@ -99,6 +99,9 @@ export class HttpImporter extends Importer {
       }
     }
 
+    // The old impl retrieved data as byte array and then converted using encoding:
+    // Return new String(rawResponse, Charset.forName((String) parameters.get("encoding")));
+    // Unfortunately there does not seem to be a universal method .toString(encoding?: string) in javascript
     const result = await axios
       .get(uri, { responseEncoding: encoding })
       .catch((error: AxiosError) => {
@@ -108,6 +111,10 @@ export class HttpImporter extends Importer {
         }
         throw new ImporterParameterError('Could not Fetch from URI:' + uri);
       });
+    // Check if data is object/array -> return stringified (because this method returns string)
+    if (typeof result.data === 'object' || Array.isArray(result.data)) {
+      return JSON.stringify(result.data);
+    }
     return result.data as string;
   }
 }
