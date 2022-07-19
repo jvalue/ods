@@ -1,6 +1,6 @@
+import { Format } from '../../adapter/Format';
 import { Interpreter } from '../../adapter/interpreter/Interpreter';
 import { InterpreterParameterDescription } from '../../adapter/interpreter/InterpreterParameterDescription';
-import { Format } from '../../adapter/model/enum/Format';
 import { InterpreterParameterError } from '../../adapter/model/exceptions/InterpreterParameterError';
 
 describe('doInterpret CSV Format returns valid JSON', () => {

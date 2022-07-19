@@ -1,4 +1,4 @@
-import { Format } from './enum/Format';
+import { Format } from '../Format';
 
 export interface FormatConfig {
   format: Format;

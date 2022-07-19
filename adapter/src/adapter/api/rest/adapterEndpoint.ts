@@ -6,8 +6,8 @@ import {
   AdapterConfig,
   AdapterConfigValidator,
 } from '../../model/AdapterConfig';
-import { Format } from '../../model/enum/Format';
-import { Protocol } from '../../model/enum/Protocol';
+import { Format } from '../../Format';
+import { Protocol } from '../../Protocol';
 import { ImporterParameterError } from '../../model/exceptions/ImporterParameterError';
 import { FormatConfig } from '../../model/FormatConfig';
 import {

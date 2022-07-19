@@ -1,5 +1,5 @@
-import { HttpImporter } from '../../importer/HttpImporter';
-import { Importer } from '../../importer/Importer';
+import { HttpImporter } from './importer/HttpImporter';
+import { Importer } from './importer/Importer';
 
 export class Protocol {
   static readonly HTTP = new HttpImporter();

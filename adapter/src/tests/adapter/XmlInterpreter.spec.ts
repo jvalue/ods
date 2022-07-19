@@ -1,4 +1,4 @@
-import { Format } from '../../adapter/model/enum/Format';
+import { Format } from '../../adapter/Format';
 
 describe('doInterpret XML Format Returns valid JSON', () => {
   test('convert standard XML to JSON test', () => {

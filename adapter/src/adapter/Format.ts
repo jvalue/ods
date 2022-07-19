@@ -1,7 +1,7 @@
-import { CsvInterpreter } from '../../interpreter/CsvInterpreter';
-import { Interpreter } from '../../interpreter/Interpreter';
-import { JsonInterpreter } from '../../interpreter/JsonInterpreter';
-import { XmlInterpreter } from '../../interpreter/XmlInterpreter';
+import { CsvInterpreter } from './interpreter/CsvInterpreter';
+import { Interpreter } from './interpreter/Interpreter';
+import { JsonInterpreter } from './interpreter/JsonInterpreter';
+import { XmlInterpreter } from './interpreter/XmlInterpreter';
 
 export class Format {
   static readonly JSON = new JsonInterpreter();

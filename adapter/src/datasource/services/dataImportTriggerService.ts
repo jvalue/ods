@@ -1,10 +1,10 @@
 import { AdapterEndpoint } from '../../adapter/api/rest/adapterEndpoint';
+import { Format } from '../../adapter/Format';
 import { AdapterConfig } from '../../adapter/model/AdapterConfig';
 import { DataImportResponse } from '../../adapter/model/DataImportResponse';
-import { Format } from '../../adapter/model/enum/Format';
-import { Protocol } from '../../adapter/model/enum/Protocol';
 import { FormatConfig } from '../../adapter/model/FormatConfig';
 import { ProtocolConfig } from '../../adapter/model/ProtocolConfig';
+import { Protocol } from '../../adapter/Protocol';
 import { AdapterService } from '../../adapter/services/adapterService';
 import { ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC } from '../../env';
 import { DataImportDTO, dataimportEntityToDTO } from '../model/DataImport.dto';

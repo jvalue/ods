@@ -1,11 +1,11 @@
+import { Format } from '../Format';
 import { Importer } from '../importer/Importer';
 import { Interpreter } from '../interpreter/Interpreter';
 import { AdapterConfig } from '../model/AdapterConfig';
 import { DataImportResponse } from '../model/DataImportResponse';
-import { Format } from '../model/enum/Format';
-import { Protocol } from '../model/enum/Protocol';
 import { FormatConfig } from '../model/FormatConfig';
 import { ProtocolConfig } from '../model/ProtocolConfig';
+import { Protocol } from '../Protocol';
 
 export class AdapterService {
   /**
@@ -74,6 +74,9 @@ export class AdapterService {
     config: FormatConfig,
   ): Promise<Record<string, unknown> | Array<Record<string, unknown>>> {
     const interpreter = config.format.getInterpreter();
+    console.error('########## FORMATTING!!!');
+    console.error(`RAWDATA: ${typeof rawData}`);
+    console.dir(rawData, { depth: null });
     return await interpreter.interpret(rawData, config.parameters);
   }
 }
