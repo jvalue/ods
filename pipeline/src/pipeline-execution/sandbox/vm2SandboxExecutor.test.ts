@@ -64,8 +64,8 @@ describe('VM2SandboxExecutor', () => {
         return;
       }
       expect(result.error.name).toBe('SyntaxError');
-      expect(result.error.lineNumber).toBe(2);
-      expect(result.error.position).toBe(0);
+      expect(result.error.lineNumber).toBe(1);
+      expect(result.error.position).toBe(13);
     });
 
     it('should throw reference errors', () => {
