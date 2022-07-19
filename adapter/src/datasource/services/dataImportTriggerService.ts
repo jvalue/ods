@@ -67,7 +67,6 @@ export class DataImportTriggerService {
     datasource: DatasourceDTO,
     runtimeParameters: Record<string, unknown> | undefined,
   ): AdapterConfig {
-    // TODO extract into fillQueryParameters (like old impl)
     const defaultParameter = datasource.protocol.parameters.defaultParameters;
     const runtimeParams = runtimeParameters?.parameters as
       | Record<string, unknown>
@@ -152,7 +151,6 @@ export class DataImportTriggerService {
       returnDataImportResponse,
     );
 
-    // TODO the following line probably crashes (later logs not visible)
     const dataImportDTO = dataimportEntityToDTO(
       dataImport,
       `/datasources/${datasourceId}/imports/${dataImport.id}/data`,

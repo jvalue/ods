@@ -45,8 +45,13 @@ export class DataImportEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    // TODO assert int
-    const datasourceId = Number.parseInt(req.params.datasourceId, 10);
+    let datasourceId;
+    try {
+      datasourceId = Number.parseInt(req.params.datasourceId, 10);
+    } catch (e) {
+      res.status(400).send('datasourceId has to be an integer!');
+      return;
+    }
     const result = await this.dataImportRepository.getByDatasourceId(
       datasourceId,
     );
@@ -66,8 +71,13 @@ export class DataImportEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    // TODO assert int
-    const datasourceId = Number.parseInt(req.params.datasourceId, 10);
+    let datasourceId;
+    try {
+      datasourceId = Number.parseInt(req.params.datasourceId, 10);
+    } catch (e) {
+      res.status(400).send('datasourceId has to be an integer!');
+      return;
+    }
     const result = await this.dataImportRepository.getLatestByDatasourceId(
       datasourceId,
     );
@@ -87,9 +97,16 @@ export class DataImportEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    // TODO assert int
-    const id = Number.parseInt(req.params.datasourceId, 10);
-    const result = await this.dataImportRepository.getLatestByDatasourceId(id);
+    let datasourceId;
+    try {
+      datasourceId = Number.parseInt(req.params.datasourceId, 10);
+    } catch (e) {
+      res.status(400).send('datasourceId has to be an integer!');
+      return;
+    }
+    const result = await this.dataImportRepository.getLatestByDatasourceId(
+      datasourceId,
+    );
     if (!this.validateEntity(result)) {
       res.status(400).send('Protocol not supported');
       return;
@@ -103,8 +120,13 @@ export class DataImportEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    // TODO assert int
-    const dataImportId = Number.parseInt(req.params.dataImportId, 10);
+    let dataImportId;
+    try {
+      dataImportId = Number.parseInt(req.params.dataImportId, 10);
+    } catch (e) {
+      res.status(400).send('dataImportId has to be an integer!');
+      return;
+    }
     const result = await this.dataImportRepository.getById(dataImportId);
     if (!this.validateEntity(result)) {
       res.status(400).send('Protocol not supported');
@@ -117,9 +139,17 @@ export class DataImportEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    // TODO assert int
-    const datasourceId = Number.parseInt(req.params.datasourceId, 10);
-    const dataImportId = Number.parseInt(req.params.dataImportId, 10);
+    let datasourceId;
+    let dataImportId;
+    try {
+      datasourceId = Number.parseInt(req.params.datasourceId, 10);
+      dataImportId = Number.parseInt(req.params.dataImportId, 10);
+    } catch (e) {
+      res
+        .status(400)
+        .send('datasourceId and dataImportId have to be integers!');
+      return;
+    }
     const dataImportEntity = await this.dataImportRepository.getById(
       dataImportId,
     );

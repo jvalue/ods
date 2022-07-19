@@ -10,12 +10,6 @@ export interface DataImportRepository {
 
   getById: (dataImportId: number) => Promise<DataImportEntity | undefined>;
 
-  // TODO not sure what this is for
-  /* GetDataFromDataImportWithParameter: (
-    datasourceId: string,
-    dataImportId: string,
-  ) => Promise<DataImportEntity>;*/
-
   create: (
     insertStatement: DataImportInsertStatement,
   ) => Promise<DataImportEntity>;

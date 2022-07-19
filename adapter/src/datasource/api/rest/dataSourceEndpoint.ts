@@ -56,8 +56,13 @@ export class DataSourceEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    // TODO assert int
-    const datasourceId = Number.parseInt(req.params.datasourceId, 10);
+    let datasourceId;
+    try {
+      datasourceId = Number.parseInt(req.params.datasourceId, 10);
+    } catch (e) {
+      res.status(400).send('datasourceId has to be an integer!');
+      return;
+    }
     const datasource = await this.datasourceRepository.getById(datasourceId);
     if (!this.validateEntity(datasource)) {
       res.status(404).send(`Datasource with ${datasourceId} not found!`);
@@ -65,19 +70,6 @@ export class DataSourceEndpoint {
     }
     res.status(200).send(datasourceEntityToDTO(datasource));
   };
-  // TODO only for test purposes
-  /* TestConsumer = async (
-    req: express.Request,
-    res: express.Response,
-  ): Promise<void> => {
-    console.log(req);
-    const msg = {
-      datasourceId: '1',
-    };
-    AmqpHelper.publishAmqpMessage();
-
-    res.status(200).send();
-  };*/
 
   addDatasource = async (
     req: express.Request,
@@ -121,10 +113,9 @@ export class DataSourceEndpoint {
     const reqUrl: string = req.url;
     if (reqHost === undefined) {
       res.status(400).send('No host for request available');
+      return;
     }
-    // Gets checked in line 113
-    // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-    res.header('location', reqHost + reqUrl + '/' + dataSourceId.toString());
+    res.header('location', `${reqHost}${reqUrl}/${dataSourceId}`);
     res.status(201).send(datasourceDTO);
   };
 
@@ -132,8 +123,13 @@ export class DataSourceEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    // TODO assert int
-    const datasourceId = Number.parseInt(req.params.datasourceId, 10);
+    let datasourceId;
+    try {
+      datasourceId = Number.parseInt(req.params.datasourceId, 10);
+    } catch (e) {
+      res.status(400).send('datasourceId has to be an integer!');
+      return;
+    }
     const validator = new DatasourceConfigValidator();
     if (!validator.validate(req.body)) {
       res.status(400).json({ errors: validator.getErrors() });
@@ -171,8 +167,13 @@ export class DataSourceEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    // TODO assert int
-    const id = Number.parseInt(req.params.datasourceId, 10);
+    let id;
+    try {
+      id = Number.parseInt(req.params.datasourceId, 10);
+    } catch (e) {
+      res.status(400).send('datasourceId has to be an integer!');
+      return;
+    }
     const datasource = await this.datasourceRepository.getById(id);
     if (datasource === undefined) {
       res.status(404).send(`No datasource for id ${id} found`);
@@ -180,7 +181,6 @@ export class DataSourceEndpoint {
     }
     await this.datasourceRepository.delete(id);
     const datasourceDTO = datasourceEntityToDTO(datasource);
-    // TODO this results into bs
     const datasourceModelForAmqp: DatasourceModelForAmqp = {
       datasource: datasourceDTO,
     };
@@ -198,9 +198,7 @@ export class DataSourceEndpoint {
   ): Promise<void> => {
     const datasourcesToDelete = await this.datasourceRepository.getAll();
     await this.datasourceRepository.deleteAll();
-    // Const routingKey = 'datasource.config.deleted';
     const routingKey = ADAPTER_AMQP_DATASOURCE_DELETED_TOPIC;
-    // TODO fix wrong entry in outbox database
     datasourcesToDelete.forEach((dataSourceDeleted) => {
       const datasourceModelForAmqp: DatasourceModelForAmqp = {
         datasource: dataSourceDeleted,
@@ -210,31 +208,25 @@ export class DataSourceEndpoint {
         datasourceModelForAmqp,
       );
     });
-    /* TODO check if replacementfrom 188-193 is correct
-    for (const dataSourceDeleted in datasourcesToDelete) {
-      const datasourceModelForAmqp: DatasourceModelForAmqp = {
-        datasource: datasourcesToDelete[dataSourceDeleted],
-      };
-      await outboxRepository.publishToOutbox(
-        datasourceModelForAmqp,
-        routingKey,
-      );
-    }*/
     res.status(204).send();
   };
   triggerDataImportForDatasource = async (
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    // TODO assert int
-    const id = Number.parseInt(req.params.datasourceId, 10);
+    let id;
+    try {
+      id = Number.parseInt(req.params.datasourceId, 10);
+    } catch (e) {
+      res.status(400).send('id has to be an integer!');
+      return;
+    }
     const runtimeParameters: Record<string, unknown> = req.body as Record<
       string,
       unknown
     >;
 
     try {
-      // TODO types
       const dataImport = await this.dataImportTriggerService.triggerImport(
         id,
         runtimeParameters,
@@ -319,8 +311,3 @@ export class DataSourceEndpoint {
     return true;
   }
 }
-
-// TODO check datasource return values for exact matching
-// TODO replace routing keys with environment variables
-// TODO Error Handling general here when datasource == null
-// TODO typisierung Datasource & Dataimport
