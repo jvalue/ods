@@ -8,12 +8,12 @@ import {
   ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC,
   ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
 } from '../../../env';
+import { DatasourceUtils } from '../../datasourceUtils';
 import { datasourceEntityToDTO } from '../../model/Datasource.dto';
 import { DatasourceEntity } from '../../model/Datasource.entity';
 import { DatasourceConfigValidator } from '../../model/DatasourceConfigValidator';
 import { DatasourceModelForAmqp } from '../../model/datasourceModelForAmqp';
 import { DatasourceRepository } from '../../repository/datasourceRepository';
-import { KnexHelper } from '../../repository/knexHelper';
 import { OutboxRepository } from '../../repository/outboxRepository';
 import { DataImportTriggerService } from '../../services/dataImportTriggerService';
 import { DataSourceNotFoundException } from '../../services/dataSourceNotFoundException';
@@ -96,7 +96,8 @@ export class DataSourceEndpoint {
       res.status(400).send('Format not supported');
       return;
     }
-    const insertStatement = KnexHelper.getInsertStatementForDataSource(req);
+    const insertStatement =
+      DatasourceUtils.getInsertStatementForDataSource(req);
     const datasource = await this.datasourceRepository.create(insertStatement);
 
     const datasourceDTO = datasourceEntityToDTO(datasource);
@@ -147,7 +148,8 @@ export class DataSourceEndpoint {
       res.status(400).send('Format not supported');
       return;
     }
-    const insertStatement = KnexHelper.getInsertStatementForDataSource(req);
+    const insertStatement =
+      DatasourceUtils.getInsertStatementForDataSource(req);
     const datasource = await this.datasourceRepository.update(
       datasourceId,
       insertStatement,

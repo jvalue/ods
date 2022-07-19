@@ -1,6 +1,7 @@
 import express from 'express';
 
 import { asyncHandler } from '../../../adapter/api/rest/utils';
+import { DatasourceUtils } from '../../datasourceUtils';
 import {
   DataImportMetaDataDTO,
   dataImportEntityToDataDTO,
@@ -10,7 +11,6 @@ import { DataImportEntity } from '../../model/DataImport.entity';
 import { datasourceEntityToDTO } from '../../model/Datasource.dto';
 import { DataImportRepository } from '../../repository/dataImportRepository';
 import { DatasourceRepository } from '../../repository/datasourceRepository';
-import { KnexHelper } from '../../repository/knexHelper';
 
 export class DataImportEndpoint {
   constructor(
@@ -111,8 +111,7 @@ export class DataImportEndpoint {
       res.status(400).send('Protocol not supported');
       return;
     }
-    // TODO check whether KnexHelper still required
-    const stringResult = KnexHelper.stringFromUTF8Array(result.data);
+    const stringResult = DatasourceUtils.stringFromUTF8Array(result.data);
     res.status(200).send(stringResult);
   };
 

@@ -1,4 +1,4 @@
-import { KnexHelper } from '../repository/knexHelper';
+import { DatasourceUtils } from '../datasourceUtils';
 
 import { DataImportEntity } from './DataImport.entity';
 
@@ -46,7 +46,7 @@ export function dataimportEntityToDTO(
     health: data.health,
     timestamp: data.timestamp,
     location: location,
-    data: KnexHelper.stringFromUTF8Array(data.data) ?? '', // TODO error when null
+    data: DatasourceUtils.stringFromUTF8Array(data.data) ?? '', // TODO error when null
     parameters: params,
   };
 }
@@ -70,7 +70,7 @@ export function dataImportEntityToDataDTO(
   parameters?: Record<string, unknown>,
 ): DataImportDataDTO {
   return {
-    data: KnexHelper.stringFromUTF8Array(data.data) ?? '', // TODO error when null
+    data: DatasourceUtils.stringFromUTF8Array(data.data) ?? '', // TODO error when null
     location: location,
     parameters: parameters,
   };
