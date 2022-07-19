@@ -1,19 +1,19 @@
 import express from 'express';
 
+import { Format } from '../../Format';
 import { Importer } from '../../importer/Importer';
 import { Interpreter } from '../../interpreter/Interpreter';
 import {
   AdapterConfig,
   AdapterConfigValidator,
 } from '../../model/AdapterConfig';
-import { Format } from '../../Format';
-import { Protocol } from '../../Protocol';
 import { ImporterParameterError } from '../../model/exceptions/ImporterParameterError';
 import { FormatConfig } from '../../model/FormatConfig';
 import {
   ProtocolConfig,
   ProtocolConfigValidator,
 } from '../../model/ProtocolConfig';
+import { Protocol } from '../../Protocol';
 import { AdapterService } from '../../services/adapterService';
 
 import { asyncHandler } from './utils';
