@@ -1,6 +1,6 @@
 import { validators } from '@jvalue/node-dry-basics';
 
-import { DatasourceConfigDTO } from './DatasourceConfigDTO';
+import { DatasourceConfigDTO } from './DatasourceConfig.dto';
 
 export class DatasourceConfigValidator {
   private errors: string[] = [];

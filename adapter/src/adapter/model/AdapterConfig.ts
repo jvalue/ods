@@ -1,6 +1,6 @@
 import { validators } from '@jvalue/node-dry-basics';
 
-import { AdapterConfigDTO } from './EndpointDTOs';
+import { AdapterConfigDTO } from './Endpoint.dto';
 import { FormatConfig } from './FormatConfig';
 import { ProtocolConfig } from './ProtocolConfig';
 
