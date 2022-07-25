@@ -1,6 +1,5 @@
 import { DatasourceUtils } from '../datasourceUtils';
-
-import { DataImportEntity } from './DataImport.entity';
+import { DataImportEntity } from '../model/DataImport.entity';
 
 export interface DataImportDTO {
   id: number;

@@ -1,8 +1,7 @@
 import { validators } from '@jvalue/node-dry-basics';
 
+import { AdapterConfigDTO } from '../api/Endpoint.dto';
 import { Protocol } from '../Protocol';
-
-import { AdapterConfigDTO } from './Endpoint.dto';
 
 export interface ProtocolConfig {
   protocol: Protocol;

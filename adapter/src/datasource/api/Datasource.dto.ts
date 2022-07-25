@@ -1,4 +1,4 @@
-import { DatasourceEntity } from './Datasource.entity';
+import { DatasourceEntity } from '../model/Datasource.entity';
 
 export interface DatasourceDTO {
   id: number;

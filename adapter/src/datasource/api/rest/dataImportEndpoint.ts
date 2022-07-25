@@ -2,15 +2,15 @@ import express from 'express';
 
 import { asyncHandler } from '../../../adapter/api/rest/utils';
 import { DatasourceUtils } from '../../datasourceUtils';
+import { DataImportEntity } from '../../model/DataImport.entity';
+import { DataImportRepository } from '../../repository/dataImportRepository';
+import { DatasourceRepository } from '../../repository/datasourceRepository';
 import {
   DataImportMetaDataDTO,
   dataImportEntityToDataDTO,
   dataImportEntityToMetaDataDTO,
-} from '../../model/DataImport.dto';
-import { DataImportEntity } from '../../model/DataImport.entity';
-import { datasourceEntityToDTO } from '../../model/Datasource.dto';
-import { DataImportRepository } from '../../repository/dataImportRepository';
-import { DatasourceRepository } from '../../repository/datasourceRepository';
+} from '../DataImport.dto';
+import { datasourceEntityToDTO } from '../Datasource.dto';
 
 export class DataImportEndpoint {
   constructor(

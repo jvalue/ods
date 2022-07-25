@@ -9,7 +9,6 @@ import {
   ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
 } from '../../../env';
 import { DatasourceUtils } from '../../datasourceUtils';
-import { datasourceEntityToDTO } from '../../model/Datasource.dto';
 import { DatasourceEntity } from '../../model/Datasource.entity';
 import { DatasourceConfigValidator } from '../../model/DatasourceConfigValidator';
 import { DatasourceModelForAmqp } from '../../model/datasourceModelForAmqp';
@@ -18,6 +17,7 @@ import { OutboxRepository } from '../../repository/outboxRepository';
 import { DataImportTriggerService } from '../../services/dataImportTriggerService';
 import { DataSourceNotFoundException } from '../../services/dataSourceNotFoundException';
 import { ErrorResponse } from '../../services/ErrorResponse';
+import { datasourceEntityToDTO } from '../Datasource.dto';
 
 export class DataSourceEndpoint {
   constructor(

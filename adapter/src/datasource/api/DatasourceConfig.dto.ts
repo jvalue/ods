@@ -1,7 +1,7 @@
 import {
   FormatConfigDTO,
   ProtocolConfigDTO,
-} from '../../adapter/model/Endpoint.dto';
+} from '../../adapter/api/Endpoint.dto';
 
 export interface DatasourceConfigDTO {
   id: number;
