@@ -29,15 +29,6 @@ INSERT INTO "${POSTGRES_SCHEMA}"."${TABLE_NAME}"
   VALUES ($1, $2)
   RETURNING id
 `;
-/*
-Const CREATE_OUTBOX_REPOSITORY_STATEMENT = `
-CREATE TABLE IF NOT EXISTS public.outbox
-(
-    id uuid NOT NULL,
-    payload jsonb NOT NULL,
-    routing_key character varying(255) COLLATE pg_catalog."default" NOT NULL,
-    CONSTRAINT outbox_pkey PRIMARY KEY (id)
-)`;*/
 
 const POOL_CONFIG: PoolConfig = {
   host: POSTGRES_HOST,

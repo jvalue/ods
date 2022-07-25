@@ -19,19 +19,6 @@ export type DataImportDataDTO = Pick<
   'data' | 'location' | 'parameters'
 >;
 
-/* Export interface DataImportMetaDataDTO extends DataImportDTO {
-  id: number;
-  error_messages: string[];
-  health: string;
-  timestamp: Date;
-  location?: string;
-}
-
-export interface DataImportDataDTO {
-  data: unknown;
-  location?: string;
-}*/
-
 export function dataimportEntityToDTO(
   data: DataImportEntity,
   location?: string,

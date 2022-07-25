@@ -81,26 +81,7 @@ export class DataImportTriggerService {
       Object.assign(replacementParameters, runtimeParams);
     }
 
-    /* TODO seems like this was moved into HTTPImporter -> whole fillQueryParameters no longer necessary
-    let url: string = datasource.protocol.parameters.location as string;
-    for (const parameterKey in replacementParameters) {
-      // TODO check if that works (value is unknown)
-      if (
-        Object.prototype.hasOwnProperty.call(
-          replacementParameters,
-          parameterKey,
-        )
-      ) {
-        const value = replacementParameters[parameterKey] as string;
-        const regex = new RegExp('{' + parameterKey + '}', 'g');
-        url = url.replace(regex, value);
-      }
-    }
-
-    const parameters = datasource.protocol.parameters;
-    parameters.location = url;*/
-
-    // This is 'new' solution for the above (instead of overriding url -> override params here and url in importer)
+    // This is 'new' solution (instead of overriding url -> override params here and url in importer)
     datasource.protocol.parameters.defaultParameters = replacementParameters;
     const parameters = {
       ...datasource.protocol.parameters,

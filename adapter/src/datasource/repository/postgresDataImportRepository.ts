@@ -129,35 +129,6 @@ export class PostgresDataImportRepository implements DataImportRepository {
     return entities[0];
   }
 
-  /* TODO not sure if needed BUT THIS GET defaultParameters OF CORRESPONDING DATASOURCE
-  async getDataFromDataImportWithParameter(
-    datasourceId: string,
-    dataImportId: string,
-  ): Promise<DataImportEntity> {
-    const dataImport = await this.getDataFromDataImport(
-      datasourceId,
-      dataImportId,
-    );
-    const result: DataImportEntity = {
-      data: KnexHelper.stringFromUTF8Array(dataImport[0].data),
-    };
-
-    const dataSource = await datasourceRepository.getDataSourceById(
-      datasourceId,
-    );
-
-    if (dataSource.protocol.parameters.defaultParameters) {
-      Object.assign(result, dataSource.protocol.parameters.defaultParameters);
-    }
-
-    if (JSON.parse(dataImport[0].parameters).parameters) {
-      const parameters = JSON.parse(dataImport[0].parameters).parameters;
-      Object.assign(result, parameters);
-    }
-
-    return result as DataImportEntity;
-  }*/
-
   private escapeQuotes(data: unknown): string {
     if (data !== undefined) {
       return JSON.stringify(data).replace("'", "''");

@@ -190,25 +190,6 @@ export class DataImportEndpoint {
       dataImportDTOParams,
     );
 
-    /* TODO no idea what exactly was done here (does not resemble original Java Spring Code)
-    const result: Record<string, unknown> = {};
-    const keys = Object.keys(returnDataImportResponse);
-    for (const entry of keys) {
-      if (entry === 'data') {
-        continue;
-      }
-      result[entry] = returnDataImportResponse[entry];
-    }
-    const data: Record<string, unknown> = JSON.parse(
-      returnDataImportResponse.data as string,
-    ) as Record<string, unknown>;
-    const dataKeys = Object.keys(data);
-    for (const entry of dataKeys) {
-      result[entry] = data[entry];
-    }*/
-
-    // TODO old impl returned the string, but that fails with integration tests
-    // -> maybe spring automatically converts to object, because when converting to json everything works?!?
     if (dataImportDataDTO.data === '') {
       res
         .status(404)

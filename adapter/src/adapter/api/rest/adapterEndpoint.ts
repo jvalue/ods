@@ -43,7 +43,7 @@ export class AdapterEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    // TODO doesn't the body contain adapterConfig?!?! -> why create adapterconfig and not simply pass to executeJob?!?!?
+    // TODO doesn't the body contain adapterConfig (at least old impl did)?!?! -> why create adapterconfig and not simply pass to executeJob?!?!?
     const validator = new AdapterConfigValidator();
     if (!validator.validate(req.body)) {
       res.status(400).json({ errors: validator.getErrors() });
