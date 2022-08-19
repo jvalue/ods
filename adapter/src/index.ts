@@ -28,6 +28,7 @@ async function main(): Promise<void> {
     res.status(200).send('I am alive!');
   });
 
+  /* Repositories */
   const outboxRepository = await initOutboxRepository(
     CONNECTION_RETRIES,
     CONNECTION_BACKOFF,
@@ -48,15 +49,12 @@ async function main(): Promise<void> {
     outboxRepository,
   );
 
+  /* AMQP Consumers */
   const amqpConnection = new AmqpConnection(
     AMQP_URL,
     CONNECTION_RETRIES,
     CONNECTION_BACKOFF,
     onAmqpConnectionLoss,
-    // "amqp://rabbit_adm:R4bb!7_4DM_p4SS@localhost:5672",
-    // 30,
-    // 2000,
-    // OnAmqpConnectionLoss
   );
   await createDataSourceAmqpConsumer(
     amqpConnection,
@@ -64,20 +62,24 @@ async function main(): Promise<void> {
     dataImportTriggerService,
   );
 
+  /* Endpoints */
   const adapterEndpoint = new AdapterEndpoint();
   adapterEndpoint.registerRoutes(app);
+
   const dataSourceEndpoint = new DataSourceEndpoint(
     datasourceRepository,
     outboxRepository,
     dataImportTriggerService,
   );
   dataSourceEndpoint.registerRoutes(app);
+
   const dataImportEndpoint = new DataImportEndpoint(
     dataImportRepository,
     datasourceRepository,
   );
   dataImportEndpoint.registerRoutes(app);
 
+  /* Start server */
   server = app.listen(port, () => {
     console.log(`Listening on port ${port}`);
   });
