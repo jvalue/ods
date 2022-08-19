@@ -1,7 +1,7 @@
 import express from 'express';
 
 import { AdapterConfig, ProtocolConfig } from '../../AdapterConfig';
-import { AdapterService } from '../../adapterService';
+import { AdapterService } from '../../AdapterService';
 import { ImporterParameterError } from '../../exceptions/ImporterParameterError';
 import { Importer, Protocol } from '../../importer';
 import { Format, Interpreter } from '../../interpreter';

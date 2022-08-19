@@ -1,7 +1,7 @@
 import { Protocol } from '../../importer';
 import { Format } from '../../interpreter';
 
-import { AdapterEndpoint } from './adapterEndpoint';
+import { AdapterEndpoint } from './AdapterEndpoint';
 
 /* eslint-env jest */
 describe('getFormat should return correct Result', () => {

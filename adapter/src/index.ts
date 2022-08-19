@@ -5,7 +5,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
 
-import { AdapterEndpoint } from './adapter/api/rest/adapterEndpoint';
+import { AdapterEndpoint } from './adapter/api/rest/AdapterEndpoint';
 import { createDataSourceAmqpConsumer } from './datasource/api/amqp/amqpConsumer';
 import { DataImportEndpoint } from './datasource/api/rest/dataImportEndpoint';
 import { DataSourceEndpoint } from './datasource/api/rest/dataSourceEndpoint';
