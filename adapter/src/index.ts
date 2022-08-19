@@ -5,6 +5,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
 
+import { AdapterService } from './adapter/AdapterService';
 import { AdapterEndpoint } from './adapter/api/rest/AdapterEndpoint';
 import { createDataSourceAmqpConsumer } from './datasource/api/amqp/AmqpConsumer';
 import { DataImportEndpoint } from './datasource/api/rest/DataImportEndpoint';
@@ -43,7 +44,12 @@ async function main(): Promise<void> {
     datasourceRepository,
   );
 
+  /* Services */
+
+  const adapterService = new AdapterService();
+
   const dataImportTriggerService = new DataImportTriggerService(
+    adapterService,
     datasourceRepository,
     dataImportRepository,
     outboxRepository,
@@ -63,7 +69,7 @@ async function main(): Promise<void> {
   );
 
   /* Endpoints */
-  const adapterEndpoint = new AdapterEndpoint();
+  const adapterEndpoint = new AdapterEndpoint(adapterService);
   adapterEndpoint.registerRoutes(app);
 
   const dataSourceEndpoint = new DataSourceEndpoint(

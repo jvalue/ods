@@ -14,6 +14,8 @@ import { asyncHandler } from './utils';
 
 const APP_VERSION = '0.0.1';
 export class AdapterEndpoint {
+  constructor(private readonly adapterService: AdapterService) {}
+
   registerRoutes = (app: express.Application): void => {
     app.post('/preview', asyncHandler(this.handleExecuteDataImport));
     app.post('/preview/raw', asyncHandler(this.handleExecuteRawPreview));
@@ -75,8 +77,9 @@ export class AdapterEndpoint {
     };
 
     try {
-      const returnDataImportResponse =
-        await AdapterService.getInstance().executeJob(adapterConfig);
+      const returnDataImportResponse = await this.adapterService.executeJob(
+        adapterConfig,
+      );
       res.status(200).send(returnDataImportResponse);
     } catch (e) {
       if (e instanceof ImporterParameterError) {
@@ -115,8 +118,9 @@ export class AdapterEndpoint {
       parameters: protocolConfigRequest.parameters,
     };
     try {
-      const returnDataImportResponse =
-        await AdapterService.getInstance().executeRawJob(protocolConfigObj);
+      const returnDataImportResponse = await this.adapterService.executeRawJob(
+        protocolConfigObj,
+      );
       res.status(200).send(returnDataImportResponse);
     } catch (e) {
       if (e instanceof ImporterParameterError) {
@@ -133,7 +137,7 @@ export class AdapterEndpoint {
     Returns Collection of Interpreter
   */
   handleGetFormat = (req: express.Request, res: express.Response): void => {
-    const interpreters = AdapterService.getInstance().getAllFormats();
+    const interpreters = this.adapterService.getAllFormats();
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json(interpreters);
   };
@@ -143,7 +147,7 @@ export class AdapterEndpoint {
   */
   handleGetProtocols = (req: express.Request, res: express.Response): void => {
     try {
-      const protocols = AdapterService.getInstance().getAllProtocols();
+      const protocols = this.adapterService.getAllProtocols();
       res.status(200).json(protocols);
     } catch (e) {
       res.status(500).send('Error finding protocols');

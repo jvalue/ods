@@ -23,6 +23,7 @@ const routingKey = ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC;
 
 export class DataImportTriggerService {
   constructor(
+    private readonly adapterService: AdapterService,
     private readonly datasourceRepository: DatasourceRepository,
     private readonly dataImportRepository: DataImportRepository,
     private readonly outboxRepository: OutboxRepository,
@@ -45,7 +46,7 @@ export class DataImportTriggerService {
       runtimeParameters,
     );
 
-    return await AdapterService.getInstance().executeJob(adapterConfig);
+    return await this.adapterService.executeJob(adapterConfig);
   }
 
   private async saveDataimport(

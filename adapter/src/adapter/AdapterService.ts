@@ -4,19 +4,6 @@ import { Importer, Protocol } from './importer';
 import { Format, Interpreter } from './interpreter';
 
 export class AdapterService {
-  /**
-   * @description Create a singleton instance of AdapterService
-   */
-  private static instance: AdapterService | undefined = undefined;
-
-  static getInstance(): AdapterService {
-    if (!AdapterService.instance) {
-      AdapterService.instance = new AdapterService();
-    }
-
-    return AdapterService.instance;
-  }
-
   getAllFormats(): Interpreter[] {
     return [Format.CSV, Format.JSON, Format.XML];
   }
@@ -76,4 +63,3 @@ export class AdapterService {
     return await interpreter.interpret(rawData, config.parameters);
   }
 }
-export const adapterService = AdapterService.getInstance();
