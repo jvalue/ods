@@ -1,5 +1,5 @@
-import { DatasourceEntity } from '../model/Datasource.entity';
-import { DatasourceInsertStatement } from '../model/DatasourceInsertStatement';
+import { DatasourceEntity } from './Datasource.entity';
+import { DatasourceInsertEntity } from './DatasourceInsert.entity';
 
 export interface DatasourceRepository {
   getAll: () => Promise<DatasourceEntity[]>;
@@ -7,12 +7,12 @@ export interface DatasourceRepository {
   getById: (id: number) => Promise<DatasourceEntity | undefined>;
 
   create: (
-    insertStatement: DatasourceInsertStatement,
+    insertStatement: DatasourceInsertEntity,
   ) => Promise<DatasourceEntity>;
 
   update: (
     id: number,
-    insertStatement: DatasourceInsertStatement,
+    insertStatement: DatasourceInsertEntity,
   ) => Promise<DatasourceEntity>;
 
   delete: (id: number) => Promise<void>;

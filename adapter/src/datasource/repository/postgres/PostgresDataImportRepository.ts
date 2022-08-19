@@ -7,12 +7,11 @@ import {
   POSTGRES_PORT,
   POSTGRES_PW,
   POSTGRES_USER,
-} from '../../env';
-import { DataImportEntity } from '../model/DataImport.entity';
-import { DataImportInsertStatement } from '../model/DataImportInsertStatement';
-
-import { DataImportRepository } from './dataImportRepository';
-import { DatasourceRepository } from './datasourceRepository';
+} from '../../../env';
+import { DataImportEntity } from '../DataImport.entity';
+import { DataImportInsertEntity } from '../DataImportInsert.entity';
+import { DataImportRepository } from '../DataImportRepository';
+import { DatasourceRepository } from '../DatasourceRepository';
 
 const TABLE_NAME = 'data_import';
 
@@ -103,7 +102,7 @@ export class PostgresDataImportRepository implements DataImportRepository {
   }
 
   async create(
-    insertStatement: DataImportInsertStatement,
+    insertStatement: DataImportInsertEntity,
   ): Promise<DataImportEntity> {
     const parameter = this.escapeQuotes(insertStatement.parameters);
     const values = [

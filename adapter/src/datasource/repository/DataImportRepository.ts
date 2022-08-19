@@ -1,5 +1,5 @@
-import { DataImportEntity } from '../model/DataImport.entity';
-import { DataImportInsertStatement } from '../model/DataImportInsertStatement';
+import { DataImportEntity } from './DataImport.entity';
+import { DataImportInsertEntity } from './DataImportInsert.entity';
 
 export interface DataImportRepository {
   getByDatasourceId: (datasourceId: number) => Promise<DataImportEntity[]>;
@@ -11,6 +11,6 @@ export interface DataImportRepository {
   getById: (dataImportId: number) => Promise<DataImportEntity | undefined>;
 
   create: (
-    insertStatement: DataImportInsertStatement,
+    insertStatement: DataImportInsertEntity,
   ) => Promise<DataImportEntity>;
 }

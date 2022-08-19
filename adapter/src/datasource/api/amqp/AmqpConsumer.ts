@@ -8,9 +8,9 @@ import {
   ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE_TOPIC,
   ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
 } from '../../../env';
-import { OutboxRepository } from '../../repository/outboxRepository';
-import { DataImportTriggerService } from '../../services/dataImportTriggerService';
-import { ErrorResponse } from '../../services/ErrorResponse';
+import { DataImportTriggerService } from '../../DataImportTriggerService';
+import { OutboxRepository } from '../../repository/OutboxRepository';
+import { ErrorResponse } from '../ErrorResponse.dto';
 
 export async function createDataSourceAmqpConsumer(
   amqpConnection: AmqpConnection,

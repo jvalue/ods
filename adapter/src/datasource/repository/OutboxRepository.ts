@@ -1,5 +1,5 @@
 import { DataImportResponse } from '../../adapter/api/DataImportResponse.dto';
-import { ErrorResponse } from '../services/ErrorResponse';
+import { ErrorResponse } from '../api/ErrorResponse.dto';
 
 export interface OutboxRepository {
   publishToOutbox: (routingKey: string, payload: unknown) => Promise<string>;

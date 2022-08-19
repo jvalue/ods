@@ -8,16 +8,16 @@ import {
   ADAPTER_AMQP_DATASOURCE_UPDATED_TOPIC,
   ADAPTER_AMQP_IMPORT_FAILED_TOPIC,
 } from '../../../env';
-import { DatasourceUtils } from '../../datasourceUtils';
-import { DatasourceEntity } from '../../model/Datasource.entity';
-import { DatasourceConfigValidator } from '../../model/DatasourceConfigValidator';
-import { DatasourceModelForAmqp } from '../../model/datasourceModelForAmqp';
-import { DatasourceRepository } from '../../repository/datasourceRepository';
-import { OutboxRepository } from '../../repository/outboxRepository';
-import { DataImportTriggerService } from '../../services/dataImportTriggerService';
-import { DataSourceNotFoundException } from '../../services/dataSourceNotFoundException';
-import { ErrorResponse } from '../../services/ErrorResponse';
+import { DataImportTriggerService } from '../../DataImportTriggerService';
+import { DataSourceNotFoundException } from '../../exceptions/DataSourceNotFoundException';
+import { DatasourceEntity } from '../../repository/Datasource.entity';
+import { DatasourceRepository } from '../../repository/DatasourceRepository';
+import { OutboxRepository } from '../../repository/OutboxRepository';
+import { DatasourceUtils } from '../../utils';
 import { datasourceEntityToDTO } from '../Datasource.dto';
+import { DatasourceModelForAmqp } from '../DatasourceAMQP.dto';
+import { DatasourceConfigValidator } from '../DatasourceConfig.dto';
+import { ErrorResponse } from '../ErrorResponse.dto';
 
 export class DataSourceEndpoint {
   constructor(

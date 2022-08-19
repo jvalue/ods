@@ -2,22 +2,22 @@ import {
   AdapterConfig,
   FormatConfig,
   ProtocolConfig,
-} from '../../adapter/AdapterConfig';
-import { AdapterService } from '../../adapter/AdapterService';
-import { DataImportResponse } from '../../adapter/api/DataImportResponse.dto';
-import { AdapterEndpoint } from '../../adapter/api/rest/AdapterEndpoint';
-import { Protocol } from '../../adapter/importer';
-import { ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC } from '../../env';
-import { DataImportDTO, dataimportEntityToDTO } from '../api/DataImport.dto';
-import { DatasourceDTO, datasourceEntityToDTO } from '../api/Datasource.dto';
-import { DataImportEntity } from '../model/DataImport.entity';
-import { DataImportInsertStatement } from '../model/DataImportInsertStatement';
-import { DatasourceEntity } from '../model/Datasource.entity';
-import { DataImportRepository } from '../repository/dataImportRepository';
-import { DatasourceRepository } from '../repository/datasourceRepository';
-import { OutboxRepository } from '../repository/outboxRepository';
+} from '../adapter/AdapterConfig';
+import { AdapterService } from '../adapter/AdapterService';
+import { DataImportResponse } from '../adapter/api/DataImportResponse.dto';
+import { AdapterEndpoint } from '../adapter/api/rest/AdapterEndpoint';
+import { Protocol } from '../adapter/importer';
+import { ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC } from '../env';
 
-import { DataSourceNotFoundException } from './dataSourceNotFoundException';
+import { DataImportDTO, dataimportEntityToDTO } from './api/DataImport.dto';
+import { DatasourceDTO, datasourceEntityToDTO } from './api/Datasource.dto';
+import { DataSourceNotFoundException } from './exceptions/DataSourceNotFoundException';
+import { DataImportEntity } from './repository/DataImport.entity';
+import { DataImportInsertEntity } from './repository/DataImportInsert.entity';
+import { DataImportRepository } from './repository/DataImportRepository';
+import { DatasourceEntity } from './repository/Datasource.entity';
+import { DatasourceRepository } from './repository/DatasourceRepository';
+import { OutboxRepository } from './repository/OutboxRepository';
 
 const routingKey = ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC;
 
@@ -53,7 +53,7 @@ export class DataImportTriggerService {
     runtimeParameters: Record<string, unknown> | undefined,
     returnDataImportResponse: DataImportResponse,
   ): Promise<DataImportEntity> {
-    const insertStatement: DataImportInsertStatement = {
+    const insertStatement: DataImportInsertEntity = {
       data: returnDataImportResponse.data,
       error_messages: [],
       health: 'OK',

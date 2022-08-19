@@ -1,4 +1,4 @@
-export interface DataImportInsertStatement {
+export interface DataImportInsertEntity {
   data: unknown;
   error_messages: unknown;
   health: unknown;

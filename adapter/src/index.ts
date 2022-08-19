@@ -6,13 +6,13 @@ import cors from 'cors';
 import express from 'express';
 
 import { AdapterEndpoint } from './adapter/api/rest/AdapterEndpoint';
-import { createDataSourceAmqpConsumer } from './datasource/api/amqp/amqpConsumer';
-import { DataImportEndpoint } from './datasource/api/rest/dataImportEndpoint';
-import { DataSourceEndpoint } from './datasource/api/rest/dataSourceEndpoint';
-import { initDataImportRepository } from './datasource/repository/postgresDataImportRepository';
-import { initDatasourceRepository } from './datasource/repository/postgresDatasourceRepository';
-import { initOutboxRepository } from './datasource/repository/postgresOutboxRepository';
-import { DataImportTriggerService } from './datasource/services/dataImportTriggerService';
+import { createDataSourceAmqpConsumer } from './datasource/api/amqp/AmqpConsumer';
+import { DataImportEndpoint } from './datasource/api/rest/DataImportEndpoint';
+import { DataSourceEndpoint } from './datasource/api/rest/DataSourceEndpoint';
+import { DataImportTriggerService } from './datasource/DataImportTriggerService';
+import { initDataImportRepository } from './datasource/repository/postgres/PostgresDataImportRepository';
+import { initDatasourceRepository } from './datasource/repository/postgres/PostgresDatasourceRepository';
+import { initOutboxRepository } from './datasource/repository/postgres/PostgresOutboxRepository';
 import { AMQP_URL, CONNECTION_BACKOFF, CONNECTION_RETRIES } from './env';
 
 export const port = 8080;

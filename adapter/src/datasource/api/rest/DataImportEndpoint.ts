@@ -1,10 +1,10 @@
 import express from 'express';
 
 import { asyncHandler } from '../../../adapter/api/rest/utils';
-import { DatasourceUtils } from '../../datasourceUtils';
-import { DataImportEntity } from '../../model/DataImport.entity';
-import { DataImportRepository } from '../../repository/dataImportRepository';
-import { DatasourceRepository } from '../../repository/datasourceRepository';
+import { DataImportEntity } from '../../repository/DataImport.entity';
+import { DataImportRepository } from '../../repository/DataImportRepository';
+import { DatasourceRepository } from '../../repository/DatasourceRepository';
+import { DatasourceUtils } from '../../utils';
 import {
   DataImportMetaDataDTO,
   dataImportEntityToDataDTO,

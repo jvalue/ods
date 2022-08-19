@@ -1,11 +1,11 @@
 import express from 'express';
 
-import { DatasourceInsertStatement } from './model/DatasourceInsertStatement';
+import { DatasourceInsertEntity } from './repository/DatasourceInsert.entity';
 
 export class DatasourceUtils {
   static getInsertStatementForDataSource(
     req: express.Request,
-  ): DatasourceInsertStatement {
+  ): DatasourceInsertEntity {
     const body = req.body as Record<string, Record<string, unknown>>;
     return {
       format_parameters: body.format.parameters,

@@ -1,7 +1,7 @@
 import { PostgresClient } from '@jvalue/node-dry-pg';
 import { PoolConfig, QueryResult } from 'pg';
 
-import { DataImportResponse } from '../../adapter/api/DataImportResponse.dto';
+import { DataImportResponse } from '../../../adapter/api/DataImportResponse.dto';
 import {
   POSTGRES_DB,
   POSTGRES_HOST,
@@ -9,10 +9,10 @@ import {
   POSTGRES_PW,
   POSTGRES_SCHEMA,
   POSTGRES_USER,
-} from '../../env';
-import { ErrorResponse } from '../services/ErrorResponse';
+} from '../../../env';
+import { ErrorResponse } from '../../api/ErrorResponse.dto';
 
-import { OutboxRepository } from './outboxRepository';
+import { OutboxRepository } from './../OutboxRepository';
 
 const TABLE_NAME = 'outbox';
 

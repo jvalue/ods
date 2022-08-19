@@ -7,11 +7,10 @@ import {
   POSTGRES_PORT,
   POSTGRES_PW,
   POSTGRES_USER,
-} from '../../env';
-import { DatasourceEntity } from '../model/Datasource.entity';
-import { DatasourceInsertStatement } from '../model/DatasourceInsertStatement';
-
-import { DatasourceRepository } from './datasourceRepository';
+} from '../../../env';
+import { DatasourceEntity } from '../Datasource.entity';
+import { DatasourceInsertEntity } from '../DatasourceInsert.entity';
+import { DatasourceRepository } from '../DatasourceRepository';
 
 const TABLE_NAME = 'datasource';
 
@@ -102,7 +101,7 @@ export class PostgresDatasourceRepository implements DatasourceRepository {
   }
 
   async create(
-    insertStatement: DatasourceInsertStatement,
+    insertStatement: DatasourceInsertEntity,
   ): Promise<DatasourceEntity> {
     const values = [
       insertStatement.format_parameters,
@@ -136,7 +135,7 @@ export class PostgresDatasourceRepository implements DatasourceRepository {
 
   async update(
     id: number,
-    insertStatement: DatasourceInsertStatement,
+    insertStatement: DatasourceInsertEntity,
   ): Promise<DatasourceEntity> {
     const values = [
       id,

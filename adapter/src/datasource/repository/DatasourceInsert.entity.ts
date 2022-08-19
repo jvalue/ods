@@ -1,4 +1,4 @@
-export interface DatasourceInsertStatement {
+export interface DatasourceInsertEntity {
   format_parameters: unknown;
   format_type: unknown;
   author: unknown;
