@@ -1,6 +1,6 @@
-import { Format } from '../Format';
+import { Interpreter } from '../interpreter';
 
 export interface FormatConfig {
-  format: Format;
+  format: Interpreter;
   parameters: Record<string, unknown>;
 }

@@ -1,10 +1,8 @@
 import express from 'express';
 
 import { AdapterService } from '../../adapterService';
-import { Format } from '../../Format';
-import { Protocol } from '../../importer';
-import { Importer } from '../../importer/Importer';
-import { Interpreter } from '../../interpreter/Interpreter';
+import { Importer, Protocol } from '../../importer';
+import { Format, Interpreter } from '../../interpreter';
 import {
   AdapterConfig,
   AdapterConfigValidator,
@@ -64,17 +62,16 @@ export class AdapterEndpoint {
     };
 
     // Check format type
-    let formatType: Interpreter;
+    let interpreter: Interpreter;
     try {
-      formatType = AdapterEndpoint.getFormat(req.body.format.type);
+      interpreter = AdapterEndpoint.getFormat(req.body.format.type);
     } catch (e) {
       res.status(400).send('Format not supported');
       return;
     }
 
-    const format = new Format(formatType);
     const formatConfigObj: FormatConfig = {
-      format: format,
+      format: interpreter,
       parameters: req.body.format.parameters,
     };
 

@@ -1,14 +1,31 @@
 import { InterpreterParameterError } from '../model/exceptions/InterpreterParameterError';
 
-import { InterpreterParameterDescription } from './InterpreterParameterDescription';
+export interface InterpreterParameterDescription {
+  name: string;
+  description: string;
+  required: boolean;
+  type: unknown;
+}
 
 /**
  * @description Abstract class for interpreters (currently supporting CSVInterpreter, JSONInterpreter and XmlInterpreter)
  */
 export abstract class Interpreter {
-  type: string | undefined;
-  description: string | undefined;
+  constructor(public type: string, public description: string) {}
 
+  abstract doInterpret(
+    data: string,
+    parameters?: Record<string, unknown>,
+  ): Promise<Record<string, unknown> | Array<Record<string, unknown>>>;
+
+  abstract getAvailableParameters(): InterpreterParameterDescription[];
+
+  /**
+   * Interprets data and returns the result
+   * @param data data as a string
+   * @param parameters additional parameters
+   * @returns the interpreted data
+   */
   async interpret(
     data: string,
     parameters: Record<string, unknown>,
@@ -16,14 +33,6 @@ export abstract class Interpreter {
     this.validateParameters(parameters);
     return await this.doInterpret(data, parameters);
   }
-
-  abstract getType(): string;
-  abstract getDescription(): string;
-  abstract doInterpret(
-    data: string,
-    parameters?: Record<string, unknown>,
-  ): Promise<Record<string, unknown> | Array<Record<string, unknown>>>;
-  abstract getAvailableParameters(): InterpreterParameterDescription[];
 
   /**
    * Validates the input parameters (Generic function, used in the derived classes)

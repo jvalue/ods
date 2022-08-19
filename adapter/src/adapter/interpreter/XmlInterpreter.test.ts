@@ -1,4 +1,4 @@
-import { Format } from '../../adapter/Format';
+import { Format } from '.';
 
 describe('doInterpret XML Format Returns valid JSON', () => {
   test('convert standard XML to JSON test', () => {

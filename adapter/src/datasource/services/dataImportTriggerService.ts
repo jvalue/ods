@@ -1,6 +1,5 @@
 import { AdapterService } from '../../adapter/adapterService';
 import { AdapterEndpoint } from '../../adapter/api/rest/adapterEndpoint';
-import { Format } from '../../adapter/Format';
 import { Protocol } from '../../adapter/importer';
 import { AdapterConfig } from '../../adapter/model/AdapterConfig';
 import { DataImportResponse } from '../../adapter/model/DataImportResponse';
@@ -92,9 +91,7 @@ export class DataImportTriggerService {
       protocol: Protocol.HTTP,
       parameters: parameters,
     };
-    const format = new Format(
-      AdapterEndpoint.getFormat(datasource.format.type),
-    );
+    const format = AdapterEndpoint.getFormat(datasource.format.type);
     const formatConfigObj: FormatConfig = {
       format: format,
       parameters: datasource.format.parameters,

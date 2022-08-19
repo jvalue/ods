@@ -1,7 +1,8 @@
-import { Format } from '../../adapter/Format';
-import { Interpreter } from '../../adapter/interpreter/Interpreter';
-import { InterpreterParameterDescription } from '../../adapter/interpreter/InterpreterParameterDescription';
-import { InterpreterParameterError } from '../../adapter/model/exceptions/InterpreterParameterError';
+import { InterpreterParameterError } from '../model/exceptions/InterpreterParameterError';
+
+import { Interpreter } from './Interpreter';
+
+import { Format, InterpreterParameterDescription } from '.';
 
 describe('doInterpret CSV Format returns valid JSON', () => {
   test('convert standard CSV to JSON with lineSeperator \n and Column Seperator ,', async () => {

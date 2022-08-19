@@ -1,23 +1,14 @@
 import { XMLParser } from 'fast-xml-parser';
 
-import { Interpreter } from './Interpreter';
-import { InterpreterParameterDescription } from './InterpreterParameterDescription';
+import { Interpreter, InterpreterParameterDescription } from './Interpreter';
 
 export class XmlInterpreter extends Interpreter {
-  type = 'XML';
-  description = 'Interpret data as XML data';
-  parameters: InterpreterParameterDescription[] = [];
-
-  override getType(): string {
-    return this.type;
-  }
-
-  override getDescription(): string {
-    return this.description;
+  constructor() {
+    super('XML', 'Interpret data as XML data');
   }
 
   override getAvailableParameters(): InterpreterParameterDescription[] {
-    return this.parameters;
+    return [];
   }
 
   /**

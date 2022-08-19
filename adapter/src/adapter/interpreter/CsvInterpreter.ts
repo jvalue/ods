@@ -1,43 +1,46 @@
 import csv from 'csvtojson';
 
-import { Interpreter } from './Interpreter';
-import { InterpreterParameterDescription } from './InterpreterParameterDescription';
+import { Interpreter, InterpreterParameterDescription } from './Interpreter';
 
 export class CsvInterpreter extends Interpreter {
-  type = 'CSV';
-
-  description = 'Interpret data as CSV data';
-  parameters: InterpreterParameterDescription[] = [
-    new InterpreterParameterDescription(
-      'columnSeparator',
-      'Column delimiter character, only one character supported',
-      'string',
-    ),
-    new InterpreterParameterDescription(
-      'lineSeparator',
-      'Line delimiter character, only \\r, \\r\\n, and \\n supported',
-      'string',
-    ),
-    new InterpreterParameterDescription(
-      'skipFirstDataRow',
-      'Skip first data row (after header)',
-      'boolean',
-    ),
-    new InterpreterParameterDescription(
-      'firstRowAsHeader',
-      'Interpret first row as header for columns',
-      'boolean',
-    ),
-  ];
-
-  override getType(): string {
-    return this.type;
+  constructor() {
+    super('CSV', 'Interpret data as CSV data');
   }
-  override getDescription(): string {
-    return this.description;
-  }
+
   override getAvailableParameters(): InterpreterParameterDescription[] {
-    return this.parameters;
+    return [
+      {
+        name: 'columnSeparator',
+        description: 'Column delimiter character, only one character supported',
+        required: true,
+        type: 'string',
+      },
+      {
+        name: 'lineSeparator',
+        description:
+          'Line delimiter character, only \\r, \\r\\n, and \\n supported',
+        required: true,
+        type: 'string',
+      },
+      {
+        name: 'skipFirstDataRow',
+        description: 'Skip first data row (after header)',
+        required: true,
+        type: 'boolean',
+      },
+      {
+        name: 'firstRowAsHeader',
+        description: 'Interpret first row as header for columns',
+        required: true,
+        type: 'boolean',
+      },
+      {
+        name: 'columnSeparator',
+        description: 'Column delimiter character, only one character supported',
+        required: true,
+        type: 'string',
+      },
+    ];
   }
 
   /**
@@ -88,7 +91,7 @@ export class CsvInterpreter extends Interpreter {
       lineSeparator !== '\r\n'
     ) {
       throw new Error(
-        this.getType() +
+        this.type +
           ' interpreter requires parameter lineSeparator to have' +
           ' value \\n, \\r, or \\r\\n. Your given value ' +
           lineSeparator +
@@ -99,7 +102,7 @@ export class CsvInterpreter extends Interpreter {
     const columnSeparator: string = inputParameters.columnSeparator as string;
     if (columnSeparator.length !== 1) {
       throw new Error(
-        this.getType() +
+        this.type +
           ' interpreter requires parameter columnSeparator to have' +
           ' length 1. Your given value ' +
           columnSeparator +

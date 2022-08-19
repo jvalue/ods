@@ -1,4 +1,4 @@
-import { Format } from '../../adapter/Format';
+import { Format } from '.';
 
 describe('doInterpret Json Format returns valid JSON', () => {
   test('doInterpret JSON data test', () => {

@@ -1,5 +1,5 @@
-import { Format } from '../../Format';
 import { Protocol } from '../../importer';
+import { Format } from '../../interpreter';
 
 import { AdapterEndpoint } from './adapterEndpoint';
 

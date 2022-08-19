@@ -1,7 +1,5 @@
-import { Format } from './Format';
-import { Protocol } from './importer';
-import { Importer } from './importer/Importer';
-import { Interpreter } from './interpreter/Interpreter';
+import { Importer, Protocol } from './importer';
+import { Format, Interpreter } from './interpreter';
 import { AdapterConfig } from './model/AdapterConfig';
 import { DataImportResponse } from './model/DataImportResponse';
 import { FormatConfig } from './model/FormatConfig';
@@ -73,7 +71,7 @@ export class AdapterService {
     rawData: string,
     config: FormatConfig,
   ): Promise<Record<string, unknown> | Array<Record<string, unknown>>> {
-    const interpreter = config.format.getInterpreter();
+    const interpreter = config.format;
     console.error('########## FORMATTING!!!');
     console.error(`RAWDATA: ${typeof rawData}`);
     console.dir(rawData, { depth: null });
