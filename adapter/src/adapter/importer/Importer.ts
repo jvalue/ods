@@ -1,10 +1,25 @@
 import { ImporterParameterError } from '../model/exceptions/ImporterParameterError';
 
-import { ImporterParameterDescription } from './ImporterParameterDescription';
+export interface ImporterParameterDescription {
+  name: string;
+  description: string;
+  required: boolean;
+  type: unknown;
+}
 
 export abstract class Importer {
-  type: string | undefined;
-  description: string | undefined;
+  constructor(public type: string, public description: string) {}
+
+  /**
+   * @returns a list of all available parameters for this importer
+   */
+  abstract getAvailableParameters(): ImporterParameterDescription[];
+
+  /**
+   * Actual logic to fetch the data.
+   * @returns the imported data as string
+   */
+  abstract doFetch(parameters: Record<string, unknown>): Promise<string>;
 
   getRequiredParameters(): ImporterParameterDescription[] {
     return this.getAvailableParameters().filter(
@@ -12,18 +27,14 @@ export abstract class Importer {
     );
   }
 
-  abstract getAvailableParameters(): ImporterParameterDescription[];
-
+  /**
+   * Validates the given parameters and imports data as string
+   */
   async fetch(parameters: Record<string, unknown>): Promise<string> {
     this.validateParameters(parameters);
     const x = await this.doFetch(parameters);
     return x;
   }
-
-  abstract getType(): string;
-  abstract getDescription(): string;
-
-  abstract doFetch(parameters: Record<string, unknown>): Promise<string>;
 
   /**
    * Validates the input parameters (Generic function, used in the derived classes)

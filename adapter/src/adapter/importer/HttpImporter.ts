@@ -2,42 +2,35 @@ import axios, { AxiosError } from 'axios';
 
 import { ImporterParameterError } from '../model/exceptions/ImporterParameterError';
 
-import { Importer } from './Importer';
-import { ImporterParameterDescription } from './ImporterParameterDescription';
+import { Importer, ImporterParameterDescription } from './Importer';
 
 export class HttpImporter extends Importer {
-  type = 'HTTP';
-  description = 'Plain HTTP';
-  parameters: ImporterParameterDescription[] = [
-    new ImporterParameterDescription({
-      name: 'location',
-      description: 'String of the URI for the HTTP call',
-      type: 'string',
-    }),
-    new ImporterParameterDescription({
-      name: 'encoding',
-      description:
-        'Encoding of the source. Available encodings: ISO-8859-1, US-ASCII, UTF-8',
-      type: 'string',
-    }),
-    new ImporterParameterDescription({
-      name: 'defaultParameters',
-      description: 'Default values for open parameters in the URI',
-      required: false,
-      type: 'RuntimeParameters',
-    }),
-  ];
-
-  override getType(): string {
-    return this.type;
-  }
-
-  override getDescription(): string {
-    return this.description;
+  constructor() {
+    super('HTTP', 'Plain HTTP');
   }
 
   override getAvailableParameters(): ImporterParameterDescription[] {
-    return this.parameters;
+    return [
+      {
+        name: 'location',
+        description: 'String of the URI for the HTTP call',
+        required: true,
+        type: 'string',
+      },
+      {
+        name: 'encoding',
+        description:
+          'Encoding of the source. Available encodings: ISO-8859-1, US-ASCII, UTF-8',
+        required: true,
+        type: 'string',
+      },
+      {
+        name: 'defaultParameters',
+        description: 'Default values for open parameters in the URI',
+        required: false,
+        type: 'RuntimeParameters',
+      },
+    ];
   }
 
   /**
@@ -57,7 +50,7 @@ export class HttpImporter extends Importer {
       encoding !== 'UTF-8'
     ) {
       throw new Error(
-        this.getType() +
+        this.type +
           ' interpreter requires parameter encoding to have value ' +
           'ISO-8859-1' +
           ', ' +

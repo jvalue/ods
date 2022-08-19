@@ -1,11 +1,11 @@
-import { Format } from '../Format';
-import { Importer } from '../importer/Importer';
-import { Interpreter } from '../interpreter/Interpreter';
-import { AdapterConfig } from '../model/AdapterConfig';
-import { DataImportResponse } from '../model/DataImportResponse';
-import { FormatConfig } from '../model/FormatConfig';
-import { ProtocolConfig } from '../model/ProtocolConfig';
-import { Protocol } from '../Protocol';
+import { Format } from './Format';
+import { Protocol } from './importer';
+import { Importer } from './importer/Importer';
+import { Interpreter } from './interpreter/Interpreter';
+import { AdapterConfig } from './model/AdapterConfig';
+import { DataImportResponse } from './model/DataImportResponse';
+import { FormatConfig } from './model/FormatConfig';
+import { ProtocolConfig } from './model/ProtocolConfig';
 
 export class AdapterService {
   /**
@@ -65,7 +65,7 @@ export class AdapterService {
   }
 
   async executeProtocol(config: ProtocolConfig): Promise<string> {
-    const importer = config.protocol.getImporter();
+    const importer = config.protocol;
     return await importer.fetch(config.parameters);
   }
 

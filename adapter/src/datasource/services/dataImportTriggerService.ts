@@ -1,11 +1,11 @@
+import { AdapterService } from '../../adapter/adapterService';
 import { AdapterEndpoint } from '../../adapter/api/rest/adapterEndpoint';
 import { Format } from '../../adapter/Format';
+import { Protocol } from '../../adapter/importer';
 import { AdapterConfig } from '../../adapter/model/AdapterConfig';
 import { DataImportResponse } from '../../adapter/model/DataImportResponse';
 import { FormatConfig } from '../../adapter/model/FormatConfig';
 import { ProtocolConfig } from '../../adapter/model/ProtocolConfig';
-import { Protocol } from '../../adapter/Protocol';
-import { AdapterService } from '../../adapter/services/adapterService';
 import { ADAPTER_AMQP_IMPORT_SUCCESS_TOPIC } from '../../env';
 import { DataImportDTO, dataimportEntityToDTO } from '../api/DataImport.dto';
 import { DatasourceDTO, datasourceEntityToDTO } from '../api/Datasource.dto';
@@ -89,7 +89,7 @@ export class DataImportTriggerService {
 
     // Start of toAdapterConfig of old impl
     const protocolConfigObj: ProtocolConfig = {
-      protocol: new Protocol(Protocol.HTTP),
+      protocol: Protocol.HTTP,
       parameters: parameters,
     };
     const format = new Format(

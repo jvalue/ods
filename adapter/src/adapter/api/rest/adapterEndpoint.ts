@@ -1,6 +1,8 @@
 import express from 'express';
 
+import { AdapterService } from '../../adapterService';
 import { Format } from '../../Format';
+import { Protocol } from '../../importer';
 import { Importer } from '../../importer/Importer';
 import { Interpreter } from '../../interpreter/Interpreter';
 import {
@@ -13,8 +15,6 @@ import {
   ProtocolConfig,
   ProtocolConfigValidator,
 } from '../../model/ProtocolConfig';
-import { Protocol } from '../../Protocol';
-import { AdapterService } from '../../services/adapterService';
 
 import { asyncHandler } from './utils';
 
@@ -50,16 +50,16 @@ export class AdapterEndpoint {
       return;
     }
     // Check protocol type
-    let protocolType: Importer;
+    let importer: Importer;
     try {
-      protocolType = AdapterEndpoint.getProtocol(req.body.protocol.type);
+      importer = AdapterEndpoint.getProtocol(req.body.protocol.type);
     } catch (e) {
       res.status(400).send('Protocol not supported');
       return;
     }
 
     const protocolConfigObj: ProtocolConfig = {
-      protocol: new Protocol(protocolType),
+      protocol: importer,
       parameters: req.body.protocol.parameters,
     };
 
@@ -119,7 +119,7 @@ export class AdapterEndpoint {
       return;
     }
     const protocolConfigObj: ProtocolConfig = {
-      protocol: new Protocol(Protocol.HTTP),
+      protocol: Protocol.HTTP,
       parameters: req.body.protocol.parameters,
     };
     try {

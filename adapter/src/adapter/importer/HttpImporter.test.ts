@@ -1,7 +1,8 @@
-import { Importer } from '../../adapter/importer/Importer';
-import { ImporterParameterDescription } from '../../adapter/importer/ImporterParameterDescription';
 import { ImporterParameterError } from '../../adapter/model/exceptions/ImporterParameterError';
-import { Protocol } from '../../adapter/Protocol';
+
+import { Importer, ImporterParameterDescription } from './Importer';
+
+import { Protocol } from '.';
 
 /* eslint-env jest */
 describe('getAvaialbleParameters Tests', () => {

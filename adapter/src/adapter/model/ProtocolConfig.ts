@@ -1,10 +1,10 @@
 import { validators } from '@jvalue/node-dry-basics';
 
 import { AdapterConfigDTO } from '../api/Endpoint.dto';
-import { Protocol } from '../Protocol';
+import { Importer } from '../importer';
 
 export interface ProtocolConfig {
-  protocol: Protocol;
+  protocol: Importer;
   parameters: Record<string, unknown>;
 }
 
