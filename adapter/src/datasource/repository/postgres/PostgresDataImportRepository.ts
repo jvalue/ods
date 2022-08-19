@@ -93,7 +93,6 @@ export class PostgresDataImportRepository implements DataImportRepository {
     return this.deserializeQueryResult(resultSet)[0];
   }
 
-  // TODO old impl queried by both dataImportId and datasourceId -> WHY?!?!!?!? (both are unique -> only one dataImportId IN WHOLE TABLE)
   async getById(dataImportId: number): Promise<DataImportEntity | undefined> {
     const resultSet = (await this.postgresClient.executeQuery(GET_BY_ID, [
       dataImportId,

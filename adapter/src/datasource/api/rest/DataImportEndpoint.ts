@@ -40,7 +40,7 @@ export class DataImportEndpoint {
       asyncHandler(this.getDataFromDataImport),
     );
   };
-  // TODO Transactional bei gets???
+
   getMetaDataImportsForDatasource = async (
     req: express.Request,
     res: express.Response,
