@@ -1,4 +1,4 @@
-import { InterpreterParameterError } from '../model/exceptions/InterpreterParameterError';
+import { InterpreterParameterError } from '../exceptions/InterpreterParameterError';
 
 export interface InterpreterParameterDescription {
   name: string;

@@ -1,7 +1,7 @@
 import express from 'express';
 
 import { asyncHandler } from '../../../adapter/api/rest/utils';
-import { ImporterParameterError } from '../../../adapter/model/exceptions/ImporterParameterError';
+import { ImporterParameterError } from '../../../adapter/exceptions/ImporterParameterError';
 import {
   ADAPTER_AMQP_DATASOURCE_CREATED_TOPIC,
   ADAPTER_AMQP_DATASOURCE_DELETED_TOPIC,

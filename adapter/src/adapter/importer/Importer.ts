@@ -1,4 +1,4 @@
-import { ImporterParameterError } from '../model/exceptions/ImporterParameterError';
+import { ImporterParameterError } from '../exceptions/ImporterParameterError';
 
 export interface ImporterParameterDescription {
   name: string;

@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios';
 
-import { ImporterParameterError } from '../model/exceptions/ImporterParameterError';
+import { ImporterParameterError } from '../exceptions/ImporterParameterError';
 
 import { Importer, ImporterParameterDescription } from './Importer';
 

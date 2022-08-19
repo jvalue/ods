@@ -1,18 +1,14 @@
 import express from 'express';
 
+import { AdapterConfig, ProtocolConfig } from '../../AdapterConfig';
 import { AdapterService } from '../../adapterService';
+import { ImporterParameterError } from '../../exceptions/ImporterParameterError';
 import { Importer, Protocol } from '../../importer';
 import { Format, Interpreter } from '../../interpreter';
 import {
-  AdapterConfig,
   AdapterConfigValidator,
-} from '../../model/AdapterConfig';
-import { ImporterParameterError } from '../../model/exceptions/ImporterParameterError';
-import { FormatConfig } from '../../model/FormatConfig';
-import {
-  ProtocolConfig,
   ProtocolConfigValidator,
-} from '../../model/ProtocolConfig';
+} from '../AdapterConfig.dto';
 
 import { asyncHandler } from './utils';
 
@@ -41,43 +37,41 @@ export class AdapterEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
-    // TODO doesn't the body contain adapterConfig (at least old impl did)?!?! -> why create adapterconfig and not simply pass to executeJob?!?!?
+    const adapterConfigRequest: unknown = req.body;
     const validator = new AdapterConfigValidator();
-    if (!validator.validate(req.body)) {
+    if (!validator.validate(adapterConfigRequest)) {
       res.status(400).json({ errors: validator.getErrors() });
       return;
     }
     // Check protocol type
     let importer: Importer;
     try {
-      importer = AdapterEndpoint.getProtocol(req.body.protocol.type);
+      importer = AdapterEndpoint.getProtocol(
+        adapterConfigRequest.protocol.type,
+      );
     } catch (e) {
       res.status(400).send('Protocol not supported');
       return;
     }
 
-    const protocolConfigObj: ProtocolConfig = {
-      protocol: importer,
-      parameters: req.body.protocol.parameters,
-    };
-
     // Check format type
     let interpreter: Interpreter;
     try {
-      interpreter = AdapterEndpoint.getFormat(req.body.format.type);
+      interpreter = AdapterEndpoint.getFormat(adapterConfigRequest.format.type);
     } catch (e) {
       res.status(400).send('Format not supported');
       return;
     }
 
-    const formatConfigObj: FormatConfig = {
-      format: interpreter,
-      parameters: req.body.format.parameters,
-    };
-
     const adapterConfig: AdapterConfig = {
-      protocolConfig: protocolConfigObj,
-      formatConfig: formatConfigObj,
+      protocolConfig: {
+        protocol: importer,
+        parameters: adapterConfigRequest.protocol.parameters,
+      },
+      formatConfig: {
+        format: interpreter,
+        parameters: adapterConfigRequest.format.parameters,
+      },
     };
 
     try {
@@ -110,14 +104,15 @@ export class AdapterEndpoint {
     req: express.Request,
     res: express.Response,
   ): Promise<void> => {
+    const protocolConfigRequest: unknown = req.body;
     const validator = new ProtocolConfigValidator();
-    if (!validator.validate(req.body)) {
+    if (!validator.validate(protocolConfigRequest)) {
       res.status(400).json({ errors: validator.getErrors() });
       return;
     }
     const protocolConfigObj: ProtocolConfig = {
       protocol: Protocol.HTTP,
-      parameters: req.body.protocol.parameters,
+      parameters: protocolConfigRequest.parameters,
     };
     try {
       const returnDataImportResponse =

@@ -1,4 +1,4 @@
-import { ImporterParameterError } from '../../adapter/model/exceptions/ImporterParameterError';
+import { ImporterParameterError } from '../exceptions/ImporterParameterError';
 
 import { Importer, ImporterParameterDescription } from './Importer';
 

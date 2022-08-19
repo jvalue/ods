@@ -1,7 +1,7 @@
 import { AmqpChannel, AmqpConnection } from '@jvalue/node-dry-amqp';
 import { ConsumeMessage } from 'amqplib';
 
-import { ImporterParameterError } from '../../../adapter/model/exceptions/ImporterParameterError';
+import { ImporterParameterError } from '../../../adapter/exceptions/ImporterParameterError';
 import {
   ADAPTER_AMQP_ADAPTER_EXCHANGE,
   ADAPTER_AMQP_DATASOURCE_IMPORT_TRIGGER_QUEUE,

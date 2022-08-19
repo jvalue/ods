@@ -1,4 +1,4 @@
-import { DataImportResponse } from '../../adapter/model/DataImportResponse';
+import { DataImportResponse } from '../../adapter/api/DataImportResponse.dto';
 import { ErrorResponse } from '../services/ErrorResponse';
 
 export interface OutboxRepository {

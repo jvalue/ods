@@ -1,7 +1,7 @@
 import { PostgresClient } from '@jvalue/node-dry-pg';
 import { PoolConfig, QueryResult } from 'pg';
 
-import { DataImportResponse } from '../../adapter/model/DataImportResponse';
+import { DataImportResponse } from '../../adapter/api/DataImportResponse.dto';
 import {
   POSTGRES_DB,
   POSTGRES_HOST,

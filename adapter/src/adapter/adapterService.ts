@@ -1,9 +1,7 @@
+import { AdapterConfig, FormatConfig, ProtocolConfig } from './AdapterConfig';
+import { DataImportResponse } from './api/DataImportResponse.dto';
 import { Importer, Protocol } from './importer';
 import { Format, Interpreter } from './interpreter';
-import { AdapterConfig } from './model/AdapterConfig';
-import { DataImportResponse } from './model/DataImportResponse';
-import { FormatConfig } from './model/FormatConfig';
-import { ProtocolConfig } from './model/ProtocolConfig';
 
 export class AdapterService {
   /**
