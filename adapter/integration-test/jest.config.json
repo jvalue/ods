@@ -1,6 +1,5 @@
 {
   "name": "ODS Adapter Integration-Test",
-  "preset": "ts-jest",
   "testEnvironment": "node",
   "roots": ["./src"],
   "globalSetup": "<rootDir>/src/setup.js",
