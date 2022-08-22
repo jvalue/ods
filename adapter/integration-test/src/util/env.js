@@ -1,4 +1,4 @@
-const DOCKER_COMPOSE_FILES = ['../../docker-compose.yml', '../../docker-compose.it.yml']
+const DOCKER_COMPOSE_FILES = ['../../docker-compose.yml', 'docker-compose.it.yml']
 const DOCKER_ENV_FILE = '../../.env'
 const ADAPTER_URL = 'http://localhost:9000/api/adapter'
 const MOCK_SERVER_URL = 'http://localhost:9000/api/integration-tests/mock-server'
