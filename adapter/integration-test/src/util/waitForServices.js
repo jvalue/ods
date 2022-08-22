@@ -2,7 +2,6 @@ const waitOn = require('wait-on')
 const {
   ADAPTER_URL,
   MOCK_SERVER_URL,
-  RABBIT_HEALTH,
   STARTUP_DELAY
 } = require('./env')
 
@@ -16,8 +15,7 @@ async function waitForServicesToBeReady () {
   const waitOptions = {
     resources: [
       ADAPTER_URL + '/version',
-      MOCK_SERVER_URL + '/',
-      RABBIT_HEALTH
+      MOCK_SERVER_URL + '/'
     ],
     timeout: TIMEOUT,
     log: false

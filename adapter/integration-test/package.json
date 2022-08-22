@@ -4,7 +4,7 @@
   "description": "Adapter Integration-Tests",
   "scripts": {
     "mock": "node src/mock.server.js",
-    "pretest": "npm run mock &",
+    "mockServer": "node src/mock.server.js",
     "test": "jest src/*.test.js --colors --verbose --runInBand",
     "posttest": "killall node",
     "lint": "eslint src --fix",
@@ -26,6 +26,7 @@
   "dependencies": {
     "@jvalue/node-dry-amqp": "0.1.2",
     "koa": "^2.13.0",
+    "koa-bodyparser": "^4.3.0",
     "koa-router": "^10.0.0",
     "wait-on": "^5.1.0"
   }
