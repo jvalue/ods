@@ -19,3 +19,6 @@ services:
       - "traefik.http.routers.to-mock-server.rule=PathPrefix(`/api/system-tests/mock-server/`)"
       - "traefik.http.routers.to-mock-server.middlewares=mock-server-stripprefix@docker"
       - "traefik.http.middlewares.mock-server-stripprefix.stripprefix.prefixes=/api/system-tests/mock-server"
+
+  rabbitmq:
+    ports: 5672:5672

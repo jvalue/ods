@@ -1,6 +1,6 @@
 const request = require('supertest')
 
-const { ADAPTER_URL, AMQP_URL, PUBLICATION_DELAY } = require('./util/env')
+const { ADAPTER_URL, AMQP_URL_OUTSIDE_DOCKER, PUBLICATION_DELAY } = require('./util/env')
 const { connectAmqp, consumeAmqpMsg, sleep } = require('./util/testHelper')
 
 const AMQP_EXCHANGE = 'ods_global'
@@ -16,7 +16,7 @@ let amqpConnection
 
 describe('Datasource Configuration', () => {
   beforeAll(async () => {
-    amqpConnection = await connectAmqp(AMQP_URL)
+    amqpConnection = await connectAmqp(AMQP_URL_OUTSIDE_DOCKER)
 
     await consumeAmqpMsg(
       amqpConnection,

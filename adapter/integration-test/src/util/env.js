@@ -5,7 +5,7 @@ const MOCK_SERVER_URL = 'http://localhost:9000/api/integration-tests/mock-server
 const MOCK_SERVER_URL_WITHIN_DOCKER = 'http://mock-server:8080'
 
 const MOCK_SERVER_PORT = process.env.MOCK_SERVER_PORT || 8081
-const RABBIT_HEALTH = 'http://rabbitmq:15672'
+const AMQP_URL_OUTSIDE_DOCKER = 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@localhost:5672'
 const AMQP_URL = 'amqp://rabbit_adm:R4bb!7_4DM_p4SS@rabbitmq:5672'
 const AMQP_EXCHANGE = 'ods_global'
 const AMQP_CONNECTION_RETRIES = 40
@@ -20,7 +20,7 @@ module.exports = {
   MOCK_SERVER_URL,
   MOCK_SERVER_PORT,
   MOCK_SERVER_URL_WITHIN_DOCKER,
-  RABBIT_HEALTH,
+  AMQP_URL_OUTSIDE_DOCKER,
   AMQP_URL,
   AMQP_EXCHANGE,
   AMQP_CONNECTION_RETRIES,

@@ -3,7 +3,7 @@ const request = require('supertest')
 const {
   ADAPTER_URL,
   MOCK_SERVER_URL_WITHIN_DOCKER,
-  AMQP_URL,
+  AMQP_URL_OUTSIDE_DOCKER,
   AMQP_CONNECTION_RETRIES,
   AMQP_CONNECTION_BACKOFF,
   PUBLICATION_DELAY
@@ -30,7 +30,7 @@ let amqpConnection
 describe('Datasource triggering', () => {
   beforeAll(async () => {
     amqpConnection = await connectAmqp(
-      AMQP_URL,
+      AMQP_URL_OUTSIDE_DOCKER,
       AMQP_CONNECTION_RETRIES,
       AMQP_CONNECTION_BACKOFF
     )
@@ -299,7 +299,7 @@ describe('Datasource triggering', () => {
 describe('Datasource REST triggering', () => {
   beforeAll(async () => {
     amqpConnection = await connectAmqp(
-      AMQP_URL,
+      AMQP_URL_OUTSIDE_DOCKER,
       AMQP_CONNECTION_RETRIES,
       AMQP_CONNECTION_BACKOFF
     )
