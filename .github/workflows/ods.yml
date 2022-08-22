@@ -26,14 +26,12 @@ jobs:
 
       - name: Build Integration-test
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml build adapter-it
+          docker-compose -f docker-compose.yml -f docker-compose.it.yml build mock-server
 
       - name: Run Integration-test
-        # Only the logs from the services listed in the `docker-compose up` command are going to be printed to stdout
-        # To get logs from other services too, just add them to the `docker-compose up` command
+        working-directory: ./adapter/integration-test
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from adapter-it adapter adapter-it
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml down
+          npm run test
 
       - name: Save Docker image as artifact
         run: |
