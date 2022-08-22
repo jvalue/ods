@@ -62,6 +62,7 @@ export class AmqpConsumer {
       // 'adapter.datasource-import-trigger',
       this.consumeEvent,
     );
+    console.log('Successfully conntected to AMQP. All consumers registered.');
   }
 
   escapeRegExp(str: string): string {

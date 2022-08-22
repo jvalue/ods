@@ -1,14 +1,10 @@
 import csv from 'csvtojson';
 
-import { Interpreter, InterpreterParameterDescription } from './Interpreter';
+import { Interpreter } from './Interpreter';
 
 export class CsvInterpreter extends Interpreter {
   constructor() {
-    super('CSV', 'Interpret data as CSV data');
-  }
-
-  override getAvailableParameters(): InterpreterParameterDescription[] {
-    return [
+    super('CSV', 'Interpret data as CSV data', [
       {
         name: 'columnSeparator',
         description: 'Column delimiter character, only one character supported',
@@ -40,7 +36,7 @@ export class CsvInterpreter extends Interpreter {
         required: true,
         type: 'string',
       },
-    ];
+    ]);
   }
 
   /**

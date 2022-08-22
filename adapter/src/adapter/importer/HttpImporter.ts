@@ -2,15 +2,11 @@ import axios, { AxiosError } from 'axios';
 
 import { ImporterParameterError } from '../exceptions/ImporterParameterError';
 
-import { Importer, ImporterParameterDescription } from './Importer';
+import { Importer } from './Importer';
 
 export class HttpImporter extends Importer {
   constructor() {
-    super('HTTP', 'Plain HTTP');
-  }
-
-  override getAvailableParameters(): ImporterParameterDescription[] {
-    return [
+    super('HTTP', 'Plain HTTP', [
       {
         name: 'location',
         description: 'String of the URI for the HTTP call',
@@ -30,7 +26,7 @@ export class HttpImporter extends Importer {
         required: false,
         type: 'RuntimeParameters',
       },
-    ];
+    ]);
   }
 
   /**

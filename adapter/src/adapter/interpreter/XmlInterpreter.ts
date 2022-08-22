@@ -1,14 +1,10 @@
 import { XMLParser } from 'fast-xml-parser';
 
-import { Interpreter, InterpreterParameterDescription } from './Interpreter';
+import { Interpreter } from './Interpreter';
 
 export class XmlInterpreter extends Interpreter {
   constructor() {
-    super('XML', 'Interpret data as XML data');
-  }
-
-  override getAvailableParameters(): InterpreterParameterDescription[] {
-    return [];
+    super('XML', 'Interpret data as XML data', []);
   }
 
   /**

@@ -64,7 +64,8 @@ describe('Stateless data import', () => {
           }
         },
         format: {
-          type: 'JSON'
+          type: 'JSON',
+          parameters: {}
         }
       }
 
@@ -85,12 +86,10 @@ describe('Stateless data import', () => {
     'Should import raw xml data',
     async () => {
       const reqBody = {
-        protocol: {
-          type: 'HTTP',
-          parameters: {
-            location: MOCK_SERVER_URL_WITHIN_DOCKER + '/xml',
-            encoding: 'UTF-8'
-          }
+        type: 'HTTP',
+        parameters: {
+          location: MOCK_SERVER_URL_WITHIN_DOCKER + '/xml',
+          encoding: 'UTF-8'
         }
       }
 
@@ -119,7 +118,8 @@ describe('Stateless data import', () => {
           }
         },
         format: {
-          type: 'XML'
+          type: 'XML',
+          parameters: {}
         }
       }
 
@@ -147,7 +147,8 @@ describe('Stateless data import', () => {
           }
         },
         format: {
-          type: 'XML'
+          type: 'XML',
+          parameters: {}
         }
       }
 
@@ -223,7 +224,8 @@ describe('Stateless data import', () => {
           }
         },
         format: {
-          type: 'JSON'
+          type: 'JSON',
+          parameters: {}
         }
       }
       const response = await request(ADAPTER_URL)
@@ -246,7 +248,8 @@ describe('Stateless data import', () => {
           }
         },
         format: {
-          type: 'UNSUPPORTED'
+          type: 'UNSUPPORTED',
+          parameters: {}
         }
       }
       const response = await request(ADAPTER_URL)
@@ -269,7 +272,8 @@ describe('Stateless data import', () => {
           }
         },
         format: {
-          type: 'JSON'
+          type: 'JSON',
+          parameters: {}
         }
       }
       const response = await request(ADAPTER_URL)
@@ -292,7 +296,8 @@ describe('Stateless data import', () => {
           }
         },
         format: {
-          type: 'JSON'
+          type: 'JSON',
+          parameters: {}
         }
       }
       const response = await request(ADAPTER_URL)

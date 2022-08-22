@@ -1,12 +1,8 @@
-import { Interpreter, InterpreterParameterDescription } from './Interpreter';
+import { Interpreter } from './Interpreter';
 
 export class JsonInterpreter extends Interpreter {
   constructor() {
-    super('JSON', 'Interpret data as JSON data');
-  }
-
-  override getAvailableParameters(): InterpreterParameterDescription[] {
-    return [];
+    super('JSON', 'Interpret data as JSON data', []);
   }
 
   override doInterpret(

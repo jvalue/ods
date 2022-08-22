@@ -8,12 +8,18 @@ export interface ImporterParameterDescription {
 }
 
 export abstract class Importer {
-  constructor(public type: string, public description: string) {}
+  constructor(
+    public type: string,
+    public description: string,
+    public parameters: ImporterParameterDescription[],
+  ) {}
 
   /**
    * @returns a list of all available parameters for this importer
    */
-  abstract getAvailableParameters(): ImporterParameterDescription[];
+  getAvailableParameters(): ImporterParameterDescription[] {
+    return this.parameters;
+  }
 
   /**
    * Actual logic to fetch the data.

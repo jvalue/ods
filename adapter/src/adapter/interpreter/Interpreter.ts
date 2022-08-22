@@ -11,14 +11,20 @@ export interface InterpreterParameterDescription {
  * @description Abstract class for interpreters (currently supporting CSVInterpreter, JSONInterpreter and XmlInterpreter)
  */
 export abstract class Interpreter {
-  constructor(public type: string, public description: string) {}
+  constructor(
+    public type: string,
+    public description: string,
+    public parameters: InterpreterParameterDescription[],
+  ) {}
 
   abstract doInterpret(
     data: string,
     parameters?: Record<string, unknown>,
   ): Promise<Record<string, unknown> | Array<Record<string, unknown>>>;
 
-  abstract getAvailableParameters(): InterpreterParameterDescription[];
+  getAvailableParameters(): InterpreterParameterDescription[] {
+    return this.parameters;
+  }
 
   /**
    * Interprets data and returns the result
