@@ -1,3 +1,5 @@
+import { TextDecoder } from 'util';
+
 import axios, { AxiosError } from 'axios';
 
 import { ImporterParameterError } from '../exceptions/ImporterParameterError';
@@ -64,12 +66,11 @@ export class HttpImporter extends Importer {
   override async doFetch(parameters: Record<string, unknown>): Promise<string> {
     const uri = parameters.location as string;
     const encoding = parameters.encoding as string;
+    const decoder = new TextDecoder(encoding);
 
-    // The old impl retrieved data as byte array and then converted using encoding:
-    // Return new String(rawResponse, Charset.forName((String) parameters.get("encoding")));
-    // Unfortunately there does not seem to be a universal method .toString(encoding?: string) in javascript
+    // Fetch as ArrayBuffer
     const result = await axios
-      .get(uri, { responseEncoding: encoding })
+      .get(uri, { responseType: 'arraybuffer' })
       .catch((error: AxiosError) => {
         if (error.response) {
           console.log(error.response);
@@ -77,10 +78,7 @@ export class HttpImporter extends Importer {
         }
         throw new ImporterParameterError('Could not Fetch from URI:' + uri);
       });
-    // Check if data is object/array -> return stringified (because this method returns string)
-    if (typeof result.data === 'object' || Array.isArray(result.data)) {
-      return JSON.stringify(result.data);
-    }
-    return result.data as string;
+    // Convert ArrayBuffer response to string using encoding
+    return decoder.decode(result.data);
   }
 }
