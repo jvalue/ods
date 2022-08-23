@@ -83,11 +83,8 @@ export class DataImportTriggerService {
       Object.assign(replacementParameters, runtimeParams);
     }
 
-    // This is 'new' solution (instead of overriding url -> override params here and url in importer)
-    datasource.protocol.parameters.defaultParameters = replacementParameters;
-    const parameters = {
-      ...datasource.protocol.parameters,
-    };
+    // Fill queryParameters in url
+    const parameters = this.fillQueryParameters(datasource, runtimeParameters);
 
     // Start of toAdapterConfig of old impl
     const protocolConfigObj: ProtocolConfig = {
@@ -104,6 +101,46 @@ export class DataImportTriggerService {
       formatConfig: formatConfigObj,
     };
     return adapterConfig;
+  }
+
+  private fillQueryParameters(
+    datasource: DatasourceDTO,
+    runtimeParameters: Record<string, unknown> | undefined,
+  ): Record<string, unknown> {
+    if (datasource.protocol.type !== Protocol.HTTP.type) {
+      return datasource.protocol.parameters;
+    }
+
+    const replacementParameters: Record<string, unknown> = {};
+
+    // Add all default parameters to the replacement parameters map
+    if (datasource.protocol.parameters.defaultParameters !== undefined) {
+      Object.assign(
+        replacementParameters,
+        datasource.protocol.parameters.defaultParameters,
+      );
+    }
+
+    // Add all runtime parameters to the replacement parameters map
+    if (
+      runtimeParameters !== undefined &&
+      runtimeParameters.parameters !== undefined
+    ) {
+      Object.assign(replacementParameters, runtimeParameters.parameters);
+    }
+
+    // Replace params in url
+    let url = datasource.protocol.parameters.location as string;
+    const keys = Object.keys(replacementParameters);
+    for (const entry of keys) {
+      const value = replacementParameters[entry] as string;
+      const regex = new RegExp('{' + entry + '}', 'g');
+      url = url.replace(regex, value);
+    }
+
+    const parameters = datasource.protocol.parameters;
+    parameters.location = url;
+    return parameters;
   }
 
   private async publishResult(

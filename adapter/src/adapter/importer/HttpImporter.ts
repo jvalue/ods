@@ -45,17 +45,9 @@ export class HttpImporter extends Importer {
       encoding !== 'US-ASCII' &&
       encoding !== 'UTF-8'
     ) {
+      const type: string = this.type;
       throw new Error(
-        this.type +
-          ' interpreter requires parameter encoding to have value ' +
-          'ISO-8859-1' +
-          ', ' +
-          'US-ASCII' +
-          ', ' +
-          'UTF-8' +
-          '. Your given value ' +
-          encoding +
-          ' is invalid!',
+        `${type} interpreter requires parameter encoding to have value ISO-8859-1, US-ASCII, UTF-8. Your given value ${encoding} is invalid!`,
       );
     }
   }
@@ -70,23 +62,8 @@ export class HttpImporter extends Importer {
    * @throws Error if Location-URI returns 404 status code
    */
   override async doFetch(parameters: Record<string, unknown>): Promise<string> {
-    let uri = parameters.location as string;
+    const uri = parameters.location as string;
     const encoding = parameters.encoding as string;
-    // Originally this was done in dataImportTrigger during creation of AdapterConfig
-    // -> RuntimeParameter are used, because the defaultParams are overriden during AdapterConfig instead
-    if (parameters.defaultParameters !== undefined) {
-      const defaultParameters = parameters.defaultParameters as Record<
-        string,
-        unknown
-      >;
-
-      const keys = Object.keys(defaultParameters);
-      for (const entry of keys) {
-        const value = defaultParameters[entry] as string;
-        const regex = new RegExp('{' + entry + '}', 'g');
-        uri = uri.replace(regex, value);
-      }
-    }
 
     // The old impl retrieved data as byte array and then converted using encoding:
     // Return new String(rawResponse, Charset.forName((String) parameters.get("encoding")));
