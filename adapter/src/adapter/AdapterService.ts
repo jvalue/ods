@@ -57,9 +57,6 @@ export class AdapterService {
     config: FormatConfig,
   ): Promise<Record<string, unknown> | Array<Record<string, unknown>>> {
     const interpreter = config.format;
-    console.error('########## FORMATTING!!!');
-    console.error(`RAWDATA: ${typeof rawData}`);
-    console.dir(rawData, { depth: null });
     return await interpreter.interpret(rawData, config.parameters);
   }
 }
