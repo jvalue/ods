@@ -6,7 +6,6 @@
     "mock": "node src/mock.server.js",
     "mockServer": "node src/mock.server.js",
     "test": "jest src/*.test.js --colors --verbose --runInBand",
-    "posttest": "killall node -q",
     "lint": "eslint src --fix",
     "lint-ci": "eslint src --max-warnings=0"
   },
