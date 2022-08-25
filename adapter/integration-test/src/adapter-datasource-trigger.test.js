@@ -2,14 +2,18 @@ const request = require('supertest')
 
 const {
   ADAPTER_URL,
-  MOCK_SERVER_URL,
-  AMQP_URL,
+  MOCK_SERVER_URL_WITHIN_DOCKER,
+  AMQP_URL_OUTSIDE_DOCKER,
   AMQP_CONNECTION_RETRIES,
   AMQP_CONNECTION_BACKOFF,
   PUBLICATION_DELAY
-} = require('./env')
-const { waitForServicesToBeReady } = require('./waitForServices')
-const { connectAmqp, publishAmqpMessage, consumeAmqpMsg, sleep } = require('./testHelper')
+} = require('./util/env')
+const {
+  connectAmqp,
+  publishAmqpMessage,
+  consumeAmqpMsg,
+  sleep
+} = require('./util/testHelper')
 
 const AMQP_EXCHANGE = 'ods_global'
 const AMQP_IT_QUEUE = 'adapter-it'
@@ -25,11 +29,19 @@ let amqpConnection
 
 describe('Datasource triggering', () => {
   beforeAll(async () => {
-    await waitForServicesToBeReady()
+    amqpConnection = await connectAmqp(
+      AMQP_URL_OUTSIDE_DOCKER,
+      AMQP_CONNECTION_RETRIES,
+      AMQP_CONNECTION_BACKOFF
+    )
 
-    amqpConnection = await connectAmqp(AMQP_URL, AMQP_CONNECTION_RETRIES, AMQP_CONNECTION_BACKOFF)
-
-    await consumeAmqpMsg(amqpConnection, AMQP_EXCHANGE, EXECUTION_TOPIC, AMQP_IT_QUEUE, publishedEvents)
+    await consumeAmqpMsg(
+      amqpConnection,
+      AMQP_EXCHANGE,
+      EXECUTION_TOPIC,
+      AMQP_IT_QUEUE,
+      publishedEvents
+    )
   }, 60000)
 
   afterAll(async () => {
@@ -40,160 +52,265 @@ describe('Datasource triggering', () => {
     }
   }, TIMEOUT)
 
-  test('Should trigger datasources with runtime parameters [AMQP datasource.import-trigger.created]', async () => {
-    const datasourceResponse = await request(ADAPTER_URL).post('/datasources').send(dynamicDatasourceConfig)
-    expect(datasourceResponse.status).toEqual(201)
-    const datasourceId = datasourceResponse.body.id
+  test(
+    'Should trigger datasources with runtime parameters [AMQP datasource.import-trigger.created]',
+    async () => {
+      const datasourceResponse = await request(ADAPTER_URL)
+        .post('/datasources')
+        .send(dynamicDatasourceConfig)
+      expect(datasourceResponse.status).toEqual(201)
+      const datasourceId = datasourceResponse.body.id
 
-    const msg = {
-      datasourceId: datasourceId,
-      runtimeParameters: runtimeParameters
-    }
-    await publishAmqpMessage(amqpConnection, AMQP_EXCHANGE, IMPORT_TRIGGER_TOPIC, msg)
-
-    // Wait to give amqp consumer time to handle trigger
-    await sleep(PUBLICATION_DELAY)
-    const delResponse = await request(ADAPTER_URL).delete(`/datasources/${datasourceId}`).send()
-    expect(delResponse.status).toEqual(204)
-
-    // check for rabbitmq message
-    await sleep(PUBLICATION_DELAY)
-    expect(publishedEvents.get(EXECUTION_SUCCESS_TOPIC)).toContainEqual(
-      {
+      const msg = {
         datasourceId: datasourceId,
-        data: '{"id":"2"}'
-      },
-      TIMEOUT
-    )
-  }, TIMEOUT)
+        runtimeParameters: runtimeParameters
+      }
+      await publishAmqpMessage(
+        amqpConnection,
+        AMQP_EXCHANGE,
+        IMPORT_TRIGGER_TOPIC,
+        msg
+      )
 
-  test('Should trigger datasources with default parameters [AMQP datasource.import-trigger.created]', async () => {
-    const datasourceResponse = await request(ADAPTER_URL).post('/datasources').send(dynamicDatasourceConfig)
-    expect(datasourceResponse.status).toEqual(201)
-    const datasourceId = datasourceResponse.body.id
+      // Wait to give amqp consumer time to handle trigger
+      await sleep(PUBLICATION_DELAY)
+      const delResponse = await request(ADAPTER_URL)
+        .delete(`/datasources/${datasourceId}`)
+        .send()
+      expect(delResponse.status).toEqual(204)
 
-    const msg = {
-      datasourceId: datasourceId
-    }
-    await publishAmqpMessage(amqpConnection, AMQP_EXCHANGE, IMPORT_TRIGGER_TOPIC, msg)
+      // check for rabbitmq message
+      await sleep(PUBLICATION_DELAY)
+      expect(publishedEvents.get(EXECUTION_SUCCESS_TOPIC)).toContainEqual(
+        {
+          datasourceId: datasourceId,
+          data: '{"id":"2"}'
+        },
+        TIMEOUT
+      )
+    },
+    TIMEOUT
+  )
 
-    // Wait to give amqp consumer time to handle trigger
-    await sleep(PUBLICATION_DELAY)
-    const delResponse = await request(ADAPTER_URL).delete(`/datasources/${datasourceId}`).send()
-    expect(delResponse.status).toEqual(204)
+  test(
+    'Should trigger datasources with default parameters [AMQP datasource.import-trigger.created]',
+    async () => {
+      const datasourceResponse = await request(ADAPTER_URL)
+        .post('/datasources')
+        .send(dynamicDatasourceConfig)
+      expect(datasourceResponse.status).toEqual(201)
+      const datasourceId = datasourceResponse.body.id
 
-    // check for rabbitmq message
-    await sleep(PUBLICATION_DELAY)
-    expect(publishedEvents.get(EXECUTION_SUCCESS_TOPIC)).toContainEqual({
-      datasourceId: datasourceId,
-      data: '{"id":"1"}'
-    })
-  }, TIMEOUT)
+      const msg = {
+        datasourceId: datasourceId
+      }
+      await publishAmqpMessage(
+        amqpConnection,
+        AMQP_EXCHANGE,
+        IMPORT_TRIGGER_TOPIC,
+        msg
+      )
 
-  test('Should trigger datasources without runtime parameters [AMQP datasource.import-trigger.created]', async () => {
-    const datasourceResponse = await request(ADAPTER_URL).post('/datasources').send(staticDatasourceConfig)
-    const datasourceId = datasourceResponse.body.id
+      // Wait to give amqp consumer time to handle trigger
+      await sleep(PUBLICATION_DELAY)
+      const delResponse = await request(ADAPTER_URL)
+        .delete(`/datasources/${datasourceId}`)
+        .send()
+      expect(delResponse.status).toEqual(204)
 
-    const msg = {
-      datasourceId: datasourceId
-    }
-    await publishAmqpMessage(amqpConnection, AMQP_EXCHANGE, IMPORT_TRIGGER_TOPIC, msg)
+      // check for rabbitmq message
+      await sleep(PUBLICATION_DELAY)
+      expect(publishedEvents.get(EXECUTION_SUCCESS_TOPIC)).toContainEqual({
+        datasourceId: datasourceId,
+        data: '{"id":"1"}'
+      })
+    },
+    TIMEOUT
+  )
 
-    // Wait to give amqp consumer time to handle trigger
-    await sleep(PUBLICATION_DELAY)
-    const delResponse = await request(ADAPTER_URL).delete(`/datasources/${datasourceId}`).send()
-    expect(delResponse.status).toEqual(204)
+  test(
+    'Should trigger datasources without runtime parameters [AMQP datasource.import-trigger.created]',
+    async () => {
+      const datasourceResponse = await request(ADAPTER_URL)
+        .post('/datasources')
+        .send(staticDatasourceConfig)
+      const datasourceId = datasourceResponse.body.id
 
-    // check for rabbitmq message
-    await sleep(PUBLICATION_DELAY)
-    expect(publishedEvents.get(EXECUTION_SUCCESS_TOPIC)).toContainEqual({
-      datasourceId: datasourceId,
-      data: '{"id":"1"}'
-    })
-  }, TIMEOUT)
+      const msg = {
+        datasourceId: datasourceId
+      }
+      await publishAmqpMessage(
+        amqpConnection,
+        AMQP_EXCHANGE,
+        IMPORT_TRIGGER_TOPIC,
+        msg
+      )
 
-  test('Should return 404 NOT_FOUND when trigger unknown datasources [AMQP datasource.import-trigger.created]', async () => {
-    const previousSuccessEvents = publishedEvents.get(EXECUTION_SUCCESS_TOPIC)
-    const previousErrorEvents = publishedEvents.get(EXECUTION_FAILED_TOPIC)
-    const msg = {
-      datasourceId: 0
-    }
-    await publishAmqpMessage(amqpConnection, AMQP_EXCHANGE, IMPORT_TRIGGER_TOPIC, msg)
+      // Wait to give amqp consumer time to handle trigger
+      await sleep(PUBLICATION_DELAY)
+      const delResponse = await request(ADAPTER_URL)
+        .delete(`/datasources/${datasourceId}`)
+        .send()
+      expect(delResponse.status).toEqual(204)
 
-    // check that no new success or failure was pushed
-    await sleep(PUBLICATION_DELAY)
-    expect(publishedEvents.get(EXECUTION_SUCCESS_TOPIC)).toEqual(previousSuccessEvents)
-    expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)).toEqual(previousErrorEvents)
-  }, TIMEOUT)
+      // check for rabbitmq message
+      await sleep(PUBLICATION_DELAY)
+      expect(publishedEvents.get(EXECUTION_SUCCESS_TOPIC)).toContainEqual({
+        datasourceId: datasourceId,
+        data: '{"id":"1"}'
+      })
+    },
+    TIMEOUT
+  )
 
-  test('Should publish results for datasources with invalid location [AMQP datasource.import-trigger.created]', async () => {
-    const brokenDatasourceConfig = JSON.parse(JSON.stringify(staticDatasourceConfig))
-    brokenDatasourceConfig.protocol.parameters.location = 'invalid-location'
-    const datasourceResponse = await request(ADAPTER_URL).post('/datasources').send(brokenDatasourceConfig)
+  test(
+    'Should return 404 NOT_FOUND when trigger unknown datasources [AMQP datasource.import-trigger.created]',
+    async () => {
+      const previousSuccessEvents = publishedEvents.get(
+        EXECUTION_SUCCESS_TOPIC
+      )
+      const previousErrorEvents = publishedEvents.get(EXECUTION_FAILED_TOPIC)
+      const msg = {
+        datasourceId: 0
+      }
+      await publishAmqpMessage(
+        amqpConnection,
+        AMQP_EXCHANGE,
+        IMPORT_TRIGGER_TOPIC,
+        msg
+      )
 
-    const datasourceId = datasourceResponse.body.id
+      // check that no new success or failure was pushed
+      await sleep(PUBLICATION_DELAY)
+      expect(publishedEvents.get(EXECUTION_SUCCESS_TOPIC)).toEqual(
+        previousSuccessEvents
+      )
+      expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)).toEqual(
+        previousErrorEvents
+      )
+    },
+    TIMEOUT
+  )
 
-    const msg = {
-      datasourceId: datasourceId
-    }
-    await publishAmqpMessage(amqpConnection, AMQP_EXCHANGE, IMPORT_TRIGGER_TOPIC, msg)
+  test(
+    'Should publish results for datasources with invalid location [AMQP datasource.import-trigger.created]',
+    async () => {
+      const brokenDatasourceConfig = JSON.parse(
+        JSON.stringify(staticDatasourceConfig)
+      )
+      brokenDatasourceConfig.protocol.parameters.location = 'invalid-location'
+      const datasourceResponse = await request(ADAPTER_URL)
+        .post('/datasources')
+        .send(brokenDatasourceConfig)
 
-    // Wait to give amqp consumer time to handle trigger
-    await sleep(PUBLICATION_DELAY)
-    const delResponse = await request(ADAPTER_URL).delete(`/datasources/${datasourceId}`).send()
-    expect(delResponse.status).toEqual(204)
+      const datasourceId = datasourceResponse.body.id
 
-    // check for rabbitmq message
-    await sleep(PUBLICATION_DELAY)
-    expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)).toContainEqual({
-      datasourceId: datasourceId,
-      error: 'URI is not absolute'
-    })
-  }, TIMEOUT)
+      const msg = {
+        datasourceId: datasourceId
+      }
+      await publishAmqpMessage(
+        amqpConnection,
+        AMQP_EXCHANGE,
+        IMPORT_TRIGGER_TOPIC,
+        msg
+      )
 
-  test('Should publish results for datasources with failing import [AMQP datasource.import-trigger.created]', async () => {
-    const brokenDatasourceConfig = JSON.parse(JSON.stringify(staticDatasourceConfig))
-    brokenDatasourceConfig.protocol.parameters.location = MOCK_SERVER_URL + '/not-found'
-    const datasourceResponse = await request(ADAPTER_URL).post('/datasources').send(brokenDatasourceConfig)
+      // Wait to give amqp consumer time to handle trigger
+      await sleep(PUBLICATION_DELAY)
+      const delResponse = await request(ADAPTER_URL)
+        .delete(`/datasources/${datasourceId}`)
+        .send()
+      expect(delResponse.status).toEqual(204)
 
-    const datasourceId = datasourceResponse.body.id
+      // check for rabbitmq message
+      await sleep(PUBLICATION_DELAY)
+      await sleep(PUBLICATION_DELAY)
+      expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)).toContainEqual({
+        datasourceId: datasourceId,
+        error: 'URI is not absolute'
+      })
+    },
+    TIMEOUT
+  )
 
-    const msg = {
-      datasourceId: datasourceId
-    }
-    await publishAmqpMessage(amqpConnection, AMQP_EXCHANGE, IMPORT_TRIGGER_TOPIC, msg)
+  test(
+    'Should publish results for datasources with failing import [AMQP datasource.import-trigger.created]',
+    async () => {
+      const brokenDatasourceConfig = JSON.parse(
+        JSON.stringify(staticDatasourceConfig)
+      )
+      brokenDatasourceConfig.protocol.parameters.location =
+        MOCK_SERVER_URL_WITHIN_DOCKER + '/not-found'
+      const datasourceResponse = await request(ADAPTER_URL)
+        .post('/datasources')
+        .send(brokenDatasourceConfig)
 
-    // Wait to give amqp consumer time to handle trigger
-    await sleep(PUBLICATION_DELAY)
-    const delResponse = await request(ADAPTER_URL).delete(`/datasources/${datasourceId}`).send()
-    expect(delResponse.status).toEqual(204)
+      const datasourceId = datasourceResponse.body.id
 
-    // check for rabbitmq notification
-    await sleep(PUBLICATION_DELAY)
-    expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)).toContainEqual({
-      datasourceId: datasourceId,
-      error: '404 Not Found: [404 NOT FOUND Error]'
-    })
-  }, TIMEOUT)
+      const msg = {
+        datasourceId: datasourceId
+      }
+      await publishAmqpMessage(
+        amqpConnection,
+        AMQP_EXCHANGE,
+        IMPORT_TRIGGER_TOPIC,
+        msg
+      )
 
-  test('Should persist data after trigger [AMQP datasource.import-trigger.created]', async () => {
-    const creationResponse = await request(ADAPTER_URL).post('/datasources').send(staticDatasourceConfig)
-    expect(creationResponse.status).toEqual(201)
+      // Wait to give amqp consumer time to handle trigger
+      await sleep(PUBLICATION_DELAY)
+      const delResponse = await request(ADAPTER_URL)
+        .delete(`/datasources/${datasourceId}`)
+        .send()
+      expect(delResponse.status).toEqual(204)
 
-    const msg = {
-      datasourceId: creationResponse.body.id
-    }
-    await publishAmqpMessage(amqpConnection, AMQP_EXCHANGE, IMPORT_TRIGGER_TOPIC, msg)
-  }, TIMEOUT)
+      // check for rabbitmq notification
+      await sleep(PUBLICATION_DELAY)
+      expect(publishedEvents.get(EXECUTION_FAILED_TOPIC)).toContainEqual({
+        datasourceId: datasourceId,
+        error: '404 Not Found: [404 NOT FOUND Error]'
+      })
+    },
+    TIMEOUT
+  )
+
+  test(
+    'Should persist data after trigger [AMQP datasource.import-trigger.created]',
+    async () => {
+      const creationResponse = await request(ADAPTER_URL)
+        .post('/datasources')
+        .send(staticDatasourceConfig)
+      expect(creationResponse.status).toEqual(201)
+
+      const msg = {
+        datasourceId: creationResponse.body.id
+      }
+      await publishAmqpMessage(
+        amqpConnection,
+        AMQP_EXCHANGE,
+        IMPORT_TRIGGER_TOPIC,
+        msg
+      )
+    },
+    TIMEOUT
+  )
 })
 
 describe('Datasource REST triggering', () => {
   beforeAll(async () => {
-    await waitForServicesToBeReady()
+    amqpConnection = await connectAmqp(
+      AMQP_URL_OUTSIDE_DOCKER,
+      AMQP_CONNECTION_RETRIES,
+      AMQP_CONNECTION_BACKOFF
+    )
 
-    amqpConnection = await connectAmqp(AMQP_URL, AMQP_CONNECTION_RETRIES, AMQP_CONNECTION_BACKOFF)
-
-    await consumeAmqpMsg(amqpConnection, AMQP_EXCHANGE, EXECUTION_TOPIC, AMQP_IT_QUEUE, publishedEvents)
+    await consumeAmqpMsg(
+      amqpConnection,
+      AMQP_EXCHANGE,
+      EXECUTION_TOPIC,
+      AMQP_IT_QUEUE,
+      publishedEvents
+    )
   }, 60000)
 
   afterAll(async () => {
@@ -218,7 +335,9 @@ describe('Datasource REST triggering', () => {
     expect(dataImportMetaData.body.id).toBeGreaterThanOrEqual(0)
     expect(dataImportMetaData.body.timestamp).toBeTruthy()
     const dataImportId = dataImportMetaData.body.id
-    expect(dataImportMetaData.body.location).toEqual(`/datasources/${datasourceId}/imports/${dataImportId}/data`)
+    expect(dataImportMetaData.body.location).toEqual(
+      `/datasources/${datasourceId}/imports/${dataImportId}/data`
+    )
 
     const data = await request(ADAPTER_URL)
       .get(dataImportMetaData.body.location)
@@ -233,10 +352,13 @@ describe('Datasource REST triggering', () => {
 
     // check for rabbitmq message
     await sleep(PUBLICATION_DELAY)
-    expect(publishedEvents.get(EXECUTION_SUCCESS_TOPIC)).toContainEqual({
-      datasourceId: datasourceId,
-      data: '{"id":"2"}'
-    }, TIMEOUT)
+    expect(publishedEvents.get(EXECUTION_SUCCESS_TOPIC)).toContainEqual(
+      {
+        datasourceId: datasourceId,
+        data: '{"id":"2"}'
+      },
+      TIMEOUT
+    )
   })
 
   test('Should trigger datasources with default parameters [POST /datasources/{id}/trigger]', async () => {
@@ -252,13 +374,17 @@ describe('Datasource REST triggering', () => {
     expect(dataImportMetadata.status).toEqual(200)
     expect(dataImportMetadata.body.id).toBeGreaterThanOrEqual(0)
     const dataImportId = dataImportMetadata.body.id
-    expect(dataImportMetadata.body.location).toEqual(`/datasources/${datasourceId}/imports/${dataImportId}/data`)
+    expect(dataImportMetadata.body.location).toEqual(
+      `/datasources/${datasourceId}/imports/${dataImportId}/data`
+    )
 
     const data = await request(ADAPTER_URL)
       .get(dataImportMetadata.body.location)
       .send()
     expect(data.status).toEqual(200)
-    expect(data.body.id).toBe(dynamicDatasourceConfig.protocol.parameters.defaultParameters.id)
+    expect(data.body.id).toBe(
+      dynamicDatasourceConfig.protocol.parameters.defaultParameters.id
+    )
 
     const delResponse = await request(ADAPTER_URL)
       .delete(`/datasources/${datasourceId}`)
@@ -285,7 +411,9 @@ describe('Datasource REST triggering', () => {
     expect(dataMetaData.status).toEqual(200)
     expect(dataMetaData.body.id).toBeGreaterThanOrEqual(0)
     const dataImportId = dataMetaData.body.id
-    expect(dataMetaData.body.location).toEqual(`/datasources/${datasourceId}/imports/${dataImportId}/data`)
+    expect(dataMetaData.body.location).toEqual(
+      `/datasources/${datasourceId}/imports/${dataImportId}/data`
+    )
 
     const data = await request(ADAPTER_URL)
       .get(dataMetaData.body.location)
@@ -315,7 +443,9 @@ describe('Datasource REST triggering', () => {
   })
 
   test('Should publish results for datasources with invalid location [POST /datasources/{id}/trigger]', async () => {
-    const brokenDatasourceConfig = JSON.parse(JSON.stringify(staticDatasourceConfig))
+    const brokenDatasourceConfig = JSON.parse(
+      JSON.stringify(staticDatasourceConfig)
+    )
     brokenDatasourceConfig.protocol.parameters.location = 'invalid-location'
     const datasourceResponse = await request(ADAPTER_URL)
       .post('/datasources')
@@ -342,8 +472,11 @@ describe('Datasource REST triggering', () => {
   })
 
   test('Should publish results for datasources with failing import [POST /datasources/{id}/trigger]', async () => {
-    const brokenDatasourceConfig = JSON.parse(JSON.stringify(staticDatasourceConfig))
-    brokenDatasourceConfig.protocol.parameters.location = MOCK_SERVER_URL + '/not-found'
+    const brokenDatasourceConfig = JSON.parse(
+      JSON.stringify(staticDatasourceConfig)
+    )
+    brokenDatasourceConfig.protocol.parameters.location =
+      MOCK_SERVER_URL_WITHIN_DOCKER + '/not-found'
     const datasourceResponse = await request(ADAPTER_URL)
       .post('/datasources')
       .send(brokenDatasourceConfig)
@@ -379,8 +512,9 @@ describe('Datasource REST triggering', () => {
       .send()
     expect(triggerResponse.status).toEqual(200)
 
-    const dataResponse = await request(ADAPTER_URL)
-      .get(triggerResponse.body.location)
+    const dataResponse = await request(ADAPTER_URL).get(
+      triggerResponse.body.location
+    )
     expect(dataResponse.status).toEqual(200)
     expect(dataResponse.body).toEqual({ id: '1' })
   })
@@ -390,7 +524,7 @@ const dynamicDatasourceConfig = {
   protocol: {
     type: 'HTTP',
     parameters: {
-      location: MOCK_SERVER_URL + '/json/{id}',
+      location: MOCK_SERVER_URL_WITHIN_DOCKER + '/json/{id}',
       encoding: 'UTF-8',
       defaultParameters: {
         id: '1',
@@ -422,7 +556,7 @@ const staticDatasourceConfig = {
   protocol: {
     type: 'HTTP',
     parameters: {
-      location: MOCK_SERVER_URL + '/json/1',
+      location: MOCK_SERVER_URL_WITHIN_DOCKER + '/json/1',
       encoding: 'UTF-8'
     }
   },

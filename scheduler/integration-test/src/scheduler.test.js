@@ -13,7 +13,8 @@ const AMQP_DATASOURCE_CONFIG_TOPIC = 'datasource.config.*'
 const AMQP_DATASOURCE_CONFIG_CREATED_TOPIC = 'datasource.config.created'
 const AMQP_DATASOURCE_CONFIG_UPDATED_TOPIC = 'datasource.config.updated'
 const AMQP_DATASOURCE_CONFIG_DELETED_TOPIC = 'datasource.config.deleted'
-const AMQP_DATASOURCE_IMPORT_TRIGGER_CREATED_TOPIC = 'datasource.import-trigger.created'
+const AMQP_DATASOURCE_IMPORT_TRIGGER_CREATED_TOPIC =
+  'datasource.import-trigger.created'
 
 const PUBLICATION_DELAY = 5000
 
@@ -33,10 +34,23 @@ describe('Scheduler-IT', () => {
   beforeAll(async () => {
     logConfigs()
     try {
-      amqpConnection = await AmqpConnector.connect(AMQP_URL, AMQP_CONNECTION_RETRIES, AMQP_CONNECTION_BACKOFF);
+      amqpConnection = await AmqpConnector.connect(
+        AMQP_URL,
+        AMQP_CONNECTION_RETRIES,
+        AMQP_CONNECTION_BACKOFF
+      );
       [mockAdapterServer] = await Promise.all([
-        createMockAdapter(amqpConnection, AMQP_EXCHANGE, AMQP_IT_QUEUE, AMQP_DATASOURCE_IMPORT_TRIGGER_CREATED_TOPIC),
-        waitOn({ resources: [`${SCHEDULER_URL}/`], timeout: 50000, log: false })
+        createMockAdapter(
+          amqpConnection,
+          AMQP_EXCHANGE,
+          AMQP_IT_QUEUE,
+          AMQP_DATASOURCE_IMPORT_TRIGGER_CREATED_TOPIC
+        ),
+        waitOn({
+          resources: [`${SCHEDULER_URL}/`],
+          timeout: 50000,
+          log: false
+        })
       ])
     } catch (err) {
       throw new Error(`Error during setup of tests: ${err}`)
@@ -47,61 +61,101 @@ describe('Scheduler-IT', () => {
     await Promise.all([amqpConnection?.close(), mockAdapterServer?.close()])
   }, TIMEOUT)
 
-  test('Should respond with semantic version [GET /version]', async () => {
-    const response = await request(SCHEDULER_URL).get('/version')
-    expect(response.status).toEqual(200)
-    expect(response.type).toEqual('text/plain')
-    const semanticVersionRegEx = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)/
-    expect(response.text).toMatch(semanticVersionRegEx)
-  }, TIMEOUT)
+  test(
+    'Should respond with semantic version [GET /version]',
+    async () => {
+      const response = await request(SCHEDULER_URL).get('/version')
+      expect(response.status).toEqual(200)
+      expect(response.type).toEqual('text/plain')
+      const semanticVersionRegEx = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)/
+      expect(response.text).toMatch(semanticVersionRegEx)
+    },
+    TIMEOUT
+  )
 
-  test('Should initialize schedule jobs correctly', async () => {
-    await sleep(5000)
+  test(
+    'Should initialize schedule jobs correctly',
+    async () => {
+      await sleep(5000)
 
-    expect(getTriggeredRequests(101)).toBeGreaterThan(1)
-  }, TIMEOUT)
+      expect(getTriggeredRequests(101)).toBeGreaterThan(1)
+    },
+    TIMEOUT
+  )
 
-  test('Should trigger datasource after creation event', async () => {
-    const channel = await createAmqpChannel()
+  test(
+    'Should trigger datasource after creation event',
+    async () => {
+      const channel = await createAmqpChannel()
 
-    const creationEvent = createDatasourceEvent(1, 2000, 10000, false)
+      const creationEvent = createDatasourceEvent(1, 2000, 10000, false)
 
-    channel.publish(AMQP_EXCHANGE, AMQP_DATASOURCE_CONFIG_CREATED_TOPIC, creationEvent)
+      channel.publish(
+        AMQP_EXCHANGE,
+        AMQP_DATASOURCE_CONFIG_CREATED_TOPIC,
+        creationEvent
+      )
 
-    await sleep(PUBLICATION_DELAY)
+      await sleep(PUBLICATION_DELAY)
 
-    expect(getTriggeredRequests(1)).toBe(1)
-  }, TIMEOUT)
+      expect(getTriggeredRequests(1)).toBe(1)
+    },
+    TIMEOUT
+  )
 
-  test('Should not trigger datasource after deletion event', async () => {
-    const channel = await createAmqpChannel()
+  test(
+    'Should not trigger datasource after deletion event',
+    async () => {
+      const channel = await createAmqpChannel()
 
-    const creationEvent = createDatasourceEvent(2, 2000, 1000, true)
-    const deletionEvent = createDeletionEvent(2)
+      const creationEvent = createDatasourceEvent(2, 2000, 1000, true)
+      const deletionEvent = createDeletionEvent(2)
 
-    channel.publish(AMQP_EXCHANGE, AMQP_DATASOURCE_CONFIG_CREATED_TOPIC, creationEvent)
-    channel.publish(AMQP_EXCHANGE, AMQP_DATASOURCE_CONFIG_DELETED_TOPIC, deletionEvent)
+      channel.publish(
+        AMQP_EXCHANGE,
+        AMQP_DATASOURCE_CONFIG_CREATED_TOPIC,
+        creationEvent
+      )
+      channel.publish(
+        AMQP_EXCHANGE,
+        AMQP_DATASOURCE_CONFIG_DELETED_TOPIC,
+        deletionEvent
+      )
 
-    await sleep(PUBLICATION_DELAY)
+      await sleep(PUBLICATION_DELAY)
 
-    expect(getTriggeredRequests(2)).toBe(0)
-  }, TIMEOUT)
+      expect(getTriggeredRequests(2)).toBe(0)
+    },
+    TIMEOUT
+  )
 
-  test('Should update trigger after update event', async () => {
-    const channel = await createAmqpChannel()
+  test(
+    'Should update trigger after update event',
+    async () => {
+      const channel = await createAmqpChannel()
 
-    const creationEvent = createDatasourceEvent(3, 500, 10000, true)
-    const updateEvent = createDatasourceEvent(3, 500, 500, true)
-    console.log(updateEvent.toString())
+      const creationEvent = createDatasourceEvent(3, 500, 10000, true)
+      const updateEvent = createDatasourceEvent(3, 500, 500, true)
+      console.log(updateEvent.toString())
 
-    channel.publish(AMQP_EXCHANGE, AMQP_DATASOURCE_CONFIG_CREATED_TOPIC, creationEvent)
-    await sleep(200)
-    channel.publish(AMQP_EXCHANGE, AMQP_DATASOURCE_CONFIG_UPDATED_TOPIC, updateEvent)
+      channel.publish(
+        AMQP_EXCHANGE,
+        AMQP_DATASOURCE_CONFIG_CREATED_TOPIC,
+        creationEvent
+      )
+      await sleep(200)
+      channel.publish(
+        AMQP_EXCHANGE,
+        AMQP_DATASOURCE_CONFIG_UPDATED_TOPIC,
+        updateEvent
+      )
 
-    await sleep(PUBLICATION_DELAY)
+      await sleep(PUBLICATION_DELAY)
 
-    expect(getTriggeredRequests(3)).toBeGreaterThan(1)
-  }, TIMEOUT)
+      expect(getTriggeredRequests(3)).toBeGreaterThan(1)
+    },
+    TIMEOUT
+  )
 })
 
 function createDeletionEvent (datasourceId) {

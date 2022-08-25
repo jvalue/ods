@@ -1,0 +1,7 @@
+{
+  "name": "ODS Adapter Integration-Test",
+  "testEnvironment": "node",
+  "roots": ["./src"],
+  "globalSetup": "<rootDir>/src/setup.js",
+  "globalTeardown": "<rootDir>/src/teardown.js"
+}

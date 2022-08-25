@@ -15,7 +15,7 @@ jobs:
 
   adapter-build:
     name: Adapter Build & Test
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v2
@@ -24,16 +24,25 @@ jobs:
         run: |
           docker-compose -f docker-compose.yml build adapter
 
-      - name: Build Integration-test
+      - name: Integration-test - build mock server
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml build adapter-it
+          docker-compose -f docker-compose.yml -f adapter/integration-test/docker-compose.it.yml build mock-server
+      
+      - name: Integration-test - Use Node.js 14.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14.x
+          cache: 'npm'
+
+      - name: Integration-test - install dependencies
+        working-directory: ./adapter/integration-test
+        run: |
+          npm i
 
       - name: Run Integration-test
-        # Only the logs from the services listed in the `docker-compose up` command are going to be printed to stdout
-        # To get logs from other services too, just add them to the `docker-compose up` command
+        working-directory: ./adapter/integration-test
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml up --exit-code-from adapter-it adapter adapter-it
-          docker-compose -f docker-compose.yml -f docker-compose.it.yml down
+          npm run test
 
       - name: Save Docker image as artifact
         run: |
@@ -52,7 +61,7 @@ jobs:
 
   scheduler-build:
     name: Scheduler Build & Test
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v2
@@ -89,7 +98,7 @@ jobs:
 
   storage-build:
     name: Storage Build & Test
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v2
@@ -163,7 +172,7 @@ jobs:
 
   pipeline-build:
     name: Pipeline Build & Test
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v2
@@ -200,7 +209,7 @@ jobs:
 
   notification-build:
     name: Notification Build & Test
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v2
@@ -250,7 +259,7 @@ jobs:
 
   ui-build:
     name: UI Build & Test
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v2
@@ -287,7 +296,7 @@ jobs:
   # ----------------- Pipeline Provider-side CDC-Test -----------------
   pipeline-provider:
     name: Pipeline Provider-side CDC-Test
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     needs: [pipeline-build, ui-build, notification-build, storage-build]
     steps:
       - uses: actions/checkout@v2
@@ -306,7 +315,7 @@ jobs:
   # ----------------- Storage Provider-side CDC-Test -----------------
   storage-provider:
     name: Storage Provider-side CDC-Test
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     needs: [storage-build, ui-build]
     steps:
       - uses: actions/checkout@v2
@@ -324,7 +333,7 @@ jobs:
   # ----------------- SYSTEMTEST --------------------
   systemtest:
     name: Systemtest
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     needs: [adapter-build, notification-build, scheduler-build, storage-build, pipeline-build, ui-build]
     steps:
       - name: Checkout
@@ -390,7 +399,7 @@ jobs:
 
   adapter_upload:
     name: Adapter Publish
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     needs: [systemtest]
 
@@ -428,7 +437,7 @@ jobs:
 
   scheduler_upload:
     name: Scheduler Publish
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     needs: [systemtest]
 
@@ -465,7 +474,7 @@ jobs:
 
   storage_upload:
     name: Storage Publish
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     needs: [systemtest, storage-provider]
 
@@ -527,7 +536,7 @@ jobs:
 
   pipeline_upload:
     name: Pipeline Publish
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     needs: [systemtest, pipeline-provider]
 
@@ -564,7 +573,7 @@ jobs:
 
   notifcation_upload:
     name: Notifcation Publish
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     needs: [systemtest]
 
@@ -601,7 +610,7 @@ jobs:
 
   ui_upload:
     name: UI Publish
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     needs: [systemtest]
 

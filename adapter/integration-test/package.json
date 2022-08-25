@@ -4,9 +4,8 @@
   "description": "Adapter Integration-Tests",
   "scripts": {
     "mock": "node src/mock.server.js",
-    "pretest": "npm run mock &",
+    "mockServer": "node src/mock.server.js",
     "test": "jest src/*.test.js --colors --verbose --runInBand",
-    "posttest": "killall node",
     "lint": "eslint src --fix",
     "lint-ci": "eslint src --max-warnings=0"
   },
@@ -16,9 +15,7 @@
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-jest": "^24.1.5",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.3.1",
-    "jest": "^26.6.3",
-    "supertest": "^6.1.3"
+    "eslint-plugin-promise": "^4.3.1"
   },
   "jest": {
     "testEnvironment": "node"
@@ -26,7 +23,10 @@
   "dependencies": {
     "@jvalue/node-dry-amqp": "0.1.2",
     "koa": "^2.13.0",
+    "koa-bodyparser": "^4.3.0",
     "koa-router": "^10.0.0",
-    "wait-on": "^5.1.0"
+    "wait-on": "^5.1.0",
+    "jest": "^26.6.3",
+    "supertest": "^6.1.3"
   }
 }

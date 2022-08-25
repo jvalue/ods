@@ -1,33 +1,35 @@
 const Koa = require('koa')
-const Router = require('koa-router')
-const router = new Router()
+const KoaRouter = require('koa-router')
+const bodyParser = require('koa-bodyparser')
 
+const router = new KoaRouter()
 const app = new Koa()
+app.use(bodyParser())
 
-const { MOCK_SERVER_PORT } = require('./env')
+const { MOCK_SERVER_PORT } = require('./util/env')
 
-router.get('/', async ctx => {
+router.get('/', async (ctx) => {
   ctx.type = 'text/plain'
   ctx.body = 'ok'
 })
 
-router.get('/not-found', async ctx => {
+router.get('/not-found', async (ctx) => {
   ctx.type = 'text/plain'
   ctx.status = 404
   ctx.body = '404 NOT FOUND Error'
 })
 
-router.get('/json', async ctx => {
+router.get('/json', async (ctx) => {
   console.log('GET /json')
   ctx.body = { whateverwillbe: 'willbe', quesera: 'sera' }
 })
 
-router.get('/json/:id', async ctx => {
+router.get('/json/:id', async (ctx) => {
   console.log('Get /json/' + ctx.params.id)
   ctx.body = { id: ctx.params.id }
 })
 
-router.get('/xml', async ctx => {
+router.get('/xml', async (ctx) => {
   console.log('GET /xml')
 
   ctx.type = 'text/xml'
@@ -36,19 +38,29 @@ router.get('/xml', async ctx => {
     '<root><from>Rick</from><to>Morty</to></root>'
 })
 
-router.get('/csv', async ctx => {
+router.get('/xmlbigger', async (ctx) => {
+  console.log('GET /xml')
+
+  ctx.type = 'text/xml'
+  ctx.body =
+    '<?xml version="1.0" encoding="UTF-8"?>' +
+    '<root><from>Rick</from><to>Morty</to>' +
+    '<test><hello>hello</hello><servus>servus</servus></test>' +
+    '</root>'
+})
+
+router.get('/csv', async (ctx) => {
   console.log('GET /CSV')
 
   ctx.type = 'text/csv'
-  ctx.body =
-    'col1,col2,col3\n' +
-    'val11,val12,val13\n' +
-    'val21,val22,val23'
+  ctx.body = 'col1,col2,col3\n' + 'val11,val12,val13\n' + 'val21,val22,val23'
 })
 
 app.use(router.routes())
 
-const server = app.listen(MOCK_SERVER_PORT, () => console.log('Starting mock server on port ' + MOCK_SERVER_PORT))
+const server = app.listen(MOCK_SERVER_PORT, () =>
+  console.log('Starting mock server on port ' + MOCK_SERVER_PORT)
+)
 
 process.on('SIGTERM', async () => {
   console.info('Mock-Server: SIGTERM signal received.')

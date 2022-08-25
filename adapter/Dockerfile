@@ -1,40 +1,46 @@
-#-------------------------------------------------------#
-# First stage: image to build and test Java application #
-#-------------------------------------------------------#
-# The gradle version here should match the gradle version in gradle/wrapper/gradle-wrapper.properties
-FROM gradle:6.7-jdk15-openj9 as builder
+#----------------------------------------------------------#
+# First stage: base image for further building and testing #
+#----------------------------------------------------------#
+FROM node:16-alpine as base
 
-WORKDIR /builder
+WORKDIR /build
 
-# Copy gradle files
-COPY *.gradle /builder/
+# Copy package*.json files first in order to make best use of docker layer caching
+COPY ./package*.json ./
 
-# Required when downloading the dependencies:
-COPY src/main/resources/application.properties /builder/src/main/resources/application.properties
+# npm clean slate install to get reproducible builds and quicker installs
+RUN npm ci
 
-# Download dependencies
-RUN gradle dependencies --refresh-dependencies --info
+# copy rest of the files
+COPY ./src ./src
+COPY ./tsconfig.json ./
+COPY ./*.js ./
 
-# Copy remaining source files
-COPY src /builder/src
+#--------------------------------------------------------#
+# Second stage: image to build and test node application #
+#--------------------------------------------------------#
+FROM base as build
 
-# Build project and run unit tests
-RUN gradle assemble
-RUN gradle test
+# lint project
+RUN npm run lint-ci
 
-#-------------------------------------------------------#
-# Second stage: image to run Java application           #
-#-------------------------------------------------------#
-FROM adoptopenjdk/openjdk15-openj9:alpine-slim
+# build
+RUN npm run transpile
 
-RUN mkdir /app
+# run unit test
+RUN npm run test
+
+#--------------------------------------------#
+# Third stage: image to run node application #
+#--------------------------------------------#
+FROM node:16-alpine
+
 WORKDIR /app
 
-ENV SPRING_PROFILES_ACTIVE prod
+COPY --from=build /build/dist/ ./dist/
+COPY --from=build /build/package*.json ./
 
-# Pull the dist files from the builder container
-COPY --from=builder /builder/build/libs/* app.jar
-
-# Run app
+RUN npm ci --only=production
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+CMD [ "npm", "run", "start:transpiled" ]
