@@ -53,7 +53,7 @@ public class CustomStringArrayType implements UserType {
   public Serializable	disassemble(Object value) throws HibernateException {
     return (Serializable) value;
   }
-
+  
   @Override
   public boolean equals(Object x, Object y) throws HibernateException {
     return x.equals(y);

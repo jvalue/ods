@@ -2,6 +2,9 @@ import { PostgresClient } from '@jvalue/node-dry-pg';
 import { ClientBase, QueryResult } from 'pg';
 
 import { POSTGRES_SCHEMA } from '../env';
+import JsonSchemaParser from '../service/jsonSchemaParser';
+import PostgresParser from '../service/postgresParser';
+import { isDefined } from '../service/sharedHelper';
 
 import {
   InsertStorageContent,
@@ -15,6 +18,8 @@ const GET_ALL_CONTENT_STATEMENT = (table: string): string =>
   `SELECT * FROM "${POSTGRES_SCHEMA}"."${table}"`;
 const GET_CONTENT_STATEMENT = (table: string): string =>
   `SELECT * FROM "${POSTGRES_SCHEMA}"."${table}" WHERE id = $1`;
+const GET_LAST_ELEMENT_STATEMENT = (table: string): string =>
+  `SELECT "id" FROM "${POSTGRES_SCHEMA}"."${table}" ORDER BY "id" DESC LIMIT 1`;
 const INSERT_CONTENT_STATEMENT = (table: string): string =>
   `INSERT INTO "${POSTGRES_SCHEMA}"."${table}" ("data", "pipelineId", "timestamp") VALUES ($1, $2, $3) RETURNING *`;
 
@@ -134,6 +139,45 @@ export class PostgresStorageContentRepository
       );
       return Number.parseInt((rows as Array<{ id: string }>)[0].id, 10);
     });
+  }
+
+  async saveContentForSchema(
+    tableIdentifier: string,
+    content: InsertStorageContent,
+  ): Promise<number> {
+    // TODO what to do in case schema missing (for now throw error)
+    if (isDefined(content.schema)) {
+      // Used this due to type guard check not extending into the returned function -> would be required in there (again)
+      const schema = content.schema;
+      return await this.postgresClient.transaction(async (client) => {
+        const jsonSchemaParser: PostgresParser = new JsonSchemaParser();
+        const resultSet: QueryResult<DatabaseStorageContent> =
+          await client.query(GET_LAST_ELEMENT_STATEMENT(tableIdentifier));
+        const nextId =
+          resultSet.rowCount === 0
+            ? 1
+            : Number.parseInt(resultSet.rows[0].id, 10) + 1;
+
+        /**
+         * When passed an array as value, pg assumes the value is meant to be a native Postgres array
+         * and therefore fails with a "invalid input syntax for type json" error when the target field
+         * is actually of type jsob/jsonb.
+         *
+         * Ref: https://github.com/brianc/node-postgres/issues/2012
+         */
+        const insertStatement: string =
+          await jsonSchemaParser.parseInsertStatement(
+            schema,
+            content.data,
+            POSTGRES_SCHEMA,
+            tableIdentifier,
+            nextId,
+          );
+        await client.query(insertStatement);
+        return nextId;
+      });
+    }
+    throw new Error('Missing schema!');
   }
 
   private toStorageContents(

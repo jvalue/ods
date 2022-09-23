@@ -13,6 +13,7 @@ import org.jvalue.ods.adapterservice.datasource.repository.DataImportRepository;
 import org.jvalue.ods.adapterservice.datasource.repository.DatasourceRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.everit.json.schema.ValidationException;
 
 import org.jvalue.ods.adapterservice.datasource.validator.*;
 
@@ -100,7 +101,7 @@ public class DatasourceManager {
    */
   @Transactional
   DataImport.MetaData executeImport(Long id, RuntimeParameters runtimeParameters)
-      throws DatasourceNotFoundException, ImporterParameterException, InterpreterParameterException, IOException {
+      throws DatasourceNotFoundException, ImporterParameterException, InterpreterParameterException, IOException {    
     Datasource datasource = getDatasource(id);
     DataImport dataImport = new DataImport(datasource, "", ValidationMetaData.HealthStatus.FAILED);
     Validator validator = new JsonSchemaValidator();

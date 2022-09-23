@@ -1,6 +1,9 @@
 import { PostgresClient } from '@jvalue/node-dry-pg';
 
 import { POSTGRES_SCHEMA } from '../env';
+import JsonSchemaParser from '../service/jsonSchemaParser';
+import PostgresParser from '../service/postgresParser';
+import { JsonSchemaElementBase } from '../service/sharedHelper';
 
 import { StorageStructureRepository } from './storageStructureRepository';
 
@@ -31,6 +34,22 @@ export class PostgresStorageStructureRepository
     await this.postgresClient.executeQuery(
       CREATE_BUCKET_STATEMENT(POSTGRES_SCHEMA, tableIdentifier),
     );
+  }
+
+  async createForSchema(
+    schema: JsonSchemaElementBase,
+    tableName: string,
+  ): Promise<void> {
+    const jsonSchemaParser: PostgresParser = new JsonSchemaParser();
+    const createStatements: string[] =
+      await jsonSchemaParser.parseCreateStatement(
+        schema,
+        POSTGRES_SCHEMA,
+        tableName,
+      );
+    for (const statement of createStatements) {
+      await this.postgresClient.executeQuery(statement);
+    }
   }
 
   /**

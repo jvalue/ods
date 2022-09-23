@@ -23,6 +23,7 @@ export class PipelineConfigManager {
         client,
         savedConfig.id,
         savedConfig.metadata.displayName,
+        savedConfig.schema,
       );
       return savedConfig;
     });

@@ -163,7 +163,7 @@ services:
     build: ./storage/storage-mq/
     environment:
       CONNECTION_RETRIES: 30
-      CONNECTION_BACKOFF_IN_MS: 2000
+      CONNECTION_BACKOFF_IN_MS: 20000
 
       POSTGRES_HOST: storage-db
       POSTGRES_PORT: 5432
@@ -221,15 +221,26 @@ services:
       POSTGRES_DB: ods
       POSTGRES_USER: ods_admin
       POSTGRES_PASSWORD: ods_pw
+
+  graphql:
+    image: ${DOCKER_REGISTRY}/storage-graphql
+    build: ./storage/storage-graphql/
+    depends_on:
+        - storage-db
+        - storage-db-liquibase
+    ports:
+        - 5432:5432
+    command: ["--connection", postgres://ods_admin:ods_pw@storage-db:5432/ods, "--port", "5432", "--schema", "storage", "--append-plugins", "postgraphile-plugin-connection-filter"]
+
   # Uncomment this if you want to persist the data.
   # volumes:
   #   - "./pgdata:/var/lib/postgresql/data"
 
   # Uncomment this if you want to manage the Postgres databases with adminer
-  # adminer: # management UI for Postgres
-  #   image: adminer
-  #   ports:
-  #     - 8081:8080
+  adminer: # management UI for Postgres
+    image: adminer
+    ports:
+      - 8081:8080
 
   storage-db-liquibase: # perform database migration on start up
     image: ${DOCKER_REGISTRY}/storage-db-liquibase

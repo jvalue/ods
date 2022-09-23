@@ -14,10 +14,12 @@ export async function publishCreation(
   client: ClientBase,
   pipelineId: number,
   pipelineName: string,
+  schema?: Record<string, unknown>,
 ): Promise<string> {
   const content = {
     pipelineId: pipelineId,
     pipelineName: pipelineName,
+    schema: schema != null ? schema : undefined,
   };
   return await insertEvent(client, AMQP_PIPELINE_CONFIG_CREATED_TOPIC, content);
 }

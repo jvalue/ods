@@ -70,6 +70,10 @@ export default class PipelineSchemaEdit extends Vue {
   }
 
   formChanged(): void {
+    this.pipeline.schema = JSON.parse(this.schemaAsText) as Record<
+      string,
+      unknown
+    >;
     this.emitValue();
     this.emitValid();
   }
